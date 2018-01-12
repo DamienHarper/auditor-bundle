@@ -1,0 +1,16 @@
+services:
+  dh_doctrine_audit.configuration:
+    class: DH\DoctrineAuditBundle\AuditConfiguration
+    arguments: ["%dh_doctrine_audit.configuration%", "@security.token_storage", "@request_stack"]
+
+  dh_doctrine_audit.event_subscriber.audit:
+    class: DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
+    arguments: ["@dh_doctrine_audit.configuration"]
+    tags:
+      - { name: doctrine.event_subscriber, connection: default }
+
+  dh_doctrine_audit.event_subscriber.create_schema:
+    class: DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
+    arguments: ["@dh_doctrine_audit.configuration"]
+    tags:
+      - { name: doctrine.event_subscriber, connection: default }

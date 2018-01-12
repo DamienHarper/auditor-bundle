@@ -1,0 +1,20 @@
+{
+  "name": "damienharper/doctrine-audit-bundle",
+  "type": "symfony-bundle",
+  "description": "Doctrine Audit Bundle",
+  "keywords": ["doctrine", "audit"],
+  "authors": [
+    {
+      "name": "Damien Harper",
+      "email": "damien.harper@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "DH\\DoctrineAuditBundle\\": "src/DoctrineAuditBundle"
+    }
+  }
+}
