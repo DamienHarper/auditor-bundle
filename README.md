@@ -12,6 +12,9 @@ managed through standard **ORM** operations.
 
 **NOTE:** audit cannot track DQL or direct SQL updates or delete statement executions.
 
+This bundle is inspired by [data-dog/audit-bundle](https://github.com/DATA-DOG/DataDogAuditBundle.git) and 
+[simplethings/entity-audit-bundle](https://github.com/simplethings/EntityAuditBundle.git)
+
 ## Install
 
 First, install it with composer:
