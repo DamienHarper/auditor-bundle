@@ -23,16 +23,16 @@ First, install it with composer:
 
 Then, add it in your **AppKernel** bundles (symfony < 3.4).
 ```php
-    // app/AppKernel.php
-    public function registerBundles()
-    {
-        $bundles = array(
-            ...
-            new DH\DoctrineAuditBundle\DHDoctrineAuditBundle(),
-            ...
-        );
+// app/AppKernel.php
+public function registerBundles()
+{
+    $bundles = array(
         ...
-    }
+        new DH\DoctrineAuditBundle\DHDoctrineAuditBundle(),
+        ...
+    );
+    ...
+}
 ```
 
 ### Configure
@@ -40,39 +40,48 @@ Then, add it in your **AppKernel** bundles (symfony < 3.4).
 Then configure which entities are audited
 
 ```yaml
-    // app/config/config.yml (symfony < 3.4)
-    // config/dh_doctrine_audit.yaml (symfony >= 3.4)
-    dh_doctrine_audit:
-        audited_entities:
-            - MyBundle\Entity\MyAuditedEntity1
-            - MyBundle\Entity\MyAuditedEntity2
+// app/config/config.yml (symfony < 3.4)
+// config/dh_doctrine_audit.yaml (symfony >= 3.4)
+dh_doctrine_audit:
+    audited_entities:
+        - MyBundle\Entity\MyAuditedEntity1
+        - MyBundle\Entity\MyAuditedEntity2
 ```
 
 or which are not
 
 ```yaml
-    // app/config/config.yml (symfony < 3.4)
-    // config/dh_doctrine_audit.yaml (symfony >= 3.4)
-    dh_doctrine_audit:
-        unaudited_entities:
-            - MyBundle\Entity\MyNotAuditedEntity
+// app/config/config.yml (symfony < 3.4)
+// config/dh_doctrine_audit.yaml (symfony >= 3.4)
+dh_doctrine_audit:
+    unaudited_entities:
+        - MyBundle\Entity\MyNotAuditedEntity
 ```
 
 You can specify either audited or unaudited entities. If both are specified, only audited entities would be taken into account.
 
+A simple controller exposes audits. To view it in action, setup the routes
+
+```yaml
+// app/config/routing.yml (symfony < 3.4)
+// config/routes.yaml (symfony >= 3.4)
+dh_doctrine_audit:
+    resource: "@DHDoctrineAuditBundle/Controller/"
+    type: annotation
+``` 
 
 ### Creating new tables
 
 Call the command below to see the new tables in the update schema queue.
 
 ```bash
-    # symfony < 3.4
-    app/console doctrine:schema:update --dump-sql 
+# symfony < 3.4
+app/console doctrine:schema:update --dump-sql 
 ```
 
 ```bash
-    # symfony >= 3.4
-    bin/console doctrine:schema:update --dump-sql 
+# symfony >= 3.4
+bin/console doctrine:schema:update --dump-sql 
 ```
 
 **Notice**: DoctrineAuditBundle currently **only** works with a DBAL Connection and EntityManager named **"default"**.
@@ -81,28 +90,29 @@ Call the command below to see the new tables in the update schema queue.
 Finally, create the database tables used by the bundle:
 
 Using [Doctrine Migrations Bundle](http://symfony.com/doc/current/bundles/DoctrineMigrationsBundle/index.html):
+
 ```bash
 # symfony < 3.4
-    app/console doctrine:migrations:diff
-    app/console doctrine:migrations:migrate
+app/console doctrine:migrations:diff
+app/console doctrine:migrations:migrate
 ```
 
 ```bash
-    # symfony >= 3.4
-    bin/console doctrine:migrations:diff
-    bin/console doctrine:migrations:migrate
+# symfony >= 3.4
+bin/console doctrine:migrations:diff
+bin/console doctrine:migrations:migrate
 ```
 
 Using Doctrine Schema:
     
 ```bash
-    # symfony < 3.4
-    app/console doctrine:schema:update --force
+# symfony < 3.4
+app/console doctrine:schema:update --force
 ```
 
 ```bash
-    # symfony >= 3.4
-    bin/console doctrine:schema:update --force
+# symfony >= 3.4
+bin/console doctrine:schema:update --force
 ```
 
 ## Usage
