@@ -1,0 +1,55 @@
+{% extends "DHDoctrineAuditBundle::layout.html.twig" %}
+
+{% block dh_doctrine_audit_content %}
+{% set diffs = entry.getDiffs() %}
+    <h1>Entity #{{ entry.getObjectId() }} changes ({{ entry.getType() }})</h1>
+
+{% if entry.getType() in ['associate', 'dissociate'] %}
+    <table>
+        <thead>
+            <th>Properties</th>
+            <th>Target</th>
+        </thead>
+        <tbody>
+        {% for key, value in diffs['target'] %}
+            <tr>
+                <td>{{ key }}</td>
+                <td>{{ value }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% elseif entry.getType() == 'remove' %}
+    <table>
+        <thead>
+            <th>Properties</th>
+            <th>Target</th>
+        </thead>
+        <tbody>
+        {% for key, value in diffs %}
+            <tr>
+                <td>{{ key }}</td>
+                <td>{{ value }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <table>
+        <thead>
+            <th>Properties</th>
+            <th>Old value</th>
+            <th>New value</th>
+        </thead>
+        <tbody>
+            {% for key, values in diffs %}
+            <tr>
+                <td>{{ key }}</td>
+                <td>{{ values['-'] }}</td>
+                <td>{{ values['+'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+{% endblock dh_doctrine_audit_content %}

@@ -1,0 +1,22 @@
+{% extends "DHDoctrineAuditBundle::layout.html.twig" %}
+
+{% block dh_doctrine_audit_content %}
+    <h1>Audits ({{ audited|length }} entities)</h1>
+
+    <table>
+        <thead>
+            <th>Class</th>
+            <th>Table</th>
+        </thead>
+        <tbody>
+        {% for entity, table in audited %}
+            <tr>
+                <td>{{ entity|escape }}</td>
+                <td>
+                    <a href="{{ path('dh_doctrine_audit_entity_history', { 'entity': entity }) }}">{{ table }}</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock dh_doctrine_audit_content %}
