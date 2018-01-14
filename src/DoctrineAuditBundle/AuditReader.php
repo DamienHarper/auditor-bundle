@@ -2,7 +2,6 @@
 namespace DH\DoctrineAuditBundle;
 
 use Doctrine\ORM\EntityManagerInterface;
-use DH\DoctrineAuditBundle\AuditConfiguration;
 
 class AuditReader
 {
@@ -51,7 +50,7 @@ class AuditReader
             ->from($auditTable)
             ->orderBy('created_at', 'DESC')
             ->addOrderBy('id', 'DESC')
-            ->setFirstResult(0)
+            ->setFirstResult(($page - 1) * $pageSize)
             ->setMaxResults($pageSize)
         ;
 

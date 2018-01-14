@@ -6,7 +6,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Request;
 
 class AuditController extends Controller
 {
@@ -15,7 +14,7 @@ class AuditController extends Controller
      * @Template
      * @Route("/audit", name="dh_doctrine_audit_audited_entities")
      */
-    public function auditedEntitiesAction(Request $request)
+    public function auditedEntitiesAction()
     {
         $reader = $this->container->get('dh_doctrine_audit.reader');
         $reader->getAuditedEntities();
