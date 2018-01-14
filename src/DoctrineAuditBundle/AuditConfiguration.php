@@ -40,6 +40,9 @@ class AuditConfiguration
 
     public function __construct(array $config, TokenStorage $securityTokenStorage, RequestStack $requestStack)
     {
+        $this->securityTokenStorage = $securityTokenStorage;
+        $this->requestStack = $requestStack;
+
         $this->table_prefix = $config['table_prefix'];
         $this->table_suffix = $config['table_suffix'];
 
@@ -54,9 +57,6 @@ class AuditConfiguration
                 $this->unauditedEntities[$unauditedEntity] = true;
             }
         }
-
-        $this->securityTokenStorage = $securityTokenStorage;
-        $this->requestStack = $requestStack;
     }
 
     /**
@@ -80,6 +80,7 @@ class AuditConfiguration
                 }
             }
         } else {
+            // all entities are audited but selected ones
             $isEntityUnaudited = false;
             foreach (array_keys($this->unauditedEntities) as $unauditedEntity) {
                 if (is_object($entity) && $entity instanceof $unauditedEntity) {
