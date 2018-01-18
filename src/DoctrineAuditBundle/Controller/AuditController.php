@@ -12,24 +12,24 @@ class AuditController extends Controller
     /**
      * @Method("GET")
      * @Template
-     * @Route("/audit", name="dh_doctrine_audit_audited_entities")
+     * @Route("/audit", name="dh_doctrine_audit_list_audits")
      */
-    public function auditedEntitiesAction()
+    public function listAuditsAction()
     {
         $reader = $this->container->get('dh_doctrine_audit.reader');
-        $reader->getAuditedEntities();
+        $reader->getEntities();
 
         return $this->render('DHDoctrineAuditBundle:Audit:audited_entities.html.twig', [
-            'audited' => $reader->getAuditedEntities(),
+            'audited' => $reader->getEntities(),
         ]);
     }
 
     /**
      * @Method("GET")
      * @Template
-     * @Route("/audit/{entity}/{id}", name="dh_doctrine_audit_entity_history")
+     * @Route("/audit/{entity}/{id}", name="dh_doctrine_audit_show_entity_history")
      */
-    public function entityHistoryAction(string $entity, int $id = null, int $page = 1, int $pageSize = 50)
+    public function showEntityHistoryAction(string $entity, int $id = null, int $page = 1, int $pageSize = 50)
     {
         $reader = $this->container->get('dh_doctrine_audit.reader');
         $results = $reader->getAudits($entity, $id, $page, $pageSize);
@@ -43,9 +43,9 @@ class AuditController extends Controller
     /**
      * @Method("GET")
      * @Template
-     * @Route("/audit/details/{entity}/{id}", name="dh_doctrine_audit_entity_audit_details")
+     * @Route("/audit/details/{entity}/{id}", name="dh_doctrine_audit_show_audit_entry")
      */
-    public function entityAuditEntryAction(string $entity, int $id)
+    public function showAuditEntryAction(string $entity, int $id)
     {
         $reader = $this->container->get('dh_doctrine_audit.reader');
         $results = $reader->getAudit($entity, $id);

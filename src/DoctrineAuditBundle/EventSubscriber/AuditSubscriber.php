@@ -52,26 +52,26 @@ class AuditSubscriber implements EventSubscriber
         $em->getConnection()->getConfiguration()->setSQLLogger($loggerChain);
 
         foreach ($uow->getScheduledEntityUpdates() as $entity) {
-            if ($this->configuration->isUnaudited($entity)) {
+            if (!$this->configuration->isAudited($entity)) {
                 continue;
             }
             $this->updated[] = [$entity, $uow->getEntityChangeSet($entity)];
         }
         foreach ($uow->getScheduledEntityInsertions() as $entity) {
-            if ($this->configuration->isUnaudited($entity)) {
+            if (!$this->configuration->isAudited($entity)) {
                 continue;
             }
             $this->inserted[] = [$entity, $ch = $uow->getEntityChangeSet($entity)];
         }
         foreach ($uow->getScheduledEntityDeletions() as $entity) {
-            if ($this->configuration->isUnaudited($entity)) {
+            if (!$this->configuration->isAudited($entity)) {
                 continue;
             }
             $uow->initializeObject($entity);
             $this->removed[] = [$entity, $this->id($em, $entity)];
         }
         foreach ($uow->getScheduledCollectionUpdates() as $collection) {
-            if ($this->configuration->isUnaudited($collection->getOwner())) {
+            if (!$this->configuration->isAudited($collection->getOwner())) {
                 continue;
             }
             $mapping = $collection->getMapping();
@@ -79,20 +79,20 @@ class AuditSubscriber implements EventSubscriber
                 continue; // ignore inverse side or one to many relations
             }
             foreach ($collection->getInsertDiff() as $entity) {
-                if ($this->configuration->isUnaudited($entity)) {
+                if (!$this->configuration->isAudited($entity)) {
                     continue;
                 }
                 $this->associated[] = [$collection->getOwner(), $entity, $mapping];
             }
             foreach ($collection->getDeleteDiff() as $entity) {
-                if ($this->configuration->isUnaudited($entity)) {
+                if (!$this->configuration->isAudited($entity)) {
                     continue;
                 }
                 $this->dissociated[] = [$collection->getOwner(), $entity, $this->id($em, $entity), $mapping];
             }
         }
         foreach ($uow->getScheduledCollectionDeletions() as $collection) {
-            if ($this->configuration->isUnaudited($collection->getOwner())) {
+            if (!$this->configuration->isAudited($collection->getOwner())) {
                 continue;
             }
             $mapping = $collection->getMapping();
@@ -100,7 +100,7 @@ class AuditSubscriber implements EventSubscriber
                 continue; // ignore inverse side or one to many relations
             }
             foreach ($collection->toArray() as $entity) {
-                if ($this->configuration->isUnaudited($entity)) {
+                if (!$this->configuration->isAudited($entity)) {
                     continue;
                 }
                 $this->dissociated[] = [$collection->getOwner(), $entity, $this->id($em, $entity), $mapping];
@@ -271,21 +271,23 @@ class AuditSubscriber implements EventSubscriber
         $meta = $em->getClassMetadata(get_class($entity));
         $diff = [];
         foreach ($ch as $fieldName => list($old, $new)) {
-            if ($meta->hasField($fieldName)) {
+            if ($meta->hasField($fieldName) &&
+                $this->configuration->isAuditedField($entity, $fieldName)
+            ) {
                 $mapping = $meta->fieldMappings[$fieldName];
                 $diff[$fieldName] = [
                     '-' => $this->value($em, Type::getType($mapping['type']), $old),
                     '+' => $this->value($em, Type::getType($mapping['type']), $new),
                 ];
-                if ($diff[$fieldName]['-'] === $diff[$fieldName]['+']) {
+                if ($diff[$fieldName]['-'] == $diff[$fieldName]['+']) {
                     unset($diff[$fieldName]);
                 }
-            } elseif ($meta->hasAssociation($fieldName) && $meta->isSingleValuedAssociation($fieldName)) {
+            } elseif ($meta->hasAssociation($fieldName) && $meta->isSingleValuedAssociation($fieldName) && $this->configuration->isAuditedField($entity, $fieldName)) {
                 $diff[$fieldName] = [
                     '-' => $this->assoc($em, $old),
                     '+' => $this->assoc($em, $new),
                 ];
-                if ($diff[$fieldName]['-'] === $diff[$fieldName]['+']) {
+                if ($diff[$fieldName]['-'] == $diff[$fieldName]['+']) {
                     unset($diff[$fieldName]);
                 }
             }
@@ -300,12 +302,19 @@ class AuditSubscriber implements EventSubscriber
         }
         $em->getUnitOfWork()->initializeObject($association); // ensure that proxies are initialized
         $meta = $em->getClassMetadata(get_class($association));
-        $pk = $meta->getSingleIdentifierFieldName();
+        $pkName = $meta->getSingleIdentifierFieldName();
+        $pkValue = $this->id($em, $association);
+        if (method_exists($association, '__toString')) {
+            $label = (string) $association;
+        } else {
+            $label = get_class() . '#' . $pkValue;
+        }
 
         return [
+            'label' => $label,
             'class' => $meta->name,
             'table' => $meta->table['name'],
-            $pk     => $this->id($em, $association),
+            $pkName => $pkValue,
         ];
     }
 

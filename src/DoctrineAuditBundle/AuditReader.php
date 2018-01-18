@@ -21,7 +21,7 @@ class AuditReader
         $this->entityManager = $entityManager;
     }
 
-    public function getAuditedEntities()
+    public function getEntities()
     {
         $entities = $this->entityManager->getConfiguration()->getMetadataDriverImpl()->getAllClassNames();
         $audited = [];

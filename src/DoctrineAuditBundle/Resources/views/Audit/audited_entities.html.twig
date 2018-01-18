@@ -13,7 +13,7 @@
             <tr>
                 <td>{{ entity|escape }}</td>
                 <td>
-                    <a href="{{ path('dh_doctrine_audit_entity_history', { 'entity': entity }) }}">{{ table }}</a>
+                    <a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': entity }) }}">{{ table }}</a>
                 </td>
             </tr>
         {% endfor %}

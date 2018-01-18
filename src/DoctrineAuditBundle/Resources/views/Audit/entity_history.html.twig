@@ -16,9 +16,9 @@
         <tbody>
         {% for entry in entries %}
             <tr>
-                <td><a href="{{ path('dh_doctrine_audit_entity_audit_details', { 'entity': entity, 'id': entry.id }) }}">{{ entry.id }}</a></td>
+                <td><a href="{{ path('dh_doctrine_audit_show_audit_entry', { 'entity': entity, 'id': entry.id }) }}">{{ entry.id }}</a></td>
                 <td>{{ entry.getType() }}</td>
-                <td><a href="{{ path('dh_doctrine_audit_entity_history', { 'entity': entity, 'id': entry.getObjectId() }) }}">{{ entry.getObjectId() }}</a></td>
+                <td><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': entity, 'id': entry.getObjectId() }) }}">{{ entry.getObjectId() }}</a></td>
                 <td>{{ entry.getUserId() }}</td>
                 <td>{{ entry.getUsername() }}</td>
                 <td>{{ entry.getIp() }}</td>

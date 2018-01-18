@@ -1,5 +1,17 @@
 {% extends "DHDoctrineAuditBundle::layout.html.twig" %}
 
+{% macro dump(value, separator) %}
+    {% if value is iterable %}
+        {% for k, v in value %}
+            {{ k }}: {{ v }}{{ separator|default('<br/>')|raw }}
+        {% endfor %}
+    {% else %}
+        {{ value }}
+    {% endif %}
+{% endmacro dump %}
+
+{% import _self as audit_viewer %}
+
 {% block dh_doctrine_audit_content %}
 {% set diffs = entry.getDiffs() %}
     <h1>Entity #{{ entry.getObjectId() }} changes ({{ entry.getType() }})</h1>
@@ -45,8 +57,8 @@
             {% for key, values in diffs %}
             <tr>
                 <td>{{ key }}</td>
-                <td>{{ values['-'] }}</td>
-                <td>{{ values['+'] }}</td>
+                <td>{{ audit_viewer.dump(values['-']) }}</td>
+                <td>{{ audit_viewer.dump(values['+']) }}</td>
             </tr>
             {% endfor %}
         </tbody>
