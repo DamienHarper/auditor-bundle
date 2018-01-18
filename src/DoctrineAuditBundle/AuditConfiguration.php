@@ -10,22 +10,22 @@ class AuditConfiguration
     /**
      * @var string
      */
-    private $table_prefix;
+    private $tablePrefix;
 
     /**
      * @var string
      */
-    private $table_suffix;
+    private $tableSuffix;
 
     /**
      * @var array
      */
-    private $auditedEntities = [];
+    private $ignoredColumns = [];
 
     /**
      * @var array
      */
-    private $unauditedEntities = [];
+    private $entities = [];
 
     /**
      * @var TokenStorage
@@ -43,57 +43,16 @@ class AuditConfiguration
         $this->securityTokenStorage = $securityTokenStorage;
         $this->requestStack = $requestStack;
 
-        $this->table_prefix = $config['table_prefix'];
-        $this->table_suffix = $config['table_suffix'];
+        $this->tablePrefix = $config['table_prefix'];
+        $this->tableSuffix = $config['table_suffix'];
+        $this->ignoredColumns = $config['ignored_columns'];
 
-        if (isset($config['audited_entities']) && !empty($config['audited_entities'])) {
+        if (isset($config['entities']) && !empty($config['entities'])) {
             // use entity names as array keys for easier lookup
-            foreach ($config['audited_entities'] as $auditedEntity) {
-                $this->auditedEntities[$auditedEntity] = true;
-            }
-        } elseif (isset($config['unaudited_entities'])) {
-            // use entity names as array keys for easier lookup
-            foreach ($config['unaudited_entities'] as $unauditedEntity) {
-                $this->unauditedEntities[$unauditedEntity] = true;
+            foreach ($config['entities'] as $auditedEntity => $fields) {
+                $this->entities[$auditedEntity] = $fields;
             }
         }
-    }
-
-    /**
-     * Returns true if $entity is not audited.
-     *
-     * @param $entity
-     * @return bool
-     */
-    public function isUnaudited($entity) : bool
-    {
-        if (!empty($this->auditedEntities)) {
-            // only selected entities are audited
-            $isEntityUnaudited = true;
-            foreach (array_keys($this->auditedEntities) as $auditedEntity) {
-                if (is_object($entity) && $entity instanceof $auditedEntity) {
-                    $isEntityUnaudited = false;
-                    break;
-                } elseif (is_string($entity) && $entity == $auditedEntity) {
-                    $isEntityUnaudited = false;
-                    break;
-                }
-            }
-        } else {
-            // all entities are audited but selected ones
-            $isEntityUnaudited = false;
-            foreach (array_keys($this->unauditedEntities) as $unauditedEntity) {
-                if (is_object($entity) && $entity instanceof $unauditedEntity) {
-                    $isEntityUnaudited = true;
-                    break;
-                } elseif (is_string($entity) && $entity == $unauditedEntity) {
-                    $isEntityUnaudited = true;
-                    break;
-                }
-            }
-        }
-
-        return $isEntityUnaudited;
     }
 
     /**
@@ -104,47 +63,75 @@ class AuditConfiguration
      */
     public function isAudited($entity) : bool
     {
-        return ! $this->isUnaudited($entity);
+        if (!empty($this->entities)) {
+            foreach (array_keys($this->entities) as $auditedEntity) {
+                if (is_object($entity) && $entity instanceof $auditedEntity) {
+                    return true;
+                } elseif (is_string($entity) && $entity == $auditedEntity) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
-     * Get the value of table_prefix.
+     * Returns true if $field is audited.
+     *
+     * @param $entity
+     * @param $field
+     * @return bool
+     */
+    public function isAuditedField($entity, $field) : bool
+    {
+        if (!in_array($field, $this->ignoredColumns) && $this->isAudited($entity)) {
+            $class = is_object($entity) ? get_class($entity) : $entity;
+            $auditedFields = $this->entities[$class];
+            return !in_array($field, $auditedFields);
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the value of tablePrefix.
      *
      * @return string
      */
     public function getTablePrefix(): string
     {
-        return $this->table_prefix;
+        return $this->tablePrefix;
     }
 
     /**
-     * Get the value of table_suffix.
+     * Get the value of tableSuffix.
      *
      * @return string
      */
     public function getTableSuffix(): string
     {
-        return $this->table_suffix;
+        return $this->tableSuffix;
     }
 
     /**
-     * Get the value of auditedEntities.
+     * Get the value of excludedColumns.
      *
-     * @return array
+     * @return string
      */
-    public function getAuditedEntities(): array
+    public function getIgnoredColumns(): array
     {
-        return $this->auditedEntities;
+        return $this->excludedColumns;
     }
 
     /**
-     * Get the value of unauditedEntities.
+     * Get the value of entities.
      *
      * @return array
      */
-    public function getUnauditedEntities(): array
+    public function getEntities(): array
     {
-        return $this->unauditedEntities;
+        return $this->entities;
     }
 
     /**

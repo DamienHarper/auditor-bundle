@@ -15,64 +15,120 @@ managed through standard **ORM** operations.
 This bundle is inspired by [data-dog/audit-bundle](https://github.com/DATA-DOG/DataDogAuditBundle.git) and 
 [simplethings/entity-audit-bundle](https://github.com/simplethings/EntityAuditBundle.git)
 
-## Install
 
-First, install it with composer:
+Installation
+============
 
-    composer require damienharper/doctrine-audit-bundle
+Applications that use Symfony Flex
+----------------------------------
 
-Then, add it in your **AppKernel** bundles (symfony < 3.4).
+Open a command console, enter your project directory and execute:
+
+```bash
+composer require composer require damienharper/doctrine-audit-bundle
+```
+
+Applications that don't use Symfony Flex
+----------------------------------------
+
+### Step 1: Download the Bundle
+
+Open a command console, enter your project directory and execute the
+following command to download the latest stable version of this bundle:
+
+```bash
+composer require composer require damienharper/doctrine-audit-bundle
+```
+
+This command requires you to have Composer installed globally, as explained
+in the [installation chapter](https://getcomposer.org/doc/00-intro.md)
+of the Composer documentation.
+
+### Step 2: Enable the Bundle
+
+Then, enable the bundle by adding it to the list of registered bundles
+in the `app/AppKernel.php` file of your project:
+
 ```php
+<?php
 // app/AppKernel.php
-public function registerBundles()
+
+// ...
+class AppKernel extends Kernel
 {
-    $bundles = array(
-        ...
-        new DH\DoctrineAuditBundle\DHDoctrineAuditBundle(),
-        ...
-    );
-    ...
+    public function registerBundles()
+    {
+        $bundles = array(
+            // ...
+            new DH\DoctrineAuditBundle\DHDoctrineAuditBundle(),
+        );
+
+        // ...
+    }
+
+    // ...
 }
 ```
 
-### Configure
 
-Then configure which entities are audited
+Configuration
+=============
 
-```yaml
-// app/config/config.yml (symfony < 3.4)
-// config/dh_doctrine_audit.yaml (symfony >= 3.4)
-dh_doctrine_audit:
-    audited_entities:
-        - MyBundle\Entity\MyAuditedEntity1
-        - MyBundle\Entity\MyAuditedEntity2
-```
+### Audited entities and properties
 
-or which are not
+By default, DoctrineAuditBundle won't audit any entity, you have to configure which entities have to be audited.
 
 ```yaml
 // app/config/config.yml (symfony < 3.4)
 // config/dh_doctrine_audit.yaml (symfony >= 3.4)
 dh_doctrine_audit:
-    unaudited_entities:
-        - MyBundle\Entity\MyNotAuditedEntity
+    entities:
+        MyBundle\Entity\MyAuditedEntity1: ~
+        MyBundle\Entity\MyAuditedEntity2: ~
 ```
 
-You can specify either audited or unaudited entities. If both are specified, only audited entities would be taken into account.
-
-A simple controller exposes audits. To view it in action, setup the routes
+All `MyAuditedEntity1` and `MyAuditedEntity2` properties will be audited. 
+Though it is possible to exclude some of them from the audit process.
 
 ```yaml
-// app/config/routing.yml (symfony < 3.4)
-// config/routes.yaml (symfony >= 3.4)
+// app/config/config.yml (symfony < 3.4)
+// config/dh_doctrine_audit.yaml (symfony >= 3.4)
 dh_doctrine_audit:
-    resource: "@DHDoctrineAuditBundle/Controller/"
-    type: annotation
-``` 
+    entities:
+        MyBundle\Entity\MyAuditedEntity1: ~   # all MyAuditedEntity1 properties are audited
+        MyBundle\Entity\MyAuditedEntity2:     # all MyAuditedEntity2 properties BUT created_at and updated_at are audited
+            - created_at                      # created_at is ignored by the audit process
+            - updated_at                      # updated_at is ignored by the audit process
+```
 
-### Creating new tables
+It is also possible to specify properties that are globally ignored by the audit process.
 
-Call the command below to see the new tables in the update schema queue.
+```yaml
+// app/config/config.yml (symfony < 3.4)
+// config/dh_doctrine_audit.yaml (symfony >= 3.4)
+dh_doctrine_audit:
+    ignored_columns:    # properties ignored by the audit process in any audited entity
+        - created_at
+        - updated_at
+```
+
+### Audit tables naming format
+
+Audit table names are composed of a prefix, the audited table name and a suffix. 
+By default, the prefix is empty and the suffix is `_audit`. Though, they can be customized.
+
+```yaml
+// app/config/config.yml (symfony < 3.4)
+// config/dh_doctrine_audit.yaml (symfony >= 3.4)
+dh_doctrine_audit:
+    table_prefix: ''
+    table_suffix: '_audit'
+```
+
+### Creating audit tables
+
+Open a command console, enter your project directory and execute the
+following command to review the new audit tables in the update schema queue.
 
 ```bash
 # symfony < 3.4
@@ -87,9 +143,7 @@ bin/console doctrine:schema:update --dump-sql
 **Notice**: DoctrineAuditBundle currently **only** works with a DBAL Connection and EntityManager named **"default"**.
 
 
-Finally, create the database tables used by the bundle:
-
-Using [Doctrine Migrations Bundle](http://symfony.com/doc/current/bundles/DoctrineMigrationsBundle/index.html):
+#### Using [Doctrine Migrations Bundle](http://symfony.com/doc/current/bundles/DoctrineMigrationsBundle/index.html)
 
 ```bash
 # symfony < 3.4
@@ -103,7 +157,7 @@ bin/console doctrine:migrations:diff
 bin/console doctrine:migrations:migrate
 ```
 
-Using Doctrine Schema:
+#### Using Doctrine Schema
     
 ```bash
 # symfony < 3.4
@@ -115,12 +169,27 @@ app/console doctrine:schema:update --force
 bin/console doctrine:schema:update --force
 ```
 
-## Usage
+### Audit viewer
+
+Add the following routes to the routing configuration to enable the included audits viewer.
+
+```yaml
+// app/config/routing.yml (symfony < 3.4)
+// config/routes.yaml (symfony >= 3.4)
+dh_doctrine_audit:
+    resource: "@DHDoctrineAuditBundle/Controller/"
+    type: annotation
+``` 
+
+
+Usage
+=====
 
 **audit** entities will be mapped automatically if you run schema update or similar.
 And all the database changes will be reflected in the audit logs afterwards.
 
-## License
+License
+=======
 
 DoctrineAuditBundle is free to use and is licensed under the [MIT license](http://www.opensource.org/licenses/mit-license.php)
 

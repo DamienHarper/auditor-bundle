@@ -19,16 +19,16 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('table_prefix')->defaultValue('')->end()
                 ->scalarNode('table_suffix')->defaultValue('_audit')->end()
 
-                ->arrayNode('audited_entities')
+                ->arrayNode('ignored_columns')
                     ->canBeUnset()
-                    ->performNoDeepMerging()
                     ->prototype('scalar')->end()
                 ->end()
 
-                ->arrayNode('unaudited_entities')
+                ->arrayNode('entities')
                     ->canBeUnset()
-                    ->performNoDeepMerging()
-                    ->prototype('scalar')->end()
+                    ->arrayPrototype()
+                        ->prototype('scalar')->end()
+                    ->end()
                 ->end()
             ->end()
         ;
