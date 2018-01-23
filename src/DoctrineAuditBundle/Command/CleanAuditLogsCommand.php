@@ -30,7 +30,7 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
         $this
             ->setDescription('Cleans audit tables')
             ->addOption('no-confirm', null, InputOption::VALUE_NONE, 'No interaction mode')
-            ->addArgument('keep', InputArgument::OPTIONAL, 'Keep last N months of audit.', 6)
+            ->addArgument('keep', InputArgument::OPTIONAL, 'Keep last N months of audit.', 12)
         ;
     }
 
@@ -50,7 +50,8 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
         $keep = (int) $input->getArgument('keep');
         if ($keep <= 0) {
             $io->error("'keep' argument must be a positive number.");
-            exit(0);
+
+            return 0;
         }
 
         $until = new \DateTime();
@@ -121,6 +122,8 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
         // if not released explicitly, Symfony releases the lock
         // automatically when the execution of the command ends
         $this->release();
+
+        return 0;
     }
 
     public function setContainer(ContainerInterface $container = null)
