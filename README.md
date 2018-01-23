@@ -96,9 +96,10 @@ Though it is possible to exclude some of them from the audit process.
 dh_doctrine_audit:
     entities:
         MyBundle\Entity\MyAuditedEntity1: ~   # all MyAuditedEntity1 properties are audited
-        MyBundle\Entity\MyAuditedEntity2:     # all MyAuditedEntity2 properties BUT created_at and updated_at are audited
-            - created_at                      # created_at is ignored by the audit process
-            - updated_at                      # updated_at is ignored by the audit process
+        MyBundle\Entity\MyAuditedEntity2:
+            ignored_columns:                  # properties ignored by the audit process
+                - created_at
+                - updated_at
 ```
 
 It is also possible to specify properties that are globally ignored by the audit process.
@@ -187,6 +188,49 @@ Usage
 
 **audit** entities will be mapped automatically if you run schema update or similar.
 And all the database changes will be reflected in the audit logs afterwards.
+
+
+Audits cleanup
+==============
+
+DoctrineAuditBundle provides a convenient command that helps you cleaning audit tables.
+Open a command console, enter your project directory and execute:
+
+```bash
+# symfony < 3.4
+app/console audit:clean
+```
+
+```bash
+# symfony >= 3.4
+bin/console audit:clean
+```
+
+By default it cleans audit entries older than 12 months. You can override this by providing the number of months 
+you want to keep in the audit tables. For example, to keep 18 months:
+
+```bash
+# symfony < 3.4
+app/console audit:clean 18
+```
+
+```bash
+# symfony >= 3.4
+bin/console audit:clean 18
+```
+
+It is also possible to bypass the confirmation and make the command un-interactive if you plan to schedule it (ie. cron)
+
+```bash
+# symfony < 3.4
+app/console audit:clean --no-confirm
+```
+
+```bash
+# symfony >= 3.4
+bin/console audit:clean --no-confirm
+```
+
 
 License
 =======
