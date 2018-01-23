@@ -1,4 +1,5 @@
 <?php
+
 namespace DH\DoctrineAuditBundle;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,7 +22,12 @@ class AuditReader
         $this->entityManager = $entityManager;
     }
 
-    public function getEntities()
+    public function getConfiguration(): AuditConfiguration
+    {
+        return $this->configuration;
+    }
+
+    public function getEntities(): array
     {
         $entities = $this->entityManager->getConfiguration()->getMetadataDriverImpl()->getAllClassNames();
         $audited = [];
@@ -35,13 +41,13 @@ class AuditReader
         return $audited;
     }
 
-    public function getAudits(string $entity, int $id = null, int $page = 1, int $pageSize = 50)
+    public function getAudits(string $entity, int $id = null, int $page = 1, int $pageSize = 50): array
     {
         $connection = $this->entityManager->getConnection();
         $auditTable = implode('', [
             $this->configuration->getTablePrefix(),
             $this->getEntityTableName($entity),
-            $this->configuration->getTableSuffix()
+            $this->configuration->getTableSuffix(),
         ]);
 
         $queryBuilder = $connection->createQueryBuilder();
@@ -54,7 +60,7 @@ class AuditReader
             ->setMaxResults($pageSize)
         ;
 
-        if ($id !== null) {
+        if (null !== $id) {
             $queryBuilder
                 ->where('object_id = :object_id')
                 ->setParameter('object_id', $id)
@@ -73,7 +79,7 @@ class AuditReader
         $auditTable = implode('', [
             $this->configuration->getTablePrefix(),
             $this->getEntityTableName($entity),
-            $this->configuration->getTableSuffix()
+            $this->configuration->getTableSuffix(),
         ]);
 
         /**
@@ -93,10 +99,11 @@ class AuditReader
     }
 
     /**
-     * Returns the table name of $entity
+     * Returns the table name of $entity.
      *
      * @param EntityManagerInterface $em
      * @param $entity
+     *
      * @return string
      */
     public function getEntityTableName($entity): string

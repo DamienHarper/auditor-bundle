@@ -4,16 +4,15 @@ namespace DH\DoctrineAuditBundle\EventSubscriber;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\DBAL\AuditLogger;
-
-use Symfony\Component\Security\Core\User\UserInterface;
-use Doctrine\DBAL\Types\Type;
+use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Logging\LoggerChain;
 use Doctrine\DBAL\Logging\SQLLogger;
-use Doctrine\Common\EventSubscriber;
-use Doctrine\ORM\Events;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Event\OnFlushEventArgs;
+use Doctrine\ORM\Events;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class AuditSubscriber implements EventSubscriber
 {
@@ -75,7 +74,7 @@ class AuditSubscriber implements EventSubscriber
                 continue;
             }
             $mapping = $collection->getMapping();
-            if (!$mapping['isOwningSide'] || $mapping['type'] !== ClassMetadataInfo::MANY_TO_MANY) {
+            if (!$mapping['isOwningSide'] || ClassMetadataInfo::MANY_TO_MANY !== $mapping['type']) {
                 continue; // ignore inverse side or one to many relations
             }
             foreach ($collection->getInsertDiff() as $entity) {
@@ -96,7 +95,7 @@ class AuditSubscriber implements EventSubscriber
                 continue;
             }
             $mapping = $collection->getMapping();
-            if (!$mapping['isOwningSide'] || $mapping['type'] !== ClassMetadataInfo::MANY_TO_MANY) {
+            if (!$mapping['isOwningSide'] || ClassMetadataInfo::MANY_TO_MANY !== $mapping['type']) {
                 continue; // ignore inverse side or one to many relations
             }
             foreach ($collection->toArray() as $entity) {
@@ -223,7 +222,7 @@ class AuditSubscriber implements EventSubscriber
 
     private function audit(EntityManager $em, array $data)
     {
-        $auditTable = $this->configuration->getTablePrefix() . $data['table'] . $this->configuration->getTableSuffix();
+        $auditTable = $this->configuration->getTablePrefix().$data['table'].$this->configuration->getTableSuffix();
         $fields = [
             'type'          => ':type',
             'object_id'     => ':object_id',
@@ -235,7 +234,7 @@ class AuditSubscriber implements EventSubscriber
         ];
 
         $query = sprintf(
-            "INSERT INTO %s (%s) VALUES (%s)",
+            'INSERT INTO %s (%s) VALUES (%s)',
             $auditTable,
             implode(', ', array_keys($fields)),
             implode(', ', array_values($fields))
@@ -263,6 +262,7 @@ class AuditSubscriber implements EventSubscriber
             Type::getType($meta->fieldMappings[$pk]['type']),
             $meta->getReflectionProperty($pk)->getValue($entity)
         );
+
         return $pk;
     }
 
@@ -292,6 +292,7 @@ class AuditSubscriber implements EventSubscriber
                 }
             }
         }
+
         return $diff;
     }
 
@@ -307,7 +308,7 @@ class AuditSubscriber implements EventSubscriber
         if (method_exists($association, '__toString')) {
             $label = (string) $association;
         } else {
-            $label = get_class() . '#' . $pkValue;
+            $label = get_class($association) . '#' . $pkValue;
         }
 
         return [
@@ -336,12 +337,12 @@ class AuditSubscriber implements EventSubscriber
         $client_ip = null;
 
         $request = $this->configuration->getRequestStack()->getCurrentRequest();
-        if ($request !== null) {
+        if (null !== $request) {
             $client_ip = $request->getClientIp();
         }
 
         $token = $this->configuration->getSecurityTokenStorage()->getToken();
-        if ($token !== null) {
+        if (null !== $token) {
             $user = $token->getUser();
             if ($user instanceof UserInterface) {
                 $user_id = $user->getId();

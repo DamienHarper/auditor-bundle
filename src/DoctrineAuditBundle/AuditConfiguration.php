@@ -37,7 +37,6 @@ class AuditConfiguration
      */
     protected $requestStack;
 
-
     public function __construct(array $config, TokenStorage $securityTokenStorage, RequestStack $requestStack)
     {
         $this->securityTokenStorage = $securityTokenStorage;
@@ -49,8 +48,8 @@ class AuditConfiguration
 
         if (isset($config['entities']) && !empty($config['entities'])) {
             // use entity names as array keys for easier lookup
-            foreach ($config['entities'] as $auditedEntity => $fields) {
-                $this->entities[$auditedEntity] = $fields;
+            foreach ($config['entities'] as $auditedEntity => $entityOptions) {
+                $this->entities[$auditedEntity] = $entityOptions;
             }
         }
     }
@@ -59,15 +58,17 @@ class AuditConfiguration
      * Returns true if $entity is audited.
      *
      * @param $entity
+     *
      * @return bool
      */
-    public function isAudited($entity) : bool
+    public function isAudited($entity): bool
     {
         if (!empty($this->entities)) {
             foreach (array_keys($this->entities) as $auditedEntity) {
                 if (is_object($entity) && $entity instanceof $auditedEntity) {
                     return true;
-                } elseif (is_string($entity) && $entity == $auditedEntity) {
+                }
+                if (is_string($entity) && $entity == $auditedEntity) {
                     return true;
                 }
             }
@@ -81,14 +82,16 @@ class AuditConfiguration
      *
      * @param $entity
      * @param $field
+     *
      * @return bool
      */
-    public function isAuditedField($entity, $field) : bool
+    public function isAuditedField($entity, $field): bool
     {
         if (!in_array($field, $this->ignoredColumns) && $this->isAudited($entity)) {
             $class = is_object($entity) ? get_class($entity) : $entity;
-            $auditedFields = $this->entities[$class];
-            return !in_array($field, $auditedFields);
+            $entityOptions = $this->entities[$class];
+
+            return !isset($entityOptions['ignored_columns']) || !in_array($field, $entityOptions['ignored_columns']);
         }
 
         return false;
@@ -121,7 +124,7 @@ class AuditConfiguration
      */
     public function getIgnoredColumns(): array
     {
-        return $this->excludedColumns;
+        return $this->ignoredColumns;
     }
 
     /**

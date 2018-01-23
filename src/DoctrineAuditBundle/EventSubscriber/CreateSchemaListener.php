@@ -3,13 +3,10 @@
 namespace DH\DoctrineAuditBundle\EventSubscriber;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
-use Doctrine\DBAL\Schema\Column;
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
-use Doctrine\ORM\Tools\ToolEvents;
-use Doctrine\ORM\Tools\Event\GenerateSchemaTableEventArgs;
-use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
 use Doctrine\Common\EventSubscriber;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Tools\Event\GenerateSchemaTableEventArgs;
+use Doctrine\ORM\Tools\ToolEvents;
 
 class CreateSchemaListener implements EventSubscriber
 {
@@ -41,7 +38,7 @@ class CreateSchemaListener implements EventSubscriber
         $schema = $eventArgs->getSchema();
         $entityTable = $eventArgs->getClassTable();
         $auditTable = $schema->createTable(
-            $this->configuration->getTablePrefix() . $entityTable->getName() . $this->configuration->getTableSuffix()
+            $this->configuration->getTablePrefix().$entityTable->getName().$this->configuration->getTableSuffix()
         );
         $auditTable->addColumn('id', 'integer', [
             'autoincrement' => true,
@@ -86,7 +83,7 @@ class CreateSchemaListener implements EventSubscriber
         if (!in_array($cm->inheritanceType, [
             ClassMetadataInfo::INHERITANCE_TYPE_NONE,
             ClassMetadataInfo::INHERITANCE_TYPE_JOINED,
-            ClassMetadataInfo::INHERITANCE_TYPE_SINGLE_TABLE
+            ClassMetadataInfo::INHERITANCE_TYPE_SINGLE_TABLE,
         ])) {
             throw new \Exception(sprintf('Inheritance type "%s" is not yet supported', $cm->inheritanceType));
         }

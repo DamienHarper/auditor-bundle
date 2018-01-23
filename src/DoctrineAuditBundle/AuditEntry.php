@@ -4,7 +4,6 @@ namespace DH\DoctrineAuditBundle;
 
 class AuditEntry
 {
-
     /**
      * @var int
      */
@@ -38,10 +37,9 @@ class AuditEntry
      */
     protected $created_at;
 
-
     public function __set($name, $value)
     {
-        $this->$name = $value;
+        $this->{$name} = $value;
     }
 
     /**

@@ -8,7 +8,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 class Configuration implements ConfigurationInterface
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getConfigTreeBuilder()
     {
@@ -16,8 +16,12 @@ class Configuration implements ConfigurationInterface
 
         $treeBuilder->root('dh_doctrine_audit')
             ->children()
-                ->scalarNode('table_prefix')->defaultValue('')->end()
-                ->scalarNode('table_suffix')->defaultValue('_audit')->end()
+                ->scalarNode('table_prefix')
+                    ->defaultValue('')
+                ->end()
+                ->scalarNode('table_suffix')
+                    ->defaultValue('_audit')
+                ->end()
 
                 ->arrayNode('ignored_columns')
                     ->canBeUnset()
@@ -26,8 +30,13 @@ class Configuration implements ConfigurationInterface
 
                 ->arrayNode('entities')
                     ->canBeUnset()
-                    ->arrayPrototype()
-                        ->prototype('scalar')->end()
+                    ->prototype('array')
+                        ->children()
+                            ->arrayNode('ignored_columns')
+                                ->canBeUnset()
+                                ->prototype('scalar')->end()
+                            ->end()
+                        ->end()
                     ->end()
                 ->end()
             ->end()
