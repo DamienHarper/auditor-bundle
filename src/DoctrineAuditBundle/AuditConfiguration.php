@@ -88,7 +88,7 @@ class AuditConfiguration
     public function isAuditedField($entity, $field): bool
     {
         if (!in_array($field, $this->ignoredColumns) && $this->isAudited($entity)) {
-            $class = is_object($entity) ? get_class($entity) : $entity;
+            $class = is_object($entity) ? \Doctrine\Common\Util\ClassUtils::getRealClass(get_class($entity)) : $entity;
             $entityOptions = $this->entities[$class];
 
             return !isset($entityOptions['ignored_columns']) || !in_array($field, $entityOptions['ignored_columns']);
@@ -120,7 +120,7 @@ class AuditConfiguration
     /**
      * Get the value of excludedColumns.
      *
-     * @return string
+     * @return array
      */
     public function getIgnoredColumns(): array
     {
