@@ -22,11 +22,19 @@ class AuditReader
         $this->entityManager = $entityManager;
     }
 
+    /**
+     * @return AuditConfiguration
+     */
     public function getConfiguration(): AuditConfiguration
     {
         return $this->configuration;
     }
 
+    /**
+     * Returns an array of audit table names indexed by entity FQN
+     *
+     * @return array
+     */
     public function getEntities(): array
     {
         $entities = $this->entityManager->getConfiguration()->getMetadataDriverImpl()->getAllClassNames();
@@ -41,12 +49,21 @@ class AuditReader
         return $audited;
     }
 
-    public function getAudits(string $entity, int $id = null, int $page = 1, int $pageSize = 50): array
+    /**
+     * Returns an array of audited entries/operations
+     *
+     * @param string|object $entity
+     * @param int|null $id
+     * @param int $page
+     * @param int $pageSize
+     * @return array
+     */
+    public function getAudits($entity, int $id = null, int $page = 1, int $pageSize = 50): array
     {
         $connection = $this->entityManager->getConnection();
         $auditTable = implode('', [
             $this->configuration->getTablePrefix(),
-            $this->getEntityTableName($entity),
+            $this->getEntityTableName(is_string($entity) ? $entity : get_class($entity)),
             $this->configuration->getTableSuffix(),
         ]);
 
@@ -73,12 +90,17 @@ class AuditReader
         ;
     }
 
-    public function getAudit(string $entity, int $id)
+    /**
+     * @param string|object $entity
+     * @param int $id
+     * @return mixed
+     */
+    public function getAudit($entity, int $id)
     {
         $connection = $this->entityManager->getConnection();
         $auditTable = implode('', [
             $this->configuration->getTablePrefix(),
-            $this->getEntityTableName($entity),
+            $this->getEntityTableName(is_string($entity) ? $entity : get_class($entity)),
             $this->configuration->getTableSuffix(),
         ]);
 
@@ -101,9 +123,7 @@ class AuditReader
     /**
      * Returns the table name of $entity.
      *
-     * @param EntityManagerInterface $em
-     * @param $entity
-     *
+     * @param string|object $entity
      * @return string
      */
     public function getEntityTableName($entity): string

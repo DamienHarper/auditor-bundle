@@ -32,11 +32,11 @@ class AuditController extends Controller
     public function showEntityHistoryAction(string $entity, int $id = null, int $page = 1, int $pageSize = 50)
     {
         $reader = $this->container->get('dh_doctrine_audit.reader');
-        $results = $reader->getAudits($entity, $id, $page, $pageSize);
+        $entries = $reader->getAudits($entity, $id, $page, $pageSize);
 
         return $this->render('DHDoctrineAuditBundle:Audit:entity_history.html.twig', [
             'entity'     => $entity,
-            'entries'   => $results,
+            'entries'   => $entries,
         ]);
     }
 
@@ -48,11 +48,11 @@ class AuditController extends Controller
     public function showAuditEntryAction(string $entity, int $id)
     {
         $reader = $this->container->get('dh_doctrine_audit.reader');
-        $results = $reader->getAudit($entity, $id);
+        $data = $reader->getAudit($entity, $id);
 
         return $this->render('DHDoctrineAuditBundle:Audit:entity_audit_details.html.twig', [
             'entity' => $entity,
-            'entry' => $results[0],
+            'entry' => $data[0],
         ]);
     }
 }

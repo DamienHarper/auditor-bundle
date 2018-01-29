@@ -20,3 +20,9 @@ services:
     arguments: ["@dh_doctrine_audit.configuration"]
     tags:
       - { name: doctrine.event_subscriber, connection: default }
+
+  dh_doctrine_audit.twig_extension:
+    class: DH\DoctrineAuditBundle\Twig\Extension\TwigExtension
+    arguments: ['@doctrine']
+    tags:
+      -  { name: twig.extension }
