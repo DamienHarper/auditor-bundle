@@ -1,5 +1,9 @@
 # DoctrineAuditBundle 
 
+[![GitHub license](https://img.shields.io/github/license/DamienHarper/DoctrineAuditBundle.svg)](https://github.com/DamienHarper/DoctrineAuditBundle/blob/master/LICENSE)
+[![release-version-badge]][packagist]
+![php-version-badge]
+
 This bundle creates audit logs for all doctrine ORM database related changes:
 
 - inserts and updates including their diffs and relation field diffs.
@@ -237,3 +241,9 @@ License
 
 DoctrineAuditBundle is free to use and is licensed under the [MIT license](http://www.opensource.org/licenses/mit-license.php)
 
+<!-- Badges -->
+[packagist]: https://packagist.org/packages/damienharper/doctrine-audit-bundle
+[release-version-badge]: https://img.shields.io/packagist/v/damienharper/doctrine-audit-bundle.svg?style=flat&label=release
+[license]: LICENSE
+[license-badge]: https://img.shields.io/github/license/DamienHarper/DoctrineAuditBundle.svg?style=flat
+[php-version-badge]: https://img.shields.io/packagist/php-v/damienharper/doctrine-audit-bundle.svg?style=flat
