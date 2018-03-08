@@ -25,4 +25,8 @@ services:
     class: DH\DoctrineAuditBundle\Twig\Extension\TwigExtension
     arguments: ['@doctrine']
     tags:
-      -  { name: twig.extension }
+      - { name: twig.extension }
+
+  DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand:
+    tags:
+      - { name: 'console.command', command: 'audit:clean' }
