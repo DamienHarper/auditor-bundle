@@ -29,6 +29,7 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
     {
         $this
             ->setDescription('Cleans audit tables')
+            ->setName(self::$defaultName)
             ->addOption('no-confirm', null, InputOption::VALUE_NONE, 'No interaction mode')
             ->addArgument('keep', InputArgument::OPTIONAL, 'Keep last N months of audit.', 12)
         ;
