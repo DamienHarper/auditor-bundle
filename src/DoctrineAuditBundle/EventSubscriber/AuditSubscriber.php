@@ -276,18 +276,18 @@ class AuditSubscriber implements EventSubscriber
             ) {
                 $mapping = $meta->fieldMappings[$fieldName];
                 $diff[$fieldName] = [
-                    '-' => $this->value($em, Type::getType($mapping['type']), $old),
-                    '+' => $this->value($em, Type::getType($mapping['type']), $new),
+                    'old' => $this->value($em, Type::getType($mapping['type']), $old),
+                    'new' => $this->value($em, Type::getType($mapping['type']), $new),
                 ];
-                if ($diff[$fieldName]['-'] == $diff[$fieldName]['+']) {
+                if ($diff[$fieldName]['old'] == $diff[$fieldName]['new']) {
                     unset($diff[$fieldName]);
                 }
             } elseif ($meta->hasAssociation($fieldName) && $meta->isSingleValuedAssociation($fieldName) && $this->configuration->isAuditedField($entity, $fieldName)) {
                 $diff[$fieldName] = [
-                    '-' => $this->assoc($em, $old),
-                    '+' => $this->assoc($em, $new),
+                    'old' => $this->assoc($em, $old),
+                    'new' => $this->assoc($em, $new),
                 ];
-                if ($diff[$fieldName]['-'] == $diff[$fieldName]['+']) {
+                if ($diff[$fieldName]['old'] == $diff[$fieldName]['new']) {
                     unset($diff[$fieldName]);
                 }
             }
