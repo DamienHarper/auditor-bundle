@@ -37,9 +37,25 @@ class CreateSchemaListener implements EventSubscriber
 
         $schema = $eventArgs->getSchema();
         $entityTable = $eventArgs->getClassTable();
-        $auditTable = $schema->createTable(
-            $this->configuration->getTablePrefix().$entityTable->getName().$this->configuration->getTableSuffix()
-        );
+
+        $entityTablename = $entityTable->getName();
+        $regex = sprintf('#^(%s\.)(.*)$#', preg_quote($schema->getName(), '#'));
+        if (preg_match($regex, $entityTablename)) {
+            // entityTablename already prefixed with schema name
+            $auditTablename = preg_replace(
+                $regex,
+                sprintf(
+                    '$1%s$2%s',
+                    preg_quote($this->configuration->getTablePrefix(), '#'),
+                    preg_quote($this->configuration->getTableSuffix(), '#')
+                ),
+                $entityTablename
+            );
+        } else {
+            $auditTablename = $this->configuration->getTablePrefix().$entityTable->getName().$this->configuration->getTableSuffix();
+        }
+
+        $auditTable = $schema->createTable($auditTablename);
         $auditTable->addColumn('id', 'integer', [
             'autoincrement' => true,
             'unsigned' => true,
