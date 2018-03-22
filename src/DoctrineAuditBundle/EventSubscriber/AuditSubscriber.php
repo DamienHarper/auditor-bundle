@@ -50,17 +50,17 @@ class AuditSubscriber implements EventSubscriber
         }
         $em->getConnection()->getConfiguration()->setSQLLogger($loggerChain);
 
-        foreach ($uow->getScheduledEntityUpdates() as $entity) {
-            if (!$this->configuration->isAudited($entity)) {
-                continue;
-            }
-            $this->updated[] = [$entity, $uow->getEntityChangeSet($entity)];
-        }
         foreach ($uow->getScheduledEntityInsertions() as $entity) {
             if (!$this->configuration->isAudited($entity)) {
                 continue;
             }
             $this->inserted[] = [$entity, $ch = $uow->getEntityChangeSet($entity)];
+        }
+        foreach ($uow->getScheduledEntityUpdates() as $entity) {
+            if (!$this->configuration->isAudited($entity)) {
+                continue;
+            }
+            $this->updated[] = [$entity, $uow->getEntityChangeSet($entity)];
         }
         foreach ($uow->getScheduledEntityDeletions() as $entity) {
             if (!$this->configuration->isAudited($entity)) {
@@ -74,9 +74,6 @@ class AuditSubscriber implements EventSubscriber
                 continue;
             }
             $mapping = $collection->getMapping();
-            if (!$mapping['isOwningSide'] || ClassMetadataInfo::MANY_TO_MANY !== $mapping['type']) {
-                continue; // ignore inverse side or one to many relations
-            }
             foreach ($collection->getInsertDiff() as $entity) {
                 if (!$this->configuration->isAudited($entity)) {
                     continue;
@@ -95,9 +92,6 @@ class AuditSubscriber implements EventSubscriber
                 continue;
             }
             $mapping = $collection->getMapping();
-            if (!$mapping['isOwningSide'] || ClassMetadataInfo::MANY_TO_MANY !== $mapping['type']) {
-                continue; // ignore inverse side or one to many relations
-            }
             foreach ($collection->toArray() as $entity) {
                 if (!$this->configuration->isAudited($entity)) {
                     continue;
@@ -112,18 +106,18 @@ class AuditSubscriber implements EventSubscriber
         $em->getConnection()->getConfiguration()->setSQLLogger($this->loggerBackup);
         $uow = $em->getUnitOfWork();
 
-        foreach ($this->updated as $entry) {
-            list($entity, $ch) = $entry;
-            // the changeset might be updated from UOW extra updates
-            $ch = array_merge($ch, $uow->getEntityChangeSet($entity));
-            $this->update($em, $entity, $ch);
-        }
-
         foreach ($this->inserted as $entry) {
             list($entity, $ch) = $entry;
             // the changeset might be updated from UOW extra updates
             $ch = array_merge($ch, $uow->getEntityChangeSet($entity));
             $this->insert($em, $entity, $ch);
+        }
+
+        foreach ($this->updated as $entry) {
+            list($entity, $ch) = $entry;
+            // the changeset might be updated from UOW extra updates
+            $ch = array_merge($ch, $uow->getEntityChangeSet($entity));
+            $this->update($em, $entity, $ch);
         }
 
         foreach ($this->associated as $entry) {
@@ -197,7 +191,7 @@ class AuditSubscriber implements EventSubscriber
             'diff' => [
                 'source' => $this->assoc($em, $source),
                 'target' => $this->assoc($em, $target),
-                'table' => $mapping['joinTable']['name'],
+                'table' => isset($mapping['joinTable']['name']) ? $mapping['joinTable']['name'] : '',
             ],
             'table'     => $meta->table['name'],
             'id'        => $this->id($em, $source),
@@ -213,7 +207,7 @@ class AuditSubscriber implements EventSubscriber
             'diff' => [
                 'source' => $this->assoc($em, $source),
                 'target' => $this->assoc($em, $target),
-                'table' => $mapping['joinTable']['name'],
+                'table' => isset($mapping['joinTable']['name']) ? $mapping['joinTable']['name'] : '',
             ],
             'table'     => $meta->table['name'],
             'id'        => $id,
