@@ -3,12 +3,22 @@
 {% macro dump(value, separator) %}
     {% if value is iterable %}
         {% for k, v in value %}
-            {{ k }}: {{ v }}{{ separator|default('<br/>')|raw }}
+            {{ k }}: {{ audit_viewer.printvalue(v) }}{{ separator|default('<br/>')|raw }}
         {% endfor %}
     {% else %}
-        {{ value }}
+        {{ audit_viewer.printvalue(value) }}
     {% endif %}
 {% endmacro dump %}
+
+{% macro printvalue(value) %}
+    {% if value is same as (true) %}
+    <em>true</em>
+    {% elseif value is same as (false) %}
+    <em>false</em>
+    {% else %}
+    {{ value }}
+    {% endif %}
+{% endmacro printvalue %}
 
 {% import _self as audit_viewer %}
 
@@ -26,7 +36,7 @@
         {% for key, value in diffs['target'] %}
             <tr>
                 <td>{{ key }}</td>
-                <td>{{ value }}</td>
+                <td>{{ audit_viewer.printvalue(value) }}</td>
             </tr>
         {% endfor %}
         </tbody>
@@ -41,7 +51,7 @@
         {% for key, value in diffs %}
             <tr>
                 <td>{{ key }}</td>
-                <td>{{ value }}</td>
+                <td>{{ audit_viewer.printvalue(value) }}</td>
             </tr>
         {% endfor %}
         </tbody>
