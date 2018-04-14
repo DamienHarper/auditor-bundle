@@ -12,9 +12,9 @@
 
 {% macro printvalue(value) %}
     {% if value is same as (true) %}
-    <em>true</em>
+    true
     {% elseif value is same as (false) %}
-    <em>false</em>
+    false
     {% else %}
     {{ value }}
     {% endif %}
