@@ -11,7 +11,6 @@ use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class AuditSubscriber implements EventSubscriber
