@@ -272,7 +272,7 @@ class AuditSubscriber implements EventSubscriber
                     'old' => $this->value($em, Type::getType($mapping['type']), $old),
                     'new' => $this->value($em, Type::getType($mapping['type']), $new),
                 ];
-                if ($diff[$fieldName]['old'] == $diff[$fieldName]['new']) {
+                if ($diff[$fieldName]['old'] === $diff[$fieldName]['new']) {
                     unset($diff[$fieldName]);
                 }
             } elseif ($meta->hasAssociation($fieldName) && $meta->isSingleValuedAssociation($fieldName) && $this->configuration->isAuditedField($entity, $fieldName)) {
@@ -280,7 +280,7 @@ class AuditSubscriber implements EventSubscriber
                     'old' => $this->assoc($em, $old),
                     'new' => $this->assoc($em, $new),
                 ];
-                if ($diff[$fieldName]['old'] == $diff[$fieldName]['new']) {
+                if ($diff[$fieldName]['old'] === $diff[$fieldName]['new']) {
                     unset($diff[$fieldName]);
                 }
             }
