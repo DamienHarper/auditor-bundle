@@ -318,6 +318,9 @@ class AuditSubscriber implements EventSubscriber
         switch ($type->getName()) {
             case Type::BOOLEAN:
                 return $type->convertToPHPValue($value, $platform); // json supports boolean values
+            case Type::FLOAT:
+            case Type::DECIMAL:
+                return (string)$type->convertToDatabaseValue($value, $platform);
             default:
                 return $type->convertToDatabaseValue($value, $platform);
         }
