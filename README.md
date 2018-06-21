@@ -102,8 +102,8 @@ dh_doctrine_audit:
         MyBundle\Entity\MyAuditedEntity1: ~   # all MyAuditedEntity1 properties are audited
         MyBundle\Entity\MyAuditedEntity2:
             ignored_columns:                  # properties ignored by the audit process
-                - created_at
-                - updated_at
+                - createdAt
+                - updatedAt
 ```
 
 It is also possible to specify properties that are globally ignored by the audit process.
@@ -113,8 +113,8 @@ It is also possible to specify properties that are globally ignored by the audit
 // config/dh_doctrine_audit.yaml (symfony >= 3.4)
 dh_doctrine_audit:
     ignored_columns:    # properties ignored by the audit process in any audited entity
-        - created_at
-        - updated_at
+        - createdAt
+        - updatedAt
 ```
 
 ### Audit tables naming format
