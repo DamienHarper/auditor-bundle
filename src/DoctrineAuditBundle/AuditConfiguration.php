@@ -65,10 +65,10 @@ class AuditConfiguration
     {
         if (!empty($this->entities)) {
             foreach (array_keys($this->entities) as $auditedEntity) {
-                if (is_object($entity) && $entity instanceof $auditedEntity) {
+                if (\is_object($entity) && $entity instanceof $auditedEntity) {
                     return true;
                 }
-                if (is_string($entity) && $entity == $auditedEntity) {
+                if (\is_string($entity) && $entity === $auditedEntity) {
                     return true;
                 }
             }
@@ -87,11 +87,11 @@ class AuditConfiguration
      */
     public function isAuditedField($entity, $field): bool
     {
-        if (!in_array($field, $this->ignoredColumns) && $this->isAudited($entity)) {
-            $class = is_object($entity) ? \Doctrine\Common\Util\ClassUtils::getRealClass(get_class($entity)) : $entity;
+        if (!\in_array($field, $this->ignoredColumns, true) && $this->isAudited($entity)) {
+            $class = \is_object($entity) ? \Doctrine\Common\Util\ClassUtils::getRealClass(\get_class($entity)) : $entity;
             $entityOptions = $this->entities[$class];
 
-            return !isset($entityOptions['ignored_columns']) || !in_array($field, $entityOptions['ignored_columns']);
+            return !isset($entityOptions['ignored_columns']) || !\in_array($field, $entityOptions['ignored_columns'], true);
         }
 
         return false;

@@ -23,7 +23,7 @@ class CreateSchemaListener implements EventSubscriber
 
         if (!$this->configuration->isAudited($cm->name)) {
             $audited = false;
-            if ($cm->isInheritanceTypeJoined() && $cm->rootEntityName == $cm->name) {
+            if ($cm->rootEntityName === $cm->name && $cm->isInheritanceTypeJoined()) {
                 foreach ($cm->subClasses as $subClass) {
                     if ($this->configuration->isAudited($subClass)) {
                         $audited = true;
@@ -96,11 +96,11 @@ class CreateSchemaListener implements EventSubscriber
         $auditTable->addIndex(['blame_id'], 'blame_id_'.md5($auditTable->getName()).'_idx');
         $auditTable->addIndex(['created_at'], 'created_at_'.md5($auditTable->getName()).'_idx');
 
-        if (!in_array($cm->inheritanceType, [
+        if (!\in_array($cm->inheritanceType, [
             ClassMetadataInfo::INHERITANCE_TYPE_NONE,
             ClassMetadataInfo::INHERITANCE_TYPE_JOINED,
             ClassMetadataInfo::INHERITANCE_TYPE_SINGLE_TABLE,
-        ])) {
+        ], true)) {
             throw new \Exception(sprintf('Inheritance type "%s" is not yet supported', $cm->inheritanceType));
         }
     }

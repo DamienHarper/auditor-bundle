@@ -31,7 +31,7 @@ class AuditReader
     }
 
     /**
-     * Returns an array of audit table names indexed by entity FQN
+     * Returns an array of audit table names indexed by entity FQN.
      *
      * @return array
      */
@@ -50,12 +50,13 @@ class AuditReader
     }
 
     /**
-     * Returns an array of audited entries/operations
+     * Returns an array of audited entries/operations.
      *
-     * @param string|object $entity
-     * @param int|null $id
-     * @param int $page
-     * @param int $pageSize
+     * @param object|string $entity
+     * @param null|int      $id
+     * @param int           $page
+     * @param int           $pageSize
+     *
      * @return array
      */
     public function getAudits($entity, int $id = null, int $page = 1, int $pageSize = 50): array
@@ -63,7 +64,7 @@ class AuditReader
         $connection = $this->entityManager->getConnection();
         $auditTable = implode('', [
             $this->configuration->getTablePrefix(),
-            $this->getEntityTableName(is_string($entity) ? $entity : get_class($entity)),
+            $this->getEntityTableName(\is_string($entity) ? $entity : \get_class($entity)),
             $this->configuration->getTableSuffix(),
         ]);
 
@@ -91,8 +92,9 @@ class AuditReader
     }
 
     /**
-     * @param string|object $entity
-     * @param int $id
+     * @param object|string $entity
+     * @param int           $id
+     *
      * @return mixed
      */
     public function getAudit($entity, int $id)
@@ -100,7 +102,7 @@ class AuditReader
         $connection = $this->entityManager->getConnection();
         $auditTable = implode('', [
             $this->configuration->getTablePrefix(),
-            $this->getEntityTableName(is_string($entity) ? $entity : get_class($entity)),
+            $this->getEntityTableName(\is_string($entity) ? $entity : \get_class($entity)),
             $this->configuration->getTableSuffix(),
         ]);
 
@@ -123,7 +125,8 @@ class AuditReader
     /**
      * Returns the table name of $entity.
      *
-     * @param string|object $entity
+     * @param object|string $entity
+     *
      * @return string
      */
     public function getEntityTableName($entity): string

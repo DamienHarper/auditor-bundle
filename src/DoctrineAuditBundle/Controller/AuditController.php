@@ -35,8 +35,8 @@ class AuditController extends Controller
         $entries = $reader->getAudits($entity, $id, $page, $pageSize);
 
         return $this->render('DHDoctrineAuditBundle:Audit:entity_history.html.twig', [
-            'entity'     => $entity,
-            'entries'   => $entries,
+            'entity' => $entity,
+            'entries' => $entries,
         ]);
     }
 

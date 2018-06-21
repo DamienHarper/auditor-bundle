@@ -34,7 +34,7 @@ class TwigExtension extends \Twig_Extension
 
     public function getClass($entity)
     {
-        return get_class($entity);
+        return \get_class($entity);
     }
 
     public function getTablename($entity)
@@ -42,7 +42,7 @@ class TwigExtension extends \Twig_Extension
         return $this
             ->doctrine
             ->getManager()
-            ->getClassMetadata(get_class($entity))
+            ->getClassMetadata(\get_class($entity))
             ->table['name']
         ;
     }
