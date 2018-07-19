@@ -454,6 +454,13 @@ class AuditSubscriber implements EventSubscriber
     {
         $platform = $em->getConnection()->getDatabasePlatform();
         switch ($type->getName()) {
+            case Type::TARRAY:
+            case Type::SIMPLE_ARRAY:
+            case Type::JSON:
+            case Type::JSON_ARRAY:
+                $convertedValue = $value === null ? null : $type->convertToDatabaseValue($value, $platform);
+                break;
+
             default:
                 $convertedValue = $type->convertToPHPValue($value, $platform);
         }
