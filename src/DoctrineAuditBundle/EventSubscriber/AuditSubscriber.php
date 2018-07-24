@@ -453,16 +453,22 @@ class AuditSubscriber implements EventSubscriber
     private function value(EntityManager $em, Type $type, $value)
     {
         $platform = $em->getConnection()->getDatabasePlatform();
+
         switch ($type->getName()) {
-            case Type::TARRAY:
-            case Type::SIMPLE_ARRAY:
-            case Type::JSON:
-            case Type::JSON_ARRAY:
-                $convertedValue = $value === null ? null : $type->convertToDatabaseValue($value, $platform);
+            case Type::DECIMAL:
+            case Type::BIGINT:
+            case Type::INTEGER:
+            case Type::SMALLINT:
+                $convertedValue = (string) $value;
+                break;
+
+            case Type::FLOAT:
+            case Type::BOOLEAN:
+                $convertedValue = $type->convertToPHPValue($value, $platform);
                 break;
 
             default:
-                $convertedValue = $type->convertToPHPValue($value, $platform);
+                $convertedValue = $type->convertToDatabaseValue($value, $platform);
         }
 
         return $convertedValue;
