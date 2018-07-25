@@ -313,6 +313,8 @@ class AuditSubscriber implements EventSubscriber
             'diffs' => ':diffs',
             'blame_id' => ':blame_id',
             'blame_user' => ':blame_user',
+            'blame_user_fqcn' => ':blame_user_fqcn',
+            'blame_user_firewall' => ':blame_user_firewall',
             'ip' => ':ip',
             'created_at' => ':created_at',
         ];
@@ -332,6 +334,8 @@ class AuditSubscriber implements EventSubscriber
         $statement->bindValue('diffs', json_encode($data['diff']));
         $statement->bindValue('blame_id', $data['blame']['user_id']);
         $statement->bindValue('blame_user', $data['blame']['username']);
+        $statement->bindValue('blame_user_fqcn', $data['blame']['user_fqcn']);
+        $statement->bindValue('blame_user_firewall', $data['blame']['user_firewall']);
         $statement->bindValue('ip', $data['blame']['client_ip']);
         $statement->bindValue('created_at', $dt->format('Y-m-d H:i:s'));
         $statement->execute();
@@ -484,6 +488,8 @@ class AuditSubscriber implements EventSubscriber
         $user_id = null;
         $username = null;
         $client_ip = null;
+        $user_fqcn = null;
+        $user_firewall = null;
 
         $request = $this->configuration->getRequestStack()->getCurrentRequest();
         if (null !== $request) {
@@ -496,6 +502,8 @@ class AuditSubscriber implements EventSubscriber
             if ($user instanceof UserInterface) {
                 $user_id = $user->getId();
                 $username = $user->getUsername();
+                $user_fqcn = \get_class($user);
+                $user_firewall = $this->configuration->getFirewallMap()->getFirewallConfig($request)->getName();
             }
         }
 
@@ -503,6 +511,8 @@ class AuditSubscriber implements EventSubscriber
             'user_id' => $user_id,
             'username' => $username,
             'client_ip' => $client_ip,
+            'user_fqcn' => $user_fqcn,
+            'user_firewall' => $user_firewall,
         ];
     }
 
