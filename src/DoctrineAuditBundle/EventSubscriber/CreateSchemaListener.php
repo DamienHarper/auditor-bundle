@@ -82,6 +82,16 @@ class CreateSchemaListener implements EventSubscriber
             'notnull' => false,
             'length' => 100,
         ]);
+        $auditTable->addColumn('blame_user_fqcn', 'string', [
+            'default' => null,
+            'notnull' => false,
+            'length' => 255,
+        ]);
+        $auditTable->addColumn('blame_user_firewall', 'string', [
+            'default' => null,
+            'notnull' => false,
+            'length' => 100,
+        ]);
         $auditTable->addColumn('ip', 'string', [
             'default' => null,
             'notnull' => false,
