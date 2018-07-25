@@ -4,6 +4,7 @@ namespace DH\DoctrineAuditBundle;
 
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 
 class AuditConfiguration
 {
@@ -37,10 +38,16 @@ class AuditConfiguration
      */
     protected $requestStack;
 
-    public function __construct(array $config, TokenStorage $securityTokenStorage, RequestStack $requestStack)
+    /**
+     * @var FirewallMap
+     */
+    private $firewallMap;
+
+    public function __construct(array $config, TokenStorage $securityTokenStorage, RequestStack $requestStack, FirewallMap $firewallMap)
     {
         $this->securityTokenStorage = $securityTokenStorage;
         $this->requestStack = $requestStack;
+        $this->firewallMap = $firewallMap;
 
         $this->tablePrefix = $config['table_prefix'];
         $this->tableSuffix = $config['table_suffix'];
