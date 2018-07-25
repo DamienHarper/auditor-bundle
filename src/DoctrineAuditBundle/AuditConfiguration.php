@@ -163,4 +163,14 @@ class AuditConfiguration
     {
         return $this->requestStack;
     }
+
+    /**
+     * Gets the value of firewallMap.
+     *
+     * @return FirewallMap
+     */
+    public function getFirewallMap(): FirewallMap
+    {
+        return $this->firewallMap;
+    }
 }
