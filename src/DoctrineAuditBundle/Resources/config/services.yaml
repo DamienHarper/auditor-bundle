@@ -1,6 +1,7 @@
 services:
-  class: DH\DoctrineAuditBundle\Controller\AuditController
-  arguments: ["%dh_doctrine_audit.configuration%"]
+  dh_doctrine_audit.controller:
+    class: DH\DoctrineAuditBundle\Controller\AuditController
+    arguments: ["%dh_doctrine_audit.configuration%"]
 
   dh_doctrine_audit.configuration:
     class: DH\DoctrineAuditBundle\AuditConfiguration
