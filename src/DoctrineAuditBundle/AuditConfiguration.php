@@ -29,6 +29,11 @@ class AuditConfiguration
     private $entities = [];
 
     /**
+     * @var boolean
+     */
+    private $showUserFirewall;
+
+    /**
      * @var TokenStorage
      */
     protected $securityTokenStorage;
@@ -52,6 +57,7 @@ class AuditConfiguration
         $this->tablePrefix = $config['table_prefix'];
         $this->tableSuffix = $config['table_suffix'];
         $this->ignoredColumns = $config['ignored_columns'];
+        $this->showUserFirewall = $config['show_user_firewall'];
 
         if (isset($config['entities']) && !empty($config['entities'])) {
             // use entity names as array keys for easier lookup
@@ -172,5 +178,15 @@ class AuditConfiguration
     public function getFirewallMap(): FirewallMap
     {
         return $this->firewallMap;
+    }
+
+    /**
+     * Gets the value of showUserFirewall.
+     *
+     * @return bool
+     */
+    public function getShowUserFirewall(): bool
+    {
+        return $this->showUserFirewall;
     }
 }

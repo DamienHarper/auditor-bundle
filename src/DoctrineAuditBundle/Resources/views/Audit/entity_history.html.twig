@@ -10,8 +10,10 @@
             <th>Object Id</th>
             <th>User Id</th>
             <th>Username</th>
-            <th>Firewall</th>
-            <th>Class</th>
+            {% if show_user_firewall %}
+                <th>Firewall</th>
+                <th>Class</th>
+            {% endif %}
             <th>IP</th>
             <th>Created At</th>
         </thead>
@@ -23,8 +25,10 @@
                 <td><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': entity, 'id': entry.getObjectId() }) }}">{{ entry.getObjectId() }}</a></td>
                 <td>{{ entry.getUserId() }}</td>
                 <td>{{ entry.getUsername() }}</td>
-                <td>{{ entry.getUserFirewall() }}</td>
-                <td>{{ entry.getUserFqcn() }}</td>
+                {% if show_firewall_info %}
+                    <td>{{ entry.getUserFirewall() }}</td>
+                    <td>{{ entry.getUserFqcn() }}</td>
+                {% endif %}
                 <td>{{ entry.getIp() }}</td>
                 <td>{{ entry.getCreatedAt() }}</td>
             </tr>

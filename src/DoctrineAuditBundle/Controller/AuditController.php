@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Controller;
 
+use DH\DoctrineAuditBundle\AuditConfiguration;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -9,6 +10,16 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 class AuditController extends Controller
 {
+    /**
+     * @var AuditConfiguration
+     */
+    private $auditConfiguration;
+
+    public function __construct(AuditConfiguration $auditConfiguration)
+    {
+        $this->auditConfiguration = $auditConfiguration;
+    }
+
     /**
      * @Method("GET")
      * @Template
@@ -37,6 +48,7 @@ class AuditController extends Controller
         return $this->render('DHDoctrineAuditBundle:Audit:entity_history.html.twig', [
             'entity' => $entity,
             'entries' => $entries,
+            'show_firewall_info' => $this->auditConfiguration->getSupportMultipleFirewalls(),
         ]);
     }
 
