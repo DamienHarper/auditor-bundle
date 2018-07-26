@@ -2,6 +2,7 @@ services:
   DH\DoctrineAuditBundle\Controller\AuditController:
     class: DH\DoctrineAuditBundle\Controller\AuditController
     arguments: ["%dh_doctrine_audit.configuration%"]
+    tags: ['controller.service_arguments']
 
   dh_doctrine_audit.configuration:
     class: DH\DoctrineAuditBundle\AuditConfiguration
