@@ -1,4 +1,7 @@
 services:
+  class: DH\DoctrineAuditBundle\Controller\AuditController
+  arguments: ["%dh_doctrine_audit.configuration%"]
+
   dh_doctrine_audit.configuration:
     class: DH\DoctrineAuditBundle\AuditConfiguration
     arguments: ["%dh_doctrine_audit.configuration%", "@security.token_storage", "@request_stack", "@security.firewall.map"]
