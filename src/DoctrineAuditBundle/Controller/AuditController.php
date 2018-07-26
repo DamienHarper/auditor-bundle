@@ -48,7 +48,7 @@ class AuditController extends Controller
         return $this->render('DHDoctrineAuditBundle:Audit:entity_history.html.twig', [
             'entity' => $entity,
             'entries' => $entries,
-            'show_firewall_info' => $this->auditConfiguration->getSupportMultipleFirewalls(),
+            'show_firewall_info' => $this->auditConfiguration['show_user_firewall'],
         ]);
     }
 
