@@ -130,6 +130,17 @@ dh_doctrine_audit:
     table_suffix: '_audit'
 ```
 
+### Displaying firewall information
+
+The name of the firewall and the fully qualified class name of the User object is recorded, but is not displayed in the template by default. This can be useful in projects that use more than one firewall. Set `show_user_firewall` to `true` to enable the display of this data.
+
+```yaml
+// app/config/config.yml (symfony < 3.4)
+// config/dh_doctrine_audit.yaml (symfony >= 3.4)
+dh_doctrine_audit:
+    show_user_firewall: false
+```
+
 ### Creating audit tables
 
 Open a command console, enter your project directory and execute the
