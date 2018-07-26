@@ -41,7 +41,6 @@ class Configuration implements ConfigurationInterface
                 ->end()
 
                 ->booleanNode('show_user_firewall')
-                    ->canBeUnset()
                     ->defaultFalse()
                 ->end()
             ->end()
