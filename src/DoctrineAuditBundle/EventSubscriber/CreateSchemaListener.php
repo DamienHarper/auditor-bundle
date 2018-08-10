@@ -23,7 +23,7 @@ class CreateSchemaListener implements EventSubscriber
 
         if (!$this->configuration->isAudited($cm->name)) {
             $audited = false;
-            if ($cm->rootEntityName === $cm->name && $cm->isInheritanceTypeJoined()) {
+            if ($cm->rootEntityName === $cm->name && ($cm->isInheritanceTypeJoined() || $cm->isInheritanceTypeSingleTable())) {
                 foreach ($cm->subClasses as $subClass) {
                     if ($this->configuration->isAudited($subClass)) {
                         $audited = true;
