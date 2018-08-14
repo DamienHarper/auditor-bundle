@@ -19,7 +19,7 @@ class AuditController extends Controller
         $reader = $this->container->get('dh_doctrine_audit.reader');
         $reader->getEntities();
 
-        return $this->render('DHDoctrineAuditBundle:Audit:audited_entities.html.twig', [
+        return $this->render('@DHDoctrineAudit/Audit/audited_entities.html.twig', [
             'audited' => $reader->getEntities(),
         ]);
     }
@@ -34,7 +34,7 @@ class AuditController extends Controller
         $reader = $this->container->get('dh_doctrine_audit.reader');
         $entries = $reader->getAudits($entity, $id, $page, $pageSize);
 
-        return $this->render('DHDoctrineAuditBundle:Audit:entity_history.html.twig', [
+        return $this->render('@DHDoctrineAudit/Audit/entity_history.html.twig', [
             'entity' => $entity,
             'entries' => $entries,
         ]);
@@ -50,7 +50,7 @@ class AuditController extends Controller
         $reader = $this->container->get('dh_doctrine_audit.reader');
         $data = $reader->getAudit($entity, $id);
 
-        return $this->render('DHDoctrineAuditBundle:Audit:entity_audit_details.html.twig', [
+        return $this->render('@DHDoctrineAudit/Audit/entity_audit_details.html.twig', [
             'entity' => $entity,
             'entry' => $data[0],
         ]);
