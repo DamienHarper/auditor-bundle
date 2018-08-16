@@ -374,7 +374,7 @@ class AuditSubscriber implements EventSubscriber
         $meta = $em->getClassMetadata(\get_class($entity));
         $diff = [];
         foreach ($ch as $fieldName => list($old, $new)) {
-            if ($meta->hasField($fieldName) &&
+            if ($meta->hasField($fieldName) && !isset($meta->embeddedClasses[$fieldName]) &&
                 $this->configuration->isAuditedField($entity, $fieldName)
             ) {
                 $mapping = $meta->fieldMappings[$fieldName];
