@@ -2,17 +2,15 @@
 
 namespace DH\DoctrineAuditBundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 class AuditController extends Controller
 {
     /**
-     * @Method("GET")
      * @Template
-     * @Route("/audit", name="dh_doctrine_audit_list_audits")
+     * @Route("/audit", name="dh_doctrine_audit_list_audits", methods={"GET"})
      */
     public function listAuditsAction()
     {
@@ -25,9 +23,8 @@ class AuditController extends Controller
     }
 
     /**
-     * @Method("GET")
      * @Template
-     * @Route("/audit/{entity}/{id}", name="dh_doctrine_audit_show_entity_history")
+     * @Route("/audit/{entity}/{id}", name="dh_doctrine_audit_show_entity_history", methods={"GET"})
      */
     public function showEntityHistoryAction(string $entity, int $id = null, int $page = 1, int $pageSize = 50)
     {
@@ -41,9 +38,8 @@ class AuditController extends Controller
     }
 
     /**
-     * @Method("GET")
      * @Template
-     * @Route("/audit/details/{entity}/{id}", name="dh_doctrine_audit_show_audit_entry")
+     * @Route("/audit/details/{entity}/{id}", name="dh_doctrine_audit_show_audit_entry", methods={"GET"})
      */
     public function showAuditEntryAction(string $entity, int $id)
     {
