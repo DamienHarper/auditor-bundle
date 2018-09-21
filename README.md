@@ -3,6 +3,7 @@
 [![GitHub license](https://img.shields.io/github/license/DamienHarper/DoctrineAuditBundle.svg)](https://github.com/DamienHarper/DoctrineAuditBundle/blob/master/LICENSE)
 [![release-version-badge]][packagist]
 ![php-version-badge]
+[![Downloads](https://img.shields.io/packagist/dt/damienharper/doctrine-audit-bundle.svg)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
 
 This bundle creates audit logs for all doctrine ORM database related changes:
 
