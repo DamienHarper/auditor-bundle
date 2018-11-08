@@ -23,7 +23,7 @@ class AuditLogger implements SQLLogger
     {
         // right before commit insert all audit entries
         if ('"COMMIT"' === $sql) {
-            call_user_func($this->flusher);
+            \call_user_func($this->flusher);
         }
     }
 
