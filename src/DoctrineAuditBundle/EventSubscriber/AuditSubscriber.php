@@ -9,6 +9,7 @@ use Doctrine\DBAL\Logging\LoggerChain;
 use Doctrine\DBAL\Logging\SQLLogger;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -31,6 +32,28 @@ class AuditSubscriber implements EventSubscriber
     public function __construct(AuditConfiguration $configuration)
     {
         $this->configuration = $configuration;
+    }
+
+    /**
+     * Handles soft-delete events from Gedmo\SoftDeleteable filter.
+     * @see https://symfony.com/doc/current/bundles/StofDoctrineExtensionsBundle/index.html
+     *
+     * @param LifecycleEventArgs $args
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    public function preSoftDelete(LifecycleEventArgs $args): void
+    {
+        $entity = $args->getEntity();
+        $em = $args->getEntityManager();
+
+        if ($this->configuration->isAudited($entity)) {
+            $this->removed[] = [
+                $entity,
+                $this->id($em, $entity),
+            ];
+        }
     }
 
     /**
@@ -511,6 +534,6 @@ class AuditSubscriber implements EventSubscriber
      */
     public function getSubscribedEvents(): array
     {
-        return [Events::onFlush];
+        return [Events::onFlush, 'preSoftDelete'];
     }
 }
