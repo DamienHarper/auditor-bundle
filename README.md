@@ -198,6 +198,8 @@ And all the database changes will be reflected in the audit logs afterwards.
 Audits cleanup
 ==============
 
+**Notice**: symfony/lock is required, to install it use `composer require symfony/lock`
+
 DoctrineAuditBundle provides a convenient command that helps you cleaning audit tables.
 Open a command console, enter your project directory and execute:
 
