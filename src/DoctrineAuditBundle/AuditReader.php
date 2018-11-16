@@ -25,7 +25,7 @@ class AuditReader
     /**
      * @var null
      */
-    private $filter = null;
+    private $filter;
 
     /**
      * AuditReader constructor.
@@ -55,7 +55,7 @@ class AuditReader
      */
     public function filterBy($filter)
     {
-        if (!in_array($filter, [self::UPDATE, self::ASSOCIATE, self::DISSOCIATE, self::INSERT, self::REMOVE])) {
+        if (!\in_array($filter, [self::UPDATE, self::ASSOCIATE, self::DISSOCIATE, self::INSERT, self::REMOVE], true)) {
             $this->filter = null;
         } else {
             $this->filter = $filter;
