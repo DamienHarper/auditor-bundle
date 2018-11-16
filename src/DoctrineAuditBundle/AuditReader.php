@@ -6,6 +6,12 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class AuditReader
 {
+    const UPDATE = 'update';
+    const ASSOCIATE = 'associate';
+    const DISSOCIATE = 'dissociate';
+    const INSERT = 'insert';
+    const REMOVE = 'remove';
+
     /**
      * @var AuditConfiguration
      */
@@ -16,6 +22,17 @@ class AuditReader
      */
     private $entityManager;
 
+    /**
+     * @var null
+     */
+    private $filter = null;
+
+    /**
+     * AuditReader constructor.
+     *
+     * @param AuditConfiguration     $configuration
+     * @param EntityManagerInterface $entityManager
+     */
     public function __construct(AuditConfiguration $configuration, EntityManagerInterface $entityManager)
     {
         $this->configuration = $configuration;
@@ -28,6 +45,21 @@ class AuditReader
     public function getConfiguration(): AuditConfiguration
     {
         return $this->configuration;
+    }
+
+    /**
+     * @param $filter
+     *
+     * Set the filter for AuditEntry retrieving
+     * If filter is not valid, returns null
+     */
+    public function filterBy($filter)
+    {
+        if (!in_array($filter, [self::UPDATE, self::ASSOCIATE, self::DISSOCIATE, self::INSERT, self::REMOVE])) {
+            $this->filter = null;
+        } else {
+            $this->filter = $filter;
+        }
     }
 
     /**
@@ -75,20 +107,23 @@ class AuditReader
             ->orderBy('created_at', 'DESC')
             ->addOrderBy('id', 'DESC')
             ->setFirstResult(($page - 1) * $pageSize)
-            ->setMaxResults($pageSize)
-        ;
+            ->setMaxResults($pageSize);
 
         if (null !== $id) {
             $queryBuilder
                 ->where('object_id = :object_id')
-                ->setParameter('object_id', $id)
-            ;
+                ->setParameter('object_id', $id);
+        }
+
+        if (null !== $this->filter) {
+            $queryBuilder
+                ->andWhere('type = :filter')
+                ->setParameter('filter', $this->filter);
         }
 
         return $queryBuilder
             ->execute()
-            ->fetchAll(\PDO::FETCH_CLASS, AuditEntry::class)
-        ;
+            ->fetchAll(\PDO::FETCH_CLASS, AuditEntry::class);
     }
 
     /**
@@ -116,10 +151,15 @@ class AuditReader
             ->where('id = :id')
             ->setParameter('id', $id);
 
+        if (null !== $this->filter) {
+            $queryBuilder
+                ->andWhere('type = :filter')
+                ->setParameter('filter', $this->filter);
+        }
+
         return $queryBuilder
             ->execute()
-            ->fetchAll(\PDO::FETCH_CLASS, AuditEntry::class)
-        ;
+            ->fetchAll(\PDO::FETCH_CLASS, AuditEntry::class);
     }
 
     /**
@@ -134,7 +174,6 @@ class AuditReader
         return $this
             ->entityManager
             ->getClassMetadata($entity)
-            ->table['name']
-        ;
+            ->table['name'];
     }
 }
