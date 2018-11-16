@@ -36,7 +36,6 @@ class AuditSubscriber implements EventSubscriber
 
     /**
      * Handles soft-delete events from Gedmo\SoftDeleteable filter.
-     *
      * @see https://symfony.com/doc/current/bundles/StofDoctrineExtensionsBundle/index.html
      *
      * @param LifecycleEventArgs $args
@@ -484,13 +483,13 @@ class AuditSubscriber implements EventSubscriber
             case Type::INTEGER:
             case Type::SMALLINT:
                 $convertedValue = (string) $value;
-
                 break;
+
             case Type::FLOAT:
             case Type::BOOLEAN:
                 $convertedValue = $type->convertToPHPValue($value, $platform);
-
                 break;
+
             default:
                 $convertedValue = $type->convertToDatabaseValue($value, $platform);
         }

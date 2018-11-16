@@ -78,13 +78,13 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
             "You are about to clean audits older than %d months (up to <comment>%s</comment>): %d entities involved.\n Do you want to proceed?",
             $input->getArgument('keep'),
             $until->format('Y-m-d'),
-            \count($entities)
+            count($entities)
         );
 
         $confirm = $input->getOption('no-confirm') ? true : $io->confirm($message, false);
 
         if ($confirm) {
-            $progressBar = new ProgressBar($output, \count($entities));
+            $progressBar = new ProgressBar($output, count($entities));
             $progressBar->setBarWidth(70);
             $progressBar->setFormat("%message%\n".$progressBar->getFormatDefinition('debug'));
 
