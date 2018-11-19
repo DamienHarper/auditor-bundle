@@ -349,7 +349,7 @@ class AuditSubscriber implements EventSubscriber
 
         $statement = $em->getConnection()->prepare($query);
 
-        $dt = new \DateTime();
+        $dt = new \DateTime('now', new \DateTimeZone('UTC'));
         $statement->bindValue('type', $data['action']);
         $statement->bindValue('object_id', $data['id']);
         $statement->bindValue('diffs', json_encode($data['diff']));
