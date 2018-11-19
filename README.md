@@ -192,7 +192,6 @@ Just call `->filterBy(filter)` on you audit Reader instance before getting your 
 
 ````php
     /**
-     * @Template
      * @Route("/audit/details/{entity}/{id}", name="dh_doctrine_audit_show_audit_entry", methods={"GET"})
      */
     public function showAuditEntryAction(string $entity, int $id)
