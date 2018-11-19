@@ -187,6 +187,38 @@ dh_doctrine_audit:
     type: annotation
 ``` 
 
+It is possible to filter by event when you call `->getAudit(s)`.
+Just call `->filterBy(filter)` on you audit Reader instance before getting your entity(ies).
+
+````php
+    /**
+     * @Template
+     * @Route("/audit/details/{entity}/{id}", name="dh_doctrine_audit_show_audit_entry", methods={"GET"})
+     */
+    public function showAuditEntryAction(string $entity, int $id)
+    {
+        $reader = $this->container->get('dh_doctrine_audit.reader');
+        
+        // add this line
+        $reader->filterBy(AuditReader::UPDATE);
+        
+        $data = $reader->getAudit($entity, $id);
+
+        return $this->render('@DHDoctrineAudit/Audit/entity_audit_details.html.twig', [
+            'entity' => $entity,
+            'entry' => $data[0],
+        ]);
+    }
+````
+
+Available constants are:
+````php
+    const UPDATE = 'update';
+    const ASSOCIATE = 'associate';
+    const DISSOCIATE = 'dissociate';
+    const INSERT = 'insert';
+    const REMOVE = 'remove';
+````
 
 Usage
 =====
