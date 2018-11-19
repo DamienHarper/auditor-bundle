@@ -48,18 +48,21 @@ class AuditReader
     }
 
     /**
-     * @param $filter
+     * Set the filter for AuditEntry retrieving.
      *
-     * Set the filter for AuditEntry retrieving
-     * If filter is not valid, returns null
+     * @param string $filter
+     *
+     * @return AuditReader
      */
-    public function filterBy($filter)
+    public function filterBy(string $filter): AuditReader
     {
         if (!\in_array($filter, [self::UPDATE, self::ASSOCIATE, self::DISSOCIATE, self::INSERT, self::REMOVE], true)) {
             $this->filter = null;
         } else {
             $this->filter = $filter;
         }
+
+        return $this;
     }
 
     /**
