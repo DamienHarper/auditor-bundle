@@ -269,6 +269,12 @@ app/console audit:clean --no-confirm
 bin/console audit:clean --no-confirm
 ```
 
+FAQ:
+====
+
+Q: I've added an new entity in the config file but it's not audited.
+
+R: First check its namespace, then clear your cache and re-run schema update or migration.
 
 License
 =======
