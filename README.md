@@ -198,10 +198,10 @@ Just call `->filterBy(filter)` on you audit Reader instance before getting your 
     {
         $reader = $this->container->get('dh_doctrine_audit.reader');
         
-        // add this line
-        $reader->filterBy(AuditReader::UPDATE);
-        
-        $data = $reader->getAudit($entity, $id);
+        $data = $reader
+             ->filterBy(AuditReader::UPDATE)   // add this to only get `update` entries.
+             ->getAudit($entity, $id)
+         ;
 
         return $this->render('@DHDoctrineAudit/Audit/entity_audit_details.html.twig', [
             'entity' => $entity,
@@ -212,11 +212,11 @@ Just call `->filterBy(filter)` on you audit Reader instance before getting your 
 
 Available constants are:
 ````php
-    const UPDATE = 'update';
-    const ASSOCIATE = 'associate';
-    const DISSOCIATE = 'dissociate';
-    const INSERT = 'insert';
-    const REMOVE = 'remove';
+    AuditReader::UPDATE
+    AuditReader::ASSOCIATE
+    AuditReader::DISSOCIATE
+    AuditReader::INSERT
+    AuditReader::REMOVE
 ````
 
 Usage
