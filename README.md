@@ -187,8 +187,7 @@ dh_doctrine_audit:
     type: annotation
 ``` 
 
-It is possible to filter by event when you call `->getAudit(s)`.
-Just call `->filterBy(filter)` on you audit Reader instance before getting your entity(ies).
+It is possible to filter results by event type by calling `AuditReader::filterBy` method before getting the results.
 
 ````php
     /**
@@ -272,9 +271,9 @@ bin/console audit:clean --no-confirm
 FAQ:
 ====
 
-Q: I've added an new entity in the config file but it's not audited.
+**Q**: I've added an new entity in the config file but it's not audited.
 
-R: First check its namespace, then clear your cache and re-run schema update or migration.
+**A**: First check its namespace, then clear your cache and re-run `doctrine:schema:update` or `doctrine:migrations:migrate`.
 
 License
 =======
