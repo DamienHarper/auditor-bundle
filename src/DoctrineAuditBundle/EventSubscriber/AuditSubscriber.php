@@ -315,7 +315,7 @@ class AuditSubscriber implements EventSubscriber
                 'table' => isset($mapping['joinTable']['name']) ?? '',
             ],
             'table' => $meta->table['name'],
-            'id' => $id,
+            'id' => $this->id($em, $source),
         ]);
     }
 
