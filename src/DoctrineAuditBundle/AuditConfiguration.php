@@ -2,7 +2,7 @@
 
 namespace DH\DoctrineAuditBundle;
 
-user DH\DoctrineAuditBundle\User\UserProviderInterface;
+use DH\DoctrineAuditBundle\User\UserProviderInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class AuditConfiguration
