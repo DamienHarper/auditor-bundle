@@ -4,6 +4,7 @@ namespace DH\DoctrineAuditBundle\EventSubscriber;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\DBAL\AuditLogger;
+use DH\DoctrineAuditBundle\User\UserInterface;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Logging\LoggerChain;
 use Doctrine\DBAL\Logging\SQLLogger;
@@ -12,7 +13,6 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 class AuditSubscriber implements EventSubscriber
 {
@@ -513,13 +513,10 @@ class AuditSubscriber implements EventSubscriber
             $client_ip = $request->getClientIp();
         }
 
-        $token = $this->configuration->getSecurityTokenStorage()->getToken();
-        if (null !== $token) {
-            $user = $token->getUser();
-            if ($user instanceof UserInterface) {
-                $user_id = $user->getId();
-                $username = $user->getUsername();
-            }
+        $user = $this->configuration->getUserProvider()->getUser();
+        if ($user instanceof UserInterface) {
+            $user_id = $user->getId();
+            $username = $user->getUsername();
         }
 
         return [
