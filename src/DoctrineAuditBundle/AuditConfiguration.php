@@ -2,8 +2,8 @@
 
 namespace DH\DoctrineAuditBundle;
 
+use DH\DoctrineAuditBundle\User\UserProviderInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
 class AuditConfiguration
 {
@@ -28,18 +28,18 @@ class AuditConfiguration
     private $entities = [];
 
     /**
-     * @var TokenStorage
+     * @var UserProviderInterface
      */
-    protected $securityTokenStorage;
+    protected $userProvider;
 
     /**
      * @var RequestStack
      */
     protected $requestStack;
 
-    public function __construct(array $config, TokenStorage $securityTokenStorage, RequestStack $requestStack)
+    public function __construct(array $config, UserProviderInterface $userProvider, RequestStack $requestStack)
     {
-        $this->securityTokenStorage = $securityTokenStorage;
+        $this->userProvider = $userProvider;
         $this->requestStack = $requestStack;
 
         $this->tablePrefix = $config['table_prefix'];
@@ -138,13 +138,13 @@ class AuditConfiguration
     }
 
     /**
-     * Get the value of securityTokenStorage.
+     * Get the value of userProvider.
      *
-     * @return TokenStorage
+     * @return UserProviderInterface
      */
-    public function getSecurityTokenStorage(): TokenStorage
+    public function getUserProvider(): UserProviderInterface
     {
-        return $this->securityTokenStorage;
+        return $this->userProvider;
     }
 
     /**

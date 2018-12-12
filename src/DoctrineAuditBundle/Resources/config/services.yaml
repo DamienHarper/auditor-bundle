@@ -1,7 +1,12 @@
 services:
+  dh_doctrine_audit.user_provider:
+    class: DH\DoctrineAuditBundle\User\TokenStorageUserProvider
+    arguments: ["@security.token_storage"]
+    public: true
+
   dh_doctrine_audit.configuration:
     class: DH\DoctrineAuditBundle\AuditConfiguration
-    arguments: ["%dh_doctrine_audit.configuration%", "@security.token_storage", "@request_stack"]
+    arguments: ["%dh_doctrine_audit.configuration%", "@dh_doctrine_audit.user_provider", "@request_stack"]
     public: true
 
   dh_doctrine_audit.reader:
