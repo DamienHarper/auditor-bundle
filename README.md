@@ -299,9 +299,13 @@ bin/console audit:clean --no-confirm
 FAQ:
 ====
 
-**Q**: I've added an new entity in the config file but it's not audited.
+#### I've added an new entity in the config file but it's not audited.
 
-**A**: First check its namespace, then clear your cache and re-run `doctrine:schema:update` or `doctrine:migrations:migrate`.
+> First check its namespace, then clear your cache and re-run `doctrine:schema:update` or `doctrine:migrations:migrate`.
+
+#### I don't use Symfony's `TokenStorage` to manage my users, how do I proceed?
+
+> Check the [Custom user provider](#custom-user-provider) section.
 
 License
 =======
