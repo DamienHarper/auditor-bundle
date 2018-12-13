@@ -3,7 +3,7 @@
 namespace DH\DoctrineAuditBundle\User;
 
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\UserInterface as BaseUserInterface;
 
 class TokenStorageUserProvider implements UserProviderInterface
 {
@@ -21,7 +21,7 @@ class TokenStorageUserProvider implements UserProviderInterface
 
         if (null !== $token) {
             $tokenUser = $token->getUser();
-            if ($tokenUser instanceof UserInterface) {
+            if ($tokenUser instanceof BaseUserInterface) {
                 $user = new User($tokenUser->getId(), $tokenUser->getUsername());
             }
         }
