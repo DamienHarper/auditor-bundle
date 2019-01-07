@@ -3,9 +3,9 @@
 namespace DH\DoctrineAuditBundle\Controller;
 
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class AuditController extends Controller
+class AuditController extends AbstractController
 {
     /**
      * @Route("/audit", name="dh_doctrine_audit_list_audits", methods={"GET"})
