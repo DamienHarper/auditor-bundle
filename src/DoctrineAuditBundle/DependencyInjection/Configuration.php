@@ -12,9 +12,11 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
+        $treeBuilder = new TreeBuilder('dh_doctrine_audit');
+        // Keep compatibility with symfony/config < 4.2
+        $rootNode = \method_exists($treeBuilder, 'getRootNode') ? $treeBuilder->getRootNode() : $treeBuilder->root('dh_doctrine_audit');
 
-        $treeBuilder->root('dh_doctrine_audit')
+        $rootNode
             ->children()
                 ->scalarNode('table_prefix')
                     ->defaultValue('')
