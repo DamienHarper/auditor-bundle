@@ -12,7 +12,8 @@
   ],
   "require": {
     "php": ">=7.1",
-    "doctrine/orm": "^2.5"
+    "doctrine/orm": "^2.5",
+    "symfony/security-core": "^3.4|^4.0"
   },
   "autoload": {
     "psr-4": {
