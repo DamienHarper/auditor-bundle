@@ -85,7 +85,7 @@ By default, DoctrineAuditBundle won't audit any entity, you have to configure wh
 
 ```yaml
 // app/config/config.yml (symfony < 3.4)
-// config/dh_doctrine_audit.yaml (symfony >= 3.4)
+// config/packages/dh_doctrine_audit.yaml (symfony >= 3.4)
 dh_doctrine_audit:
     entities:
         MyBundle\Entity\MyAuditedEntity1: ~
@@ -97,7 +97,7 @@ Though it is possible to exclude some of them from the audit process.
 
 ```yaml
 // app/config/config.yml (symfony < 3.4)
-// config/dh_doctrine_audit.yaml (symfony >= 3.4)
+// config/packages/dh_doctrine_audit.yaml (symfony >= 3.4)
 dh_doctrine_audit:
     entities:
         MyBundle\Entity\MyAuditedEntity1: ~   # all MyAuditedEntity1 properties are audited
@@ -111,7 +111,7 @@ It is also possible to specify properties that are globally ignored by the audit
 
 ```yaml
 // app/config/config.yml (symfony < 3.4)
-// config/dh_doctrine_audit.yaml (symfony >= 3.4)
+// config/packages/dh_doctrine_audit.yaml (symfony >= 3.4)
 dh_doctrine_audit:
     ignored_columns:    # properties ignored by the audit process in any audited entity
         - createdAt
@@ -125,7 +125,7 @@ By default, the prefix is empty and the suffix is `_audit`. Though, they can be 
 
 ```yaml
 // app/config/config.yml (symfony < 3.4)
-// config/dh_doctrine_audit.yaml (symfony >= 3.4)
+// config/packages/dh_doctrine_audit.yaml (symfony >= 3.4)
 dh_doctrine_audit:
     table_prefix: ''
     table_suffix: '_audit'
