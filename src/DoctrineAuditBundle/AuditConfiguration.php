@@ -141,16 +141,35 @@ class AuditConfiguration
     }
 
     /**
-     * Enables or disables auditing for a specific entity.
+     * Enables auditing for a specific entity.
      *
      * @param string $entity Entity class name
-     * @param bool $enabled If auditing is enabled
+     *
+     * @return $this
      */
-    public function setEntityEnabled(string $entity, bool $enabled)
+    public function enableAuditFor(string $entity): self
     {
         if (isset($this->entities[$entity])) {
-            $this->entities[$entity]['enabled'] = $enabled;
+            $this->entities[$entity]['enabled'] = true;
         }
+
+        return $this;
+    }
+
+    /**
+     * Disables auditing for a specific entity.
+     *
+     * @param string $entity Entity class name
+     *
+     * @return $this
+     */
+    public function disableAuditFor(string $entity): self
+    {
+        if (isset($this->entities[$entity])) {
+            $this->entities[$entity]['enabled'] = false;
+        }
+
+        return $this;
     }
 
     /**
