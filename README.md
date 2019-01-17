@@ -246,6 +246,36 @@ services:
         class: App\CustomUserProvider
 ````
 
+### Disable auditing in runtime
+
+If you have a situation where you need to disable audit logging for some specific operation (like an automated
+process), you can do this by injecting the `dh_doctrine_audit.configuration` service in your class.
+
+To disable auditing for an entity, use:
+
+````php
+$auditConfiguration->disableAuditFor(MyAuditedEntity1::class);
+````
+
+To enable auditing afterwards, use:
+
+````php
+$auditConfiguration->enableAuditFor(MyAuditedEntity1::class);
+````
+
+You can also have an entity that is not audited by default and only enable auditing when you need it. To do so, add
+this to your configuration file:
+
+````yml
+dh_doctrine_audit:
+    entities:
+        MyBundle\Entity\MyAuditedEntity1:
+            enabled: false
+````
+
+This will create the audit table for this entity, but will only save audit entries when explicitly enabled as shown
+above.
+
 Usage
 =====
 

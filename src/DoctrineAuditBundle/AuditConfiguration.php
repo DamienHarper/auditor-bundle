@@ -64,7 +64,10 @@ class AuditConfiguration
     public function isAudited($entity): bool
     {
         if (!empty($this->entities)) {
-            foreach (array_keys($this->entities) as $auditedEntity) {
+            foreach ($this->entities as $auditedEntity => $entityOptions) {
+                if (isset($entityOptions['enabled']) && !$entityOptions['enabled']) {
+                    continue;
+                }
                 if (\is_object($entity) && $entity instanceof $auditedEntity) {
                     return true;
                 }
@@ -135,6 +138,38 @@ class AuditConfiguration
     public function getEntities(): array
     {
         return $this->entities;
+    }
+
+    /**
+     * Enables auditing for a specific entity.
+     *
+     * @param string $entity Entity class name
+     *
+     * @return $this
+     */
+    public function enableAuditFor(string $entity): self
+    {
+        if (isset($this->entities[$entity])) {
+            $this->entities[$entity]['enabled'] = true;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Disables auditing for a specific entity.
+     *
+     * @param string $entity Entity class name
+     *
+     * @return $this
+     */
+    public function disableAuditFor(string $entity): self
+    {
+        if (isset($this->entities[$entity])) {
+            $this->entities[$entity]['enabled'] = false;
+        }
+
+        return $this;
     }
 
     /**
