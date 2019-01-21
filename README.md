@@ -246,12 +246,16 @@ services:
         class: App\CustomUserProvider
 ````
 
-### Disable auditing in runtime
+### Disable auditing at runtime
 
-If you have a situation where you need to disable audit logging for some specific operation (like an automated
-process), you can do this by injecting the `dh_doctrine_audit.configuration` service in your class.
+You can disable audit logging at runtime by calling `AuditConfiguration::disableAuditFor(string $entity)`
+This will prevent the system from logging changes applied to `$entity` objects.
 
-To disable auditing for an entity, use:
+You can then re-enable audit logging at runtime by calling `AuditConfiguration::enableAuditFor(string $entity)`
+
+**Warning:** disabling audit logging for an entity will make its audit logs incomplete/partial (no change applied to specified entity is logged in the relevant audit table while audit logging is disabled for that entity).
+
+To disable auditing for an entity, you first have to inject the `dh_doctrine_audit.configuration` service in your class, then use:
 
 ````php
 $auditConfiguration->disableAuditFor(MyAuditedEntity1::class);
@@ -263,7 +267,7 @@ To enable auditing afterwards, use:
 $auditConfiguration->enableAuditFor(MyAuditedEntity1::class);
 ````
 
-You can also have an entity that is not audited by default and only enable auditing when you need it. To do so, add
+You can also disable audit logging for an entity by default and only enable auditing when needed. To do so, add
 this to your configuration file:
 
 ````yml
@@ -275,6 +279,7 @@ dh_doctrine_audit:
 
 This will create the audit table for this entity, but will only save audit entries when explicitly enabled as shown
 above.
+
 
 Usage
 =====
@@ -336,6 +341,7 @@ FAQ:
 #### I don't use Symfony's `TokenStorage` to manage my users, how do I proceed?
 
 > Check the [Custom user provider](#custom-user-provider) section.
+
 
 License
 =======
