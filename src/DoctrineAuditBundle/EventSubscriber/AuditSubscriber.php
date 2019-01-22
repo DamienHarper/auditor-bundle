@@ -212,6 +212,7 @@ class AuditSubscriber implements EventSubscriber
             'blame' => $this->blame(),
             'diff' => $this->diff($em, $entity, $ch),
             'table' => $meta->table['name'],
+            'schema' => $meta->table['schema'] ?? null,
             'id' => $this->id($em, $entity),
         ]);
     }
@@ -238,6 +239,7 @@ class AuditSubscriber implements EventSubscriber
             'blame' => $this->blame(),
             'diff' => $diff,
             'table' => $meta->table['name'],
+            'schema' => $meta->table['schema'] ?? null,
             'id' => $this->id($em, $entity),
         ]);
     }
@@ -260,6 +262,7 @@ class AuditSubscriber implements EventSubscriber
             'blame' => $this->blame(),
             'diff' => $this->assoc($em, $entity),
             'table' => $meta->table['name'],
+            'schema' => $meta->table['schema'] ?? null,
             'id' => $id,
         ]);
     }
@@ -329,7 +332,7 @@ class AuditSubscriber implements EventSubscriber
      */
     private function audit(EntityManager $em, array $data): void
     {
-        $auditTable = $this->configuration->getTablePrefix().$data['table'].$this->configuration->getTableSuffix();
+        $auditTable = $data['schema'].'.'.$this->configuration->getTablePrefix().$data['table'].$this->configuration->getTableSuffix();
         $fields = [
             'type' => ':type',
             'object_id' => ':object_id',
