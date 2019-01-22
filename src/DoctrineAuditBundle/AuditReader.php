@@ -97,7 +97,11 @@ class AuditReader
     public function getAudits($entity, int $id = null, int $page = 1, int $pageSize = 50): array
     {
         $connection = $this->entityManager->getConnection();
+
+        $schema = $this->entityManager->getClassMetadata($entity)->table['schema'] ? $this->entityManager->getClassMetadata($entity)->table['schema'] . '.' : '';
+
         $auditTable = implode('', [
+            $schema,
             $this->configuration->getTablePrefix(),
             $this->getEntityTableName(\is_string($entity) ? $entity : \get_class($entity)),
             $this->configuration->getTableSuffix(),
@@ -138,7 +142,11 @@ class AuditReader
     public function getAudit($entity, int $id)
     {
         $connection = $this->entityManager->getConnection();
+
+        $schema = $this->entityManager->getClassMetadata($entity)->table['schema'] ? $this->entityManager->getClassMetadata($entity)->table['schema'] . '.' : '';
+
         $auditTable = implode('', [
+            $schema,
             $this->configuration->getTablePrefix(),
             $this->getEntityTableName(\is_string($entity) ? $entity : \get_class($entity)),
             $this->configuration->getTableSuffix(),
