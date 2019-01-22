@@ -332,7 +332,8 @@ class AuditSubscriber implements EventSubscriber
      */
     private function audit(EntityManager $em, array $data): void
     {
-        $auditTable = $data['schema'].'.'.$this->configuration->getTablePrefix().$data['table'].$this->configuration->getTableSuffix();
+        $schema = $data['schema'] ? $data['schema'] . '.' : '';
+        $auditTable = $schema . '.' . $this->configuration->getTablePrefix() . $data['table'] . $this->configuration->getTableSuffix();
         $fields = [
             'type' => ':type',
             'object_id' => ':object_id',
