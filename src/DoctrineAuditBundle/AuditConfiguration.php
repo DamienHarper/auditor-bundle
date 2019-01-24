@@ -68,7 +68,7 @@ class AuditConfiguration
                 if (isset($entityOptions['enabled']) && !$entityOptions['enabled']) {
                     continue;
                 }
-                if (\is_object($entity) && $entity instanceof $auditedEntity) {
+                if (\is_object($entity) && $entity instanceof $auditedEntity && !is_subclass_of($entity, $auditedEntity)) {
                     return true;
                 }
                 if (\is_string($entity) && $entity === $auditedEntity) {
