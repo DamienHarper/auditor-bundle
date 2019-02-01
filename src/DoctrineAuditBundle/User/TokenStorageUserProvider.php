@@ -18,13 +18,13 @@ class TokenStorageUserProvider implements UserProviderInterface
     public function getUser(): ?UserInterface
     {
         $user = null;
-        $impersonation = '';
 
         $token = $this->security->getToken();
         if (null !== $token) {
             $tokenUser = $token->getUser();
             if ($tokenUser instanceof BaseUserInterface) {
-                if ($this->security->isGranted('ROLE_PREVIOUS_ADMIN') /* && config track impersonation?? */ ) {
+                $impersonation = '';
+                if ($this->security->isGranted('ROLE_PREVIOUS_ADMIN')) {
                     foreach ($this->security->getToken()->getRoles() as $role) {
                         if ($role instanceof SwitchUserRole) {
                             $impersonatorUser = $role->getSource()->getUser();
