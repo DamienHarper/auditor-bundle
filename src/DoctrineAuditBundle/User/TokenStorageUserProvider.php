@@ -31,7 +31,7 @@ class TokenStorageUserProvider implements UserProviderInterface
                             break;
                         }
                     }
-                    $impersonation = ' (impersonated by: '.$impersonatorUser->getUsername().'[id: '.$impersonatorUser->getId().'])';
+                    $impersonation = ' [impersonator '.$impersonatorUser->getUsername().':'.$impersonatorUser->getId().']';
                 }
                 $user = new User($tokenUser->getId(), $tokenUser->getUsername().$impersonation);
             }
