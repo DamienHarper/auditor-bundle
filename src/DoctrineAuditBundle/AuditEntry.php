@@ -13,7 +13,7 @@ class AuditEntry
      */
     protected $type;
     /**
-     * @var int
+     * @var int|string
      */
     protected $object_id;
     /**
@@ -65,9 +65,9 @@ class AuditEntry
     /**
      * Get the value of object_id.
      *
-     * @return int
+     * @return int|string
      */
-    public function getObjectId(): ?int
+    public function getObjectId()
     {
         return $this->object_id;
     }
