@@ -64,6 +64,7 @@ class CreateSchemaListener implements EventSubscriber
             'notnull' => true,
             'length' => 10,
         ]);
+        // TODO: automate the object_id as integer or string based on original entity
         $auditTable->addColumn('object_id', 'integer', [
             'notnull' => true,
             'unsigned' => true,
