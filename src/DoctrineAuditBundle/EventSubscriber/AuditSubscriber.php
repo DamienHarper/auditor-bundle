@@ -525,6 +525,9 @@ class AuditSubscriber implements EventSubscriber
             $username = $user->getUsername();
         }
 
+        /**
+         * TODO: test here for ROLE_PREVIOUS_ADMIN, if yes, set username as "username (impersonated by: imp_username[id])"
+         */
         return [
             'user_id' => $user_id,
             'username' => $username,
