@@ -54,7 +54,7 @@ class AuditReader
      *
      * @return AuditReader
      */
-    public function filterBy(string $filter): AuditReader
+    public function filterBy(string $filter): self
     {
         if (!\in_array($filter, [self::UPDATE, self::ASSOCIATE, self::DISSOCIATE, self::INSERT, self::REMOVE], true)) {
             $this->filter = null;
@@ -98,7 +98,7 @@ class AuditReader
     {
         $connection = $this->entityManager->getConnection();
 
-        $schema = isset($this->entityManager->getClassMetadata($entity)->table['schema']) ? $this->entityManager->getClassMetadata($entity)->table['schema'] . '.' : '';
+        $schema = isset($this->entityManager->getClassMetadata($entity)->table['schema']) ? $this->entityManager->getClassMetadata($entity)->table['schema'].'.' : '';
 
         $auditTable = implode('', [
             $schema,
@@ -143,7 +143,7 @@ class AuditReader
     {
         $connection = $this->entityManager->getConnection();
 
-        $schema = isset($this->entityManager->getClassMetadata($entity)->table['schema']) ? $this->entityManager->getClassMetadata($entity)->table['schema'] . '.' : '';
+        $schema = isset($this->entityManager->getClassMetadata($entity)->table['schema']) ? $this->entityManager->getClassMetadata($entity)->table['schema'].'.' : '';
 
         $auditTable = implode('', [
             $schema,

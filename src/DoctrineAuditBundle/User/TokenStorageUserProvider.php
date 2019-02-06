@@ -2,9 +2,9 @@
 
 namespace DH\DoctrineAuditBundle\User;
 
+use Symfony\Component\Security\Core\Role\SwitchUserRole;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface as BaseUserInterface;
-use Symfony\Component\Security\Core\Role\SwitchUserRole;
 
 class TokenStorageUserProvider implements UserProviderInterface
 {
@@ -18,8 +18,8 @@ class TokenStorageUserProvider implements UserProviderInterface
     public function getUser(): ?UserInterface
     {
         $user = null;
-
         $token = $this->security->getToken();
+
         if (null !== $token) {
             $tokenUser = $token->getUser();
             if ($tokenUser instanceof BaseUserInterface) {
@@ -28,6 +28,7 @@ class TokenStorageUserProvider implements UserProviderInterface
                     foreach ($this->security->getToken()->getRoles() as $role) {
                         if ($role instanceof SwitchUserRole) {
                             $impersonatorUser = $role->getSource()->getUser();
+
                             break;
                         }
                     }
