@@ -25,6 +25,7 @@ class TokenStorageUserProvider implements UserProviderInterface
             if ($tokenUser instanceof BaseUserInterface) {
                 $impersonation = '';
                 if ($this->security->isGranted('ROLE_PREVIOUS_ADMIN')) {
+                    $impersonatorUser = null;
                     foreach ($this->security->getToken()->getRoles() as $role) {
                         if ($role instanceof SwitchUserRole) {
                             $impersonatorUser = $role->getSource()->getUser();
@@ -32,7 +33,9 @@ class TokenStorageUserProvider implements UserProviderInterface
                             break;
                         }
                     }
-                    $impersonation = ' [impersonator '.$impersonatorUser->getUsername().':'.$impersonatorUser->getId().']';
+                    if ($impersonatorUser) {
+                        $impersonation = ' [impersonator '.$impersonatorUser->getUsername().':'.$impersonatorUser->getId().']';
+                    }
                 }
                 $user = new User($tokenUser->getId(), $tokenUser->getUsername().$impersonation);
             }
