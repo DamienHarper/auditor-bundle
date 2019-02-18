@@ -3,6 +3,7 @@
 namespace DH\DoctrineAuditBundle;
 
 use DH\DoctrineAuditBundle\User\UserProviderInterface;
+use Doctrine\ORM\Proxy\Proxy;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class AuditConfiguration
@@ -68,9 +69,15 @@ class AuditConfiguration
                 if (isset($entityOptions['enabled']) && !$entityOptions['enabled']) {
                     continue;
                 }
-                if (\is_object($entity) && $entity instanceof $auditedEntity && !is_subclass_of($entity, $auditedEntity)) {
+
+                if (\is_object($entity) && (
+                    ($entity instanceof $auditedEntity && !is_subclass_of($entity, $auditedEntity))
+                    ||
+                    ($entity instanceof Proxy && is_subclass_of($entity, $auditedEntity))
+                )) {
                     return true;
                 }
+
                 if (\is_string($entity) && $entity === $auditedEntity) {
                     return true;
                 }
