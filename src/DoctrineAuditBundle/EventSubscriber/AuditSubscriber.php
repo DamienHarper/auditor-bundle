@@ -382,6 +382,22 @@ class AuditSubscriber implements EventSubscriber
     {
         $meta = $em->getClassMetadata(\get_class($entity));
         $pk = $meta->getSingleIdentifierFieldName();
+
+        if (!isset($meta->fieldMappings[$pk])) {
+            // Primary key is not part of fieldMapping
+            // @see https://github.com/DamienHarper/DoctrineAuditBundle/issues/40
+            // @see https://www.doctrine-project.org/projects/doctrine-orm/en/latest/tutorials/composite-primary-keys.html#identity-through-foreign-entities
+            // We try to get it from associationMapping (will throw a MappingException if not available)
+            $targetEntity = $meta->getReflectionProperty($pk)->getValue($entity);
+
+            $mapping = $meta->getAssociationMapping($pk);
+            $meta = $em->getClassMetadata($mapping['targetEntity']);
+            $pk = $meta->getSingleIdentifierFieldName();
+            $type = Type::getType($meta->fieldMappings[$pk]['type']);
+
+            return $this->value($em, $type, $meta->getReflectionProperty($pk)->getValue($targetEntity));
+        }
+
         $type = Type::getType($meta->fieldMappings[$pk]['type']);
 
         return $this->value($em, $type, $meta->getReflectionProperty($pk)->getValue($entity));
