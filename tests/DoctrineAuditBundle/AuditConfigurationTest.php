@@ -10,7 +10,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
 
 /**
- * @coversNothing
+ * @covers \DH\DoctrineAuditBundle\AuditConfiguration
+ * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
  */
 class AuditConfigurationTest extends TestCase
 {
@@ -73,6 +74,22 @@ class AuditConfigurationTest extends TestCase
 
         $this->assertSame($entities, $configuration->getEntities(), 'AuditConfiguration::getEntities() returns configured entities list.');
     }
+
+    public function testGetUserProvider(): void
+    {
+        $configuration = $this->getAuditConfiguration();
+
+        $this->assertInstanceOf(TokenStorageUserProvider::class, $configuration->getUserProvider(), 'UserProvider instanceof TokenStorageUserProvider::class');
+    }
+
+    public function testGetRequestStack(): void
+    {
+        $configuration = $this->getAuditConfiguration();
+
+        $this->assertInstanceOf(RequestStack::class, $configuration->getRequestStack(), 'RequestStack instanceof RequestStack::class');
+    }
+
+
 
     public function testIsAudited(): void
     {
