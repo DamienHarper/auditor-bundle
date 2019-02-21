@@ -40,6 +40,11 @@ services:
     tags:
       - { name: twig.extension }
 
-  DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand:
+  dh_doctrine_audit.command.clean:
+    class: DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand
     tags:
       - { name: 'console.command', command: 'audit:clean' }
+
+  DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand:
+    alias: dh_doctrine_audit.command.clean
+    public: true
