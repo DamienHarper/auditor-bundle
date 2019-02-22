@@ -66,9 +66,21 @@ class AuditReader
     }
 
     /**
+     * Returns current filter
+     *
+     * @return string|null
+     */
+    public function getFilter(): ?string
+    {
+        return $this->filter;
+    }
+
+    /**
      * Returns an array of audit table names indexed by entity FQN.
      *
      * @return array
+     *
+     * @throws \Doctrine\ORM\ORMException
      */
     public function getEntities(): array
     {
