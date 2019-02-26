@@ -3,6 +3,8 @@
 namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -64,8 +66,8 @@ class AuditConfigurationTest extends TestCase
     public function testGetEntities(): void
     {
         $entities = [
-            'Fixtures\Core\Post' => null,
-            'Fixtures\Core\Comment' => null,
+            Post::class => null,
+            Comment::class => null,
         ];
 
         $configuration = $this->getAuditConfiguration([
@@ -92,15 +94,15 @@ class AuditConfigurationTest extends TestCase
     public function testIsAudited(): void
     {
         $entities = [
-            'Fixtures\Core\Post' => null,
+            Post::class => null,
         ];
 
         $configuration = $this->getAuditConfiguration([
             'entities' => $entities,
         ]);
 
-        $this->assertTrue($configuration->isAudited('Fixtures\Core\Post'), 'entity "Fixtures\Core\Post" is audited.');
-        $this->assertFalse($configuration->isAudited('Fixtures\Core\Comment'), 'entity "Fixtures\Core\Comment" is not audited.');
+        $this->assertTrue($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is audited.');
+        $this->assertFalse($configuration->isAudited(Comment::class), 'entity "'.Comment::class.'" is not audited.');
     }
 
     /**
@@ -118,10 +120,10 @@ class AuditConfigurationTest extends TestCase
             'entities' => $entities,
         ]);
 
-        $this->assertTrue($configuration->isAudited('Fixtures\Core\Post'), 'entity "Fixtures\Core\Post" is audited.');
+        $this->assertTrue($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is audited.');
 
         $entities = [
-            'Fixtures\Core\Post' => [
+            Post::class => [
                 'enabled' => false,
             ],
         ];
@@ -130,7 +132,7 @@ class AuditConfigurationTest extends TestCase
             'entities' => $entities,
         ]);
 
-        $this->assertFalse($configuration->isAudited('Fixtures\Core\Post'), 'entity "Fixtures\Core\Post" is not audited.');
+        $this->assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
     }
 
     /**
@@ -139,17 +141,17 @@ class AuditConfigurationTest extends TestCase
     public function testIsAuditedFieldAuditsAnyFieldByDefault(): void
     {
         $entities = [
-            'Fixtures\Core\Post' => null,
+            Post::class => null,
         ];
 
         $configuration = $this->getAuditConfiguration([
             'entities' => $entities,
         ]);
 
-        $this->assertTrue($configuration->isAuditedField('Fixtures\Core\Post', 'id'), 'any field is audited.');
-        $this->assertTrue($configuration->isAuditedField('Fixtures\Core\Post', 'title'), 'any field is audited.');
-        $this->assertTrue($configuration->isAuditedField('Fixtures\Core\Post', 'created_at'), 'any field is audited.');
-        $this->assertTrue($configuration->isAuditedField('Fixtures\Core\Post', 'updated_at'), 'any field is audited.');
+        $this->assertTrue($configuration->isAuditedField(Post::class, 'id'), 'any field is audited.');
+        $this->assertTrue($configuration->isAuditedField(Post::class, 'title'), 'any field is audited.');
+        $this->assertTrue($configuration->isAuditedField(Post::class, 'created_at'), 'any field is audited.');
+        $this->assertTrue($configuration->isAuditedField(Post::class, 'updated_at'), 'any field is audited.');
     }
 
     /**
@@ -158,7 +160,7 @@ class AuditConfigurationTest extends TestCase
     public function testIsAuditedFieldHonorsLocallyIgnoredColumns(): void
     {
         $entities = [
-            'Fixtures\Core\Post' => [
+            Post::class => [
                 'ignored_columns' => [
                     'created_at',
                     'updated_at',
@@ -170,10 +172,10 @@ class AuditConfigurationTest extends TestCase
             'entities' => $entities,
         ]);
 
-        $this->assertTrue($configuration->isAuditedField('Fixtures\Core\Post', 'id'), 'field "Fixtures\Core\Post::$id" is audited.');
-        $this->assertTrue($configuration->isAuditedField('Fixtures\Core\Post', 'title'), 'field "Fixtures\Core\Post::$title" is audited.');
-        $this->assertFalse($configuration->isAuditedField('Fixtures\Core\Post', 'created_at'), 'field "Fixtures\Core\Post::$created_at" is not audited.');
-        $this->assertFalse($configuration->isAuditedField('Fixtures\Core\Post', 'updated_at'), 'field "Fixtures\Core\Post::$updated_at" is not audited.');
+        $this->assertTrue($configuration->isAuditedField(Post::class, 'id'), 'field "'.Post::class.'::$id" is audited.');
+        $this->assertTrue($configuration->isAuditedField(Post::class, 'title'), 'field "'.Post::class.'::$title" is audited.');
+        $this->assertFalse($configuration->isAuditedField(Post::class, 'created_at'), 'field "'.Post::class.'::$created_at" is not audited.');
+        $this->assertFalse($configuration->isAuditedField(Post::class, 'updated_at'), 'field "'.Post::class.'::$updated_at" is not audited.');
     }
 
     /**
@@ -182,7 +184,7 @@ class AuditConfigurationTest extends TestCase
     public function testIsAuditedFieldHonorsGloballyIgnoredColumns(): void
     {
         $entities = [
-            'Fixtures\Core\Post' => null,
+            Post::class => null,
         ];
 
         $configuration = $this->getAuditConfiguration([
@@ -193,10 +195,10 @@ class AuditConfigurationTest extends TestCase
             'entities' => $entities,
         ]);
 
-        $this->assertTrue($configuration->isAuditedField('Fixtures\Core\Post', 'id'), 'field "Fixtures\Core\Post::$id" is audited.');
-        $this->assertTrue($configuration->isAuditedField('Fixtures\Core\Post', 'title'), 'field "Fixtures\Core\Post::$title" is audited.');
-        $this->assertFalse($configuration->isAuditedField('Fixtures\Core\Post', 'created_at'), 'field "Fixtures\Core\Post::$created_at" is not audited.');
-        $this->assertFalse($configuration->isAuditedField('Fixtures\Core\Post', 'updated_at'), 'field "Fixtures\Core\Post::$updated_at" is not audited.');
+        $this->assertTrue($configuration->isAuditedField(Post::class, 'id'), 'field "'.Post::class.'::$id" is audited.');
+        $this->assertTrue($configuration->isAuditedField(Post::class, 'title'), 'field "'.Post::class.'::$title" is audited.');
+        $this->assertFalse($configuration->isAuditedField(Post::class, 'created_at'), 'field "'.Post::class.'::$created_at" is not audited.');
+        $this->assertFalse($configuration->isAuditedField(Post::class, 'updated_at'), 'field "'.Post::class.'::$updated_at" is not audited.');
     }
 
     /**
@@ -205,7 +207,7 @@ class AuditConfigurationTest extends TestCase
     public function testEnableAuditFor(): void
     {
         $entities = [
-            'Fixtures\Core\Post' => [
+            Post::class => [
                 'enabled' => false,
             ],
         ];
@@ -214,11 +216,11 @@ class AuditConfigurationTest extends TestCase
             'entities' => $entities,
         ]);
 
-        $this->assertFalse($configuration->isAudited('Fixtures\Core\Post'), 'entity "Fixtures\Core\Post" is not audited.');
+        $this->assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
 
-        $configuration->enableAuditFor('Fixtures\Core\Post');
+        $configuration->enableAuditFor(Post::class);
 
-        $this->assertTrue($configuration->isAudited('Fixtures\Core\Post'), 'entity "Fixtures\Core\Post" is audited.');
+        $this->assertTrue($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is audited.');
     }
 
     /**
@@ -227,7 +229,7 @@ class AuditConfigurationTest extends TestCase
     public function testDisableAuditFor(): void
     {
         $entities = [
-            'Fixtures\Core\Post' => [
+            Post::class => [
                 'enabled' => true,
             ],
         ];
@@ -236,11 +238,11 @@ class AuditConfigurationTest extends TestCase
             'entities' => $entities,
         ]);
 
-        $this->assertTrue($configuration->isAudited('Fixtures\Core\Post'), 'entity "Fixtures\Core\Post" is audited.');
+        $this->assertTrue($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is audited.');
 
-        $configuration->disableAuditFor('Fixtures\Core\Post');
+        $configuration->disableAuditFor(Post::class);
 
-        $this->assertFalse($configuration->isAudited('Fixtures\Core\Post'), 'entity "Fixtures\Core\Post" is not audited.');
+        $this->assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
     }
 
     /** Utility methods */
