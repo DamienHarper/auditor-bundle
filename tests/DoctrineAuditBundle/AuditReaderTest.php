@@ -201,6 +201,30 @@ class AuditReaderTest extends CoreTestCase
         $this->assertCount(2, $audits, 'le nombre de résultats est correct.');
     }
 
+    /**
+     * @depends testGetAudits
+     */
+    public function testGetAudit(): void
+    {
+        $reader = $this->getReader($this->getAuditConfiguration());
+
+        $audits = $reader->getAudit(Author::class, 1);
+
+        $this->assertCount(1, $audits, 'le nombre de résultats est correct.');
+    }
+
+    /**
+     * @depends testGetAudits
+     */
+    public function testGetAuditHonorsFilter(): void
+    {
+        $reader = $this->getReader($this->getAuditConfiguration());
+
+        $audits = $reader->filterBy(AuditReader::UPDATE)->getAudit(Author::class, 1);
+
+        $this->assertCount(0, $audits, 'le nombre de résultats est correct.');
+    }
+
     protected function getReader(AuditConfiguration $configuration = null): AuditReader
     {
         return new AuditReader($configuration ?? $this->createAuditConfiguration(), $this->getEntityManager());
