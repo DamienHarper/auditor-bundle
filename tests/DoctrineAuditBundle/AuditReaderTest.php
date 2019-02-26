@@ -108,7 +108,7 @@ class AuditReaderTest extends CoreTestCase
         /** @var AuditEntry[] $audits */
         $audits = $reader->getAudits(Author::class, null, 1, 50);
 
-        $this->assertCount(3, $audits, 'le nombre de résultats est correct.');
+        $this->assertCount(3, $audits, 'result count is ok.');
         $this->assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'entry1 is an update operation.');
         $this->assertSame(AuditReader::INSERT, $audits[1]->getType(), 'entry2 is an insert operation.');
         $this->assertSame(AuditReader::INSERT, $audits[2]->getType(), 'entry3 is an insert operation.');
@@ -116,7 +116,7 @@ class AuditReaderTest extends CoreTestCase
         /** @var AuditEntry[] $audits */
         $audits = $reader->getAudits(Post::class, null, 1, 50);
 
-        $this->assertCount(3, $audits, 'le nombre de résultats est correct.');
+        $this->assertCount(3, $audits, 'result count is ok.');
         $this->assertSame(AuditReader::INSERT, $audits[0]->getType(), 'entry1 is an insert operation.');
         $this->assertSame(AuditReader::INSERT, $audits[1]->getType(), 'entry2 is an insert operation.');
         $this->assertSame(AuditReader::INSERT, $audits[2]->getType(), 'entry3 is an insert operation.');
@@ -124,7 +124,7 @@ class AuditReaderTest extends CoreTestCase
         /** @var AuditEntry[] $audits */
         $audits = $reader->getAudits(Comment::class, null, 1, 50);
 
-        $this->assertCount(3, $audits, 'le nombre de résultats est correct.');
+        $this->assertCount(3, $audits, 'result count is ok.');
         $this->assertSame(AuditReader::INSERT, $audits[0]->getType(), 'entry1 is an insert operation.');
         $this->assertSame(AuditReader::INSERT, $audits[1]->getType(), 'entry2 is an insert operation.');
         $this->assertSame(AuditReader::INSERT, $audits[2]->getType(), 'entry3 is an insert operation.');
@@ -144,21 +144,21 @@ class AuditReaderTest extends CoreTestCase
         /** @var AuditEntry[] $audits */
         $audits = $reader->getAudits(Author::class, 1, 1, 50);
 
-        $this->assertCount(2, $audits, 'le nombre de résultats est correct.');
+        $this->assertCount(2, $audits, 'result count is ok.');
 
         /** @var AuditEntry[] $audits */
         $audits = $reader->getAudits(Post::class, 1, 1, 50);
 
-        $this->assertCount(1, $audits, 'le nombre de résultats est correct.');
+        $this->assertCount(1, $audits, 'result count is ok.');
 
         /** @var AuditEntry[] $audits */
         $audits = $reader->getAudits(Comment::class, 1, 1, 50);
 
-        $this->assertCount(1, $audits, 'le nombre de résultats est correct.');
+        $this->assertCount(1, $audits, 'result count is ok.');
 
         /** @var AuditEntry[] $audits */
         $audits = $reader->getAudits(Post::class, 0, 1, 50);
-        $this->assertSame([], $audits, 'aucun résultat pour un id "invalide".');
+        $this->assertSame([], $audits, 'no result when id is invalid.');
     }
 
     /**
@@ -171,12 +171,12 @@ class AuditReaderTest extends CoreTestCase
         /** @var AuditEntry[] $audits */
         $audits = $reader->getAudits(Author::class, null, 1, 2);
 
-        $this->assertCount(2, $audits, 'le nombre de résultats est correct.');
+        $this->assertCount(2, $audits, 'result count is ok.');
 
         /** @var AuditEntry[] $audits */
         $audits = $reader->getAudits(Author::class, null, 2, 2);
 
-        $this->assertCount(1, $audits, 'le nombre de résultats est correct.');
+        $this->assertCount(1, $audits, 'result count is ok.');
 
         $this->expectException(\InvalidArgumentException::class);
         $reader->getAudits(Post::class, null, 1, 0);
@@ -193,12 +193,12 @@ class AuditReaderTest extends CoreTestCase
         /** @var AuditEntry[] $audits */
         $audits = $reader->filterBy(AuditReader::UPDATE)->getAudits(Author::class, null, 1, 50);
 
-        $this->assertCount(1, $audits, 'le nombre de résultats est correct.');
+        $this->assertCount(1, $audits, 'result count is ok.');
 
         /** @var AuditEntry[] $audits */
         $audits = $reader->filterBy(AuditReader::INSERT)->getAudits(Author::class, null, 1, 50);
 
-        $this->assertCount(2, $audits, 'le nombre de résultats est correct.');
+        $this->assertCount(2, $audits, 'result count is ok.');
     }
 
     /**
@@ -210,7 +210,7 @@ class AuditReaderTest extends CoreTestCase
 
         $audits = $reader->getAudit(Author::class, 1);
 
-        $this->assertCount(1, $audits, 'le nombre de résultats est correct.');
+        $this->assertCount(1, $audits, 'result count is ok.');
     }
 
     /**
@@ -222,7 +222,7 @@ class AuditReaderTest extends CoreTestCase
 
         $audits = $reader->filterBy(AuditReader::UPDATE)->getAudit(Author::class, 1);
 
-        $this->assertCount(0, $audits, 'le nombre de résultats est correct.');
+        $this->assertCount(0, $audits, 'result count is ok.');
     }
 
     protected function getReader(AuditConfiguration $configuration = null): AuditReader
