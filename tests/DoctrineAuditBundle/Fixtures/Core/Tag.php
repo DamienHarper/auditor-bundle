@@ -7,7 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity
  * @ORM\Table(name="tag")
  */
 class Tag
@@ -122,6 +122,6 @@ class Tag
 
     public function __sleep()
     {
-        return array('id', 'title');
+        return ['id', 'title'];
     }
 }

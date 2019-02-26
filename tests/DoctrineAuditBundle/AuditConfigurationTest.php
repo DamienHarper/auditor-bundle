@@ -17,21 +17,21 @@ class AuditConfigurationTest extends TestCase
 {
     public function testDefaultTablePrefix(): void
     {
-        $configuration = $this->getConfiguration();
+        $configuration = $this->getAuditConfiguration();
 
         $this->assertSame('', $configuration->getTablePrefix(), 'table_prefix is empty by default.');
     }
 
     public function testDefaultTableSuffix(): void
     {
-        $configuration = $this->getConfiguration();
+        $configuration = $this->getAuditConfiguration();
 
         $this->assertSame('_audit', $configuration->getTableSuffix(), 'table_suffix is "_audit" by default.');
     }
 
     public function testCustomTablePrefix(): void
     {
-        $configuration = $this->getConfiguration([
+        $configuration = $this->getAuditConfiguration([
             'table_prefix' => 'audit_',
         ]);
 
@@ -40,7 +40,7 @@ class AuditConfigurationTest extends TestCase
 
     public function testCustomTableSuffix(): void
     {
-        $configuration = $this->getConfiguration([
+        $configuration = $this->getAuditConfiguration([
             'table_suffix' => '_audit_log',
         ]);
 
@@ -54,7 +54,7 @@ class AuditConfigurationTest extends TestCase
             'updated_at',
         ];
 
-        $configuration = $this->getConfiguration([
+        $configuration = $this->getAuditConfiguration([
             'ignored_columns' => $ignored,
         ]);
 
@@ -68,7 +68,7 @@ class AuditConfigurationTest extends TestCase
             'Fixtures\Core\Comment' => null,
         ];
 
-        $configuration = $this->getConfiguration([
+        $configuration = $this->getAuditConfiguration([
             'entities' => $entities,
         ]);
 
@@ -77,19 +77,17 @@ class AuditConfigurationTest extends TestCase
 
     public function testGetUserProvider(): void
     {
-        $configuration = $this->getConfiguration();
+        $configuration = $this->getAuditConfiguration();
 
         $this->assertInstanceOf(TokenStorageUserProvider::class, $configuration->getUserProvider(), 'UserProvider instanceof TokenStorageUserProvider::class');
     }
 
     public function testGetRequestStack(): void
     {
-        $configuration = $this->getConfiguration();
+        $configuration = $this->getAuditConfiguration();
 
         $this->assertInstanceOf(RequestStack::class, $configuration->getRequestStack(), 'RequestStack instanceof RequestStack::class');
     }
-
-
 
     public function testIsAudited(): void
     {
@@ -97,7 +95,7 @@ class AuditConfigurationTest extends TestCase
             'Fixtures\Core\Post' => null,
         ];
 
-        $configuration = $this->getConfiguration([
+        $configuration = $this->getAuditConfiguration([
             'entities' => $entities,
         ]);
 
@@ -116,7 +114,7 @@ class AuditConfigurationTest extends TestCase
             ],
         ];
 
-        $configuration = $this->getConfiguration([
+        $configuration = $this->getAuditConfiguration([
             'entities' => $entities,
         ]);
 
@@ -128,7 +126,7 @@ class AuditConfigurationTest extends TestCase
             ],
         ];
 
-        $configuration = $this->getConfiguration([
+        $configuration = $this->getAuditConfiguration([
             'entities' => $entities,
         ]);
 
@@ -144,7 +142,7 @@ class AuditConfigurationTest extends TestCase
             'Fixtures\Core\Post' => null,
         ];
 
-        $configuration = $this->getConfiguration([
+        $configuration = $this->getAuditConfiguration([
             'entities' => $entities,
         ]);
 
@@ -168,7 +166,7 @@ class AuditConfigurationTest extends TestCase
             ],
         ];
 
-        $configuration = $this->getConfiguration([
+        $configuration = $this->getAuditConfiguration([
             'entities' => $entities,
         ]);
 
@@ -187,7 +185,7 @@ class AuditConfigurationTest extends TestCase
             'Fixtures\Core\Post' => null,
         ];
 
-        $configuration = $this->getConfiguration([
+        $configuration = $this->getAuditConfiguration([
             'ignored_columns' => [
                 'created_at',
                 'updated_at',
@@ -212,7 +210,7 @@ class AuditConfigurationTest extends TestCase
             ],
         ];
 
-        $configuration = $this->getConfiguration([
+        $configuration = $this->getAuditConfiguration([
             'entities' => $entities,
         ]);
 
@@ -234,7 +232,7 @@ class AuditConfigurationTest extends TestCase
             ],
         ];
 
-        $configuration = $this->getConfiguration([
+        $configuration = $this->getAuditConfiguration([
             'entities' => $entities,
         ]);
 
@@ -266,7 +264,7 @@ class AuditConfigurationTest extends TestCase
         return new TokenStorageUserProvider($this->getSecurity());
     }
 
-    protected function getConfiguration(array $options = []): AuditConfiguration
+    protected function getAuditConfiguration(array $options = []): AuditConfiguration
     {
         return new AuditConfiguration(
             array_merge([

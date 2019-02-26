@@ -7,7 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity
  * @ORM\Table(name="author")
  */
 class Author
@@ -152,6 +152,6 @@ class Author
 
     public function __sleep()
     {
-        return array('id', 'fullname', 'email');
+        return ['id', 'fullname', 'email'];
     }
 }

@@ -2,13 +2,13 @@
 
 namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core;
 
-use Doctrine\Common\Collections\Collection;
-use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity
  * @ORM\Table(name="post", indexes={@ORM\Index(name="fk_1_idx", columns={"author_id"})})
  */
 class Post
@@ -292,6 +292,6 @@ class Post
 
     public function __sleep()
     {
-        return array('id', 'title', 'body', 'created_at', 'author_id');
+        return ['id', 'title', 'body', 'created_at', 'author_id'];
     }
 }

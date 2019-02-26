@@ -3,21 +3,24 @@
 namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
+use DH\DoctrineAuditBundle\AuditEntry;
 use DH\DoctrineAuditBundle\AuditReader;
-use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
-use PHPUnit\Framework\TestCase;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Core\Security;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 
 /**
+ * @covers \DH\DoctrineAuditBundle\AuditEntry
  * @covers \DH\DoctrineAuditBundle\AuditReader
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
+ * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
+ * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
+ * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  */
-class AuditReaderTest extends BaseTestCase
+class AuditReaderTest extends CoreTestCase
 {
-    protected $fixturesPath = __DIR__ . '/Fixtures';
+    protected $fixturesPath = __DIR__.'/Fixtures';
 
     public function testGetAuditConfiguration(): void
     {
@@ -59,18 +62,18 @@ class AuditReaderTest extends BaseTestCase
     public function testGetEntityTableName(): void
     {
         $entities = [
-            'DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post' => null,
-            'DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment' => null,
+            Post::class => null,
+            Comment::class => null,
         ];
 
-        $configuration = $this->getConfiguration([
+        $configuration = $this->createAuditConfiguration([
             'entities' => $entities,
         ]);
 
         $reader = $this->getReader($configuration);
 
-        $this->assertSame('post', $reader->getEntityTableName('DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post'), 'tablename is ok.');
-        $this->assertSame('comment', $reader->getEntityTableName('DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment'), 'tablename is ok.');
+        $this->assertSame('post', $reader->getEntityTableName(Post::class), 'tablename is ok.');
+        $this->assertSame('comment', $reader->getEntityTableName(Comment::class), 'tablename is ok.');
     }
 
     /**
@@ -79,8 +82,8 @@ class AuditReaderTest extends BaseTestCase
     public function testGetEntities(): void
     {
         $entities = [
-            'DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post' => null,
-            'DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment' => null,
+            Post::class => null,
+            Comment::class => null,
         ];
 
         $expected = array_combine(
@@ -89,7 +92,7 @@ class AuditReaderTest extends BaseTestCase
         );
         ksort($expected);
 
-        $configuration = $this->getConfiguration([
+        $configuration = $this->createAuditConfiguration([
             'entities' => $entities,
         ]);
 
@@ -98,29 +101,96 @@ class AuditReaderTest extends BaseTestCase
         $this->assertSame($expected, $reader->getEntities(), 'entities are sorted.');
     }
 
-
-
-    protected function getConfiguration(array $options = []): AuditConfiguration
+    public function testGetAudits(): void
     {
-        $container = new ContainerBuilder();
-        $security = new Security($container);
-        $requestStack = new RequestStack();
-        $userProvider = new TokenStorageUserProvider($security);
+        $reader = $this->getReader($this->getAuditConfiguration());
 
-        return new AuditConfiguration(
-            array_merge([
-                'table_prefix' => '',
-                'table_suffix' => '_audit',
-                'ignored_columns' => [],
-                'entities' => [],
-            ], $options),
-            $userProvider,
-            $requestStack
-        );
+        /** @var AuditEntry[] $audits */
+        $audits = $reader->getAudits(Author::class, null, 1, 50);
+
+        $this->assertCount(3, $audits, 'le nombre de résultats est correct.');
+        $this->assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'entry1 is an update operation.');
+        $this->assertSame(AuditReader::INSERT, $audits[1]->getType(), 'entry2 is an insert operation.');
+        $this->assertSame(AuditReader::INSERT, $audits[2]->getType(), 'entry3 is an insert operation.');
+
+        /** @var AuditEntry[] $audits */
+        $audits = $reader->getAudits(Post::class, null, 1, 50);
+
+        $this->assertCount(3, $audits, 'le nombre de résultats est correct.');
+        $this->assertSame(AuditReader::INSERT, $audits[0]->getType(), 'entry1 is an insert operation.');
+        $this->assertSame(AuditReader::INSERT, $audits[1]->getType(), 'entry2 is an insert operation.');
+        $this->assertSame(AuditReader::INSERT, $audits[2]->getType(), 'entry3 is an insert operation.');
+
+        /** @var AuditEntry[] $audits */
+        $audits = $reader->getAudits(Comment::class, null, 1, 50);
+
+        $this->assertCount(3, $audits, 'le nombre de résultats est correct.');
+        $this->assertSame(AuditReader::INSERT, $audits[0]->getType(), 'entry1 is an insert operation.');
+        $this->assertSame(AuditReader::INSERT, $audits[1]->getType(), 'entry2 is an insert operation.');
+        $this->assertSame(AuditReader::INSERT, $audits[2]->getType(), 'entry3 is an insert operation.');
+    }
+
+    /**
+     * @depends testGetAudits
+     */
+    public function testGetAuditsHonorsId(): void
+    {
+        $reader = $this->getReader($this->getAuditConfiguration());
+
+        /** @var AuditEntry[] $audits */
+        $audits = $reader->getAudits(Author::class, 1, 1, 50);
+
+        $this->assertCount(2, $audits, 'le nombre de résultats est correct.');
+
+        /** @var AuditEntry[] $audits */
+        $audits = $reader->getAudits(Post::class, 1, 1, 50);
+
+        $this->assertCount(1, $audits, 'le nombre de résultats est correct.');
+
+        /** @var AuditEntry[] $audits */
+        $audits = $reader->getAudits(Comment::class, 1, 1, 50);
+
+        $this->assertCount(1, $audits, 'le nombre de résultats est correct.');
+    }
+
+    /**
+     * @depends testGetAudits
+     */
+    public function testGetAuditsHonorsPageSize(): void
+    {
+        $reader = $this->getReader($this->getAuditConfiguration());
+
+        /** @var AuditEntry[] $audits */
+        $audits = $reader->getAudits(Author::class, null, 1, 2);
+
+        $this->assertCount(2, $audits, 'le nombre de résultats est correct.');
+
+        /** @var AuditEntry[] $audits */
+        $audits = $reader->getAudits(Author::class, null, 2, 2);
+
+        $this->assertCount(1, $audits, 'le nombre de résultats est correct.');
+    }
+
+    /**
+     * @depends testGetAudits
+     */
+    public function testGetAuditsHonorsFilter(): void
+    {
+        $reader = $this->getReader($this->getAuditConfiguration());
+
+        /** @var AuditEntry[] $audits */
+        $audits = $reader->filterBy(AuditReader::UPDATE)->getAudits(Author::class, null, 1, 50);
+
+        $this->assertCount(1, $audits, 'le nombre de résultats est correct.');
+
+        /** @var AuditEntry[] $audits */
+        $audits = $reader->filterBy(AuditReader::INSERT)->getAudits(Author::class, null, 1, 50);
+
+        $this->assertCount(2, $audits, 'le nombre de résultats est correct.');
     }
 
     protected function getReader(AuditConfiguration $configuration = null): AuditReader
     {
-        return new AuditReader($configuration ?? $this->getConfiguration(), $this->getEntityManager());
+        return new AuditReader($configuration ?? $this->createAuditConfiguration(), $this->getEntityManager());
     }
 }

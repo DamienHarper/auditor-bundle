@@ -2,16 +2,22 @@
 
 namespace DH\DoctrineAuditBundle\Tests;
 
+use DH\DoctrineAuditBundle\AuditConfiguration;
+use DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber;
+use DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener;
+use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Proxy\ProxyFactory;
 use Doctrine\ORM\Tools\SchemaTool;
 use Gedmo;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Core\Security;
 
 abstract class BaseTestCase extends TestCase
 {
@@ -32,6 +38,8 @@ abstract class BaseTestCase extends TestCase
 
     protected $fixturesPath;
 
+    protected $auditConfiguration;
+
     /**
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
@@ -45,6 +53,7 @@ abstract class BaseTestCase extends TestCase
     }
 
     /**
+     * @throws \Doctrine\Common\Persistence\Mapping\MappingException
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
      */
@@ -53,6 +62,32 @@ abstract class BaseTestCase extends TestCase
         $this->tearDownEntitySchema();
         $this->em = null;
         $this->schemaTool = null;
+    }
+
+    protected function createAuditConfiguration(array $options = []): AuditConfiguration
+    {
+        $auditConfiguration = new AuditConfiguration(
+            array_merge([
+                'table_prefix' => '',
+                'table_suffix' => '_audit',
+                'ignored_columns' => [],
+                'entities' => [],
+            ], $options),
+            new TokenStorageUserProvider(new Security(new ContainerBuilder())),
+            new RequestStack()
+        );
+
+        return $auditConfiguration;
+    }
+
+    protected function getAuditConfiguration(): AuditConfiguration
+    {
+        return $this->auditConfiguration;
+    }
+
+    protected function setAuditConfiguration(AuditConfiguration $configuration): void
+    {
+        $this->auditConfiguration = $configuration;
     }
 
     /**
@@ -82,6 +117,8 @@ abstract class BaseTestCase extends TestCase
 
         $connection = $this->_getConnection();
 
+        $this->setAuditConfiguration($this->createAuditConfiguration());
+
         // get rid of more global state
         $evm = $connection->getEventManager();
         foreach ($evm->getListeners() as $event => $listeners) {
@@ -89,17 +126,10 @@ abstract class BaseTestCase extends TestCase
                 $evm->removeEventListener([$event], $listener);
             }
         }
+        $evm->addEventSubscriber(new AuditSubscriber($this->getAuditConfiguration()));
+        $evm->addEventSubscriber(new CreateSchemaListener($this->getAuditConfiguration()));
 
         $this->em = EntityManager::create($connection, $config);
-
-        if (isset($this->customTypes) and \is_array($this->customTypes)) {
-            foreach ($this->customTypes as $customTypeName => $customTypeClass) {
-                if (!Type::hasType($customTypeName)) {
-                    Type::addType($customTypeName, $customTypeClass);
-                }
-                $this->em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('db_'.$customTypeName, $customTypeName);
-            }
-        }
 
         return $this->em;
     }

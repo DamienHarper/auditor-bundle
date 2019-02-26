@@ -2,11 +2,11 @@
 
 namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core;
 
-use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity
  * @ORM\Table(name="`comment`", indexes={@ORM\Index(name="fk__idx", columns={"post_id"})})
  */
 class Comment
@@ -24,7 +24,7 @@ class Comment
     protected $body;
 
     /**
-     * Comment author email
+     * Comment author email.
      *
      * @ORM\Column(type="string", length=255)
      */
@@ -197,6 +197,6 @@ class Comment
 
     public function __sleep()
     {
-        return array('id', 'body', 'author', 'created_at', 'post_id');
+        return ['id', 'body', 'author', 'created_at', 'post_id'];
     }
 }
