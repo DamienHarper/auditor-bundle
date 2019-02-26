@@ -128,6 +128,10 @@ class AuditReaderTest extends CoreTestCase
         $this->assertSame(AuditReader::INSERT, $audits[0]->getType(), 'entry1 is an insert operation.');
         $this->assertSame(AuditReader::INSERT, $audits[1]->getType(), 'entry2 is an insert operation.');
         $this->assertSame(AuditReader::INSERT, $audits[2]->getType(), 'entry3 is an insert operation.');
+
+        $this->expectException(\InvalidArgumentException::class);
+        $reader->getAudits(Post::class, null, 0, 50);
+        $reader->getAudits(Post::class, null, -1, 50);
     }
 
     /**
@@ -151,6 +155,10 @@ class AuditReaderTest extends CoreTestCase
         $audits = $reader->getAudits(Comment::class, 1, 1, 50);
 
         $this->assertCount(1, $audits, 'le nombre de résultats est correct.');
+
+        /** @var AuditEntry[] $audits */
+        $audits = $reader->getAudits(Post::class, 0, 1, 50);
+        $this->assertSame([], $audits, 'aucun résultat pour un id "invalide".');
     }
 
     /**
@@ -169,6 +177,10 @@ class AuditReaderTest extends CoreTestCase
         $audits = $reader->getAudits(Author::class, null, 2, 2);
 
         $this->assertCount(1, $audits, 'le nombre de résultats est correct.');
+
+        $this->expectException(\InvalidArgumentException::class);
+        $reader->getAudits(Post::class, null, 1, 0);
+        $reader->getAudits(Post::class, null, 1, -1);
     }
 
     /**

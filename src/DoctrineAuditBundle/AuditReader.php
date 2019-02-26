@@ -108,6 +108,13 @@ class AuditReader
      */
     public function getAudits($entity, int $id = null, int $page = 1, int $pageSize = 50): array
     {
+        if ($page < 1) {
+            throw new \InvalidArgumentException('$page must be greater or equal than 1.');
+        }
+        if ($pageSize < 1) {
+            throw new \InvalidArgumentException('$pageSize must be greater or equal than 1.');
+        }
+
         $connection = $this->entityManager->getConnection();
 
         $schema = isset($this->entityManager->getClassMetadata($entity)->table['schema']) ? $this->entityManager->getClassMetadata($entity)->table['schema'].'.' : '';

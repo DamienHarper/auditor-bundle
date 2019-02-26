@@ -111,7 +111,7 @@ class AuditConfigurationTest extends TestCase
     public function testIsAuditedHonorsEnabledFlag(): void
     {
         $entities = [
-            'Fixtures\Core\Post' => [
+            Post::class => [
                 'enabled' => true,
             ],
         ];
