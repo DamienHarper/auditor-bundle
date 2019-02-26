@@ -20,8 +20,6 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
  */
 class AuditReaderTest extends CoreTestCase
 {
-    protected $fixturesPath = __DIR__.'/Fixtures';
-
     public function testGetAuditConfiguration(): void
     {
         $reader = $this->getReader();

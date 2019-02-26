@@ -9,6 +9,11 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 abstract class CoreTestCase extends BaseTestCase
 {
     /**
+     * @var string
+     */
+    protected $fixturesPath = __DIR__ . '/Fixtures';
+
+    /**
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\Tools\ToolsException
