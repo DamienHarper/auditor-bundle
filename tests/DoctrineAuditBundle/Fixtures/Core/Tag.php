@@ -25,7 +25,7 @@ class Tag
     protected $title;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Post", mappedBy="tags")
+     * @ORM\ManyToMany(targetEntity="Post", mappedBy="tags", cascade={"persist", "remove"})
      */
     protected $posts;
 

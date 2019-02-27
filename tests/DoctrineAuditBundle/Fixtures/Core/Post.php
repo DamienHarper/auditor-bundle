@@ -54,7 +54,7 @@ class Post
     protected $author;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Tag", inversedBy="posts")
+     * @ORM\ManyToMany(targetEntity="Tag", inversedBy="posts", cascade={"persist", "remove"})
      * @ORM\JoinTable(name="post__tag",
      *     joinColumns={@ORM\JoinColumn(name="post_id", referencedColumnName="id", nullable=false)},
      *     inverseJoinColumns={@ORM\JoinColumn(name="tag_id", referencedColumnName="id", nullable=false)}

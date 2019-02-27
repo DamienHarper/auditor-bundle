@@ -12,7 +12,7 @@ abstract class CoreTestCase extends BaseTestCase
     /**
      * @var string
      */
-    protected $fixturesPath = __DIR__ . '/Fixtures';
+    protected $fixturesPath = __DIR__.'/Fixtures';
 
     /**
      * @throws \Doctrine\DBAL\DBALException
@@ -58,6 +58,7 @@ abstract class CoreTestCase extends BaseTestCase
      * +PostTag 3.3
      * +PostTag 3.5
      * +-PostTag 4.4
+     * +-PostTag 4.5.
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
@@ -137,7 +138,6 @@ abstract class CoreTestCase extends BaseTestCase
 
         $em->flush();
 
-
         $author1->setFullname('John Doe');
         $em->persist($author1);
 
@@ -156,7 +156,6 @@ abstract class CoreTestCase extends BaseTestCase
             ->setCreatedAt(new \DateTime())
         ;
         $em->persist($post4);
-
 
         $tag1 = new Tag();
         $tag1->setTitle('techno');
@@ -180,7 +179,6 @@ abstract class CoreTestCase extends BaseTestCase
 
         $em->flush();
 
-
         $post1
             ->addTag($tag1)
             ->addTag($tag2)
@@ -191,13 +189,17 @@ abstract class CoreTestCase extends BaseTestCase
             ->addTag($tag5)
         ;
         $post4
+            ->addTag($tag2)
             ->addTag($tag4)
+            ->addTag($tag5)
         ;
 
         $em->flush();
 
-
-        $post4->removeTag($tag4);
+        $post4
+            ->removeTag($tag4)
+            ->removeTag($tag5)
+        ;
         $em->flush();
 
         $author3->removePost($post4);
