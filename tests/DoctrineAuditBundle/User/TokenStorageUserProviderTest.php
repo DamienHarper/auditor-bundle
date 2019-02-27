@@ -49,7 +49,8 @@ class TokenStorageUserProviderTest extends TestCase
         $container->set('security.token_storage', $this->tokenStorage);
         $container->set('security.authorization_checker', $this->authorizationChecker);
 
-        $this->assertNull($token->getUser());
+        $this->assertSame(2, $token->getUser()->getId());
+        $this->assertSame('dark.vador [impersonator john.doe:1]', $token->getUser()->getUsername());
     }
 
     public function setUp(): void
