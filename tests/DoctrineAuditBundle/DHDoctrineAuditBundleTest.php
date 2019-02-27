@@ -16,7 +16,12 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
 
 /**
- * @coversNothing
+ * @covers \DH\DoctrineAuditBundle\DHDoctrineAuditBundle
+ * @covers \DH\DoctrineAuditBundle\AuditConfiguration
+ * @covers \DH\DoctrineAuditBundle\AuditReader
+ * @covers \DH\DoctrineAuditBundle\DependencyInjection\Configuration
+ * @covers \DH\DoctrineAuditBundle\DependencyInjection\DHDoctrineAuditExtension
+ * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
  */
 class DHDoctrineAuditBundleTest extends TestCase
 {
