@@ -5,6 +5,7 @@ namespace DH\DoctrineAuditBundle\Tests;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
 
 abstract class CoreTestCase extends BaseTestCase
 {
@@ -28,12 +29,40 @@ abstract class CoreTestCase extends BaseTestCase
             Author::class => ['default' => true],
             Post::class => ['default' => true],
             Comment::class => ['default' => true],
+            Tag::class => ['default' => true],
         ]);
 
         $this->setUpEntitySchema();
         $this->setupEntities();
     }
 
+    /**
+     * ++Author 1
+     *   +Post 1
+     *      +Comment 1
+     *   +Post 2
+     * +Author 2
+     *   +Post 3
+     *      +Comment 2
+     *      +Comment 3
+     * +-Author 3
+     *   +-Post 4
+     * +Tag 1
+     * +Tag 2
+     * +Tag 3
+     * +Tag 4
+     * +Tag 5
+     * +PostTag 1.1
+     * +PostTag 1.2
+     * +PostTag 3.1
+     * +PostTag 3.3
+     * +PostTag 3.5
+     * +-PostTag 4.4
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
     protected function setupEntities(): void
     {
         $em = $this->getEntityManager();
@@ -108,9 +137,73 @@ abstract class CoreTestCase extends BaseTestCase
 
         $em->flush();
 
+
         $author1->setFullname('John Doe');
         $em->persist($author1);
 
+        $author3 = new Author();
+        $author3
+            ->setFullname('Luke Slywalker')
+            ->setEmail('luck.skywalker@gmail.com')
+        ;
+        $em->persist($author3);
+
+        $post4 = new Post();
+        $post4
+            ->setAuthor($author3)
+            ->setTitle('First post')
+            ->setBody('Here is the body')
+            ->setCreatedAt(new \DateTime())
+        ;
+        $em->persist($post4);
+
+
+        $tag1 = new Tag();
+        $tag1->setTitle('techno');
+        $em->persist($tag1);
+
+        $tag2 = new Tag();
+        $tag2->setTitle('Second comment about post #3');
+        $em->persist($tag2);
+
+        $tag3 = new Tag();
+        $tag3->setTitle('Second comment about post #3');
+        $em->persist($tag3);
+
+        $tag4 = new Tag();
+        $tag4->setTitle('Second comment about post #3');
+        $em->persist($tag4);
+
+        $tag5 = new Tag();
+        $tag5->setTitle('Second comment about post #3');
+        $em->persist($tag5);
+
+        $em->flush();
+
+
+        $post1
+            ->addTag($tag1)
+            ->addTag($tag2)
+        ;
+        $post3
+            ->addTag($tag1)
+            ->addTag($tag3)
+            ->addTag($tag5)
+        ;
+        $post4
+            ->addTag($tag4)
+        ;
+
+        $em->flush();
+
+
+        $post4->removeTag($tag4);
+        $em->flush();
+
+        $author3->removePost($post4);
+        $em->flush();
+
+        $em->remove($author3);
         $em->flush();
     }
 }
