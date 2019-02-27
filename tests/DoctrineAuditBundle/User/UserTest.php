@@ -2,14 +2,6 @@
 
 namespace DH\DoctrineAuditBundle\Tests\User;
 
-use DH\DoctrineAuditBundle\AuditConfiguration;
-use DH\DoctrineAuditBundle\AuditReader;
-use DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand;
-use DH\DoctrineAuditBundle\DependencyInjection\DHDoctrineAuditExtension;
-use DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber;
-use DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener;
-use DH\DoctrineAuditBundle\Twig\Extension\TwigExtension;
-use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use DH\DoctrineAuditBundle\User\User;
 use PHPUnit\Framework\TestCase;
 
@@ -18,28 +10,28 @@ use PHPUnit\Framework\TestCase;
  */
 class UserTest extends TestCase
 {
-    public function testGetId()
+    public function testGetId(): void
     {
         $user = new User(1, 'john.doe');
 
         $this->assertSame(1, $user->getId());
     }
 
-    public function testGetUsername()
+    public function testGetUsername(): void
     {
         $user = new User(1, 'john.doe');
 
         $this->assertSame('john.doe', $user->getUsername());
     }
 
-    public function testGetIdOnEmptyUser()
+    public function testGetIdOnEmptyUser(): void
     {
         $user = new User();
 
         $this->assertNull($user->getId());
     }
 
-    public function testGetUsernameOnEmptyUser()
+    public function testGetUsernameOnEmptyUser(): void
     {
         $user = new User();
 
