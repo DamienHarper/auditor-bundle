@@ -2,8 +2,8 @@
 
 namespace DH\DoctrineAuditBundle\Tests\User;
 
-use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\User;
+use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;

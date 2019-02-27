@@ -2,8 +2,8 @@
 
 namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core;
 
-use Symfony\Component\Security\Core\User\UserInterface;
 use DH\DoctrineAuditBundle\User\User as BaseUser;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class User extends BaseUser implements UserInterface
 {
@@ -34,5 +34,4 @@ class User extends BaseUser implements UserInterface
     public function eraseCredentials(): void
     {
     }
-
 }
