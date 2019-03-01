@@ -4,6 +4,7 @@ namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\DummyEntity;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
 
@@ -30,6 +31,7 @@ abstract class CoreTestCase extends BaseTestCase
             Post::class => ['default' => true],
             Comment::class => ['default' => true],
             Tag::class => ['default' => true],
+            DummyEntity::class => ['default' => true],
         ]);
 
         $this->setUpEntitySchema();
@@ -162,19 +164,19 @@ abstract class CoreTestCase extends BaseTestCase
         $em->persist($tag1);
 
         $tag2 = new Tag();
-        $tag2->setTitle('Second comment about post #3');
+        $tag2->setTitle('house');
         $em->persist($tag2);
 
         $tag3 = new Tag();
-        $tag3->setTitle('Second comment about post #3');
+        $tag3->setTitle('hardcore');
         $em->persist($tag3);
 
         $tag4 = new Tag();
-        $tag4->setTitle('Second comment about post #3');
+        $tag4->setTitle('jungle');
         $em->persist($tag4);
 
         $tag5 = new Tag();
-        $tag5->setTitle('Second comment about post #3');
+        $tag5->setTitle('gabber');
         $em->persist($tag5);
 
         $em->flush();

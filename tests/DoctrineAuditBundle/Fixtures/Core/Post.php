@@ -37,19 +37,19 @@ class Post
     protected $created_at;
 
     /**
-     * @ORM\Column(type="integer", options={"unsigned": true})
+     * @ORM\Column(type="integer", options={"unsigned": true}, nullable=true)
      */
     protected $author_id;
 
     /**
      * @ORM\OneToMany(targetEntity="Comment", mappedBy="post")
-     * @ORM\JoinColumn(name="id", referencedColumnName="post_id", nullable=false)
+     * @ORM\JoinColumn(name="id", referencedColumnName="post_id", nullable=true)
      */
     protected $comments;
 
     /**
      * @ORM\ManyToOne(targetEntity="Author", inversedBy="posts")
-     * @ORM\JoinColumn(name="author_id", referencedColumnName="id", nullable=false)
+     * @ORM\JoinColumn(name="author_id", referencedColumnName="id", nullable=true)
      */
     protected $author;
 
@@ -288,6 +288,11 @@ class Post
     public function getTags(): Collection
     {
         return $this->tags;
+    }
+
+    public function __toString()
+    {
+        return $this->title;
     }
 
     public function __sleep()

@@ -197,6 +197,7 @@ abstract class BaseTestCase extends TestCase
                 $params = [
                     'driver' => 'pdo_sqlite',
                     'memory' => true,
+//                    'path' => 'db.sqlite',
                 ];
             }
 
