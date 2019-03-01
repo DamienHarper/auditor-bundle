@@ -107,20 +107,19 @@ class AuditReaderTest extends CoreTestCase
         /** @var AuditEntry[] $audits */
         $audits = $reader->getAudits(Author::class, null, 1, 50);
 
+        $i = 0;
         $this->assertCount(5, $audits, 'result count is ok.');
-        $this->assertSame(AuditReader::REMOVE, $audits[0]->getType(), 'entry1 is a remove operation.');
-        $this->assertSame(AuditReader::UPDATE, $audits[1]->getType(), 'entry2 is an update operation.');
-        $this->assertSame(AuditReader::INSERT, $audits[2]->getType(), 'entry3 is an insert operation.');
-        $this->assertSame(AuditReader::INSERT, $audits[3]->getType(), 'entry4 is an insert operation.');
-        $this->assertSame(AuditReader::INSERT, $audits[4]->getType(), 'entry5 is an insert operation.');
+        $this->assertSame(AuditReader::REMOVE, $audits[$i++]->getType(), 'entry'.$i.' is a remove operation.');
+        $this->assertSame(AuditReader::UPDATE, $audits[$i++]->getType(), 'entry'.$i.' is an update operation.');
+        $this->assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an insert operation.');
+        $this->assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an insert operation.');
+        $this->assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an insert operation.');
 
         /** @var AuditEntry[] $audits */
         $audits = $reader->getAudits(Post::class, null, 1, 50);
 
         $i = 0;
-//        $this->assertCount(13, $audits, 'result count is ok.');
         $this->assertCount(14, $audits, 'result count is ok.');
-//        $this->assertCount(11, $audits, 'result count is ok.');
         $this->assertSame(AuditReader::DISSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is a dissociate operation.');
         $this->assertSame(AuditReader::DISSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is a dissociate operation.');
         $this->assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an associate operation.');
