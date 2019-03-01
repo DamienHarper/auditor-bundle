@@ -10,12 +10,21 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\DummyEntity;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\User;
+use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Security\Core\Security;
 
 /**
  * @covers \DH\DoctrineAuditBundle\AuditEntry
  * @covers \DH\DoctrineAuditBundle\AuditReader
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
+ * @covers \DH\DoctrineAuditBundle\User\User
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
@@ -42,8 +51,8 @@ class AuditSubscriberTest extends CoreTestCase
         $entry = $audits[0];
         $this->assertSame(1, $entry->getId(), 'audit entry ID is ok.');
         $this->assertSame(AuditReader::INSERT, $entry->getType(), 'audit entry type is ok.');
-        $this->assertSame('Unknown', $entry->getUserId(), 'audit entry blame_id is ok.');
-        $this->assertSame('Unknown', $entry->getUsername(), 'audit entry blame_user is ok.');
+        $this->assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
+        $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         $this->assertNull($entry->getIp(), 'audit entry IP is ok.');
         $this->assertSame([
             'fullname' => [
@@ -83,8 +92,8 @@ class AuditSubscriberTest extends CoreTestCase
         $entry = $audits[1];
         $this->assertSame(1, $entry->getId(), 'audit entry ID is ok.');
         $this->assertSame(AuditReader::INSERT, $entry->getType(), 'audit entry type is ok.');
-        $this->assertSame('Unknown', $entry->getUserId(), 'audit entry blame_id is ok.');
-        $this->assertSame('Unknown', $entry->getUsername(), 'audit entry blame_user is ok.');
+        $this->assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
+        $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         $this->assertNull($entry->getIp(), 'audit entry IP is ok.');
         $this->assertSame([
             'fullname' => [
@@ -100,8 +109,8 @@ class AuditSubscriberTest extends CoreTestCase
         $entry = $audits[0];
         $this->assertSame(2, $entry->getId(), 'audit entry ID is ok.');
         $this->assertSame(AuditReader::UPDATE, $entry->getType(), 'audit entry type is ok.');
-        $this->assertSame('Unknown', $entry->getUserId(), 'audit entry blame_id is ok.');
-        $this->assertSame('Unknown', $entry->getUsername(), 'audit entry blame_user is ok.');
+        $this->assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
+        $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         $this->assertNull($entry->getIp(), 'audit entry IP is ok.');
         $this->assertSame([
             'fullname' => [
@@ -142,8 +151,8 @@ class AuditSubscriberTest extends CoreTestCase
         $entry = $audits[0];
         $this->assertSame(2, $entry->getId(), 'audit entry ID is ok.');
         $this->assertSame(AuditReader::REMOVE, $entry->getType(), 'audit entry type is ok.');
-        $this->assertSame('Unknown', $entry->getUserId(), 'audit entry blame_id is ok.');
-        $this->assertSame('Unknown', $entry->getUsername(), 'audit entry blame_user is ok.');
+        $this->assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
+        $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         $this->assertNull($entry->getIp(), 'audit entry IP is ok.');
         $this->assertSame([
             'label' => Author::class.'#1',
@@ -846,6 +855,42 @@ class AuditSubscriberTest extends CoreTestCase
     }
 
 
+
+
+    protected function createAuditConfiguration(array $options = []): AuditConfiguration
+    {
+        $container = new ContainerBuilder();
+        $security = new Security($container);
+        $tokenStorage = new TokenStorage();
+
+        $user = new User(1, 'dark.vador');
+        $user->setRoles(['ROLE_ADMIN']);
+        $tokenStorage->setToken(new UsernamePasswordToken($user, '12345', 'provider', $user->getRoles()));
+
+        $authorizationChecker = $this->getMockBuilder(AuthorizationCheckerInterface::class)->getMock();
+        $authorizationChecker
+            ->expects($this->any())
+            ->method('isGranted')
+            ->with('ROLE_PREVIOUS_ADMIN')
+            ->willReturn(true)
+        ;
+
+        $container->set('security.token_storage', $tokenStorage);
+        $container->set('security.authorization_checker', $authorizationChecker);
+
+        $auditConfiguration = new AuditConfiguration(
+            array_merge([
+                'table_prefix' => '',
+                'table_suffix' => '_audit',
+                'ignored_columns' => [],
+                'entities' => [],
+            ], $options),
+            new TokenStorageUserProvider($security),
+            new RequestStack()
+        );
+
+        return $auditConfiguration;
+    }
 
     protected function setupEntities(): void
     {
