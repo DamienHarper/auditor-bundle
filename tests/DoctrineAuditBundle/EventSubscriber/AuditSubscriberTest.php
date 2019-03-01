@@ -5,7 +5,7 @@ namespace DH\DoctrineAuditBundle\Tests\EventSubscriber;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\AuditEntry;
 use DH\DoctrineAuditBundle\AuditReader;
-use DH\DoctrineAuditBundle\Tests\CoreTestCase;
+use DH\DoctrineAuditBundle\Tests\CoreTest;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\DummyEntity;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
@@ -13,6 +13,7 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\User;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -29,7 +30,7 @@ use Symfony\Component\Security\Core\Security;
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  */
-class AuditSubscriberTest extends CoreTestCase
+class AuditSubscriberTest extends CoreTest
 {
     public function testInsertWithoutRelation(): void
     {
@@ -53,7 +54,7 @@ class AuditSubscriberTest extends CoreTestCase
         $this->assertSame(AuditReader::INSERT, $entry->getType(), 'audit entry type is ok.');
         $this->assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
-        $this->assertNull($entry->getIp(), 'audit entry IP is ok.');
+        $this->assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
         $this->assertSame([
             'fullname' => [
                 'old' => null,
@@ -94,7 +95,7 @@ class AuditSubscriberTest extends CoreTestCase
         $this->assertSame(AuditReader::INSERT, $entry->getType(), 'audit entry type is ok.');
         $this->assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
-        $this->assertNull($entry->getIp(), 'audit entry IP is ok.');
+        $this->assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
         $this->assertSame([
             'fullname' => [
                 'old' => null,
@@ -111,7 +112,7 @@ class AuditSubscriberTest extends CoreTestCase
         $this->assertSame(AuditReader::UPDATE, $entry->getType(), 'audit entry type is ok.');
         $this->assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
-        $this->assertNull($entry->getIp(), 'audit entry IP is ok.');
+        $this->assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
         $this->assertSame([
             'fullname' => [
                 'old' => 'John',
@@ -153,7 +154,7 @@ class AuditSubscriberTest extends CoreTestCase
         $this->assertSame(AuditReader::REMOVE, $entry->getType(), 'audit entry type is ok.');
         $this->assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
-        $this->assertNull($entry->getIp(), 'audit entry IP is ok.');
+        $this->assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
         $this->assertSame([
             'label' => Author::class.'#1',
             'class' => Author::class,
@@ -908,6 +909,9 @@ class AuditSubscriberTest extends CoreTestCase
         $container->set('security.token_storage', $tokenStorage);
         $container->set('security.authorization_checker', $authorizationChecker);
 
+        $requestStack = new RequestStack();
+        $requestStack->push(new Request([], [], [], [], [], ['REMOTE_ADDR' => '1.2.3.4']));
+
         $auditConfiguration = new AuditConfiguration(
             array_merge([
                 'table_prefix' => '',
@@ -916,7 +920,7 @@ class AuditSubscriberTest extends CoreTestCase
                 'entities' => [],
             ], $options),
             new TokenStorageUserProvider($security),
-            new RequestStack()
+            $requestStack
         );
 
         return $auditConfiguration;

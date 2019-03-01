@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
 
-abstract class BaseTestCase extends TestCase
+abstract class BaseTest extends TestCase
 {
     /**
      * @var null|Connection

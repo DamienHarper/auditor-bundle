@@ -19,7 +19,7 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  */
-class AuditReaderTest extends CoreTestCase
+class AuditReaderTest extends CoreTest
 {
     public function testGetAuditConfiguration(): void
     {

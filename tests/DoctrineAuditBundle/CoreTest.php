@@ -8,7 +8,7 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\DummyEntity;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
 
-abstract class CoreTestCase extends BaseTestCase
+abstract class CoreTest extends BaseTest
 {
     /**
      * @var string
