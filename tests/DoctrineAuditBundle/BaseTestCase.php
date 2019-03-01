@@ -108,6 +108,7 @@ abstract class BaseTestCase extends TestCase
         $config->setProxyDir(__DIR__.'/Proxies');
         $config->setAutoGenerateProxyClasses(ProxyFactory::AUTOGENERATE_EVAL);
         $config->setProxyNamespace('DH\DoctrineAuditBundle\Tests\Proxies');
+        $config->addFilter('soft-deleteable', Gedmo\SoftDeleteable\Filter\SoftDeleteableFilter::class);
 
         $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver([
             $this->fixturesPath,
@@ -128,6 +129,7 @@ abstract class BaseTestCase extends TestCase
         }
         $evm->addEventSubscriber(new AuditSubscriber($this->getAuditConfiguration()));
         $evm->addEventSubscriber(new CreateSchemaListener($this->getAuditConfiguration()));
+        $evm->addEventSubscriber(new Gedmo\SoftDeleteable\SoftDeleteableListener());
 
         $this->em = EntityManager::create($connection, $config);
 

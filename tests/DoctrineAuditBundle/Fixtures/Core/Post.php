@@ -10,6 +10,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * @ORM\Entity
  * @ORM\Table(name="post", indexes={@ORM\Index(name="fk_1_idx", columns={"author_id"})})
+ * @Gedmo\SoftDeleteable(fieldName="deleted_at", timeAware=false)
  */
 class Post
 {
@@ -35,6 +36,11 @@ class Post
      * @ORM\Column(type="datetime")
      */
     protected $created_at;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true, options={"default": NULL})
+     */
+    protected $deleted_at;
 
     /**
      * @ORM\Column(type="integer", options={"unsigned": true}, nullable=true)

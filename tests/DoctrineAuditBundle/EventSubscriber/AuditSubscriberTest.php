@@ -854,6 +854,36 @@ class AuditSubscriberTest extends CoreTestCase
         ], $audits[0]->getDiffs(), 'relation ok.');
     }
 
+    public function testSoftRemove(): void
+    {
+        $em = $this->getEntityManager();
+        $em->getFilters()->enable('soft-deleteable');
+
+        $reader = $this->getReader($this->getAuditConfiguration());
+
+        $author = new Author();
+        $author
+            ->setFullname('John Doe')
+            ->setEmail('john.doe@gmail.com')
+        ;
+        $em->persist($author);
+
+        $post = new Post();
+        $post
+            ->setAuthor($author)
+            ->setTitle('First post')
+            ->setBody('Here is the body')
+            ->setCreatedAt(new \DateTime())
+        ;
+        $em->persist($post);
+        $em->flush();
+
+        $em->remove($post);
+        $em->flush();
+
+        $this->assertTrue(true);
+    }
+
 
 
 
