@@ -261,7 +261,7 @@ class AuditSubscriber implements EventSubscriber
         $this->audit($em, [
             'action' => 'remove',
             'blame' => $this->blame(),
-            'diff' => $this->assoc($em, $entity),
+            'diff' => $this->assoc($em, $entity, $id),
             'table' => $meta->table['name'],
             'schema' => $meta->table['schema'] ?? null,
             'id' => $id,
@@ -282,18 +282,23 @@ class AuditSubscriber implements EventSubscriber
     private function associate(EntityManager $em, $source, $target, array $mapping): void
     {
         $meta = $em->getClassMetadata(\get_class($source));
-        $this->audit($em, [
+        $data = [
             'action' => 'associate',
             'blame' => $this->blame(),
             'diff' => [
                 'source' => $this->assoc($em, $source),
                 'target' => $this->assoc($em, $target),
-                'table' => isset($mapping['joinTable']['name']) ?? '',
             ],
             'table' => $meta->table['name'],
             'schema' => $meta->table['schema'] ?? null,
             'id' => $this->id($em, $source),
-        ]);
+        ];
+
+        if (isset($mapping['joinTable']['name'])) {
+            $data['diff']['table'] = $mapping['joinTable']['name'];
+        }
+
+        $this->audit($em, $data);
     }
 
     /**
@@ -311,18 +316,23 @@ class AuditSubscriber implements EventSubscriber
     private function dissociate(EntityManager $em, $source, $target, $id, array $mapping): void
     {
         $meta = $em->getClassMetadata(\get_class($source));
-        $this->audit($em, [
+        $data = [
             'action' => 'dissociate',
             'blame' => $this->blame(),
             'diff' => [
                 'source' => $this->assoc($em, $source),
                 'target' => $this->assoc($em, $target),
-                'table' => isset($mapping['joinTable']['name']) ?? '',
             ],
             'table' => $meta->table['name'],
             'schema' => $meta->table['schema'] ?? null,
             'id' => $this->id($em, $source),
-        ]);
+        ];
+
+        if (isset($mapping['joinTable']['name'])) {
+            $data['diff']['table'] = $mapping['joinTable']['name'];
+        }
+
+        $this->audit($em, $data);
     }
 
     /**
