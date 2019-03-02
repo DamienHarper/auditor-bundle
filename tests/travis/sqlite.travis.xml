@@ -10,7 +10,7 @@
          verbose="true">
 
     <logging>
-        <log type='coverage-html' target='tests/coverage' />
+        <log type='coverage-html' target='../coverage' />
     </logging>
 
     <testsuites>
