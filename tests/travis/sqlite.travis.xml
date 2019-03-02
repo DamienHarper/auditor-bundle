@@ -15,13 +15,13 @@
 
     <testsuites>
         <testsuite name="DoctrineAuditBundle test suite">
-            <directory suffix="Test.php">tests/DoctrineAuditBundle</directory>
+            <directory suffix="Test.php">../DoctrineAuditBundle</directory>
         </testsuite>
     </testsuites>
 
     <filter>
         <whitelist addUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">src</directory>
+            <directory suffix=".php">../../src</directory>
         </whitelist>
     </filter>
 </phpunit>
