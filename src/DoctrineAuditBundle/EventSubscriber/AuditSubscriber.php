@@ -261,7 +261,7 @@ class AuditSubscriber implements EventSubscriber
         $this->audit($em, [
             'action' => 'remove',
             'blame' => $this->blame(),
-            'diff' => $this->assoc($em, $entity),
+            'diff' => $this->assoc($em, $entity, $id),
             'table' => $meta->table['name'],
             'schema' => $meta->table['schema'] ?? null,
             'id' => $id,
@@ -282,18 +282,23 @@ class AuditSubscriber implements EventSubscriber
     private function associate(EntityManager $em, $source, $target, array $mapping): void
     {
         $meta = $em->getClassMetadata(\get_class($source));
-        $this->audit($em, [
+        $data = [
             'action' => 'associate',
             'blame' => $this->blame(),
             'diff' => [
                 'source' => $this->assoc($em, $source),
                 'target' => $this->assoc($em, $target),
-                'table' => isset($mapping['joinTable']['name']) ?? '',
             ],
             'table' => $meta->table['name'],
             'schema' => $meta->table['schema'] ?? null,
             'id' => $this->id($em, $source),
-        ]);
+        ];
+
+        if (isset($mapping['joinTable']['name'])) {
+            $data['diff']['table'] = $mapping['joinTable']['name'];
+        }
+
+        $this->audit($em, $data);
     }
 
     /**
@@ -311,18 +316,23 @@ class AuditSubscriber implements EventSubscriber
     private function dissociate(EntityManager $em, $source, $target, $id, array $mapping): void
     {
         $meta = $em->getClassMetadata(\get_class($source));
-        $this->audit($em, [
+        $data = [
             'action' => 'dissociate',
             'blame' => $this->blame(),
             'diff' => [
                 'source' => $this->assoc($em, $source),
                 'target' => $this->assoc($em, $target),
-                'table' => isset($mapping['joinTable']['name']) ?? '',
             ],
             'table' => $meta->table['name'],
             'schema' => $meta->table['schema'] ?? null,
             'id' => $this->id($em, $source),
-        ]);
+        ];
+
+        if (isset($mapping['joinTable']['name'])) {
+            $data['diff']['table'] = $mapping['joinTable']['name'];
+        }
+
+        $this->audit($em, $data);
     }
 
     /**
@@ -462,7 +472,7 @@ class AuditSubscriber implements EventSubscriber
      *
      * @return array
      */
-    private function assoc(EntityManager $em, $association = null): ?array
+    private function assoc(EntityManager $em, $association = null, $id = null): ?array
     {
         if (null === $association) {
             return null;
@@ -470,7 +480,7 @@ class AuditSubscriber implements EventSubscriber
         $em->getUnitOfWork()->initializeObject($association); // ensure that proxies are initialized
         $meta = $em->getClassMetadata(\get_class($association));
         $pkName = $meta->getSingleIdentifierFieldName();
-        $pkValue = $this->id($em, $association);
+        $pkValue = $id ?? $this->id($em, $association);
         if (method_exists($association, '__toString')) {
             $label = (string) $association;
         } else {
@@ -498,21 +508,28 @@ class AuditSubscriber implements EventSubscriber
      */
     private function value(EntityManager $em, Type $type, $value)
     {
+        if (null === $value) {
+            return null;
+        }
+
         $platform = $em->getConnection()->getDatabasePlatform();
 
         switch ($type->getName()) {
             case Type::DECIMAL:
             case Type::BIGINT:
+                $convertedValue = (string) $value;
+                break;
+
             case Type::INTEGER:
             case Type::SMALLINT:
-                $convertedValue = (string) $value;
-
+                $convertedValue = (int) $value;
                 break;
+
             case Type::FLOAT:
             case Type::BOOLEAN:
                 $convertedValue = $type->convertToPHPValue($value, $platform);
-
                 break;
+
             default:
                 $convertedValue = $type->convertToDatabaseValue($value, $platform);
         }

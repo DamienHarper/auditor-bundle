@@ -18,7 +18,12 @@ class TokenStorageUserProvider implements UserProviderInterface
     public function getUser(): ?UserInterface
     {
         $user = null;
-        $token = $this->security->getToken();
+
+        try {
+            $token = $this->security->getToken();
+        } catch (\Exception $e) {
+            $token = null;
+        }
 
         if (null !== $token) {
             $tokenUser = $token->getUser();

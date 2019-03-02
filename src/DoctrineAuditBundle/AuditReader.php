@@ -66,9 +66,21 @@ class AuditReader
     }
 
     /**
+     * Returns current filter
+     *
+     * @return string|null
+     */
+    public function getFilter(): ?string
+    {
+        return $this->filter;
+    }
+
+    /**
      * Returns an array of audit table names indexed by entity FQN.
      *
      * @return array
+     *
+     * @throws \Doctrine\ORM\ORMException
      */
     public function getEntities(): array
     {
@@ -96,6 +108,13 @@ class AuditReader
      */
     public function getAudits($entity, int $id = null, int $page = 1, int $pageSize = 50): array
     {
+        if ($page < 1) {
+            throw new \InvalidArgumentException('$page must be greater or equal than 1.');
+        }
+        if ($pageSize < 1) {
+            throw new \InvalidArgumentException('$pageSize must be greater or equal than 1.');
+        }
+
         $connection = $this->entityManager->getConnection();
 
         $schema = isset($this->entityManager->getClassMetadata($entity)->table['schema']) ? $this->entityManager->getClassMetadata($entity)->table['schema'].'.' : '';

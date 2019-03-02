@@ -345,6 +345,30 @@ FAQ:
 > Check the [Custom user provider](#custom-user-provider) section.
 
 
+Contributing
+============
+
+DoctrineAuditBundle is an open source project. Contributions made by the community are welcome. Send us your ideas, code reviews, pull requests and feature requests to help us improve this project.
+
+Do not forget to provide unit tests when contributing to this project.
+
+
+Tests
+=====
+
+To run the test suite, install dev dependencies first:
+
+```bash
+composer install --dev
+```
+
+Then run:
+
+```bash
+./vendor/bin/phpunit
+```
+
+
 License
 =======
 

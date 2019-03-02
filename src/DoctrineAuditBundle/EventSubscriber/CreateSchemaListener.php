@@ -55,53 +55,56 @@ class CreateSchemaListener implements EventSubscriber
             $auditTablename = $this->configuration->getTablePrefix().$entityTable->getName().$this->configuration->getTableSuffix();
         }
 
-        $auditTable = $schema->createTable($auditTablename);
-        $auditTable->addColumn('id', 'integer', [
-            'autoincrement' => true,
-            'unsigned' => true,
-        ]);
-        $auditTable->addColumn('type', 'string', [
-            'notnull' => true,
-            'length' => 10,
-        ]);
-        $auditTable->addColumn('object_id', 'integer', [
-            'notnull' => true,
-            'unsigned' => true,
-        ]);
-        $auditTable->addColumn('diffs', 'json_array', [
-            'default' => null,
-            'notnull' => false,
-        ]);
-        $auditTable->addColumn('blame_id', 'integer', [
-            'default' => null,
-            'notnull' => false,
-            'unsigned' => true,
-        ]);
-        $auditTable->addColumn('blame_user', 'string', [
-            'default' => null,
-            'notnull' => false,
-            'length' => 100,
-        ]);
-        $auditTable->addColumn('ip', 'string', [
-            'default' => null,
-            'notnull' => false,
-            'length' => 45,
-        ]);
-        $auditTable->addColumn('created_at', 'datetime', [
-            'notnull' => true,
-        ]);
-        $auditTable->setPrimaryKey(['id']);
-        $auditTable->addIndex(['type'], 'type_'.md5($auditTable->getName()).'_idx');
-        $auditTable->addIndex(['object_id'], 'object_id_'.md5($auditTable->getName()).'_idx');
-        $auditTable->addIndex(['blame_id'], 'blame_id_'.md5($auditTable->getName()).'_idx');
-        $auditTable->addIndex(['created_at'], 'created_at_'.md5($auditTable->getName()).'_idx');
+        if (!$schema->hasTable($auditTablename)) {
+            $auditTable = $schema->createTable($auditTablename);
+            $auditTable->addColumn('id', 'integer', [
+                'autoincrement' => true,
+                'unsigned' => true,
+            ]);
+            $auditTable->addColumn('type', 'string', [
+                'notnull' => true,
+                'length' => 10,
+            ]);
+            $auditTable->addColumn('object_id', 'integer', [
+                'notnull' => true,
+                'unsigned' => true,
+            ]);
+            $auditTable->addColumn('diffs', 'json_array', [
+                'default' => null,
+                'notnull' => false,
+            ]);
+            $auditTable->addColumn('blame_id', 'integer', [
+                'default' => null,
+                'notnull' => false,
+                'unsigned' => true,
+            ]);
+            $auditTable->addColumn('blame_user', 'string', [
+                'default' => null,
+                'notnull' => false,
+                'length' => 100,
+            ]);
+            $auditTable->addColumn('ip', 'string', [
+                'default' => null,
+                'notnull' => false,
+                'length' => 45,
+            ]);
+            $auditTable->addColumn('created_at', 'datetime', [
+                'notnull' => true,
+            ]);
 
-        if (!\in_array($cm->inheritanceType, [
-            ClassMetadataInfo::INHERITANCE_TYPE_NONE,
-            ClassMetadataInfo::INHERITANCE_TYPE_JOINED,
-            ClassMetadataInfo::INHERITANCE_TYPE_SINGLE_TABLE,
-        ], true)) {
-            throw new \Exception(sprintf('Inheritance type "%s" is not yet supported', $cm->inheritanceType));
+            if (!\in_array($cm->inheritanceType, [
+                ClassMetadataInfo::INHERITANCE_TYPE_NONE,
+                ClassMetadataInfo::INHERITANCE_TYPE_JOINED,
+                ClassMetadataInfo::INHERITANCE_TYPE_SINGLE_TABLE,
+            ], true)) {
+                throw new \Exception(sprintf('Inheritance type "%s" is not yet supported', $cm->inheritanceType));
+            }
+
+            $auditTable->setPrimaryKey(['id']);
+            $auditTable->addIndex(['type'], 'type_'.md5($auditTable->getName()).'_idx');
+            $auditTable->addIndex(['object_id'], 'object_id_'.md5($auditTable->getName()).'_idx');
+            $auditTable->addIndex(['blame_id'], 'blame_id_'.md5($auditTable->getName()).'_idx');
+            $auditTable->addIndex(['created_at'], 'created_at_'.md5($auditTable->getName()).'_idx');
         }
     }
 

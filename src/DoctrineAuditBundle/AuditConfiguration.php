@@ -56,6 +56,16 @@ class AuditConfiguration
     }
 
     /**
+     * Set the value of entities.
+     *
+     * @param array $entities
+     */
+    public function setEntities(array $entities): void
+    {
+        $this->entities = $entities;
+    }
+
+    /**
      * Returns true if $entity is audited.
      *
      * @param $entity
@@ -184,7 +194,7 @@ class AuditConfiguration
      *
      * @return UserProviderInterface
      */
-    public function getUserProvider(): UserProviderInterface
+    public function getUserProvider(): ?UserProviderInterface
     {
         return $this->userProvider;
     }
