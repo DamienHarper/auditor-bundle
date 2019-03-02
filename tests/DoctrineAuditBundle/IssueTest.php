@@ -9,6 +9,7 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Issues\DieselCase;
 
 /**
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
+ * @covers \DH\DoctrineAuditBundle\AuditEntry
  * @covers \DH\DoctrineAuditBundle\AuditReader
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
@@ -45,16 +46,15 @@ class IssueTest extends BaseTest
 
     public function testIssue40(): void
     {
-        $em = $this->getEntityManager();
         $reader = $this->getReader($this->getAuditConfiguration());
-
 
         $audits = $reader->getAudits(CoreCase::class);
         $this->assertCount(1, $audits, 'results count ok.');
-//        $this->assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
+        $this->assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
 
         $audits = $reader->getAudits(DieselCase::class);
         $this->assertCount(1, $audits, 'results count ok.');
+        $this->assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
 
     }
 
@@ -73,11 +73,6 @@ class IssueTest extends BaseTest
         $dieselCase->setName('yo');
         $em->persist($dieselCase);
         $em->flush();
-
-////        $dieselCase = $em->getRepository(DieselCase::class)->find(1);
-////        $dieselCase->setCreatedAt(new \DateTime('now'));
-//        $dieselCase->setName('dams');
-//        $em->flush();
     }
 
 

@@ -7,10 +7,13 @@ use DH\DoctrineAuditBundle\AuditEntry;
 use DH\DoctrineAuditBundle\AuditReader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Bike;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Car;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\DummyEntity;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\User;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Vehicle;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\Request;
@@ -171,10 +174,10 @@ class AuditSubscriberTest extends CoreTest
         $em = $this->getEntityManager();
         $reader = $this->getReader($this->getAuditConfiguration());
 
-        $entityOne = new DummyEntity();
-        $entityOne->setLabel('int: null->17');
-        $entityOne->setIntValue(17);
-        $em->persist($entityOne);
+        $dummy = new DummyEntity();
+        $dummy->setLabel('int: null->17');
+        $dummy->setIntValue(17);
+        $em->persist($dummy);
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
@@ -191,9 +194,9 @@ class AuditSubscriberTest extends CoreTest
         ], $audits[0]->getDiffs(), 'int: null->17');
 
 
-        $entityOne->setLabel('int: 17->null');
-        $entityOne->setIntValue(null);
-        $em->persist($entityOne);
+        $dummy->setLabel('int: 17->null');
+        $dummy->setIntValue(null);
+        $em->persist($dummy);
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
@@ -210,9 +213,9 @@ class AuditSubscriberTest extends CoreTest
         ], $audits[0]->getDiffs(), 'int: 17->null');
 
 
-        $entityOne->setLabel('int: null->24');
-        $entityOne->setIntValue(24);
-        $em->persist($entityOne);
+        $dummy->setLabel('int: null->24');
+        $dummy->setIntValue(24);
+        $em->persist($dummy);
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
@@ -229,9 +232,9 @@ class AuditSubscriberTest extends CoreTest
         ], $audits[0]->getDiffs(), 'int: null->24');
 
 
-        $entityOne->setLabel('int: 24->"24"');
-        $entityOne->setIntValue("24");
-        $em->persist($entityOne);
+        $dummy->setLabel('int: 24->"24"');
+        $dummy->setIntValue("24");
+        $em->persist($dummy);
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
@@ -244,9 +247,9 @@ class AuditSubscriberTest extends CoreTest
         ], $audits[0]->getDiffs(), 'int: 24->"24"');
 
 
-        $entityOne->setLabel('int: "24"->24');
-        $entityOne->setIntValue(24);
-        $em->persist($entityOne);
+        $dummy->setLabel('int: "24"->24');
+        $dummy->setIntValue(24);
+        $em->persist($dummy);
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
@@ -259,9 +262,9 @@ class AuditSubscriberTest extends CoreTest
         ], $audits[0]->getDiffs(), 'int: "24"->24');
 
 
-        $entityOne->setLabel('int: 24->24.0');
-        $entityOne->setIntValue(24.0);
-        $em->persist($entityOne);
+        $dummy->setLabel('int: 24->24.0');
+        $dummy->setIntValue(24.0);
+        $em->persist($dummy);
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
@@ -274,9 +277,9 @@ class AuditSubscriberTest extends CoreTest
         ], $audits[0]->getDiffs(), 'int: 24->24.0');
 
 
-        $entityOne->setLabel('int: 24->null');
-        $entityOne->setIntValue(null);
-        $em->persist($entityOne);
+        $dummy->setLabel('int: 24->null');
+        $dummy->setIntValue(null);
+        $em->persist($dummy);
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
@@ -301,10 +304,10 @@ class AuditSubscriberTest extends CoreTest
         $em = $this->getEntityManager();
         $reader = $this->getReader($this->getAuditConfiguration());
 
-        $entityOne = new DummyEntity();
-        $entityOne->setLabel('decimal: null->10.2');
-        $entityOne->setDecimalValue(10.2);
-        $em->persist($entityOne);
+        $dummy = new DummyEntity();
+        $dummy->setLabel('decimal: null->10.2');
+        $dummy->setDecimalValue(10.2);
+        $em->persist($dummy);
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
@@ -321,9 +324,9 @@ class AuditSubscriberTest extends CoreTest
         ], $audits[0]->getDiffs(), 'decimal: null->10.2');
 
 
-        $entityOne->setLabel('decimal: 10.2->"10.2"');
-        $entityOne->setDecimalValue('10.2');
-        $em->persist($entityOne);
+        $dummy->setLabel('decimal: 10.2->"10.2"');
+        $dummy->setDecimalValue('10.2');
+        $em->persist($dummy);
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
@@ -344,9 +347,9 @@ class AuditSubscriberTest extends CoreTest
         $em = $this->getEntityManager();
         $reader = $this->getReader($this->getAuditConfiguration());
 
-        $entityOne = new DummyEntity();
-        $entityOne->setLabel('bool: null');
-        $em->persist($entityOne);
+        $dummy = new DummyEntity();
+        $dummy->setLabel('bool: null');
+        $em->persist($dummy);
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
@@ -359,9 +362,9 @@ class AuditSubscriberTest extends CoreTest
         ], $audits[0]->getDiffs(), 'bool: null');
 
 
-        $entityOne->setLabel('bool: null->true');
-        $entityOne->setBoolValue( true);
-        $em->persist($entityOne);
+        $dummy->setLabel('bool: null->true');
+        $dummy->setBoolValue( true);
+        $em->persist($dummy);
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
@@ -378,9 +381,9 @@ class AuditSubscriberTest extends CoreTest
         ], $audits[0]->getDiffs(), 'bool: null->true');
 
 
-        $entityOne->setLabel('bool: true->null');
-        $entityOne->setBoolValue( null);
-        $em->persist($entityOne);
+        $dummy->setLabel('bool: true->null');
+        $dummy->setBoolValue( null);
+        $em->persist($dummy);
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
@@ -397,9 +400,9 @@ class AuditSubscriberTest extends CoreTest
         ], $audits[0]->getDiffs(), 'bool: true->null');
 
 
-        $entityOne->setLabel('bool: null->false');
-        $entityOne->setBoolValue( false);
-        $em->persist($entityOne);
+        $dummy->setLabel('bool: null->false');
+        $dummy->setBoolValue( false);
+        $em->persist($dummy);
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
@@ -416,9 +419,9 @@ class AuditSubscriberTest extends CoreTest
         ], $audits[0]->getDiffs(), 'bool: null->false');
 
 
-        $entityOne->setLabel('bool: false->null');
-        $entityOne->setBoolValue( null);
-        $em->persist($entityOne);
+        $dummy->setLabel('bool: false->null');
+        $dummy->setBoolValue( null);
+        $em->persist($dummy);
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
@@ -443,10 +446,10 @@ class AuditSubscriberTest extends CoreTest
         $em = $this->getEntityManager();
         $reader = $this->getReader($this->getAuditConfiguration());
 
-        $entityOne = new DummyEntity();
-        $entityOne->setLabel('php_array: null->[R1, R2]');
-        $entityOne->setPhpArray(['R1', 'R2']);
-        $em->persist($entityOne);
+        $dummy = new DummyEntity();
+        $dummy->setLabel('php_array: null->[R1, R2]');
+        $dummy->setPhpArray(['R1', 'R2']);
+        $em->persist($dummy);
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
@@ -471,10 +474,10 @@ class AuditSubscriberTest extends CoreTest
         $em = $this->getEntityManager();
         $reader = $this->getReader($this->getAuditConfiguration());
 
-        $entityOne = new DummyEntity();
-        $entityOne->setLabel('json_array: null->[R1, R2]');
-        $entityOne->setJsonArray(['R1', 'R2']);
-        $em->persist($entityOne);
+        $dummy = new DummyEntity();
+        $dummy->setLabel('json_array: null->[R1, R2]');
+        $dummy->setJsonArray(['R1', 'R2']);
+        $em->persist($dummy);
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
@@ -499,10 +502,10 @@ class AuditSubscriberTest extends CoreTest
         $em = $this->getEntityManager();
         $reader = $this->getReader($this->getAuditConfiguration());
 
-        $entityOne = new DummyEntity();
-        $entityOne->setLabel('simple_array: null->[R1, R2]');
-        $entityOne->setSimpleArray(['R1', 'R2']);
-        $em->persist($entityOne);
+        $dummy = new DummyEntity();
+        $dummy->setLabel('simple_array: null->[R1, R2]');
+        $dummy->setSimpleArray(['R1', 'R2']);
+        $em->persist($dummy);
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
@@ -860,8 +863,6 @@ class AuditSubscriberTest extends CoreTest
         $em = $this->getEntityManager();
         $em->getFilters()->enable('soft-deleteable');
 
-        $reader = $this->getReader($this->getAuditConfiguration());
-
         $author = new Author();
         $author
             ->setFullname('John Doe')
@@ -885,6 +886,33 @@ class AuditSubscriberTest extends CoreTest
         $this->assertTrue(true);
     }
 
+
+    /**
+     * @depends testInsertWithoutRelation
+     */
+    public function testAuditingSubclass(): void
+    {
+        $em = $this->getEntityManager();
+
+        $vehicle = new Vehicle();
+        $vehicle->setLabel('Oh my truck');
+        $vehicle->setWheels(6);
+        $em->persist($vehicle);
+        $em->flush();
+
+        $car = new Car();
+        $car->setLabel('La Ferrari');
+        $car->setWheels(4);
+        $em->persist($car);
+        $em->flush();
+
+        $bike = new Bike();
+        $bike->setLabel('ZX10R');
+        $bike->setWheels(2);
+        $em->flush();
+
+        $this->assertCount(0, [], 'no audits.');
+    }
 
 
 

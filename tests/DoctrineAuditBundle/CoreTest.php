@@ -3,6 +3,8 @@
 namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Bike;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Car;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\DummyEntity;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
@@ -32,6 +34,8 @@ abstract class CoreTest extends BaseTest
             Comment::class => ['default' => true],
             Tag::class => ['default' => true],
             DummyEntity::class => ['default' => true],
+            Car::class => ['default' => true],
+            Bike::class => ['default' => true],
         ]);
 
         $this->setUpEntitySchema();

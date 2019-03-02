@@ -2,12 +2,11 @@
 
 namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity()
- * @ORM\Table(name="entity_one")
+ * @ORM\Table(name="dummy_entity")
  */
 class DummyEntity
 {
