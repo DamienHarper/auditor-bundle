@@ -26,7 +26,7 @@ class Comment
     /**
      * Comment author email.
      *
-     * @ORM\Column(type="string", length=255, cascade={"persist", "remove"})
+     * @ORM\Column(type="string", length=255)
      */
     protected $author;
 
@@ -42,7 +42,7 @@ class Comment
     protected $post_id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Post", inversedBy="comments")
+     * @ORM\ManyToOne(targetEntity="Post", inversedBy="comments", cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="post_id", referencedColumnName="id", nullable=false)
      */
     protected $post;
