@@ -30,7 +30,7 @@ class Author
     protected $email;
 
     /**
-     * @ORM\OneToMany(targetEntity="Post", mappedBy="author")
+     * @ORM\OneToMany(targetEntity="Post", mappedBy="author", cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="id", referencedColumnName="author_id", nullable=false)
      */
     protected $posts;

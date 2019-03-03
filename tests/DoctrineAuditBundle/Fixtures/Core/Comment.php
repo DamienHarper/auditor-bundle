@@ -26,7 +26,7 @@ class Comment
     /**
      * Comment author email.
      *
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, cascade={"persist", "remove"})
      */
     protected $author;
 

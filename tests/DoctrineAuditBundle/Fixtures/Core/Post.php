@@ -48,13 +48,13 @@ class Post
     protected $author_id;
 
     /**
-     * @ORM\OneToMany(targetEntity="Comment", mappedBy="post")
+     * @ORM\OneToMany(targetEntity="Comment", mappedBy="post", cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="id", referencedColumnName="post_id", nullable=true)
      */
     protected $comments;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Author", inversedBy="posts")
+     * @ORM\ManyToOne(targetEntity="Author", inversedBy="posts", cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="author_id", referencedColumnName="id", nullable=true)
      */
     protected $author;
