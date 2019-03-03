@@ -31,7 +31,7 @@ class Author
 
     /**
      * @ORM\OneToMany(targetEntity="Post", mappedBy="author", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(name="id", referencedColumnName="author_id", nullable=false)
+     * @ORM\JoinColumn(name="id", referencedColumnName="author_id", nullable=true)
      */
     protected $posts;
 

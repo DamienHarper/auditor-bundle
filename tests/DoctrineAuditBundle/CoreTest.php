@@ -211,6 +211,9 @@ abstract class CoreTest extends BaseTest
         $author3->removePost($post4);
         $em->flush();
 
+        $em->remove($post4);
+        $em->flush();
+
         $em->remove($author3);
         $em->flush();
     }
