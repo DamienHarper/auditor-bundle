@@ -13,7 +13,7 @@
   "require": {
     "php": ">=7.1",
     "symfony/orm-pack": "^1.0",
-    "symfony/security-bundle": "^3.4|^4.0"
+    "symfony/security-bundle": "^3.4 || ^4.0"
   },
   "autoload": {
     "psr-4": {
@@ -26,8 +26,8 @@
     }
   },
   "require-dev": {
-    "phpunit/phpunit": "^8.0",
-    "matthiasnoback/symfony-dependency-injection-test": "dev-master",
+    "phpunit/phpunit": "^7.0 || ^8.0",
+    "matthiasnoback/symfony-dependency-injection-test": "^3.1 || dev-master",
     "gedmo/doctrine-extensions": "^2.4",
     "symfony/var-dumper": "^4.2",
     "stof/doctrine-extensions-bundle": "^1.3"
