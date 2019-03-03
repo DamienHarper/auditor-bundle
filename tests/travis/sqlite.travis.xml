@@ -8,20 +8,9 @@
          beStrictAboutOutputDuringTests="true"
          beStrictAboutTodoAnnotatedTests="true"
          verbose="true">
-
-    <logging>
-        <log type='coverage-html' target='../coverage' />
-    </logging>
-
     <testsuites>
         <testsuite name="DoctrineAuditBundle test suite">
             <directory suffix="Test.php">../DoctrineAuditBundle</directory>
         </testsuite>
     </testsuites>
-
-    <filter>
-        <whitelist addUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">../../src</directory>
-        </whitelist>
-    </filter>
 </phpunit>
