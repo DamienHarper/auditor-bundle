@@ -5,6 +5,7 @@ namespace DH\DoctrineAuditBundle\Tests\EventSubscriber;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\AuditEntry;
 use DH\DoctrineAuditBundle\AuditReader;
+use DH\DoctrineAuditBundle\Tests\ArrayTestCaseTrait;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Bike;
@@ -35,6 +36,8 @@ use Symfony\Component\Security\Core\Security;
  */
 class AuditSubscriberTest extends CoreTest
 {
+    use ArrayTestCaseTrait;
+
     public function testInsertWithoutRelation(): void
     {
         $em = $this->getEntityManager();
@@ -58,7 +61,7 @@ class AuditSubscriberTest extends CoreTest
         $this->assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         $this->assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'fullname' => [
                 'old' => null,
                 'new' => 'John Doe',
@@ -99,7 +102,7 @@ class AuditSubscriberTest extends CoreTest
         $this->assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         $this->assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'fullname' => [
                 'old' => null,
                 'new' => 'John',
@@ -116,7 +119,7 @@ class AuditSubscriberTest extends CoreTest
         $this->assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         $this->assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'fullname' => [
                 'old' => 'John',
                 'new' => 'John Doe',
@@ -158,7 +161,7 @@ class AuditSubscriberTest extends CoreTest
         $this->assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         $this->assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'label' => Author::class.'#1',
             'class' => Author::class,
             'table' => $em->getClassMetadata(Author::class)->getTableName(),
@@ -182,7 +185,7 @@ class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         $this->assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'label' => [
                 'old' => null,
                 'new' => 'int: null->17',
@@ -201,7 +204,7 @@ class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         $this->assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'label' => [
                 'old' => 'int: null->17',
                 'new' => 'int: 17->null',
@@ -220,7 +223,7 @@ class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         $this->assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'label' => [
                 'old' => 'int: 17->null',
                 'new' => 'int: null->24',
@@ -239,7 +242,7 @@ class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         $this->assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'label' => [
                 'old' => 'int: null->24',
                 'new' => 'int: 24->"24"',
@@ -254,7 +257,7 @@ class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         $this->assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'label' => [
                 'old' => 'int: 24->"24"',
                 'new' => 'int: "24"->24',
@@ -269,7 +272,7 @@ class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         $this->assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'label' => [
                 'old' => 'int: "24"->24',
                 'new' => 'int: 24->24.0',
@@ -284,7 +287,7 @@ class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         $this->assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'label' => [
                 'old' => 'int: 24->24.0',
                 'new' => 'int: 24->null',
@@ -312,7 +315,7 @@ class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         $this->assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'label' => [
                 'old' => null,
                 'new' => 'decimal: null->10.2',
@@ -331,7 +334,7 @@ class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         $this->assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'label' => [
                 'old' => 'decimal: null->10.2',
                 'new' => 'decimal: 10.2->"10.2"',
@@ -354,7 +357,7 @@ class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         $this->assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'label' => [
                 'old' => null,
                 'new' => 'bool: null',
@@ -369,7 +372,7 @@ class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         $this->assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'label' => [
                 'old' => 'bool: null',
                 'new' => 'bool: null->true',
@@ -388,7 +391,7 @@ class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         $this->assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'label' => [
                 'old' => 'bool: null->true',
                 'new' => 'bool: true->null',
@@ -407,7 +410,7 @@ class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         $this->assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'label' => [
                 'old' => 'bool: true->null',
                 'new' => 'bool: null->false',
@@ -426,7 +429,7 @@ class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         $this->assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'label' => [
                 'old' => 'bool: null->false',
                 'new' => 'bool: false->null',
@@ -454,7 +457,7 @@ class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         $this->assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'label' => [
                 'old' => null,
                 'new' => 'php_array: null->[R1, R2]',
@@ -482,7 +485,7 @@ class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         $this->assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'label' => [
                 'old' => null,
                 'new' => 'json_array: null->[R1, R2]',
@@ -510,7 +513,7 @@ class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         $this->assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
-        $this->assertSame([
+        $this->assertArraySimilar([
             'label' => [
                 'old' => null,
                 'new' => 'simple_array: null->[R1, R2]',
@@ -568,7 +571,7 @@ class AuditSubscriberTest extends CoreTest
         $this->assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
         $this->assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
 
-        $this->assertSame([
+        $this->assertArraySimilar([
             'source' => [
                 'label' => Author::class.'#1',
                 'class' => Author::class,
@@ -583,7 +586,7 @@ class AuditSubscriberTest extends CoreTest
             ],
         ], $audits[0]->getDiffs(), 'relation ok.');
 
-        $this->assertSame([
+        $this->assertArraySimilar([
             'source' => [
                 'label' => Author::class.'#1',
                 'class' => Author::class,
@@ -651,7 +654,7 @@ class AuditSubscriberTest extends CoreTest
         $this->assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
         $this->assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
 
-        $this->assertSame([
+        $this->assertArraySimilar([
             'source' => [
                 'label' => Author::class.'#1',
                 'class' => Author::class,
@@ -666,7 +669,7 @@ class AuditSubscriberTest extends CoreTest
             ],
         ], $audits[0]->getDiffs(), 'relation ok.');
 
-        $this->assertSame([
+        $this->assertArraySimilar([
             'source' => [
                 'label' => Author::class.'#1',
                 'class' => Author::class,
@@ -735,7 +738,7 @@ class AuditSubscriberTest extends CoreTest
         $this->assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
         $this->assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
 
-        $this->assertSame([
+        $this->assertArraySimilar([
             'source' => [
                 'label' => (string) $post,
                 'class' => Post::class,
@@ -751,7 +754,7 @@ class AuditSubscriberTest extends CoreTest
             'table' => 'post__tag',
         ], $audits[0]->getDiffs(), 'relation ok.');
 
-        $this->assertSame([
+        $this->assertArraySimilar([
             'source' => [
                 'label' => (string) $post,
                 'class' => Post::class,
@@ -767,7 +770,7 @@ class AuditSubscriberTest extends CoreTest
             'table' => 'post__tag',
         ], $audits[1]->getDiffs(), 'relation ok.');
 
-        $this->assertSame([
+        $this->assertArraySimilar([
             'source' => [
                 'label' => (string) $post,
                 'class' => Post::class,
@@ -841,7 +844,7 @@ class AuditSubscriberTest extends CoreTest
         $this->assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
         $this->assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
 
-        $this->assertSame([
+        $this->assertArraySimilar([
             'source' => [
                 'label' => (string) $post,
                 'class' => Post::class,

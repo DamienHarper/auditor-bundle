@@ -119,7 +119,8 @@ class AuditReaderTest extends CoreTest
         $audits = $reader->getAudits(Post::class, null, 1, 50);
 
         $i = 0;
-        $this->assertCount(14, $audits, 'result count is ok.');
+        $this->assertCount(15, $audits, 'result count is ok.');
+        $this->assertSame(AuditReader::UPDATE, $audits[$i++]->getType(), 'entry'.$i.' is an update operation.');
         $this->assertSame(AuditReader::DISSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is a dissociate operation.');
         $this->assertSame(AuditReader::DISSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is a dissociate operation.');
         $this->assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an associate operation.');

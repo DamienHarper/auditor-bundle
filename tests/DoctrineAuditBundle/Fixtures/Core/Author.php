@@ -136,6 +136,7 @@ class Author
     public function removePost(Post $post): self
     {
         $this->posts->removeElement($post);
+        $post->setAuthor(null);
 
         return $this;
     }
