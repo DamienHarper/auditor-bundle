@@ -17,13 +17,13 @@ php:
 #    - nightly
 
 env:
-#    - DB=mysql
+    - DB=mysql
     - DB=sqlite
 #    - DB=pgsql
 
 before_install:
 #    - if [[ $DB == 'mysql' && $MYSQL_VERSION == '5.7' ]]; then ./tests/travis/install-mysql-5.7.sh; fi
-#    - if [[ $DB == 'mysql' ]]; then mysql -u root -e 'select version()'; fi
+    - if [[ $DB == 'mysql' ]]; then mysql -u root -e 'select version()'; fi
 #    - if [[ $DB == 'pgsql' ]]; then psql -U postgres -c 'SHOW SERVER_VERSION'; fi
 #    - if [[ $TRAVIS_PHP_VERSION != 'hhvm' ]]; then phpenv config-rm xdebug.ini; fi
     - composer self-update
@@ -34,17 +34,37 @@ script: ./vendor/bin/phpunit -c tests/travis/$DB.travis.xml
 
 matrix:
     fast_finish: true
-#    include:
-#        - php: 7.1
-#          env: NAME="MySQL 5.6" DB=mysql
-#          dist: trusty
-#          sudo: required
-#          addons:
-#              apt:
-#                  packages:
-#                      - mysql-server-5.6
-#                      - mysql-client-core-5.6
-#                      - mysql-client-5.6
+    include:
+        - php: 7.1
+          env: NAME="MySQL 5.6" DB=mysql
+          dist: trusty
+          sudo: required
+          addons:
+              apt:
+                  packages:
+                      - mysql-server-5.6
+                      - mysql-client-core-5.6
+                      - mysql-client-5.6
+        - php: 7.2
+          env: NAME="MySQL 5.6" DB=mysql
+          dist: trusty
+          sudo: required
+          addons:
+              apt:
+                  packages:
+                      - mysql-server-5.6
+                      - mysql-client-core-5.6
+                      - mysql-client-5.6
+        - php: 7.3
+          env: NAME="MySQL 5.6" DB=mysql
+          dist: trusty
+          sudo: required
+          addons:
+              apt:
+                  packages:
+                      - mysql-server-5.6
+                      - mysql-client-core-5.6
+                      - mysql-client-5.6
 #        - php: 7.1
 #          env: NAME="MySQL 5.7" DB=mysql MYSQL_VERSION=5.7
 #          sudo: required
@@ -65,4 +85,3 @@ matrix:
 #          env: DB=pgsql  # driver for PostgreSQL currently unsupported by HHVM, requires 3rd party dependency
 #    allow_failures:
 #        - php: nightly
-#        - php: hhvm
