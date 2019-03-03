@@ -6,6 +6,7 @@
 [![License](https://poser.pugx.org/damienharper/doctrine-audit-bundle/license)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
 [![Monthly Downloads](https://poser.pugx.org/damienharper/doctrine-audit-bundle/d/monthly)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
 [![Daily Downloads](https://poser.pugx.org/damienharper/doctrine-audit-bundle/d/daily)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
+[![Build Status](https://travis-ci.com/DamienHarper/DoctrineAuditBundle.svg?branch=master)](https://travis-ci.com/DamienHarper/DoctrineAuditBundle)
 
 This bundle creates audit logs for all doctrine ORM database related changes:
 
