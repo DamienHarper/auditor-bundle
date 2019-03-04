@@ -9,12 +9,12 @@
          beStrictAboutTodoAnnotatedTests="true"
          verbose="true">
     <php>
-        <var name="db_type" value="pdo_mysql"/>
+        <var name="db_type" value="pdo_pgsql"/>
         <var name="db_host" value="127.0.0.1"/>
-        <var name="db_username" value="root"/>
+        <var name="db_username" value="postgres"/>
         <var name="db_password" value=""/>
         <var name="db_name" value="doctrine_audit"/>
-        <var name="db_port" value="3306"/>
+        <var name="db_port" value="5432"/>
     </php>
     <testsuites>
         <testsuite name="DoctrineAuditBundle test suite">
