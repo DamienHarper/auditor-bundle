@@ -9,7 +9,7 @@ composer install --dev
 
 Then you can run the test suite with different configuration (SQLite, MySQL or PostgreSQL):
 
-#### Default configuration (SQLite)
+### Default configuration (SQLite)
 
 This configuration uses an in memory sqlite database, it's the fastest configuration.
 
@@ -21,7 +21,7 @@ or
 ./vendor/bin/phpunit -c tests/travis/sqlite.travis.xml 
 ```
 
-#### MySQL configuration
+### MySQL configuration
 
 This configuration expects to connect to a MySQL database.
 
@@ -38,7 +38,7 @@ docker run --name mysql_db -e MYSQL_DATABASE=doctrine_audit -d -p 3306:3306 mysq
 ```
 
 
-#### PostgreSQL configuration
+### PostgreSQL configuration
 
 This configuration expects to connect to a PostgreSQL database.
 
