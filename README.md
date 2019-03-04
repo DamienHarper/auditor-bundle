@@ -357,17 +357,7 @@ Do not forget to provide unit tests when contributing to this project.
 Tests
 =====
 
-To run the test suite, install dev dependencies first:
-
-```bash
-composer install --dev
-```
-
-Then run:
-
-```bash
-./vendor/bin/phpunit
-```
+Please, follow instructions in [this dedicated README](tests/README.md)
 
 
 License
