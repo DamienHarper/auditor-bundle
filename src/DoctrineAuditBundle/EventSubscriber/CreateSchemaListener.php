@@ -55,7 +55,7 @@ class CreateSchemaListener implements EventSubscriber
             $auditTablename = $this->configuration->getTablePrefix().$entityTable->getName().$this->configuration->getTableSuffix();
         }
 
-        if (!$schema->hasTable($auditTablename)) {
+        if (null !== $auditTablename && !$schema->hasTable($auditTablename)) {
             $auditTable = $schema->createTable($auditTablename);
             $auditTable->addColumn('id', 'integer', [
                 'autoincrement' => true,

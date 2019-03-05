@@ -66,7 +66,7 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
         /**
          * @var Connection
          */
-        $connection = $registry->getManager()->getConnection();
+        $connection = $registry->getEntityManager()->getConnection();
 
         /**
          * @var AuditReader
