@@ -68,29 +68,31 @@ class AuditConfiguration
     /**
      * Returns true if $entity is audited.
      *
-     * @param $entity
+     * @param string|object $entity
      *
      * @return bool
      */
     public function isAudited($entity): bool
     {
-        if (!empty($this->entities)) {
-            foreach ($this->entities as $auditedEntity => $entityOptions) {
-                if (isset($entityOptions['enabled']) && !$entityOptions['enabled']) {
-                    continue;
-                }
+        if (empty($this->entities)) {
+            return false;
+        }
 
-                if (\is_object($entity) && (
-                    ($entity instanceof $auditedEntity && !is_subclass_of($entity, $auditedEntity))
-                    ||
-                    ($entity instanceof Proxy && is_subclass_of($entity, $auditedEntity))
-                )) {
-                    return true;
-                }
+        foreach ($this->entities as $auditedEntity => $entityOptions) {
+            if (isset($entityOptions['enabled']) && !$entityOptions['enabled']) {
+                continue;
+            }
 
-                if (\is_string($entity) && $entity === $auditedEntity) {
-                    return true;
-                }
+            if (\is_object($entity) && (
+                ($entity instanceof $auditedEntity && !is_subclass_of($entity, (string) $auditedEntity))
+                ||
+                ($entity instanceof Proxy && is_subclass_of($entity, (string) $auditedEntity))
+            )) {
+                return true;
+            }
+
+            if (\is_string($entity) && $entity === $auditedEntity) {
+                return true;
             }
         }
 
@@ -100,12 +102,12 @@ class AuditConfiguration
     /**
      * Returns true if $field is audited.
      *
-     * @param $entity
-     * @param $field
+     * @param string|object $entity
+     * @param string $field
      *
      * @return bool
      */
-    public function isAuditedField($entity, $field): bool
+    public function isAuditedField($entity, string $field): bool
     {
         if (!\in_array($field, $this->ignoredColumns, true) && $this->isAudited($entity)) {
             $class = \is_object($entity) ? \Doctrine\Common\Util\ClassUtils::getRealClass(\get_class($entity)) : $entity;

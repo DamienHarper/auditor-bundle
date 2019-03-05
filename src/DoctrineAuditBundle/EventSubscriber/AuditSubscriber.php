@@ -19,7 +19,7 @@ class AuditSubscriber implements EventSubscriber
     private $configuration;
 
     /**
-     * @var SQLLogger
+     * @var ?SQLLogger
      */
     private $loggerBackup;
 
@@ -181,7 +181,7 @@ class AuditSubscriber implements EventSubscriber
         }
 
         foreach ($this->dissociated as list($source, $target, $id, $mapping)) {
-            $this->dissociate($em, $source, $target, $id, $mapping);
+            $this->dissociate($em, $source, $target, $mapping);
         }
 
         foreach ($this->removed as list($entity, $id)) {
@@ -199,7 +199,7 @@ class AuditSubscriber implements EventSubscriber
      * Adds an insert entry to the audit table.
      *
      * @param EntityManager $em
-     * @param $entity
+     * @param object $entity
      * @param array $ch
      *
      * @throws \Doctrine\DBAL\DBALException
@@ -222,7 +222,7 @@ class AuditSubscriber implements EventSubscriber
      * Adds an update entry to the audit table.
      *
      * @param EntityManager $em
-     * @param $entity
+     * @param object $entity
      * @param array $ch
      *
      * @throws \Doctrine\DBAL\DBALException
@@ -249,8 +249,8 @@ class AuditSubscriber implements EventSubscriber
      * Adds a remove entry to the audit table.
      *
      * @param EntityManager $em
-     * @param $entity
-     * @param $id
+     * @param object $entity
+     * @param mixed $id
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
@@ -272,8 +272,8 @@ class AuditSubscriber implements EventSubscriber
      * Adds an association entry to the audit table.
      *
      * @param EntityManager $em
-     * @param $source
-     * @param $target
+     * @param object $source
+     * @param object $target
      * @param array $mapping
      *
      * @throws \Doctrine\DBAL\DBALException
@@ -281,43 +281,42 @@ class AuditSubscriber implements EventSubscriber
      */
     private function associate(EntityManager $em, $source, $target, array $mapping): void
     {
-        $meta = $em->getClassMetadata(\get_class($source));
-        $data = [
-            'action' => 'associate',
-            'blame' => $this->blame(),
-            'diff' => [
-                'source' => $this->assoc($em, $source),
-                'target' => $this->assoc($em, $target),
-            ],
-            'table' => $meta->table['name'],
-            'schema' => $meta->table['schema'] ?? null,
-            'id' => $this->id($em, $source),
-        ];
-
-        if (isset($mapping['joinTable']['name'])) {
-            $data['diff']['table'] = $mapping['joinTable']['name'];
-        }
-
-        $this->audit($em, $data);
+        $this->associateOrDissociate('associate', $em, $source, $target, $mapping);
     }
 
     /**
      * Adds a dissociation entry to the audit table.
      *
      * @param EntityManager $em
-     * @param $source
-     * @param $target
-     * @param $id
+     * @param object $source
+     * @param object $target
      * @param array $mapping
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    private function dissociate(EntityManager $em, $source, $target, $id, array $mapping): void
+    private function dissociate(EntityManager $em, $source, $target, array $mapping): void
+    {
+        $this->associateOrDissociate('dissociate', $em, $source, $target, $mapping);
+    }
+
+    /**
+     * Adds an association entry to the audit table.
+     *
+     * @param string $type
+     * @param EntityManager $em
+     * @param object $source
+     * @param object $target
+     * @param array $mapping
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    private function associateOrDissociate(string $type, EntityManager $em, $source, $target, array $mapping): void
     {
         $meta = $em->getClassMetadata(\get_class($source));
         $data = [
-            'action' => 'dissociate',
+            'action' => $type,
             'blame' => $this->blame(),
             'diff' => [
                 'source' => $this->assoc($em, $source),
@@ -381,7 +380,7 @@ class AuditSubscriber implements EventSubscriber
      * Returns the primary key value of an entity.
      *
      * @param EntityManager $em
-     * @param $entity
+     * @param object $entity
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
@@ -417,7 +416,7 @@ class AuditSubscriber implements EventSubscriber
      * Computes a usable diff.
      *
      * @param EntityManager $em
-     * @param $entity
+     * @param object $entity
      * @param array $ch
      *
      * @throws \Doctrine\DBAL\DBALException
@@ -465,7 +464,8 @@ class AuditSubscriber implements EventSubscriber
      * Returns an array describing an association.
      *
      * @param EntityManager $em
-     * @param null          $association
+     * @param object        $association
+     * @param mixed         $id
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
@@ -477,6 +477,7 @@ class AuditSubscriber implements EventSubscriber
         if (null === $association) {
             return null;
         }
+
         $em->getUnitOfWork()->initializeObject($association); // ensure that proxies are initialized
         $meta = $em->getClassMetadata(\get_class($association));
         $pkName = $meta->getSingleIdentifierFieldName();
@@ -500,7 +501,7 @@ class AuditSubscriber implements EventSubscriber
      *
      * @param EntityManager $em
      * @param Type          $type
-     * @param $value
+     * @param mixed         $value
      *
      * @throws \Doctrine\DBAL\DBALException
      *

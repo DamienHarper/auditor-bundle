@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle;
 
+use Doctrine\DBAL\Statement;
 use Doctrine\ORM\EntityManagerInterface;
 
 class AuditReader
@@ -23,7 +24,7 @@ class AuditReader
     private $entityManager;
 
     /**
-     * @var null
+     * @var ?string
      */
     private $filter;
 
@@ -84,7 +85,11 @@ class AuditReader
      */
     public function getEntities(): array
     {
-        $entities = $this->entityManager->getConfiguration()->getMetadataDriverImpl()->getAllClassNames();
+        $metadataDriver = $this->entityManager->getConfiguration()->getMetadataDriverImpl();
+        $entities = [];
+        if (null !== $metadataDriver) {
+            $entities = $metadataDriver->getAllClassNames();
+        }
         $audited = [];
         foreach ($entities as $entity) {
             if ($this->configuration->isAudited($entity)) {
@@ -147,9 +152,11 @@ class AuditReader
                 ->setParameter('filter', $this->filter);
         }
 
-        return $queryBuilder
-            ->execute()
-            ->fetchAll(\PDO::FETCH_CLASS, AuditEntry::class);
+        /** @var Statement $statement */
+        $statement = $queryBuilder->execute();
+        $statement->setFetchMode(\PDO::FETCH_CLASS, AuditEntry::class);
+
+        return $statement->fetchAll();
     }
 
     /**
@@ -187,9 +194,11 @@ class AuditReader
                 ->setParameter('filter', $this->filter);
         }
 
-        return $queryBuilder
-            ->execute()
-            ->fetchAll(\PDO::FETCH_CLASS, AuditEntry::class);
+        /** @var Statement $statement */
+        $statement = $queryBuilder->execute();
+        $statement->setFetchMode(\PDO::FETCH_CLASS, AuditEntry::class);
+
+        return $statement->fetchAll();
     }
 
     /**

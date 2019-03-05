@@ -30,6 +30,10 @@
     "matthiasnoback/symfony-dependency-injection-test": "^3.1 || dev-master",
     "gedmo/doctrine-extensions": "^2.4",
     "symfony/var-dumper": "^4.2",
-    "stof/doctrine-extensions-bundle": "^1.3"
+    "stof/doctrine-extensions-bundle": "^1.3",
+    "phpstan/phpstan": "^0.11.2",
+    "phpstan/phpstan-doctrine": "^0.11.1",
+    "phpstan/phpstan-symfony": "^0.11.1",
+    "twig/extensions": "^1.5"
   }
 }
