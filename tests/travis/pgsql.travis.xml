@@ -8,6 +8,7 @@
          beStrictAboutOutputDuringTests="true"
          beStrictAboutTodoAnnotatedTests="true"
          verbose="true">
+
     <php>
         <var name="db_type" value="pdo_pgsql"/>
         <var name="db_host" value="127.0.0.1"/>
@@ -16,9 +17,21 @@
         <var name="db_name" value="doctrine_audit"/>
         <var name="db_port" value="5432"/>
     </php>
+
     <testsuites>
         <testsuite name="DoctrineAuditBundle test suite">
             <directory suffix="Test.php">../DoctrineAuditBundle</directory>
         </testsuite>
     </testsuites>
+
+    <filter>
+        <whitelist addUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">../../src</directory>
+            <exclude>
+                <file>../../src/DoctrineAuditBundle/User/UserInterface.php</file>
+                <file>../../src/DoctrineAuditBundle/User/UserProviderInterface.php</file>
+                <file>../../src/DoctrineAuditBundle/DHDoctrineAuditBundle.php</file>
+            </exclude>
+        </whitelist>
+    </filter>
 </phpunit>

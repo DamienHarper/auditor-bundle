@@ -14,7 +14,6 @@ php:
     - 7.1
     - 7.2
     - 7.3
-#    - nightly
 
 env:
     - DB=mysql
@@ -27,11 +26,19 @@ before_install:
     - if [[ $DB == 'pgsql' ]]; then psql -U postgres -c 'SHOW SERVER_VERSION'; fi
     - composer self-update
 
-install: composer update $COMPOSER_FLAGS --prefer-dist
+install:
+    - composer update $COMPOSER_FLAGS --prefer-dist
 
-script: ./vendor/bin/phpunit -c tests/travis/$DB.travis.xml
+before_script:
+    - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+    - chmod +x ./cc-test-reporter
+    - if [ $(phpenv version-name) = "7.3" ]; then ./cc-test-reporter before-build; fi
+
+script:
+    - ./vendor/bin/phpunit -c tests/travis/$DB.travis.xml --coverage-clover clover.xml
+
+after_script:
+    - if [ $(phpenv version-name) = "7.3" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi
 
 matrix:
     fast_finish: true
-#    allow_failures:
-#        - php: nightly
