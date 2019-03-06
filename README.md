@@ -7,6 +7,8 @@
 [![Monthly Downloads](https://poser.pugx.org/damienharper/doctrine-audit-bundle/d/monthly)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
 [![Daily Downloads](https://poser.pugx.org/damienharper/doctrine-audit-bundle/d/daily)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
 [![Build Status](https://travis-ci.com/DamienHarper/DoctrineAuditBundle.svg?branch=master)](https://travis-ci.com/DamienHarper/DoctrineAuditBundle)
+[![Maintainability](https://api.codeclimate.com/v1/badges/2b8ef891de14763f043b/maintainability)](https://codeclimate.com/github/DamienHarper/DoctrineAuditBundle/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/2b8ef891de14763f043b/test_coverage)](https://codeclimate.com/github/DamienHarper/DoctrineAuditBundle/test_coverage)
 
 This bundle creates audit logs for all doctrine ORM database related changes:
 
