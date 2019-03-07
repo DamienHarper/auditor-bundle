@@ -5,17 +5,17 @@ namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity
  * @ORM\Table(name="vehicle")
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="type", type="string")
- * @ORM\DiscriminatorMap({"car" = "Car", "bike" = "Bike", "vehicle" = "Vehicle"})
+ * @ORM\DiscriminatorMap({"car": "Car", "bike": "Bike", "vehicle": "Vehicle"})
  */
 class Vehicle
 {
     /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
+     * @ORM\Id
+     * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
     private $id;
@@ -29,7 +29,6 @@ class Vehicle
      * @ORM\Column(type="integer")
      */
     private $wheels;
-
 
     public function getWheels(): int
     {
@@ -62,11 +61,13 @@ class Vehicle
      * Set the value of name.
      *
      * @param mixed $label
+     *
      * @return DummyEntity
      */
     public function setLabel($label)
     {
         $this->label = $label;
+
         return $this;
     }
 }

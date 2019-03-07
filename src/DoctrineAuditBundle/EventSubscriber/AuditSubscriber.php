@@ -199,8 +199,8 @@ class AuditSubscriber implements EventSubscriber
      * Adds an insert entry to the audit table.
      *
      * @param EntityManager $em
-     * @param object $entity
-     * @param array $ch
+     * @param object        $entity
+     * @param array         $ch
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
@@ -222,8 +222,8 @@ class AuditSubscriber implements EventSubscriber
      * Adds an update entry to the audit table.
      *
      * @param EntityManager $em
-     * @param object $entity
-     * @param array $ch
+     * @param object        $entity
+     * @param array         $ch
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
@@ -249,8 +249,8 @@ class AuditSubscriber implements EventSubscriber
      * Adds a remove entry to the audit table.
      *
      * @param EntityManager $em
-     * @param object $entity
-     * @param mixed $id
+     * @param object        $entity
+     * @param mixed         $id
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
@@ -272,9 +272,9 @@ class AuditSubscriber implements EventSubscriber
      * Adds an association entry to the audit table.
      *
      * @param EntityManager $em
-     * @param object $source
-     * @param object $target
-     * @param array $mapping
+     * @param object        $source
+     * @param object        $target
+     * @param array         $mapping
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
@@ -288,9 +288,9 @@ class AuditSubscriber implements EventSubscriber
      * Adds a dissociation entry to the audit table.
      *
      * @param EntityManager $em
-     * @param object $source
-     * @param object $target
-     * @param array $mapping
+     * @param object        $source
+     * @param object        $target
+     * @param array         $mapping
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
@@ -303,11 +303,11 @@ class AuditSubscriber implements EventSubscriber
     /**
      * Adds an association entry to the audit table.
      *
-     * @param string $type
+     * @param string        $type
      * @param EntityManager $em
-     * @param object $source
-     * @param object $target
-     * @param array $mapping
+     * @param object        $source
+     * @param object        $target
+     * @param array         $mapping
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
@@ -380,7 +380,7 @@ class AuditSubscriber implements EventSubscriber
      * Returns the primary key value of an entity.
      *
      * @param EntityManager $em
-     * @param object $entity
+     * @param object        $entity
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
@@ -416,8 +416,8 @@ class AuditSubscriber implements EventSubscriber
      * Computes a usable diff.
      *
      * @param EntityManager $em
-     * @param object $entity
-     * @param array $ch
+     * @param object        $entity
+     * @param array         $ch
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
@@ -519,18 +519,18 @@ class AuditSubscriber implements EventSubscriber
             case Type::DECIMAL:
             case Type::BIGINT:
                 $convertedValue = (string) $value;
-                break;
 
+                break;
             case Type::INTEGER:
             case Type::SMALLINT:
                 $convertedValue = (int) $value;
-                break;
 
+                break;
             case Type::FLOAT:
             case Type::BOOLEAN:
                 $convertedValue = $type->convertToPHPValue($value, $platform);
-                break;
 
+                break;
             default:
                 $convertedValue = $type->convertToDatabaseValue($value, $platform);
         }

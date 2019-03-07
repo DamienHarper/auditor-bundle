@@ -194,7 +194,6 @@ class AuditSubscriberTest extends CoreTest
             ],
         ], $audits[0]->getDiffs(), 'int: null->17');
 
-
         $dummy->setLabel('int: 17->null');
         $dummy->setIntValue(null);
         $em->persist($dummy);
@@ -212,7 +211,6 @@ class AuditSubscriberTest extends CoreTest
                 'new' => null,
             ],
         ], $audits[0]->getDiffs(), 'int: 17->null');
-
 
         $dummy->setLabel('int: null->24');
         $dummy->setIntValue(24);
@@ -232,7 +230,6 @@ class AuditSubscriberTest extends CoreTest
             ],
         ], $audits[0]->getDiffs(), 'int: null->24');
 
-
         $dummy->setLabel('int: 24->"24"');
         $dummy->setIntValue("24");
         $em->persist($dummy);
@@ -246,7 +243,6 @@ class AuditSubscriberTest extends CoreTest
                 'new' => 'int: 24->"24"',
             ],
         ], $audits[0]->getDiffs(), 'int: 24->"24"');
-
 
         $dummy->setLabel('int: "24"->24');
         $dummy->setIntValue(24);
@@ -262,7 +258,6 @@ class AuditSubscriberTest extends CoreTest
             ],
         ], $audits[0]->getDiffs(), 'int: "24"->24');
 
-
         $dummy->setLabel('int: 24->24.0');
         $dummy->setIntValue(24.0);
         $em->persist($dummy);
@@ -276,7 +271,6 @@ class AuditSubscriberTest extends CoreTest
                 'new' => 'int: 24->24.0',
             ],
         ], $audits[0]->getDiffs(), 'int: 24->24.0');
-
 
         $dummy->setLabel('int: 24->null');
         $dummy->setIntValue(null);
@@ -324,7 +318,6 @@ class AuditSubscriberTest extends CoreTest
             ],
         ], $audits[0]->getDiffs(), 'decimal: null->10.2');
 
-
         $dummy->setLabel('decimal: 10.2->"10.2"');
         $dummy->setDecimalValue('10.2');
         $em->persist($dummy);
@@ -362,9 +355,8 @@ class AuditSubscriberTest extends CoreTest
             ],
         ], $audits[0]->getDiffs(), 'bool: null');
 
-
         $dummy->setLabel('bool: null->true');
-        $dummy->setBoolValue( true);
+        $dummy->setBoolValue(true);
         $em->persist($dummy);
         $em->flush();
 
@@ -381,9 +373,8 @@ class AuditSubscriberTest extends CoreTest
             ],
         ], $audits[0]->getDiffs(), 'bool: null->true');
 
-
         $dummy->setLabel('bool: true->null');
-        $dummy->setBoolValue( null);
+        $dummy->setBoolValue(null);
         $em->persist($dummy);
         $em->flush();
 
@@ -400,9 +391,8 @@ class AuditSubscriberTest extends CoreTest
             ],
         ], $audits[0]->getDiffs(), 'bool: true->null');
 
-
         $dummy->setLabel('bool: null->false');
-        $dummy->setBoolValue( false);
+        $dummy->setBoolValue(false);
         $em->persist($dummy);
         $em->flush();
 
@@ -419,9 +409,8 @@ class AuditSubscriberTest extends CoreTest
             ],
         ], $audits[0]->getDiffs(), 'bool: null->false');
 
-
         $dummy->setLabel('bool: false->null');
-        $dummy->setBoolValue( null);
+        $dummy->setBoolValue(null);
         $em->persist($dummy);
         $em->flush();
 
@@ -887,7 +876,6 @@ class AuditSubscriberTest extends CoreTest
         $this->assertTrue(true);
     }
 
-
     /**
      * @depends testInsertWithoutRelation
      */
@@ -914,8 +902,6 @@ class AuditSubscriberTest extends CoreTest
 
         $this->assertCount(0, [], 'no audits.');
     }
-
-
 
     protected function createAuditConfiguration(array $options = []): AuditConfiguration
     {

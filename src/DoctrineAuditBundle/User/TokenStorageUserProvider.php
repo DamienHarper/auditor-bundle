@@ -38,13 +38,13 @@ class TokenStorageUserProvider implements UserProviderInterface
                     }
                 }
 
-                if (is_object($impersonatorUser)) {
-                    $id = \method_exists($impersonatorUser, 'getId') ? $impersonatorUser->getId() : null;
-                    $username = \method_exists($impersonatorUser, 'getUsername') ? $impersonatorUser->getUsername() : (string) $impersonatorUser;
+                if (\is_object($impersonatorUser)) {
+                    $id = method_exists($impersonatorUser, 'getId') ? $impersonatorUser->getId() : null;
+                    $username = method_exists($impersonatorUser, 'getUsername') ? $impersonatorUser->getUsername() : (string) $impersonatorUser;
                     $impersonation = ' [impersonator '.$username.':'.$id.']';
                 }
             }
-            $id = \method_exists($tokenUser, 'getId') ? $tokenUser->getId() : null;
+            $id = method_exists($tokenUser, 'getId') ? $tokenUser->getId() : null;
             $user = new User($id, $tokenUser->getUsername().$impersonation);
         }
 

@@ -17,7 +17,7 @@ class Configuration implements ConfigurationInterface
 
         // Keep compatibility with symfony/config < 4.2
         /** @var ParentNodeDefinitionInterface $rootNode */
-        $rootNode = \method_exists($treeBuilder, 'getRootNode') ? $treeBuilder->getRootNode() : $treeBuilder->root('dh_doctrine_audit');
+        $rootNode = method_exists($treeBuilder, 'getRootNode') ? $treeBuilder->getRootNode() : $treeBuilder->root('dh_doctrine_audit');
 
         $rootNode
             ->children()

@@ -3,7 +3,6 @@
 namespace DH\DoctrineAuditBundle;
 
 use DH\DoctrineAuditBundle\User\UserProviderInterface;
-use Doctrine\ORM\Proxy\Proxy;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class AuditConfiguration
@@ -68,7 +67,7 @@ class AuditConfiguration
     /**
      * Returns true if $entity is audited.
      *
-     * @param string|object $entity
+     * @param object|string $entity
      *
      * @return bool
      */
@@ -99,8 +98,8 @@ class AuditConfiguration
     /**
      * Returns true if $field is audited.
      *
-     * @param string|object $entity
-     * @param string $field
+     * @param object|string $entity
+     * @param string        $field
      *
      * @return bool
      */

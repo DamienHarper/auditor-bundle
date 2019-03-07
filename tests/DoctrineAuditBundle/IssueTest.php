@@ -24,7 +24,6 @@ class IssueTest extends BaseTest
      */
     protected $fixturesPath = __DIR__.'/Fixtures';
 
-
     /**
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
@@ -56,7 +55,6 @@ class IssueTest extends BaseTest
         $audits = $reader->getAudits(DieselCase::class);
         $this->assertCount(1, $audits, 'results count ok.');
         $this->assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
-
     }
 
     protected function setupEntities(): void
@@ -75,8 +73,6 @@ class IssueTest extends BaseTest
         $em->persist($dieselCase);
         $em->flush();
     }
-
-
 
     protected function getReader(AuditConfiguration $configuration = null): AuditReader
     {
