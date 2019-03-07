@@ -29,13 +29,13 @@ abstract class CoreTest extends BaseTest
 
         $configuration = $this->getAuditConfiguration();
         $configuration->setEntities([
-            Author::class => ['default' => true],
-            Post::class => ['default' => true],
-            Comment::class => ['default' => true],
-            Tag::class => ['default' => true],
-            DummyEntity::class => ['default' => true],
-            Car::class => ['default' => true],
-            Bike::class => ['default' => true],
+            Author::class => ['enabled' => true],
+            Post::class => ['enabled' => true],
+            Comment::class => ['enabled' => true],
+            Tag::class => ['enabled' => true],
+            DummyEntity::class => ['enabled' => true],
+            Car::class => ['enabled' => true],
+            Bike::class => ['enabled' => true],
         ]);
 
         $this->setUpEntitySchema();

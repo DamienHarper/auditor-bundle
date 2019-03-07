@@ -67,9 +67,9 @@ class AuditReader
     }
 
     /**
-     * Returns current filter
+     * Returns current filter.
      *
-     * @return string|null
+     * @return null|string
      */
     public function getFilter(): ?string
     {
@@ -79,9 +79,9 @@ class AuditReader
     /**
      * Returns an array of audit table names indexed by entity FQN.
      *
-     * @return array
-     *
      * @throws \Doctrine\ORM\ORMException
+     *
+     * @return array
      */
     public function getEntities(): array
     {

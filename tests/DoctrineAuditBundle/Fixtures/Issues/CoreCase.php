@@ -6,10 +6,11 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\HasLifecycleCallbacks()
+ * @ORM\HasLifecycleCallbacks
  * @ORM\Table(name="case_core")
  */
-class CoreCase {
+class CoreCase
+{
     /**
      * @ORM\Column(type="integer")
      * @ORM\Id

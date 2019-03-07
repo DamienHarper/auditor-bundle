@@ -13,6 +13,7 @@ use Symfony\Component\Security\Core\Security;
 
 /**
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
+ * @covers \DH\DoctrineAuditBundle\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
  */
 class AuditConfigurationTest extends TestCase
@@ -155,7 +156,7 @@ class AuditConfigurationTest extends TestCase
     }
 
     /**
-     * @depends testIsAudited
+     * @depends testIsAuditedFieldAuditsAnyFieldByDefault
      */
     public function testIsAuditedFieldHonorsLocallyIgnoredColumns(): void
     {
@@ -179,7 +180,7 @@ class AuditConfigurationTest extends TestCase
     }
 
     /**
-     * @depends testIsAudited
+     * @depends testIsAuditedFieldHonorsLocallyIgnoredColumns
      */
     public function testIsAuditedFieldHonorsGloballyIgnoredColumns(): void
     {

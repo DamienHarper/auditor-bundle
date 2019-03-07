@@ -5,13 +5,13 @@ namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity
  * @ORM\Table(name="dummy_entity")
  */
 class DummyEntity
 {
     /**
-     * @ORM\Id()
+     * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      * @ORM\Column(type="integer")
      */
@@ -52,7 +52,6 @@ class DummyEntity
      */
     protected $simple_array;
 
-
     public function getId()
     {
         return $this->id;
@@ -72,11 +71,13 @@ class DummyEntity
      * Set the value of name.
      *
      * @param mixed $label
+     *
      * @return DummyEntity
      */
     public function setLabel($label)
     {
         $this->label = $label;
+
         return $this;
     }
 
@@ -84,6 +85,7 @@ class DummyEntity
     {
         return $this->php_array;
     }
+
     public function setPhpArray(array $php_array)
     {
         $this->php_array = $php_array;
@@ -95,6 +97,7 @@ class DummyEntity
     {
         return $this->json_array;
     }
+
     public function setJsonArray($json_array)
     {
         $this->json_array = $json_array;
@@ -106,6 +109,7 @@ class DummyEntity
     {
         return $this->simple_array;
     }
+
     public function setSimpleArray($simple_array)
     {
         $this->simple_array = $simple_array;
@@ -121,6 +125,7 @@ class DummyEntity
     public function setIntValue($int_value)
     {
         $this->int_value = $int_value;
+
         return $this;
     }
 
@@ -128,6 +133,7 @@ class DummyEntity
     {
         return $this->decimal_value;
     }
+
     public function setDecimalValue($decimal_value)
     {
         $this->decimal_value = $decimal_value;
@@ -139,9 +145,11 @@ class DummyEntity
     {
         return $this->bool_value;
     }
+
     public function setBoolValue($bool_value)
     {
         $this->bool_value = $bool_value;
+
         return $this;
     }
 }
