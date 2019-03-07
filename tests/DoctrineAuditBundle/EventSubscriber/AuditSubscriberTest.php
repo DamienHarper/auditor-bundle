@@ -26,6 +26,7 @@ use Symfony\Component\Security\Core\Security;
 /**
  * @covers \DH\DoctrineAuditBundle\AuditEntry
  * @covers \DH\DoctrineAuditBundle\AuditReader
+ * @covers \DH\DoctrineAuditBundle\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\User\User
