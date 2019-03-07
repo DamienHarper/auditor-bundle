@@ -36,8 +36,8 @@ class IssueTest extends BaseTest
 
         $configuration = $this->getAuditConfiguration();
         $configuration->setEntities([
-            DieselCase::class => ['default' => true],
-            CoreCase::class => ['default' => true],
+            DieselCase::class => ['enabled' => true],
+            CoreCase::class => ['enabled' => true],
         ]);
 
         $this->setUpEntitySchema();
