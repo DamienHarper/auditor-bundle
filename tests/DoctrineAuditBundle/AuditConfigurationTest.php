@@ -155,7 +155,7 @@ class AuditConfigurationTest extends TestCase
     }
 
     /**
-     * @depends testIsAudited
+     * @depends testIsAuditedFieldAuditsAnyFieldByDefault
      */
     public function testIsAuditedFieldHonorsLocallyIgnoredColumns(): void
     {
@@ -179,7 +179,7 @@ class AuditConfigurationTest extends TestCase
     }
 
     /**
-     * @depends testIsAudited
+     * @depends testIsAuditedFieldHonorsLocallyIgnoredColumns
      */
     public function testIsAuditedFieldHonorsGloballyIgnoredColumns(): void
     {
