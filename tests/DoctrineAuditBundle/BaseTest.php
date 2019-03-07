@@ -31,14 +31,14 @@ abstract class BaseTest extends TestCase
      */
     protected $em;
 
+    protected $fixturesPath;
+
+    protected $auditConfiguration;
+
     /**
      * @var SchemaTool
      */
     private $schemaTool;
-
-    protected $fixturesPath;
-
-    protected $auditConfiguration;
 
     /**
      * @throws \Doctrine\DBAL\DBALException
@@ -64,6 +64,54 @@ abstract class BaseTest extends TestCase
         $this->schemaTool = null;
     }
 
+    /**
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\ORMException
+     *
+     * @return SchemaTool
+     */
+    protected function getSchemaTool(): SchemaTool
+    {
+        if (null !== $this->schemaTool) {
+            return $this->schemaTool;
+        }
+
+        return $this->schemaTool = new SchemaTool($this->getEntityManager());
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\Tools\ToolsException
+     */
+    protected function setUpEntitySchema(): void
+    {
+        $classes = $this->getEntityManager()->getMetadataFactory()->getAllMetadata();
+
+        $this->getSchemaTool()->createSchema($classes);
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\ORMException
+     */
+    protected function tearDownEntitySchema(): void
+    {
+        $classes = $this->getEntityManager()->getMetadataFactory()->getAllMetadata();
+
+        $this->getSchemaTool()->dropSchema($classes);
+    }
+
+    protected function getAuditConfiguration(): AuditConfiguration
+    {
+        return $this->auditConfiguration;
+    }
+
+    protected function setAuditConfiguration(AuditConfiguration $configuration): void
+    {
+        $this->auditConfiguration = $configuration;
+    }
+
     protected function createAuditConfiguration(array $options = []): AuditConfiguration
     {
         $auditConfiguration = new AuditConfiguration(
@@ -78,16 +126,6 @@ abstract class BaseTest extends TestCase
         );
 
         return $auditConfiguration;
-    }
-
-    protected function getAuditConfiguration(): AuditConfiguration
-    {
-        return $this->auditConfiguration;
-    }
-
-    protected function setAuditConfiguration(AuditConfiguration $configuration): void
-    {
-        $this->auditConfiguration = $configuration;
     }
 
     /**
@@ -134,21 +172,6 @@ abstract class BaseTest extends TestCase
         $this->em = EntityManager::create($connection, $config);
 
         return $this->em;
-    }
-
-    /**
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\ORMException
-     *
-     * @return SchemaTool
-     */
-    protected function getSchemaTool(): SchemaTool
-    {
-        if (null !== $this->schemaTool) {
-            return $this->schemaTool;
-        }
-
-        return $this->schemaTool = new SchemaTool($this->getEntityManager());
     }
 
     /**
@@ -207,28 +230,5 @@ abstract class BaseTest extends TestCase
         }
 
         return self::$conn;
-    }
-
-    /**
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\Tools\ToolsException
-     */
-    protected function setUpEntitySchema(): void
-    {
-        $classes = $this->getEntityManager()->getMetadataFactory()->getAllMetadata();
-
-        $this->getSchemaTool()->createSchema($classes);
-    }
-
-    /**
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\ORMException
-     */
-    protected function tearDownEntitySchema(): void
-    {
-        $classes = $this->getEntityManager()->getMetadataFactory()->getAllMetadata();
-
-        $this->getSchemaTool()->dropSchema($classes);
     }
 }
