@@ -23,4 +23,17 @@ class DoctrineHelper
 
         return substr($class, $pos + Proxy::MARKER_LENGTH + 2);
     }
+
+    /**
+     * Given a class name and a proxy namespace returns the proxy name.
+     *
+     * @param string $className
+     * @param string $proxyNamespace
+     *
+     * @return string
+     */
+    public static function generateProxyClassName($className, $proxyNamespace): string
+    {
+        return rtrim($proxyNamespace, '\\').'\\'.Proxy::MARKER.'\\'.ltrim($className, '\\');
+    }
 }

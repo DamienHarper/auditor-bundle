@@ -203,6 +203,26 @@ class AuditConfigurationTest extends TestCase
     }
 
     /**
+     * @depends testIsAuditedFieldHonorsLocallyIgnoredColumns
+     */
+    public function testIsAuditedFieldReturnsFalseIfEntityIsNotAudited(): void
+    {
+        $entities = [
+            Post::class => null,
+        ];
+
+        $configuration = $this->getAuditConfiguration([
+            'ignored_columns' => [
+                'created_at',
+                'updated_at',
+            ],
+            'entities' => $entities,
+        ]);
+
+        $this->assertFalse($configuration->isAuditedField(Comment::class, 'id'), 'field "'.Comment::class.'::$id" is audited but "'.Comment::class.'" entity is not.');
+    }
+
+    /**
      * @depends testIsAuditedHonorsEnabledFlag
      */
     public function testEnableAuditFor(): void
