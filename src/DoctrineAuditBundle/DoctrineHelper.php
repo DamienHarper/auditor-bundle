@@ -9,7 +9,7 @@ class DoctrineHelper
     /**
      * Gets the real class name of a class name that could be a proxy.
      *
-     * @param string|object $subject
+     * @param object|string $subject
      *
      * @return string
      */
@@ -17,7 +17,7 @@ class DoctrineHelper
     {
         $class = \is_object($subject) ? \get_class($subject) : $subject;
 
-        if (false === $pos = strrpos($class, '\\' . Proxy::MARKER . '\\')) {
+        if (false === $pos = strrpos($class, '\\'.Proxy::MARKER.'\\')) {
             return $class;
         }
 
