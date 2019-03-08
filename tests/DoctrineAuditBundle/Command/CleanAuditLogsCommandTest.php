@@ -7,12 +7,16 @@ use DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Command\LockableTrait;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
+ * @covers \DH\DoctrineAuditBundle\AuditManager
  * @covers \DH\DoctrineAuditBundle\AuditReader
+ * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand
@@ -22,34 +26,11 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  */
 class CleanAuditLogsCommandTest extends CoreTest
 {
+    use LockableTrait;
+
     public function testExecute(): void
     {
-        $this->fixturesPath = __DIR__.'/../Fixtures';
-
-        $application = new Application();
-        $application->add(new CleanAuditLogsCommand());
-
-        $container = new ContainerBuilder();
-        $em = $this->getEntityManager();
-
-        $container->set('entity_manager', $em);
-        $container->setAlias('doctrine.orm.default_entity_manager', 'entity_manager');
-
-        $registry = new Registry(
-            $container,
-            [],
-            ['default' => 'entity_manager'],
-            'default',
-            'default'
-        );
-
-        $container->set('doctrine', $registry);
-
-        $reader = new AuditReader($this->getAuditConfiguration(), $em);
-        $container->set('dh_doctrine_audit.reader', $reader);
-
-        $command = $application->find('audit:clean');
-        $command->setContainer($container);
+        $command = $this->getCommand();
         $commandTester = new CommandTester($command);
         $commandTester->execute([
             '--no-confirm' => true,
@@ -58,36 +39,36 @@ class CleanAuditLogsCommandTest extends CoreTest
         // the output of the command in the console
         $output = $commandTester->getDisplay();
         $this->assertStringContainsString('[OK] Success', $output);
+
+        $command->unlock();
     }
 
-    public function testExecuteWithKeepNegative(): void
+    /**
+     * @depends testExecute
+     */
+    public function testExecuteFailsWhileLocked(): void
     {
-        $this->fixturesPath = __DIR__.'/../Fixtures';
+        $this->lock('audit:clean');
 
-        $application = new Application();
-        $application->add(new CleanAuditLogsCommand());
+        $command = $this->getCommand();
+        $commandTester = new CommandTester($command);
+        $commandTester->execute([
+            '--no-confirm' => true,
+        ]);
 
-        $container = new ContainerBuilder();
-        $em = $this->getEntityManager();
+        // the output of the command in the console
+        $output = $commandTester->getDisplay();
+        $this->assertStringContainsString('The command is already running in another process.', $output);
 
-        $container->set('entity_manager', $em);
-        $container->setAlias('doctrine.orm.default_entity_manager', 'entity_manager');
+        $command->unlock();
+    }
 
-        $registry = new Registry(
-            $container,
-            [],
-            ['default' => 'entity_manager'],
-            'default',
-            'default'
-        );
-
-        $container->set('doctrine', $registry);
-
-        $reader = new AuditReader($this->getAuditConfiguration(), $em);
-        $container->set('dh_doctrine_audit.reader', $reader);
-
-        $command = $application->find('audit:clean');
-        $command->setContainer($container);
+    /**
+     * @depends testExecute
+     */
+    public function testExecuteFailsWithKeepNegative(): void
+    {
+        $command = $this->getCommand();
         $commandTester = new CommandTester($command);
 
         $commandTester->execute([
@@ -98,5 +79,61 @@ class CleanAuditLogsCommandTest extends CoreTest
         // the output of the command in the console
         $output = $commandTester->getDisplay();
         $this->assertStringContainsString("'keep' argument must be a positive number.", $output);
+
+        $command->unlock();
+    }
+
+    /**
+     * @depends testExecuteFailsWithKeepNegative
+     */
+    public function testExecuteFailsWithKeepNull(): void
+    {
+        $command = $this->getCommand();
+        $command->unlock();
+
+        $commandTester = new CommandTester($command);
+
+        $commandTester->execute([
+            '--no-confirm' => true,
+            'keep' => 0,
+        ]);
+
+        // the output of the command in the console
+        $output = $commandTester->getDisplay();
+        $this->assertStringContainsString("'keep' argument must be a positive number.", $output);
+
+        $command->unlock();
+    }
+
+    protected function getCommand(): Command
+    {
+        $this->fixturesPath = __DIR__.'/../Fixtures';
+
+        $application = new Application();
+        $application->add(new CleanAuditLogsCommand());
+
+        $container = new ContainerBuilder();
+        $em = $this->getEntityManager();
+
+        $container->set('entity_manager', $em);
+        $container->setAlias('doctrine.orm.default_entity_manager', 'entity_manager');
+
+        $registry = new Registry(
+            $container,
+            [],
+            ['default' => 'entity_manager'],
+            'default',
+            'default'
+        );
+
+        $container->set('doctrine', $registry);
+
+        $reader = new AuditReader($this->getAuditConfiguration(), $em);
+        $container->set('dh_doctrine_audit.reader', $reader);
+
+        $command = $application->find('audit:clean');
+        $command->setContainer($container);
+
+        return $command;
     }
 }

@@ -25,7 +25,9 @@ use Symfony\Component\Security\Core\Security;
 
 /**
  * @covers \DH\DoctrineAuditBundle\AuditEntry
+ * @covers \DH\DoctrineAuditBundle\AuditManager
  * @covers \DH\DoctrineAuditBundle\AuditReader
+ * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
@@ -231,7 +233,7 @@ class AuditSubscriberTest extends CoreTest
         ], $audits[0]->getDiffs(), 'int: null->24');
 
         $dummy->setLabel('int: 24->"24"');
-        $dummy->setIntValue("24");
+        $dummy->setIntValue('24');
         $em->persist($dummy);
         $em->flush();
 

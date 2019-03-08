@@ -1,6 +1,6 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests;
+namespace DH\DoctrineAuditBundle\Tests\Helper;
 
 use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;

@@ -131,4 +131,9 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
     {
         $this->container = $container;
     }
+
+    public function unlock()
+    {
+        return $this->release();
+    }
 }
