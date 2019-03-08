@@ -2,12 +2,12 @@
 
 namespace DH\DoctrineAuditBundle\Tests;
 
-use DH\DoctrineAuditBundle\DoctrineHelper;
+use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \DH\DoctrineAuditBundle\DoctrineHelper
+ * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  */
 class DoctrineHelperTest extends TestCase
 {

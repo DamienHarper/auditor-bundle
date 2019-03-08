@@ -13,7 +13,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 /**
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\AuditReader
- * @covers \DH\DoctrineAuditBundle\DoctrineHelper
+ * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber

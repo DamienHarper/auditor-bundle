@@ -11,7 +11,7 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Issues\DieselCase;
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\AuditEntry
  * @covers \DH\DoctrineAuditBundle\AuditReader
- * @covers \DH\DoctrineAuditBundle\DoctrineHelper
+ * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
