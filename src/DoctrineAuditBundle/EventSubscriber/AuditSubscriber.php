@@ -30,24 +30,6 @@ class AuditSubscriber implements EventSubscriber
     }
 
     /**
-     * Handles soft-delete events from Gedmo\SoftDeleteable filter.
-     *
-     * @see https://symfony.com/doc/current/bundles/StofDoctrineExtensionsBundle/index.html
-     *
-     * @param LifecycleEventArgs $args
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    public function preSoftDelete(LifecycleEventArgs $args): void
-    {
-        $entity = $args->getEntity();
-        $em = $args->getEntityManager();
-
-        $this->manager->softDelete($em, $entity);
-    }
-
-    /**
      * It is called inside EntityManager#flush() after the changes to all the managed entities
      * and their associations have been computed.
      *
@@ -67,11 +49,23 @@ class AuditSubscriber implements EventSubscriber
         $this->loggerBackup = $em->getConnection()->getConfiguration()->getSQLLogger();
         $loggerChain = new LoggerChain();
         $loggerChain->addLogger(new AuditLogger(function () use ($em) {
-            $this->flush($em);
+            // flushes pending data
+            $em->getConnection()->getConfiguration()->setSQLLogger($this->loggerBackup);
+            $uow = $em->getUnitOfWork();
+
+            $this->manager->processInsertions($em, $uow);
+            $this->manager->processUpdates($em, $uow);
+            $this->manager->processAssociations($em);
+            $this->manager->processDissociations($em);
+            $this->manager->processDeletions($em);
+
+            $this->manager->reset();
         }));
+
         if ($this->loggerBackup instanceof SQLLogger) {
             $loggerChain->addLogger($this->loggerBackup);
         }
+
         $em->getConnection()->getConfiguration()->setSQLLogger($loggerChain);
 
         $this->manager->collectScheduledInsertions($uow);
@@ -82,25 +76,18 @@ class AuditSubscriber implements EventSubscriber
     }
 
     /**
-     * Flushes pending data.
+     * Handles soft-delete events from Gedmo\SoftDeleteable filter.
      *
-     * @param EntityManager $em
+     * @see https://symfony.com/doc/current/bundles/StofDoctrineExtensionsBundle/index.html
+     *
+     * @param LifecycleEventArgs $args
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    private function flush(EntityManager $em): void
+    public function preSoftDelete(LifecycleEventArgs $args): void
     {
-        $em->getConnection()->getConfiguration()->setSQLLogger($this->loggerBackup);
-        $uow = $em->getUnitOfWork();
-
-        $this->manager->processInsertions($em, $uow);
-        $this->manager->processUpdates($em, $uow);
-        $this->manager->processAssociations($em);
-        $this->manager->processDissociations($em);
-        $this->manager->processDeletions($em);
-
-        $this->manager->reset();
+        $this->manager->softDelete($args->getEntityManager(), $args->getEntity());
     }
 
     /**

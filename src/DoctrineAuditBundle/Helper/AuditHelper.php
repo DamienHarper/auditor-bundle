@@ -25,7 +25,7 @@ class AuditHelper
     /**
      * @return \DH\DoctrineAuditBundle\AuditConfiguration
      */
-    public function getAuditConfiguration(): AuditConfiguration
+    public function getConfiguration(): AuditConfiguration
     {
         return $this->configuration;
     }
