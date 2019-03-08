@@ -2,9 +2,9 @@
 
 namespace DH\DoctrineAuditBundle\Tests;
 
-use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\DependencyInjection\DHDoctrineAuditExtension;
 use DH\DoctrineAuditBundle\DHDoctrineAuditBundle;
+use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver;

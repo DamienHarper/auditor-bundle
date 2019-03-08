@@ -3,11 +3,11 @@
 namespace DH\DoctrineAuditBundle\Tests\DependencyInjection;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
-use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand;
 use DH\DoctrineAuditBundle\DependencyInjection\DHDoctrineAuditExtension;
 use DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber;
 use DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener;
+use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\Twig\Extension\TwigExtension;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;

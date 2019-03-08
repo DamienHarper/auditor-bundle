@@ -2,8 +2,8 @@
 
 namespace DH\DoctrineAuditBundle\Tests\Command;
 
-use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand;
+use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Symfony\Component\Console\Command\Command;
