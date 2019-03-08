@@ -43,14 +43,12 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
             return 0;
         }
 
-        // If you prefer to wait until the lock is released, use this:
-        // $this->lock(null, true);
-
         $io = new SymfonyStyle($input, $output);
 
         $keep = (int) $input->getArgument('keep');
         if ($keep <= 0) {
             $io->error("'keep' argument must be a positive number.");
+            $this->release();
 
             return 0;
         }
