@@ -75,7 +75,6 @@ class CleanAuditLogsCommandTest extends CoreTest
         // the output of the command in the console
         $output = $commandTester->getDisplay();
         $this->assertStringContainsString('[OK] Success', $output);
-
     }
 
     /**
@@ -96,7 +95,6 @@ class CleanAuditLogsCommandTest extends CoreTest
         $output = $commandTester->getDisplay();
         $this->assertStringContainsString('The command is already running in another process.', $output);
     }
-
 
     protected function createCommand(): Command
     {
