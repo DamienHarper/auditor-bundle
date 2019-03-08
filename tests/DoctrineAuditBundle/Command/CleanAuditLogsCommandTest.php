@@ -48,7 +48,6 @@ class CleanAuditLogsCommandTest extends CoreTest
         $reader = new AuditReader($this->getAuditConfiguration(), $em);
         $container->set('dh_doctrine_audit.reader', $reader);
 
-
         $command = $application->find('audit:clean');
         $command->setContainer($container);
         $commandTester = new CommandTester($command);
@@ -86,7 +85,6 @@ class CleanAuditLogsCommandTest extends CoreTest
 
         $reader = new AuditReader($this->getAuditConfiguration(), $em);
         $container->set('dh_doctrine_audit.reader', $reader);
-
 
         $command = $application->find('audit:clean');
         $command->setContainer($container);
