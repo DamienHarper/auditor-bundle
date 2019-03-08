@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle;
 
+use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
 use DH\DoctrineAuditBundle\User\UserProviderInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
