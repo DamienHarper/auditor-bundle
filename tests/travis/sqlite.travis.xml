@@ -8,6 +8,7 @@
          beStrictAboutOutputDuringTests="true"
          beStrictAboutTodoAnnotatedTests="true"
          verbose="true">
+
     <testsuites>
         <testsuite name="DoctrineAuditBundle test suite">
             <directory suffix="Test.php">../DoctrineAuditBundle</directory>

@@ -127,7 +127,7 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
         return 0;
     }
 
-    public function setContainer(ContainerInterface $container = null)
+    public function setContainer(ContainerInterface $container = null): void
     {
         $this->container = $container;
     }
