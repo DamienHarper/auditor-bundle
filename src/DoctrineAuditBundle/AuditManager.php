@@ -3,7 +3,6 @@
 namespace DH\DoctrineAuditBundle;
 
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
-use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
 
 class AuditManager
@@ -12,6 +11,12 @@ class AuditManager
      * @var \DH\DoctrineAuditBundle\AuditConfiguration
      */
     private $configuration;
+
+    private $inserted = [];     // [$source, $changeset]
+    private $updated = [];      // [$source, $changeset]
+    private $removed = [];      // [$source, $id]
+    private $associated = [];   // [$source, $target, $mapping]
+    private $dissociated = [];  // [$source, $target, $id, $mapping]
 
     /**
      * @var AuditHelper
@@ -138,6 +143,23 @@ class AuditManager
     }
 
     /**
+     * @param EntityManager $em
+     * @param object        $entity
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    public function softDelete(EntityManager $em, $entity): void
+    {
+        if ($this->getAuditConfiguration()->isAudited($entity)) {
+            $this->removed[] = [
+                $entity,
+                $this->getHelper()->id($em, $entity),
+            ];
+        }
+    }
+
+    /**
      * Adds an association entry to the audit table.
      *
      * @param string        $type
@@ -224,16 +246,194 @@ class AuditManager
     }
 
     /**
-     * Set the value of helper.
-     *
-     * @param AuditHelper $helper
-     *
-     * @return AuditHelper
+     * @param \Doctrine\ORM\UnitOfWork $uow
      */
-    public function setHelper(AuditHelper $helper): self
+    public function collectScheduledInsertions(\Doctrine\ORM\UnitOfWork $uow): void
     {
-        $this->helper = $helper;
+        foreach ($uow->getScheduledEntityInsertions() as $entity) {
+            if ($this->getAuditConfiguration()->isAudited($entity)) {
+                $this->inserted[] = [
+                    $entity,
+                    $uow->getEntityChangeSet($entity),
+                ];
+            }
+        }
+    }
 
-        return $this;
+    /**
+     * @param \Doctrine\ORM\UnitOfWork $uow
+     */
+    public function collectScheduledUpdates(\Doctrine\ORM\UnitOfWork $uow): void
+    {
+        foreach ($uow->getScheduledEntityUpdates() as $entity) {
+            if ($this->getAuditConfiguration()->isAudited($entity)) {
+                $this->updated[] = [
+                    $entity,
+                    $uow->getEntityChangeSet($entity),
+                ];
+            }
+        }
+    }
+
+    /**
+     * @param \Doctrine\ORM\UnitOfWork $uow
+     * @param EntityManager            $em
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    public function collectScheduledDeletions(\Doctrine\ORM\UnitOfWork $uow, EntityManager $em): void
+    {
+        foreach ($uow->getScheduledEntityDeletions() as $entity) {
+            if ($this->getAuditConfiguration()->isAudited($entity)) {
+                $uow->initializeObject($entity);
+                $this->removed[] = [
+                    $entity,
+                    $this->getHelper()->id($em, $entity),
+                ];
+            }
+        }
+    }
+
+    /**
+     * @param \Doctrine\ORM\UnitOfWork $uow
+     * @param EntityManager            $em
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    public function collectScheduledCollectionUpdates(\Doctrine\ORM\UnitOfWork $uow, EntityManager $em): void
+    {
+        foreach ($uow->getScheduledCollectionUpdates() as $collection) {
+            if ($this->getAuditConfiguration()->isAudited($collection->getOwner())) {
+                $mapping = $collection->getMapping();
+                foreach ($collection->getInsertDiff() as $entity) {
+                    if ($this->getAuditConfiguration()->isAudited($entity)) {
+                        $this->associated[] = [
+                            $collection->getOwner(),
+                            $entity,
+                            $mapping,
+                        ];
+                    }
+                }
+                foreach ($collection->getDeleteDiff() as $entity) {
+                    if ($this->getAuditConfiguration()->isAudited($entity)) {
+                        $this->dissociated[] = [
+                            $collection->getOwner(),
+                            $entity,
+                            $this->getHelper()->id($em, $entity),
+                            $mapping,
+                        ];
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param \Doctrine\ORM\UnitOfWork $uow
+     * @param EntityManager            $em
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    public function collectScheduledCollectionDeletions(\Doctrine\ORM\UnitOfWork $uow, EntityManager $em): void
+    {
+        foreach ($uow->getScheduledCollectionDeletions() as $collection) {
+            if ($this->getAuditConfiguration()->isAudited($collection->getOwner())) {
+                $mapping = $collection->getMapping();
+                foreach ($collection->toArray() as $entity) {
+                    if (!$this->getAuditConfiguration()->isAudited($entity)) {
+                        continue;
+                    }
+                    $this->dissociated[] = [
+                        $collection->getOwner(),
+                        $entity,
+                        $this->getHelper()->id($em, $entity),
+                        $mapping,
+                    ];
+                }
+            }
+        }
+    }
+
+    /**
+     * @param EntityManager            $em
+     * @param \Doctrine\ORM\UnitOfWork $uow
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    public function processInsertions(EntityManager $em, \Doctrine\ORM\UnitOfWork $uow): void
+    {
+        foreach ($this->inserted as list($entity, $ch)) {
+            // the changeset might be updated from UOW extra updates
+            $ch = array_merge($ch, $uow->getEntityChangeSet($entity));
+            $this->insert($em, $entity, $ch);
+        }
+    }
+
+    /**
+     * @param EntityManager            $em
+     * @param \Doctrine\ORM\UnitOfWork $uow
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    public function processUpdates(EntityManager $em, \Doctrine\ORM\UnitOfWork $uow): void
+    {
+        foreach ($this->updated as list($entity, $ch)) {
+            // the changeset might be updated from UOW extra updates
+            $ch = array_merge($ch, $uow->getEntityChangeSet($entity));
+            $this->update($em, $entity, $ch);
+        }
+    }
+
+    /**
+     * @param EntityManager $em
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    public function processAssociations(EntityManager $em): void
+    {
+        foreach ($this->associated as list($source, $target, $mapping)) {
+            $this->associate($em, $source, $target, $mapping);
+        }
+    }
+
+    /**
+     * @param EntityManager $em
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    public function processDissociations(EntityManager $em): void
+    {
+        foreach ($this->dissociated as list($source, $target, $id, $mapping)) {
+            $this->dissociate($em, $source, $target, $mapping);
+        }
+    }
+
+    /**
+     * @param EntityManager $em
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    public function processDeletions(EntityManager $em): void
+    {
+        foreach ($this->removed as list($entity, $id)) {
+            $this->remove($em, $entity, $id);
+        }
+    }
+
+    public function reset(): void
+    {
+        $this->inserted = [];
+        $this->updated = [];
+        $this->removed = [];
+        $this->associated = [];
+        $this->dissociated = [];
     }
 }
