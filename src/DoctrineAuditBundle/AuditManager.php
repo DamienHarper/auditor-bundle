@@ -151,10 +151,10 @@ class AuditManager
      */
     public function softDelete(EntityManager $em, $entity): void
     {
-        if ($this->getAuditConfiguration()->isAudited($entity)) {
+        if ($this->configuration->isAudited($entity)) {
             $this->removed[] = [
                 $entity,
-                $this->getHelper()->id($em, $entity),
+                $this->helper->id($em, $entity),
             ];
         }
     }
@@ -251,7 +251,7 @@ class AuditManager
     public function collectScheduledInsertions(\Doctrine\ORM\UnitOfWork $uow): void
     {
         foreach ($uow->getScheduledEntityInsertions() as $entity) {
-            if ($this->getAuditConfiguration()->isAudited($entity)) {
+            if ($this->configuration->isAudited($entity)) {
                 $this->inserted[] = [
                     $entity,
                     $uow->getEntityChangeSet($entity),
@@ -266,7 +266,7 @@ class AuditManager
     public function collectScheduledUpdates(\Doctrine\ORM\UnitOfWork $uow): void
     {
         foreach ($uow->getScheduledEntityUpdates() as $entity) {
-            if ($this->getAuditConfiguration()->isAudited($entity)) {
+            if ($this->configuration->isAudited($entity)) {
                 $this->updated[] = [
                     $entity,
                     $uow->getEntityChangeSet($entity),
@@ -285,11 +285,11 @@ class AuditManager
     public function collectScheduledDeletions(\Doctrine\ORM\UnitOfWork $uow, EntityManager $em): void
     {
         foreach ($uow->getScheduledEntityDeletions() as $entity) {
-            if ($this->getAuditConfiguration()->isAudited($entity)) {
+            if ($this->configuration->isAudited($entity)) {
                 $uow->initializeObject($entity);
                 $this->removed[] = [
                     $entity,
-                    $this->getHelper()->id($em, $entity),
+                    $this->helper->id($em, $entity),
                 ];
             }
         }
@@ -305,10 +305,10 @@ class AuditManager
     public function collectScheduledCollectionUpdates(\Doctrine\ORM\UnitOfWork $uow, EntityManager $em): void
     {
         foreach ($uow->getScheduledCollectionUpdates() as $collection) {
-            if ($this->getAuditConfiguration()->isAudited($collection->getOwner())) {
+            if ($this->configuration->isAudited($collection->getOwner())) {
                 $mapping = $collection->getMapping();
                 foreach ($collection->getInsertDiff() as $entity) {
-                    if ($this->getAuditConfiguration()->isAudited($entity)) {
+                    if ($this->configuration->isAudited($entity)) {
                         $this->associated[] = [
                             $collection->getOwner(),
                             $entity,
@@ -317,11 +317,11 @@ class AuditManager
                     }
                 }
                 foreach ($collection->getDeleteDiff() as $entity) {
-                    if ($this->getAuditConfiguration()->isAudited($entity)) {
+                    if ($this->configuration->isAudited($entity)) {
                         $this->dissociated[] = [
                             $collection->getOwner(),
                             $entity,
-                            $this->getHelper()->id($em, $entity),
+                            $this->helper->id($em, $entity),
                             $mapping,
                         ];
                     }
@@ -340,16 +340,16 @@ class AuditManager
     public function collectScheduledCollectionDeletions(\Doctrine\ORM\UnitOfWork $uow, EntityManager $em): void
     {
         foreach ($uow->getScheduledCollectionDeletions() as $collection) {
-            if ($this->getAuditConfiguration()->isAudited($collection->getOwner())) {
+            if ($this->configuration->isAudited($collection->getOwner())) {
                 $mapping = $collection->getMapping();
                 foreach ($collection->toArray() as $entity) {
-                    if (!$this->getAuditConfiguration()->isAudited($entity)) {
+                    if (!$this->configuration->isAudited($entity)) {
                         continue;
                     }
                     $this->dissociated[] = [
                         $collection->getOwner(),
                         $entity,
-                        $this->getHelper()->id($em, $entity),
+                        $this->helper->id($em, $entity),
                         $mapping,
                     ];
                 }
