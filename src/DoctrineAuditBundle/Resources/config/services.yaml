@@ -14,11 +14,11 @@ services:
     public: true
 
   dh_doctrine_audit.reader:
-    class: DH\DoctrineAuditBundle\AuditReader
+    class: DH\DoctrineAuditBundle\Reader\AuditReader
     arguments: ["@dh_doctrine_audit.configuration", "@doctrine.orm.default_entity_manager"]
     public: true
 
-  DH\DoctrineAuditBundle\AuditReader:
+  DH\DoctrineAuditBundle\Reader\AuditReader:
     alias: dh_doctrine_audit.reader
     public: true
 

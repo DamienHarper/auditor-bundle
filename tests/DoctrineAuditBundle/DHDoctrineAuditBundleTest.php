@@ -2,7 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Tests;
 
-use DH\DoctrineAuditBundle\AuditReader;
+use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\DependencyInjection\DHDoctrineAuditExtension;
 use DH\DoctrineAuditBundle\DHDoctrineAuditBundle;
 use Doctrine\Bundle\DoctrineBundle\Registry;
@@ -18,7 +18,7 @@ use Symfony\Component\Security\Core\Security;
 /**
  * @covers \DH\DoctrineAuditBundle\DHDoctrineAuditBundle
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
- * @covers \DH\DoctrineAuditBundle\AuditReader
+ * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
  * @covers \DH\DoctrineAuditBundle\DependencyInjection\Configuration
  * @covers \DH\DoctrineAuditBundle\DependencyInjection\DHDoctrineAuditExtension
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
