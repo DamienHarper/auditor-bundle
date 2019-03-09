@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Tests;
 
+use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Bike;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Car;
@@ -9,6 +10,15 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\DummyEntity;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\User;
+use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Security\Core\Security;
 
 abstract class CoreTest extends BaseTest
 {
@@ -213,5 +223,43 @@ abstract class CoreTest extends BaseTest
 
         $em->remove($author3);
         $em->flush();
+    }
+
+    protected function createAuditConfiguration(array $options = []): AuditConfiguration
+    {
+        $container = new ContainerBuilder();
+        $security = new Security($container);
+        $tokenStorage = new TokenStorage();
+
+        $user = new User(1, 'dark.vador');
+        $user->setRoles(['ROLE_ADMIN']);
+        $tokenStorage->setToken(new UsernamePasswordToken($user, '12345', 'provider', $user->getRoles()));
+
+        $authorizationChecker = $this->getMockBuilder(AuthorizationCheckerInterface::class)->getMock();
+        $authorizationChecker
+            ->expects($this->any())
+            ->method('isGranted')
+            ->with('ROLE_PREVIOUS_ADMIN')
+            ->willReturn(true)
+        ;
+
+        $container->set('security.token_storage', $tokenStorage);
+        $container->set('security.authorization_checker', $authorizationChecker);
+
+        $requestStack = new RequestStack();
+        $requestStack->push(new Request([], [], [], [], [], ['REMOTE_ADDR' => '1.2.3.4']));
+
+        $auditConfiguration = new AuditConfiguration(
+            array_merge([
+                'table_prefix' => '',
+                'table_suffix' => '_audit',
+                'ignored_columns' => [],
+                'entities' => [],
+            ], $options),
+            new TokenStorageUserProvider($security),
+            $requestStack
+        );
+
+        return $auditConfiguration;
     }
 }

@@ -7,6 +7,7 @@ use DH\DoctrineAuditBundle\AuditManager;
 use DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber;
 use DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
+use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\DBAL\Connection;
@@ -237,5 +238,10 @@ abstract class BaseTest extends TestCase
         }
 
         return self::$conn;
+    }
+
+    protected function getReader(AuditConfiguration $configuration = null): AuditReader
+    {
+        return new AuditReader($configuration ?? $this->createAuditConfiguration(), $this->getEntityManager());
     }
 }

@@ -287,9 +287,4 @@ class AuditReaderTest extends CoreTest
 
         $this->assertCount(0, $audits, 'result count is ok.');
     }
-
-    protected function getReader(AuditConfiguration $configuration = null): AuditReader
-    {
-        return new AuditReader($configuration ?? $this->createAuditConfiguration(), $this->getEntityManager());
-    }
 }

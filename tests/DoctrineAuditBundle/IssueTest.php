@@ -2,7 +2,6 @@
 
 namespace DH\DoctrineAuditBundle\Tests;
 
-use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issues\CoreCase;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issues\DieselCase;
@@ -74,10 +73,5 @@ class IssueTest extends BaseTest
         $dieselCase->setName('yo');
         $em->persist($dieselCase);
         $em->flush();
-    }
-
-    protected function getReader(AuditConfiguration $configuration = null): AuditReader
-    {
-        return new AuditReader($configuration ?? $this->createAuditConfiguration(), $this->getEntityManager());
     }
 }

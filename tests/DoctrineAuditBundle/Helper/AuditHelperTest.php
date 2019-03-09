@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
  */
 class AuditHelperTest extends TestCase
 {
-    public function testDams1(): void
+    public function testValue(): void
     {
         $this->assertTrue(true, 'yo');
     }
