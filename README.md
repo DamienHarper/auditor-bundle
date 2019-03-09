@@ -2,13 +2,14 @@
 
 [![Latest Stable Version](https://poser.pugx.org/damienharper/doctrine-audit-bundle/v/stable)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
 [![Latest Unstable Version](https://poser.pugx.org/damienharper/doctrine-audit-bundle/v/unstable)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
-[![Total Downloads](https://poser.pugx.org/damienharper/doctrine-audit-bundle/downloads)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
-[![License](https://poser.pugx.org/damienharper/doctrine-audit-bundle/license)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
-[![Monthly Downloads](https://poser.pugx.org/damienharper/doctrine-audit-bundle/d/monthly)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
-[![Daily Downloads](https://poser.pugx.org/damienharper/doctrine-audit-bundle/d/daily)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
 [![Build Status](https://travis-ci.com/DamienHarper/DoctrineAuditBundle.svg?branch=master)](https://travis-ci.com/DamienHarper/DoctrineAuditBundle)
+[![License](https://poser.pugx.org/damienharper/doctrine-audit-bundle/license)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
 [![Maintainability](https://api.codeclimate.com/v1/badges/2b8ef891de14763f043b/maintainability)](https://codeclimate.com/github/DamienHarper/DoctrineAuditBundle/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/2b8ef891de14763f043b/test_coverage)](https://codeclimate.com/github/DamienHarper/DoctrineAuditBundle/test_coverage)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DamienHarper/DoctrineAuditBundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/DamienHarper/DoctrineAuditBundle/?branch=master)<br/>
+[![Total Downloads](https://poser.pugx.org/damienharper/doctrine-audit-bundle/downloads)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
+[![Monthly Downloads](https://poser.pugx.org/damienharper/doctrine-audit-bundle/d/monthly)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
+[![Daily Downloads](https://poser.pugx.org/damienharper/doctrine-audit-bundle/d/daily)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
 
 This bundle creates audit logs for all doctrine ORM database related changes:
 
