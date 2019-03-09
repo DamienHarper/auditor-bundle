@@ -100,8 +100,8 @@ class AuditHelper
                 $meta->isSingleValuedAssociation($fieldName) &&
                 $this->configuration->isAuditedField($entity, $fieldName)
             ) {
-                $o = $this->assoc($em, $old);
-                $n = $this->assoc($em, $new);
+                $o = $this->summarize($em, $old);
+                $n = $this->summarize($em, $new);
                 if ($o !== $n) {
                     $diff[$fieldName] = [
                         'old' => $o,
@@ -186,10 +186,10 @@ class AuditHelper
     }
 
     /**
-     * Returns an array describing an association.
+     * Returns an array describing an entity.
      *
      * @param EntityManager $em
-     * @param object        $association
+     * @param object        $entity
      * @param mixed         $id
      *
      * @throws \Doctrine\DBAL\DBALException
@@ -197,20 +197,20 @@ class AuditHelper
      *
      * @return array
      */
-    public function assoc(EntityManager $em, $association = null, $id = null): ?array
+    public function summarize(EntityManager $em, $entity = null, $id = null): ?array
     {
-        if (null === $association) {
+        if (null === $entity) {
             return null;
         }
 
-        $em->getUnitOfWork()->initializeObject($association); // ensure that proxies are initialized
-        $meta = $em->getClassMetadata(\get_class($association));
+        $em->getUnitOfWork()->initializeObject($entity); // ensure that proxies are initialized
+        $meta = $em->getClassMetadata(\get_class($entity));
         $pkName = $meta->getSingleIdentifierFieldName();
-        $pkValue = $id ?? $this->id($em, $association);
-        if (method_exists($association, '__toString')) {
-            $label = (string) $association;
+        $pkValue = $id ?? $this->id($em, $entity);
+        if (method_exists($entity, '__toString')) {
+            $label = (string) $entity;
         } else {
-            $label = \get_class($association).'#'.$pkValue;
+            $label = \get_class($entity).'#'.$pkValue;
         }
 
         return [

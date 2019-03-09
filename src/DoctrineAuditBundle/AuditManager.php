@@ -103,7 +103,7 @@ class AuditManager
         $this->audit($em, [
             'action' => 'remove',
             'blame' => $this->helper->blame(),
-            'diff' => $this->helper->assoc($em, $entity, $id),
+            'diff' => $this->helper->summarize($em, $entity, $id),
             'table' => $meta->table['name'],
             'schema' => $meta->table['schema'] ?? null,
             'id' => $id,
@@ -178,8 +178,8 @@ class AuditManager
             'action' => $type,
             'blame' => $this->helper->blame(),
             'diff' => [
-                'source' => $this->helper->assoc($em, $source),
-                'target' => $this->helper->assoc($em, $target),
+                'source' => $this->helper->summarize($em, $source),
+                'target' => $this->helper->summarize($em, $target),
             ],
             'table' => $meta->table['name'],
             'schema' => $meta->table['schema'] ?? null,
