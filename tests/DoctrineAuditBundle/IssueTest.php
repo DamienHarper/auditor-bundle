@@ -8,15 +8,15 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Issues\DieselCase;
 
 /**
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
- * @covers \DH\DoctrineAuditBundle\Reader\AuditEntry
  * @covers \DH\DoctrineAuditBundle\AuditManager
- * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
- * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
- * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
+ * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
+ * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
+ * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
+ * @covers \DH\DoctrineAuditBundle\Reader\AuditEntry
+ * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
- * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  */
 class IssueTest extends BaseTest
 {

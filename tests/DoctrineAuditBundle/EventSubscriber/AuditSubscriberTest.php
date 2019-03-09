@@ -14,17 +14,17 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Vehicle;
 
 /**
- * @covers \DH\DoctrineAuditBundle\Reader\AuditEntry
+ * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\AuditManager
- * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
+ * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
+ * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
+ * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
- * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
- * @covers \DH\DoctrineAuditBundle\AuditConfiguration
+ * @covers \DH\DoctrineAuditBundle\Reader\AuditEntry
+ * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
  * @covers \DH\DoctrineAuditBundle\User\User
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
- * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
- * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  */
 class AuditSubscriberTest extends CoreTest
 {

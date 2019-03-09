@@ -12,16 +12,17 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
 
 /**
- * @covers \DH\DoctrineAuditBundle\Reader\AuditEntry
- * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
- * @covers \DH\DoctrineAuditBundle\AuditManager
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
- * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
- * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
- * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
+ * @covers \DH\DoctrineAuditBundle\AuditManager
+ * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
- * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
+ * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
+ * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
+ * @covers \DH\DoctrineAuditBundle\Reader\AuditEntry
+ * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
+ * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
+ * @covers \DH\DoctrineAuditBundle\User\User
  */
 class AuditReaderTest extends CoreTest
 {
