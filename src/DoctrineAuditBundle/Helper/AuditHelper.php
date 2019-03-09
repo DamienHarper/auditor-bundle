@@ -46,24 +46,24 @@ class AuditHelper
         $meta = $em->getClassMetadata(\get_class($entity));
         $pk = $meta->getSingleIdentifierFieldName();
 
-        if (!isset($meta->fieldMappings[$pk])) {
-            // Primary key is not part of fieldMapping
-            // @see https://github.com/DamienHarper/DoctrineAuditBundle/issues/40
-            // @see https://www.doctrine-project.org/projects/doctrine-orm/en/latest/tutorials/composite-primary-keys.html#identity-through-foreign-entities
-            // We try to get it from associationMapping (will throw a MappingException if not available)
-            $targetEntity = $meta->getReflectionProperty($pk)->getValue($entity);
-
-            $mapping = $meta->getAssociationMapping($pk);
-            $meta = $em->getClassMetadata($mapping['targetEntity']);
-            $pk = $meta->getSingleIdentifierFieldName();
+        if (isset($meta->fieldMappings[$pk])) {
             $type = Type::getType($meta->fieldMappings[$pk]['type']);
 
-            return $this->value($em, $type, $meta->getReflectionProperty($pk)->getValue($targetEntity));
+            return $this->value($em, $type, $meta->getReflectionProperty($pk)->getValue($entity));
         }
 
+        // Primary key is not part of fieldMapping
+        // @see https://github.com/DamienHarper/DoctrineAuditBundle/issues/40
+        // @see https://www.doctrine-project.org/projects/doctrine-orm/en/latest/tutorials/composite-primary-keys.html#identity-through-foreign-entities
+        // We try to get it from associationMapping (will throw a MappingException if not available)
+        $targetEntity = $meta->getReflectionProperty($pk)->getValue($entity);
+
+        $mapping = $meta->getAssociationMapping($pk);
+        $meta = $em->getClassMetadata($mapping['targetEntity']);
+        $pk = $meta->getSingleIdentifierFieldName();
         $type = Type::getType($meta->fieldMappings[$pk]['type']);
 
-        return $this->value($em, $type, $meta->getReflectionProperty($pk)->getValue($entity));
+        return $this->value($em, $type, $meta->getReflectionProperty($pk)->getValue($targetEntity));
     }
 
     /**
@@ -82,32 +82,34 @@ class AuditHelper
     {
         $meta = $em->getClassMetadata(\get_class($entity));
         $diff = [];
+
         foreach ($ch as $fieldName => list($old, $new)) {
-            if ($meta->hasField($fieldName) && !isset($meta->embeddedClasses[$fieldName]) &&
+            $o = null;
+            $n = null;
+
+            if (
+                $meta->hasField($fieldName) &&
+                !isset($meta->embeddedClasses[$fieldName]) &&
                 $this->configuration->isAuditedField($entity, $fieldName)
             ) {
                 $mapping = $meta->fieldMappings[$fieldName];
                 $type = Type::getType($mapping['type']);
                 $o = $this->value($em, $type, $old);
                 $n = $this->value($em, $type, $new);
-                if ($o !== $n) {
-                    $diff[$fieldName] = [
-                        'old' => $o,
-                        'new' => $n,
-                    ];
-                }
-            } elseif ($meta->hasAssociation($fieldName) &&
+            } elseif (
+                $meta->hasAssociation($fieldName) &&
                 $meta->isSingleValuedAssociation($fieldName) &&
                 $this->configuration->isAuditedField($entity, $fieldName)
             ) {
                 $o = $this->summarize($em, $old);
                 $n = $this->summarize($em, $new);
-                if ($o !== $n) {
-                    $diff[$fieldName] = [
-                        'old' => $o,
-                        'new' => $n,
-                    ];
-                }
+            }
+
+            if ($o !== $n) {
+                $diff[$fieldName] = [
+                    'old' => $o,
+                    'new' => $n,
+                ];
             }
         }
 
@@ -207,6 +209,7 @@ class AuditHelper
         $meta = $em->getClassMetadata(\get_class($entity));
         $pkName = $meta->getSingleIdentifierFieldName();
         $pkValue = $id ?? $this->id($em, $entity);
+
         if (method_exists($entity, '__toString')) {
             $label = (string) $entity;
         } else {
