@@ -9,6 +9,10 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issues\CoreCase;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issues\DieselCase;
+use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Core\Security;
 
 /**
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
@@ -299,6 +303,111 @@ class AuditHelperTest extends CoreTest
         ];
 
         $this->assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() honors locally ignored columns.');
+    }
+
+    public function testDiffIgnoresUnchangedValues(): void
+    {
+        $em = $this->getEntityManager();
+        $configuration = $this->getAuditConfiguration();
+        $helper = new AuditHelper($configuration);
+
+        $now = new \DateTime('now');
+        $post = new Post();
+        $post
+            ->setTitle('First post')
+            ->setBody('What a nice first post!')
+            ->setCreatedAt($now)
+        ;
+
+        $em->persist($post);
+        $em->flush();
+
+        $post
+            ->setTitle('First post ever!')
+            ->setCreatedAt($now)
+        ;
+
+        $changeset = [
+            'title' => [
+                'First post',
+                'First post ever!',
+            ],
+            'created_at' => [
+                $now,
+                $now,
+            ],
+        ];
+
+        $expected = [
+            'title' => [
+                'old' => 'First post',
+                'new' => 'First post ever!',
+            ],
+        ];
+
+        $this->assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() ignores unchanged values.');
+    }
+
+    public function testBlame(): void
+    {
+        $em = $this->getEntityManager();
+        $configuration = $this->getAuditConfiguration();
+        $helper = new AuditHelper($configuration);
+
+        $expected = [
+            'user_id' => 1,
+            'username' => 'dark.vador',
+            'client_ip' => '1.2.3.4',
+        ];
+
+        $this->assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
+    }
+
+    public function testBlameWhenNoRequest(): void
+    {
+        $em = $this->getEntityManager();
+        $configuration = new AuditConfiguration(
+            [
+                'table_prefix' => '',
+                'table_suffix' => '_audit',
+                'ignored_columns' => [],
+                'entities' => [],
+            ],
+            $this->getAuditConfiguration()->getUserProvider(),
+            new RequestStack()
+        );
+        $helper = new AuditHelper($configuration);
+
+        $expected = [
+            'user_id' => 1,
+            'username' => 'dark.vador',
+            'client_ip' => null,
+        ];
+
+        $this->assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
+    }
+
+    public function testBlameWhenNoUser(): void
+    {
+        $configuration = new AuditConfiguration(
+            [
+                'table_prefix' => '',
+                'table_suffix' => '_audit',
+                'ignored_columns' => [],
+                'entities' => [],
+            ],
+            new TokenStorageUserProvider(new Security(new ContainerBuilder())),
+            new RequestStack()
+        );
+        $helper = new AuditHelper($configuration);
+
+        $expected = [
+            'user_id' => null,
+            'username' => null,
+            'client_ip' => null,
+        ];
+
+        $this->assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
     }
 
     public function testGetConfiguration(): void
