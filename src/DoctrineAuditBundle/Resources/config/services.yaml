@@ -14,12 +14,30 @@ services:
     public: true
 
   dh_doctrine_audit.reader:
-    class: DH\DoctrineAuditBundle\AuditReader
+    class: DH\DoctrineAuditBundle\Reader\AuditReader
     arguments: ["@dh_doctrine_audit.configuration", "@doctrine.orm.default_entity_manager"]
     public: true
 
-  DH\DoctrineAuditBundle\AuditReader:
+  DH\DoctrineAuditBundle\Reader\AuditReader:
     alias: dh_doctrine_audit.reader
+    public: true
+
+  dh_doctrine_audit.manager:
+    class: DH\DoctrineAuditBundle\AuditManager
+    arguments: ["@dh_doctrine_audit.configuration", "@dh_doctrine_audit.helper"]
+    public: true
+
+  DH\DoctrineAuditBundle\AuditManager:
+    alias: dh_doctrine_audit.manager
+    public: true
+
+  dh_doctrine_audit.helper:
+    class: DH\DoctrineAuditBundle\Helper\AuditHelper
+    arguments: ["@dh_doctrine_audit.configuration"]
+    public: true
+
+  DH\DoctrineAuditBundle\Helper\AuditHelper:
+    alias: dh_doctrine_audit.helper
     public: true
 
   dh_doctrine_audit.event_subscriber.audit:

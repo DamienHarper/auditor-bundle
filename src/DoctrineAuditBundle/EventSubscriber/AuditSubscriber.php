@@ -2,13 +2,11 @@
 
 namespace DH\DoctrineAuditBundle\EventSubscriber;
 
-use DH\DoctrineAuditBundle\AuditConfiguration;
+use DH\DoctrineAuditBundle\AuditManager;
 use DH\DoctrineAuditBundle\DBAL\AuditLogger;
-use DH\DoctrineAuditBundle\User\UserInterface;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Logging\LoggerChain;
 use Doctrine\DBAL\Logging\SQLLogger;
-use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
@@ -16,45 +14,19 @@ use Doctrine\ORM\Events;
 
 class AuditSubscriber implements EventSubscriber
 {
-    private $configuration;
+    /**
+     * @var AuditManager
+     */
+    private $manager;
 
     /**
      * @var ?SQLLogger
      */
     private $loggerBackup;
 
-    private $inserted = [];     // [$source, $changeset]
-    private $updated = [];      // [$source, $changeset]
-    private $removed = [];      // [$source, $id]
-    private $associated = [];   // [$source, $target, $mapping]
-    private $dissociated = [];  // [$source, $target, $id, $mapping]
-
-    public function __construct(AuditConfiguration $configuration)
+    public function __construct(AuditManager $manager)
     {
-        $this->configuration = $configuration;
-    }
-
-    /**
-     * Handles soft-delete events from Gedmo\SoftDeleteable filter.
-     *
-     * @see https://symfony.com/doc/current/bundles/StofDoctrineExtensionsBundle/index.html
-     *
-     * @param LifecycleEventArgs $args
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    public function preSoftDelete(LifecycleEventArgs $args): void
-    {
-        $entity = $args->getEntity();
-        $em = $args->getEntityManager();
-
-        if ($this->configuration->isAudited($entity)) {
-            $this->removed[] = [
-                $entity,
-                $this->id($em, $entity),
-            ];
-        }
+        $this->manager = $manager;
     }
 
     /**
@@ -77,416 +49,45 @@ class AuditSubscriber implements EventSubscriber
         $this->loggerBackup = $em->getConnection()->getConfiguration()->getSQLLogger();
         $loggerChain = new LoggerChain();
         $loggerChain->addLogger(new AuditLogger(function () use ($em) {
-            $this->flush($em);
+            // flushes pending data
+            $em->getConnection()->getConfiguration()->setSQLLogger($this->loggerBackup);
+            $uow = $em->getUnitOfWork();
+
+            $this->manager->processInsertions($em, $uow);
+            $this->manager->processUpdates($em, $uow);
+            $this->manager->processAssociations($em);
+            $this->manager->processDissociations($em);
+            $this->manager->processDeletions($em);
+
+            $this->manager->reset();
         }));
+
         if ($this->loggerBackup instanceof SQLLogger) {
             $loggerChain->addLogger($this->loggerBackup);
         }
+
         $em->getConnection()->getConfiguration()->setSQLLogger($loggerChain);
 
-        $this->collectScheduledInsertions($uow);
-        $this->collectScheduledUpdates($uow);
-        $this->collectScheduledDeletions($uow, $em);
-        $this->collectScheduledCollectionUpdates($uow, $em);
-        $this->collectScheduledCollectionDeletions($uow, $em);
+        $this->manager->collectScheduledInsertions($uow);
+        $this->manager->collectScheduledUpdates($uow);
+        $this->manager->collectScheduledDeletions($uow, $em);
+        $this->manager->collectScheduledCollectionUpdates($uow, $em);
+        $this->manager->collectScheduledCollectionDeletions($uow, $em);
     }
 
     /**
-     * Flushes pending data.
+     * Handles soft-delete events from Gedmo\SoftDeleteable filter.
      *
-     * @param EntityManager $em
+     * @see https://symfony.com/doc/current/bundles/StofDoctrineExtensionsBundle/index.html
+     *
+     * @param LifecycleEventArgs $args
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    private function flush(EntityManager $em): void
+    public function preSoftDelete(LifecycleEventArgs $args): void
     {
-        $em->getConnection()->getConfiguration()->setSQLLogger($this->loggerBackup);
-        $uow = $em->getUnitOfWork();
-
-        $this->processInsertions($em, $uow);
-        $this->processUpdates($em, $uow);
-        $this->processAssociations($em);
-        $this->processDissociations($em);
-        $this->processDeletions($em);
-
-        $this->inserted = [];
-        $this->updated = [];
-        $this->removed = [];
-        $this->associated = [];
-        $this->dissociated = [];
-    }
-
-    /**
-     * Adds an insert entry to the audit table.
-     *
-     * @param EntityManager $em
-     * @param object        $entity
-     * @param array         $ch
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    private function insert(EntityManager $em, $entity, array $ch): void
-    {
-        $meta = $em->getClassMetadata(\get_class($entity));
-        $this->audit($em, [
-            'action' => 'insert',
-            'blame' => $this->blame(),
-            'diff' => $this->diff($em, $entity, $ch),
-            'table' => $meta->table['name'],
-            'schema' => $meta->table['schema'] ?? null,
-            'id' => $this->id($em, $entity),
-        ]);
-    }
-
-    /**
-     * Adds an update entry to the audit table.
-     *
-     * @param EntityManager $em
-     * @param object        $entity
-     * @param array         $ch
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    private function update(EntityManager $em, $entity, array $ch): void
-    {
-        $diff = $this->diff($em, $entity, $ch);
-        if (!$diff) {
-            return; // if there is no entity diff, do not log it
-        }
-        $meta = $em->getClassMetadata(\get_class($entity));
-        $this->audit($em, [
-            'action' => 'update',
-            'blame' => $this->blame(),
-            'diff' => $diff,
-            'table' => $meta->table['name'],
-            'schema' => $meta->table['schema'] ?? null,
-            'id' => $this->id($em, $entity),
-        ]);
-    }
-
-    /**
-     * Adds a remove entry to the audit table.
-     *
-     * @param EntityManager $em
-     * @param object        $entity
-     * @param mixed         $id
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    private function remove(EntityManager $em, $entity, $id): void
-    {
-        $meta = $em->getClassMetadata(\get_class($entity));
-        $this->audit($em, [
-            'action' => 'remove',
-            'blame' => $this->blame(),
-            'diff' => $this->assoc($em, $entity, $id),
-            'table' => $meta->table['name'],
-            'schema' => $meta->table['schema'] ?? null,
-            'id' => $id,
-        ]);
-    }
-
-    /**
-     * Adds an association entry to the audit table.
-     *
-     * @param EntityManager $em
-     * @param object        $source
-     * @param object        $target
-     * @param array         $mapping
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    private function associate(EntityManager $em, $source, $target, array $mapping): void
-    {
-        $this->associateOrDissociate('associate', $em, $source, $target, $mapping);
-    }
-
-    /**
-     * Adds a dissociation entry to the audit table.
-     *
-     * @param EntityManager $em
-     * @param object        $source
-     * @param object        $target
-     * @param array         $mapping
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    private function dissociate(EntityManager $em, $source, $target, array $mapping): void
-    {
-        $this->associateOrDissociate('dissociate', $em, $source, $target, $mapping);
-    }
-
-    /**
-     * Adds an association entry to the audit table.
-     *
-     * @param string        $type
-     * @param EntityManager $em
-     * @param object        $source
-     * @param object        $target
-     * @param array         $mapping
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    private function associateOrDissociate(string $type, EntityManager $em, $source, $target, array $mapping): void
-    {
-        $meta = $em->getClassMetadata(\get_class($source));
-        $data = [
-            'action' => $type,
-            'blame' => $this->blame(),
-            'diff' => [
-                'source' => $this->assoc($em, $source),
-                'target' => $this->assoc($em, $target),
-            ],
-            'table' => $meta->table['name'],
-            'schema' => $meta->table['schema'] ?? null,
-            'id' => $this->id($em, $source),
-        ];
-
-        if (isset($mapping['joinTable']['name'])) {
-            $data['diff']['table'] = $mapping['joinTable']['name'];
-        }
-
-        $this->audit($em, $data);
-    }
-
-    /**
-     * Adds an entry to the audit table.
-     *
-     * @param EntityManager $em
-     * @param array         $data
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     */
-    private function audit(EntityManager $em, array $data): void
-    {
-        $schema = $data['schema'] ? $data['schema'].'.' : '';
-        $auditTable = $schema.$this->configuration->getTablePrefix().$data['table'].$this->configuration->getTableSuffix();
-        $fields = [
-            'type' => ':type',
-            'object_id' => ':object_id',
-            'diffs' => ':diffs',
-            'blame_id' => ':blame_id',
-            'blame_user' => ':blame_user',
-            'ip' => ':ip',
-            'created_at' => ':created_at',
-        ];
-
-        $query = sprintf(
-            'INSERT INTO %s (%s) VALUES (%s)',
-            $auditTable,
-            implode(', ', array_keys($fields)),
-            implode(', ', array_values($fields))
-        );
-
-        $statement = $em->getConnection()->prepare($query);
-
-        $dt = new \DateTime('now', new \DateTimeZone('UTC'));
-        $statement->bindValue('type', $data['action']);
-        $statement->bindValue('object_id', $data['id']);
-        $statement->bindValue('diffs', json_encode($data['diff']));
-        $statement->bindValue('blame_id', $data['blame']['user_id']);
-        $statement->bindValue('blame_user', $data['blame']['username']);
-        $statement->bindValue('ip', $data['blame']['client_ip']);
-        $statement->bindValue('created_at', $dt->format('Y-m-d H:i:s'));
-        $statement->execute();
-    }
-
-    /**
-     * Returns the primary key value of an entity.
-     *
-     * @param EntityManager $em
-     * @param object        $entity
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     *
-     * @return mixed
-     */
-    private function id(EntityManager $em, $entity)
-    {
-        $meta = $em->getClassMetadata(\get_class($entity));
-        $pk = $meta->getSingleIdentifierFieldName();
-
-        if (!isset($meta->fieldMappings[$pk])) {
-            // Primary key is not part of fieldMapping
-            // @see https://github.com/DamienHarper/DoctrineAuditBundle/issues/40
-            // @see https://www.doctrine-project.org/projects/doctrine-orm/en/latest/tutorials/composite-primary-keys.html#identity-through-foreign-entities
-            // We try to get it from associationMapping (will throw a MappingException if not available)
-            $targetEntity = $meta->getReflectionProperty($pk)->getValue($entity);
-
-            $mapping = $meta->getAssociationMapping($pk);
-            $meta = $em->getClassMetadata($mapping['targetEntity']);
-            $pk = $meta->getSingleIdentifierFieldName();
-            $type = Type::getType($meta->fieldMappings[$pk]['type']);
-
-            return $this->value($em, $type, $meta->getReflectionProperty($pk)->getValue($targetEntity));
-        }
-
-        $type = Type::getType($meta->fieldMappings[$pk]['type']);
-
-        return $this->value($em, $type, $meta->getReflectionProperty($pk)->getValue($entity));
-    }
-
-    /**
-     * Computes a usable diff.
-     *
-     * @param EntityManager $em
-     * @param object        $entity
-     * @param array         $ch
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     *
-     * @return array
-     */
-    private function diff(EntityManager $em, $entity, array $ch): array
-    {
-        $meta = $em->getClassMetadata(\get_class($entity));
-        $diff = [];
-        foreach ($ch as $fieldName => list($old, $new)) {
-            if ($meta->hasField($fieldName) && !isset($meta->embeddedClasses[$fieldName]) &&
-                $this->configuration->isAuditedField($entity, $fieldName)
-            ) {
-                $mapping = $meta->fieldMappings[$fieldName];
-                $type = Type::getType($mapping['type']);
-                $o = $this->value($em, $type, $old);
-                $n = $this->value($em, $type, $new);
-                if ($o !== $n) {
-                    $diff[$fieldName] = [
-                        'old' => $o,
-                        'new' => $n,
-                    ];
-                }
-            } elseif ($meta->hasAssociation($fieldName) &&
-                $meta->isSingleValuedAssociation($fieldName) &&
-                $this->configuration->isAuditedField($entity, $fieldName)
-            ) {
-                $o = $this->assoc($em, $old);
-                $n = $this->assoc($em, $new);
-                if ($o !== $n) {
-                    $diff[$fieldName] = [
-                        'old' => $o,
-                        'new' => $n,
-                    ];
-                }
-            }
-        }
-
-        return $diff;
-    }
-
-    /**
-     * Returns an array describing an association.
-     *
-     * @param EntityManager $em
-     * @param object        $association
-     * @param mixed         $id
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     *
-     * @return array
-     */
-    private function assoc(EntityManager $em, $association = null, $id = null): ?array
-    {
-        if (null === $association) {
-            return null;
-        }
-
-        $em->getUnitOfWork()->initializeObject($association); // ensure that proxies are initialized
-        $meta = $em->getClassMetadata(\get_class($association));
-        $pkName = $meta->getSingleIdentifierFieldName();
-        $pkValue = $id ?? $this->id($em, $association);
-        if (method_exists($association, '__toString')) {
-            $label = (string) $association;
-        } else {
-            $label = \get_class($association).'#'.$pkValue;
-        }
-
-        return [
-            'label' => $label,
-            'class' => $meta->name,
-            'table' => $meta->table['name'],
-            $pkName => $pkValue,
-        ];
-    }
-
-    /**
-     * Type converts the input value and returns it.
-     *
-     * @param EntityManager $em
-     * @param Type          $type
-     * @param mixed         $value
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     *
-     * @return mixed
-     */
-    private function value(EntityManager $em, Type $type, $value)
-    {
-        if (null === $value) {
-            return null;
-        }
-
-        $platform = $em->getConnection()->getDatabasePlatform();
-
-        switch ($type->getName()) {
-            case Type::DECIMAL:
-            case Type::BIGINT:
-                $convertedValue = (string) $value;
-
-                break;
-            case Type::INTEGER:
-            case Type::SMALLINT:
-                $convertedValue = (int) $value;
-
-                break;
-            case Type::FLOAT:
-            case Type::BOOLEAN:
-                $convertedValue = $type->convertToPHPValue($value, $platform);
-
-                break;
-            default:
-                $convertedValue = $type->convertToDatabaseValue($value, $platform);
-        }
-
-        return $convertedValue;
-    }
-
-    /**
-     * Blames an audit operation.
-     *
-     * @return array
-     */
-    private function blame(): array
-    {
-        $user_id = null;
-        $username = null;
-        $client_ip = null;
-
-        $request = $this->configuration->getRequestStack()->getCurrentRequest();
-        if (null !== $request) {
-            $client_ip = $request->getClientIp();
-        }
-
-        $user = $this->configuration->getUserProvider()->getUser();
-        if ($user instanceof UserInterface) {
-            $user_id = $user->getId();
-            $username = $user->getUsername();
-        }
-
-        return [
-            'user_id' => $user_id,
-            'username' => $username,
-            'client_ip' => $client_ip,
-        ];
+        $this->manager->softDelete($args->getEntityManager(), $args->getEntity());
     }
 
     /**
@@ -495,188 +96,5 @@ class AuditSubscriber implements EventSubscriber
     public function getSubscribedEvents(): array
     {
         return [Events::onFlush, 'preSoftDelete'];
-    }
-
-    /**
-     * @param \Doctrine\ORM\UnitOfWork $uow
-     */
-    private function collectScheduledInsertions(\Doctrine\ORM\UnitOfWork $uow): void
-    {
-        foreach ($uow->getScheduledEntityInsertions() as $entity) {
-            if ($this->configuration->isAudited($entity)) {
-                $this->inserted[] = [
-                    $entity,
-                    $uow->getEntityChangeSet($entity),
-                ];
-            }
-        }
-    }
-
-    /**
-     * @param \Doctrine\ORM\UnitOfWork $uow
-     */
-    private function collectScheduledUpdates(\Doctrine\ORM\UnitOfWork $uow): void
-    {
-        foreach ($uow->getScheduledEntityUpdates() as $entity) {
-            if ($this->configuration->isAudited($entity)) {
-                $this->updated[] = [
-                    $entity,
-                    $uow->getEntityChangeSet($entity),
-                ];
-            }
-        }
-    }
-
-    /**
-     * @param \Doctrine\ORM\UnitOfWork $uow
-     * @param EntityManager $em
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    private function collectScheduledDeletions(\Doctrine\ORM\UnitOfWork $uow, EntityManager $em): void
-    {
-        foreach ($uow->getScheduledEntityDeletions() as $entity) {
-            if ($this->configuration->isAudited($entity)) {
-                $uow->initializeObject($entity);
-                $this->removed[] = [
-                    $entity,
-                    $this->id($em, $entity),
-                ];
-            }
-        }
-    }
-
-    /**
-     * @param \Doctrine\ORM\UnitOfWork $uow
-     * @param EntityManager $em
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    private function collectScheduledCollectionUpdates(\Doctrine\ORM\UnitOfWork $uow, EntityManager $em): void
-    {
-        foreach ($uow->getScheduledCollectionUpdates() as $collection) {
-            if ($this->configuration->isAudited($collection->getOwner())) {
-                $mapping = $collection->getMapping();
-                foreach ($collection->getInsertDiff() as $entity) {
-                    if ($this->configuration->isAudited($entity)) {
-                        $this->associated[] = [
-                            $collection->getOwner(),
-                            $entity,
-                            $mapping,
-                        ];
-                    }
-                }
-                foreach ($collection->getDeleteDiff() as $entity) {
-                    if ($this->configuration->isAudited($entity)) {
-                        $this->dissociated[] = [
-                            $collection->getOwner(),
-                            $entity,
-                            $this->id($em, $entity),
-                            $mapping,
-                        ];
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * @param \Doctrine\ORM\UnitOfWork $uow
-     * @param EntityManager $em
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    private function collectScheduledCollectionDeletions(\Doctrine\ORM\UnitOfWork $uow, EntityManager $em): void
-    {
-        foreach ($uow->getScheduledCollectionDeletions() as $collection) {
-            if ($this->configuration->isAudited($collection->getOwner())) {
-                $mapping = $collection->getMapping();
-                foreach ($collection->toArray() as $entity) {
-                    if (!$this->configuration->isAudited($entity)) {
-                        continue;
-                    }
-                    $this->dissociated[] = [
-                        $collection->getOwner(),
-                        $entity,
-                        $this->id($em, $entity),
-                        $mapping,
-                    ];
-                }
-            }
-        }
-    }
-
-    /**
-     * @param EntityManager $em
-     * @param \Doctrine\ORM\UnitOfWork $uow
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    private function processInsertions(EntityManager $em, \Doctrine\ORM\UnitOfWork $uow): void
-    {
-        foreach ($this->inserted as list($entity, $ch)) {
-            // the changeset might be updated from UOW extra updates
-            $ch = array_merge($ch, $uow->getEntityChangeSet($entity));
-            $this->insert($em, $entity, $ch);
-        }
-    }
-
-    /**
-     * @param EntityManager $em
-     * @param \Doctrine\ORM\UnitOfWork $uow
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    private function processUpdates(EntityManager $em, \Doctrine\ORM\UnitOfWork $uow): void
-    {
-        foreach ($this->updated as list($entity, $ch)) {
-            // the changeset might be updated from UOW extra updates
-            $ch = array_merge($ch, $uow->getEntityChangeSet($entity));
-            $this->update($em, $entity, $ch);
-        }
-    }
-
-    /**
-     * @param EntityManager $em
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    private function processAssociations(EntityManager $em): void
-    {
-        foreach ($this->associated as list($source, $target, $mapping)) {
-            $this->associate($em, $source, $target, $mapping);
-        }
-    }
-
-    /**
-     * @param EntityManager $em
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    private function processDissociations(EntityManager $em): void
-    {
-        foreach ($this->dissociated as list($source, $target, $id, $mapping)) {
-            $this->dissociate($em, $source, $target, $mapping);
-        }
-    }
-
-    /**
-     * @param EntityManager $em
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    private function processDeletions(EntityManager $em): void
-    {
-        foreach ($this->removed as list($entity, $id)) {
-            $this->remove($em, $entity, $id);
-        }
     }
 }

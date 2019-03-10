@@ -1,24 +1,28 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests;
+namespace DH\DoctrineAuditBundle\Tests\Reader;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
-use DH\DoctrineAuditBundle\AuditEntry;
-use DH\DoctrineAuditBundle\AuditReader;
+use DH\DoctrineAuditBundle\Reader\AuditEntry;
+use DH\DoctrineAuditBundle\Reader\AuditReader;
+use DH\DoctrineAuditBundle\Tests\CoreTest;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
 
 /**
- * @covers \DH\DoctrineAuditBundle\AuditEntry
- * @covers \DH\DoctrineAuditBundle\AuditReader
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
- * @covers \DH\DoctrineAuditBundle\DoctrineHelper
- * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
+ * @covers \DH\DoctrineAuditBundle\AuditManager
+ * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
- * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
+ * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
+ * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
+ * @covers \DH\DoctrineAuditBundle\Reader\AuditEntry
+ * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
+ * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
+ * @covers \DH\DoctrineAuditBundle\User\User
  */
 class AuditReaderTest extends CoreTest
 {
@@ -283,10 +287,5 @@ class AuditReaderTest extends CoreTest
         $audits = $reader->filterBy(AuditReader::UPDATE)->getAudit(Author::class, 1);
 
         $this->assertCount(0, $audits, 'result count is ok.');
-    }
-
-    protected function getReader(AuditConfiguration $configuration = null): AuditReader
-    {
-        return new AuditReader($configuration ?? $this->createAuditConfiguration(), $this->getEntityManager());
     }
 }

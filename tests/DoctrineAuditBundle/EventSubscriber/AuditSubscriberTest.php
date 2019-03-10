@@ -2,9 +2,8 @@
 
 namespace DH\DoctrineAuditBundle\Tests\EventSubscriber;
 
-use DH\DoctrineAuditBundle\AuditConfiguration;
-use DH\DoctrineAuditBundle\AuditEntry;
-use DH\DoctrineAuditBundle\AuditReader;
+use DH\DoctrineAuditBundle\Reader\AuditEntry;
+use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Bike;
@@ -12,27 +11,20 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Car;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\DummyEntity;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\User;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Vehicle;
-use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use Symfony\Component\Security\Core\Security;
 
 /**
- * @covers \DH\DoctrineAuditBundle\AuditEntry
- * @covers \DH\DoctrineAuditBundle\AuditReader
- * @covers \DH\DoctrineAuditBundle\DoctrineHelper
- * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
+ * @covers \DH\DoctrineAuditBundle\AuditManager
+ * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
+ * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
+ * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
+ * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
+ * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
+ * @covers \DH\DoctrineAuditBundle\Reader\AuditEntry
+ * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
  * @covers \DH\DoctrineAuditBundle\User\User
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
- * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
- * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  */
 class AuditSubscriberTest extends CoreTest
 {
@@ -231,7 +223,7 @@ class AuditSubscriberTest extends CoreTest
         ], $audits[0]->getDiffs(), 'int: null->24');
 
         $dummy->setLabel('int: 24->"24"');
-        $dummy->setIntValue("24");
+        $dummy->setIntValue('24');
         $em->persist($dummy);
         $em->flush();
 
@@ -903,50 +895,7 @@ class AuditSubscriberTest extends CoreTest
         $this->assertCount(0, [], 'no audits.');
     }
 
-    protected function createAuditConfiguration(array $options = []): AuditConfiguration
-    {
-        $container = new ContainerBuilder();
-        $security = new Security($container);
-        $tokenStorage = new TokenStorage();
-
-        $user = new User(1, 'dark.vador');
-        $user->setRoles(['ROLE_ADMIN']);
-        $tokenStorage->setToken(new UsernamePasswordToken($user, '12345', 'provider', $user->getRoles()));
-
-        $authorizationChecker = $this->getMockBuilder(AuthorizationCheckerInterface::class)->getMock();
-        $authorizationChecker
-            ->expects($this->any())
-            ->method('isGranted')
-            ->with('ROLE_PREVIOUS_ADMIN')
-            ->willReturn(true)
-        ;
-
-        $container->set('security.token_storage', $tokenStorage);
-        $container->set('security.authorization_checker', $authorizationChecker);
-
-        $requestStack = new RequestStack();
-        $requestStack->push(new Request([], [], [], [], [], ['REMOTE_ADDR' => '1.2.3.4']));
-
-        $auditConfiguration = new AuditConfiguration(
-            array_merge([
-                'table_prefix' => '',
-                'table_suffix' => '_audit',
-                'ignored_columns' => [],
-                'entities' => [],
-            ], $options),
-            new TokenStorageUserProvider($security),
-            $requestStack
-        );
-
-        return $auditConfiguration;
-    }
-
     protected function setupEntities(): void
     {
-    }
-
-    protected function getReader(AuditConfiguration $configuration = null): AuditReader
-    {
-        return new AuditReader($configuration ?? $this->createAuditConfiguration(), $this->getEntityManager());
     }
 }

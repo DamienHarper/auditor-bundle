@@ -15,7 +15,6 @@ use Symfony\Component\Security\Core\Security;
 /**
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
  * @covers \DH\DoctrineAuditBundle\User\User
- * @covers \DH\DoctrineAuditBundle\User\User
  */
 class TokenStorageUserProviderTest extends TestCase
 {

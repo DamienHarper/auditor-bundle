@@ -2,9 +2,9 @@
 
 namespace DH\DoctrineAuditBundle\Tests;
 
-use DH\DoctrineAuditBundle\AuditReader;
 use DH\DoctrineAuditBundle\DependencyInjection\DHDoctrineAuditExtension;
 use DH\DoctrineAuditBundle\DHDoctrineAuditBundle;
+use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver;
@@ -16,11 +16,11 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
 
 /**
- * @covers \DH\DoctrineAuditBundle\DHDoctrineAuditBundle
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
- * @covers \DH\DoctrineAuditBundle\AuditReader
  * @covers \DH\DoctrineAuditBundle\DependencyInjection\Configuration
  * @covers \DH\DoctrineAuditBundle\DependencyInjection\DHDoctrineAuditExtension
+ * @covers \DH\DoctrineAuditBundle\DHDoctrineAuditBundle
+ * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
  */
 class DHDoctrineAuditBundleTest extends TestCase

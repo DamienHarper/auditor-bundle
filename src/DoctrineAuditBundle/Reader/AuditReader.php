@@ -1,7 +1,8 @@
 <?php
 
-namespace DH\DoctrineAuditBundle;
+namespace DH\DoctrineAuditBundle\Reader;
 
+use DH\DoctrineAuditBundle\AuditConfiguration;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\EntityManagerInterface;
 

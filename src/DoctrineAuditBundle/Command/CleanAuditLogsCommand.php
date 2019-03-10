@@ -2,7 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Command;
 
-use DH\DoctrineAuditBundle\AuditReader;
+use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Symfony\Bridge\Doctrine\RegistryInterface;
@@ -43,14 +43,12 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
             return 0;
         }
 
-        // If you prefer to wait until the lock is released, use this:
-        // $this->lock(null, true);
-
         $io = new SymfonyStyle($input, $output);
 
         $keep = (int) $input->getArgument('keep');
         if ($keep <= 0) {
             $io->error("'keep' argument must be a positive number.");
+            $this->release();
 
             return 0;
         }
@@ -130,5 +128,10 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
     public function setContainer(ContainerInterface $container = null): void
     {
         $this->container = $container;
+    }
+
+    public function unlock()
+    {
+        return $this->release();
     }
 }

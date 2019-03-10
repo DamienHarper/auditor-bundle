@@ -1,6 +1,6 @@
 <?php
 
-namespace DH\DoctrineAuditBundle;
+namespace DH\DoctrineAuditBundle\Helper;
 
 use Doctrine\ORM\Proxy\Proxy;
 

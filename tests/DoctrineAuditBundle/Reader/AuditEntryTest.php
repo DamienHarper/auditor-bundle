@@ -1,12 +1,12 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests;
+namespace DH\DoctrineAuditBundle\Tests\Reader;
 
-use DH\DoctrineAuditBundle\AuditEntry;
+use DH\DoctrineAuditBundle\Reader\AuditEntry;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \DH\DoctrineAuditBundle\AuditEntry
+ * @covers \DH\DoctrineAuditBundle\Reader\AuditEntry
  */
 class AuditEntryTest extends TestCase
 {

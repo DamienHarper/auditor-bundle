@@ -3,8 +3,11 @@
 namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
+use DH\DoctrineAuditBundle\AuditManager;
 use DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber;
 use DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener;
+use DH\DoctrineAuditBundle\Helper\AuditHelper;
+use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\DBAL\Connection;
@@ -34,6 +37,8 @@ abstract class BaseTest extends TestCase
     protected $fixturesPath;
 
     protected $auditConfiguration;
+
+    protected $auditManager;
 
     /**
      * @var SchemaTool
@@ -157,6 +162,9 @@ abstract class BaseTest extends TestCase
         $connection = $this->_getConnection();
 
         $this->setAuditConfiguration($this->createAuditConfiguration());
+        $configuration = $this->getAuditConfiguration();
+
+        $this->auditManager = new AuditManager($configuration, new AuditHelper($configuration));
 
         // get rid of more global state
         $evm = $connection->getEventManager();
@@ -165,7 +173,7 @@ abstract class BaseTest extends TestCase
                 $evm->removeEventListener([$event], $listener);
             }
         }
-        $evm->addEventSubscriber(new AuditSubscriber($this->getAuditConfiguration()));
+        $evm->addEventSubscriber(new AuditSubscriber($this->auditManager));
         $evm->addEventSubscriber(new CreateSchemaListener($this->getAuditConfiguration()));
         $evm->addEventSubscriber(new Gedmo\SoftDeleteable\SoftDeleteableListener());
 
@@ -230,5 +238,10 @@ abstract class BaseTest extends TestCase
         }
 
         return self::$conn;
+    }
+
+    protected function getReader(AuditConfiguration $configuration = null): AuditReader
+    {
+        return new AuditReader($configuration ?? $this->createAuditConfiguration(), $this->getEntityManager());
     }
 }
