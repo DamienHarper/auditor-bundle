@@ -7,6 +7,8 @@ use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Issues\CoreCase;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Issues\DieselCase;
 
 /**
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
@@ -42,7 +44,7 @@ class AuditHelperTest extends CoreTest
             'id' => 1,
         ];
 
-        $this->assertSame($expected, $helper->summarize($em, $author),'AuditHelper::summarize ok');
+        $this->assertSame($expected, $helper->summarize($em, $author), 'AuditHelper::summarize ok');
 
         $post = new Post();
         $post
@@ -60,7 +62,7 @@ class AuditHelperTest extends CoreTest
             'id' => 1,
         ];
 
-        $this->assertSame($expected, $helper->summarize($em, $post),'AuditHelper::summarize is ok.');
+        $this->assertSame($expected, $helper->summarize($em, $post), 'AuditHelper::summarize is ok.');
     }
 
     public function testId(): void
@@ -77,6 +79,226 @@ class AuditHelperTest extends CoreTest
         ;
 
         $this->assertSame(1, $helper->id($em, $author), 'AuditHelper::id() is ok.');
+
+        $dieselCore = new CoreCase();
+        $dieselCore->type = 'type1';
+        $dieselCore->status = 'status1';
+
+        $dieselCase = new DieselCase();
+        $dieselCase->setName('name1');
+        $dieselCase->coreCase = $dieselCore;
+
+        $em->persist($dieselCore);
+        $em->persist($dieselCase);
+        $em->flush();
+
+        $this->assertSame(1, $helper->id($em, $dieselCore));
+        $this->assertSame(1, $helper->id($em, $dieselCase));
+
+        $dieselCore = new CoreCase();
+        $dieselCore->type = 'type2';
+        $dieselCore->status = 'status2';
+
+        $dieselCase->coreCase = $dieselCore;
+
+        $em->persist($dieselCore);
+        $em->persist($dieselCase);
+        $em->flush();
+
+        $this->assertSame(2, $helper->id($em, $dieselCore));
+        $this->assertSame(2, $helper->id($em, $dieselCase));
+    }
+
+    public function testDiffInsert(): void
+    {
+        $em = $this->getEntityManager();
+        $configuration = $this->getAuditConfiguration();
+        $helper = new AuditHelper($configuration);
+
+        $author = new Author();
+        $author
+            ->setFullname('John Doe')
+            ->setEmail('john.doe@gmail.com')
+        ;
+
+        $changeset = [
+            'fullname' => [
+                null,
+                'John Doe',
+            ],
+            'email' => [
+                null,
+                'john.doe@gmail.com',
+            ],
+        ];
+
+        $expected = [
+            'fullname' => [
+                'old' => null,
+                'new' => 'John Doe',
+            ],
+            'email' => [
+                'old' => null,
+                'new' => 'john.doe@gmail.com',
+            ],
+        ];
+
+        $this->assertSame($expected, $helper->diff($em, $author, $changeset), 'AuditHelper::diff() / insert is ok.');
+    }
+
+    public function testDiffUpdate(): void
+    {
+        $em = $this->getEntityManager();
+        $configuration = $this->getAuditConfiguration();
+        $helper = new AuditHelper($configuration);
+
+        $author = new Author();
+        $author
+            ->setFullname('John Doe')
+            ->setEmail('john.doe@gmail.com')
+        ;
+
+        $changeset = [
+            'fullname' => [
+                'John Doe',
+                'Dark Vador',
+            ],
+            'email' => [
+                'john.doe@gmail.com',
+                'dark.vador@gmail.com',
+            ],
+        ];
+
+        $expected = [
+            'fullname' => [
+                'old' => 'John Doe',
+                'new' => 'Dark Vador',
+            ],
+            'email' => [
+                'old' => 'john.doe@gmail.com',
+                'new' => 'dark.vador@gmail.com',
+            ],
+        ];
+
+        $this->assertSame($expected, $helper->diff($em, $author, $changeset), 'AuditHelper::diff() / update is ok.');
+    }
+
+    public function testDiffHonorsGloballyIgnoredColumns(): void
+    {
+        $em = $this->getEntityManager();
+        $configuration = $this->getAuditConfiguration();
+        $configuration = new AuditConfiguration(
+            [
+                'table_prefix' => '',
+                'table_suffix' => '_audit',
+                'ignored_columns' => [
+                    'created_at',
+                    'updated_at',
+                ],
+                'entities' => [
+                    Post::class => null,
+                ],
+            ],
+            $configuration->getUserProvider(),
+            $configuration->getRequestStack()
+        );
+        $helper = new AuditHelper($configuration);
+
+        $now = new \DateTime('now');
+        $post = new Post();
+        $post
+            ->setTitle('First post')
+            ->setBody('What a nice first post!')
+            ->setCreatedAt($now)
+        ;
+
+        $changeset = [
+            'title' => [
+                null,
+                'First post',
+            ],
+            'body' => [
+                null,
+                'What a nice first post!',
+            ],
+            'created_at' => [
+                null,
+                $now,
+            ],
+        ];
+
+        $expected = [
+            'title' => [
+                'old' => null,
+                'new' => 'First post',
+            ],
+            'body' => [
+                'old' => null,
+                'new' => 'What a nice first post!',
+            ],
+        ];
+
+        $this->assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() honors globally ignored columns.');
+    }
+
+    public function testDiffHonorsLocallyIgnoredColumns(): void
+    {
+        $em = $this->getEntityManager();
+        $configuration = $this->getAuditConfiguration();
+        $configuration = new AuditConfiguration(
+            [
+                'table_prefix' => '',
+                'table_suffix' => '_audit',
+                'ignored_columns' => [],
+                'entities' => [
+                    Post::class => [
+                        'ignored_columns' => [
+                            'created_at',
+                            'updated_at',
+                        ],
+                    ],
+                ],
+            ],
+            $configuration->getUserProvider(),
+            $configuration->getRequestStack()
+        );
+        $helper = new AuditHelper($configuration);
+
+        $now = new \DateTime('now');
+        $post = new Post();
+        $post
+            ->setTitle('First post')
+            ->setBody('What a nice first post!')
+            ->setCreatedAt($now)
+        ;
+
+        $changeset = [
+            'title' => [
+                null,
+                'First post',
+            ],
+            'body' => [
+                null,
+                'What a nice first post!',
+            ],
+            'created_at' => [
+                null,
+                $now,
+            ],
+        ];
+
+        $expected = [
+            'title' => [
+                'old' => null,
+                'new' => 'First post',
+            ],
+            'body' => [
+                'old' => null,
+                'new' => 'What a nice first post!',
+            ],
+        ];
+
+        $this->assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() honors locally ignored columns.');
     }
 
     public function testGetConfiguration(): void
