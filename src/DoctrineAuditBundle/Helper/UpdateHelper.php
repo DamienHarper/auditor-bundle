@@ -4,7 +4,6 @@ namespace DH\DoctrineAuditBundle\Helper;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\AuditManager;
-use DH\DoctrineAuditBundle\User\UserInterface;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
@@ -95,7 +94,7 @@ class UpdateHelper
                     foreach ($expected[$column->getName()]['options'] as $key => $value) {
                         $method = 'get'.ucfirst($key);
                         if (method_exists($column, $method)) {
-                            if ($value !== $column->$method()) {
+                            if ($value !== $column->{$method}()) {
                                 $update[] = [
                                     'column' => $column,
                                     'metadata' => $expected[$column->getName()],
@@ -115,7 +114,7 @@ class UpdateHelper
         }
 
         foreach ($expected as $column => $struct) {
-            if (!\in_array($column, $processed)) {
+            if (!\in_array($column, $processed, true)) {
                 $add[] = [
                     'column' => $column,
                     'metadata' => $struct,

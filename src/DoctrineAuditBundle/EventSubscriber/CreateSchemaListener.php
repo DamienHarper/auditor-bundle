@@ -2,7 +2,6 @@
 
 namespace DH\DoctrineAuditBundle\EventSubscriber;
 
-use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\AuditManager;
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
 use Doctrine\Common\EventSubscriber;

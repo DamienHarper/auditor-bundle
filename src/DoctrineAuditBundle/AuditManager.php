@@ -3,7 +3,6 @@
 namespace DH\DoctrineAuditBundle;
 
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
-use DH\DoctrineAuditBundle\Helper\UpdateHelper;
 use Doctrine\ORM\EntityManager;
 
 class AuditManager

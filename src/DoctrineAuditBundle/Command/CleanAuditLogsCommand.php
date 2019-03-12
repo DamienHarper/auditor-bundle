@@ -111,7 +111,7 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
                 $progressBar->advance();
             }
 
-            $progressBar->setMessage("Cleaning audit tables... (<info>done</info>)");
+            $progressBar->setMessage('Cleaning audit tables... (<info>done</info>)');
             $progressBar->display();
 
             $io->newLine(2);

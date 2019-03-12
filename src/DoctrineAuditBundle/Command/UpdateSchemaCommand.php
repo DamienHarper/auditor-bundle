@@ -4,19 +4,13 @@ namespace DH\DoctrineAuditBundle\Command;
 
 use DH\DoctrineAuditBundle\AuditManager;
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
-use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
-use Doctrine\DBAL\Types\Type;
-use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
 use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -49,27 +43,27 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
         $io = new SymfonyStyle($input, $output);
 
         /**
-         * @var AuditManager $manager
+         * @var AuditManager
          */
         $manager = $this->container->get('dh_doctrine_audit.manager');
 
         /**
-         * @var UpdateHelper $updater
+         * @var UpdateHelper
          */
         $updater = new UpdateHelper($manager);
 
         /**
-         * @var RegistryInterface $registry
+         * @var RegistryInterface
          */
         $registry = $this->container->get('doctrine');
 
         /**
-         * @var Connection $connection
+         * @var Connection
          */
         $connection = $registry->getManager()->getConnection();
 
         /**
-         * @var AbstractSchemaManager $schemaManager
+         * @var AbstractSchemaManager
          */
         $schemaManager = $connection->getSchemaManager();
         $tables = $schemaManager->listTables();
@@ -106,7 +100,7 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
             $progressBar->advance();
         }
 
-        $progressBar->setMessage("Processing audit tables... (<info>done</info>)");
+        $progressBar->setMessage('Processing audit tables... (<info>done</info>)');
         $progressBar->display();
 
         $io->newLine(2);

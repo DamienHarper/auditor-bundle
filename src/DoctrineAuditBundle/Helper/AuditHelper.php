@@ -4,8 +4,6 @@ namespace DH\DoctrineAuditBundle\Helper;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\User\UserInterface;
-use Doctrine\DBAL\Schema\Schema;
-use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
 
@@ -227,7 +225,7 @@ class AuditHelper
     }
 
     /**
-     * Return columns of audit tables
+     * Return columns of audit tables.
      *
      * @return array
      */
@@ -239,7 +237,7 @@ class AuditHelper
                 'options' => [
                     'autoincrement' => true,
                     'unsigned' => true,
-                ]
+                ],
             ],
             'type' => [
                 'type' => Type::STRING,
