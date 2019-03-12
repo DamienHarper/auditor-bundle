@@ -174,7 +174,7 @@ abstract class BaseTest extends TestCase
             }
         }
         $evm->addEventSubscriber(new AuditSubscriber($this->auditManager));
-        $evm->addEventSubscriber(new CreateSchemaListener($this->getAuditConfiguration()));
+        $evm->addEventSubscriber(new CreateSchemaListener($this->auditManager));
         $evm->addEventSubscriber(new Gedmo\SoftDeleteable\SoftDeleteableListener());
 
         $this->em = EntityManager::create($connection, $config);

@@ -57,12 +57,12 @@ class UpdateHelper
             $auditTable = $schema->createTable($auditTablename);
 
             // Add columns to audit table
-            foreach ($this->getAuditTableColumns() as $name => $struct) {
+            foreach ($this->manager->getHelper()->getAuditTableColumns() as $name => $struct) {
                 $auditTable->addColumn($name, $struct['type'], $struct['options']);
             }
 
             // Add indices to audit table
-            foreach ($this->getAuditTableIndices($auditTablename) as $column => $struct) {
+            foreach ($this->manager->getHelper()->getAuditTableIndices($auditTablename) as $column => $struct) {
                 if ('primary' === $struct['type']) {
                     $auditTable->setPrimaryKey([$column]);
                 } else {
