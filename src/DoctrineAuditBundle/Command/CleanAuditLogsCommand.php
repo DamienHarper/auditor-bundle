@@ -64,7 +64,7 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
         /**
          * @var Connection
          */
-        $connection = $registry->getEntityManager()->getConnection();
+        $connection = $registry->getManager()->getConnection();
 
         /**
          * @var AuditReader
@@ -110,6 +110,9 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
                 $progressBar->setMessage("Cleaning audit tables... (<info>{$auditTable}</info>)");
                 $progressBar->advance();
             }
+
+            $progressBar->setMessage("Cleaning audit tables... (<info>done</info>)");
+            $progressBar->display();
 
             $io->newLine(2);
 
