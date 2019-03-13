@@ -7,6 +7,7 @@ use DH\DoctrineAuditBundle\Exception\UpdateException;
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
+use Doctrine\ORM\EntityManager;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
@@ -44,24 +45,29 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
         $io = new SymfonyStyle($input, $output);
 
         /**
-         * @var AuditManager
+         * @var AuditManager $manager
          */
         $manager = $this->container->get('dh_doctrine_audit.manager');
 
         /**
-         * @var UpdateHelper
+         * @var UpdateHelper $updater
          */
         $updater = new UpdateHelper($manager);
 
         /**
-         * @var RegistryInterface
+         * @var RegistryInterface $registry
          */
         $registry = $this->container->get('doctrine');
 
         /**
-         * @var Connection
+         * @var EntityManager $em
          */
-        $connection = $registry->getManager()->getConnection();
+        $em = $registry->getManager();
+
+        /**
+         * @var Connection $connection
+         */
+        $connection = $em->getConnection();
 
         /**
          * @var AbstractSchemaManager
@@ -95,7 +101,7 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
             $progressBar->display();
 
             try {
-                $updater->updateAuditTable($schemaManager, $table, $registry->getManager());
+                $updater->updateAuditTable($schemaManager, $table, $em);
             } catch (UpdateException $e) {
                 $errors[] = $e->getMessage();
                 $io->error($e->getMessage());
