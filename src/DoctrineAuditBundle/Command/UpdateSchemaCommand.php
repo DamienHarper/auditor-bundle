@@ -45,27 +45,27 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
         $io = new SymfonyStyle($input, $output);
 
         /**
-         * @var AuditManager $manager
+         * @var AuditManager
          */
         $manager = $this->container->get('dh_doctrine_audit.manager');
 
         /**
-         * @var UpdateHelper $updater
+         * @var UpdateHelper
          */
         $updater = new UpdateHelper($manager);
 
         /**
-         * @var RegistryInterface $registry
+         * @var RegistryInterface
          */
         $registry = $this->container->get('doctrine');
 
         /**
-         * @var EntityManager $em
+         * @var EntityManager
          */
         $em = $registry->getManager();
 
         /**
-         * @var Connection $connection
+         * @var Connection
          */
         $connection = $em->getConnection();
 

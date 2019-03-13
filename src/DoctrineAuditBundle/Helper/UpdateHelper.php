@@ -35,10 +35,10 @@ class UpdateHelper
     }
 
     /**
-     * Creates an audit table
+     * Creates an audit table.
      *
      * @param Schema $schema
-     * @param Table $table
+     * @param Table  $table
      */
     public function createAuditTable(Schema $schema, Table $table): void
     {
@@ -82,8 +82,8 @@ class UpdateHelper
      * Ensures an audit table's structure is valid.
      *
      * @param AbstractSchemaManager $schemaManager
-     * @param Table $table
-     * @param EntityManager $em
+     * @param Table                 $table
+     * @param EntityManager         $em
      *
      * @throws UpdateException
      * @throws \Doctrine\DBAL\Schema\SchemaException
@@ -95,14 +95,16 @@ class UpdateHelper
 
         $table = $toSchema->getTable($table->getName());
         $columns = $schemaManager->listTableColumns($table->getName());
-        $expected = $this->manager->getHelper()->getAuditTableColumns();
+        $expectedColumns = $this->manager->getHelper()->getAuditTableColumns();
+        $expectedIndices = $this->manager->getHelper()->getAuditTableIndices($table->getName());
         $processed = [];
 
+        // process columns
         foreach ($columns as $column) {
-            if (array_key_exists($column->getName(), $expected)) {
+            if (array_key_exists($column->getName(), $expectedColumns)) {
                 // column is part of expected columns
                 $table->dropColumn($column->getName());
-                $table->addColumn($column->getName(), $expected[$column->getName()]['type'], $expected[$column->getName()]['options']);
+                $table->addColumn($column->getName(), $expectedColumns[$column->getName()]['type'], $expectedColumns[$column->getName()]['options']);
             } else {
                 // column is not part of expected columns so it has to be removed
                 $table->dropColumn($column->getName());
@@ -111,13 +113,23 @@ class UpdateHelper
             $processed[] = $column->getName();
         }
 
-        foreach ($expected as $column => $options) {
+        foreach ($expectedColumns as $column => $options) {
             if (!\in_array($column, $processed, true)) {
                 // expected column in not part of concrete ones so it's a new column, we need to add it
                 $table->addColumn($column, $options['type'], $options['options']);
             }
         }
 
+        // process indices
+        foreach ($expectedIndices as $column => $options) {
+            if ('primary' === $options['type']) {
+                $table->setPrimaryKey([$column]);
+            } else {
+                $table->addIndex([$column], $options['name']);
+            }
+        }
+
+        // apply changes
         $sql = $fromSchema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
         foreach ($sql as $query) {
             try {

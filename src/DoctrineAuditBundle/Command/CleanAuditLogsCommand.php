@@ -58,17 +58,17 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
         $until->modify('-'.$keep.' month');
 
         /**
-         * @var RegistryInterface $registry
+         * @var RegistryInterface
          */
         $registry = $this->container->get('doctrine');
 
         /**
-         * @var EntityManager $em
+         * @var EntityManager
          */
         $em = $registry->getManager();
 
         /**
-         * @var Connection $connection
+         * @var Connection
          */
         $connection = $em->getConnection();
 

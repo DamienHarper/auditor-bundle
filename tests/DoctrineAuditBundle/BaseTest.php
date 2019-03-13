@@ -58,7 +58,6 @@ abstract class BaseTest extends TestCase
     }
 
     /**
-     * @throws \Doctrine\Common\Persistence\Mapping\MappingException
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
      */
@@ -159,7 +158,7 @@ abstract class BaseTest extends TestCase
 
         Gedmo\DoctrineExtensions::registerAnnotations();
 
-        $connection = $this->_getConnection();
+        $connection = $this->getConnection();
 
         $this->setAuditConfiguration($this->createAuditConfiguration());
         $configuration = $this->getAuditConfiguration();
@@ -187,57 +186,68 @@ abstract class BaseTest extends TestCase
      *
      * @return null|Connection
      */
-    protected function _getConnection(): Connection
+    protected function getConnection(): Connection
     {
-        if (!isset(self::$conn)) {
-            if (isset(
-                $GLOBALS['db_type'],
-                $GLOBALS['db_username'],
-                $GLOBALS['db_password'],
-                $GLOBALS['db_host'],
-                $GLOBALS['db_name'],
-                $GLOBALS['db_port']
-            )) {
-                $params = [
-                    'driver' => $GLOBALS['db_type'],
-                    'user' => $GLOBALS['db_username'],
-                    'password' => $GLOBALS['db_password'],
-                    'host' => $GLOBALS['db_host'],
-                    'dbname' => $GLOBALS['db_name'],
-                    'port' => $GLOBALS['db_port'],
-                ];
+        $params = $this->getConnectionParameters();
 
-                $tmpParams = $params;
-                $dbname = $params['dbname'];
-                unset($tmpParams['dbname']);
+        if (isset(
+            $GLOBALS['db_type'],
+            $GLOBALS['db_username'],
+            $GLOBALS['db_password'],
+            $GLOBALS['db_host'],
+            $GLOBALS['db_name'],
+            $GLOBALS['db_port']
+        )) {
+            $tmpParams = $params;
+            $dbname = $params['dbname'];
+            unset($tmpParams['dbname']);
 
-                $conn = DriverManager::getConnection($tmpParams);
-                $platform = $conn->getDatabasePlatform();
+            $conn = DriverManager::getConnection($tmpParams);
+            $platform = $conn->getDatabasePlatform();
 
-                if ($platform->supportsCreateDropDatabase()) {
-                    $conn->getSchemaManager()->dropAndCreateDatabase($dbname);
-                } else {
-                    $sm = $conn->getSchemaManager();
-                    $schema = $sm->createSchema();
-                    $stmts = $schema->toDropSql($conn->getDatabasePlatform());
-                    foreach ($stmts as $stmt) {
-                        $conn->exec($stmt);
-                    }
-                }
-
-                $conn->close();
+            if ($platform->supportsCreateDropDatabase()) {
+                $conn->getSchemaManager()->dropAndCreateDatabase($dbname);
             } else {
-                $params = [
-                    'driver' => 'pdo_sqlite',
-                    'memory' => true,
-//                    'path' => 'db.sqlite',
-                ];
+                $sm = $conn->getSchemaManager();
+                $schema = $sm->createSchema();
+                $stmts = $schema->toDropSql($conn->getDatabasePlatform());
+                foreach ($stmts as $stmt) {
+                    $conn->exec($stmt);
+                }
             }
 
-            self::$conn = DriverManager::getConnection($params);
+            $conn->close();
         }
 
-        return self::$conn;
+        return DriverManager::getConnection($params);
+    }
+
+    protected function getConnectionParameters(): array
+    {
+        if (isset(
+            $GLOBALS['db_type'],
+            $GLOBALS['db_username'],
+            $GLOBALS['db_password'],
+            $GLOBALS['db_host'],
+            $GLOBALS['db_name'],
+            $GLOBALS['db_port']
+        )) {
+            $params = [
+                'driver' => $GLOBALS['db_type'],
+                'user' => $GLOBALS['db_username'],
+                'password' => $GLOBALS['db_password'],
+                'host' => $GLOBALS['db_host'],
+                'dbname' => $GLOBALS['db_name'],
+                'port' => $GLOBALS['db_port'],
+            ];
+        } else {
+            $params = [
+                'driver' => 'pdo_sqlite',
+                'memory' => true,
+            ];
+        }
+
+        return $params;
     }
 
     protected function getReader(AuditConfiguration $configuration = null): AuditReader
