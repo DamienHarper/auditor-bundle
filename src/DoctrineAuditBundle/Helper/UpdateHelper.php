@@ -34,6 +34,12 @@ class UpdateHelper
         return $this->manager->getConfiguration();
     }
 
+    /**
+     * Creates an audit table
+     *
+     * @param Schema $schema
+     * @param Table $table
+     */
     public function createAuditTable(Schema $schema, Table $table): void
     {
         $entityTablename = $table->getName();
@@ -72,6 +78,16 @@ class UpdateHelper
         }
     }
 
+    /**
+     * Ensures an audit table's structure is valid.
+     *
+     * @param AbstractSchemaManager $schemaManager
+     * @param Table $table
+     * @param EntityManager $em
+     *
+     * @throws UpdateException
+     * @throws \Doctrine\DBAL\Schema\SchemaException
+     */
     public function updateAuditTable(AbstractSchemaManager $schemaManager, Table $table, EntityManager $em): void
     {
         $fromSchema = $schemaManager->createSchema();
