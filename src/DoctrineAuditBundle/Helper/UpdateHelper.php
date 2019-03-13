@@ -4,10 +4,11 @@ namespace DH\DoctrineAuditBundle\Helper;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\AuditManager;
+use DH\DoctrineAuditBundle\Exception\UpdateException;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
-use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
 
 class UpdateHelper
@@ -71,101 +72,44 @@ class UpdateHelper
         }
     }
 
-    public function checkAuditTable(AbstractSchemaManager $schemaManager, Table $table): array
-    {
-        $columns = $schemaManager->listTableColumns($table->getName());
-        $expected = $this->manager->getHelper()->getAuditTableColumns();
-
-        $add = [];
-        $update = [];
-        $remove = [];
-        $processed = [];
-
-        foreach ($columns as $column) {
-            if (array_key_exists($column->getName(), $expected)) {
-                // column is part of expected columns, check its properties
-                if ($column->getType()->getName() !== $expected[$column->getName()]['type']) {
-                    // column type is different
-                    $update[] = [
-                        'column' => $column,
-                        'metadata' => $expected[$column->getName()],
-                    ];
-                } else {
-                    foreach ($expected[$column->getName()]['options'] as $key => $value) {
-                        $method = 'get'.ucfirst($key);
-                        if (method_exists($column, $method)) {
-                            if ($value !== $column->{$method}()) {
-                                $update[] = [
-                                    'column' => $column,
-                                    'metadata' => $expected[$column->getName()],
-                                ];
-                            }
-                        }
-                    }
-                }
-            } else {
-                // column is not part of expected columns so it has to be removed
-                $remove[] = [
-                    'column' => $column,
-                ];
-            }
-
-            $processed[] = $column->getName();
-        }
-
-        foreach ($expected as $column => $struct) {
-            if (!\in_array($column, $processed, true)) {
-                $add[] = [
-                    'column' => $column,
-                    'metadata' => $struct,
-                ];
-            }
-        }
-
-        $operations = [];
-
-        if (!empty($add)) {
-            $operations['add'] = $add;
-        }
-        if (!empty($update)) {
-            $operations['update'] = $update;
-        }
-        if (!empty($remove)) {
-            $operations['remove'] = $remove;
-        }
-
-        return $operations;
-    }
-
-    public function updateAuditTable(AbstractSchemaManager $schemaManager, Table $table, array $operations, EntityManager $em): void
+    public function updateAuditTable(AbstractSchemaManager $schemaManager, Table $table, EntityManager $em): void
     {
         $fromSchema = $schemaManager->createSchema();
         $toSchema = clone $fromSchema;
 
         $table = $toSchema->getTable($table->getName());
+        $columns = $schemaManager->listTableColumns($table->getName());
+        $expected = $this->manager->getHelper()->getAuditTableColumns();
+        $processed = [];
 
-        if (isset($operations['add'])) {
-            foreach ($operations['add'] as $operation) {
-                $table->addColumn($operation['column'], $operation['metadata']['type'], $operation['metadata']['options']);
+        foreach ($columns as $column) {
+            if (array_key_exists($column->getName(), $expected)) {
+                // column is part of expected columns
+                $table->dropColumn($column->getName());
+                $table->addColumn($column->getName(), $expected[$column->getName()]['type'], $expected[$column->getName()]['options']);
+            } else {
+                // column is not part of expected columns so it has to be removed
+                $table->dropColumn($column->getName());
             }
+
+            $processed[] = $column->getName();
         }
 
-        if (isset($operations['update'])) {
-            foreach ($operations['update'] as $operation) {
-                $table->changeColumn($operation['column']->getName(), $operation['metadata']['options']);
-            }
-        }
-
-        if (isset($operations['remove'])) {
-            foreach ($operations['remove'] as $operation) {
-                $table->dropColumn($operation['column']->getName());
+        foreach ($expected as $column => $options) {
+            if (!\in_array($column, $processed, true)) {
+                // expected column in not part of concrete ones so it's a new column, we need to add it
+                $table->addColumn($column, $options['type'], $options['options']);
             }
         }
 
         $sql = $fromSchema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
         foreach ($sql as $query) {
-            $statement = $em->getConnection()->prepare($query);
-            $statement->execute();
+            try {
+                $statement = $em->getConnection()->prepare($query);
+                $statement->execute();
+            } catch (\Exception $e) {
+                throw new UpdateException(sprintf('Failed to update/fix "%s" audit table.', $table->getName()));
+            }
         }
     }
 }

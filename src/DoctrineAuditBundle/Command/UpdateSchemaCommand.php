@@ -3,6 +3,7 @@
 namespace DH\DoctrineAuditBundle\Command;
 
 use DH\DoctrineAuditBundle\AuditManager;
+use DH\DoctrineAuditBundle\Exception\UpdateException;
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
@@ -68,6 +69,7 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
         $schemaManager = $connection->getSchemaManager();
         $tables = $schemaManager->listTables();
         $audits = [];
+        $errors = [];
 
         $regex = sprintf(
             '#^%s(.*)%s$#',
@@ -92,9 +94,11 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
             $progressBar->setMessage("Processing audit tables... (<info>{$table->getName()}</info>)");
             $progressBar->display();
 
-            $operations = $updater->checkAuditTable($schemaManager, $table);
-            if (isset($operations['add']) || isset($operations['update']) || isset($operations['remove'])) {
-                $updater->updateAuditTable($schemaManager, $table, $operations, $registry->getManager());
+            try {
+                $updater->updateAuditTable($schemaManager, $table, $registry->getManager());
+            } catch (UpdateException $e) {
+                $errors[] = $e->getMessage();
+                $io->error($e->getMessage());
             }
 
             $progressBar->advance();
@@ -105,13 +109,19 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
 
         $io->newLine(2);
 
-        $io->success('Success.');
+        if (empty($errors)) {
+            $io->success('Success.');
+        } else {
+            foreach ($errors as $error) {
+                $io->error($error);
+            }
+        }
 
         // if not released explicitly, Symfony releases the lock
         // automatically when the execution of the command ends
         $this->release();
 
-        return 0;
+        return (int) empty($errors);
     }
 
     public function setContainer(ContainerInterface $container = null): void
