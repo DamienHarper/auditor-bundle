@@ -123,8 +123,10 @@ class UpdateHelper
         // process indices
         foreach ($expectedIndices as $column => $options) {
             if ('primary' === $options['type']) {
+                $table->dropPrimaryKey();
                 $table->setPrimaryKey([$column]);
             } else {
+                $table->dropIndex($options['name']);
                 $table->addIndex([$column], $options['name']);
             }
         }

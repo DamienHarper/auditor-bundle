@@ -144,7 +144,7 @@ class UpdateHelperTest extends BaseTest
         }
 
         // new expected structure
-        $expected = [
+        $expectedColumns = [
             'id' => [
                 'type' => Type::INTEGER,
                 'options' => [
@@ -160,10 +160,10 @@ class UpdateHelperTest extends BaseTest
                 ],
             ],
             'object_id' => [
-                'type' => Type::INTEGER,
+                'type' => Type::STRING,
                 'options' => [
                     'notnull' => true,
-                    'unsigned' => true,
+                    'length' => 50,
                 ],
             ],
             'diffs' => [
@@ -189,14 +189,14 @@ class UpdateHelperTest extends BaseTest
                     'length' => 100,
                 ],
             ],
-            'ip' => [
-                'type' => Type::STRING,
-                'options' => [
-                    'default' => null,
-                    'notnull' => false,
-                    'length' => 45,
-                ],
-            ],
+//            'ip' => [
+//                'type' => Type::STRING,
+//                'options' => [
+//                    'default' => null,
+//                    'notnull' => false,
+//                    'length' => 45,
+//                ],
+//            ],
             'created_at' => [
                 'type' => Type::DATETIME,
                 'options' => [
@@ -220,10 +220,37 @@ class UpdateHelperTest extends BaseTest
             ],
         ];
 
+        $tablename = 'author_audit';
+        $expectedIndices = [
+            'id' => [
+                'type' => 'primary',
+            ],
+            'type' => [
+                'type' => 'index',
+                'name' => 'type_'.md5($tablename).'_idx',
+            ],
+            'object_id' => [
+                'type' => 'index',
+                'name' => 'object_id_'.md5($tablename).'_idx',
+            ],
+            'blame_id' => [
+                'type' => 'index',
+                'name' => 'blame_id_'.md5($tablename).'_idx',
+            ],
+            'created_at' => [
+                'type' => 'index',
+                'name' => 'created_at_'.md5($tablename).'_idx',
+            ],
+        ];
+
         $helper = $this->createMock(AuditHelper::class);
         $helper
             ->method('getAuditTableColumns')
-            ->willReturn($expected)
+            ->willReturn($expectedColumns)
+        ;
+        $helper
+            ->method('getAuditTableIndices')
+            ->willReturn($expectedIndices)
         ;
 
         $manager->setHelper($helper);
