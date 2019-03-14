@@ -3,6 +3,7 @@
 namespace DH\DoctrineAuditBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class AuditController extends AbstractController
@@ -10,7 +11,7 @@ class AuditController extends AbstractController
     /**
      * @Route("/audit", name="dh_doctrine_audit_list_audits", methods={"GET"})
      */
-    public function listAuditsAction()
+    public function listAuditsAction(): Response
     {
         $reader = $this->container->get('dh_doctrine_audit.reader');
         $reader->getEntities();
@@ -23,7 +24,7 @@ class AuditController extends AbstractController
     /**
      * @Route("/audit/{entity}/{id}", name="dh_doctrine_audit_show_entity_history", methods={"GET"})
      */
-    public function showEntityHistoryAction(string $entity, int $id = null, int $page = 1, int $pageSize = 50)
+    public function showEntityHistoryAction(string $entity, int $id = null, int $page = 1, int $pageSize = 50): Response
     {
         $reader = $this->container->get('dh_doctrine_audit.reader');
         $entries = $reader->getAudits($entity, $id, $page, $pageSize);
@@ -37,7 +38,7 @@ class AuditController extends AbstractController
     /**
      * @Route("/audit/details/{entity}/{id}", name="dh_doctrine_audit_show_audit_entry", methods={"GET"})
      */
-    public function showAuditEntryAction(string $entity, int $id)
+    public function showAuditEntryAction(string $entity, int $id): Response
     {
         $reader = $this->container->get('dh_doctrine_audit.reader');
         $data = $reader->getAudit($entity, $id);
