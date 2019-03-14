@@ -58,7 +58,6 @@ abstract class BaseTest extends TestCase
     }
 
     /**
-     * @throws \Doctrine\Common\Persistence\Mapping\MappingException
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
      */
@@ -159,7 +158,8 @@ abstract class BaseTest extends TestCase
 
         Gedmo\DoctrineExtensions::registerAnnotations();
 
-        $connection = $this->_getConnection();
+        $connection = $this->getSharedConnection();
+//        $connection = $this->getConnection();
 
         $this->setAuditConfiguration($this->createAuditConfiguration());
         $configuration = $this->getAuditConfiguration();
@@ -174,7 +174,7 @@ abstract class BaseTest extends TestCase
             }
         }
         $evm->addEventSubscriber(new AuditSubscriber($this->auditManager));
-        $evm->addEventSubscriber(new CreateSchemaListener($this->getAuditConfiguration()));
+        $evm->addEventSubscriber(new CreateSchemaListener($this->auditManager));
         $evm->addEventSubscriber(new Gedmo\SoftDeleteable\SoftDeleteableListener());
 
         $this->em = EntityManager::create($connection, $config);
@@ -182,62 +182,92 @@ abstract class BaseTest extends TestCase
         return $this->em;
     }
 
+    protected function getSharedConnection(): Connection
+    {
+        if (null === self::$conn) {
+            self::$conn = $this->getConnection();
+        }
+
+        if (false === self::$conn->ping()) {
+            self::$conn->close();
+            self::$conn->connect();
+        }
+
+        return self::$conn;
+    }
+
     /**
      * @throws \Doctrine\DBAL\DBALException
      *
      * @return null|Connection
      */
-    protected function _getConnection(): Connection
+    protected function getConnection(): Connection
     {
-        if (!isset(self::$conn)) {
-            if (isset(
-                $GLOBALS['db_type'],
-                $GLOBALS['db_username'],
-                $GLOBALS['db_password'],
-                $GLOBALS['db_host'],
-                $GLOBALS['db_name'],
-                $GLOBALS['db_port']
-            )) {
-                $params = [
-                    'driver' => $GLOBALS['db_type'],
-                    'user' => $GLOBALS['db_username'],
-                    'password' => $GLOBALS['db_password'],
-                    'host' => $GLOBALS['db_host'],
-                    'dbname' => $GLOBALS['db_name'],
-                    'port' => $GLOBALS['db_port'],
-                ];
-
-                $tmpParams = $params;
-                $dbname = $params['dbname'];
-                unset($tmpParams['dbname']);
-
-                $conn = DriverManager::getConnection($tmpParams);
-                $platform = $conn->getDatabasePlatform();
-
-                if ($platform->supportsCreateDropDatabase()) {
-                    $conn->getSchemaManager()->dropAndCreateDatabase($dbname);
-                } else {
-                    $sm = $conn->getSchemaManager();
-                    $schema = $sm->createSchema();
-                    $stmts = $schema->toDropSql($conn->getDatabasePlatform());
-                    foreach ($stmts as $stmt) {
-                        $conn->exec($stmt);
-                    }
-                }
-
-                $conn->close();
-            } else {
-                $params = [
-                    'driver' => 'pdo_sqlite',
-                    'memory' => true,
-//                    'path' => 'db.sqlite',
-                ];
-            }
-
-            self::$conn = DriverManager::getConnection($params);
+        if (null !== self::$conn) {
+            self::$conn->close();
+            self::$conn = null;
         }
 
-        return self::$conn;
+        $params = $this->getConnectionParameters();
+
+        if (isset(
+            $GLOBALS['db_type'],
+            $GLOBALS['db_username'],
+            $GLOBALS['db_password'],
+            $GLOBALS['db_host'],
+            $GLOBALS['db_name'],
+            $GLOBALS['db_port']
+        )) {
+            $tmpParams = $params;
+            $dbname = $params['dbname'];
+            unset($tmpParams['dbname']);
+
+            $conn = DriverManager::getConnection($tmpParams);
+            $platform = $conn->getDatabasePlatform();
+
+            if ($platform->supportsCreateDropDatabase()) {
+                $conn->getSchemaManager()->dropAndCreateDatabase($dbname);
+            } else {
+                $sm = $conn->getSchemaManager();
+                $schema = $sm->createSchema();
+                $stmts = $schema->toDropSql($conn->getDatabasePlatform());
+                foreach ($stmts as $stmt) {
+                    $conn->exec($stmt);
+                }
+            }
+
+            $conn->close();
+        }
+
+        return DriverManager::getConnection($params);
+    }
+
+    protected function getConnectionParameters(): array
+    {
+        if (isset(
+            $GLOBALS['db_type'],
+            $GLOBALS['db_username'],
+            $GLOBALS['db_password'],
+            $GLOBALS['db_host'],
+            $GLOBALS['db_name'],
+            $GLOBALS['db_port']
+        )) {
+            $params = [
+                'driver' => $GLOBALS['db_type'],
+                'user' => $GLOBALS['db_username'],
+                'password' => $GLOBALS['db_password'],
+                'host' => $GLOBALS['db_host'],
+                'dbname' => $GLOBALS['db_name'],
+                'port' => $GLOBALS['db_port'],
+            ];
+        } else {
+            $params = [
+                'driver' => 'pdo_sqlite',
+                'memory' => true,
+            ];
+        }
+
+        return $params;
     }
 
     protected function getReader(AuditConfiguration $configuration = null): AuditReader

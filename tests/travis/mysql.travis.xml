@@ -28,9 +28,10 @@
         <whitelist addUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">../../src</directory>
             <exclude>
+                <file>../../src/DoctrineAuditBundle/DHDoctrineAuditBundle.php</file>
+                <file>../../src/DoctrineAuditBundle/Exception/UpdateException.php</file>
                 <file>../../src/DoctrineAuditBundle/User/UserInterface.php</file>
                 <file>../../src/DoctrineAuditBundle/User/UserProviderInterface.php</file>
-                <file>../../src/DoctrineAuditBundle/DHDoctrineAuditBundle.php</file>
             </exclude>
         </whitelist>
     </filter>

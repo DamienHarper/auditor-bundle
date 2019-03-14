@@ -48,7 +48,7 @@ services:
 
   dh_doctrine_audit.event_subscriber.create_schema:
     class: DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
-    arguments: ["@dh_doctrine_audit.configuration"]
+    arguments: ["@dh_doctrine_audit.manager"]
     tags:
       - { name: doctrine.event_subscriber, connection: default }
 

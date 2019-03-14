@@ -5,6 +5,7 @@ namespace DH\DoctrineAuditBundle\Command;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\ORM\EntityManager;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
@@ -62,9 +63,14 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
         $registry = $this->container->get('doctrine');
 
         /**
+         * @var EntityManager
+         */
+        $em = $registry->getManager();
+
+        /**
          * @var Connection
          */
-        $connection = $registry->getEntityManager()->getConnection();
+        $connection = $em->getConnection();
 
         /**
          * @var AuditReader
@@ -110,6 +116,9 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
                 $progressBar->setMessage("Cleaning audit tables... (<info>{$auditTable}</info>)");
                 $progressBar->advance();
             }
+
+            $progressBar->setMessage('Cleaning audit tables... (<info>done</info>)');
+            $progressBar->display();
 
             $io->newLine(2);
 

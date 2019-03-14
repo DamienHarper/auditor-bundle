@@ -42,7 +42,7 @@ class DHDoctrineAuditExtensionTest extends AbstractExtensionTestCase
         $this->assertContainerBuilderHasServiceDefinitionWithTag('dh_doctrine_audit.event_subscriber.audit', 'doctrine.event_subscriber', ['connection' => 'default']);
 
         $this->assertContainerBuilderHasService('dh_doctrine_audit.event_subscriber.create_schema', CreateSchemaListener::class);
-        $this->assertContainerBuilderHasServiceDefinitionWithArgument('dh_doctrine_audit.event_subscriber.create_schema', 0, 'dh_doctrine_audit.configuration');
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument('dh_doctrine_audit.event_subscriber.create_schema', 0, 'dh_doctrine_audit.manager');
         $this->assertContainerBuilderHasServiceDefinitionWithTag('dh_doctrine_audit.event_subscriber.create_schema', 'doctrine.event_subscriber', ['connection' => 'default']);
 
         $this->assertContainerBuilderHasService('dh_doctrine_audit.twig_extension', TwigExtension::class);

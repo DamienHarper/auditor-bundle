@@ -236,6 +236,16 @@ class AuditManager
     }
 
     /**
+     * Set the value of helper.
+     *
+     * @param AuditHelper $helper
+     */
+    public function setHelper(AuditHelper $helper): void
+    {
+        $this->helper = $helper;
+    }
+
+    /**
      * Get the value of helper.
      *
      * @return AuditHelper

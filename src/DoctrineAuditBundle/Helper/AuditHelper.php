@@ -223,4 +223,102 @@ class AuditHelper
             $pkName => $pkValue,
         ];
     }
+
+    /**
+     * Return columns of audit tables.
+     *
+     * @return array
+     */
+    public function getAuditTableColumns(): array
+    {
+        $columns = [
+            'id' => [
+                'type' => Type::INTEGER,
+                'options' => [
+                    'autoincrement' => true,
+                    'unsigned' => true,
+                ],
+            ],
+            'type' => [
+                'type' => Type::STRING,
+                'options' => [
+                    'notnull' => true,
+                    'length' => 10,
+                ],
+            ],
+            'object_id' => [
+                'type' => Type::INTEGER,
+                'options' => [
+                    'notnull' => true,
+                    'unsigned' => true,
+                ],
+            ],
+            'diffs' => [
+                'type' => Type::JSON_ARRAY,
+                'options' => [
+                    'default' => null,
+                    'notnull' => false,
+                ],
+            ],
+            'blame_id' => [
+                'type' => Type::INTEGER,
+                'options' => [
+                    'default' => null,
+                    'notnull' => false,
+                    'unsigned' => true,
+                ],
+            ],
+            'blame_user' => [
+                'type' => Type::STRING,
+                'options' => [
+                    'default' => null,
+                    'notnull' => false,
+                    'length' => 100,
+                ],
+            ],
+            'ip' => [
+                'type' => Type::STRING,
+                'options' => [
+                    'default' => null,
+                    'notnull' => false,
+                    'length' => 45,
+                ],
+            ],
+            'created_at' => [
+                'type' => Type::DATETIME,
+                'options' => [
+                    'notnull' => true,
+                ],
+            ],
+        ];
+
+        return $columns;
+    }
+
+    public function getAuditTableIndices(string $tablename): array
+    {
+        $indices = [
+            'id' => [
+                'type' => 'primary',
+            ],
+            'type' => [
+                'type' => 'index',
+                'name' => 'type_'.md5($tablename).'_idx',
+            ],
+            'object_id' => [
+                'type' => 'index',
+                'name' => 'object_id_'.md5($tablename).'_idx',
+            ],
+            'blame_id' => [
+                'type' => 'index',
+                'name' => 'blame_id_'.md5($tablename).'_idx',
+            ],
+            'created_at' => [
+                'type' => 'index',
+                'name' => 'created_at_'.md5($tablename).'_idx',
+            ],
+        ];
+
+        return $indices;
+    }
 }
