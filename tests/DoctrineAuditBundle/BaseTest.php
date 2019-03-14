@@ -158,7 +158,8 @@ abstract class BaseTest extends TestCase
 
         Gedmo\DoctrineExtensions::registerAnnotations();
 
-        $connection = $this->getConnection();
+        $connection = $this->getSharedConnection();
+//        $connection = $this->getConnection();
 
         $this->setAuditConfiguration($this->createAuditConfiguration());
         $configuration = $this->getAuditConfiguration();
@@ -179,6 +180,15 @@ abstract class BaseTest extends TestCase
         $this->em = EntityManager::create($connection, $config);
 
         return $this->em;
+    }
+
+    protected function getSharedConnection(): Connection
+    {
+        if (!isset(self::$conn)) {
+            self::$conn = $this->getConnection();
+        }
+
+        return self::$conn;
     }
 
     /**

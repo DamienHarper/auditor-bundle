@@ -9,6 +9,7 @@ use DH\DoctrineAuditBundle\Helper\UpdateHelper;
 use DH\DoctrineAuditBundle\Tests\BaseTest;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\DBAL\Schema\Table;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Proxy\ProxyFactory;
@@ -142,10 +143,119 @@ class UpdateHelperTest extends BaseTest
             $statement->execute();
         }
 
+        // new expected structure
+        $expected = [
+            'id' => [
+                'type' => Type::INTEGER,
+                'options' => [
+                    'autoincrement' => true,
+                    'unsigned' => true,
+                ],
+            ],
+            'type' => [
+                'type' => Type::STRING,
+                'options' => [
+                    'notnull' => true,
+                    'length' => 10,
+                ],
+            ],
+            'object_id' => [
+                'type' => Type::INTEGER,
+                'options' => [
+                    'notnull' => true,
+                    'unsigned' => true,
+                ],
+            ],
+            'diffs' => [
+                'type' => Type::JSON_ARRAY,
+                'options' => [
+                    'default' => null,
+                    'notnull' => false,
+                ],
+            ],
+            'blame_id' => [
+                'type' => Type::INTEGER,
+                'options' => [
+                    'default' => null,
+                    'notnull' => false,
+                    'unsigned' => true,
+                ],
+            ],
+            'blame_user' => [
+                'type' => Type::STRING,
+                'options' => [
+                    'default' => null,
+                    'notnull' => false,
+                    'length' => 100,
+                ],
+            ],
+            'ip' => [
+                'type' => Type::STRING,
+                'options' => [
+                    'default' => null,
+                    'notnull' => false,
+                    'length' => 45,
+                ],
+            ],
+            'created_at' => [
+                'type' => Type::DATETIME,
+                'options' => [
+                    'notnull' => true,
+                ],
+            ],
+            'locale' => [
+                'type' => Type::STRING,
+                'options' => [
+                    'default' => null,
+                    'notnull' => false,
+                    'length' => 5,
+                ],
+            ],
+            'version' => [
+                'type' => Type::INTEGER,
+                'options' => [
+                    'default' => null,
+                    'notnull' => true,
+                ],
+            ],
+        ];
+
+        $helper = $this->createMock(AuditHelper::class);
+        $helper
+            ->method('getAuditTableColumns')
+            ->willReturn($expected)
+        ;
+
+        $manager->setHelper($helper);
+
+        $fromSchema = $schemaManager->createSchema();
+        $toSchema = clone  $fromSchema;
         $authorAuditTable = $this->getTable($schemaManager->listTables(), 'author_audit');
+        $updater->updateAuditTable($schemaManager, $authorAuditTable, $em);
+
+        // apply changes
+        $sql = $fromSchema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
+        foreach ($sql as $query) {
+            $statement = $em->getConnection()->prepare($query);
+            $statement->execute();
+        }
+
+        $authorAuditTable = $this->getTable($schemaManager->listTables(), 'author_audit');
+
+        // check expected columns
         $expected = $helper->getAuditTableColumns();
         foreach ($expected as $name => $options) {
-            $this->assertTrue($authorAuditTable->hasColumn($name), 'audit table has an "'.$name.'" column.');
+            $this->assertTrue($authorAuditTable->hasColumn($name), 'audit table has a column named "'.$name.'".');
+        }
+
+        // check expected indices
+        $expected = $helper->getAuditTableIndices('author_audit');
+        foreach ($expected as $name => $options) {
+            if ('primary' === $options['type']) {
+                $this->assertTrue($authorAuditTable->hasPrimaryKey(), 'audit table has a primary key named "'.$name.'".');
+            } else {
+                $this->assertTrue($authorAuditTable->hasIndex($options['name']), 'audit table has an index named "'.$name.'".');
+            }
         }
     }
 
