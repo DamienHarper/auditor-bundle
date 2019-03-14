@@ -24,7 +24,7 @@ class IssueTest extends BaseTest
     /**
      * @var string
      */
-    protected $fixturesPath = __DIR__.'/Fixtures';
+    protected $fixturesPath = __DIR__.'/Fixtures/Issues';
 
     /**
      * @throws \Doctrine\DBAL\DBALException

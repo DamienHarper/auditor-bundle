@@ -184,8 +184,13 @@ abstract class BaseTest extends TestCase
 
     protected function getSharedConnection(): Connection
     {
-        if (!isset(self::$conn)) {
+        if (null === self::$conn) {
             self::$conn = $this->getConnection();
+        }
+
+        if (false === self::$conn->ping()) {
+            self::$conn->close();
+            self::$conn->connect();
         }
 
         return self::$conn;
@@ -198,6 +203,11 @@ abstract class BaseTest extends TestCase
      */
     protected function getConnection(): Connection
     {
+        if (null !== self::$conn) {
+            self::$conn->close();
+            self::$conn = null;
+        }
+
         $params = $this->getConnectionParameters();
 
         if (isset(
