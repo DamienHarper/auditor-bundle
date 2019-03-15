@@ -24,10 +24,10 @@ class AuditController extends AbstractController
     /**
      * @Route("/audit/{entity}/{id}", name="dh_doctrine_audit_show_entity_history", methods={"GET"})
      *
-     * @param string $entity
-     * @param string|int $id
-     * @param int $page
-     * @param int $pageSize
+     * @param string     $entity
+     * @param int|string $id
+     * @param int        $page
+     * @param int        $pageSize
      *
      * @return Response
      */
@@ -45,8 +45,8 @@ class AuditController extends AbstractController
     /**
      * @Route("/audit/details/{entity}/{id}", name="dh_doctrine_audit_show_audit_entry", methods={"GET"})
      *
-     * @param string $entity
-     * @param string|int $id
+     * @param string     $entity
+     * @param int|string $id
      *
      * @return Response
      */

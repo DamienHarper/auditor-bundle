@@ -106,7 +106,7 @@ class AuditReader
      * Returns an array of audited entries/operations.
      *
      * @param object|string $entity
-     * @param string|int    $id
+     * @param int|string    $id
      * @param int           $page
      * @param int           $pageSize
      *
@@ -162,7 +162,7 @@ class AuditReader
 
     /**
      * @param object|string $entity
-     * @param string|int    $id
+     * @param int|string    $id
      *
      * @return mixed
      */
