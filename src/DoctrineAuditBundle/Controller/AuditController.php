@@ -23,8 +23,15 @@ class AuditController extends AbstractController
 
     /**
      * @Route("/audit/{entity}/{id}", name="dh_doctrine_audit_show_entity_history", methods={"GET"})
+     *
+     * @param string $entity
+     * @param string|int $id
+     * @param int $page
+     * @param int $pageSize
+     *
+     * @return Response
      */
-    public function showEntityHistoryAction(string $entity, int $id = null, int $page = 1, int $pageSize = 50): Response
+    public function showEntityHistoryAction(string $entity, $id = null, int $page = 1, int $pageSize = 50): Response
     {
         $reader = $this->container->get('dh_doctrine_audit.reader');
         $entries = $reader->getAudits($entity, $id, $page, $pageSize);
@@ -37,8 +44,13 @@ class AuditController extends AbstractController
 
     /**
      * @Route("/audit/details/{entity}/{id}", name="dh_doctrine_audit_show_audit_entry", methods={"GET"})
+     *
+     * @param string $entity
+     * @param string|int $id
+     *
+     * @return Response
      */
-    public function showAuditEntryAction(string $entity, int $id): Response
+    public function showAuditEntryAction(string $entity, $id): Response
     {
         $reader = $this->container->get('dh_doctrine_audit.reader');
         $data = $reader->getAudit($entity, $id);

@@ -106,13 +106,13 @@ class AuditReader
      * Returns an array of audited entries/operations.
      *
      * @param object|string $entity
-     * @param null|int      $id
+     * @param string|int    $id
      * @param int           $page
      * @param int           $pageSize
      *
      * @return array
      */
-    public function getAudits($entity, int $id = null, int $page = 1, int $pageSize = 50): array
+    public function getAudits($entity, $id = null, int $page = 1, int $pageSize = 50): array
     {
         if ($page < 1) {
             throw new \InvalidArgumentException('$page must be greater or equal than 1.');
@@ -162,11 +162,11 @@ class AuditReader
 
     /**
      * @param object|string $entity
-     * @param int           $id
+     * @param string|int    $id
      *
      * @return mixed
      */
-    public function getAudit($entity, int $id)
+    public function getAudit($entity, $id)
     {
         $connection = $this->entityManager->getConnection();
 
