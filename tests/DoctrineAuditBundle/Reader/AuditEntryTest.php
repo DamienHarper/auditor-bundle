@@ -15,7 +15,7 @@ class AuditEntryTest extends TestCase
         $entry = new AuditEntry();
         $entry->id = 1;
         $entry->type = 'type';
-        $entry->object_id = 1;
+        $entry->object_id = '1';
         $entry->diffs = '{}';
         $entry->blame_id = 1;
         $entry->blame_user = 'John Doe';
@@ -24,7 +24,7 @@ class AuditEntryTest extends TestCase
 
         $this->assertSame(1, $entry->getId(), 'AuditEntry::getId() is ok.');
         $this->assertSame('type', $entry->getType(), 'AuditEntry::getType() is ok.');
-        $this->assertSame(1, $entry->getObjectId(), 'AuditEntry::getObjectId() is ok.');
+        $this->assertSame('1', $entry->getObjectId(), 'AuditEntry::getObjectId() is ok.');
         $this->assertSame([], $entry->getDiffs(), 'AuditEntry::getDiffs() is ok.');
         $this->assertSame(1, $entry->getUserId(), 'AuditEntry::getUserId() is ok.');
         $this->assertSame('John Doe', $entry->getUsername(), 'AuditEntry::getUsername() is ok.');

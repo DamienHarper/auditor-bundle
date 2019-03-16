@@ -354,13 +354,19 @@ Contributing
 
 DoctrineAuditBundle is an open source project. Contributions made by the community are welcome. Send us your ideas, code reviews, pull requests and feature requests to help us improve this project.
 
-Do not forget to provide unit tests when contributing to this project.
+Do not forget to provide unit tests when contributing to this project. To do so, follow instructions in [this dedicated README](tests/README.md)
 
 
-Tests
-=====
+Supported DB
+============
 
-Please, follow instructions in [this dedicated README](tests/README.md)
+* MySQL
+* MariaDB
+* PostgreSQL
+* SQLite
+
+*This bundle should work with **any other** database supported by Doctrine. 
+Though, we can only really support the ones we can test with Travis-CI.*
 
 
 License

@@ -8,30 +8,37 @@ class AuditEntry
      * @var int
      */
     protected $id;
+
     /**
      * @var string
      */
     protected $type;
+
     /**
-     * @var int
+     * @var string
      */
     protected $object_id;
+
     /**
      * @var string
      */
     protected $diffs;
+
     /**
      * @var int
      */
     protected $blame_id;
+
     /**
      * @var string
      */
     protected $blame_user;
+
     /**
      * @var string
      */
     protected $ip;
+
     /**
      * @var string
      */
@@ -65,9 +72,9 @@ class AuditEntry
     /**
      * Get the value of object_id.
      *
-     * @return int
+     * @return string
      */
-    public function getObjectId(): ?int
+    public function getObjectId(): string
     {
         return $this->object_id;
     }

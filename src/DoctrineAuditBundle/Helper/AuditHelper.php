@@ -247,10 +247,9 @@ class AuditHelper
                 ],
             ],
             'object_id' => [
-                'type' => Type::INTEGER,
+                'type' => Type::STRING,
                 'options' => [
                     'notnull' => true,
-                    'unsigned' => true,
                 ],
             ],
             'diffs' => [
