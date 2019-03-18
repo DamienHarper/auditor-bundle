@@ -18,6 +18,7 @@ use Doctrine\ORM\Proxy\ProxyFactory;
 use Doctrine\ORM\Tools\SchemaTool;
 use Gedmo;
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
@@ -118,6 +119,8 @@ abstract class BaseTest extends TestCase
 
     protected function createAuditConfiguration(array $options = []): AuditConfiguration
     {
+        $container = new ContainerBuilder();
+
         $auditConfiguration = new AuditConfiguration(
             array_merge([
                 'table_prefix' => '',
@@ -125,8 +128,9 @@ abstract class BaseTest extends TestCase
                 'ignored_columns' => [],
                 'entities' => [],
             ], $options),
-            new TokenStorageUserProvider(new Security(new ContainerBuilder())),
-            new RequestStack()
+            new TokenStorageUserProvider(new Security($container)),
+            new RequestStack(),
+            new FirewallMap($container, [])
         );
 
         return $auditConfiguration;

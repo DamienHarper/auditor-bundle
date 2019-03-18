@@ -37,6 +37,16 @@ class AuditEntry
     /**
      * @var string
      */
+    protected $blame_user_fqdn;
+
+    /**
+     * @var string
+     */
+    protected $blame_user_firewall;
+
+    /**
+     * @var string
+     */
     protected $ip;
 
     /**
@@ -97,6 +107,22 @@ class AuditEntry
     public function getUsername(): string
     {
         return $this->blame_user ?? 'Unknown';
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getUserFqdn(): ?string
+    {
+        return $this->blame_user_fqdn;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getUserFirewall(): ?string
+    {
+        return $this->blame_user_firewall;
     }
 
     /**

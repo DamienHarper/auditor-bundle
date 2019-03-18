@@ -4,6 +4,7 @@ namespace DH\DoctrineAuditBundle;
 
 use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
 use DH\DoctrineAuditBundle\User\UserProviderInterface;
+use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class AuditConfiguration
@@ -38,10 +39,16 @@ class AuditConfiguration
      */
     protected $requestStack;
 
-    public function __construct(array $config, UserProviderInterface $userProvider, RequestStack $requestStack)
+    /**
+     * @var FirewallMap
+     */
+    private $firewallMap;
+
+    public function __construct(array $config, UserProviderInterface $userProvider, RequestStack $requestStack, FirewallMap $firewallMap)
     {
         $this->userProvider = $userProvider;
         $this->requestStack = $requestStack;
+        $this->firewallMap = $firewallMap;
 
         $this->tablePrefix = $config['table_prefix'];
         $this->tableSuffix = $config['table_suffix'];
@@ -226,5 +233,15 @@ class AuditConfiguration
     public function getRequestStack(): RequestStack
     {
         return $this->requestStack;
+    }
+
+    /**
+     * Gets the value of firewallMap.
+     *
+     * @return FirewallMap
+     */
+    public function getFirewallMap(): FirewallMap
+    {
+        return $this->firewallMap;
     }
 }

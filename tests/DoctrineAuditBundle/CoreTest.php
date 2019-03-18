@@ -12,6 +12,7 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\User;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
+use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -257,7 +258,8 @@ abstract class CoreTest extends BaseTest
                 'entities' => [],
             ], $options),
             new TokenStorageUserProvider($security),
-            $requestStack
+            $requestStack,
+            new FirewallMap($container, [])
         );
 
         return $auditConfiguration;
