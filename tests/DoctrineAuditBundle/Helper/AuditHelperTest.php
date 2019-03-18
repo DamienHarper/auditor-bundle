@@ -10,6 +10,8 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issues\CoreCase;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issues\DieselCase;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
+use DH\DoctrineAuditBundle\User\User;
+use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
@@ -206,7 +208,8 @@ class AuditHelperTest extends CoreTest
                 ],
             ],
             $configuration->getUserProvider(),
-            $configuration->getRequestStack()
+            $configuration->getRequestStack(),
+            new FirewallMap(new ContainerBuilder(), [])
         );
         $helper = new AuditHelper($configuration);
 
@@ -266,7 +269,8 @@ class AuditHelperTest extends CoreTest
                 ],
             ],
             $configuration->getUserProvider(),
-            $configuration->getRequestStack()
+            $configuration->getRequestStack(),
+            new FirewallMap(new ContainerBuilder(), [])
         );
         $helper = new AuditHelper($configuration);
 
@@ -360,6 +364,8 @@ class AuditHelperTest extends CoreTest
             'user_id' => 1,
             'username' => 'dark.vador',
             'client_ip' => '1.2.3.4',
+            'user_fqdn' => User::class,
+            'user_firewall' => null,
         ];
 
         $this->assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
@@ -376,7 +382,8 @@ class AuditHelperTest extends CoreTest
                 'entities' => [],
             ],
             $this->getAuditConfiguration()->getUserProvider(),
-            new RequestStack()
+            new RequestStack(),
+            new FirewallMap(new ContainerBuilder(), [])
         );
         $helper = new AuditHelper($configuration);
 
@@ -384,6 +391,8 @@ class AuditHelperTest extends CoreTest
             'user_id' => 1,
             'username' => 'dark.vador',
             'client_ip' => null,
+            'user_fqdn' => User::class,
+            'user_firewall' => null,
         ];
 
         $this->assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
@@ -399,7 +408,8 @@ class AuditHelperTest extends CoreTest
                 'entities' => [],
             ],
             new TokenStorageUserProvider(new Security(new ContainerBuilder())),
-            new RequestStack()
+            new RequestStack(),
+            new FirewallMap(new ContainerBuilder(), [])
         );
         $helper = new AuditHelper($configuration);
 
@@ -407,6 +417,8 @@ class AuditHelperTest extends CoreTest
             'user_id' => null,
             'username' => null,
             'client_ip' => null,
+            'user_fqdn' => null,
+            'user_firewall' => null,
         ];
 
         $this->assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');

@@ -211,6 +211,8 @@ class AuditManager
             'diffs' => ':diffs',
             'blame_id' => ':blame_id',
             'blame_user' => ':blame_user',
+            'blame_user_fqdn' => ':blame_user_fqdn',
+            'blame_user_firewall' => ':blame_user_firewall',
             'ip' => ':ip',
             'created_at' => ':created_at',
         ];
@@ -230,6 +232,8 @@ class AuditManager
         $statement->bindValue('diffs', json_encode($data['diff']));
         $statement->bindValue('blame_id', $data['blame']['user_id']);
         $statement->bindValue('blame_user', $data['blame']['username']);
+        $statement->bindValue('blame_user_fqdn', $data['blame']['user_fqdn']);
+        $statement->bindValue('blame_user_firewall', $data['blame']['user_firewall']);
         $statement->bindValue('ip', $data['blame']['client_ip']);
         $statement->bindValue('created_at', $dt->format('Y-m-d H:i:s'));
         $statement->execute();

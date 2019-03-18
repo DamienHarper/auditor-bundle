@@ -11,6 +11,7 @@ use Doctrine\DBAL\Driver;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Setup;
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
@@ -64,6 +65,9 @@ class DHDoctrineAuditBundleTest extends TestCase
 
         $requestStack = new RequestStack();
         $container->set('request_stack', $requestStack);
+
+        $firewallMap = new FirewallMap($container, []);
+        $container->set('security.firewall.map', $firewallMap);
 
         $container->compile();
 

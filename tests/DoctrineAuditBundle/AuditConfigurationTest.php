@@ -7,6 +7,7 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
@@ -266,29 +267,10 @@ class AuditConfigurationTest extends TestCase
         $this->assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
     }
 
-    /** Utility methods */
-    protected function getContainer(): ContainerBuilder
-    {
-        return new ContainerBuilder();
-    }
-
-    protected function getSecurity(): Security
-    {
-        return new Security($this->getContainer());
-    }
-
-    protected function getRequestStack(): RequestStack
-    {
-        return new RequestStack();
-    }
-
-    protected function getUserProvider(): TokenStorageUserProvider
-    {
-        return new TokenStorageUserProvider($this->getSecurity());
-    }
-
     protected function getAuditConfiguration(array $options = []): AuditConfiguration
     {
+        $container = new ContainerBuilder();
+
         return new AuditConfiguration(
             array_merge([
                 'table_prefix' => '',
@@ -296,8 +278,9 @@ class AuditConfigurationTest extends TestCase
                 'ignored_columns' => [],
                 'entities' => [],
             ], $options),
-            $this->getUserProvider(),
-            $this->getRequestStack()
+            new TokenStorageUserProvider(new Security($container)),
+            new RequestStack(),
+            new FirewallMap($container, [])
         );
     }
 }

@@ -168,22 +168,28 @@ class AuditHelper
         $user_id = null;
         $username = null;
         $client_ip = null;
+        $user_fqdn = null;
+        $user_firewall = null;
 
         $request = $this->configuration->getRequestStack()->getCurrentRequest();
         if (null !== $request) {
             $client_ip = $request->getClientIp();
+            $user_firewall = null === $this->configuration->getFirewallMap()->getFirewallConfig($request) ? null : $this->configuration->getFirewallMap()->getFirewallConfig($request)->getName();
         }
 
         $user = $this->configuration->getUserProvider()->getUser();
         if ($user instanceof UserInterface) {
             $user_id = $user->getId();
             $username = $user->getUsername();
+            $user_fqdn = \get_class($user);
         }
 
         return [
             'user_id' => $user_id,
             'username' => $username,
             'client_ip' => $client_ip,
+            'user_fqdn' => $user_fqdn,
+            'user_firewall' => $user_firewall,
         ];
     }
 
@@ -268,6 +274,22 @@ class AuditHelper
                 ],
             ],
             'blame_user' => [
+                'type' => Type::STRING,
+                'options' => [
+                    'default' => null,
+                    'notnull' => false,
+                    'length' => 255,
+                ],
+            ],
+            'blame_user_fqdn' => [
+                'type' => Type::STRING,
+                'options' => [
+                    'default' => null,
+                    'notnull' => false,
+                    'length' => 255,
+                ],
+            ],
+            'blame_user_firewall' => [
                 'type' => Type::STRING,
                 'options' => [
                     'default' => null,
