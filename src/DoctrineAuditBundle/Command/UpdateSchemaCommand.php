@@ -73,7 +73,11 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
          * @var AbstractSchemaManager
          */
         $schemaManager = $connection->getSchemaManager();
-        $tables = $schemaManager->listTables();
+
+        $io->writeln('Introspecting schema...');
+
+        $schema = $schemaManager->createSchema();
+        $tables = $schema->getTables();
         $audits = [];
         $errors = [];
 
@@ -101,7 +105,7 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
             $progressBar->display();
 
             try {
-                $updater->updateAuditTable($schemaManager, $table, $em);
+                $schema = $updater->updateAuditTable($schemaManager, $schema, $table, $em);
             } catch (UpdateException $e) {
                 $errors[] = $e->getMessage();
                 $io->error($e->getMessage());

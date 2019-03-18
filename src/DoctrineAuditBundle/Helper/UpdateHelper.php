@@ -82,16 +82,19 @@ class UpdateHelper
      * Ensures an audit table's structure is valid.
      *
      * @param AbstractSchemaManager $schemaManager
+     * @param Schema                $schema
      * @param Table                 $table
      * @param EntityManager         $em
      *
      * @throws UpdateException
      * @throws \Doctrine\DBAL\Schema\SchemaException
+     *
+     * @return Schema
      */
-    public function updateAuditTable(AbstractSchemaManager $schemaManager, Table $table, EntityManager $em): void
+    public function updateAuditTable(AbstractSchemaManager $schemaManager, Schema $schema, Table $table, EntityManager $em): Schema
     {
-        $fromSchema = $schemaManager->createSchema();
-        $toSchema = clone $fromSchema;
+        $fromSchema = $schema;
+        $toSchema = clone $schema;
 
         $table = $toSchema->getTable($table->getName());
         $columns = $schemaManager->listTableColumns($table->getName());
@@ -141,5 +144,7 @@ class UpdateHelper
                 throw new UpdateException(sprintf('Failed to update/fix "%s" audit table.', $table->getName()));
             }
         }
+
+        return $toSchema;
     }
 }

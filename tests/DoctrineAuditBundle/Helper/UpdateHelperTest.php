@@ -258,7 +258,7 @@ class UpdateHelperTest extends BaseTest
         $fromSchema = $schemaManager->createSchema();
         $toSchema = clone  $fromSchema;
         $authorAuditTable = $this->getTable($schemaManager->listTables(), 'author_audit');
-        $updater->updateAuditTable($schemaManager, $authorAuditTable, $em);
+        $updater->updateAuditTable($schemaManager, $fromSchema, $authorAuditTable, $em);
 
         // apply changes
         $sql = $fromSchema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
