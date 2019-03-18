@@ -3,6 +3,7 @@
 namespace DH\DoctrineAuditBundle\Tests\Reader;
 
 use DH\DoctrineAuditBundle\Reader\AuditEntry;
+use DH\DoctrineAuditBundle\User\User;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -19,6 +20,8 @@ class AuditEntryTest extends TestCase
         $entry->diffs = '{}';
         $entry->blame_id = 1;
         $entry->blame_user = 'John Doe';
+        $entry->blame_user_fqdn = User::class;
+        $entry->blame_user_firewall = 'main';
         $entry->ip = '1.2.3.4';
         $entry->created_at = 'now';
 
@@ -28,6 +31,8 @@ class AuditEntryTest extends TestCase
         $this->assertSame([], $entry->getDiffs(), 'AuditEntry::getDiffs() is ok.');
         $this->assertSame(1, $entry->getUserId(), 'AuditEntry::getUserId() is ok.');
         $this->assertSame('John Doe', $entry->getUsername(), 'AuditEntry::getUsername() is ok.');
+        $this->assertSame(User::class, $entry->getUserFqdn(), 'AuditEntry::getUserFqdn() is ok.');
+        $this->assertSame('main', $entry->getUserFirewall(), 'AuditEntry::getUserFirewall() is ok.');
         $this->assertSame('1.2.3.4', $entry->getIp(), 'AuditEntry::getIp() is ok.');
         $this->assertSame('now', $entry->getCreatedAt(), 'AuditEntry::getCreatedAt() is ok.');
     }
