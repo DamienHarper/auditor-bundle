@@ -314,9 +314,8 @@ class UpdateHelperTest extends BaseTest
         $config->setAutoGenerateProxyClasses(ProxyFactory::AUTOGENERATE_EVAL);
         $config->setProxyNamespace('DH\DoctrineAuditBundle\Tests\Proxies');
 
-        $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver([
-            $this->fixturesPath,
-        ], false));
+        $fixturesPath = \is_array($this->fixturesPath) ? $this->fixturesPath : [$this->fixturesPath];
+        $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver($fixturesPath, false));
 
         Gedmo\DoctrineExtensions::registerAnnotations();
 

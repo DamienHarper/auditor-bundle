@@ -26,7 +26,10 @@ class IssueTest extends BaseTest
     /**
      * @var string
      */
-    protected $fixturesPath = __DIR__ . '/Fixtures/Issue40';
+    protected $fixturesPath = [
+        __DIR__ . '/Fixtures/Issue37',
+        __DIR__ . '/Fixtures/Issue40',
+    ];
 
     public function testIssue40(): void
     {

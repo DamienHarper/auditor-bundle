@@ -156,9 +156,8 @@ abstract class BaseTest extends TestCase
         $config->setProxyNamespace('DH\DoctrineAuditBundle\Tests\Proxies');
         $config->addFilter('soft-deleteable', Gedmo\SoftDeleteable\Filter\SoftDeleteableFilter::class);
 
-        $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver([
-            $this->fixturesPath,
-        ], false));
+        $fixturesPath = \is_array($this->fixturesPath) ? $this->fixturesPath : [$this->fixturesPath];
+        $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver($fixturesPath, false));
 
         Gedmo\DoctrineExtensions::registerAnnotations();
 
