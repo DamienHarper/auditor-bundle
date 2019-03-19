@@ -228,7 +228,7 @@ class AuditManager
 
         $dt = new \DateTime('now', new \DateTimeZone('UTC'));
         $statement->bindValue('type', $data['action']);
-        $statement->bindValue('object_id', $data['id']);
+        $statement->bindValue('object_id', (string) $data['id']);
         $statement->bindValue('diffs', json_encode($data['diff']));
         $statement->bindValue('blame_id', $data['blame']['user_id']);
         $statement->bindValue('blame_user', $data['blame']['username']);
