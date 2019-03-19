@@ -1,8 +1,8 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests\Fixtures\Issues;
+namespace DH\DoctrineAuditBundle\Tests\Fixtures\Issue37;
 
-use DH\DoctrineAuditBundle\Tests\Fixtures\Issues\Locale;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Issue37\Locale;
 use Doctrine\ORM\Mapping as ORM;
 
 /**

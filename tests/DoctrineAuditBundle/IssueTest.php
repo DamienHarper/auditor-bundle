@@ -3,10 +3,10 @@
 namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\Reader\AuditReader;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Issues\CoreCase;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Issues\DieselCase;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Issues\Locale;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Issues\User;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Issue40\CoreCase;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Issue40\DieselCase;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Issue37\Locale;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Issue37\User;
 
 /**
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
@@ -26,7 +26,7 @@ class IssueTest extends BaseTest
     /**
      * @var string
      */
-    protected $fixturesPath = __DIR__.'/Fixtures/Issues';
+    protected $fixturesPath = __DIR__ . '/Fixtures/Issue40';
 
     public function testIssue40(): void
     {

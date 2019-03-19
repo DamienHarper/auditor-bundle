@@ -1,6 +1,6 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests\Fixtures\Issues;
+namespace DH\DoctrineAuditBundle\Tests\Fixtures\Issue37;
 
 use Doctrine\ORM\Mapping as ORM;
 
