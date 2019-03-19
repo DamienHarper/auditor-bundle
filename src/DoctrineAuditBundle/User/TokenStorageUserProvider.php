@@ -25,6 +25,10 @@ class TokenStorageUserProvider implements UserProviderInterface
             return null;
         }
 
+        if (null === $token) {
+            return null;
+        }
+
         $tokenUser = $token->getUser();
         if ($tokenUser instanceof BaseUserInterface) {
             $impersonation = '';
