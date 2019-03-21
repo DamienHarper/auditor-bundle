@@ -1,76 +1,119 @@
 {% extends "@DHDoctrineAudit/layout.html.twig" %}
 
+{% import '@DHDoctrineAudit/Audit/bootstrap.html.twig' as bootstrap %}
+
 {% macro dump(value, separator) %}
-    {% import _self as audit_viewer %}
     {% if value is iterable %}
-        {% for k, v in value %}
-            {{ k }}: {{ audit_viewer.dump(v) }}{{ separator|default('<br/>')|raw }}
-        {% endfor %}
-    {% else %}
-        {% if value is same as (true) %}
-            {{- 'true' -}}
-        {% elseif value is same as (false) %}
-            {{- 'false' -}}
-        {% elseif value is null %}
-            {{- 'null' -}}
+        {# Vilain hack afin de deviner si value correspond à un objet #}
+        {% if value|length == 4 and value.label is defined %}
+            {{ value.label|trans }}
         {% else %}
-            {{- value -}}
+            {% for k, v in value %}
+                {{ k }}: {{ v }}{{ separator|default('<br/>')|raw }}
+            {% endfor %}
         {% endif %}
+    {% else %}
+        {{ value }}
     {% endif %}
 {% endmacro dump %}
 
 {% import _self as audit_viewer %}
 
 {% block dh_doctrine_audit_content %}
-{% set diffs = entry.getDiffs() %}
-    <h1>Entity #{{ entry.getObjectId() }} changes ({{ entry.getType() }})</h1>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_list_audits') }}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_show_entity_history', {'entity': entity}) }}">{{ entity }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><a href="{{ path('dh_doctrine_audit_show_audit_entry', {'entity': entity, 'id': entry.getObjectId()}) }}">{{ entity }}#{{ entry.getObjectId() }}</a></li>
+        </ol>
+    </nav>
 
-{% if entry.getType() in ['associate', 'dissociate'] %}
-    <table>
-        <thead>
-            <th>Properties</th>
+    {% set diffs = entry.getDiffs() %}
+    <h2 class="card-title float-left"><code>{{ entity }}#{{ entry.getObjectId() }}</code></h2>
+    <h3 class="float-right">{{ bootstrap.badge(entry.getType(), bootstrap.label_type(entry.getType())) }}</h3>
+
+    {% if entry.getType() in ['associate', 'dissociate'] %}
+        <table class="table table-hover">
+            <thead class="thead-dark">
+            <th>Property</th>
             <th>Target</th>
-        </thead>
-        <tbody>
-        {% for key, value in diffs['target'] %}
-            <tr>
-                <td>{{ key }}</td>
-                <td>{{ audit_viewer.dump(value) }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-{% elseif entry.getType() == 'remove' %}
-    <table>
-        <thead>
-            <th>Properties</th>
+            </thead>
+            <tbody>
+            {% for key, value in diffs['target'] %}
+                <tr>
+                    <td><code>{{ key }}</code></td>
+                    <td>{{ bootstrap.text(audit_viewer.dump(value), 'secondary') }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% elseif entry.getType() == 'remove' %}
+        <table class="table table-hover">
+            <thead class="thead-dark">
+            <th>Property</th>
             <th>Target</th>
-        </thead>
-        <tbody>
-        {% for key, value in diffs %}
-            <tr>
-                <td>{{ key }}</td>
-                <td>{{ audit_viewer.dump(value) }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-{% else %}
-    <table>
-        <thead>
-            <th>Properties</th>
+            </thead>
+            <tbody>
+            {% for key, value in diffs %}
+                <tr>
+                    <td><code>{{ key }}</code></td>
+                    <td>{{ bootstrap.text(audit_viewer.dump(value), 'secondary') }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <table class="table table-hover">
+            <thead class="thead-dark">
+            <th>Property</th>
             <th>Old value</th>
             <th>New value</th>
-        </thead>
-        <tbody>
+            </thead>
+            <tbody>
             {% for key, values in diffs %}
-            <tr>
-                <td>{{ key }}</td>
-                <td>{{ audit_viewer.dump(values['old']) }}</td>
-                <td>{{ audit_viewer.dump(values['new']) }}</td>
-            </tr>
+                <tr>
+                    <td><code>{{ key }}</code></td>
+                    <td>
+                        {% if values['old'] is defined %}
+                            {% if values['old'] is empty %}
+                                {{ bootstrap.badge('null', 'secondary') }}
+                            {% else %}
+                                {{ bootstrap.text(audit_viewer.dump(values['old']), 'danger') }}
+                            {% endif %}
+                        {% else %}
+                            {% if values['-'] is empty %}
+                                {{ bootstrap.badge('null', 'secondary') }}
+                            {% else %}
+                                {{ bootstrap.text(audit_viewer.dump(values['-']), 'danger') }}
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if values['new'] is defined %}
+                            {% if values['new'] is empty %}
+                                {{ bootstrap.badge('null', 'secondary') }}
+                            {% else %}
+                                {% if values['old'] is empty %}
+                                    {{ bootstrap.text(audit_viewer.dump(values['new']), 'primary') }}
+                                {% else %}
+                                    {{ bootstrap.text(audit_viewer.dump(values['new']), 'success') }}
+                                {% endif %}
+                            {% endif %}
+                        {% else %}
+                            {% if values['+'] is empty %}
+                                {{ bootstrap.badge('null', 'secondary') }}
+                            {% else %}
+                                {% if values['-'] is empty %}
+                                    {{ bootstrap.text(audit_viewer.dump(values['+']), 'primary') }}
+                                {% else %}
+                                    {{ bootstrap.text(audit_viewer.dump(values['+']), 'success') }}
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
             {% endfor %}
-        </tbody>
-    </table>
-{% endif %}
+            </tbody>
+        </table>
+    {% endif %}
 {% endblock dh_doctrine_audit_content %}

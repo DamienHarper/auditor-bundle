@@ -1,0 +1,31 @@
+{% macro badge(text, type) %}
+    {% if type is defined and type starts with 'bg-' %}
+        {% set prefix = '' %}
+    {% else %}
+        {% set prefix = 'badge-' %}
+    {% endif %}
+    <span class="badge {{ prefix ~ type|default('secondary') }}">{{ text }}</span>
+{% endmacro %}
+
+{% macro text(text, type) %}
+    {% if type is defined and type starts with 'bg-' %}
+        {% set prefix = '' %}
+    {% else %}
+        {% set prefix = 'text-' %}
+    {% endif %}
+    <span class="{{ prefix ~ type|default('secondary') }}">{{ text }}</span>
+{% endmacro %}
+
+{% macro label_type(value) %}
+{% spaceless %}
+    {% if value in ['insert', 'associate'] %}
+        {{ 'success' }}
+    {% elseif value == 'update' %}
+        {{ 'primary' }}
+    {% elseif value in ['remove', 'dissociate'] %}
+        {{ 'danger' }}
+    {% else %}
+        {{ 'secondary' }}
+    {% endif %}
+{% endspaceless %}
+{% endmacro %}

@@ -1,25 +1,36 @@
 {% extends "@DHDoctrineAudit/layout.html.twig" %}
 
-{% block dh_doctrine_audit_content %}
-    <h1>{{ entity }} history ({{ entries|length }} operations)</h1>
+{% import '@DHDoctrineAudit/Audit/bootstrap.html.twig' as bootstrap %}
 
-    <table>
-        <thead>
-            <th>Id</th>
-            <th>Type</th>
-            <th>Object Id</th>
-            <th>User Id</th>
-            <th>Username</th>
-            <th>Firewall</th>
-            <th>Class</th>
-            <th>IP</th>
-            <th>Created At</th>
+{% import _self as audit_viewer %}
+
+{% block dh_doctrine_audit_content %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_list_audits') }}">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><a href="{{ path('dh_doctrine_audit_show_entity_history', {'entity': entity}) }}">{{ entity }}</a></li>
+        </ol>
+    </nav>
+
+    <h2 class="card-title float-left"><code>{{ entity }}</code></h2>
+    <h3 class="float-right">{{ bootstrap.badge(entries|length ~ ' operations', 'primary') }}</h3>
+
+    <table class="table table-hover">
+        <thead class="thead-dark">
+        <th>Type</th>
+        <th>Object Id</th>
+        <th>User Id</th>
+        <th>Username</th>
+        <th>Firewall</th>
+        <th>Class</th>
+        <th>IP</th>
+        <th>Created At</th>
+        <th></th>
         </thead>
         <tbody>
         {% for entry in entries %}
             <tr>
-                <td><a href="{{ path('dh_doctrine_audit_show_audit_entry', { 'entity': entity, 'id': entry.id }) }}">{{ entry.id }}</a></td>
-                <td>{{ entry.getType() }}</td>
+                <td>{{ bootstrap.badge(entry.getType(), bootstrap.label_type(entry.getType())) }}</td>
                 <td><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': entity, 'id': entry.getObjectId() }) }}">{{ entry.getObjectId() }}</a></td>
                 <td>{{ entry.getUserId() }}</td>
                 <td>{{ entry.getUsername() }}</td>
@@ -27,6 +38,7 @@
                 <td>{{ entry.getUserFqdn() }}</td>
                 <td>{{ entry.getIp() }}</td>
                 <td>{{ entry.getCreatedAt() }}</td>
+                <td><a href="{{ path('dh_doctrine_audit_show_audit_entry', { 'entity': entity, 'id': entry.id }) }}">View details</a></td>
             </tr>
         {% endfor %}
         </tbody>
