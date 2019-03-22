@@ -41,8 +41,8 @@ class AuditEntryTest extends TestCase
     {
         $entry = new AuditEntry();
 
-        $this->assertSame('Unknown', $entry->getUserId(), 'AuditEntry::getUserId() is ok with undefined user.');
-        $this->assertSame('Unknown', $entry->getUsername(), 'AuditEntry::getUsername() is ok with undefined user.');
+        $this->assertNull($entry->getUserId(), 'AuditEntry::getUserId() is ok with undefined user.');
+        $this->assertNull($entry->getUsername(), 'AuditEntry::getUsername() is ok with undefined user.');
     }
 
     public function testGetDiffsReturnsAnArray(): void
