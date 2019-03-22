@@ -1,0 +1,51 @@
+{% macro dump(value, separator) %}
+{% spaceless %}
+    {% if value is iterable %}
+        {# Ugly hack to guess if value is describing an object #}
+        {% if value|length == 4 and value.label is defined %}
+            {{ value.label }}
+        {% else %}
+            {% for k, v in value %}
+                {{ k }}: {{ v }}{{ separator|default('<br/>')|raw }}
+            {% endfor %}
+        {% endif %}
+    {% else %}
+        {{ value }}
+    {% endif %}
+{% endspaceless %}
+{% endmacro dump %}
+
+{% macro humanize(entity, entry) %}
+    {% import _self as audit_helper %}
+
+    {% if entry.getType() == 'insert' %}
+        {% set action = 'inserted' %}
+    {% elseif entry.getType() == 'update' %}
+        {% set action = 'updated' %}
+    {% elseif entry.getType() == 'remove' %}
+        {% set action = 'deleted' %}
+    {% elseif entry.getType() == 'associate' %}
+        {% set action = 'associated' %}
+        {% set target = entry.getDiffs() %}
+    {% elseif entry.getType() == 'dissociate' %}
+        {% set action = 'dissociated' %}
+        {% set target = entry.getDiffs() %}
+    {% else %}
+        {% set action = '???' %}
+    {% endif %}
+
+    <code>{{ entity }}#{{ entry.getObjectId() }}</code>
+    has been <b>{{ action }}</b>
+    {% if target is defined %}
+        {% set defaultLabel = target['target']['class'] ~ '#' ~ target['target']['id'] %}
+        {{ entry.getType() == 'associate' ? 'with' : 'from' }} <code>{{ defaultLabel }}</code>
+        {% if defaultLabel != target['target']['label'] %}
+            (<em>{{ audit_helper.dump(target['target']) }}</em>)
+        {% endif %}
+    {% endif %}
+    by <b>{{ entry.getUsername() is null ? 'unknown user' : entry.getUsername() }}</b>
+    on {{ entry.getCreatedAt()|date('Y-m-d') }} at {{ entry.getCreatedAt()|date('H:i:s') }}
+    {% if entry.getIp() is not empty %}
+        , IP: {{ entry.getIp() }}
+    {% endif %}
+{% endmacro %}

@@ -1,30 +1,32 @@
 {% extends "@DHDoctrineAudit/layout.html.twig" %}
 
 {% block dh_doctrine_audit_content %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item active"><a href="{{ path('dh_doctrine_audit_list_audits') }}">Home</a></li>
-        </ol>
-    </nav>
-
-    <h2 class="card-title">{{ audited|length }} audited entities</h2>
-
-    <table class="table table-hover">
-        <thead class="thead-dark">
-        <th>Entity</th>
-        <th>Table</th>
-        <th></th>
-        </thead>
-        <tbody>
-        {% for entity, table in audited %}
-            <tr>
-                <td><code>{{ entity|escape }}</code></td>
-                <td>{{ table|escape }}</td>
-                <td>
-                    <a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': entity }) }}">View audits</a>
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+<div class="card">
+    <div class="card-body">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active"><a href="{{ path('dh_doctrine_audit_list_audits') }}">Home</a></li>
+            </ol>
+        </nav>
+        <h4 class="card-title">{{ audited|length }} audited entities</h4>
+        <table class="table table-hover">
+            <thead class="thead-dark">
+            <th>Entity</th>
+            <th>Table</th>
+            <th></th>
+            </thead>
+            <tbody>
+            {% for entity, table in audited %}
+                <tr>
+                    <td><code>{{ entity|escape }}</code></td>
+                    <td>{{ table|escape }}</td>
+                    <td>
+                        <a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': entity }) }}">View audits</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock dh_doctrine_audit_content %}

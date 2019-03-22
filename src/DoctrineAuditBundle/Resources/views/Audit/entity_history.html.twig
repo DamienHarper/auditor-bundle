@@ -1,46 +1,37 @@
 {% extends "@DHDoctrineAudit/layout.html.twig" %}
 
 {% import '@DHDoctrineAudit/Audit/bootstrap.html.twig' as bootstrap %}
-
-{% import _self as audit_viewer %}
+{% import '@DHDoctrineAudit/Audit/audit_helper.html.twig' as audit_helper %}
 
 {% block dh_doctrine_audit_content %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_list_audits') }}">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page"><a href="{{ path('dh_doctrine_audit_show_entity_history', {'entity': entity}) }}">{{ entity }}</a></li>
-        </ol>
-    </nav>
+<div class="card">
+    <div class="card-body">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_list_audits') }}">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><a href="{{ path('dh_doctrine_audit_show_entity_history', {'entity': entity}) }}">{{ entity }}</a></li>
+            </ol>
+        </nav>
 
-    <h2 class="card-title float-left"><code>{{ entity }}</code></h2>
-    <h3 class="float-right">{{ bootstrap.badge(entries|length ~ ' operations', 'primary') }}</h3>
+        <h4 class="card-title float-left"><code>{{ entity }}</code></h4>
+        <h5 class="float-right">{{ bootstrap.badge(entries|length ~ ' operations', 'primary') }}</h5>
 
-    <table class="table table-hover">
-        <thead class="thead-dark">
-        <th>Type</th>
-        <th>Object Id</th>
-        <th>User Id</th>
-        <th>Username</th>
-        <th>Firewall</th>
-        <th>Class</th>
-        <th>IP</th>
-        <th>Created At</th>
-        <th></th>
-        </thead>
-        <tbody>
-        {% for entry in entries %}
-            <tr>
-                <td>{{ bootstrap.badge(entry.getType(), bootstrap.label_type(entry.getType())) }}</td>
-                <td><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': entity, 'id': entry.getObjectId() }) }}">{{ entry.getObjectId() }}</a></td>
-                <td>{{ entry.getUserId() }}</td>
-                <td>{{ entry.getUsername() }}</td>
-                <td>{{ entry.getUserFirewall() }}</td>
-                <td>{{ entry.getUserFqdn() }}</td>
-                <td>{{ entry.getIp() }}</td>
-                <td>{{ entry.getCreatedAt() }}</td>
-                <td><a href="{{ path('dh_doctrine_audit_show_audit_entry', { 'entity': entity, 'id': entry.id }) }}">View details</a></td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+        <table class="table table-hover">
+            <thead class="thead-dark">
+            <th>Type</th>
+            <th>Description</th>
+            <th></th>
+            </thead>
+            <tbody>
+            {% for entry in entries %}
+                <tr>
+                    <td>{{ bootstrap.badge(entry.getType(), bootstrap.label_type(entry.getType())) }}</td>
+                    <td>{{ audit_helper.humanize(entity, entry) }}</td>
+                    <td><a href="{{ path('dh_doctrine_audit_show_audit_entry', { 'entity': entity, 'id': entry.id }) }}">View details</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock dh_doctrine_audit_content %}

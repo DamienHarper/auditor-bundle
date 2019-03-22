@@ -1,36 +1,23 @@
 {% extends "@DHDoctrineAudit/layout.html.twig" %}
 
 {% import '@DHDoctrineAudit/Audit/bootstrap.html.twig' as bootstrap %}
-
-{% macro dump(value, separator) %}
-    {% if value is iterable %}
-        {# Vilain hack afin de deviner si value correspond à un objet #}
-        {% if value|length == 4 and value.label is defined %}
-            {{ value.label|trans }}
-        {% else %}
-            {% for k, v in value %}
-                {{ k }}: {{ v }}{{ separator|default('<br/>')|raw }}
-            {% endfor %}
-        {% endif %}
-    {% else %}
-        {{ value }}
-    {% endif %}
-{% endmacro dump %}
-
-{% import _self as audit_viewer %}
+{% import '@DHDoctrineAudit/Audit/audit_helper.html.twig' as audit_helper %}
 
 {% block dh_doctrine_audit_content %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_list_audits') }}">Home</a></li>
-            <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_show_entity_history', {'entity': entity}) }}">{{ entity }}</a></li>
-            <li class="breadcrumb-item active" aria-current="page"><a href="{{ path('dh_doctrine_audit_show_audit_entry', {'entity': entity, 'id': entry.getObjectId()}) }}">{{ entity }}#{{ entry.getObjectId() }}</a></li>
-        </ol>
-    </nav>
+<div class="card">
+    <div class="card-body">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_list_audits') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_show_entity_history', {'entity': entity}) }}">{{ entity }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><a href="{{ path('dh_doctrine_audit_show_audit_entry', {'entity': entity, 'id': entry.getObjectId()}) }}">{{ entity }}#{{ entry.getObjectId() }}</a></li>
+            </ol>
+        </nav>
 
-    {% set diffs = entry.getDiffs() %}
-    <h2 class="card-title float-left"><code>{{ entity }}#{{ entry.getObjectId() }}</code></h2>
-    <h3 class="float-right">{{ bootstrap.badge(entry.getType(), bootstrap.label_type(entry.getType())) }}</h3>
+        {% set diffs = entry.getDiffs() %}
+        <h4 class="card-title float-left"><code>{{ entity }}#{{ entry.getObjectId() }}</code></h4>
+        <h5 class="float-right">{{ bootstrap.badge(entry.getType(), bootstrap.label_type(entry.getType())) }}</h5>
+        <h6 style="clear: both">{{ audit_helper.humanize(entity, entry) }}</h6>
 
     {% if entry.getType() in ['associate', 'dissociate'] %}
         <table class="table table-hover">
@@ -42,7 +29,7 @@
             {% for key, value in diffs['target'] %}
                 <tr>
                     <td><code>{{ key }}</code></td>
-                    <td>{{ bootstrap.text(audit_viewer.dump(value), 'secondary') }}</td>
+                    <td>{{ bootstrap.text(audit_helper.dump(value), 'secondary') }}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -57,7 +44,7 @@
             {% for key, value in diffs %}
                 <tr>
                     <td><code>{{ key }}</code></td>
-                    <td>{{ bootstrap.text(audit_viewer.dump(value), 'secondary') }}</td>
+                    <td>{{ bootstrap.text(audit_helper.dump(value), 'secondary') }}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -78,13 +65,13 @@
                             {% if values['old'] is empty %}
                                 {{ bootstrap.badge('null', 'secondary') }}
                             {% else %}
-                                {{ bootstrap.text(audit_viewer.dump(values['old']), 'danger') }}
+                                {{ bootstrap.text(audit_helper.dump(values['old']), 'danger') }}
                             {% endif %}
                         {% else %}
                             {% if values['-'] is empty %}
                                 {{ bootstrap.badge('null', 'secondary') }}
                             {% else %}
-                                {{ bootstrap.text(audit_viewer.dump(values['-']), 'danger') }}
+                                {{ bootstrap.text(audit_helper.dump(values['-']), 'danger') }}
                             {% endif %}
                         {% endif %}
                     </td>
@@ -94,9 +81,9 @@
                                 {{ bootstrap.badge('null', 'secondary') }}
                             {% else %}
                                 {% if values['old'] is empty %}
-                                    {{ bootstrap.text(audit_viewer.dump(values['new']), 'primary') }}
+                                    {{ bootstrap.text(audit_helper.dump(values['new']), 'primary') }}
                                 {% else %}
-                                    {{ bootstrap.text(audit_viewer.dump(values['new']), 'success') }}
+                                    {{ bootstrap.text(audit_helper.dump(values['new']), 'success') }}
                                 {% endif %}
                             {% endif %}
                         {% else %}
@@ -104,9 +91,9 @@
                                 {{ bootstrap.badge('null', 'secondary') }}
                             {% else %}
                                 {% if values['-'] is empty %}
-                                    {{ bootstrap.text(audit_viewer.dump(values['+']), 'primary') }}
+                                    {{ bootstrap.text(audit_helper.dump(values['+']), 'primary') }}
                                 {% else %}
-                                    {{ bootstrap.text(audit_viewer.dump(values['+']), 'success') }}
+                                    {{ bootstrap.text(audit_helper.dump(values['+']), 'success') }}
                                 {% endif %}
                             {% endif %}
                         {% endif %}
@@ -116,4 +103,6 @@
             </tbody>
         </table>
     {% endif %}
+    </div>
+</div>
 {% endblock dh_doctrine_audit_content %}

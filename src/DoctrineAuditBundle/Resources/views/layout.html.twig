@@ -13,11 +13,7 @@
         <a class="navbar-brand mb-0 text-light">DoctrineAuditBundle demo</a>
     </nav>
 
-    <div class="card">
-        <div class="card-body">
-            {% block dh_doctrine_audit_content %}{% endblock %}
-        </div>
-    </div>
+    {% block dh_doctrine_audit_content %}{% endblock %}
 </div>
 {% block javascripts %}
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
