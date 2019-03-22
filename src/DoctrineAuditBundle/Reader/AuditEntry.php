@@ -92,21 +92,21 @@ class AuditEntry
     /**
      * Get the value of blame_id.
      *
-     * @return int|string
+     * @return null|int|string
      */
     public function getUserId()
     {
-        return $this->blame_id ?? 'Unknown';
+        return $this->blame_id;
     }
 
     /**
      * Get the value of blame_user.
      *
-     * @return string
+     * @return null|string
      */
-    public function getUsername(): string
+    public function getUsername(): ?string
     {
-        return $this->blame_user ?? 'Unknown';
+        return $this->blame_user;
     }
 
     /**
