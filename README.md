@@ -1,4 +1,4 @@
-# DoctrineAuditBundle 
+# DoctrineAuditBundle [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Create%20audit%20logs%20for%20all%20Doctrine%20ORM%20database%20related%20changes%20with%20DoctrineAuditBundle.&url=https://github.com/DamienHarper/DoctrineAuditBundle&hashtags=doctrine-audit-log-bundle)
 
 [![Latest Stable Version](https://poser.pugx.org/damienharper/doctrine-audit-bundle/v/stable)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
 [![Latest Unstable Version](https://poser.pugx.org/damienharper/doctrine-audit-bundle/v/unstable)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
@@ -11,7 +11,7 @@
 [![Monthly Downloads](https://poser.pugx.org/damienharper/doctrine-audit-bundle/d/monthly)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
 [![Daily Downloads](https://poser.pugx.org/damienharper/doctrine-audit-bundle/d/daily)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
 
-This bundle creates audit logs for all doctrine ORM database related changes:
+This bundle creates audit logs for all Doctrine ORM database related changes:
 
 - inserts and updates including their diffs and relation field diffs.
 - many to many relation changes, association and dissociation actions.
