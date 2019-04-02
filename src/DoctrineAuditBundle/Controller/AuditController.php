@@ -16,7 +16,7 @@ class AuditController extends AbstractController
         $reader = $this->container->get('dh_doctrine_audit.reader');
         $reader->getEntities();
 
-        return $this->render('audits.html.twig', [
+        return $this->render('@DHDoctrineAudit/Audit/audits.html.twig', [
             'audited' => $reader->getEntities(),
             'reader' => $reader,
         ]);
@@ -57,7 +57,7 @@ class AuditController extends AbstractController
         $reader = $this->container->get('dh_doctrine_audit.reader');
         $data = $reader->getAudit($entity, $id);
 
-        return $this->render('entity_history_entry.html.twig', [
+        return $this->render('@DHDoctrineAudit/Audit/entity_history_entry.html.twig', [
             'entity' => $entity,
             'entry' => $data[0],
         ]);
