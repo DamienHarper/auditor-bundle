@@ -11,12 +11,12 @@
                 <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_list_audits') }}">Home</a></li>
                 <li class="breadcrumb-item {% if id is null %}active{% endif %}" aria-current="page"><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': entity }) }}">{{ entity }}</a></li>
                 {% if id is not null %}
-                <li class="breadcrumb-item active" aria-current="page"><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': entity, 'id': id }) }}">{{ entity~'#'~id }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': entity, 'id': id }) }}">{{ entity }}#{{ id }}</a></li>
                 {% endif %}
             </ol>
         </nav>
 
-        <h4 class="card-title float-left"><code>{{ entity }}</code> <em>(most recent first)</em></h4>
+        <h4 class="card-title float-left"><code>{{ entity }}{% if id is not null %}#{{ id }}{% endif %}</code> <em>(most recent first)</em></h4>
         <h5 class="float-right">{{ bootstrap.badge(entries|length ~ ' operations', 'primary') }}</h5>
 
         <div class="timeline-centered">
