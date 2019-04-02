@@ -3,19 +3,19 @@
 namespace DH\DoctrineAuditBundle\Twig\Extension;
 
 use Symfony\Bridge\Doctrine\RegistryInterface;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFunction;
 
-class TwigExtension extends \Twig_Extension
+class TwigExtension extends AbstractExtension
 {
     protected $doctrine;
 
-    public function getFunctions()
+    public function getFunctions(): array
     {
-        // Register the function in twig :
-        // In your template you can use it as : {{findUser(123)}}
         return [
-            new \Twig_SimpleFunction('findUser', [$this, 'findUser']),
-            new \Twig_SimpleFunction('class', [$this, 'getClass']),
-            new \Twig_SimpleFunction('tablename', [$this, 'getTablename']),
+            new TwigFunction('findUser', [$this, 'findUser']),
+            new TwigFunction('class', [$this, 'getClass']),
+            new TwigFunction('tablename', [$this, 'getTablename']),
         ];
     }
 
@@ -26,18 +26,22 @@ class TwigExtension extends \Twig_Extension
 
     public function findUser($id, $repository)
     {
+        if (null === $id) {
+            return null;
+        }
+
         $em = $this->doctrine->getManager();
         $repo = $em->getRepository($repository);
 
         return $repo->find($id);
     }
 
-    public function getClass($entity)
+    public function getClass($entity): string
     {
         return \get_class($entity);
     }
 
-    public function getTablename($entity)
+    public function getTablename($entity): string
     {
         return $this
             ->doctrine
@@ -50,7 +54,7 @@ class TwigExtension extends \Twig_Extension
     /**
      * {@inheritdoc}
      */
-    public function getName()
+    public function getName(): string
     {
         return 'twig_extensions';
     }

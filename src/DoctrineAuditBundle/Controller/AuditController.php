@@ -16,8 +16,9 @@ class AuditController extends AbstractController
         $reader = $this->container->get('dh_doctrine_audit.reader');
         $reader->getEntities();
 
-        return $this->render('@DHDoctrineAudit/Audit/audited_entities.html.twig', [
+        return $this->render('@DHDoctrineAudit/Audit/audits.html.twig', [
             'audited' => $reader->getEntities(),
+            'reader' => $reader,
         ]);
     }
 
@@ -37,6 +38,7 @@ class AuditController extends AbstractController
         $entries = $reader->getAudits($entity, $id, $page, $pageSize);
 
         return $this->render('@DHDoctrineAudit/Audit/entity_history.html.twig', [
+            'id' => $id,
             'entity' => $entity,
             'entries' => $entries,
         ]);
@@ -55,7 +57,7 @@ class AuditController extends AbstractController
         $reader = $this->container->get('dh_doctrine_audit.reader');
         $data = $reader->getAudit($entity, $id);
 
-        return $this->render('@DHDoctrineAudit/Audit/entity_audit_details.html.twig', [
+        return $this->render('@DHDoctrineAudit/Audit/entity_history_entry.html.twig', [
             'entity' => $entity,
             'entry' => $data[0],
         ]);
