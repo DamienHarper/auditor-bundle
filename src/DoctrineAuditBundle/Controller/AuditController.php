@@ -18,6 +18,7 @@ class AuditController extends AbstractController
 
         return $this->render('@DHDoctrineAudit/Audit/audited_entities.html.twig', [
             'audited' => $reader->getEntities(),
+            'reader' => $reader,
         ]);
     }
 

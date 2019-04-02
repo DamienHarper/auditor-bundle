@@ -13,25 +13,136 @@
             </ol>
         </nav>
 
-        <h4 class="card-title float-left"><code>{{ entity }}</code></h4>
+        <h4 class="card-title float-left"><code>{{ entity }}</code> <em>(most recent first)</em></h4>
         <h5 class="float-right">{{ bootstrap.badge(entries|length ~ ' operations', 'primary') }}</h5>
 
-        <table class="table table-hover">
-            <thead class="thead-dark">
-            <th>Type</th>
-            <th>Description</th>
-            <th></th>
-            </thead>
-            <tbody>
-            {% for entry in entries %}
-                <tr>
-                    <td>{{ bootstrap.badge(entry.getType(), bootstrap.label_type(entry.getType())) }}</td>
-                    <td>{{ audit_helper.humanize(entity, entry) }}</td>
-                    <td><a href="{{ path('dh_doctrine_audit_show_audit_entry', { 'entity': entity, 'id': entry.id }) }}">View details</a></td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        <div class="timeline-centered">
+        {% for entry in entries %}
+            <article class="timeline-entry">
+                <div class="timeline-entry-inner">
+                    <time class="timeline-time" datetime="2014-01-10T03:45">
+                        <span>{{ entry.getCreatedAt()|date('H:i:s') }}</span> <span>{{ entry.getCreatedAt()|date('l d F Y') }}</span>
+                    </time>
+
+                    <div class="timeline-icon bg-{{ bootstrap.label_type(entry.getType()) }}">
+                        <i class="entypo-feather"></i>
+                    </div>
+
+                    <div class="timeline-label">
+                        <h2>
+                            {{ audit_helper.humanize(entity, entry) }}
+                            {{ bootstrap.badge(entry.getType(), bootstrap.label_type(entry.getType())~' float-right') }}
+                        </h2>
+{#                        <p>#}
+{#                            <a href="{{ path('dh_doctrine_audit_show_audit_entry', { 'entity': entity, 'id': entry.id }) }}">View details</a>#}
+{#                        </p>#}
+                        {% set diffs = entry.getDiffs() %}
+                        {% if entry.getType() in ['associate', 'dissociate'] %}
+                            <table class="table table-hover table-sm mb-0">
+                                <thead class="thead-light">
+                                <th width="25%">Property</th>
+                                <th>Target</th>
+                                </thead>
+                                <tbody>
+                                {% for key, value in diffs['target'] %}
+                                    <tr>
+                                        <td><code>{{ key }}</code></td>
+                                        <td>{{ bootstrap.text(audit_helper.dump(value), 'secondary') }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% elseif entry.getType() == 'remove' %}
+                            <table class="table table-hover table-sm mb-0">
+                                <thead class="thead-light">
+                                <th width="25%">Property</th>
+                                <th>Target</th>
+                                </thead>
+                                <tbody>
+                                {% for key, value in diffs %}
+                                    <tr>
+                                        <td><code>{{ key }}</code></td>
+                                        <td>{{ bootstrap.text(audit_helper.dump(value), 'secondary') }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <table class="table table-hover table-sm mb-0">
+                                <thead class="thead-light">
+                                <th width="25%">Property</th>
+                                <th width="35%">Old value</th>
+                                <th width="40%">New value</th>
+                                </thead>
+                                <tbody>
+                                {% for key, values in diffs %}
+                                    <tr>
+                                        <td><code>{{ key }}</code></td>
+                                        <td>
+                                            {% if values['old'] is defined %}
+                                                {% if values['old'] is empty %}
+                                                    {{ bootstrap.badge('null', 'secondary') }}
+                                                {% else %}
+                                                    {{ bootstrap.text(audit_helper.dump(values['old']), 'danger') }}
+                                                {% endif %}
+                                            {% else %}
+                                                {% if values['-'] is empty %}
+                                                    {{ bootstrap.badge('null', 'secondary') }}
+                                                {% else %}
+                                                    {{ bootstrap.text(audit_helper.dump(values['-']), 'danger') }}
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if values['new'] is defined %}
+                                                {% if values['new'] is empty %}
+                                                    {{ bootstrap.badge('null', 'secondary') }}
+                                                {% else %}
+                                                    {% if values['old'] is empty %}
+                                                        {{ bootstrap.text(audit_helper.dump(values['new']), 'primary') }}
+                                                    {% else %}
+                                                        {{ bootstrap.text(audit_helper.dump(values['new']), 'success') }}
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% else %}
+                                                {% if values['+'] is empty %}
+                                                    {{ bootstrap.badge('null', 'secondary') }}
+                                                {% else %}
+                                                    {% if values['-'] is empty %}
+                                                        {{ bootstrap.text(audit_helper.dump(values['+']), 'primary') }}
+                                                    {% else %}
+                                                        {{ bootstrap.text(audit_helper.dump(values['+']), 'success') }}
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% endif %}
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+        </div>
+
+{#        <table class="table table-hover">#}
+{#            <thead class="thead-dark">#}
+{#            <th>Type</th>#}
+{#            <th>Description</th>#}
+{#            <th></th>#}
+{#            </thead>#}
+{#            <tbody>#}
+{#            {% for entry in entries %}#}
+{#                <tr>#}
+{#                    <td>{{ bootstrap.badge(entry.getType(), bootstrap.label_type(entry.getType())) }}</td>#}
+{#                    <td>{{ audit_helper.humanize(entity, entry) }}</td>#}
+{#                    <td><a href="{{ path('dh_doctrine_audit_show_audit_entry', { 'entity': entity, 'id': entry.id }) }}">View details</a></td>#}
+{#                </tr>#}
+{#            {% endfor %}#}
+{#            </tbody>#}
+{#        </table>#}
     </div>
 </div>
 {% endblock dh_doctrine_audit_content %}
