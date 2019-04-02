@@ -18,12 +18,14 @@
 
 {% macro label_type(value) %}
 {% spaceless %}
-    {% if value in ['insert', 'associate'] %}
+    {% if value == 'insert' %}
         {{ 'success' }}
     {% elseif value == 'update' %}
         {{ 'primary' }}
-    {% elseif value in ['remove', 'dissociate'] %}
+    {% elseif value == 'remove' %}
         {{ 'danger' }}
+    {% elseif value in ['associate', 'dissociate'] %}
+        {{ 'warning' }}
     {% else %}
         {{ 'secondary' }}
     {% endif %}
