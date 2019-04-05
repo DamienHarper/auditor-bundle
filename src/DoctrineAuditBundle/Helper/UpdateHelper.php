@@ -42,22 +42,15 @@ class UpdateHelper
      */
     public function createAuditTable(Schema $schema, Table $table): void
     {
-        $entityTablename = $table->getName();
-        $regex = sprintf('#^(%s\.)(.*)$#', preg_quote($schema->getName(), '#'));
-        if (preg_match($regex, $entityTablename)) {
-            // entityTablename already prefixed with schema name
-            $auditTablename = preg_replace(
-                $regex,
-                sprintf(
-                    '$1%s$2%s',
-                    preg_quote($this->getConfiguration()->getTablePrefix(), '#'),
-                    preg_quote($this->getConfiguration()->getTableSuffix(), '#')
-                ),
-                $entityTablename
-            );
-        } else {
-            $auditTablename = $this->getConfiguration()->getTablePrefix().$table->getName().$this->getConfiguration()->getTableSuffix();
-        }
+        $auditTablename = preg_replace(
+            sprintf('#^([^\.]+\.)?(%s)$#', preg_quote($table->getName(), '#')),
+            sprintf(
+                '$1%s$2%s',
+                preg_quote($this->getConfiguration()->getTablePrefix(), '#'),
+                preg_quote($this->getConfiguration()->getTableSuffix(), '#')
+            ),
+            $table->getName()
+        );
 
         if (null !== $auditTablename && !$schema->hasTable($auditTablename)) {
             $auditTable = $schema->createTable($auditTablename);
