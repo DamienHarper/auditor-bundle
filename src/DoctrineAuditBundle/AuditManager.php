@@ -54,8 +54,8 @@ class AuditManager
             'action' => 'insert',
             'blame' => $this->helper->blame(),
             'diff' => $this->helper->diff($em, $entity, $ch),
-            'table' => $meta->table['name'],
-            'schema' => $meta->table['schema'] ?? null,
+            'table' => $meta->getTableName(),
+            'schema' => $meta->getSchemaName(),
             'id' => $this->helper->id($em, $entity),
         ]);
     }
@@ -81,8 +81,8 @@ class AuditManager
             'action' => 'update',
             'blame' => $this->helper->blame(),
             'diff' => $diff,
-            'table' => $meta->table['name'],
-            'schema' => $meta->table['schema'] ?? null,
+            'table' => $meta->getTableName(),
+            'schema' => $meta->getSchemaName(),
             'id' => $this->helper->id($em, $entity),
         ]);
     }
@@ -104,8 +104,8 @@ class AuditManager
             'action' => 'remove',
             'blame' => $this->helper->blame(),
             'diff' => $this->helper->summarize($em, $entity, $id),
-            'table' => $meta->table['name'],
-            'schema' => $meta->table['schema'] ?? null,
+            'table' => $meta->getTableName(),
+            'schema' => $meta->getSchemaName(),
             'id' => $id,
         ]);
     }
@@ -181,8 +181,8 @@ class AuditManager
                 'source' => $this->helper->summarize($em, $source),
                 'target' => $this->helper->summarize($em, $target),
             ],
-            'table' => $meta->table['name'],
-            'schema' => $meta->table['schema'] ?? null,
+            'table' => $meta->getTableName(),
+            'schema' => $meta->getSchemaName(),
             'id' => $this->helper->id($em, $source),
         ];
 

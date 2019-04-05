@@ -225,7 +225,7 @@ class AuditHelper
         return [
             'label' => $label,
             'class' => $meta->name,
-            'table' => $meta->table['name'],
+            'table' => $meta->getTableName(),
             $pkName => $pkValue,
         ];
     }

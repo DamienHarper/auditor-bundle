@@ -47,7 +47,7 @@ class TwigExtension extends AbstractExtension
             ->doctrine
             ->getManager()
             ->getClassMetadata(\get_class($entity))
-            ->table['name']
+            ->getTableName()
         ;
     }
 

@@ -123,7 +123,10 @@ class AuditReader
 
         $connection = $this->entityManager->getConnection();
 
-        $schema = isset($this->entityManager->getClassMetadata($entity)->table['schema']) ? $this->entityManager->getClassMetadata($entity)->table['schema'].'.' : '';
+        $schema = '';
+        if (null !== $this->entityManager->getClassMetadata($entity)->getSchemaName()) {
+            $schema = $this->entityManager->getClassMetadata($entity)->getSchemaName().'.';
+        }
 
         $auditTable = implode('', [
             $schema,
@@ -170,7 +173,10 @@ class AuditReader
     {
         $connection = $this->entityManager->getConnection();
 
-        $schema = isset($this->entityManager->getClassMetadata($entity)->table['schema']) ? $this->entityManager->getClassMetadata($entity)->table['schema'].'.' : '';
+        $schema = '';
+        if (null !== $this->entityManager->getClassMetadata($entity)->getSchemaName()) {
+            $schema = $this->entityManager->getClassMetadata($entity)->getSchemaName().'.';
+        }
 
         $auditTable = implode('', [
             $schema,
@@ -214,6 +220,6 @@ class AuditReader
         return $this
             ->entityManager
             ->getClassMetadata($entity)
-            ->table['name'];
+            ->getTableName();
     }
 }
