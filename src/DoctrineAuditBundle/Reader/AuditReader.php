@@ -122,14 +122,10 @@ class AuditReader
         }
 
         $connection = $this->entityManager->getConnection();
-
-        $schema = '';
-        if (null !== $this->entityManager->getClassMetadata($entity)->getSchemaName()) {
-            $schema = $this->entityManager->getClassMetadata($entity)->getSchemaName().'.';
-        }
+        $schema = $this->entityManager->getClassMetadata($entity)->getSchemaName();
 
         $auditTable = implode('', [
-            $schema,
+            null === $schema ? '' : $schema.'.',
             $this->configuration->getTablePrefix(),
             $this->getEntityTableName(\is_string($entity) ? $entity : \get_class($entity)),
             $this->configuration->getTableSuffix(),
@@ -172,14 +168,10 @@ class AuditReader
     public function getAudit($entity, $id)
     {
         $connection = $this->entityManager->getConnection();
-
-        $schema = '';
-        if (null !== $this->entityManager->getClassMetadata($entity)->getSchemaName()) {
-            $schema = $this->entityManager->getClassMetadata($entity)->getSchemaName().'.';
-        }
+        $schema = $this->entityManager->getClassMetadata($entity)->getSchemaName();
 
         $auditTable = implode('', [
-            $schema,
+            null === $schema ? '' : $schema.'.',
             $this->configuration->getTablePrefix(),
             $this->getEntityTableName(\is_string($entity) ? $entity : \get_class($entity)),
             $this->configuration->getTableSuffix(),
