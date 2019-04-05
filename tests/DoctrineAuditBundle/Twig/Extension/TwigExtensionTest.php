@@ -81,6 +81,7 @@ class TwigExtensionTest extends BaseTest
         $em->persist($author);
         $em->flush();
 
+        $this->assertNull($extension->findUser(null, Author::class));
         $this->assertNotNull($extension->findUser(1, Author::class));
         $this->assertInstanceOf(Author::class, $extension->findUser(1, Author::class));
     }
