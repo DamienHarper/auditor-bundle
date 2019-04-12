@@ -107,17 +107,18 @@ class AuditReader
      *
      * @param object|string $entity
      * @param int|string    $id
-     * @param int           $page
-     * @param int           $pageSize
+     * @param null|int      $page
+     * @param null|int      $pageSize
      *
      * @return array
      */
-    public function getAudits($entity, $id = null, int $page = 1, int $pageSize = 50): array
+    public function getAudits($entity, $id = null, ?int $page = null, ?int $pageSize = null): array
     {
-        if ($page < 1) {
+        if (null !== $page && $page < 1) {
             throw new \InvalidArgumentException('$page must be greater or equal than 1.');
         }
-        if ($pageSize < 1) {
+
+        if (null !== $pageSize && $pageSize < 1) {
             throw new \InvalidArgumentException('$pageSize must be greater or equal than 1.');
         }
 
@@ -137,8 +138,14 @@ class AuditReader
             ->from($auditTable)
             ->orderBy('created_at', 'DESC')
             ->addOrderBy('id', 'DESC')
-            ->setFirstResult(($page - 1) * $pageSize)
-            ->setMaxResults($pageSize);
+        ;
+
+        if (null !== $pageSize) {
+            $queryBuilder
+                ->setFirstResult(($page - 1) * $pageSize)
+                ->setMaxResults($pageSize)
+            ;
+        }
 
         if (null !== $id) {
             $queryBuilder
