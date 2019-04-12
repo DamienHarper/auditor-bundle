@@ -5,6 +5,7 @@ namespace DH\DoctrineAuditBundle\Reader;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\DBAL\Query\QueryBuilder;
 
 class AuditReader
 {
@@ -114,6 +115,51 @@ class AuditReader
      */
     public function getAudits($entity, $id = null, ?int $page = null, ?int $pageSize = null): array
     {
+        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id, $page, $pageSize);
+
+        /** @var Statement $statement */
+        $statement = $queryBuilder->execute();
+        $statement->setFetchMode(\PDO::FETCH_CLASS, AuditEntry::class);
+
+        return $statement->fetchAll();
+    }
+
+    /**
+     * Returns the amount of audited entries/operations.
+     *
+     * @param object|string $entity
+     * @param int|string    $id
+     * @param null|int      $page
+     * @param null|int      $pageSize
+     *
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     *
+     * @return int
+     */
+    public function getAuditsCount($entity, $id = null, ?int $page = null, ?int $pageSize = null): int
+    {
+        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id, $page, $pageSize);
+
+        return $queryBuilder
+            ->resetQueryPart('select')
+            ->select('COUNT(id)')
+            ->execute()
+            ->fetchColumn(0)
+        ;
+    }
+
+    /**
+     * Returns an array of audited entries/operations.
+     *
+     * @param object|string $entity
+     * @param int|string    $id
+     * @param null|int      $page
+     * @param null|int      $pageSize
+     *
+     * @return QueryBuilder
+     */
+    private function getAuditsQueryBuilder($entity, $id = null, ?int $page = null, ?int $pageSize = null): QueryBuilder
+    {
         if (null !== $page && $page < 1) {
             throw new \InvalidArgumentException('$page must be greater or equal than 1.');
         }
@@ -159,11 +205,7 @@ class AuditReader
                 ->setParameter('filter', $this->filter);
         }
 
-        /** @var Statement $statement */
-        $statement = $queryBuilder->execute();
-        $statement->setFetchMode(\PDO::FETCH_CLASS, AuditEntry::class);
-
-        return $statement->fetchAll();
+        return $queryBuilder;
     }
 
     /**
