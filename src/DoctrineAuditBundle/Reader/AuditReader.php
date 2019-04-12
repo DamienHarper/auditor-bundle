@@ -123,7 +123,7 @@ class AuditReader
         }
 
         $connection = $this->entityManager->getConnection();
-        $schema = $this->entityManager->getClassMetadata($entity)->getSchemaName();
+        $schema = $this->entityManager->getClassMetadata(\is_string($entity) ? $entity : \get_class($entity))->getSchemaName();
 
         $auditTable = implode('', [
             null === $schema ? '' : $schema.'.',
@@ -175,7 +175,7 @@ class AuditReader
     public function getAudit($entity, $id)
     {
         $connection = $this->entityManager->getConnection();
-        $schema = $this->entityManager->getClassMetadata($entity)->getSchemaName();
+        $schema = $this->entityManager->getClassMetadata(\is_string($entity) ? $entity : \get_class($entity))->getSchemaName();
 
         $auditTable = implode('', [
             null === $schema ? '' : $schema.'.',
