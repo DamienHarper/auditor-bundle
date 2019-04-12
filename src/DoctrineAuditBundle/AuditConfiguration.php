@@ -30,6 +30,11 @@ class AuditConfiguration
     private $entities = [];
 
     /**
+     * @var array
+     */
+    private $entityConfig;
+
+    /**
      * @var UserProviderInterface
      */
     protected $userProvider;
@@ -50,13 +55,18 @@ class AuditConfiguration
         $this->requestStack = $requestStack;
         $this->firewallMap = $firewallMap;
 
+        $this->entityConfig = $config['entities'];
         $this->tablePrefix = $config['table_prefix'];
         $this->tableSuffix = $config['table_suffix'];
         $this->ignoredColumns = $config['ignored_columns'];
 
-        if (isset($config['entities']) && !empty($config['entities'])) {
+        $this->setEntityDefault();
+    }
+
+    private function setEntityDefault() {
+        if (isset($this->entityConfig) && !empty($this->entityConfig)) {
             // use entity names as array keys for easier lookup
-            foreach ($config['entities'] as $auditedEntity => $entityOptions) {
+            foreach ($this->entityConfig as $auditedEntity => $entityOptions) {
                 $this->entities[$auditedEntity] = $entityOptions;
             }
         }
@@ -216,17 +226,23 @@ class AuditConfiguration
     }
 
     /**
-     * Enables/Disables auditing for all entities.
+     * Enables/Disables auditing for all entities or restors default config settings.
      *
-     * @param bool enabled: true/false
+     * @param bool|string enabled: true/false/defalt
      *
      * @return $this
      */
-    public function enableAudit(bool $enabled): self
+    public function enableAudit($enabled = 'default'): self
     {
-        foreach ($this->entities as $entity) {
-            $entity[$entity]['enabled'] = $enabled;
+        if ($enabled === true || $enabled === false) {
+            foreach ($this->entities as $entity) {
+                $entity[$entity]['enabled'] = $enabled;
+            }
+
+            return $this;
         }
+
+        $this->setEntityDefault();
 
         return $this;
     }
