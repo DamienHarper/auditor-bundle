@@ -226,7 +226,7 @@ class AuditConfiguration
     }
 
     /**
-     * Enables/Disables auditing for all entities or restors default config settings.
+     * Enables/Disables auditing for all entities or restors default.
      *
      * @param bool|string enabled: true/false/defalt
      *
@@ -234,14 +234,16 @@ class AuditConfiguration
      */
     public function enableAudit($enabled = 'default'): self
     {
+        // set ALL entities to enabled = true/false
         if ($enabled === true || $enabled === false) {
-            foreach ($this->entities as $entity) {
-                $entity[$entity]['enabled'] = $enabled;
+            foreach (array_keys($this->entities) as $key) {
+                $this->entities[$key]['enabled'] = $enabled;
             }
 
             return $this;
         }
 
+        // restore default entities config
         $this->setEntityDefault();
 
         return $this;
