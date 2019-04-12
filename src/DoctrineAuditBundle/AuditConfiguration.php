@@ -216,6 +216,22 @@ class AuditConfiguration
     }
 
     /**
+     * Enables/Disables auditing for all entities.
+     *
+     * @param bool enabled: true/false
+     *
+     * @return $this
+     */
+    public function enableAudit(bool $enabled): self
+    {
+        foreach ($this->entities as $entity) {
+            $entity[$entity]['enabled'] = $enabled;
+        }
+
+        return $this;
+    }
+
+    /**
      * Get the value of userProvider.
      *
      * @return UserProviderInterface
