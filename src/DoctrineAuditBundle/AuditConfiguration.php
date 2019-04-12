@@ -2,7 +2,9 @@
 
 namespace DH\DoctrineAuditBundle;
 
+use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
 use DH\DoctrineAuditBundle\User\UserProviderInterface;
+use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class AuditConfiguration
@@ -37,10 +39,16 @@ class AuditConfiguration
      */
     protected $requestStack;
 
-    public function __construct(array $config, UserProviderInterface $userProvider, RequestStack $requestStack)
+    /**
+     * @var FirewallMap
+     */
+    private $firewallMap;
+
+    public function __construct(array $config, UserProviderInterface $userProvider, RequestStack $requestStack, FirewallMap $firewallMap)
     {
         $this->userProvider = $userProvider;
         $this->requestStack = $requestStack;
+        $this->firewallMap = $firewallMap;
 
         $this->tablePrefix = $config['table_prefix'];
         $this->tableSuffix = $config['table_suffix'];
@@ -55,49 +63,84 @@ class AuditConfiguration
     }
 
     /**
+     * Set the value of entities.
+     *
+     * @param array $entities
+     */
+    public function setEntities(array $entities): void
+    {
+        $this->entities = $entities;
+    }
+
+    /**
      * Returns true if $entity is audited.
      *
-     * @param $entity
+     * @param object|string $entity
      *
      * @return bool
      */
     public function isAudited($entity): bool
     {
-        if (!empty($this->entities)) {
-            foreach ($this->entities as $auditedEntity => $entityOptions) {
-                if (isset($entityOptions['enabled']) && !$entityOptions['enabled']) {
-                    continue;
-                }
-                if (\is_object($entity) && $entity instanceof $auditedEntity && !is_subclass_of($entity, $auditedEntity)) {
-                    return true;
-                }
-                if (\is_string($entity) && $entity === $auditedEntity) {
-                    return true;
-                }
-            }
+        $class = DoctrineHelper::getRealClass($entity);
+
+        // is $entity part of audited entities?
+        if (!array_key_exists($class, $this->entities)) {
+            // no => $entity is not audited
+            return false;
         }
 
-        return false;
+        $entityOptions = $this->entities[$class];
+
+        if (null === $entityOptions) {
+            // no option defined => $entity is audited
+            return true;
+        }
+
+        if (isset($entityOptions['enabled'])) {
+            return (bool) $entityOptions['enabled'];
+        }
+
+        return true;
     }
 
     /**
      * Returns true if $field is audited.
      *
-     * @param $entity
-     * @param $field
+     * @param object|string $entity
+     * @param string        $field
      *
      * @return bool
      */
-    public function isAuditedField($entity, $field): bool
+    public function isAuditedField($entity, string $field): bool
     {
-        if (!\in_array($field, $this->ignoredColumns, true) && $this->isAudited($entity)) {
-            $class = \is_object($entity) ? \Doctrine\Common\Util\ClassUtils::getRealClass(\get_class($entity)) : $entity;
-            $entityOptions = $this->entities[$class];
-
-            return !isset($entityOptions['ignored_columns']) || !\in_array($field, $entityOptions['ignored_columns'], true);
+        // is $field is part of globally ignored columns?
+        if (\in_array($field, $this->ignoredColumns, true)) {
+            // yes => $field is not audited
+            return false;
         }
 
-        return false;
+        // is $entity audited?
+        if (!$this->isAudited($entity)) {
+            // no => $field is not audited
+            return false;
+        }
+
+        $class = DoctrineHelper::getRealClass($entity);
+        $entityOptions = $this->entities[$class];
+
+        if (null === $entityOptions) {
+            // no option defined => $field is audited
+            return true;
+        }
+
+        // are columns excluded and is field part of them?
+        if (isset($entityOptions['ignored_columns']) &&
+            \in_array($field, $entityOptions['ignored_columns'], true)) {
+            // yes => $field is not audited
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -177,7 +220,7 @@ class AuditConfiguration
      *
      * @return UserProviderInterface
      */
-    public function getUserProvider(): UserProviderInterface
+    public function getUserProvider(): ?UserProviderInterface
     {
         return $this->userProvider;
     }
@@ -190,5 +233,15 @@ class AuditConfiguration
     public function getRequestStack(): RequestStack
     {
         return $this->requestStack;
+    }
+
+    /**
+     * Gets the value of firewallMap.
+     *
+     * @return FirewallMap
+     */
+    public function getFirewallMap(): FirewallMap
+    {
+        return $this->firewallMap;
     }
 }

@@ -2,9 +2,10 @@
 
 namespace DH\DoctrineAuditBundle\Command;
 
-use DH\DoctrineAuditBundle\AuditReader;
+use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\ORM\EntityManager;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
@@ -43,14 +44,12 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
             return 0;
         }
 
-        // If you prefer to wait until the lock is released, use this:
-        // $this->lock(null, true);
-
         $io = new SymfonyStyle($input, $output);
 
         $keep = (int) $input->getArgument('keep');
         if ($keep <= 0) {
             $io->error("'keep' argument must be a positive number.");
+            $this->release();
 
             return 0;
         }
@@ -64,9 +63,14 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
         $registry = $this->container->get('doctrine');
 
         /**
+         * @var EntityManager
+         */
+        $em = $registry->getManager();
+
+        /**
          * @var Connection
          */
-        $connection = $registry->getManager()->getConnection();
+        $connection = $em->getConnection();
 
         /**
          * @var AuditReader
@@ -78,13 +82,13 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
             "You are about to clean audits older than %d months (up to <comment>%s</comment>): %d entities involved.\n Do you want to proceed?",
             $input->getArgument('keep'),
             $until->format('Y-m-d'),
-            count($entities)
+            \count($entities)
         );
 
         $confirm = $input->getOption('no-confirm') ? true : $io->confirm($message, false);
 
         if ($confirm) {
-            $progressBar = new ProgressBar($output, count($entities));
+            $progressBar = new ProgressBar($output, \count($entities));
             $progressBar->setBarWidth(70);
             $progressBar->setFormat("%message%\n".$progressBar->getFormatDefinition('debug'));
 
@@ -113,6 +117,9 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
                 $progressBar->advance();
             }
 
+            $progressBar->setMessage('Cleaning audit tables... (<info>done</info>)');
+            $progressBar->display();
+
             $io->newLine(2);
 
             $io->success('Success.');
@@ -127,8 +134,13 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
         return 0;
     }
 
-    public function setContainer(ContainerInterface $container = null)
+    public function setContainer(ContainerInterface $container = null): void
     {
         $this->container = $container;
+    }
+
+    public function unlock()
+    {
+        return $this->release();
     }
 }

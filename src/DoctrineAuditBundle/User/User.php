@@ -5,12 +5,12 @@ namespace DH\DoctrineAuditBundle\User;
 class User implements UserInterface
 {
     /**
-     * @var int|null
+     * @var null|int
      */
     protected $id;
 
     /**
-     * @var string|null
+     * @var null|string
      */
     protected $username;
 

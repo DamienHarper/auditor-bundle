@@ -1,7 +1,9 @@
 <?php
 
-namespace DH\DoctrineAuditBundle;
+namespace DH\DoctrineAuditBundle\Reader;
 
+use DH\DoctrineAuditBundle\AuditConfiguration;
+use Doctrine\DBAL\Statement;
 use Doctrine\ORM\EntityManagerInterface;
 
 class AuditReader
@@ -23,7 +25,7 @@ class AuditReader
     private $entityManager;
 
     /**
-     * @var null
+     * @var ?string
      */
     private $filter;
 
@@ -54,7 +56,7 @@ class AuditReader
      *
      * @return AuditReader
      */
-    public function filterBy(string $filter): AuditReader
+    public function filterBy(string $filter): self
     {
         if (!\in_array($filter, [self::UPDATE, self::ASSOCIATE, self::DISSOCIATE, self::INSERT, self::REMOVE], true)) {
             $this->filter = null;
@@ -66,13 +68,29 @@ class AuditReader
     }
 
     /**
+     * Returns current filter.
+     *
+     * @return null|string
+     */
+    public function getFilter(): ?string
+    {
+        return $this->filter;
+    }
+
+    /**
      * Returns an array of audit table names indexed by entity FQN.
+     *
+     * @throws \Doctrine\ORM\ORMException
      *
      * @return array
      */
     public function getEntities(): array
     {
-        $entities = $this->entityManager->getConfiguration()->getMetadataDriverImpl()->getAllClassNames();
+        $metadataDriver = $this->entityManager->getConfiguration()->getMetadataDriverImpl();
+        $entities = [];
+        if (null !== $metadataDriver) {
+            $entities = $metadataDriver->getAllClassNames();
+        }
         $audited = [];
         foreach ($entities as $entity) {
             if ($this->configuration->isAudited($entity)) {
@@ -88,20 +106,27 @@ class AuditReader
      * Returns an array of audited entries/operations.
      *
      * @param object|string $entity
-     * @param null|int      $id
-     * @param int           $page
-     * @param int           $pageSize
+     * @param int|string    $id
+     * @param null|int      $page
+     * @param null|int      $pageSize
      *
      * @return array
      */
-    public function getAudits($entity, int $id = null, int $page = 1, int $pageSize = 50): array
+    public function getAudits($entity, $id = null, ?int $page = null, ?int $pageSize = null): array
     {
-        $connection = $this->entityManager->getConnection();
+        if (null !== $page && $page < 1) {
+            throw new \InvalidArgumentException('$page must be greater or equal than 1.');
+        }
 
-        $schema = isset($this->entityManager->getClassMetadata($entity)->table['schema']) ? $this->entityManager->getClassMetadata($entity)->table['schema'] . '.' : '';
+        if (null !== $pageSize && $pageSize < 1) {
+            throw new \InvalidArgumentException('$pageSize must be greater or equal than 1.');
+        }
+
+        $connection = $this->entityManager->getConnection();
+        $schema = $this->entityManager->getClassMetadata(\is_string($entity) ? $entity : \get_class($entity))->getSchemaName();
 
         $auditTable = implode('', [
-            $schema,
+            null === $schema ? '' : $schema.'.',
             $this->configuration->getTablePrefix(),
             $this->getEntityTableName(\is_string($entity) ? $entity : \get_class($entity)),
             $this->configuration->getTableSuffix(),
@@ -113,8 +138,14 @@ class AuditReader
             ->from($auditTable)
             ->orderBy('created_at', 'DESC')
             ->addOrderBy('id', 'DESC')
-            ->setFirstResult(($page - 1) * $pageSize)
-            ->setMaxResults($pageSize);
+        ;
+
+        if (null !== $pageSize) {
+            $queryBuilder
+                ->setFirstResult(($page - 1) * $pageSize)
+                ->setMaxResults($pageSize)
+            ;
+        }
 
         if (null !== $id) {
             $queryBuilder
@@ -128,25 +159,26 @@ class AuditReader
                 ->setParameter('filter', $this->filter);
         }
 
-        return $queryBuilder
-            ->execute()
-            ->fetchAll(\PDO::FETCH_CLASS, AuditEntry::class);
+        /** @var Statement $statement */
+        $statement = $queryBuilder->execute();
+        $statement->setFetchMode(\PDO::FETCH_CLASS, AuditEntry::class);
+
+        return $statement->fetchAll();
     }
 
     /**
      * @param object|string $entity
-     * @param int           $id
+     * @param int|string    $id
      *
      * @return mixed
      */
-    public function getAudit($entity, int $id)
+    public function getAudit($entity, $id)
     {
         $connection = $this->entityManager->getConnection();
-
-        $schema = isset($this->entityManager->getClassMetadata($entity)->table['schema']) ? $this->entityManager->getClassMetadata($entity)->table['schema'] . '.' : '';
+        $schema = $this->entityManager->getClassMetadata(\is_string($entity) ? $entity : \get_class($entity))->getSchemaName();
 
         $auditTable = implode('', [
-            $schema,
+            null === $schema ? '' : $schema.'.',
             $this->configuration->getTablePrefix(),
             $this->getEntityTableName(\is_string($entity) ? $entity : \get_class($entity)),
             $this->configuration->getTableSuffix(),
@@ -168,9 +200,11 @@ class AuditReader
                 ->setParameter('filter', $this->filter);
         }
 
-        return $queryBuilder
-            ->execute()
-            ->fetchAll(\PDO::FETCH_CLASS, AuditEntry::class);
+        /** @var Statement $statement */
+        $statement = $queryBuilder->execute();
+        $statement->setFetchMode(\PDO::FETCH_CLASS, AuditEntry::class);
+
+        return $statement->fetchAll();
     }
 
     /**
@@ -185,6 +219,6 @@ class AuditReader
         return $this
             ->entityManager
             ->getClassMetadata($entity)
-            ->table['name'];
+            ->getTableName();
     }
 }

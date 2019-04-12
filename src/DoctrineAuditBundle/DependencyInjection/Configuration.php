@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\DependencyInjection;
 
+use Symfony\Component\Config\Definition\Builder\ParentNodeDefinitionInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -13,8 +14,10 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder('dh_doctrine_audit');
+
         // Keep compatibility with symfony/config < 4.2
-        $rootNode = \method_exists($treeBuilder, 'getRootNode') ? $treeBuilder->getRootNode() : $treeBuilder->root('dh_doctrine_audit');
+        /** @var ParentNodeDefinitionInterface $rootNode */
+        $rootNode = method_exists($treeBuilder, 'getRootNode') ? $treeBuilder->getRootNode() : $treeBuilder->root('dh_doctrine_audit');
 
         $rootNode
             ->children()

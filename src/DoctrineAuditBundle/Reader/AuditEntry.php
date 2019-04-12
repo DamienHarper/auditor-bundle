@@ -1,6 +1,6 @@
 <?php
 
-namespace DH\DoctrineAuditBundle;
+namespace DH\DoctrineAuditBundle\Reader;
 
 class AuditEntry
 {
@@ -8,30 +8,47 @@ class AuditEntry
      * @var int
      */
     protected $id;
+
     /**
      * @var string
      */
     protected $type;
+
     /**
-     * @var int
+     * @var string
      */
     protected $object_id;
+
     /**
      * @var string
      */
     protected $diffs;
+
     /**
      * @var int
      */
     protected $blame_id;
+
     /**
      * @var string
      */
     protected $blame_user;
+
+    /**
+     * @var string
+     */
+    protected $blame_user_fqdn;
+
+    /**
+     * @var string
+     */
+    protected $blame_user_firewall;
+
     /**
      * @var string
      */
     protected $ip;
+
     /**
      * @var string
      */
@@ -65,9 +82,9 @@ class AuditEntry
     /**
      * Get the value of object_id.
      *
-     * @return int
+     * @return string
      */
-    public function getObjectId(): ?int
+    public function getObjectId(): string
     {
         return $this->object_id;
     }
@@ -75,21 +92,37 @@ class AuditEntry
     /**
      * Get the value of blame_id.
      *
-     * @return int|string
+     * @return null|int|string
      */
     public function getUserId()
     {
-        return $this->blame_id ?? 'Unknown';
+        return $this->blame_id;
     }
 
     /**
      * Get the value of blame_user.
      *
-     * @return string
+     * @return null|string
      */
-    public function getUsername(): string
+    public function getUsername(): ?string
     {
-        return $this->blame_user ?? 'Unknown';
+        return $this->blame_user;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getUserFqdn(): ?string
+    {
+        return $this->blame_user_fqdn;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getUserFirewall(): ?string
+    {
+        return $this->blame_user_firewall;
     }
 
     /**
