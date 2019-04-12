@@ -226,7 +226,7 @@ class AuditConfiguration
     }
 
     /**
-     * Enables/Disables auditing for all entities or restors default.
+     * Enables/Disables auditing for all entities or restore default configuration.
      *
      * @param bool|string enabled: true/false/defalt
      *
