@@ -96,6 +96,12 @@
             </article>
         {% endfor %}
         </div>
+
+        {% if entries.haveToPaginate() %}
+        <div class="pagerfanta float-right">
+            {{ pagerfanta(entries, 'twitter_bootstrap4') }}
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock dh_doctrine_audit_content %}
