@@ -14,7 +14,6 @@ class AuditController extends AbstractController
     public function listAuditsAction(): Response
     {
         $reader = $this->container->get('dh_doctrine_audit.reader');
-        $reader->getEntities();
 
         return $this->render('@DHDoctrineAudit/Audit/audits.html.twig', [
             'audited' => $reader->getEntities(),

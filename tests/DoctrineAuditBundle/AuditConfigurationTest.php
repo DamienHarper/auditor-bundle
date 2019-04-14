@@ -107,6 +107,23 @@ class AuditConfigurationTest extends TestCase
         $this->assertFalse($configuration->isAudited(Comment::class), 'entity "'.Comment::class.'" is not audited.');
     }
 
+    public function testIsAuditable(): void
+    {
+        $entities = [
+            Post::class => [
+                'enabled' => false,
+            ],
+        ];
+
+        $configuration = $this->getAuditConfiguration([
+            'entities' => $entities,
+        ]);
+
+        $this->assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
+        $this->assertTrue($configuration->isAuditable(Post::class), 'entity "'.Post::class.'" is auditable.');
+        $this->assertFalse($configuration->isAudited(Comment::class), 'entity "'.Comment::class.'" is not audited.');
+    }
+
     /**
      * @depends testIsAudited
      */

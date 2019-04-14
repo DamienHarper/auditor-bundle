@@ -79,6 +79,26 @@ class AuditConfiguration
      *
      * @return bool
      */
+    public function isAuditable($entity): bool
+    {
+        $class = DoctrineHelper::getRealClass($entity);
+
+        // is $entity part of audited entities?
+        if (!array_key_exists($class, $this->entities)) {
+            // no => $entity is not audited
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns true if $entity is audited.
+     *
+     * @param object|string $entity
+     *
+     * @return bool
+     */
     public function isAudited($entity): bool
     {
         $class = DoctrineHelper::getRealClass($entity);

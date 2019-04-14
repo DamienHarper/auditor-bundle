@@ -93,7 +93,7 @@ class AuditReader
         }
         $audited = [];
         foreach ($entities as $entity) {
-            if ($this->configuration->isAudited($entity)) {
+            if ($this->configuration->isAuditable($entity)) {
                 $audited[$entity] = $this->getEntityTableName($entity);
             }
         }
