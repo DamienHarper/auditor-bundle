@@ -10,6 +10,7 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
+use Pagerfanta\Pagerfanta;
 
 /**
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
@@ -177,6 +178,27 @@ class AuditReaderTest extends CoreTest
         $this->expectException(\InvalidArgumentException::class);
         $reader->getAudits(Post::class, null, 0, 50);
         $reader->getAudits(Post::class, null, -1, 50);
+    }
+
+    public function testGetAuditsPager(): void
+    {
+        $reader = $this->getReader($this->getAuditConfiguration());
+
+        /** @var AuditEntry[] $audits */
+        $pager = $reader->getAuditsPager(Author::class, null, 1, 3);
+
+        $this->assertInstanceOf(Pagerfanta::class, $pager, 'pager is a Pagerfanta instance.');
+        $this->assertTrue($pager->haveToPaginate(), 'pager has to paginate.');
+    }
+
+    public function testGetAuditsCount(): void
+    {
+        $reader = $this->getReader($this->getAuditConfiguration());
+
+        /** @var AuditEntry[] $audits */
+        $count = $reader->getAuditsCount(Author::class, null);
+
+        $this->assertSame(5, $count, 'count is ok.');
     }
 
     /**

@@ -4,6 +4,7 @@ namespace DH\DoctrineAuditBundle\Twig\Extension;
 
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
 use Twig\TwigFunction;
 
 class TwigExtension extends AbstractExtension
@@ -16,6 +17,13 @@ class TwigExtension extends AbstractExtension
             new TwigFunction('findUser', [$this, 'findUser']),
             new TwigFunction('class', [$this, 'getClass']),
             new TwigFunction('tablename', [$this, 'getTablename']),
+        ];
+    }
+
+    public function getFilters(): array
+    {
+        return [
+            new TwigFilter('json_decode', 'json_decode'),
         ];
     }
 

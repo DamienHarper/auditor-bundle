@@ -61,7 +61,19 @@ class TwigExtensionTest extends BaseTest
         $this->assertNotEmpty($functions, 'extension has at least 1 function.');
 
         foreach ($functions as $function) {
-            $this->assertInstanceOf('Twig_SimpleFunction', $function, 'function instanceof Twig_SimpleFunction');
+            $this->assertInstanceOf('Twig\TwigFunction', $function, 'function instanceof Twig\TwigFunction');
+        }
+    }
+
+    public function testGetFilters(): void
+    {
+        $extension = new TwigExtension($this->container->get('doctrine'));
+        $filters = $extension->getFilters();
+
+        $this->assertNotEmpty($filters, 'extension has at least 1 filter.');
+
+        foreach ($filters as $filter) {
+            $this->assertInstanceOf('Twig\TwigFilter', $filter, 'filter instanceof Twig\TwigFilter');
         }
     }
 

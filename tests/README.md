@@ -11,12 +11,14 @@ Then you can run the test suite with different configuration (SQLite, MySQL or P
 
 ### Default configuration (SQLite)
 
-This configuration uses an in memory sqlite database, it's the fastest configuration.
+This configuration uses an in memory SQLite database and generates code coverage report in `tests/coverage` folder (requires [Xdebug extension](https://xdebug.org/docs/install#configure-php)).
 
 ```bash
 ./vendor/bin/phpunit 
 ```
-or
+
+You can also run tests using an in memory SQLite database and without generating code coverage report, it's the fastest configuration.
+
 ```bash
 ./vendor/bin/phpunit -c tests/travis/sqlite.travis.xml 
 ```

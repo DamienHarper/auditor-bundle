@@ -2,7 +2,9 @@
 
 namespace DH\DoctrineAuditBundle\Controller;
 
+use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -26,15 +28,17 @@ class AuditController extends AbstractController
      *
      * @param string     $entity
      * @param int|string $id
-     * @param null|int   $page
-     * @param null|int   $pageSize
+     * @param int        $page
+     * @param int        $pageSize
      *
      * @return Response
      */
-    public function showEntityHistoryAction(string $entity, $id = null, ?int $page = null, ?int $pageSize = null): Response
+    public function showEntityHistoryAction(Request $request, string $entity, $id = null): Response
     {
+        $page = (int) $request->query->get('page', 1);
+
         $reader = $this->container->get('dh_doctrine_audit.reader');
-        $entries = $reader->getAudits($entity, $id, $page, $pageSize);
+        $entries = $reader->getAuditsPager($entity, $id, $page, AuditReader::PAGE_SIZE);
 
         return $this->render('@DHDoctrineAudit/Audit/entity_history.html.twig', [
             'id' => $id,

@@ -3,8 +3,11 @@
 namespace DH\DoctrineAuditBundle\Reader;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
+use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\EntityManagerInterface;
+use Pagerfanta\Adapter\DoctrineDbalSingleTableAdapter;
+use Pagerfanta\Pagerfanta;
 
 class AuditReader
 {
@@ -13,6 +16,8 @@ class AuditReader
     const DISSOCIATE = 'dissociate';
     const INSERT = 'insert';
     const REMOVE = 'remove';
+
+    const PAGE_SIZE = 50;
 
     /**
      * @var AuditConfiguration
@@ -114,6 +119,77 @@ class AuditReader
      */
     public function getAudits($entity, $id = null, ?int $page = null, ?int $pageSize = null): array
     {
+        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id, $page, $pageSize);
+
+        /** @var Statement $statement */
+        $statement = $queryBuilder->execute();
+        $statement->setFetchMode(\PDO::FETCH_CLASS, AuditEntry::class);
+
+        return $statement->fetchAll();
+    }
+
+    /**
+     * Returns an array of audited entries/operations.
+     *
+     * @param object|string $entity
+     * @param int|string    $id
+     * @param null|int      $page
+     * @param null|int      $pageSize
+     *
+     * @return Pagerfanta
+     */
+    public function getAuditsPager($entity, $id = null, int $page = 1, int $pageSize = self::PAGE_SIZE): Pagerfanta
+    {
+        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id);
+
+        $adapter = new DoctrineDbalSingleTableAdapter($queryBuilder, 'at.id');
+
+        $pagerfanta = new Pagerfanta($adapter);
+        $pagerfanta
+            ->setMaxPerPage($pageSize)
+            ->setCurrentPage($page)
+        ;
+
+        return $pagerfanta;
+    }
+
+    /**
+     * Returns the amount of audited entries/operations.
+     *
+     * @param object|string $entity
+     * @param int|string    $id
+     *
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     *
+     * @return int
+     */
+    public function getAuditsCount($entity, $id = null): int
+    {
+        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id);
+
+        $result = $queryBuilder
+            ->resetQueryPart('select')
+            ->resetQueryPart('orderBy')
+            ->select('COUNT(id)')
+            ->execute()
+            ->fetchColumn(0)
+        ;
+
+        return false === $result ? 0 : $result;
+    }
+
+    /**
+     * Returns an array of audited entries/operations.
+     *
+     * @param object|string $entity
+     * @param int|string    $id
+     * @param int           $page
+     * @param int           $pageSize
+     *
+     * @return QueryBuilder
+     */
+    private function getAuditsQueryBuilder($entity, $id = null, ?int $page = null, ?int $pageSize = null): QueryBuilder
+    {
         if (null !== $page && $page < 1) {
             throw new \InvalidArgumentException('$page must be greater or equal than 1.');
         }
@@ -135,7 +211,7 @@ class AuditReader
         $queryBuilder = $connection->createQueryBuilder();
         $queryBuilder
             ->select('*')
-            ->from($auditTable)
+            ->from($auditTable, 'at')
             ->orderBy('created_at', 'DESC')
             ->addOrderBy('id', 'DESC')
         ;
@@ -149,7 +225,7 @@ class AuditReader
 
         if (null !== $id) {
             $queryBuilder
-                ->where('object_id = :object_id')
+                ->andWhere('object_id = :object_id')
                 ->setParameter('object_id', $id);
         }
 
@@ -159,11 +235,7 @@ class AuditReader
                 ->setParameter('filter', $this->filter);
         }
 
-        /** @var Statement $statement */
-        $statement = $queryBuilder->execute();
-        $statement->setFetchMode(\PDO::FETCH_CLASS, AuditEntry::class);
-
-        return $statement->fetchAll();
+        return $queryBuilder;
     }
 
     /**
