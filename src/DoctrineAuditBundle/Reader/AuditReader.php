@@ -17,7 +17,7 @@ class AuditReader
     const INSERT = 'insert';
     const REMOVE = 'remove';
 
-    const PAGE_SIZE = 5;
+    const PAGE_SIZE = 50;
 
     /**
      * @var AuditConfiguration
