@@ -3,9 +3,11 @@
 namespace DH\DoctrineAuditBundle\Reader;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
+use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\DBAL\Query\QueryBuilder;
+use Pagerfanta\Adapter\DoctrineDbalSingleTableAdapter;
+use Pagerfanta\Pagerfanta;
 
 class AuditReader
 {
@@ -14,6 +16,8 @@ class AuditReader
     const DISSOCIATE = 'dissociate';
     const INSERT = 'insert';
     const REMOVE = 'remove';
+
+    const PAGE_SIZE = 5;
 
     /**
      * @var AuditConfiguration
@@ -125,20 +129,43 @@ class AuditReader
     }
 
     /**
-     * Returns the amount of audited entries/operations.
+     * Returns an array of audited entries/operations.
      *
      * @param object|string $entity
      * @param int|string    $id
      * @param null|int      $page
      * @param null|int      $pageSize
      *
+     * @return Pagerfanta
+     */
+    public function getAuditsPager($entity, $id = null, int $page = 1, int $pageSize = self::PAGE_SIZE): Pagerfanta
+    {
+        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id);
+
+        $adapter = new DoctrineDbalSingleTableAdapter($queryBuilder, 'at.id');
+
+        $pagerfanta = new Pagerfanta($adapter);
+        $pagerfanta
+            ->setMaxPerPage($pageSize)
+            ->setCurrentPage($page)
+        ;
+
+        return $pagerfanta;
+    }
+
+    /**
+     * Returns the amount of audited entries/operations.
+     *
+     * @param object|string $entity
+     * @param int|string    $id
+     *
      * @throws \Doctrine\ORM\NonUniqueResultException
      *
      * @return int
      */
-    public function getAuditsCount($entity, $id = null, ?int $page = null, ?int $pageSize = null): int
+    public function getAuditsCount($entity, $id = null): int
     {
-        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id, $page, $pageSize);
+        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id);
 
         return $queryBuilder
             ->resetQueryPart('select')
@@ -153,8 +180,8 @@ class AuditReader
      *
      * @param object|string $entity
      * @param int|string    $id
-     * @param null|int      $page
-     * @param null|int      $pageSize
+     * @param int           $page
+     * @param int           $pageSize
      *
      * @return QueryBuilder
      */
@@ -181,7 +208,7 @@ class AuditReader
         $queryBuilder = $connection->createQueryBuilder();
         $queryBuilder
             ->select('*')
-            ->from($auditTable)
+            ->from($auditTable, 'at')
             ->orderBy('created_at', 'DESC')
             ->addOrderBy('id', 'DESC')
         ;
@@ -195,7 +222,7 @@ class AuditReader
 
         if (null !== $id) {
             $queryBuilder
-                ->where('object_id = :object_id')
+                ->andWhere('object_id = :object_id')
                 ->setParameter('object_id', $id);
         }
 
