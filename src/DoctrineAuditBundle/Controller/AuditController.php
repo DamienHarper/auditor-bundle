@@ -36,7 +36,7 @@ class AuditController extends AbstractController
      */
     public function showEntityHistoryAction(Request $request, string $entity, $id = null): Response
     {
-        $page = $request->query->get('page', 1);
+        $page = (int) $request->query->get('page', 1);
 
         $reader = $this->container->get('dh_doctrine_audit.reader');
         $entries = $reader->getAuditsPager($entity, $id, $page, AuditReader::PAGE_SIZE);
