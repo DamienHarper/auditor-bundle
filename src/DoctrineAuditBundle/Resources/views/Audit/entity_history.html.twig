@@ -21,10 +21,11 @@
 
         <div class="timeline-centered">
         {% for entry in entries %}
+            {% set diffs = entry.diffs|json_decode(true) %}
             <article class="timeline-entry">
                 <div class="timeline-entry-inner">
                     <time class="timeline-time" datetime="2014-01-10T03:45">
-                        <span>{{ entry.getCreatedAt()|date('H:i:s') }}</span> <span>{{ entry.getCreatedAt()|date('l d F Y') }}</span>
+                        <span>{{ entry.created_at|date('H:i:s') }}</span> <span>{{ entry.created_at|date('l d F Y') }}</span>
                     </time>
 
                     <div class="timeline-icon bg-{{ bootstrap.label_type(entry.type) }}">
@@ -44,7 +45,7 @@
                             <th width="35%">New value</th>
                             </thead>
                             <tbody>
-                            {% for key, values in entry.diffs %}
+                            {% for key, values in diffs %}
                                 <tr>
                                     <td><code>{{ key }}</code></td>
                                     <td>
