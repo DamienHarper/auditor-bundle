@@ -169,6 +169,7 @@ class AuditReader
 
         $result = $queryBuilder
             ->resetQueryPart('select')
+            ->resetQueryPart('orderBy')
             ->select('COUNT(id)')
             ->execute()
             ->fetchColumn(0)
