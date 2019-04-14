@@ -167,12 +167,14 @@ class AuditReader
     {
         $queryBuilder = $this->getAuditsQueryBuilder($entity, $id);
 
-        return $queryBuilder
+        $result = $queryBuilder
             ->resetQueryPart('select')
             ->select('COUNT(id)')
             ->execute()
             ->fetchColumn(0)
         ;
+
+        return false === $result ? 0 : $result;
     }
 
     /**
