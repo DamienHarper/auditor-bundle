@@ -51,6 +51,21 @@ class AuditConfigurationTest extends TestCase
         $this->assertSame('_audit_log', $configuration->getTableSuffix(), 'custom table_suffix is "_audit_log".');
     }
 
+    public function testDefaultEnabled(): void
+    {
+        $configuration = $this->getAuditConfiguration();
+
+        $this->assertTrue($configuration->getEnabled(), 'Global enabled it true by default.');
+    }
+
+    public function testSetEnabledToFalse(): void
+    {
+        $configuration = $this->getAuditConfiguration();
+        $configuration->setEnabled(false);
+
+        $this->assertFalse($configuration->getEnabled(), 'Global enabled is set to false.');
+    }
+
     public function testGloballyIgnoredColumns(): void
     {
         $ignored = [
@@ -294,6 +309,7 @@ class AuditConfigurationTest extends TestCase
                 'table_suffix' => '_audit',
                 'ignored_columns' => [],
                 'entities' => [],
+                'enabled' => true,
             ], $options),
             new TokenStorageUserProvider(new Security($container)),
             new RequestStack(),
