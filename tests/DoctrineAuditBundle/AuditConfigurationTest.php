@@ -172,6 +172,26 @@ class AuditConfigurationTest extends TestCase
     /**
      * @depends testIsAudited
      */
+    public function testIsAuditedWhenAuditIsDisabled(): void
+    {
+        $entities = [
+            Post::class => [
+                'enabled' => true,
+            ],
+        ];
+
+        $configuration = $this->getAuditConfiguration([
+            'entities' => $entities,
+        ]);
+
+        $configuration->disable();
+
+        $this->assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
+    }
+
+    /**
+     * @depends testIsAudited
+     */
     public function testIsAuditedFieldAuditsAnyFieldByDefault(): void
     {
         $entities = [
