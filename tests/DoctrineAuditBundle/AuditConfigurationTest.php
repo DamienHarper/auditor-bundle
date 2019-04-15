@@ -55,15 +55,15 @@ class AuditConfigurationTest extends TestCase
     {
         $configuration = $this->getAuditConfiguration();
 
-        $this->assertTrue($configuration->getEnabled(), 'Global enabled it true by default.');
+        $this->assertTrue($configuration->getEnabled(), 'Enabled by default.');
     }
 
     public function testSetEnabledToFalse(): void
     {
         $configuration = $this->getAuditConfiguration();
-        $configuration->setEnabled(false);
+        $configuration->disable();
 
-        $this->assertFalse($configuration->getEnabled(), 'Global enabled is set to false.');
+        $this->assertFalse($configuration->getEnabled(), 'Disabled. Global enabled is set to false.');
     }
 
     public function testGloballyIgnoredColumns(): void

@@ -78,13 +78,37 @@ class AuditConfiguration
     }
 
     /**
-     * Set enabled flag.
+     * enabled audit.
      *
      * @param bool $enabled
      */
-    public function setEnabled(bool $enabled): void
+    public function enabled(): self
     {
-        $this->enabled = $enabled;
+        $this->enabled = true;
+
+        return $this;
+    }
+
+    /**
+     * disable audit.
+     *
+     * @param bool $enabled
+     */
+    public function disable(): self
+    {
+        $this->enabled = false;
+
+        return $this;
+    }
+
+    /**
+     * Get enabled flag.
+     *
+     * @param bool $enabled
+     */
+    public function getEnabled(): bool
+    {
+        return $this->enabled;
     }
 
     /**
