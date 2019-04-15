@@ -51,14 +51,14 @@ class AuditConfigurationTest extends TestCase
         $this->assertSame('_audit_log', $configuration->getTableSuffix(), 'custom table_suffix is "_audit_log".');
     }
 
-    public function testDefaultEnabled(): void
+    public function testEnabled(): void
     {
         $configuration = $this->getAuditConfiguration();
 
         $this->assertTrue($configuration->getEnabled(), 'Enabled by default.');
     }
 
-    public function testSetEnabledToFalse(): void
+    public function testDisabled(): void
     {
         $configuration = $this->getAuditConfiguration();
         $configuration->disable();

@@ -82,7 +82,7 @@ class AuditConfiguration
      *
      * @param bool $enabled
      */
-    public function enabled(): self
+    public function enable(): self
     {
         $this->enabled = true;
 
@@ -106,7 +106,7 @@ class AuditConfiguration
      *
      * @param bool $enabled
      */
-    public function getEnabled(): bool
+    public function isEnabled(): bool
     {
         return $this->enabled;
     }
