@@ -184,6 +184,8 @@ class AuditConfigurationTest extends TestCase
             'entities' => $entities,
         ]);
 
+        $this->assertTrue($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is audited.');
+
         $configuration->disable();
 
         $this->assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
