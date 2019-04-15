@@ -176,10 +176,6 @@ class AuditConfiguration
      */
     public function isAuditedField($entity, string $field): bool
     {
-        if (!$this->enabled) {
-            return false;
-        }
-
         // is $field is part of globally ignored columns?
         if (\in_array($field, $this->ignoredColumns, true)) {
             // yes => $field is not audited
