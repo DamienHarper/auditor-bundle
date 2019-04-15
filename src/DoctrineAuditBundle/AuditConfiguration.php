@@ -30,6 +30,11 @@ class AuditConfiguration
     private $entities = [];
 
     /**
+     * @var bool
+     */
+    private $enabled = true;
+
+    /**
      * @var UserProviderInterface
      */
     protected $userProvider;
@@ -73,6 +78,16 @@ class AuditConfiguration
     }
 
     /**
+     * Set enabled flag.
+     *
+     * @param bool $enabled
+     */
+    public function setEnabled(bool $enabled): void
+    {
+        $this->enabled = $enabled;
+    }
+
+    /**
      * Returns true if $entity is audited.
      *
      * @param object|string $entity
@@ -101,6 +116,10 @@ class AuditConfiguration
      */
     public function isAudited($entity): bool
     {
+        if (!$this->enabled) {
+            return false;
+        }
+
         $class = DoctrineHelper::getRealClass($entity);
 
         // is $entity part of audited entities?
@@ -133,6 +152,10 @@ class AuditConfiguration
      */
     public function isAuditedField($entity, string $field): bool
     {
+        if (!$this->enabled) {
+            return false;
+        }
+
         // is $field is part of globally ignored columns?
         if (\in_array($field, $this->ignoredColumns, true)) {
             // yes => $field is not audited
