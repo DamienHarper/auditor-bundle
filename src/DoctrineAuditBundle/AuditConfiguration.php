@@ -30,6 +30,11 @@ class AuditConfiguration
     private $entities = [];
 
     /**
+     * @var bool
+     */
+    private $enabled = true;
+
+    /**
      * @var UserProviderInterface
      */
     protected $userProvider;
@@ -73,6 +78,40 @@ class AuditConfiguration
     }
 
     /**
+     * enabled audit.
+     *
+     * @return $this
+     */
+    public function enable(): self
+    {
+        $this->enabled = true;
+
+        return $this;
+    }
+
+    /**
+     * disable audit.
+     *
+     * @return $this
+     */
+    public function disable(): self
+    {
+        $this->enabled = false;
+
+        return $this;
+    }
+
+    /**
+     * Get enabled flag.
+     *
+     * @return bool
+     */
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
+    }
+
+    /**
      * Returns true if $entity is audited.
      *
      * @param object|string $entity
@@ -101,6 +140,10 @@ class AuditConfiguration
      */
     public function isAudited($entity): bool
     {
+        if (!$this->enabled) {
+            return false;
+        }
+
         $class = DoctrineHelper::getRealClass($entity);
 
         // is $entity part of audited entities?
