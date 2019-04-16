@@ -80,7 +80,7 @@ class AuditConfiguration
     /**
      * enabled audit.
      *
-     * @param bool $enabled
+     * @return $this
      */
     public function enable(): self
     {
@@ -92,7 +92,7 @@ class AuditConfiguration
     /**
      * disable audit.
      *
-     * @param bool $enabled
+     * @return $this
      */
     public function disable(): self
     {
@@ -104,7 +104,7 @@ class AuditConfiguration
     /**
      * Get enabled flag.
      *
-     * @param bool $enabled
+     * @return bool
      */
     public function isEnabled(): bool
     {
