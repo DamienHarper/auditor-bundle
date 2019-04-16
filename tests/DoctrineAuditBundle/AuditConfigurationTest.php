@@ -51,11 +51,19 @@ class AuditConfigurationTest extends TestCase
         $this->assertSame('_audit_log', $configuration->getTableSuffix(), 'custom table_suffix is "_audit_log".');
     }
 
-    public function testEnabled(): void
+    public function testDefaultEnabled(): void
     {
         $configuration = $this->getAuditConfiguration();
 
-        $this->assertTrue($configuration->getEnabled(), 'Enabled by default.');
+        $this->assertTrue($configuration->isEnabled(), 'Enabled by default.');
+    }
+
+    public function testEnabled(): void
+    {
+        $configuration = $this->getAuditConfiguration();
+        $configuration->enable();
+
+        $this->assertTrue($configuration->isEnabled(), 'Enabled by default.');
     }
 
     public function testDisabled(): void
@@ -63,7 +71,7 @@ class AuditConfigurationTest extends TestCase
         $configuration = $this->getAuditConfiguration();
         $configuration->disable();
 
-        $this->assertFalse($configuration->getEnabled(), 'Disabled. Global enabled is set to false.');
+        $this->assertFalse($configuration->isEnabled(), 'Disabled. Global enabled is set to false.');
     }
 
     public function testGloballyIgnoredColumns(): void
@@ -165,6 +173,40 @@ class AuditConfigurationTest extends TestCase
         $configuration = $this->getAuditConfiguration([
             'entities' => $entities,
         ]);
+
+        $this->assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
+    }
+
+    /**
+     * @depends testIsAudited
+     */
+    public function testIsAuditedWhenAuditIsEnabled(): void
+    {
+        $entities = [
+            Post::class => [
+                'enabled' => true,
+            ],
+        ];
+
+        $configuration = $this->getAuditConfiguration([
+            'entities' => $entities,
+        ]);
+
+        $configuration->enable();
+
+        $this->assertTrue($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is audited.');
+
+        $entities = [
+            Post::class => [
+                'enabled' => false,
+            ],
+        ];
+
+        $configuration = $this->getAuditConfiguration([
+            'entities' => $entities,
+        ]);
+
+        $configuration->enable();
 
         $this->assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
     }
