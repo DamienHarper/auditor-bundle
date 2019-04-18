@@ -9,8 +9,8 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_list_audits') }}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_show_entity_history', {'entity': entity}) }}">{{ entity }}</a></li>
-                <li class="breadcrumb-item active" aria-current="page"><a href="{{ path('dh_doctrine_audit_show_audit_entry', {'entity': entity, 'id': entry.getObjectId()}) }}">{{ entity }}#{{ entry.getObjectId() }}</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_show_entity_history', {'entity': helper.namespaceToParam(entity)}) }}">{{ entity }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><a href="{{ path('dh_doctrine_audit_show_audit_entry', {'entity': helper.namespaceToParam(entity), 'id': entry.getObjectId()}) }}">{{ entity }}#{{ entry.getObjectId() }}</a></li>
             </ol>
         </nav>
 

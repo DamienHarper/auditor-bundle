@@ -13,6 +13,10 @@
 {% endfilter %}
 {% endmacro dump %}
 
+{% macro namespaceToParam(entity) %}
+{{- entity|replace({'\\': '-'}) -}}
+{% endmacro namespaceToParam %}
+
 {% macro humanize(entity, entry) %}
     {% import _self as helper %}
 
@@ -40,14 +44,14 @@
         {% set action = '???' %}
     {% endif %}
 
-    <code><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': entity, 'id': entry.object_id }) }}" class="code">{{ subject }}</a></code>
+    <code><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': helper.namespaceToParam(entity), 'id': entry.object_id }) }}" class="code">{{ subject }}</a></code>
     {% if source is defined and subject != source.label %}
     <em>({{ source.label }})</em>
     {% endif %}
     has been <b>{{ action }}</b>
     {% if target is defined %}
         {% set subject = target.class~'#'~target.id %}
-        {{ direction }} <code><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': target.class, 'id': target.id }) }}">{{ subject }}</a></code>
+        {{ direction }} <code><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': helper.namespaceToParam(target.class), 'id': target.id }) }}">{{ subject }}</a></code>
         {% if subject != target.label %}
             (<em>{{ helper.dump(target) }}</em>)
         {% endif %}

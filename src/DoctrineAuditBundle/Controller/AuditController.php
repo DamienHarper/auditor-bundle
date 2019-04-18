@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Controller;
 
+use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -36,6 +37,7 @@ class AuditController extends AbstractController
     public function showEntityHistoryAction(Request $request, string $entity, $id = null): Response
     {
         $page = (int) $request->query->get('page', 1);
+        $entity = AuditHelper::paramToNamespace($entity);
 
         $reader = $this->container->get('dh_doctrine_audit.reader');
         $entries = $reader->getAuditsPager($entity, $id, $page, AuditReader::PAGE_SIZE);
@@ -57,6 +59,8 @@ class AuditController extends AbstractController
      */
     public function showAuditEntryAction(string $entity, $id): Response
     {
+        $entity = AuditHelper::paramToNamespace($entity);
+
         $reader = $this->container->get('dh_doctrine_audit.reader');
         $data = $reader->getAudit($entity, $id);
 
