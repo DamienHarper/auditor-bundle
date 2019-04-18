@@ -1,6 +1,7 @@
 {% extends "@DHDoctrineAudit/layout.html.twig" %}
 
 {% import '@DHDoctrineAudit/Audit/bootstrap.html.twig' as bootstrap %}
+{% import '@DHDoctrineAudit/Audit/helper.html.twig' as helper %}
 
 {% block dh_doctrine_audit_content %}
 <div class="card border-0">
@@ -25,7 +26,7 @@
                     <td>{{ table|escape }}</td>
                     <td>{{ bootstrap.badge(reader.getAuditsCount(entity) ~ ' operations') }}</td>
                     <td>
-                        <a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': entity }) }}">View audits</a>
+                        <a href="{{ path('dh_doctrine_audit_show_entity_history', {'entity': helper.namespaceToParam(entity)}) }}">View audits</a>
                     </td>
                 </tr>
             {% endfor %}

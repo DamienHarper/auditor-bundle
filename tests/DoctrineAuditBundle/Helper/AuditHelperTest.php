@@ -424,6 +424,16 @@ class AuditHelperTest extends CoreTest
         $this->assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
     }
 
+    public function testParamToNamespace(): void
+    {
+        $this->assertSame(Author::class, AuditHelper::paramToNamespace('DH-DoctrineAuditBundle-Tests-Fixtures-Core-Author'), 'AuditHelper::paramToNamespace() is ok.');
+    }
+
+    public function testNamespaceToParam(): void
+    {
+        $this->assertSame('DH-DoctrineAuditBundle-Tests-Fixtures-Core-Author', AuditHelper::namespaceToParam(Author::class), 'AuditHelper::namespaceToParam() is ok.');
+    }
+
     public function testGetConfiguration(): void
     {
         $em = $this->getEntityManager();
