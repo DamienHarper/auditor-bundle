@@ -27,7 +27,7 @@ before_install:
     - composer self-update
 
 install:
-    - composer update $COMPOSER_FLAGS --prefer-dist
+    - COMPOSER_MEMORY_LIMIT=-1 composer update $COMPOSER_FLAGS --prefer-dist
 
 before_script:
     - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
