@@ -76,7 +76,7 @@ class AppKernel extends Kernel
         $bundles = array(
             // ...
             new DH\DoctrineAuditBundle\DHDoctrineAuditBundle(),
-            new WhiteOctober\PagerfantaBundle\WhiteOctoberPagerfantaBundle(),
+            new WhiteOctober\PagerfantaBundle\WhiteOctoberPagerfantaBundle(), // only required if you plan to use included viewer/templates
         );
 
         // ...
