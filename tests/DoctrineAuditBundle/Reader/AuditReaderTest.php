@@ -82,6 +82,23 @@ class AuditReaderTest extends CoreTest
         $this->assertSame('comment', $reader->getEntityTableName(Comment::class), 'tablename is ok.');
     }
 
+    public function testGetEntityTableAuditName(): void
+    {
+        $entities = [
+            Post::class => null,
+            Comment::class => null,
+        ];
+
+        $configuration = $this->createAuditConfiguration([
+            'entities' => $entities,
+        ]);
+
+        $reader = $this->getReader($configuration);
+
+        $this->assertSame('post_audit', $reader->getEntityAuditTableName(Post::class), 'tablename is ok.');
+        $this->assertSame('comment_audit', $reader->getEntityAuditTableName(Comment::class), 'tablename is ok.');
+    }
+
     /**
      * @depends testGetEntityTableName
      */

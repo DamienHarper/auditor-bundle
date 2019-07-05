@@ -6,6 +6,7 @@ use DH\DoctrineAuditBundle\AuditConfiguration;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Pagerfanta\Adapter\DoctrineDbalSingleTableAdapter;
 use Pagerfanta\Pagerfanta;
 
@@ -199,19 +200,11 @@ class AuditReader
         }
 
         $connection = $this->entityManager->getConnection();
-        $schema = $this->entityManager->getClassMetadata(\is_string($entity) ? $entity : \get_class($entity))->getSchemaName();
-
-        $auditTable = implode('', [
-            null === $schema ? '' : $schema.'.',
-            $this->configuration->getTablePrefix(),
-            $this->getEntityTableName(\is_string($entity) ? $entity : \get_class($entity)),
-            $this->configuration->getTableSuffix(),
-        ]);
 
         $queryBuilder = $connection->createQueryBuilder();
         $queryBuilder
             ->select('*')
-            ->from($auditTable, 'at')
+            ->from($this->getEntityAuditTableName($entity), 'at')
             ->orderBy('created_at', 'DESC')
             ->addOrderBy('id', 'DESC')
         ;
@@ -247,14 +240,6 @@ class AuditReader
     public function getAudit($entity, $id)
     {
         $connection = $this->entityManager->getConnection();
-        $schema = $this->entityManager->getClassMetadata(\is_string($entity) ? $entity : \get_class($entity))->getSchemaName();
-
-        $auditTable = implode('', [
-            null === $schema ? '' : $schema.'.',
-            $this->configuration->getTablePrefix(),
-            $this->getEntityTableName(\is_string($entity) ? $entity : \get_class($entity)),
-            $this->configuration->getTableSuffix(),
-        ]);
 
         /**
          * @var \Doctrine\DBAL\Query\QueryBuilder
@@ -262,7 +247,7 @@ class AuditReader
         $queryBuilder = $connection->createQueryBuilder();
         $queryBuilder
             ->select('*')
-            ->from($auditTable)
+            ->from($this->getEntityAuditTableName($entity))
             ->where('id = :id')
             ->setParameter('id', $id);
 
@@ -279,6 +264,13 @@ class AuditReader
         return $statement->fetchAll();
     }
 
+    private function getClassMetadata($entity): ClassMetadata
+    {
+        return $this
+            ->entityManager
+            ->getClassMetadata($entity);
+    }
+
     /**
      * Returns the table name of $entity.
      *
@@ -288,9 +280,22 @@ class AuditReader
      */
     public function getEntityTableName($entity): string
     {
-        return $this
-            ->entityManager
-            ->getClassMetadata($entity)
+        return $this->getClassMetadata($entity)
             ->getTableName();
+    }
+
+    /**
+     * Returns the audit table name for $entity
+     *
+     * @param $entity
+     *
+     * @return string
+     */
+    public function getEntityAuditTableName($entity): string
+    {
+        $entityName = \is_string($entity) ? $entity : \get_class($entity);
+        $schema = $this->getClassMetadata($entityName)->getSchemaName() ? $this->getClassMetadata($entityName)->getSchemaName() . '.' : '';
+
+        return sprintf('%s%s%s%s', $schema, $this->configuration->getTablePrefix(), $this->getEntityTableName($entityName), $this->configuration->getTableSuffix());
     }
 }
