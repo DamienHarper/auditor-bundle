@@ -21,9 +21,8 @@ env:
     - DB=pgsql
 
 before_install:
-#    - if [[ $DB == 'mysql' && $MYSQL_VERSION == '5.7' ]]; then ./tests/travis/install-mysql-5.7.sh; fi
-    - if [[ $DB == 'mysql' ]]; then mysql -u root -e 'select version()'; fi
-    - if [[ $DB == 'pgsql' ]]; then psql -U postgres -c 'SHOW SERVER_VERSION'; fi
+    - if [[ $DB == 'mysql' ]]; then sudo systemctl start mysql && mysql -u root -e 'select version()'; fi
+    - if [[ $DB == 'pgsql' ]]; then sudo systemctl start postgresql && psql -U postgres -c 'SHOW SERVER_VERSION'; fi
     - composer self-update
 
 install:
