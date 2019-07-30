@@ -1,6 +1,6 @@
 {% macro dump(value, separator) %}
 {% import _self as helper %}
-{% spaceless %}
+{% apply spaceless %}
     {% if value.label is defined %}
         {{ value.label }}
     {% elseif value is iterable %}
@@ -10,7 +10,7 @@
     {% else %}
         {{ value }}
     {% endif %}
-{% endspaceless %}
+{% endapply %}
 {% endmacro dump %}
 
 {% macro namespaceToParam(entity) %}

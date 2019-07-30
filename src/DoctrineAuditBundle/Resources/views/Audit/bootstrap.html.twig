@@ -17,7 +17,7 @@
 {% endmacro %}
 
 {% macro label_type(value) %}
-{% spaceless %}
+{% apply spaceless %}
     {% if value == 'insert' %}
         {{ 'success' }}
     {% elseif value == 'update' %}
@@ -29,5 +29,5 @@
     {% else %}
         {{ 'secondary' }}
     {% endif %}
-{% endspaceless %}
+{% endapply %}
 {% endmacro %}
