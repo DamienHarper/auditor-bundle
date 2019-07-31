@@ -47,8 +47,7 @@ class AuditSubscriber implements EventSubscriber
 
         // extend the SQL logger
         $this->loggerBackup = $em->getConnection()->getConfiguration()->getSQLLogger();
-        $loggerChain = new LoggerChain();
-        $loggerChain->addLogger(new AuditLogger(function () use ($em) {
+        $auditLogger = new AuditLogger(function () use ($em) {
             // flushes pending data
             $em->getConnection()->getConfiguration()->setSQLLogger($this->loggerBackup);
             $uow = $em->getUnitOfWork();
@@ -60,13 +59,17 @@ class AuditSubscriber implements EventSubscriber
             $this->manager->processDeletions($em);
 
             $this->manager->reset();
-        }));
+        });
 
-        if ($this->loggerBackup instanceof SQLLogger) {
+        // Embed the chain into the existing LoggerChain, or create a new chain embed the existing SQLLogger.
+        if ($this->loggerBackup instanceof LoggerChain) {
+            $this->loggerBackup->addLogger($auditLogger);
+        } elseif ($this->loggerBackup instanceof SQLLogger) {
+            $loggerChain = new LoggerChain();
+            $loggerChain->addLogger($auditLogger);
             $loggerChain->addLogger($this->loggerBackup);
+            $em->getConnection()->getConfiguration()->setSQLLogger($loggerChain);
         }
-
-        $em->getConnection()->getConfiguration()->setSQLLogger($loggerChain);
 
         $this->manager->collectScheduledInsertions($uow);
         $this->manager->collectScheduledUpdates($uow);
