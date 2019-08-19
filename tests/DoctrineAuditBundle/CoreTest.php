@@ -254,6 +254,7 @@ abstract class CoreTest extends BaseTest
             array_merge([
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
+                'timezone' => 'UTC',
                 'ignored_columns' => [],
                 'entities' => [],
             ], $options),

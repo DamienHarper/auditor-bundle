@@ -69,6 +69,7 @@ class DHDoctrineAuditExtensionTest extends AbstractExtensionTestCase
         $this->assertContainerBuilderHasParameter('dh_doctrine_audit.configuration', [
             'table_prefix' => '',
             'table_suffix' => '_audit',
+            'timezone' => 'UTC',
             'ignored_columns' => [],
             'entities' => [],
         ]);

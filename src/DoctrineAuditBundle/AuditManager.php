@@ -226,7 +226,7 @@ class AuditManager
 
         $statement = $em->getConnection()->prepare($query);
 
-        $dt = new \DateTime('now', new \DateTimeZone('UTC'));
+        $dt = new \DateTime('now', new \DateTimeZone($this->getConfiguration()->getTimezone()));
         $statement->bindValue('type', $data['action']);
         $statement->bindValue('object_id', (string) $data['id']);
         $statement->bindValue('diffs', json_encode($data['diff']));

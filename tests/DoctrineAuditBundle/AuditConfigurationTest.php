@@ -363,6 +363,22 @@ class AuditConfigurationTest extends TestCase
         $this->assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
     }
 
+    public function testDefaultTimezone(): void
+    {
+        $configuration = $this->getAuditConfiguration();
+
+        $this->assertSame('UTC', $configuration->getTimezone(), 'timezone is UTC by default.');
+    }
+
+    public function testCustomTimezone(): void
+    {
+        $configuration = $this->getAuditConfiguration([
+            'timezone' => 'Europe/London',
+        ]);
+
+        $this->assertSame('Europe/London', $configuration->getTimezone(), 'custom timezone is "Europe/London".');
+    }
+
     protected function getAuditConfiguration(array $options = []): AuditConfiguration
     {
         $container = new ContainerBuilder();
@@ -371,6 +387,7 @@ class AuditConfigurationTest extends TestCase
             array_merge([
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
+                'timezone' => 'UTC',
                 'ignored_columns' => [],
                 'entities' => [],
                 'enabled' => true,

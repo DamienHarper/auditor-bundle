@@ -20,6 +20,11 @@ class AuditConfiguration
     private $tableSuffix;
 
     /**
+     * @var string
+     */
+    private $timezone;
+
+    /**
      * @var array
      */
     private $ignoredColumns = [];
@@ -57,6 +62,7 @@ class AuditConfiguration
 
         $this->tablePrefix = $config['table_prefix'];
         $this->tableSuffix = $config['table_suffix'];
+        $this->timezone = $config['timezone'];
         $this->ignoredColumns = $config['ignored_columns'];
 
         if (isset($config['entities']) && !empty($config['entities'])) {
@@ -224,6 +230,16 @@ class AuditConfiguration
     public function getTableSuffix(): string
     {
         return $this->tableSuffix;
+    }
+
+    /**
+     * Get the value of timezone
+     *
+     * @return string
+     */
+    public function getTimezone(): string
+    {
+        return $this->timezone;
     }
 
     /**

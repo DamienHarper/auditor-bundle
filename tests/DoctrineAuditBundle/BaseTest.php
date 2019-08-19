@@ -125,6 +125,7 @@ abstract class BaseTest extends TestCase
             array_merge([
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
+                'timezone' => 'UTC',
                 'ignored_columns' => [],
                 'entities' => [],
             ], $options),
