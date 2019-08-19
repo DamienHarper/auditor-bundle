@@ -97,7 +97,7 @@ class UpdateHelper
 
         // process columns
         foreach ($columns as $column) {
-            if (array_key_exists($column->getName(), $expectedColumns)) {
+            if (\array_key_exists($column->getName(), $expectedColumns)) {
                 // column is part of expected columns
                 $table->dropColumn($column->getName());
                 $table->addColumn($column->getName(), $expectedColumns[$column->getName()]['type'], $expectedColumns[$column->getName()]['options']);

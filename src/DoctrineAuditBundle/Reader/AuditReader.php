@@ -285,7 +285,7 @@ class AuditReader
     }
 
     /**
-     * Returns the audit table name for $entity
+     * Returns the audit table name for $entity.
      *
      * @param $entity
      *
@@ -294,7 +294,7 @@ class AuditReader
     public function getEntityAuditTableName($entity): string
     {
         $entityName = \is_string($entity) ? $entity : \get_class($entity);
-        $schema = $this->getClassMetadata($entityName)->getSchemaName() ? $this->getClassMetadata($entityName)->getSchemaName() . '.' : '';
+        $schema = $this->getClassMetadata($entityName)->getSchemaName() ? $this->getClassMetadata($entityName)->getSchemaName().'.' : '';
 
         return sprintf('%s%s%s%s', $schema, $this->configuration->getTablePrefix(), $this->getEntityTableName($entityName), $this->configuration->getTableSuffix());
     }

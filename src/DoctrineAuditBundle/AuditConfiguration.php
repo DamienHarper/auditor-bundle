@@ -123,7 +123,7 @@ class AuditConfiguration
         $class = DoctrineHelper::getRealClass($entity);
 
         // is $entity part of audited entities?
-        if (!array_key_exists($class, $this->entities)) {
+        if (!\array_key_exists($class, $this->entities)) {
             // no => $entity is not audited
             return false;
         }
@@ -147,7 +147,7 @@ class AuditConfiguration
         $class = DoctrineHelper::getRealClass($entity);
 
         // is $entity part of audited entities?
-        if (!array_key_exists($class, $this->entities)) {
+        if (!\array_key_exists($class, $this->entities)) {
             // no => $entity is not audited
             return false;
         }
