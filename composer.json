@@ -41,5 +41,8 @@
   },
   "conflict": {
     "twig/twig": "<1.40|<2.9"
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit"
   }
 }
