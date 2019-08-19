@@ -54,7 +54,7 @@ class AuditManagerTest extends CoreTest
         $this->assertEquals(1, $entry->getUserId(), 'audit entry blame_id is ok.');
         $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         $this->assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        $this->assertSame([
+        $this->assertEquals([
             'fullname' => [
                 'old' => null,
                 'new' => 'John Doe',
@@ -95,7 +95,7 @@ class AuditManagerTest extends CoreTest
         $this->assertEquals(1, $entry->getUserId(), 'audit entry blame_id is ok.');
         $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         $this->assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        $this->assertSame([
+        $this->assertEquals([
             'fullname' => [
                 'old' => 'John Doe',
                 'new' => 'Dark Vador',
@@ -133,7 +133,7 @@ class AuditManagerTest extends CoreTest
         $this->assertEquals(1, $entry->getUserId(), 'audit entry blame_id is ok.');
         $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         $this->assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        $this->assertSame([
+        $this->assertEquals([
             'label' => Author::class.'#1',
             'class' => Author::class,
             'table' => $em->getClassMetadata(Author::class)->getTableName(),
@@ -197,7 +197,7 @@ class AuditManagerTest extends CoreTest
         $this->assertEquals(1, $entry->getUserId(), 'audit entry blame_id is ok.');
         $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         $this->assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        $this->assertSame([
+        $this->assertEquals([
             'source' => [
                 'label' => Author::class.'#1',
                 'class' => Author::class,
@@ -266,7 +266,7 @@ class AuditManagerTest extends CoreTest
         $this->assertEquals(1, $entry->getUserId(), 'audit entry blame_id is ok.');
         $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         $this->assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        $this->assertSame([
+        $this->assertEquals([
             'source' => [
                 'label' => Author::class.'#1',
                 'class' => Author::class,
@@ -382,7 +382,7 @@ class AuditManagerTest extends CoreTest
         $this->assertEquals(1, $entry->getUserId(), 'audit entry blame_id is ok.');
         $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         $this->assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        $this->assertSame([
+        $this->assertEquals([
             'source' => [
                 'label' => (string) $post,
                 'class' => Post::class,
@@ -404,7 +404,7 @@ class AuditManagerTest extends CoreTest
         $this->assertEquals(1, $entry->getUserId(), 'audit entry blame_id is ok.');
         $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         $this->assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        $this->assertSame([
+        $this->assertEquals([
             'source' => [
                 'label' => (string) $post,
                 'class' => Post::class,
@@ -523,7 +523,7 @@ class AuditManagerTest extends CoreTest
         $this->assertEquals(1, $entry->getUserId(), 'audit entry blame_id is ok.');
         $this->assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         $this->assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        $this->assertSame([
+        $this->assertEquals([
             'source' => [
                 'label' => 'First post',
                 'class' => Post::class,
