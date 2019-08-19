@@ -33,6 +33,10 @@ class Configuration implements ConfigurationInterface
                     ->prototype('scalar')->end()
                 ->end()
 
+                ->scalarNode('timezone')
+                    ->defaultValue('UTC')
+                ->end()
+
                 ->arrayNode('entities')
                     ->canBeUnset()
                     ->prototype('array')

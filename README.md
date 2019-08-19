@@ -142,6 +142,17 @@ dh_doctrine_audit:
     table_suffix: '_audit'
 ```
 
+### Timezone
+
+You can configure the timezone the audit `created_at` is generated in. This by default is 'UTC'.
+
+```yaml
+// app/config/config.yml (symfony < 3.4)
+// config/packages/dh_doctrine_audit.yaml (symfony >= 3.4)
+dh_doctrine_audit:
+    timezone: 'Europe/London'
+```
+
 ### Creating audit tables
 
 Open a command console, enter your project directory and execute the
