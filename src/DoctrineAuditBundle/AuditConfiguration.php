@@ -25,6 +25,11 @@ class AuditConfiguration
     private $timezone;
 
     /**
+     * @var bool
+     */
+    private $globalEnabled;
+
+    /**
      * @var array
      */
     private $ignoredColumns = [];
@@ -63,6 +68,7 @@ class AuditConfiguration
         $this->tablePrefix = $config['table_prefix'];
         $this->tableSuffix = $config['table_suffix'];
         $this->timezone = $config['timezone'];
+        $this->globalEnabled = $config['global_enabled'];
         $this->ignoredColumns = $config['ignored_columns'];
 
         if (isset($config['entities']) && !empty($config['entities'])) {
@@ -240,6 +246,16 @@ class AuditConfiguration
     public function getTimezone(): string
     {
         return $this->timezone;
+    }
+
+    /**
+     * Get the value of globalEnabled
+     *
+     * @return bool
+     */
+    public function isGlobalEnabled(): bool
+    {
+        return $this->globalEnabled;
     }
 
     /**

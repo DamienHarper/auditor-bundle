@@ -153,6 +153,17 @@ dh_doctrine_audit:
     timezone: 'Europe/London'
 ```
 
+### Global Enable
+
+You can globally enable or disable the auditing of entities. By default, it will audit entities.
+
+```yaml
+// app/config/config.yml (symfony < 3.4)
+// config/packages/dh_doctrine_audit.yaml (symfony >= 3.4)
+dh_doctrine_audit:
+    global_enabled: '%env(bool:AUDITING_ENABLED)%'
+```
+
 ### Creating audit tables
 
 Open a command console, enter your project directory and execute the

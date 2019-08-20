@@ -560,6 +560,33 @@ class AuditManagerTest extends CoreTest
         $this->assertInstanceOf(AuditHelper::class, $manager->getHelper(), 'helper instanceof AuditHelper::class');
     }
 
+    public function testAuditNotInsertedWhenGloballyDisabled(): void
+    {
+        $em = $this->getEntityManager();
+        $configuration = $this->createAuditConfiguration([
+            'global_enabled' => false,
+        ]);
+        $helper = new AuditHelper($configuration);
+        $manager = new AuditManager($configuration, $helper);
+        $reader = new AuditReader($configuration, $em);
+
+        $author = new Author();
+        $author
+            ->setId(1)
+            ->setFullname('John Doe')
+            ->setEmail('john.doe@gmail.com')
+        ;
+
+        $manager->insert($em, $author, [
+            'fullname' => [null, 'John Doe'],
+            'email' => [null, 'john.doe@gmail.com'],
+        ]);
+
+        $audits = $reader->getAudits(Author::class);
+
+        $this->assertEmpty($audits, 'no audits created on global enable disabled');
+    }
+
     protected function setupEntities(): void
     {
     }

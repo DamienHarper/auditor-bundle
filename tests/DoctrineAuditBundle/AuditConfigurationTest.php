@@ -379,6 +379,13 @@ class AuditConfigurationTest extends TestCase
         $this->assertSame('Europe/London', $configuration->getTimezone(), 'custom timezone is "Europe/London".');
     }
 
+    public function testDefaultGlobalEnabled(): void
+    {
+        $configuration = $this->getAuditConfiguration();
+
+        $this->assertTrue($configuration->isGlobalEnabled(), 'global_enabled is true by default');
+    }
+
     protected function getAuditConfiguration(array $options = []): AuditConfiguration
     {
         $container = new ContainerBuilder();
@@ -388,6 +395,7 @@ class AuditConfigurationTest extends TestCase
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
                 'timezone' => 'UTC',
+                'global_enabled' => true,
                 'ignored_columns' => [],
                 'entities' => [],
                 'enabled' => true,

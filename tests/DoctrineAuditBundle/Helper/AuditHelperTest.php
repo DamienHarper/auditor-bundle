@@ -200,6 +200,7 @@ class AuditHelperTest extends CoreTest
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
                 'timezone' => 'UTC',
+                'global_enabled' => true,
                 'ignored_columns' => [
                     'created_at',
                     'updated_at',
@@ -260,6 +261,7 @@ class AuditHelperTest extends CoreTest
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
                 'timezone' => 'UTC',
+                'global_enabled' => true,
                 'ignored_columns' => [],
                 'entities' => [
                     Post::class => [
@@ -381,6 +383,7 @@ class AuditHelperTest extends CoreTest
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
                 'timezone' => 'UTC',
+                'global_enabled' => true,
                 'ignored_columns' => [],
                 'entities' => [],
             ],
@@ -408,6 +411,7 @@ class AuditHelperTest extends CoreTest
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
                 'timezone' => 'UTC',
+                'global_enabled' => true,
                 'ignored_columns' => [],
                 'entities' => [],
             ],

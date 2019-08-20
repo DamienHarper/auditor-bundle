@@ -37,6 +37,10 @@ class Configuration implements ConfigurationInterface
                     ->defaultValue('UTC')
                 ->end()
 
+                ->scalarNode('global_enabled')
+                    ->defaultTrue()
+                ->end()
+
                 ->arrayNode('entities')
                     ->canBeUnset()
                     ->prototype('array')

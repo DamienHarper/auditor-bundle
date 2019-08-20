@@ -255,6 +255,7 @@ abstract class CoreTest extends BaseTest
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
                 'timezone' => 'UTC',
+                'global_enabled' => true,
                 'ignored_columns' => [],
                 'entities' => [],
             ], $options),

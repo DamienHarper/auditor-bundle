@@ -126,6 +126,7 @@ abstract class BaseTest extends TestCase
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
                 'timezone' => 'UTC',
+                'global_enabled' => true,
                 'ignored_columns' => [],
                 'entities' => [],
             ], $options),
