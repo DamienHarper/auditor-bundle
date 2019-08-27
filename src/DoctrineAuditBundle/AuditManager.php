@@ -4,6 +4,7 @@ namespace DH\DoctrineAuditBundle;
 
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 class AuditManager
 {
@@ -23,10 +24,16 @@ class AuditManager
      */
     private $helper;
 
+    /**
+     * @var EntityManagerInterface|null
+     */
+    private $customStorageEntityManager;
+
     public function __construct(AuditConfiguration $configuration, AuditHelper $helper)
     {
         $this->configuration = $configuration;
         $this->helper = $helper;
+        $this->customStorageEntityManager = $configuration->getCustomStorageEntityManager();
     }
 
     /**
@@ -224,7 +231,9 @@ class AuditManager
             implode(', ', array_values($fields))
         );
 
-        $statement = $em->getConnection()->prepare($query);
+        $statement = ($this->customStorageEntityManager !== null)
+            ? $this->customStorageEntityManager->getConnection()->prepare($query)
+            : $em->getConnection()->prepare($query);
 
         $dt = new \DateTime('now', new \DateTimeZone($this->getConfiguration()->getTimezone()));
         $statement->bindValue('type', $data['action']);
