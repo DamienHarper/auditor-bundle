@@ -379,13 +379,6 @@ class AuditConfigurationTest extends TestCase
         $this->assertSame('Europe/London', $configuration->getTimezone(), 'custom timezone is "Europe/London".');
     }
 
-    public function testDefaultCustomStorageEntityManager(): void
-    {
-        $configuration = $this->getAuditConfiguration();
-
-        $this->assertNull($configuration->getCustomStorageEntityManager());
-    }
-
     protected function getAuditConfiguration(array $options = []): AuditConfiguration
     {
         $container = new ContainerBuilder();

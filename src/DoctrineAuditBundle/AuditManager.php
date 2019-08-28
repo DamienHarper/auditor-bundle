@@ -28,11 +28,11 @@ class AuditManager
      */
     private $customStorageEntityManager;
 
-    public function __construct(AuditConfiguration $configuration, AuditHelper $helper)
+    public function __construct(AuditConfiguration $configuration, AuditHelper $helper, ?EntityManager $customStorageEntityManager = null)
     {
         $this->configuration = $configuration;
         $this->helper = $helper;
-        $this->customStorageEntityManager = $configuration->getCustomStorageEntityManager();
+        $this->customStorageEntityManager = $customStorageEntityManager;
     }
 
     /**
