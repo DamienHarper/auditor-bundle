@@ -153,17 +153,6 @@ dh_doctrine_audit:
     timezone: 'Europe/London'
 ```
 
-### Custom database for storage audit
-
-If your project uses two databases it is possible to save audits in different storage. To do that you have to inject to AuditConfiguration optional parameter $customStorageEntityManager which has to be instance of EntityManager. Example implementation:
-
- ```yaml
-// config/services.yaml (symfony >= 3.4)
-dh_doctrine_audit.configuration:
-    class: DH\DoctrineAuditBundle\AuditConfiguration
-    arguments: ["%dh_doctrine_audit.configuration%", "@dh_doctrine_audit.user_provider", "@request_stack", "@security.firewall.map", "@doctrine.orm.your_custom_entity_manager"]
- ```
-
 ### Creating audit tables
 
 Open a command console, enter your project directory and execute the
@@ -206,6 +195,28 @@ app/console doctrine:schema:update --force
 ```bash
 # symfony >= 3.4
 bin/console doctrine:schema:update --force
+```
+
+### Custom database for storage audit
+
+If your project uses two databases it is possible to save audits in different storage. To do that you have to inject to AuditConfiguration optional parameter $customStorageEntityManager which has to be instance of EntityManager. Example implementation:
+
+ ```yaml
+// config/services.yaml (symfony >= 3.4)
+dh_doctrine_audit.configuration:
+    class: DH\DoctrineAuditBundle\AuditConfiguration
+    arguments: ["%dh_doctrine_audit.configuration%", "@dh_doctrine_audit.user_provider", "@request_stack", "@security.firewall.map", "@doctrine.orm.your_custom_entity_manager"]
+ ```
+
+To generate migrations from schema difference you have to also overwrite settings for schema listener:
+
+```yaml
+// config/services.yaml (symfony >= 3.4)
+dh_doctrine_audit.event_subscriber.create_schema:
+    class: DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
+    arguments: ["@dh_doctrine_audit.manager"]
+    tags:
+        - { name: doctrine.event_subscriber, connection: your_em }
 ```
 
 ### Audit viewer
