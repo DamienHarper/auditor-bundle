@@ -4,7 +4,6 @@ namespace DH\DoctrineAuditBundle;
 
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityManagerInterface;
 
 class AuditManager
 {
@@ -25,7 +24,7 @@ class AuditManager
     private $helper;
 
     /**
-     * @var EntityManagerInterface|null
+     * @var EntityManager|null
      */
     private $customStorageEntityManager;
 
@@ -231,9 +230,8 @@ class AuditManager
             implode(', ', array_values($fields))
         );
 
-        $statement = ($this->customStorageEntityManager !== null)
-            ? $this->customStorageEntityManager->getConnection()->prepare($query)
-            : $em->getConnection()->prepare($query);
+        $storage = $this->selectStorageSpace($em);
+        $statement = $storage->getConnection()->prepare($query);
 
         $dt = new \DateTime('now', new \DateTimeZone($this->getConfiguration()->getTimezone()));
         $statement->bindValue('type', $data['action']);
@@ -458,5 +456,14 @@ class AuditManager
         $this->removed = [];
         $this->associated = [];
         $this->dissociated = [];
+    }
+
+    /**
+     * @param EntityManager $em
+     * @return EntityManager
+     */
+    private function selectStorageSpace(EntityManager $em): EntityManager
+    {
+        return $this->customStorageEntityManager ?? $em;
     }
 }
