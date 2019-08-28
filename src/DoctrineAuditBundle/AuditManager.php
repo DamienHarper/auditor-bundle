@@ -23,10 +23,16 @@ class AuditManager
      */
     private $helper;
 
-    public function __construct(AuditConfiguration $configuration, AuditHelper $helper)
+    /**
+     * @var EntityManager|null
+     */
+    private $customStorageEntityManager;
+
+    public function __construct(AuditConfiguration $configuration, AuditHelper $helper, ?EntityManager $customStorageEntityManager = null)
     {
         $this->configuration = $configuration;
         $this->helper = $helper;
+        $this->customStorageEntityManager = $customStorageEntityManager;
     }
 
     /**
@@ -224,7 +230,8 @@ class AuditManager
             implode(', ', array_values($fields))
         );
 
-        $statement = $em->getConnection()->prepare($query);
+        $storage = $this->selectStorageSpace($em);
+        $statement = $storage->getConnection()->prepare($query);
 
         $dt = new \DateTime('now', new \DateTimeZone($this->getConfiguration()->getTimezone()));
         $statement->bindValue('type', $data['action']);
@@ -449,5 +456,14 @@ class AuditManager
         $this->removed = [];
         $this->associated = [];
         $this->dissociated = [];
+    }
+
+    /**
+     * @param EntityManager $em
+     * @return EntityManager
+     */
+    private function selectStorageSpace(EntityManager $em): EntityManager
+    {
+        return $this->customStorageEntityManager ?? $em;
     }
 }
