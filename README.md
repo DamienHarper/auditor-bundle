@@ -153,6 +153,17 @@ dh_doctrine_audit:
     timezone: 'Europe/London'
 ```
 
+### Custom database for storage audit
+
+If your project uses two databases it is possible to save audits in different storage. To do that you have to inject to AuditConfiguration optional parameter $customStorageEntityManager which has to be instance of EntityManager. Example implementation:
+
+ ```yaml
+// config/services.yaml (symfony >= 3.4)
+dh_doctrine_audit.configuration:
+    class: DH\DoctrineAuditBundle\AuditConfiguration
+    arguments: ["%dh_doctrine_audit.configuration%", "@dh_doctrine_audit.user_provider", "@request_stack", "@security.firewall.map", "@doctrine.orm.your_custom_entity_manager"]
+ ```
+
 ### Creating audit tables
 
 Open a command console, enter your project directory and execute the
