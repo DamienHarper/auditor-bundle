@@ -199,6 +199,12 @@ bin/console doctrine:schema:update --force
 
 ### Custom database for storage audit
 
+**Warning:** Using custom database for audit breaks atomicity of that package - audited entity operation is performed into different transactions. It means that:
+
+* if the current audited entity operation fails, audit data is still persisted to the separate database which is very bad (reference to entity data which doesn't exist in the main database or reference to entity data in main database which doesn't reflect changes logged in audit data)
+
+* if the current audited entity operation succeed, audit data persistence in the separate database still can fail which is bad but can be acceptable in some use cases (depending on how critical audit data is for your application/business, missing audit data could be acceptable)
+
 If your project uses two databases it is possible to save audits in different storage. To do that you have to inject to AuditManager optional parameter $customStorageEntityManager which has to be instance of EntityManager. Example implementation:
 
  ```yaml
