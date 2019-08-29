@@ -233,7 +233,6 @@ dh_doctrine_audit.reader:
         arguments: ["@dh_doctrine_audit.configuration", @doctrine.orm.default_entity_manager", "@doctrine.orm.custom_storage_entity_manager"]
         public: true
 ```
-
 ### Audit viewer
 
 Add the following routes to the routing configuration to enable the included audits viewer.
