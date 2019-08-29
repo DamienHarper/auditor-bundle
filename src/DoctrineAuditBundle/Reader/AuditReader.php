@@ -134,9 +134,7 @@ class AuditReader
                 continue;
             }
 
-            foreach ($metadataDriver->getAllClassNames() as $class) {
-                $entities[] = $class;
-            }
+            $entities = array_merge($entities, $metadataDriver->getAllClassNames());
         }
 
         return $entities;
