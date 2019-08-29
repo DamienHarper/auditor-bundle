@@ -109,19 +109,9 @@ class AuditReader
      */
     public function getEntities(): array
     {
-
-        $entities = [];
-        foreach ($this->registry->getManagers() as $objectManager) {
-            $metadataDriver = $objectManager->getConfiguration()->getMetadataDriverImpl();
-            if (null !== $metadataDriver) {
-                $classes = $metadataDriver->getAllClassNames();
-                foreach ($classes as $class) {
-                    $entities[] = $class;
-                }
-            }
-        }
-
+        $entities = $this->getAllClassNames();
         $audited = [];
+
         foreach ($entities as $entity) {
             if ($this->configuration->isAuditable($entity)) {
                 $audited[$entity] = $this->getEntityTableName($entity);
@@ -130,6 +120,26 @@ class AuditReader
         ksort($audited);
 
         return $audited;
+    }
+
+    /**
+     * @return array
+     */
+    private function getAllClassNames(): array
+    {
+        $entities = [];
+        foreach ($this->registry->getManagers() as $objectManager) {
+            $metadataDriver = $objectManager->getConfiguration()->getMetadataDriverImpl();
+            if (null === $metadataDriver) {
+                continue;
+            }
+
+            foreach ($metadataDriver->getAllClassNames() as $class) {
+                $entities[] = $class;
+            }
+        }
+
+        return $entities;
     }
 
     /**
