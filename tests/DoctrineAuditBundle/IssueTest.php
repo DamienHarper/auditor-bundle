@@ -31,6 +31,27 @@ class IssueTest extends BaseTest
      */
     protected $fixturesPath = __DIR__.'/Fixtures';
 
+    public function testAuditingSubclass(): void
+    {
+        $em = $this->getEntityManager();
+        $reader = $this->getReader($this->getAuditConfiguration());
+
+        $car = new Car();
+        $car->setLabel('La Ferrari');
+        $car->setWheels(4);
+        $em->persist($car);
+        $em->flush();
+
+        $bike = new Bike();
+        $bike->setLabel('ZX10R');
+        $bike->setWheels(2);
+        $em->persist($bike);
+        $em->flush();
+
+        $audits = $reader->getAudits(Vehicle::class);
+        $this->assertCount(2, $audits, 'results count ok.');
+    }
+
     public function testIssue40(): void
     {
         $em = $this->getEntityManager();
@@ -103,33 +124,6 @@ class IssueTest extends BaseTest
         $this->assertCount(2, $audits, 'results count ok.');
     }
 
-    public function testAuditingSubclass(): void
-    {
-        $em = $this->getEntityManager();
-        $reader = $this->getReader($this->getAuditConfiguration());
-
-        $vehicle = new Vehicle();
-        $vehicle->setLabel('Oh my truck');
-        $vehicle->setWheels(6);
-        $em->persist($vehicle);
-        $em->flush();
-
-        $car = new Car();
-        $car->setLabel('La Ferrari');
-        $car->setWheels(4);
-        $em->persist($car);
-        $em->flush();
-
-        $bike = new Bike();
-        $bike->setLabel('ZX10R');
-        $bike->setWheels(2);
-        $em->persist($bike);
-        $em->flush();
-
-        $audits = $reader->getAudits(Vehicle::class);
-        $this->assertCount(3, $audits, 'results count ok.');
-    }
-
     /**
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
@@ -146,7 +140,6 @@ class IssueTest extends BaseTest
             CoreCase::class => ['enabled' => true],
             Locale::class => ['enabled' => true],
             User::class => ['enabled' => true],
-            Vehicle::class => ['enabled' => true],
             Car::class => ['enabled' => true],
             Bike::class => ['enabled' => true],
         ]);
