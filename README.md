@@ -230,7 +230,7 @@ To show changes in audit viewer you also have to inject two entity managers into
 ```yaml
 dh_doctrine_audit.reader:
         class: DH\DoctrineAuditBundle\Reader\AuditReader
-        arguments: ["@dh_doctrine_audit.configuration", @doctrine.orm.default_entity_manager", "@doctrine.orm.custom_storage_entity_manager"]
+        arguments: ["@dh_doctrine_audit.configuration", @doctrine.orm.default_entity_manager", '@Doctrine\Common\Persistence\ManagerRegistry', "@doctrine.orm.custom_storage_entity_manager"]
         public: true
 ```
 ### Audit viewer
