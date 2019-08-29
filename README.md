@@ -225,6 +225,15 @@ dh_doctrine_audit.event_subscriber.create_schema:
         - { name: doctrine.event_subscriber, connection: your_em }
 ```
 
+To show changes in audit viewer you also have to inject two entity managers into AuditReader. First em is responsible for connection with database where entities are stored, second is responsible for connection with database, where audits are save.
+
+```yaml
+dh_doctrine_audit.reader:
+        class: DH\DoctrineAuditBundle\Reader\AuditReader
+        arguments: ["@dh_doctrine_audit.configuration", @doctrine.orm.default_entity_manager", "@doctrine.orm.custom_storage_entity_manager"]
+        public: true
+```
+
 ### Audit viewer
 
 Add the following routes to the routing configuration to enable the included audits viewer.

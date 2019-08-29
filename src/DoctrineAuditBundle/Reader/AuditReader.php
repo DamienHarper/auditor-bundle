@@ -31,6 +31,11 @@ class AuditReader
     private $entityManager;
 
     /**
+     * @var EntityManagerInterface|null
+     */
+    private $customStorageEntityManager;
+
+    /**
      * @var ?string
      */
     private $filter;
@@ -41,10 +46,14 @@ class AuditReader
      * @param AuditConfiguration     $configuration
      * @param EntityManagerInterface $entityManager
      */
-    public function __construct(AuditConfiguration $configuration, EntityManagerInterface $entityManager)
-    {
+    public function __construct(
+        AuditConfiguration $configuration,
+        EntityManagerInterface $entityManager,
+        ?EntityManagerInterface $customStorageEntityManager = null
+    ) {
         $this->configuration = $configuration;
         $this->entityManager = $entityManager;
+        $this->customStorageEntityManager = $customStorageEntityManager;
     }
 
     /**
@@ -199,7 +208,8 @@ class AuditReader
             throw new \InvalidArgumentException('$pageSize must be greater or equal than 1.');
         }
 
-        $connection = $this->entityManager->getConnection();
+        $storage = $this->selectStorage();
+        $connection = $storage->getConnection();
 
         $queryBuilder = $connection->createQueryBuilder();
         $queryBuilder
@@ -297,5 +307,13 @@ class AuditReader
         $schema = $this->getClassMetadata($entityName)->getSchemaName() ? $this->getClassMetadata($entityName)->getSchemaName().'.' : '';
 
         return sprintf('%s%s%s%s', $schema, $this->configuration->getTablePrefix(), $this->getEntityTableName($entityName), $this->configuration->getTableSuffix());
+    }
+
+    /**
+     * @return EntityManagerInterface
+     */
+    private function selectStorage(): EntityManagerInterface
+    {
+        return $this->customStorageEntityManager ?? $this->entityManager;
     }
 }
