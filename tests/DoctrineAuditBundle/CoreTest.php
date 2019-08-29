@@ -45,8 +45,6 @@ abstract class CoreTest extends BaseTest
             Comment::class => ['enabled' => true],
             Tag::class => ['enabled' => true],
             DummyEntity::class => ['enabled' => true],
-            Car::class => ['enabled' => true],
-            Bike::class => ['enabled' => true],
         ]);
 
         $this->setUpEntitySchema();

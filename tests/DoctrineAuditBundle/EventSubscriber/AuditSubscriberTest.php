@@ -869,33 +869,6 @@ class AuditSubscriberTest extends CoreTest
         $this->assertTrue(true);
     }
 
-    /**
-     * @depends testInsertWithoutRelation
-     */
-    public function testAuditingSubclass(): void
-    {
-        $em = $this->getEntityManager();
-
-        $vehicle = new Vehicle();
-        $vehicle->setLabel('Oh my truck');
-        $vehicle->setWheels(6);
-        $em->persist($vehicle);
-        $em->flush();
-
-        $car = new Car();
-        $car->setLabel('La Ferrari');
-        $car->setWheels(4);
-        $em->persist($car);
-        $em->flush();
-
-        $bike = new Bike();
-        $bike->setLabel('ZX10R');
-        $bike->setWheels(2);
-        $em->flush();
-
-        $this->assertCount(0, [], 'no audits.');
-    }
-
     protected function setupEntities(): void
     {
     }
