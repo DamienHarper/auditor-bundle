@@ -3,10 +3,11 @@
 namespace DH\DoctrineAuditBundle\Reader;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
+use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Pagerfanta\Adapter\DoctrineDbalSingleTableAdapter;
 use Pagerfanta\Pagerfanta;
 
@@ -36,6 +37,11 @@ class AuditReader
     private $customStorageEntityManager;
 
     /**
+     * @var Registry
+     */
+    private $registry;
+
+    /**
      * @var ?string
      */
     private $filter;
@@ -49,10 +55,12 @@ class AuditReader
     public function __construct(
         AuditConfiguration $configuration,
         EntityManagerInterface $entityManager,
-        ?EntityManagerInterface $customStorageEntityManager = null
+        Registry $registry,
+        ?EntityManagerInterface $customStorageEntityManager
     ) {
         $this->configuration = $configuration;
         $this->entityManager = $entityManager;
+        $this->registry = $registry;
         $this->customStorageEntityManager = $customStorageEntityManager;
     }
 
@@ -101,11 +109,18 @@ class AuditReader
      */
     public function getEntities(): array
     {
-        $metadataDriver = $this->entityManager->getConfiguration()->getMetadataDriverImpl();
+
         $entities = [];
-        if (null !== $metadataDriver) {
-            $entities = $metadataDriver->getAllClassNames();
+        foreach ($this->registry->getManagers() as $objectManager) {
+            $metadataDriver = $objectManager->getConfiguration()->getMetadataDriverImpl();
+            if (null !== $metadataDriver) {
+                $classes = $metadataDriver->getAllClassNames();
+                foreach ($classes as $class) {
+                    $entities[] = $class;
+                }
+            }
         }
+
         $audited = [];
         foreach ($entities as $entity) {
             if ($this->configuration->isAuditable($entity)) {
@@ -276,9 +291,7 @@ class AuditReader
 
     private function getClassMetadata($entity): ClassMetadata
     {
-        return $this
-            ->entityManager
-            ->getClassMetadata($entity);
+        return $this->registry->getManagerForClass($entity)->getClassMetadata($entity);
     }
 
     /**

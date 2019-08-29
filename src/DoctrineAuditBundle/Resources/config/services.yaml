@@ -15,7 +15,7 @@ services:
 
   dh_doctrine_audit.reader:
     class: DH\DoctrineAuditBundle\Reader\AuditReader
-    arguments: ["@dh_doctrine_audit.configuration", "@doctrine.orm.default_entity_manager"]
+    arguments: ["@dh_doctrine_audit.configuration", "@doctrine.orm.default_entity_manager", '@Doctrine\Common\Persistence\ManagerRegistry']
     public: true
 
   DH\DoctrineAuditBundle\Reader\AuditReader:
