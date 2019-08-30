@@ -123,6 +123,7 @@ abstract class BaseTest extends TestCase
 
         $auditConfiguration = new AuditConfiguration(
             array_merge([
+                'enabled' => true,
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
                 'timezone' => 'UTC',

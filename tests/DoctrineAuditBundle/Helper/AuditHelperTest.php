@@ -197,6 +197,7 @@ class AuditHelperTest extends CoreTest
         $configuration = $this->getAuditConfiguration();
         $configuration = new AuditConfiguration(
             [
+                'enabled' => true,
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
                 'timezone' => 'UTC',
@@ -257,6 +258,7 @@ class AuditHelperTest extends CoreTest
         $configuration = $this->getAuditConfiguration();
         $configuration = new AuditConfiguration(
             [
+                'enabled' => true,
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
                 'timezone' => 'UTC',
@@ -378,6 +380,7 @@ class AuditHelperTest extends CoreTest
         $em = $this->getEntityManager();
         $configuration = new AuditConfiguration(
             [
+                'enabled' => true,
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
                 'timezone' => 'UTC',
@@ -405,6 +408,7 @@ class AuditHelperTest extends CoreTest
     {
         $configuration = new AuditConfiguration(
             [
+                'enabled' => true,
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
                 'timezone' => 'UTC',
