@@ -31,11 +31,6 @@ class AuditReader
     private $entityManager;
 
     /**
-     * @var EntityManagerInterface|null
-     */
-    private $customStorageEntityManager;
-
-    /**
      * @var ?string
      */
     private $filter;
@@ -48,12 +43,10 @@ class AuditReader
      */
     public function __construct(
         AuditConfiguration $configuration,
-        EntityManagerInterface $entityManager,
-        ?EntityManagerInterface $customStorageEntityManager = null
+        EntityManagerInterface $entityManager
     ) {
         $this->configuration = $configuration;
         $this->entityManager = $entityManager;
-        $this->customStorageEntityManager = $customStorageEntityManager;
     }
 
     /**
@@ -314,6 +307,6 @@ class AuditReader
      */
     private function selectStorage(): EntityManagerInterface
     {
-        return $this->customStorageEntityManager ?? $this->entityManager;
+        return $this->configuration->getCustomStorageEntityManager() ?? $this->entityManager;
     }
 }

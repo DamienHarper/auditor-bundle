@@ -23,16 +23,10 @@ class AuditManager
      */
     private $helper;
 
-    /**
-     * @var EntityManager|null
-     */
-    private $customStorageEntityManager;
-
-    public function __construct(AuditConfiguration $configuration, AuditHelper $helper, ?EntityManager $customStorageEntityManager = null)
+    public function __construct(AuditConfiguration $configuration, AuditHelper $helper)
     {
         $this->configuration = $configuration;
         $this->helper = $helper;
-        $this->customStorageEntityManager = $customStorageEntityManager;
     }
 
     /**
@@ -464,6 +458,6 @@ class AuditManager
      */
     private function selectStorageSpace(EntityManager $em): EntityManager
     {
-        return $this->customStorageEntityManager ?? $em;
+        return $this->configuration->getCustomStorageEntityManager() ?? $em;
     }
 }

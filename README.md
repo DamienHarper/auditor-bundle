@@ -205,13 +205,13 @@ bin/console doctrine:schema:update --force
 
 * if the current audited entity operation succeed, audit data persistence in the separate database still can fail which is bad but can be acceptable in some use cases (depending on how critical audit data is for your application/business, missing audit data could be acceptable)
 
-If your project uses two databases it is possible to save audits in different storage. To do that you have to inject to AuditManager optional parameter $customStorageEntityManager which has to be instance of EntityManager. Example implementation:
+If your project uses two databases it is possible to save audits in different storage. To do that you have to inject to AuditConfiguration optional parameter $customStorageEntityManager which has to be instance of EntityManager. Example implementation:
 
  ```yaml
 // config/services.yaml (symfony >= 3.4)
-dh_doctrine_audit.manager:
+dh_doctrine_audit.configuration:
     class: DH\DoctrineAuditBundle\AuditManager
-    arguments: ["@dh_doctrine_audit.configuration", "@dh_doctrine_audit.helper", "@doctrine.orm.your_custom_entity_manager"]
+    arguments: ["%dh_doctrine_audit.configuration%", "@dh_doctrine_audit.user_provider", "@request_stack", "@security.firewall.map", "@doctrine.orm.your_custom_entity_manager"]
  ```
 
 To generate migrations from schema difference you have to also overwrite settings for schema listener:
@@ -225,14 +225,6 @@ dh_doctrine_audit.event_subscriber.create_schema:
         - { name: doctrine.event_subscriber, connection: your_em }
 ```
 
-To show changes in audit viewer you also have to inject two entity managers into AuditReader. First em is responsible for connection with database where entities are stored, second is responsible for connection with database, where audits are save.
-
-```yaml
-dh_doctrine_audit.reader:
-        class: DH\DoctrineAuditBundle\Reader\AuditReader
-        arguments: ["@dh_doctrine_audit.configuration", @doctrine.orm.default_entity_manager", "@doctrine.orm.custom_storage_entity_manager"]
-        public: true
-```
 ### Audit viewer
 
 Add the following routes to the routing configuration to enable the included audits viewer.
