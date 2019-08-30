@@ -153,6 +153,7 @@ dh_doctrine_audit:
     timezone: 'Europe/London'
 ```
 
+
 ### Creating audit tables
 
 Open a command console, enter your project directory and execute the
@@ -296,7 +297,41 @@ services:
         class: App\CustomUserProvider
 ````
 
-### Disable auditing at runtime
+### Enabling and disabling the auditing of entities
+
+You can enable or disable the auditing of entities globally, per entity and at runtime.
+By default, it is enabled globally.
+
+#### Globally enable/disable
+
+Global enabling/disabling is done in the configuration file.
+- When enabled globally, all entities configured under the `entities` section of the configuration file are 
+audited unless explicitly disabled in their audit configuration.
+- When disabled globally, **nothing is audited**.
+
+```yaml
+// app/config/config.yml (symfony < 3.4)
+// config/packages/dh_doctrine_audit.yaml (symfony >= 3.4)
+dh_doctrine_audit:
+    enabled: true
+```
+
+#### Per entity enable/disable
+
+Per entity enabling/disabling is done in the configuration file.
+
+```yaml
+// app/config/config.yml (symfony < 3.4)
+// config/packages/dh_doctrine_audit.yaml (symfony >= 3.4)
+dh_doctrine_audit:
+    enabled: true                               # auditing is globally enabled
+    entities:
+        MyBundle\Entity\MyAuditedEntity1:
+            enabled: false                      # auditing of this entity is disabled
+        MyBundle\Entity\MyAuditedEntity2: ~     # auditing of this entity is enabled
+```
+
+#### Enabling/Disabling auditing at runtime
 
 You can disable audit logging at runtime by calling `AuditConfiguration::disableAuditFor(string $entity)`
 This will prevent the system from logging changes applied to `$entity` objects.
