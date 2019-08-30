@@ -60,6 +60,7 @@ class AuditConfiguration
         $this->requestStack = $requestStack;
         $this->firewallMap = $firewallMap;
 
+        $this->enabled = $config['enabled'];
         $this->tablePrefix = $config['table_prefix'];
         $this->tableSuffix = $config['table_suffix'];
         $this->timezone = $config['timezone'];
@@ -233,7 +234,7 @@ class AuditConfiguration
     }
 
     /**
-     * Get the value of timezone
+     * Get the value of timezone.
      *
      * @return string
      */
