@@ -4,8 +4,6 @@ namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Bike;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Car;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\DummyEntity;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
@@ -250,6 +248,7 @@ abstract class CoreTest extends BaseTest
 
         $auditConfiguration = new AuditConfiguration(
             array_merge([
+                'enabled' => true,
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
                 'timezone' => 'UTC',

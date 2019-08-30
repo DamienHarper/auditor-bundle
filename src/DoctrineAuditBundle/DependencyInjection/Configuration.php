@@ -21,6 +21,10 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
+                ->scalarNode('enabled')
+                    ->defaultTrue()
+                ->end()
+
                 ->scalarNode('table_prefix')
                     ->defaultValue('')
                 ->end()
