@@ -212,9 +212,9 @@ reference to entity data in main database which doesn't reflect changes logged i
 **still can fail** which is bad but can be acceptable in some use cases (depending on how critical 
 audit data is for your application/business, missing audit data could be acceptable)
 
-If your project uses two databases it is possible to save audits in different storage. 
-To do that you have to inject to AuditManager optional parameter $customStorageEntityManager 
-which has to be instance of EntityManager. Example implementation:
+It is possible to save audits in a different database than the one where audited entities live. 
+To do that you have to inject as third parameter of `AuditManager` an optional secondary entity manager
+binded to that second database. 
 
  ```yaml
 // config/services.yaml (symfony >= 3.4)
@@ -223,7 +223,7 @@ dh_doctrine_audit.manager:
     arguments: ["@dh_doctrine_audit.configuration", "@dh_doctrine_audit.helper", "@doctrine.orm.your_custom_entity_manager"]
  ```
 
-To generate migrations from schema difference you have to also overwrite settings for schema listener:
+Also, to generate migrations from schema difference you have to also overwrite settings for schema listener:
 
 ```yaml
 // config/services.yaml (symfony >= 3.4)
@@ -231,7 +231,7 @@ dh_doctrine_audit.event_subscriber.create_schema:
     class: DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
     arguments: ["@dh_doctrine_audit.manager"]
     tags:
-        - { name: doctrine.event_subscriber, connection: your_em }
+        - { name: doctrine.event_subscriber, connection: connection_to_second_database }
 ```
 
 ### Audit viewer
@@ -351,14 +351,14 @@ but audit entries will only be saved when auditing is explicitly enabled [at run
 
 #### At runtime enable/disable
 
+**Warning:** disabling audit logging for an entity will make its audit logs **incomplete/partial** 
+(no change applied to specified entity is logged in the relevant audit table while audit logging 
+is disabled for that entity).
+
 You can disable audit logging at runtime by calling `AuditConfiguration::disableAuditFor(string $entity)`
 This will prevent the system from logging changes applied to `$entity` objects.
 
 You can then re-enable audit logging at runtime by calling `AuditConfiguration::enableAuditFor(string $entity)`
-
-**Warning:** disabling audit logging for an entity will make its audit logs incomplete/partial 
-(no change applied to specified entity is logged in the relevant audit table while audit logging 
-is disabled for that entity).
 
 To disable auditing for an entity, you first have to inject the `dh_doctrine_audit.configuration` 
 service in your class, then use:
