@@ -16,7 +16,8 @@ This bundle creates audit logs for all Doctrine ORM database related changes:
 - inserts and updates including their diffs and relation field diffs.
 - many to many relation changes, association and dissociation actions.
 - if there is an user in token storage, it is used to identify the user who made the changes.
-- the audit entries are inserted within the same transaction during **flush**, if something fails the state remains clean.
+- the audit entries are inserted within the same transaction during **flush**, 
+if something fails the state remains clean.
 
 Basically you can track any change from these log entries if they were
 managed through standard **ORM** operations.
@@ -92,7 +93,8 @@ Configuration
 
 ### Audited entities and properties
 
-By default, DoctrineAuditBundle won't audit any entity, you have to configure which entities have to be audited.
+By default, DoctrineAuditBundle won't audit any entity, you have to configure which entities 
+have to be audited.
 
 ```yaml
 // app/config/config.yml (symfony < 3.4)
@@ -200,13 +202,19 @@ bin/console doctrine:schema:update --force
 
 ### Custom database for storage audit
 
-**Warning:** Using custom database for audit breaks atomicity of that package - audited entity operation is performed into different transactions. It means that:
+**Warning:** Using custom database for storing audit **breaks atomicity**. 
+Audited entity operation is performed into different transactions. It means that:
+* if the current audited entity operation **fails**, audit data is **still persisted** to the separate database 
+which is very bad (reference to entity data which doesn't exist in the main database or 
+reference to entity data in main database which doesn't reflect changes logged in audit data)
 
-* if the current audited entity operation fails, audit data is still persisted to the separate database which is very bad (reference to entity data which doesn't exist in the main database or reference to entity data in main database which doesn't reflect changes logged in audit data)
+* if the current audited entity operation **succeed**, audit data persistence in the separate database 
+**still can fail** which is bad but can be acceptable in some use cases (depending on how critical 
+audit data is for your application/business, missing audit data could be acceptable)
 
-* if the current audited entity operation succeed, audit data persistence in the separate database still can fail which is bad but can be acceptable in some use cases (depending on how critical audit data is for your application/business, missing audit data could be acceptable)
-
-If your project uses two databases it is possible to save audits in different storage. To do that you have to inject to AuditManager optional parameter $customStorageEntityManager which has to be instance of EntityManager. Example implementation:
+If your project uses two databases it is possible to save audits in different storage. 
+To do that you have to inject to AuditManager optional parameter $customStorageEntityManager 
+which has to be instance of EntityManager. Example implementation:
 
  ```yaml
 // config/services.yaml (symfony >= 3.4)
@@ -238,7 +246,8 @@ dh_doctrine_audit:
     type: annotation
 ``` 
 
-It is possible to filter results by event type by calling `AuditReader::filterBy` method before getting the results.
+It is possible to filter results by event type by calling `AuditReader::filterBy` method 
+before getting the results.
 
 ````php
     /**
@@ -271,8 +280,9 @@ Available constants are:
 
 ### Custom user provider
 
-If you don't use Symfony's `TokenStorage` to save your current user, you can configure a custom user provider. You just
-need to implement the `UserProviderInterface` and configure it as a service named `dh_doctrine_audit.user_provider`.
+If you don't use Symfony's `TokenStorage` to save your current user, you can configure 
+a custom user provider. You just need to implement the `UserProviderInterface` and 
+configure it as a service named `dh_doctrine_audit.user_provider`.
 
 ````php
 use DH\DoctrineAuditBundle\User\User;
@@ -299,14 +309,16 @@ services:
 
 ### Enabling and disabling the auditing of entities
 
-You can enable or disable the auditing of entities globally, per entity and at runtime.
+You can enable or disable the auditing of entities [globally](#globally-enabledisable), 
+[per entity](#per-entity-enabledisable) and at [runtime](#at-runtime-enabledisable).
 By default, it is enabled globally.
 
 #### Globally enable/disable
 
 Global enabling/disabling is done in the configuration file.
-- When enabled globally, all entities configured under the `entities` section of the configuration file are 
-audited unless explicitly disabled in their audit configuration.
+- When enabled globally, all entities configured under the `entities` section of the 
+configuration file are audited unless explicitly disabled in their audit configuration 
+(cf. [Per entity enabling/disabling](#per-entity-enabledisable)).
 - When disabled globally, **nothing is audited**.
 
 ```yaml
@@ -320,6 +332,9 @@ dh_doctrine_audit:
 
 Per entity enabling/disabling is done in the configuration file.
 
+This lets you disable audit logging for an entity by default and only enable auditing 
+when needed for example. To do so, add this to your configuration file:
+
 ```yaml
 // app/config/config.yml (symfony < 3.4)
 // config/packages/dh_doctrine_audit.yaml (symfony >= 3.4)
@@ -331,16 +346,22 @@ dh_doctrine_audit:
         MyBundle\Entity\MyAuditedEntity2: ~     # auditing of this entity is enabled
 ```
 
-#### Enabling/Disabling auditing at runtime
+In the above example, an audit table will be created for `MyAuditedEntity1`, 
+but audit entries will only be saved when auditing is explicitly enabled [at runtime](#at-runtime-enabledisable).
+
+#### At runtime enable/disable
 
 You can disable audit logging at runtime by calling `AuditConfiguration::disableAuditFor(string $entity)`
 This will prevent the system from logging changes applied to `$entity` objects.
 
 You can then re-enable audit logging at runtime by calling `AuditConfiguration::enableAuditFor(string $entity)`
 
-**Warning:** disabling audit logging for an entity will make its audit logs incomplete/partial (no change applied to specified entity is logged in the relevant audit table while audit logging is disabled for that entity).
+**Warning:** disabling audit logging for an entity will make its audit logs incomplete/partial 
+(no change applied to specified entity is logged in the relevant audit table while audit logging 
+is disabled for that entity).
 
-To disable auditing for an entity, you first have to inject the `dh_doctrine_audit.configuration` service in your class, then use:
+To disable auditing for an entity, you first have to inject the `dh_doctrine_audit.configuration` 
+service in your class, then use:
 
 ````php
 $auditConfiguration->disableAuditFor(MyAuditedEntity1::class);
@@ -351,19 +372,6 @@ To enable auditing afterwards, use:
 ````php
 $auditConfiguration->enableAuditFor(MyAuditedEntity1::class);
 ````
-
-You can also disable audit logging for an entity by default and only enable auditing when needed. To do so, add
-this to your configuration file:
-
-````yml
-dh_doctrine_audit:
-    entities:
-        MyBundle\Entity\MyAuditedEntity1:
-            enabled: false
-````
-
-This will create the audit table for this entity, but will only save audit entries when explicitly enabled as shown
-above.
 
 
 Usage
@@ -391,8 +399,8 @@ app/console audit:clean
 bin/console audit:clean
 ```
 
-By default it cleans audit entries older than 12 months. You can override this by providing the number of months 
-you want to keep in the audit tables. For example, to keep 18 months:
+By default it cleans audit entries older than 12 months. You can override this by providing 
+the number of months you want to keep in the audit tables. For example, to keep 18 months:
 
 ```bash
 # symfony < 3.4
@@ -404,7 +412,8 @@ app/console audit:clean 18
 bin/console audit:clean 18
 ```
 
-It is also possible to bypass the confirmation and make the command un-interactive if you plan to schedule it (ie. cron)
+It is also possible to bypass the confirmation and make the command non-interactive 
+if you plan to schedule it (ie. cron)
 
 ```bash
 # symfony < 3.4
@@ -431,9 +440,11 @@ FAQ:
 Contributing
 ============
 
-DoctrineAuditBundle is an open source project. Contributions made by the community are welcome. Send us your ideas, code reviews, pull requests and feature requests to help us improve this project.
+DoctrineAuditBundle is an open source project. Contributions made by the community are welcome. 
+Send us your ideas, code reviews, pull requests and feature requests to help us improve this project.
 
-Do not forget to provide unit tests when contributing to this project. To do so, follow instructions in [this dedicated README](tests/README.md)
+Do not forget to provide unit tests when contributing to this project. 
+To do so, follow instructions in [this dedicated README](tests/README.md)
 
 
 Supported DB
