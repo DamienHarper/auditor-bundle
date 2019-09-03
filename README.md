@@ -155,7 +155,6 @@ dh_doctrine_audit:
     timezone: 'Europe/London'
 ```
 
-
 ### Creating audit tables
 
 Open a command console, enter your project directory and execute the

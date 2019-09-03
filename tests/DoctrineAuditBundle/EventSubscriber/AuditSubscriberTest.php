@@ -6,12 +6,9 @@ use DH\DoctrineAuditBundle\Reader\AuditEntry;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Bike;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Car;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\DummyEntity;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Vehicle;
 
 /**
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
@@ -29,6 +26,15 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Vehicle;
  */
 class AuditSubscriberTest extends CoreTest
 {
+    public function testCustomStorageEntityManager(): void
+    {
+        $configuration = $this->createAuditConfiguration([], $this->getSecondaryEntityManager());
+        $defaultEM = $this->getEntityManager();
+
+        $this->assertNotNull($configuration->getCustomStorageEntityManager(), 'custom storage entity manager is not null');
+        $this->assertNotSame($defaultEM, $configuration->getCustomStorageEntityManager(), 'custom storage entity manager is not default one');
+    }
+
     public function testInsertWithoutRelation(): void
     {
         $em = $this->getEntityManager();

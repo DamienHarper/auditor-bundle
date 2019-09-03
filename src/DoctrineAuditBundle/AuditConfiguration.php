@@ -4,6 +4,7 @@ namespace DH\DoctrineAuditBundle;
 
 use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
 use DH\DoctrineAuditBundle\User\UserProviderInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -54,11 +55,22 @@ class AuditConfiguration
      */
     private $firewallMap;
 
-    public function __construct(array $config, UserProviderInterface $userProvider, RequestStack $requestStack, FirewallMap $firewallMap)
-    {
+    /**
+     * @var EntityManagerInterface|null
+     */
+    private $customStorageEntityManager;
+
+    public function __construct(
+        array $config,
+        UserProviderInterface $userProvider,
+        RequestStack $requestStack,
+        FirewallMap $firewallMap,
+        ?EntityManagerInterface $customStorageEntityManager = null
+    ) {
         $this->userProvider = $userProvider;
         $this->requestStack = $requestStack;
         $this->firewallMap = $firewallMap;
+        $this->customStorageEntityManager = $customStorageEntityManager;
 
         $this->enabled = $config['enabled'];
         $this->tablePrefix = $config['table_prefix'];
@@ -323,5 +335,13 @@ class AuditConfiguration
     public function getFirewallMap(): FirewallMap
     {
         return $this->firewallMap;
+    }
+
+    /**
+     * @return EntityManagerInterface|null
+     */
+    public function getCustomStorageEntityManager(): ?EntityManagerInterface
+    {
+        return $this->customStorageEntityManager;
     }
 }

@@ -117,7 +117,7 @@ abstract class BaseTest extends TestCase
         $this->auditConfiguration = $configuration;
     }
 
-    protected function createAuditConfiguration(array $options = []): AuditConfiguration
+    protected function createAuditConfiguration(array $options = [], ?EntityManager $entityManager = null): AuditConfiguration
     {
         $container = new ContainerBuilder();
 
@@ -132,7 +132,8 @@ abstract class BaseTest extends TestCase
             ], $options),
             new TokenStorageUserProvider(new Security($container)),
             new RequestStack(),
-            new FirewallMap($container, [])
+            new FirewallMap($container, []),
+            $entityManager
         );
 
         return $auditConfiguration;
@@ -164,7 +165,6 @@ abstract class BaseTest extends TestCase
         Gedmo\DoctrineExtensions::registerAnnotations();
 
         $connection = $this->getSharedConnection();
-//        $connection = $this->getConnection();
 
         $this->setAuditConfiguration($this->createAuditConfiguration());
         $configuration = $this->getAuditConfiguration();
@@ -273,6 +273,29 @@ abstract class BaseTest extends TestCase
         }
 
         return $params;
+    }
+
+    protected function getSecondaryEntityManager(): EntityManager
+    {
+        $connection = $this->getSecondaryConnection();
+
+        $config = new Configuration();
+        $config->setMetadataCacheImpl(new ArrayCache());
+        $config->setQueryCacheImpl(new ArrayCache());
+        $config->setProxyDir(__DIR__.'/Proxies');
+        $config->setAutoGenerateProxyClasses(ProxyFactory::AUTOGENERATE_EVAL);
+        $config->setProxyNamespace('DH\DoctrineAuditBundle\Tests\Proxies');
+        $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver([__DIR__.'/Fixtures'], false));
+
+        return EntityManager::create($connection, $config);
+    }
+
+    protected function getSecondaryConnection(): Connection
+    {
+        return DriverManager::getConnection([
+            'driver' => 'pdo_sqlite',
+            'memory' => true,
+        ]);
     }
 
     protected function getReader(AuditConfiguration $configuration = null): AuditReader

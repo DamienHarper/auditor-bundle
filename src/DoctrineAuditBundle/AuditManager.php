@@ -4,6 +4,7 @@ namespace DH\DoctrineAuditBundle;
 
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 class AuditManager
 {
@@ -23,16 +24,10 @@ class AuditManager
      */
     private $helper;
 
-    /**
-     * @var EntityManager|null
-     */
-    private $customStorageEntityManager;
-
-    public function __construct(AuditConfiguration $configuration, AuditHelper $helper, ?EntityManager $customStorageEntityManager = null)
+    public function __construct(AuditConfiguration $configuration, AuditHelper $helper)
     {
         $this->configuration = $configuration;
         $this->helper = $helper;
-        $this->customStorageEntityManager = $customStorageEntityManager;
     }
 
     /**
@@ -459,11 +454,11 @@ class AuditManager
     }
 
     /**
-     * @param EntityManager $em
-     * @return EntityManager
+     * @param EntityManagerInterface $em
+     * @return EntityManagerInterface
      */
-    private function selectStorageSpace(EntityManager $em): EntityManager
+    private function selectStorageSpace(EntityManagerInterface $em): EntityManagerInterface
     {
-        return $this->customStorageEntityManager ?? $em;
+        return $this->configuration->getCustomStorageEntityManager() ?? $em;
     }
 }
