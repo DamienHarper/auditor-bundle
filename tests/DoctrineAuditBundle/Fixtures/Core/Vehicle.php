@@ -9,9 +9,9 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="vehicle")
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="type", type="string")
- * @ORM\DiscriminatorMap({"car": "Car", "bike": "Bike", "vehicle": "Vehicle"})
+ * @ORM\DiscriminatorMap({"car": "Car", "bike": "Bike"})
  */
-class Vehicle
+abstract class Vehicle
 {
     /**
      * @ORM\Id
@@ -47,23 +47,11 @@ class Vehicle
         return $this->id;
     }
 
-    /**
-     * Get the value of name.
-     *
-     * @return mixed
-     */
     public function getLabel()
     {
         return $this->label;
     }
 
-    /**
-     * Set the value of name.
-     *
-     * @param mixed $label
-     *
-     * @return DummyEntity
-     */
     public function setLabel($label)
     {
         $this->label = $label;

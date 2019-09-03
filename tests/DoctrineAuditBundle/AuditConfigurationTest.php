@@ -61,7 +61,6 @@ class AuditConfigurationTest extends TestCase
     public function testEnabled(): void
     {
         $configuration = $this->getAuditConfiguration();
-        $configuration->enable();
 
         $this->assertTrue($configuration->isEnabled(), 'Enabled by default.');
     }

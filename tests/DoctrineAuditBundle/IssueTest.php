@@ -3,6 +3,9 @@
 namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\Reader\AuditReader;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Bike;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Car;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Vehicle;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issue37\Locale;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issue37\User;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issue40\CoreCase;
@@ -26,10 +29,28 @@ class IssueTest extends BaseTest
     /**
      * @var string
      */
-    protected $fixturesPath = [
-        __DIR__.'/Fixtures/Issue37',
-        __DIR__.'/Fixtures/Issue40',
-    ];
+    protected $fixturesPath = __DIR__.'/Fixtures';
+
+    public function testAuditingSubclass(): void
+    {
+        $em = $this->getEntityManager();
+        $reader = $this->getReader($this->getAuditConfiguration());
+
+        $car = new Car();
+        $car->setLabel('La Ferrari');
+        $car->setWheels(4);
+        $em->persist($car);
+        $em->flush();
+
+        $bike = new Bike();
+        $bike->setLabel('ZX10R');
+        $bike->setWheels(2);
+        $em->persist($bike);
+        $em->flush();
+
+        $audits = $reader->getAudits(Vehicle::class);
+        $this->assertCount(2, $audits, 'results count ok.');
+    }
 
     public function testIssue40(): void
     {
@@ -119,6 +140,8 @@ class IssueTest extends BaseTest
             CoreCase::class => ['enabled' => true],
             Locale::class => ['enabled' => true],
             User::class => ['enabled' => true],
+            Car::class => ['enabled' => true],
+            Bike::class => ['enabled' => true],
         ]);
 
         $this->setUpEntitySchema();
