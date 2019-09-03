@@ -10,6 +10,7 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\User;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
+use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\Request;
@@ -222,7 +223,7 @@ abstract class CoreTest extends BaseTest
         $em->flush();
     }
 
-    protected function createAuditConfiguration(array $options = []): AuditConfiguration
+    protected function createAuditConfiguration(array $options = [], ?EntityManager $entityManager = null): AuditConfiguration
     {
         $container = new ContainerBuilder();
         $security = new Security($container);
@@ -257,7 +258,8 @@ abstract class CoreTest extends BaseTest
             ], $options),
             new TokenStorageUserProvider($security),
             $requestStack,
-            new FirewallMap($container, [])
+            new FirewallMap($container, []),
+            $entityManager
         );
 
         return $auditConfiguration;
