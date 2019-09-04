@@ -27,10 +27,9 @@ class AuditController extends AbstractController
     /**
      * @Route("/audit/{entity}/{id}", name="dh_doctrine_audit_show_entity_history", methods={"GET"})
      *
+     * @param Request    $request
      * @param string     $entity
      * @param int|string $id
-     * @param int        $page
-     * @param int        $pageSize
      *
      * @return Response
      */

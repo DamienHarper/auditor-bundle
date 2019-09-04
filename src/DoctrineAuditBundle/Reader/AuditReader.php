@@ -136,8 +136,8 @@ class AuditReader
      *
      * @param object|string $entity
      * @param int|string    $id
-     * @param null|int      $page
-     * @param null|int      $pageSize
+     * @param int           $page
+     * @param int           $pageSize
      *
      * @return Pagerfanta
      */
@@ -161,8 +161,6 @@ class AuditReader
      *
      * @param object|string $entity
      * @param int|string    $id
-     *
-     * @throws \Doctrine\ORM\NonUniqueResultException
      *
      * @return int
      */
@@ -290,7 +288,7 @@ class AuditReader
     /**
      * Returns the audit table name for $entity.
      *
-     * @param $entity
+     * @param mixed $entity
      *
      * @return string
      */
