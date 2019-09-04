@@ -215,7 +215,10 @@ class AuditHelper
         $meta = $em->getClassMetadata(\get_class($entity));
         $pkName = $meta->getSingleIdentifierFieldName();
         $pkValue = $id ?? $this->id($em, $entity);
-        if (is_null($pkValue)) return null; // An added guard for proxies that fail to initialize.
+        // An added guard for proxies that fail to initialize.
+        if (is_null($pkValue)) {
+            return null;
+        }
 
         if (method_exists($entity, '__toString')) {
             $label = (string) $entity;

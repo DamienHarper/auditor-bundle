@@ -4,6 +4,7 @@ namespace DH\DoctrineAuditBundle\EventSubscriber;
 
 use DH\DoctrineAuditBundle\AuditManager;
 use DH\DoctrineAuditBundle\DBAL\AuditLogger;
+use DH\DoctrineAuditBundle\DBAL\AuditLoggerChain;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Logging\LoggerChain;
 use Doctrine\DBAL\Logging\SQLLogger;
@@ -62,14 +63,17 @@ class AuditSubscriber implements EventSubscriber
         });
 
         // Embed the chain into the existing LoggerChain, or create a new chain embed the existing SQLLogger.
-        if ($this->loggerBackup instanceof LoggerChain) {
-            $this->loggerBackup->addLogger($auditLogger);
+        $newChain = new AuditLoggerChain();
+        $newChain->addLogger($auditLogger);
+        if ($this->loggerBackup instanceof AuditLoggerChain) {
+            /** @var SQLLogger $logger */
+            foreach ($this->loggerBackup->getLoggers() as $logger) {
+                $newChain->addLogger($logger);
+            }
         } elseif ($this->loggerBackup instanceof SQLLogger) {
-            $loggerChain = new LoggerChain();
-            $loggerChain->addLogger($auditLogger);
-            $loggerChain->addLogger($this->loggerBackup);
-            $em->getConnection()->getConfiguration()->setSQLLogger($loggerChain);
+            $newChain->addLogger($this->loggerBackup);
         }
+        $em->getConnection()->getConfiguration()->setSQLLogger($newChain);
 
         $this->manager->collectScheduledInsertions($uow);
         $this->manager->collectScheduledUpdates($uow);
