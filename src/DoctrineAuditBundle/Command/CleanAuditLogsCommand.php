@@ -32,7 +32,7 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
             ->setDescription('Cleans audit tables')
             ->setName(self::$defaultName)
             ->addOption('no-confirm', null, InputOption::VALUE_NONE, 'No interaction mode')
-            ->addArgument('keep', InputArgument::OPTIONAL, 'Keep last N months of audit.', 12)
+            ->addArgument('keep', InputArgument::OPTIONAL, 'Keep last N months of audit.', '12')
         ;
     }
 
@@ -80,7 +80,7 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
 
         $message = sprintf(
             "You are about to clean audits older than %d months (up to <comment>%s</comment>): %d entities involved.\n Do you want to proceed?",
-            $input->getArgument('keep'),
+            $keep,
             $until->format('Y-m-d'),
             \count($entities)
         );
