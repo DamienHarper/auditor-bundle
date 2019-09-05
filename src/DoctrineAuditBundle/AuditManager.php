@@ -455,6 +455,7 @@ class AuditManager
 
     /**
      * @param EntityManagerInterface $em
+     *
      * @return EntityManagerInterface
      */
     private function selectStorageSpace(EntityManagerInterface $em): EntityManagerInterface

@@ -1,13 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: acanicatti@smart-trade.net
- * Date: 8/14/19
- * Time: 3:50 PM
- */
 
 namespace DH\DoctrineAuditBundle\DBAL;
-
 
 use Doctrine\DBAL\Logging\SQLLogger;
 
@@ -20,7 +13,6 @@ class AuditLoggerChain implements SQLLogger
      * Adds a logger in the chain.
      *
      * @param SQLLogger $logger
-     * @return void
      */
     public function addLogger(SQLLogger $logger)
     {

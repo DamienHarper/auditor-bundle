@@ -56,7 +56,7 @@ class AuditConfiguration
     private $firewallMap;
 
     /**
-     * @var EntityManagerInterface|null
+     * @var null|EntityManagerInterface
      */
     private $customStorageEntityManager;
 
@@ -338,7 +338,7 @@ class AuditConfiguration
     }
 
     /**
-     * @return EntityManagerInterface|null
+     * @return null|EntityManagerInterface
      */
     public function getCustomStorageEntityManager(): ?EntityManagerInterface
     {

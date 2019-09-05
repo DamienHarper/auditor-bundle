@@ -219,7 +219,7 @@ class AuditHelper
         $pkName = $meta->getSingleIdentifierFieldName();
         $pkValue = $id ?? $this->id($em, $entity);
         // An added guard for proxies that fail to initialize.
-        if (null == $pkValue) {
+        if (null === $pkValue) {
             return null;
         }
 
