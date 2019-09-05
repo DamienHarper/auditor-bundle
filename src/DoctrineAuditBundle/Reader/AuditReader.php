@@ -12,13 +12,13 @@ use Pagerfanta\Pagerfanta;
 
 class AuditReader
 {
-    const UPDATE = 'update';
-    const ASSOCIATE = 'associate';
-    const DISSOCIATE = 'dissociate';
-    const INSERT = 'insert';
-    const REMOVE = 'remove';
+    public const UPDATE = 'update';
+    public const ASSOCIATE = 'associate';
+    public const DISSOCIATE = 'dissociate';
+    public const INSERT = 'insert';
+    public const REMOVE = 'remove';
 
-    const PAGE_SIZE = 50;
+    public const PAGE_SIZE = 50;
 
     /**
      * @var AuditConfiguration
@@ -220,13 +220,15 @@ class AuditReader
         if (null !== $id) {
             $queryBuilder
                 ->andWhere('object_id = :object_id')
-                ->setParameter('object_id', $id);
+                ->setParameter('object_id', $id)
+            ;
         }
 
         if (null !== $this->filter) {
             $queryBuilder
                 ->andWhere('type = :filter')
-                ->setParameter('filter', $this->filter);
+                ->setParameter('filter', $this->filter)
+            ;
         }
 
         return $queryBuilder;
@@ -250,12 +252,14 @@ class AuditReader
             ->select('*')
             ->from($this->getEntityAuditTableName($entity))
             ->where('id = :id')
-            ->setParameter('id', $id);
+            ->setParameter('id', $id)
+        ;
 
         if (null !== $this->filter) {
             $queryBuilder
                 ->andWhere('type = :filter')
-                ->setParameter('filter', $this->filter);
+                ->setParameter('filter', $this->filter)
+            ;
         }
 
         /** @var Statement $statement */
@@ -269,7 +273,8 @@ class AuditReader
     {
         return $this
             ->entityManager
-            ->getClassMetadata($entity);
+            ->getClassMetadata($entity)
+        ;
     }
 
     /**
@@ -282,7 +287,8 @@ class AuditReader
     public function getEntityTableName($entity): string
     {
         return $this->getClassMetadata($entity)
-            ->getTableName();
+            ->getTableName()
+        ;
     }
 
     /**

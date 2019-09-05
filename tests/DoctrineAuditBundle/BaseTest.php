@@ -121,7 +121,7 @@ abstract class BaseTest extends TestCase
     {
         $container = new ContainerBuilder();
 
-        $auditConfiguration = new AuditConfiguration(
+        return new AuditConfiguration(
             array_merge([
                 'enabled' => true,
                 'table_prefix' => '',
@@ -135,8 +135,6 @@ abstract class BaseTest extends TestCase
             new FirewallMap($container, []),
             $entityManager
         );
-
-        return $auditConfiguration;
     }
 
     /**

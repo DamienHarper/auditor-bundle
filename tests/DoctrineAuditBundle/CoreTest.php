@@ -247,7 +247,7 @@ abstract class CoreTest extends BaseTest
         $requestStack = new RequestStack();
         $requestStack->push(new Request([], [], [], [], [], ['REMOTE_ADDR' => '1.2.3.4']));
 
-        $auditConfiguration = new AuditConfiguration(
+        return new AuditConfiguration(
             array_merge([
                 'enabled' => true,
                 'table_prefix' => '',
@@ -261,7 +261,5 @@ abstract class CoreTest extends BaseTest
             new FirewallMap($container, []),
             $entityManager
         );
-
-        return $auditConfiguration;
     }
 }

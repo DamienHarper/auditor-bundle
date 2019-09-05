@@ -52,10 +52,13 @@ class AuditHelper
             return $this->value($em, $type, $meta->getReflectionProperty($pk)->getValue($entity));
         }
 
-        // Primary key is not part of fieldMapping
-        // @see https://github.com/DamienHarper/DoctrineAuditBundle/issues/40
-        // @see https://www.doctrine-project.org/projects/doctrine-orm/en/latest/tutorials/composite-primary-keys.html#identity-through-foreign-entities
-        // We try to get it from associationMapping (will throw a MappingException if not available)
+        /**
+         * Primary key is not part of fieldMapping.
+         *
+         * @see https://github.com/DamienHarper/DoctrineAuditBundle/issues/40
+         * @see https://www.doctrine-project.org/projects/doctrine-orm/en/latest/tutorials/composite-primary-keys.html#identity-through-foreign-entities
+         * We try to get it from associationMapping (will throw a MappingException if not available)
+         */
         $targetEntity = $meta->getReflectionProperty($pk)->getValue($entity);
 
         $mapping = $meta->getAssociationMapping($pk);
@@ -237,7 +240,7 @@ class AuditHelper
      */
     public function getAuditTableColumns(): array
     {
-        $columns = [
+        return [
             'id' => [
                 'type' => Type::INTEGER,
                 'options' => [
@@ -312,13 +315,11 @@ class AuditHelper
                 ],
             ],
         ];
-
-        return $columns;
     }
 
     public function getAuditTableIndices(string $tablename): array
     {
-        $indices = [
+        return [
             'id' => [
                 'type' => 'primary',
             ],
@@ -339,8 +340,6 @@ class AuditHelper
                 'name' => 'created_at_'.md5($tablename).'_idx',
             ],
         ];
-
-        return $indices;
     }
 
     public static function paramToNamespace(string $entity): string
