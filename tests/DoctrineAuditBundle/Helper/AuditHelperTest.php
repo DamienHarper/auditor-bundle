@@ -20,6 +20,7 @@ use Symfony\Component\Security\Core\Security;
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\AuditManager
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
+ * @covers \DH\DoctrineAuditBundle\DBAL\AuditLoggerChain
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
  * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper

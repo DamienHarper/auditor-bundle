@@ -16,6 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * @covers \DH\DoctrineAuditBundle\AuditManager
  * @covers \DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
+ * @covers \DH\DoctrineAuditBundle\DBAL\AuditLoggerChain
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
  * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
