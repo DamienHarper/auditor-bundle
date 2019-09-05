@@ -4,6 +4,7 @@ namespace DH\DoctrineAuditBundle\EventSubscriber;
 
 use DH\DoctrineAuditBundle\AuditManager;
 use DH\DoctrineAuditBundle\DBAL\AuditLogger;
+use DH\DoctrineAuditBundle\DBAL\AuditLoggerChain;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Logging\LoggerChain;
 use Doctrine\DBAL\Logging\SQLLogger;
@@ -47,8 +48,7 @@ class AuditSubscriber implements EventSubscriber
 
         // extend the SQL logger
         $this->loggerBackup = $em->getConnection()->getConfiguration()->getSQLLogger();
-        $loggerChain = new LoggerChain();
-        $loggerChain->addLogger(new AuditLogger(function () use ($em) {
+        $auditLogger = new AuditLogger(function () use ($em) {
             // flushes pending data
             $em->getConnection()->getConfiguration()->setSQLLogger($this->loggerBackup);
             $uow = $em->getUnitOfWork();
@@ -60,12 +60,19 @@ class AuditSubscriber implements EventSubscriber
             $this->manager->processDeletions($em);
 
             $this->manager->reset();
-        }));
+        });
 
-        if ($this->loggerBackup instanceof SQLLogger) {
+        // Initialize a new LoggerChain with the new AuditLogger + the existing SQLLoggers.
+        $loggerChain = new AuditLoggerChain();
+        $loggerChain->addLogger($auditLogger);
+        if ($this->loggerBackup instanceof AuditLoggerChain) {
+            /** @var SQLLogger $logger */
+            foreach ($this->loggerBackup->getLoggers() as $logger) {
+                $loggerChain->addLogger($logger);
+            }
+        } elseif ($this->loggerBackup instanceof SQLLogger) {
             $loggerChain->addLogger($this->loggerBackup);
         }
-
         $em->getConnection()->getConfiguration()->setSQLLogger($loggerChain);
 
         $this->manager->collectScheduledInsertions($uow);
