@@ -36,11 +36,11 @@ class TokenStorageUserProviderTest extends TestCase
         $security = new Security($container);
         $token = new TokenStorageUserProvider($security);
 
-        $user1 = new User(1, 'john.doe');
+        $user1 = new User('1', 'john.doe');
         $user1->setRoles(['ROLE_ADMIN']);
         $token1 = new UsernamePasswordToken($user1, '12345', 'provider', $user1->getRoles());
 
-        $user2 = new User(2, 'dark.vador');
+        $user2 = new User('2', 'dark.vador');
         $user2->setRoles(['ROLE_USER', 'ROLE_PREVIOUS_ADMIN', new SwitchUserRole('ROLE_ADMIN', $token1)]);
         $token2 = new UsernamePasswordToken($user2, '12345', 'provider', $user2->getRoles());
 
@@ -48,7 +48,7 @@ class TokenStorageUserProviderTest extends TestCase
         $container->set('security.token_storage', $this->tokenStorage);
         $container->set('security.authorization_checker', $this->authorizationChecker);
 
-        $this->assertSame(2, $token->getUser()->getId());
+        $this->assertSame('2', $token->getUser()->getId());
         $this->assertSame('dark.vador [impersonator john.doe:1]', $token->getUser()->getUsername());
     }
 
