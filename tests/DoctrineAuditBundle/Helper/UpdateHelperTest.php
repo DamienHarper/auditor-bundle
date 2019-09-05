@@ -174,7 +174,7 @@ class UpdateHelperTest extends BaseTest
                 ],
             ],
             'blame_id' => [
-                'type' => Type::INTEGER,
+                'type' => Type::STRING,
                 'options' => [
                     'default' => null,
                     'notnull' => false,
