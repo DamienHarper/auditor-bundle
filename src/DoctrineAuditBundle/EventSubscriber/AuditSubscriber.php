@@ -62,18 +62,18 @@ class AuditSubscriber implements EventSubscriber
             $this->manager->reset();
         });
 
-        // Embed the chain into the existing LoggerChain, or create a new chain embed the existing SQLLogger.
-        $newChain = new AuditLoggerChain();
-        $newChain->addLogger($auditLogger);
+        // Initialize a new LoggerChain with the new AuditLogger + the existing SQLLoggers.
+        $loggerChain = new AuditLoggerChain();
+        $loggerChain->addLogger($auditLogger);
         if ($this->loggerBackup instanceof AuditLoggerChain) {
             /** @var SQLLogger $logger */
             foreach ($this->loggerBackup->getLoggers() as $logger) {
-                $newChain->addLogger($logger);
+                $loggerChain->addLogger($logger);
             }
         } elseif ($this->loggerBackup instanceof SQLLogger) {
-            $newChain->addLogger($this->loggerBackup);
+            $loggerChain->addLogger($this->loggerBackup);
         }
-        $em->getConnection()->getConfiguration()->setSQLLogger($newChain);
+        $em->getConnection()->getConfiguration()->setSQLLogger($loggerChain);
 
         $this->manager->collectScheduledInsertions($uow);
         $this->manager->collectScheduledUpdates($uow);
