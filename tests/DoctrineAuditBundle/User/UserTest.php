@@ -12,14 +12,14 @@ class UserTest extends TestCase
 {
     public function testGetId(): void
     {
-        $user = new User(1, 'john.doe');
+        $user = new User("1", 'john.doe');
 
-        $this->assertSame(1, $user->getId());
+        $this->assertSame("1", $user->getId());
     }
 
     public function testGetUsername(): void
     {
-        $user = new User(1, 'john.doe');
+        $user = new User("1", 'john.doe');
 
         $this->assertSame('john.doe', $user->getUsername());
     }
