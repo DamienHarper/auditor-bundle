@@ -5,7 +5,7 @@ namespace DH\DoctrineAuditBundle\User;
 class User implements UserInterface
 {
     /**
-     * @var null|int
+     * @var null|int|string
      */
     protected $id;
 
@@ -14,13 +14,13 @@ class User implements UserInterface
      */
     protected $username;
 
-    public function __construct(?int $id = null, ?string $username = null)
+    public function __construct($id = null, ?string $username = null)
     {
         $this->id = $id;
         $this->username = $username;
     }
 
-    public function getId(): ?int
+    public function getId()
     {
         return $this->id;
     }
