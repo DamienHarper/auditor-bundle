@@ -540,6 +540,31 @@ class AuditManagerTest extends CoreTest
         ], $entry->getDiffs(), 'audit entry diffs is ok.');
     }
 
+    public function testGetTransactionHash(): void
+    {
+        $configuration = $this->getAuditConfiguration();
+        $helper = new AuditHelper($configuration);
+        $manager = new AuditManager($configuration, $helper);
+
+        $transaction_hash = $manager->getTransactionHash();
+        $this->assertNotNull($transaction_hash, 'transaction_hash is not null');
+        $this->assertIsString($transaction_hash, 'transaction_hash is a string');
+        $this->assertSame(40, strlen($transaction_hash), 'transaction_hash is a string of 40 characters');
+    }
+
+    public function testTransactionHashAfterReset(): void
+    {
+        $configuration = $this->getAuditConfiguration();
+        $helper = new AuditHelper($configuration);
+        $manager = new AuditManager($configuration, $helper);
+
+        $before = $manager->getTransactionHash();
+        $manager->reset();
+        $after = $manager->getTransactionHash();
+
+        $this->assertNotSame($after, $before, 'transaction_hash is reset by AuditManager::reset()');
+    }
+
     public function testGetConfiguration(): void
     {
         $em = $this->getEntityManager();

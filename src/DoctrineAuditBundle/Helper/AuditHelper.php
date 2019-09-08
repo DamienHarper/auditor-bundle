@@ -265,6 +265,13 @@ class AuditHelper
                     'notnull' => true,
                 ],
             ],
+            'transaction_hash' => [
+                'type' => Type::STRING,
+                'options' => [
+                    'notnull' => false,
+                    'length' => 40,
+                ],
+            ],
             'diffs' => [
                 'type' => Type::JSON_ARRAY,
                 'options' => [
@@ -334,6 +341,10 @@ class AuditHelper
             'object_id' => [
                 'type' => 'index',
                 'name' => 'object_id_'.md5($tablename).'_idx',
+            ],
+            'transaction_hash' => [
+                'type' => 'index',
+                'name' => 'transaction_hash_'.md5($tablename).'_idx',
             ],
             'blame_id' => [
                 'type' => 'index',

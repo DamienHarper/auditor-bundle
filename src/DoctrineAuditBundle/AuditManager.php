@@ -13,6 +13,11 @@ class AuditManager
      */
     private $configuration;
 
+    /**
+     * @var string|null
+     */
+    private $transaction_hash;
+
     private $inserted = [];     // [$source, $changeset]
     private $updated = [];      // [$source, $changeset]
     private $removed = [];      // [$source, $id]
@@ -39,6 +44,20 @@ class AuditManager
     }
 
     /**
+     * Returns transaction hash.
+     *
+     * @return string
+     */
+    public function getTransactionHash(): string
+    {
+        if (null === $this->transaction_hash) {
+            $this->transaction_hash = sha1(uniqid('tid', true));
+        }
+
+        return $this->transaction_hash;
+    }
+
+    /**
      * Adds an insert entry to the audit table.
      *
      * @param EntityManager $em
@@ -58,6 +77,7 @@ class AuditManager
             'table' => $meta->getTableName(),
             'schema' => $meta->getSchemaName(),
             'id' => $this->helper->id($em, $entity),
+            'transaction_hash' => $this->getTransactionHash(),
         ]);
     }
 
@@ -85,6 +105,7 @@ class AuditManager
             'table' => $meta->getTableName(),
             'schema' => $meta->getSchemaName(),
             'id' => $this->helper->id($em, $entity),
+            'transaction_hash' => $this->getTransactionHash(),
         ]);
     }
 
@@ -108,6 +129,7 @@ class AuditManager
             'table' => $meta->getTableName(),
             'schema' => $meta->getSchemaName(),
             'id' => $id,
+            'transaction_hash' => $this->getTransactionHash(),
         ]);
     }
 
@@ -185,6 +207,7 @@ class AuditManager
             'table' => $meta->getTableName(),
             'schema' => $meta->getSchemaName(),
             'id' => $this->helper->id($em, $source),
+            'transaction_hash' => $this->getTransactionHash(),
         ];
 
         if (isset($mapping['joinTable']['name'])) {
@@ -209,6 +232,7 @@ class AuditManager
         $fields = [
             'type' => ':type',
             'object_id' => ':object_id',
+            'transaction_hash' => ':transaction_hash',
             'diffs' => ':diffs',
             'blame_id' => ':blame_id',
             'blame_user' => ':blame_user',
@@ -231,6 +255,7 @@ class AuditManager
         $dt = new \DateTime('now', new \DateTimeZone($this->getConfiguration()->getTimezone()));
         $statement->bindValue('type', $data['action']);
         $statement->bindValue('object_id', (string) $data['id']);
+        $statement->bindValue('transaction_hash', (string) $data['transaction_hash']);
         $statement->bindValue('diffs', json_encode($data['diff']));
         $statement->bindValue('blame_id', $data['blame']['user_id']);
         $statement->bindValue('blame_user', $data['blame']['username']);
@@ -451,6 +476,7 @@ class AuditManager
         $this->removed = [];
         $this->associated = [];
         $this->dissociated = [];
+        $this->transaction_hash = null;
     }
 
     /**
