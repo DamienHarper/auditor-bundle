@@ -150,7 +150,7 @@ class AuditSubscriberTest extends CoreTest
         $audits = $reader->getAudits(Author::class);
         $afterCount = \count($audits);
 
-        $this->assertEquals($beforeCount + 1, $afterCount, 'removing an entity (no relation set) adds 1 entry in the audit table.');
+        $this->assertSame($beforeCount + 1, $afterCount, 'removing an entity (no relation set) adds 1 entry in the audit table.');
 
         /** @var AuditEntry $entry */
         $entry = $audits[0];
@@ -851,18 +851,10 @@ class AuditSubscriberTest extends CoreTest
     public function testSoftRemove(): void
     {
         $em = $this->getEntityManager();
-        $em->getFilters()->enable('soft-deleteable');
-
-        $author = new Author();
-        $author
-            ->setFullname('John Doe')
-            ->setEmail('john.doe@gmail.com')
-        ;
-        $em->persist($author);
+        $reader = $this->getReader($this->getAuditConfiguration());
 
         $post = new Post();
         $post
-            ->setAuthor($author)
             ->setTitle('First post')
             ->setBody('Here is the body')
             ->setCreatedAt(new \DateTime())
@@ -870,10 +862,22 @@ class AuditSubscriberTest extends CoreTest
         $em->persist($post);
         $em->flush();
 
+        $audits = $reader->getAudits(Post::class);
+        $beforeCount = \count($audits);
+
         $em->remove($post);
         $em->flush();
 
-        $this->assertTrue(true);
+        $reader = $this->getReader($this->getAuditConfiguration());
+        $audits = $reader->getAudits(Post::class);
+        $afterCount = \count($audits);
+
+        $this->assertSame($beforeCount + 1, $afterCount, 'removing an entity (no relation set) adds 1 entry in the audit table.');
+
+        $i = 0;
+        $this->assertCount(2, $audits, 'result count is ok.');
+        $this->assertSame(AuditReader::REMOVE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::REMOVE operation.');
+        $this->assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
     }
 
     public function testTransactionHash(): void

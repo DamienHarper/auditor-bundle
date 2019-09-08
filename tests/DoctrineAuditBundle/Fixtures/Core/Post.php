@@ -171,6 +171,30 @@ class Post
     }
 
     /**
+     * Set the value of deleted_at.
+     *
+     * @param ?\DateTime $deleted_at
+     *
+     * @return Post
+     */
+    public function setDeletedAt(?\DateTime $deleted_at): self
+    {
+        $this->deleted_at = $deleted_at;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of deleted_at.
+     *
+     * @return ?\DateTime
+     */
+    public function getDeletedAt(): ?\DateTime
+    {
+        return $this->deleted_at;
+    }
+
+    /**
      * Set the value of author_id.
      *
      * @param int $author_id
