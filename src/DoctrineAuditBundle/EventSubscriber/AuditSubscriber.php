@@ -6,10 +6,7 @@ use DH\DoctrineAuditBundle\AuditManager;
 use DH\DoctrineAuditBundle\DBAL\AuditLogger;
 use DH\DoctrineAuditBundle\DBAL\AuditLoggerChain;
 use Doctrine\Common\EventSubscriber;
-use Doctrine\DBAL\Logging\LoggerChain;
 use Doctrine\DBAL\Logging\SQLLogger;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
 
@@ -83,25 +80,10 @@ class AuditSubscriber implements EventSubscriber
     }
 
     /**
-     * Handles soft-delete events from Gedmo\SoftDeleteable filter.
-     *
-     * @see https://symfony.com/doc/current/bundles/StofDoctrineExtensionsBundle/index.html
-     *
-     * @param LifecycleEventArgs $args
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    public function preSoftDelete(LifecycleEventArgs $args): void
-    {
-        $this->manager->softDelete($args->getEntityManager(), $args->getEntity());
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function getSubscribedEvents(): array
     {
-        return [Events::onFlush, 'preSoftDelete'];
+        return [Events::onFlush];
     }
 }

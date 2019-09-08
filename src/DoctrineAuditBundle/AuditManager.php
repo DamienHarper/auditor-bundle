@@ -144,23 +144,6 @@ class AuditManager
     }
 
     /**
-     * @param EntityManager $em
-     * @param object        $entity
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    public function softDelete(EntityManager $em, $entity): void
-    {
-        if ($this->configuration->isAudited($entity)) {
-            $this->removed[] = [
-                $entity,
-                $this->helper->id($em, $entity),
-            ];
-        }
-    }
-
-    /**
      * Adds an association entry to the audit table.
      *
      * @param string        $type
