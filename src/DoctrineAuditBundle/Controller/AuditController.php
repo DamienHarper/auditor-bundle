@@ -47,25 +47,4 @@ class AuditController extends AbstractController
             'entries' => $entries,
         ]);
     }
-
-    /**
-     * @Route("/audit/details/{entity}/{id}", name="dh_doctrine_audit_show_audit_entry", methods={"GET"})
-     *
-     * @param string     $entity
-     * @param int|string $id
-     *
-     * @return Response
-     */
-    public function showAuditEntryAction(string $entity, $id): Response
-    {
-        $entity = AuditHelper::paramToNamespace($entity);
-
-        $reader = $this->container->get('dh_doctrine_audit.reader');
-        $data = $reader->getAudit($entity, $id);
-
-        return $this->render('@DHDoctrineAudit/Audit/entity_history_entry.html.twig', [
-            'entity' => $entity,
-            'entry' => $data[0],
-        ]);
-    }
 }
