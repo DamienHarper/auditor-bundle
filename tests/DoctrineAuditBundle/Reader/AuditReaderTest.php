@@ -414,6 +414,8 @@ class AuditReaderTest extends CoreTest
         $reader = $this->getReader($this->getAuditConfiguration());
         $audits = $reader->getAuditsByTransactionHash($hash);
 
-        $this->assertCount(3, $audits, 'AuditReader::getAllAuditsByTransactionHash() is ok.');
+        $this->assertCount(2, $audits, 'AuditReader::getAllAuditsByTransactionHash() is ok.');
+        $this->assertCount(1, $audits[Author::class], 'AuditReader::getAllAuditsByTransactionHash() is ok.');
+        $this->assertCount(2, $audits[Post::class], 'AuditReader::getAllAuditsByTransactionHash() is ok.');
     }
 }
