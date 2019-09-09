@@ -30,7 +30,7 @@ class AuditEntry
     protected $diffs;
 
     /**
-     * @var int
+     * @var null|int|string
      */
     protected $blame_id;
 
