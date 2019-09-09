@@ -148,7 +148,10 @@ class AuditReader
 
         $entities = $this->getEntities();
         foreach ($entities as $entity => $tablename) {
-            $results[$entity] = $this->getAudits($entity, null, null, null, $transactionHash);
+            $audits = $this->getAudits($entity, null, null, null, $transactionHash);
+            if (\count($audits) > 0) {
+                $results[$entity] = $audits;
+            }
         }
 
         return $results;
