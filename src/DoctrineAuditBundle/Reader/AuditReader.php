@@ -117,12 +117,13 @@ class AuditReader
      * @param int|string    $id
      * @param null|int      $page
      * @param null|int      $pageSize
+     * @param null|string   $transactionHash
      *
      * @return array
      */
-    public function getAudits($entity, $id = null, ?int $page = null, ?int $pageSize = null): array
+    public function getAudits($entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null): array
     {
-        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id, $page, $pageSize);
+        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id, $page, $pageSize, $transactionHash);
 
         /** @var Statement $statement */
         $statement = $queryBuilder->execute();
@@ -186,10 +187,11 @@ class AuditReader
      * @param int|string    $id
      * @param int           $page
      * @param int           $pageSize
+     * @param null|string   $transactionHash
      *
      * @return QueryBuilder
      */
-    private function getAuditsQueryBuilder($entity, $id = null, ?int $page = null, ?int $pageSize = null): QueryBuilder
+    private function getAuditsQueryBuilder($entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null): QueryBuilder
     {
         if (null !== $page && $page < 1) {
             throw new \InvalidArgumentException('$page must be greater or equal than 1.');
@@ -228,6 +230,13 @@ class AuditReader
             $queryBuilder
                 ->andWhere('type = :filter')
                 ->setParameter('filter', $this->filter)
+            ;
+        }
+
+        if (null !== $transactionHash) {
+            $queryBuilder
+                ->andWhere('transaction_hash = :transaction_hash')
+                ->setParameter('transaction_hash', $transactionHash)
             ;
         }
 
