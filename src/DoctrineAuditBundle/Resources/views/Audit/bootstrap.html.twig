@@ -4,7 +4,7 @@
     {% else %}
         {% set prefix = 'badge-' %}
     {% endif %}
-    <span class="badge {{ prefix ~ type|default('secondary') }}">{{ text }}</span>
+    <span class="badge {{ prefix ~ type|default('secondary') }} p-1 pl-2 pr-2">{{ text|raw }}</span>
 {% endmacro %}
 
 {% macro text(text, type) %}
