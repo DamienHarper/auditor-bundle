@@ -133,6 +133,28 @@ class AuditReader
     }
 
     /**
+     * Returns an array of all audited entries/operations for a given transaction hash
+     * indexed by entity FQCN.
+     *
+     * @param string $transactionHash
+     *
+     * @throws \Doctrine\ORM\ORMException
+     *
+     * @return array
+     */
+    public function getAuditsByTransactionHash(string $transactionHash): array
+    {
+        $results = [];
+
+        $entities = $this->getEntities();
+        foreach ($entities as $entity => $tablename) {
+            $results[$entity] = $this->getAudits($entity, null, null, null, $transactionHash);
+        }
+
+        return $results;
+    }
+
+    /**
      * Returns an array of audited entries/operations.
      *
      * @param object|string $entity

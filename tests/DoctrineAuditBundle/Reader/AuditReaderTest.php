@@ -371,4 +371,49 @@ class AuditReaderTest extends CoreTest
 
         $this->assertCount(2, $audits, 'result count is ok.');
     }
+
+    public function testGetAllAuditsByTransactionHash(): void
+    {
+        $em = $this->getEntityManager();
+        $reader = $this->getReader($this->getAuditConfiguration());
+
+        $author = new Author();
+        $author
+            ->setFullname('John Doe')
+            ->setEmail('john.doe@gmail.com')
+        ;
+        $em->persist($author);
+
+        $post1 = new Post();
+        $post1
+            ->setAuthor($author)
+            ->setTitle('First post')
+            ->setBody('Here is the body')
+            ->setCreatedAt(new \DateTime())
+        ;
+
+        $post2 = new Post();
+        $post2
+            ->setAuthor($author)
+            ->setTitle('Second post')
+            ->setBody('Here is another body')
+            ->setCreatedAt(new \DateTime())
+        ;
+
+        $em->persist($post1);
+        $em->persist($post2);
+        $em->flush();
+
+        /** @var AuditEntry[] $audits */
+        $audits = $reader->getAudits(Post::class);
+        $hash = $audits[0]->getTransactionHash();
+
+        $em->remove($post2);
+        $em->flush();
+
+        $reader = $this->getReader($this->getAuditConfiguration());
+        $audits = $reader->getAuditsByTransactionHash($hash);
+
+        $this->assertCount(3, $audits, 'AuditReader::getAllAuditsByTransactionHash() is ok.');
+    }
 }
