@@ -122,7 +122,9 @@ class UpdateHelper
                 $table->dropPrimaryKey();
                 $table->setPrimaryKey([$column]);
             } else {
-                $table->dropIndex($options['name']);
+                if ($table->hasIndex($options['name'])) {
+                    $table->dropIndex($options['name']);
+                }
                 $table->addIndex([$column], $options['name']);
             }
         }
