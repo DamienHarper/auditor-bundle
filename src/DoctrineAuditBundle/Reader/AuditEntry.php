@@ -20,12 +20,17 @@ class AuditEntry
     protected $object_id;
 
     /**
+     * @var string|null
+     */
+    protected $transaction_hash;
+
+    /**
      * @var string
      */
     protected $diffs;
 
     /**
-     * @var int
+     * @var null|int|string
      */
     protected $blame_id;
 
@@ -87,6 +92,16 @@ class AuditEntry
     public function getObjectId(): string
     {
         return $this->object_id;
+    }
+
+    /**
+     * Get the value of transaction_hash.
+     *
+     * @return string|null
+     */
+    public function getTransactionHash(): ?string
+    {
+        return $this->transaction_hash;
     }
 
     /**

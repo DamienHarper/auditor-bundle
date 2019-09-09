@@ -880,6 +880,54 @@ class AuditSubscriberTest extends CoreTest
         $this->assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
     }
 
+    public function testTransactionHash(): void
+    {
+        $em = $this->getEntityManager();
+        $reader = $this->getReader($this->getAuditConfiguration());
+
+        $author = new Author();
+        $author
+            ->setFullname('John Doe')
+            ->setEmail('john.doe@gmail.com')
+        ;
+        $em->persist($author);
+
+        $post = new Post();
+        $post
+            ->setAuthor($author)
+            ->setTitle('First post')
+            ->setBody('Here is the body')
+            ->setCreatedAt(new \DateTime())
+        ;
+        $em->persist($post);
+        $em->flush();
+
+        /** @var AuditEntry[] $audits */
+        $audits = $reader->getAudits(Author::class);
+
+        $this->assertCount(1, $audits, 'result count is ok.');
+        $author_transaction_hash = $audits[0]->getTransactionHash();
+
+        /** @var AuditEntry[] $audits */
+        $audits = $reader->getAudits(Post::class);
+
+        $this->assertCount(1, $audits, 'result count is ok.');
+        $post_transaction_hash = $audits[0]->getTransactionHash();
+
+        $this->assertSame($author_transaction_hash, $post_transaction_hash, 'transaction hash is the same for both audit entries.');
+
+        $em->remove($post);
+        $em->flush();
+
+        /** @var AuditEntry[] $audits */
+        $audits = $reader->getAudits(Post::class);
+
+        $this->assertCount(2, $audits, 'result count is ok.');
+        $removed_post_transaction_hash = $audits[0]->getTransactionHash();
+
+        $this->assertNotSame($removed_post_transaction_hash, $post_transaction_hash, 'transaction hash is NOT the same.');
+    }
+
     protected function setupEntities(): void
     {
     }
