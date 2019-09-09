@@ -25,6 +25,26 @@ class AuditController extends AbstractController
     }
 
     /**
+     * @Route("/audit/transaction/{hash}", name="dh_doctrine_audit_show_transaction", methods={"GET"})
+     *
+     * @param string $hash
+     *
+     * @throws \Doctrine\ORM\ORMException
+     *
+     * @return Response
+     */
+    public function showTransactionAction(string $hash): Response
+    {
+        $reader = $this->container->get('dh_doctrine_audit.reader');
+        $audits = $reader->getAuditsByTransactionHash($hash);
+
+        return $this->render('@DHDoctrineAudit/Audit/transaction.html.twig', [
+            'hash' => $hash,
+            'audits' => $audits,
+        ]);
+    }
+
+    /**
      * @Route("/audit/{entity}/{id}", name="dh_doctrine_audit_show_entity_history", methods={"GET"})
      *
      * @param Request    $request

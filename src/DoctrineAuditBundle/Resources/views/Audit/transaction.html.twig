@@ -1,0 +1,30 @@
+{% extends "@DHDoctrineAudit/layout.html.twig" %}
+
+{% import '@DHDoctrineAudit/Audit/bootstrap.html.twig' as bootstrap %}
+{% import '@DHDoctrineAudit/Audit/helper.html.twig' as helper %}
+
+{% block dh_doctrine_audit_content %}
+    <div class="card border-0">
+        <div class="card-body">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_list_audits') }}">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page"><a href="{{ path('dh_doctrine_audit_show_transaction', {hash: hash}) }}">Transaction #{{ hash }}</a></li>
+                </ol>
+            </nav>
+
+            <h4 class="card-title"><code>Transaction #{{ hash }}</code> <em>(entity per entity)</em></h4>
+
+            {% for entity, entries in audits %}
+            <hr />
+            <h4 class="card-title float-left"><code>{{ entity }}</code> <em>(most recent first)</em></h4>
+            <h5 class="float-right">{{ bootstrap.badge(entries|length ~ ' operations', 'primary') }}</h5>
+            <div class="timeline-centered">
+                {% for entry in entries %}
+                    {{ include('@DHDoctrineAudit/Audit/entry.html.twig', {'entry': entry}) }}
+               {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock dh_doctrine_audit_content %}

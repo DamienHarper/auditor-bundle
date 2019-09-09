@@ -20,7 +20,7 @@ class AuditEntry
     protected $object_id;
 
     /**
-     * @var string|null
+     * @var null|string
      */
     protected $transaction_hash;
 
@@ -64,6 +64,16 @@ class AuditEntry
         $this->{$name} = $value;
     }
 
+    public function __get($name)
+    {
+        return $this->{$name};
+    }
+
+    public function __isset($name)
+    {
+        return property_exists($this, $name);
+    }
+
     /**
      * Get the value of id.
      *
@@ -97,7 +107,7 @@ class AuditEntry
     /**
      * Get the value of transaction_hash.
      *
-     * @return string|null
+     * @return null|string
      */
     public function getTransactionHash(): ?string
     {
