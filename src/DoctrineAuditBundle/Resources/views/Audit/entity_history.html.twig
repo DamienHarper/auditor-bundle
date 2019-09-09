@@ -55,12 +55,6 @@
                                         {% else %}
                                             {{ bootstrap.text(helper.dump(values.old), 'danger') }}
                                         {% endif %}
-{#                                    {% else %}#}
-{#                                        {% if values['-'] is empty %}#}
-{#                                            {{ bootstrap.badge('null', 'secondary') }}#}
-{#                                        {% else %}#}
-{#                                            {{ bootstrap.text(helper.dump(values['-']), 'danger') }}#}
-{#                                        {% endif %}#}
                                     {% endif %}
                                     </td>
                                     <td>
@@ -74,16 +68,6 @@
                                                 {{ bootstrap.text(helper.dump(values.new), 'success') }}
                                             {% endif %}
                                         {% endif %}
-{#                                    {% else %}#}
-{#                                        {% if values['+'] is empty %}#}
-{#                                            {{ bootstrap.badge('null', 'secondary') }}#}
-{#                                        {% else %}#}
-{#                                            {% if values['-'] is empty %}#}
-{#                                                {{ bootstrap.text(helper.dump(values['+']), 'primary') }}#}
-{#                                            {% else %}#}
-{#                                                {{ bootstrap.text(helper.dump(values['+']), 'success') }}#}
-{#                                            {% endif %}#}
-{#                                        {% endif %}#}
                                     {% endif %}
                                     </td>
                                 </tr>
