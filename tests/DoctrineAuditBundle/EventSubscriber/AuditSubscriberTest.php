@@ -61,7 +61,7 @@ final class AuditSubscriberTest extends CoreTest
         static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertSame([
+        static::assertEquals([
             'email' => [
                 'old' => null,
                 'new' => 'john.doe@gmail.com',
@@ -102,7 +102,7 @@ final class AuditSubscriberTest extends CoreTest
         static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertSame([
+        static::assertEquals([
             'email' => [
                 'old' => null,
                 'new' => 'john.doe@gmail.com',
@@ -119,7 +119,7 @@ final class AuditSubscriberTest extends CoreTest
         static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertSame([
+        static::assertEquals([
             'fullname' => [
                 'old' => 'John',
                 'new' => 'John Doe',
@@ -161,7 +161,7 @@ final class AuditSubscriberTest extends CoreTest
         static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertSame([
+        static::assertEquals([
             'label' => Author::class.'#1',
             'class' => Author::class,
             'table' => $em->getClassMetadata(Author::class)->getTableName(),
@@ -185,7 +185,7 @@ final class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         static::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
-        static::assertSame([
+        static::assertEquals([
             'int_value' => [
                 'old' => null,
                 'new' => 17,
@@ -203,7 +203,7 @@ final class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         static::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        static::assertSame([
+        static::assertEquals([
             'int_value' => [
                 'old' => 17,
                 'new' => null,
@@ -221,7 +221,7 @@ final class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         static::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        static::assertSame([
+        static::assertEquals([
             'int_value' => [
                 'old' => null,
                 'new' => 24,
@@ -239,7 +239,7 @@ final class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         static::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        static::assertSame([
+        static::assertEquals([
             'label' => [
                 'old' => 'int: null->24',
                 'new' => 'int: 24->"24"',
@@ -253,7 +253,7 @@ final class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         static::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        static::assertSame([
+        static::assertEquals([
             'label' => [
                 'old' => 'int: 24->"24"',
                 'new' => 'int: "24"->24',
@@ -267,7 +267,7 @@ final class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         static::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        static::assertSame([
+        static::assertEquals([
             'label' => [
                 'old' => 'int: "24"->24',
                 'new' => 'int: 24->24.0',
@@ -281,7 +281,7 @@ final class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         static::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        static::assertSame([
+        static::assertEquals([
             'int_value' => [
                 'old' => 24,
                 'new' => null,
@@ -309,7 +309,7 @@ final class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         static::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
-        static::assertSame([
+        static::assertEquals([
             'decimal_value' => [
                 'old' => null,
                 'new' => '10.2',
@@ -327,7 +327,7 @@ final class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         static::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        static::assertSame([
+        static::assertEquals([
             'label' => [
                 'old' => 'decimal: null->10.2',
                 'new' => 'decimal: 10.2->"10.2"',
@@ -350,7 +350,7 @@ final class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         static::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
-        static::assertSame([
+        static::assertEquals([
             'label' => [
                 'old' => null,
                 'new' => 'bool: null',
@@ -364,7 +364,7 @@ final class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         static::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        static::assertSame([
+        static::assertEquals([
             'bool_value' => [
                 'old' => null,
                 'new' => true,
@@ -382,7 +382,7 @@ final class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         static::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        static::assertSame([
+        static::assertEquals([
             'bool_value' => [
                 'old' => true,
                 'new' => null,
@@ -400,7 +400,7 @@ final class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         static::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        static::assertSame([
+        static::assertEquals([
             'bool_value' => [
                 'old' => null,
                 'new' => false,
@@ -418,7 +418,7 @@ final class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         static::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
-        static::assertSame([
+        static::assertEquals([
             'bool_value' => [
                 'old' => false,
                 'new' => null,
@@ -446,7 +446,7 @@ final class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         static::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
-        static::assertSame([
+        static::assertEquals([
             'label' => [
                 'old' => null,
                 'new' => 'php_array: null->[R1, R2]',
@@ -474,7 +474,7 @@ final class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         static::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
-        static::assertSame([
+        static::assertEquals([
             'json_array' => [
                 'old' => null,
                 'new' => '["R1","R2"]',
@@ -502,7 +502,7 @@ final class AuditSubscriberTest extends CoreTest
 
         $audits = $reader->getAudits(DummyEntity::class);
         static::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
-        static::assertSame([
+        static::assertEquals([
             'label' => [
                 'old' => null,
                 'new' => 'simple_array: null->[R1, R2]',
@@ -560,7 +560,7 @@ final class AuditSubscriberTest extends CoreTest
         static::assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
         static::assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
 
-        static::assertSame([
+        static::assertEquals([
             'source' => [
                 'label' => Author::class.'#1',
                 'class' => Author::class,
@@ -575,7 +575,7 @@ final class AuditSubscriberTest extends CoreTest
             ],
         ], $audits[0]->getDiffs(), 'relation ok.');
 
-        static::assertSame([
+        static::assertEquals([
             'source' => [
                 'label' => Author::class.'#1',
                 'class' => Author::class,
@@ -643,7 +643,7 @@ final class AuditSubscriberTest extends CoreTest
         static::assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
         static::assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
 
-        static::assertSame([
+        static::assertEquals([
             'source' => [
                 'label' => Author::class.'#1',
                 'class' => Author::class,
@@ -658,7 +658,7 @@ final class AuditSubscriberTest extends CoreTest
             ],
         ], $audits[0]->getDiffs(), 'relation ok.');
 
-        static::assertSame([
+        static::assertEquals([
             'source' => [
                 'label' => Author::class.'#1',
                 'class' => Author::class,
@@ -727,7 +727,7 @@ final class AuditSubscriberTest extends CoreTest
         static::assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
         static::assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
 
-        static::assertSame([
+        static::assertEquals([
             'source' => [
                 'label' => (string) $post,
                 'class' => Post::class,
@@ -743,7 +743,7 @@ final class AuditSubscriberTest extends CoreTest
             'table' => 'post__tag',
         ], $audits[0]->getDiffs(), 'relation ok.');
 
-        static::assertSame([
+        static::assertEquals([
             'source' => [
                 'label' => (string) $post,
                 'class' => Post::class,
@@ -759,7 +759,7 @@ final class AuditSubscriberTest extends CoreTest
             'table' => 'post__tag',
         ], $audits[1]->getDiffs(), 'relation ok.');
 
-        static::assertSame([
+        static::assertEquals([
             'source' => [
                 'label' => (string) $post,
                 'class' => Post::class,
@@ -833,7 +833,7 @@ final class AuditSubscriberTest extends CoreTest
         static::assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
         static::assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
 
-        static::assertSame([
+        static::assertEquals([
             'source' => [
                 'label' => (string) $post,
                 'class' => Post::class,

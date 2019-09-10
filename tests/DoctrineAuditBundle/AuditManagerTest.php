@@ -56,7 +56,7 @@ final class AuditManagerTest extends CoreTest
         static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertSame([
+        static::assertEquals([
             'email' => [
                 'old' => null,
                 'new' => 'john.doe@gmail.com',
@@ -97,7 +97,7 @@ final class AuditManagerTest extends CoreTest
         static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertSame([
+        static::assertEquals([
             'email' => [
                 'old' => 'john.doe@gmail.com',
                 'new' => 'dark.vador@gmail.com',
@@ -135,7 +135,7 @@ final class AuditManagerTest extends CoreTest
         static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertSame([
+        static::assertEquals([
             'label' => Author::class.'#1',
             'class' => Author::class,
             'table' => $em->getClassMetadata(Author::class)->getTableName(),
@@ -199,7 +199,7 @@ final class AuditManagerTest extends CoreTest
         static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertSame([
+        static::assertEquals([
             'source' => [
                 'label' => Author::class.'#1',
                 'class' => Author::class,
@@ -268,7 +268,7 @@ final class AuditManagerTest extends CoreTest
         static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertSame([
+        static::assertEquals([
             'source' => [
                 'label' => Author::class.'#1',
                 'class' => Author::class,
@@ -384,7 +384,7 @@ final class AuditManagerTest extends CoreTest
         static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertSame([
+        static::assertEquals([
             'source' => [
                 'label' => (string) $post,
                 'class' => Post::class,
@@ -406,7 +406,7 @@ final class AuditManagerTest extends CoreTest
         static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertSame([
+        static::assertEquals([
             'source' => [
                 'label' => (string) $post,
                 'class' => Post::class,
@@ -525,7 +525,7 @@ final class AuditManagerTest extends CoreTest
         static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertSame([
+        static::assertEquals([
             'source' => [
                 'label' => 'First post',
                 'class' => Post::class,

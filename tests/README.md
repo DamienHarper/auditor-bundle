@@ -36,7 +36,7 @@ This configuration expects to connect to a MySQL database.
 Assuming you have docker installed, you can easily start a MySQL server with following command (MySQL 8)
 
 ```bash
-docker run --name mysql_db -e MYSQL_DATABASE=doctrine_audit -d -p 3306:3306 mysql --default-authentication-plugin=mysql_native_password
+docker run --name mysql_db -e MYSQL_DATABASE=doctrine_audit -e MYSQL_ALLOW_EMPTY_PASSWORD=1 -d -p 3306:3306 mysql --default-authentication-plugin=mysql_native_password
 ```
 
 
