@@ -37,6 +37,17 @@ final class AuditEntryTest extends TestCase
         static::assertSame('main', $entry->getUserFirewall(), 'AuditEntry::getUserFirewall() is ok.');
         static::assertSame('1.2.3.4', $entry->getIp(), 'AuditEntry::getIp() is ok.');
         static::assertSame('now', $entry->getCreatedAt(), 'AuditEntry::getCreatedAt() is ok.');
+
+        static::assertSame(1, $entry->id, 'id accessor is ok.');
+        static::assertSame('type', $entry->type, 'type accessor is ok.');
+        static::assertSame('1', $entry->object_id, 'object_id accessor is ok.');
+        static::assertSame('{}', $entry->diffs, 'diffs accessor is ok.');
+        static::assertSame(1, $entry->blame_id, 'blame_id accessor is ok.');
+        static::assertSame('John Doe', $entry->blame_user, 'blame_user accessor is ok.');
+        static::assertSame(User::class, $entry->blame_user_fqdn, 'blame_user_fqdn accessor is ok.');
+        static::assertSame('main', $entry->blame_user_firewall, 'blame_user_firewall accessor is ok.');
+        static::assertSame('1.2.3.4', $entry->ip, 'ip accessor is ok.');
+        static::assertSame('now', $entry->created_at, 'created_at accessor is ok.');
     }
 
     public function testUndefinedUser(): void
