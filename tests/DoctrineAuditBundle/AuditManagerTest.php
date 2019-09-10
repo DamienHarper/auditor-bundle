@@ -551,7 +551,7 @@ final class AuditManagerTest extends CoreTest
         $transaction_hash = $manager->getTransactionHash();
         static::assertNotNull($transaction_hash, 'transaction_hash is not null');
         static::assertIsString($transaction_hash, 'transaction_hash is a string');
-        static::assertSame(40, \mb_strlen($transaction_hash), 'transaction_hash is a string of 40 characters');
+        static::assertSame(40, mb_strlen($transaction_hash), 'transaction_hash is a string of 40 characters');
     }
 
     public function testTransactionHashAfterReset(): void

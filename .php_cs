@@ -10,6 +10,7 @@ $config = PhpCsFixer\Config::create()
         '@DoctrineAnnotation' => true,
         '@PHPUnit60Migration:risky' => true,
         'backtick_to_shell_exec' => true,
+        'date_time_immutable' => false,
         'declare_strict_types' => false,
         'general_phpdoc_annotation_remove' => [
             'annotations' => [
@@ -21,8 +22,10 @@ $config = PhpCsFixer\Config::create()
         'linebreak_after_opening_tag' => true,
         'list_syntax' => ['syntax' => 'long'],
         'mb_str_functions' => true,
+        'no_superfluous_phpdoc_tags' => false,
         'ordered_class_elements' => false,
         'ordered_interfaces' => true,
+        'simplified_null_return' => false,
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()
