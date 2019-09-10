@@ -13,16 +13,22 @@
                 </ol>
             </nav>
 
-            <h4 class="card-title"><code>Transaction #{{ hash }}</code> <em>(entity per entity)</em></h4>
+            <h4 class="card-title float-left"><code>Transaction #{{ hash }}</code> <em>(entity per entity)</em></h4>
+            {% set amount = 0 %}
+            {% for entity, entries in audits %}
+                {% set amount = amount + entries|length %}
+            {% endfor %}
+            <h5 class="float-right">{{ bootstrap.badge(amount ~ ' operations', 'primary') }}</h5>
+            <div style="clear: both"></div>
 
             {% for entity, entries in audits %}
-            <hr />
+            <hr class="mt-0" />
             <h4 class="card-title float-left"><code>{{ entity }}</code> <em>(most recent first)</em></h4>
             <h5 class="float-right">{{ bootstrap.badge(entries|length ~ ' operations', 'primary') }}</h5>
             <div class="timeline-centered">
                 {% for entry in entries %}
                     {{ include('@DHDoctrineAudit/Audit/entry.html.twig', {'entry': entry}) }}
-               {% endfor %}
+                {% endfor %}
             </div>
             {% endfor %}
         </div>

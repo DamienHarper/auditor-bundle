@@ -15,9 +15,11 @@
             <div class="row">
                 <div class="col-lg-8"><h2 class="mb-0">{{ helper.humanize(entity, entry) }}</h2></div>
                 <div class="col-lg-3" align="right">
+                    {% if entry.transaction_hash is not empty %}
                     <a href="{{ path('dh_doctrine_audit_show_transaction', {hash: entry.transaction_hash}) }}" class="badge badge-pill badge-light font-weight-light transaction-hash" title="View all operations within this transaction">
                         <i class="fas fa-tag"></i>&nbsp;{{ entry.transaction_hash }}
                     </a>
+                    {% endif %}
                 </div>
                 <div class="col-lg-1" align="center">{{ bootstrap.badge(entry.type, bootstrap.label_type(entry.type)) }}</div>
             </div>
