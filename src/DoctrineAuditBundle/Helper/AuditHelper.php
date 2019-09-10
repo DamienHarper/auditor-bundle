@@ -115,6 +115,7 @@ class AuditHelper
                 ];
             }
         }
+        ksort($diff);
 
         return $diff;
     }

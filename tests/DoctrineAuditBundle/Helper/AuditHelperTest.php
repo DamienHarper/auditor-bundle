@@ -133,24 +133,24 @@ final class AuditHelperTest extends CoreTest
         ;
 
         $changeset = [
-            'fullname' => [
-                null,
-                'John Doe',
-            ],
             'email' => [
                 null,
                 'john.doe@gmail.com',
             ],
+            'fullname' => [
+                null,
+                'John Doe',
+            ],
         ];
 
         $expected = [
-            'fullname' => [
-                'old' => null,
-                'new' => 'John Doe',
-            ],
             'email' => [
                 'old' => null,
                 'new' => 'john.doe@gmail.com',
+            ],
+            'fullname' => [
+                'old' => null,
+                'new' => 'John Doe',
             ],
         ];
 
@@ -170,24 +170,24 @@ final class AuditHelperTest extends CoreTest
         ;
 
         $changeset = [
-            'fullname' => [
-                'John Doe',
-                'Dark Vador',
-            ],
             'email' => [
                 'john.doe@gmail.com',
                 'dark.vador@gmail.com',
             ],
+            'fullname' => [
+                'John Doe',
+                'Dark Vador',
+            ],
         ];
 
         $expected = [
-            'fullname' => [
-                'old' => 'John Doe',
-                'new' => 'Dark Vador',
-            ],
             'email' => [
                 'old' => 'john.doe@gmail.com',
                 'new' => 'dark.vador@gmail.com',
+            ],
+            'fullname' => [
+                'old' => 'John Doe',
+                'new' => 'Dark Vador',
             ],
         ];
 
@@ -227,10 +227,6 @@ final class AuditHelperTest extends CoreTest
         ;
 
         $changeset = [
-            'title' => [
-                null,
-                'First post',
-            ],
             'body' => [
                 null,
                 'What a nice first post!',
@@ -239,16 +235,20 @@ final class AuditHelperTest extends CoreTest
                 null,
                 $now,
             ],
+            'title' => [
+                null,
+                'First post',
+            ],
         ];
 
         $expected = [
-            'title' => [
-                'old' => null,
-                'new' => 'First post',
-            ],
             'body' => [
                 'old' => null,
                 'new' => 'What a nice first post!',
+            ],
+            'title' => [
+                'old' => null,
+                'new' => 'First post',
             ],
         ];
 
@@ -290,10 +290,6 @@ final class AuditHelperTest extends CoreTest
         ;
 
         $changeset = [
-            'title' => [
-                null,
-                'First post',
-            ],
             'body' => [
                 null,
                 'What a nice first post!',
@@ -302,16 +298,20 @@ final class AuditHelperTest extends CoreTest
                 null,
                 $now,
             ],
+            'title' => [
+                null,
+                'First post',
+            ],
         ];
 
         $expected = [
-            'title' => [
-                'old' => null,
-                'new' => 'First post',
-            ],
             'body' => [
                 'old' => null,
                 'new' => 'What a nice first post!',
+            ],
+            'title' => [
+                'old' => null,
+                'new' => 'First post',
             ],
         ];
 
@@ -341,13 +341,13 @@ final class AuditHelperTest extends CoreTest
         ;
 
         $changeset = [
-            'title' => [
-                'First post',
-                'First post ever!',
-            ],
             'created_at' => [
                 $now,
                 $now,
+            ],
+            'title' => [
+                'First post',
+                'First post ever!',
             ],
         ];
 

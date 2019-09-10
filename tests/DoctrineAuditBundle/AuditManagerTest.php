@@ -57,13 +57,13 @@ final class AuditManagerTest extends CoreTest
         static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
         static::assertSame([
-            'fullname' => [
-                'old' => null,
-                'new' => 'John Doe',
-            ],
             'email' => [
                 'old' => null,
                 'new' => 'john.doe@gmail.com',
+            ],
+            'fullname' => [
+                'old' => null,
+                'new' => 'John Doe',
             ],
         ], $entry->getDiffs(), 'audit entry diffs is ok.');
     }
@@ -98,13 +98,13 @@ final class AuditManagerTest extends CoreTest
         static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
         static::assertSame([
-            'fullname' => [
-                'old' => 'John Doe',
-                'new' => 'Dark Vador',
-            ],
             'email' => [
                 'old' => 'john.doe@gmail.com',
                 'new' => 'dark.vador@gmail.com',
+            ],
+            'fullname' => [
+                'old' => 'John Doe',
+                'new' => 'Dark Vador',
             ],
         ], $entry->getDiffs(), 'audit entry diffs is ok.');
     }
