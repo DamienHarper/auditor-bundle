@@ -8,12 +8,14 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
+ *
+ * @internal
  */
-class DoctrineHelperTest extends TestCase
+final class DoctrineHelperTest extends TestCase
 {
     public function testGenerateProxyClassName(): void
     {
-        $this->assertSame('DH\DoctrineAuditBundle\Tests\Fixtures\Core\__CG__\Post', DoctrineHelper::generateProxyClassName('Post', substr(Post::class, 0, strrpos(Post::class, '\\'))));
+        static::assertSame('DH\DoctrineAuditBundle\Tests\Fixtures\Core\__CG__\Post', DoctrineHelper::generateProxyClassName('Post', mb_substr(Post::class, 0, mb_strrpos(Post::class, '\\'))));
     }
 
     /**
@@ -21,8 +23,8 @@ class DoctrineHelperTest extends TestCase
      */
     public function testGetRealName(): void
     {
-        $this->assertNotSame('Post', DoctrineHelper::getRealClass(Post::class));
-        $this->assertSame(Post::class, DoctrineHelper::getRealClass(Post::class));
-        $this->assertSame(Post::class, DoctrineHelper::getRealClass(DoctrineHelper::generateProxyClassName(Post::class, substr(Post::class, 0, strrpos(Post::class, '\\')))));
+        static::assertNotSame('Post', DoctrineHelper::getRealClass(Post::class));
+        static::assertSame(Post::class, DoctrineHelper::getRealClass(Post::class));
+        static::assertSame(Post::class, DoctrineHelper::getRealClass(DoctrineHelper::generateProxyClassName(Post::class, mb_substr(Post::class, 0, mb_strrpos(Post::class, '\\')))));
     }
 }

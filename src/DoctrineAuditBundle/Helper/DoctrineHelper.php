@@ -17,11 +17,11 @@ class DoctrineHelper
     {
         $class = \is_object($subject) ? \get_class($subject) : $subject;
 
-        if (false === $pos = strrpos($class, '\\'.Proxy::MARKER.'\\')) {
+        if (false === $pos = mb_strrpos($class, '\\'.Proxy::MARKER.'\\')) {
             return $class;
         }
 
-        return substr($class, $pos + Proxy::MARKER_LENGTH + 2);
+        return mb_substr($class, $pos + Proxy::MARKER_LENGTH + 2);
     }
 
     /**

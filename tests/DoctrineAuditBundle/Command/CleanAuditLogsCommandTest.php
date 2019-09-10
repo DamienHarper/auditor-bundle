@@ -25,8 +25,10 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
  * @covers \DH\DoctrineAuditBundle\User\User
+ *
+ * @internal
  */
-class CleanAuditLogsCommandTest extends CoreTest
+final class CleanAuditLogsCommandTest extends CoreTest
 {
     use LockableTrait;
 
@@ -42,7 +44,7 @@ class CleanAuditLogsCommandTest extends CoreTest
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        $this->assertStringContainsString("'keep' argument must be a positive number.", $output);
+        static::assertStringContainsString("'keep' argument must be a positive number.", $output);
     }
 
     /**
@@ -60,7 +62,7 @@ class CleanAuditLogsCommandTest extends CoreTest
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        $this->assertStringContainsString("'keep' argument must be a positive number.", $output);
+        static::assertStringContainsString("'keep' argument must be a positive number.", $output);
     }
 
     /**
@@ -77,7 +79,7 @@ class CleanAuditLogsCommandTest extends CoreTest
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        $this->assertStringContainsString('[OK] Success', $output);
+        static::assertStringContainsString('[OK] Success', $output);
     }
 
     /**
@@ -96,7 +98,7 @@ class CleanAuditLogsCommandTest extends CoreTest
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        $this->assertStringContainsString('The command is already running in another process.', $output);
+        static::assertStringContainsString('The command is already running in another process.', $output);
     }
 
     protected function createCommand(): Command

@@ -30,8 +30,10 @@ use Symfony\Component\Security\Core\Security;
  * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
  * @covers \DH\DoctrineAuditBundle\User\User
+ *
+ * @internal
  */
-class AuditHelperTest extends CoreTest
+final class AuditHelperTest extends CoreTest
 {
     public function testSummarize(): void
     {
@@ -53,7 +55,7 @@ class AuditHelperTest extends CoreTest
             'id' => 1,
         ];
 
-        $this->assertSame($expected, $helper->summarize($em, $author), 'AuditHelper::summarize ok');
+        static::assertSame($expected, $helper->summarize($em, $author), 'AuditHelper::summarize ok');
 
         $post = new Post();
         $post
@@ -71,7 +73,7 @@ class AuditHelperTest extends CoreTest
             'id' => 1,
         ];
 
-        $this->assertSame($expected, $helper->summarize($em, $post), 'AuditHelper::summarize is ok.');
+        static::assertSame($expected, $helper->summarize($em, $post), 'AuditHelper::summarize is ok.');
     }
 
     public function testId(): void
@@ -87,7 +89,7 @@ class AuditHelperTest extends CoreTest
             ->setEmail('john.doe@gmail.com')
         ;
 
-        $this->assertSame(1, $helper->id($em, $author), 'AuditHelper::id() is ok.');
+        static::assertSame(1, $helper->id($em, $author), 'AuditHelper::id() is ok.');
 
         $dieselCore = new CoreCase();
         $dieselCore->type = 'type1';
@@ -101,8 +103,8 @@ class AuditHelperTest extends CoreTest
         $em->persist($dieselCase);
         $em->flush();
 
-        $this->assertSame(1, $helper->id($em, $dieselCore));
-        $this->assertSame(1, $helper->id($em, $dieselCase));
+        static::assertSame(1, $helper->id($em, $dieselCore));
+        static::assertSame(1, $helper->id($em, $dieselCase));
 
         $dieselCore = new CoreCase();
         $dieselCore->type = 'type2';
@@ -114,8 +116,8 @@ class AuditHelperTest extends CoreTest
         $em->persist($dieselCase);
         $em->flush();
 
-        $this->assertSame(2, $helper->id($em, $dieselCore));
-        $this->assertSame(2, $helper->id($em, $dieselCase));
+        static::assertSame(2, $helper->id($em, $dieselCore));
+        static::assertSame(2, $helper->id($em, $dieselCase));
     }
 
     public function testDiffInsert(): void
@@ -152,7 +154,7 @@ class AuditHelperTest extends CoreTest
             ],
         ];
 
-        $this->assertSame($expected, $helper->diff($em, $author, $changeset), 'AuditHelper::diff() / insert is ok.');
+        static::assertSame($expected, $helper->diff($em, $author, $changeset), 'AuditHelper::diff() / insert is ok.');
     }
 
     public function testDiffUpdate(): void
@@ -189,7 +191,7 @@ class AuditHelperTest extends CoreTest
             ],
         ];
 
-        $this->assertSame($expected, $helper->diff($em, $author, $changeset), 'AuditHelper::diff() / update is ok.');
+        static::assertSame($expected, $helper->diff($em, $author, $changeset), 'AuditHelper::diff() / update is ok.');
     }
 
     public function testDiffHonorsGloballyIgnoredColumns(): void
@@ -250,7 +252,7 @@ class AuditHelperTest extends CoreTest
             ],
         ];
 
-        $this->assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() honors globally ignored columns.');
+        static::assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() honors globally ignored columns.');
     }
 
     public function testDiffHonorsLocallyIgnoredColumns(): void
@@ -313,7 +315,7 @@ class AuditHelperTest extends CoreTest
             ],
         ];
 
-        $this->assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() honors locally ignored columns.');
+        static::assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() honors locally ignored columns.');
     }
 
     public function testDiffIgnoresUnchangedValues(): void
@@ -356,7 +358,7 @@ class AuditHelperTest extends CoreTest
             ],
         ];
 
-        $this->assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() ignores unchanged values.');
+        static::assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() ignores unchanged values.');
     }
 
     public function testBlame(): void
@@ -373,7 +375,7 @@ class AuditHelperTest extends CoreTest
             'user_firewall' => null,
         ];
 
-        $this->assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
+        static::assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
     }
 
     public function testBlameWhenNoRequest(): void
@@ -402,7 +404,7 @@ class AuditHelperTest extends CoreTest
             'user_firewall' => null,
         ];
 
-        $this->assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
+        static::assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
     }
 
     public function testBlameWhenNoUser(): void
@@ -430,17 +432,17 @@ class AuditHelperTest extends CoreTest
             'user_firewall' => null,
         ];
 
-        $this->assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
+        static::assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
     }
 
     public function testParamToNamespace(): void
     {
-        $this->assertSame(Author::class, AuditHelper::paramToNamespace('DH-DoctrineAuditBundle-Tests-Fixtures-Core-Author'), 'AuditHelper::paramToNamespace() is ok.');
+        static::assertSame(Author::class, AuditHelper::paramToNamespace('DH-DoctrineAuditBundle-Tests-Fixtures-Core-Author'), 'AuditHelper::paramToNamespace() is ok.');
     }
 
     public function testNamespaceToParam(): void
     {
-        $this->assertSame('DH-DoctrineAuditBundle-Tests-Fixtures-Core-Author', AuditHelper::namespaceToParam(Author::class), 'AuditHelper::namespaceToParam() is ok.');
+        static::assertSame('DH-DoctrineAuditBundle-Tests-Fixtures-Core-Author', AuditHelper::namespaceToParam(Author::class), 'AuditHelper::namespaceToParam() is ok.');
     }
 
     public function testGetConfiguration(): void
@@ -449,7 +451,7 @@ class AuditHelperTest extends CoreTest
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
 
-        $this->assertInstanceOf(AuditConfiguration::class, $helper->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
+        static::assertInstanceOf(AuditConfiguration::class, $helper->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
     }
 
     protected function setupEntities(): void

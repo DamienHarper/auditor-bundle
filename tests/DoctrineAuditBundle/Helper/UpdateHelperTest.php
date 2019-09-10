@@ -28,8 +28,10 @@ use Gedmo;
  * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
  * @covers \DH\DoctrineAuditBundle\User\User
+ *
+ * @internal
  */
-class UpdateHelperTest extends BaseTest
+final class UpdateHelperTest extends BaseTest
 {
     /**
      * @var string
@@ -57,7 +59,7 @@ class UpdateHelperTest extends BaseTest
         $schemaManager = $em->getConnection()->getSchemaManager();
 
         $authorTable = $this->getTable($schemaManager->listTables(), 'author');
-        $this->assertNull($this->getTable($schemaManager->listTables(), 'author_audit'), 'author_audit does not exist yet.');
+        static::assertNull($this->getTable($schemaManager->listTables(), 'author_audit'), 'author_audit does not exist yet.');
 
         $fromSchema = $schemaManager->createSchema();
         $toSchema = clone  $fromSchema;
@@ -71,7 +73,7 @@ class UpdateHelperTest extends BaseTest
         }
 
         $authorAuditTable = $this->getTable($schemaManager->listTables(), 'author_audit');
-        $this->assertNotNull($authorAuditTable, 'author_audit table has been created.');
+        static::assertNotNull($authorAuditTable, 'author_audit table has been created.');
     }
 
     /**
@@ -104,16 +106,16 @@ class UpdateHelperTest extends BaseTest
         // check expected columns
         $expected = $helper->getAuditTableColumns();
         foreach ($expected as $name => $options) {
-            $this->assertTrue($authorAuditTable->hasColumn($name), 'audit table has a column named "'.$name.'".');
+            static::assertTrue($authorAuditTable->hasColumn($name), 'audit table has a column named "'.$name.'".');
         }
 
         // check expected indices
         $expected = $helper->getAuditTableIndices('author_audit');
         foreach ($expected as $name => $options) {
             if ('primary' === $options['type']) {
-                $this->assertTrue($authorAuditTable->hasPrimaryKey(), 'audit table has a primary key named "'.$name.'".');
+                static::assertTrue($authorAuditTable->hasPrimaryKey(), 'audit table has a primary key named "'.$name.'".');
             } else {
-                $this->assertTrue($authorAuditTable->hasIndex($options['name']), 'audit table has an index named "'.$name.'".');
+                static::assertTrue($authorAuditTable->hasIndex($options['name']), 'audit table has an index named "'.$name.'".');
             }
         }
     }
@@ -189,14 +191,14 @@ class UpdateHelperTest extends BaseTest
                     'length' => 100,
                 ],
             ],
-//            'ip' => [
-//                'type' => Type::STRING,
-//                'options' => [
-//                    'default' => null,
-//                    'notnull' => false,
-//                    'length' => 45,
-//                ],
-//            ],
+            //            'ip' => [
+            //                'type' => Type::STRING,
+            //                'options' => [
+            //                    'default' => null,
+            //                    'notnull' => false,
+            //                    'length' => 45,
+            //                ],
+            //            ],
             'created_at' => [
                 'type' => Type::DATETIME,
                 'options' => [
@@ -272,16 +274,16 @@ class UpdateHelperTest extends BaseTest
         // check expected columns
         $expected = $helper->getAuditTableColumns();
         foreach ($expected as $name => $options) {
-            $this->assertTrue($authorAuditTable->hasColumn($name), 'audit table has a column named "'.$name.'".');
+            static::assertTrue($authorAuditTable->hasColumn($name), 'audit table has a column named "'.$name.'".');
         }
 
         // check expected indices
         $expected = $helper->getAuditTableIndices('author_audit');
         foreach ($expected as $name => $options) {
             if ('primary' === $options['type']) {
-                $this->assertTrue($authorAuditTable->hasPrimaryKey(), 'audit table has a primary key named "'.$name.'".');
+                static::assertTrue($authorAuditTable->hasPrimaryKey(), 'audit table has a primary key named "'.$name.'".');
             } else {
-                $this->assertTrue($authorAuditTable->hasIndex($options['name']), 'audit table has an index named "'.$name.'".');
+                static::assertTrue($authorAuditTable->hasIndex($options['name']), 'audit table has an index named "'.$name.'".');
             }
         }
     }
@@ -292,7 +294,7 @@ class UpdateHelperTest extends BaseTest
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
 
-        $this->assertInstanceOf(AuditConfiguration::class, $helper->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
+        static::assertInstanceOf(AuditConfiguration::class, $helper->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
     }
 
     /**

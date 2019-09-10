@@ -51,7 +51,7 @@ abstract class BaseTest extends TestCase
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\Tools\ToolsException
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         $this->getEntityManager();
         $this->getSchemaTool();
@@ -62,7 +62,7 @@ abstract class BaseTest extends TestCase
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
      */
-    public function tearDown(): void
+    protected function tearDown(): void
     {
         $this->tearDownEntitySchema();
         $this->em = null;

@@ -32,7 +32,7 @@ abstract class CoreTest extends BaseTest
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\Tools\ToolsException
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         $this->getEntityManager();
         $this->getSchemaTool();
@@ -235,7 +235,7 @@ abstract class CoreTest extends BaseTest
 
         $authorizationChecker = $this->getMockBuilder(AuthorizationCheckerInterface::class)->getMock();
         $authorizationChecker
-            ->expects($this->any())
+            ->expects(static::any())
             ->method('isGranted')
             ->with('ROLE_PREVIOUS_ADMIN')
             ->willReturn(true)

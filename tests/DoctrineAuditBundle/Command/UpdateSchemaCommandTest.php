@@ -27,8 +27,10 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
  * @covers \DH\DoctrineAuditBundle\User\User
+ *
+ * @internal
  */
-class UpdateSchemaCommandTest extends CoreTest
+final class UpdateSchemaCommandTest extends CoreTest
 {
     use LockableTrait;
 
@@ -41,7 +43,7 @@ class UpdateSchemaCommandTest extends CoreTest
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        $this->assertStringContainsString('[OK] Success', $output);
+        static::assertStringContainsString('[OK] Success', $output);
     }
 
     /**
@@ -58,7 +60,7 @@ class UpdateSchemaCommandTest extends CoreTest
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        $this->assertStringContainsString('The command is already running in another process.', $output);
+        static::assertStringContainsString('The command is already running in another process.', $output);
     }
 
     protected function createCommand(): Command

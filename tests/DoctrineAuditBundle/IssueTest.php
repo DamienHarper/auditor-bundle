@@ -24,8 +24,10 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Issue40\DieselCase;
  * @covers \DH\DoctrineAuditBundle\Reader\AuditEntry
  * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
+ *
+ * @internal
  */
-class IssueTest extends BaseTest
+final class IssueTest extends BaseTest
 {
     /**
      * @var string
@@ -50,7 +52,7 @@ class IssueTest extends BaseTest
         $em->flush();
 
         $audits = $reader->getAudits(Vehicle::class);
-        $this->assertCount(2, $audits, 'results count ok.');
+        static::assertCount(2, $audits, 'results count ok.');
     }
 
     public function testIssue40(): void
@@ -71,12 +73,12 @@ class IssueTest extends BaseTest
         $em->flush();
 
         $audits = $reader->getAudits(CoreCase::class);
-        $this->assertCount(1, $audits, 'results count ok.');
-        $this->assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
+        static::assertCount(1, $audits, 'results count ok.');
+        static::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
 
         $audits = $reader->getAudits(DieselCase::class);
-        $this->assertCount(1, $audits, 'results count ok.');
-        $this->assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
+        static::assertCount(1, $audits, 'results count ok.');
+        static::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
     }
 
     public function testIssue37(): void
@@ -101,9 +103,9 @@ class IssueTest extends BaseTest
         $em->flush();
 
         $audits = $reader->getAudits(Locale::class);
-        $this->assertCount(2, $audits, 'results count ok.');
-        $this->assertSame('en_US', $audits[0]->getObjectId(), 'AuditEntry::object_id is a string.');
-        $this->assertSame('fr_FR', $audits[1]->getObjectId(), 'AuditEntry::object_id is a string.');
+        static::assertCount(2, $audits, 'results count ok.');
+        static::assertSame('en_US', $audits[0]->getObjectId(), 'AuditEntry::object_id is a string.');
+        static::assertSame('fr_FR', $audits[1]->getObjectId(), 'AuditEntry::object_id is a string.');
 
         $user1 = new User();
         $user1
@@ -122,7 +124,7 @@ class IssueTest extends BaseTest
         $em->flush();
 
         $audits = $reader->getAudits(User::class);
-        $this->assertCount(2, $audits, 'results count ok.');
+        static::assertCount(2, $audits, 'results count ok.');
     }
 
     /**
@@ -130,7 +132,7 @@ class IssueTest extends BaseTest
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\Tools\ToolsException
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         $this->getEntityManager();
         $this->getSchemaTool();

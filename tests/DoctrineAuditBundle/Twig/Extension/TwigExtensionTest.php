@@ -19,8 +19,10 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\Twig\Extension\TwigExtension
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
+ *
+ * @internal
  */
-class TwigExtensionTest extends BaseTest
+final class TwigExtensionTest extends BaseTest
 {
     /**
      * @var ContainerBuilder
@@ -32,7 +34,7 @@ class TwigExtensionTest extends BaseTest
      */
     protected $fixturesPath = __DIR__.'/../../Fixtures';
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -59,10 +61,10 @@ class TwigExtensionTest extends BaseTest
         $extension = new TwigExtension($this->container->get('doctrine'));
         $functions = $extension->getFunctions();
 
-        $this->assertNotEmpty($functions, 'extension has at least 1 function.');
+        static::assertNotEmpty($functions, 'extension has at least 1 function.');
 
         foreach ($functions as $function) {
-            $this->assertInstanceOf('Twig\TwigFunction', $function, 'function instanceof Twig\TwigFunction');
+            static::assertInstanceOf('Twig\TwigFunction', $function, 'function instanceof Twig\TwigFunction');
         }
     }
 
@@ -71,10 +73,10 @@ class TwigExtensionTest extends BaseTest
         $extension = new TwigExtension($this->container->get('doctrine'));
         $filters = $extension->getFilters();
 
-        $this->assertNotEmpty($filters, 'extension has at least 1 filter.');
+        static::assertNotEmpty($filters, 'extension has at least 1 filter.');
 
         foreach ($filters as $filter) {
-            $this->assertInstanceOf('Twig\TwigFilter', $filter, 'filter instanceof Twig\TwigFilter');
+            static::assertInstanceOf('Twig\TwigFilter', $filter, 'filter instanceof Twig\TwigFilter');
         }
     }
 
@@ -82,7 +84,7 @@ class TwigExtensionTest extends BaseTest
     {
         $extension = new TwigExtension($this->container->get('doctrine'));
 
-        $this->assertNull($extension->findUser(1, Author::class));
+        static::assertNull($extension->findUser(1, Author::class));
 
         $author = new Author();
         $author
@@ -94,29 +96,29 @@ class TwigExtensionTest extends BaseTest
         $em->persist($author);
         $em->flush();
 
-        $this->assertNull($extension->findUser(null, Author::class));
-        $this->assertNotNull($extension->findUser(1, Author::class));
-        $this->assertInstanceOf(Author::class, $extension->findUser(1, Author::class));
+        static::assertNull($extension->findUser(null, Author::class));
+        static::assertNotNull($extension->findUser(1, Author::class));
+        static::assertInstanceOf(Author::class, $extension->findUser(1, Author::class));
     }
 
     public function testGetClass(): void
     {
         $extension = new TwigExtension($this->container->get('doctrine'));
 
-        $this->assertSame(Author::class, $extension->getClass(new Author()), 'TwigExtension::getClass() is ok.');
+        static::assertSame(Author::class, $extension->getClass(new Author()), 'TwigExtension::getClass() is ok.');
     }
 
     public function testGetTablename(): void
     {
         $extension = new TwigExtension($this->container->get('doctrine'));
 
-        $this->assertSame('author', $extension->getTablename(new Author()), 'TwigExtension::getTablename() is ok.');
+        static::assertSame('author', $extension->getTablename(new Author()), 'TwigExtension::getTablename() is ok.');
     }
 
     public function testGetName(): void
     {
         $extension = new TwigExtension($this->container->get('doctrine'));
 
-        $this->assertSame('twig_extensions', $extension->getName(), 'TwigExtension::getName() is ok.');
+        static::assertSame('twig_extensions', $extension->getName(), 'TwigExtension::getName() is ok.');
     }
 }

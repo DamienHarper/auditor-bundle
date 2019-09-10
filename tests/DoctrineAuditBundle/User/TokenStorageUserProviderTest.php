@@ -15,8 +15,10 @@ use Symfony\Component\Security\Core\Security;
 /**
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
  * @covers \DH\DoctrineAuditBundle\User\User
+ *
+ * @internal
  */
-class TokenStorageUserProviderTest extends TestCase
+final class TokenStorageUserProviderTest extends TestCase
 {
     private $authorizationChecker;
     private $tokenStorage;
@@ -27,7 +29,7 @@ class TokenStorageUserProviderTest extends TestCase
         $security = new Security($container);
         $token = new TokenStorageUserProvider($security);
 
-        $this->assertNull($token->getUser());
+        static::assertNull($token->getUser());
     }
 
     public function testGetUserWhenUserIsDefined(): void
@@ -48,16 +50,16 @@ class TokenStorageUserProviderTest extends TestCase
         $container->set('security.token_storage', $this->tokenStorage);
         $container->set('security.authorization_checker', $this->authorizationChecker);
 
-        $this->assertSame('2', $token->getUser()->getId());
-        $this->assertSame('dark.vador [impersonator john.doe:1]', $token->getUser()->getUsername());
+        static::assertSame('2', $token->getUser()->getId());
+        static::assertSame('dark.vador [impersonator john.doe:1]', $token->getUser()->getUsername());
     }
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         $this->tokenStorage = new TokenStorage();
         $this->authorizationChecker = $this->getMockBuilder(AuthorizationCheckerInterface::class)->getMock();
         $this->authorizationChecker
-            ->expects($this->any())
+            ->expects(static::any())
             ->method('isGranted')
             ->with('ROLE_PREVIOUS_ADMIN')
             ->willReturn(true)

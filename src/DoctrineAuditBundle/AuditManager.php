@@ -14,7 +14,7 @@ class AuditManager
     private $configuration;
 
     /**
-     * @var string|null
+     * @var null|string
      */
     private $transaction_hash;
 

@@ -14,10 +14,12 @@ use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
 
 /**
- * @covers \DH\DoctrineAuditBundle\DependencyInjection\DHDoctrineAuditExtension
  * @covers \DH\DoctrineAuditBundle\DependencyInjection\Configuration::getConfigTreeBuilder
+ * @covers \DH\DoctrineAuditBundle\DependencyInjection\DHDoctrineAuditExtension
+ *
+ * @internal
  */
-class DHDoctrineAuditExtensionTest extends AbstractExtensionTestCase
+final class DHDoctrineAuditExtensionTest extends AbstractExtensionTestCase
 {
     public function testItRegistersDefaultServices(): void
     {

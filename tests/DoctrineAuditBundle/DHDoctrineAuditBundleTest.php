@@ -23,8 +23,10 @@ use Symfony\Component\Security\Core\Security;
  * @covers \DH\DoctrineAuditBundle\DHDoctrineAuditBundle
  * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
+ *
+ * @internal
  */
-class DHDoctrineAuditBundleTest extends TestCase
+final class DHDoctrineAuditBundleTest extends TestCase
 {
     public function testDefaultBuild(): void
     {
@@ -72,6 +74,6 @@ class DHDoctrineAuditBundleTest extends TestCase
         $container->compile();
 
         $auditReader = $container->get('dh_doctrine_audit.reader');
-        $this->assertInstanceOf(AuditReader::class, $auditReader);
+        static::assertInstanceOf(AuditReader::class, $auditReader);
     }
 }
