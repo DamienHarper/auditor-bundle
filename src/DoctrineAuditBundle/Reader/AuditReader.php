@@ -3,10 +3,10 @@
 namespace DH\DoctrineAuditBundle\Reader;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Pagerfanta\Adapter\DoctrineDbalSingleTableAdapter;
 use Pagerfanta\Pagerfanta;
 
