@@ -35,18 +35,11 @@ class TokenStorageUserProvider implements UserProviderInterface
 
         $impersonation = '';
         if ($this->security->isGranted('ROLE_PREVIOUS_ADMIN')) {
-            $impersonatorUser = null;
             // Symfony > 4.3
             if ($token instanceof SwitchUserToken) {
                 $impersonatorUser = $token->getOriginalToken()->getUser();
             } else {
-                foreach ($this->security->getToken()->getRoles() as $role) {
-                    if ($role instanceof SwitchUserRole) {
-                        $impersonatorUser = $role->getSource()->getUser();
-
-                        break;
-                    }
-                }
+                $impersonatorUser = $this->getImpersonatorUser();
             }
 
             if (\is_object($impersonatorUser)) {
@@ -58,5 +51,16 @@ class TokenStorageUserProvider implements UserProviderInterface
         $id = method_exists($tokenUser, 'getId') ? $tokenUser->getId() : null;
 
         return new User($id, $tokenUser->getUsername().$impersonation);
+    }
+
+    private function getImpersonatorUser()
+    {
+        foreach ($this->security->getToken()->getRoles() as $role) {
+            if ($role instanceof SwitchUserRole) {
+                return $role->getSource()->getUser();
+            }
+        }
+
+        return null;
     }
 }
