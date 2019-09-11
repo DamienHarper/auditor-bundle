@@ -31,33 +31,34 @@ class TokenStorageUserProvider implements UserProviderInterface
         }
 
         $tokenUser = $token->getUser();
-        if ($tokenUser instanceof BaseUserInterface) {
-            $impersonation = '';
-            if ($this->security->isGranted('ROLE_PREVIOUS_ADMIN')) {
-                $impersonatorUser = null;
-                // Symfony > 4.3
-                if ($token instanceof SwitchUserToken) {
-                    $impersonatorUser = $token->getOriginalToken()->getUser();
-                } else {
-                    foreach ($this->security->getToken()->getRoles() as $role) {
-                        if ($role instanceof SwitchUserRole) {
-                            $impersonatorUser = $role->getSource()->getUser();
-
-                            break;
-                        }
-                    }
-                }
-
-                if (\is_object($impersonatorUser)) {
-                    $id = method_exists($impersonatorUser, 'getId') ? $impersonatorUser->getId() : null;
-                    $username = method_exists($impersonatorUser, 'getUsername') ? $impersonatorUser->getUsername() : (string) $impersonatorUser;
-                    $impersonation = ' [impersonator '.$username.':'.$id.']';
-                }
-            }
-            $id = method_exists($tokenUser, 'getId') ? $tokenUser->getId() : null;
-            $user = new User($id, $tokenUser->getUsername().$impersonation);
+        if (!($tokenUser instanceof BaseUserInterface)) {
+            return null;
         }
 
-        return $user;
+        $impersonation = '';
+        if ($this->security->isGranted('ROLE_PREVIOUS_ADMIN')) {
+            $impersonatorUser = null;
+            // Symfony > 4.3
+            if ($token instanceof SwitchUserToken) {
+                $impersonatorUser = $token->getOriginalToken()->getUser();
+            } else {
+                foreach ($this->security->getToken()->getRoles() as $role) {
+                    if ($role instanceof SwitchUserRole) {
+                        $impersonatorUser = $role->getSource()->getUser();
+
+                        break;
+                    }
+                }
+            }
+
+            if (\is_object($impersonatorUser)) {
+                $id = method_exists($impersonatorUser, 'getId') ? $impersonatorUser->getId() : null;
+                $username = method_exists($impersonatorUser, 'getUsername') ? $impersonatorUser->getUsername() : (string) $impersonatorUser;
+                $impersonation = ' [impersonator '.$username.':'.$id.']';
+            }
+        }
+        $id = method_exists($tokenUser, 'getId') ? $tokenUser->getId() : null;
+
+        return new User($id, $tokenUser->getUsername().$impersonation);
     }
 }
