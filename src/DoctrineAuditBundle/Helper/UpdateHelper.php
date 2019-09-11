@@ -108,7 +108,6 @@ class UpdateHelper
 
             $processed[] = $column->getName();
         }
-        $column = null;
 
         foreach ($expectedColumns as $column => $options) {
             if (!\in_array($column, $processed, true)) {
@@ -116,7 +115,6 @@ class UpdateHelper
                 $table->addColumn($column, $options['type'], $options['options']);
             }
         }
-        $column = null;
 
         // process indices
         foreach ($expectedIndices as $column => $options) {
