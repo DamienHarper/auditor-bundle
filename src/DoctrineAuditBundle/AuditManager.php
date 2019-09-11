@@ -94,7 +94,7 @@ class AuditManager
     public function update(EntityManager $em, $entity, array $ch): void
     {
         $diff = $this->helper->diff($em, $entity, $ch);
-        if (!$diff) {
+        if (0 === \count($diff)) {
             return; // if there is no entity diff, do not log it
         }
         $meta = $em->getClassMetadata(\get_class($entity));
