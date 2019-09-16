@@ -93,6 +93,12 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
             }
         }
 
+        if (0 === \count($audits)) {
+            $io->warning('There are no audit table to upgrade.');
+
+            return 0;
+        }
+
         $progressBar = new ProgressBar($output, \count($audits));
         $progressBar->setBarWidth(70);
         $progressBar->setFormat("%message%\n".$progressBar->getFormatDefinition('debug'));
