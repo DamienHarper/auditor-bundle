@@ -285,7 +285,6 @@ class AuditHelper
                 'options' => [
                     'default' => null,
                     'notnull' => false,
-                    'unsigned' => true,
                 ],
             ],
             'blame_user' => [
