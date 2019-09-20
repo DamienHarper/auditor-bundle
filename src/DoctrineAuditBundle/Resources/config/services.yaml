@@ -6,7 +6,12 @@ services:
 
   dh_doctrine_audit.configuration:
     class: DH\DoctrineAuditBundle\AuditConfiguration
-    arguments: ["%dh_doctrine_audit.configuration%", "@dh_doctrine_audit.user_provider", "@request_stack", "@security.firewall.map"]
+    arguments:
+      - "%dh_doctrine_audit.configuration%"
+      - "@dh_doctrine_audit.user_provider"
+      - "@request_stack"
+      - "@security.firewall.map"
+      - "@doctrine.orm.default_entity_manager"
     public: true
 
   DH\DoctrineAuditBundle\AuditConfiguration:

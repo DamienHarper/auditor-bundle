@@ -384,7 +384,7 @@ final class AuditConfigurationTest extends TestCase
     {
         $configuration = $this->getAuditConfiguration();
 
-        static::assertNull($configuration->getCustomStorageEntityManager(), 'custom storage entity manager is null by default');
+        static::assertNull($configuration->getEntityManager(), 'custom storage entity manager is null by default');
     }
 
     protected function getAuditConfiguration(array $options = []): AuditConfiguration

@@ -58,19 +58,19 @@ class AuditConfiguration
     /**
      * @var null|EntityManagerInterface
      */
-    private $customStorageEntityManager;
+    private $entityManager;
 
     public function __construct(
         array $config,
         UserProviderInterface $userProvider,
         RequestStack $requestStack,
         FirewallMap $firewallMap,
-        ?EntityManagerInterface $customStorageEntityManager = null
+        EntityManagerInterface $entityManager
     ) {
         $this->userProvider = $userProvider;
         $this->requestStack = $requestStack;
         $this->firewallMap = $firewallMap;
-        $this->customStorageEntityManager = $customStorageEntityManager;
+        $this->entityManager = $entityManager;
 
         $this->enabled = $config['enabled'];
         $this->tablePrefix = $config['table_prefix'];
@@ -338,10 +338,10 @@ class AuditConfiguration
     }
 
     /**
-     * @return null|EntityManagerInterface
+     * @return EntityManagerInterface
      */
-    public function getCustomStorageEntityManager(): ?EntityManagerInterface
+    public function getEntityManager(): EntityManagerInterface
     {
-        return $this->customStorageEntityManager;
+        return $this->entityManager;
     }
 }
