@@ -37,11 +37,18 @@ class UpdateHelper
     /**
      * Creates an audit table.
      *
-     * @param Schema $schema
-     * @param Table  $table
+     * @param Table $table
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     *
+     * @return Schema
      */
-    public function createAuditTable(Schema $schema, Table $table): void
+    public function createAuditTable(Table $table): Schema
     {
+        $entityManager = $this->getConfiguration()->getEntityManager();
+        $schemaManager = $entityManager->getConnection()->getSchemaManager();
+        $schema = $schemaManager->createSchema();
+
         $auditTablename = preg_replace(
             sprintf('#^([^\.]+\.)?(%s)$#', preg_quote($table->getName(), '#')),
             sprintf(
@@ -68,7 +75,18 @@ class UpdateHelper
                     $auditTable->addIndex([$column], $struct['name']);
                 }
             }
+
+            $sql = $schema->toSql($entityManager->getConnection()->getDatabasePlatform());
+            foreach ($sql as $query) {
+                try {
+                    $statement = $entityManager->getConnection()->prepare($query);
+                    $statement->execute();
+                } catch (\Exception $e) {
+                }
+            }
         }
+
+        return $schema;
     }
 
     /**
