@@ -5,10 +5,6 @@ namespace DH\DoctrineAuditBundle\Command;
 use DH\DoctrineAuditBundle\AuditManager;
 use DH\DoctrineAuditBundle\Exception\UpdateException;
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Schema\AbstractSchemaManager;
-use Doctrine\ORM\EntityManager;
-use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -54,27 +50,10 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
          */
         $updater = new UpdateHelper($manager);
 
-        /**
-         * @var RegistryInterface
-         */
-        $registry = $this->container->get('doctrine');
-
-        /**
-         * @var EntityManager
-         */
-        $em = $registry->getManager();
-
-        /**
-         * @var Connection
-         */
-        $connection = $em->getConnection();
-
-        /**
-         * @var AbstractSchemaManager
-         */
-        $schemaManager = $connection->getSchemaManager();
-
         $io->writeln('Introspecting schema...');
+
+        $entityManager = $manager->getConfiguration()->getEntityManager();
+        $schemaManager = $entityManager->getConnection()->getSchemaManager();
 
         $schema = $schemaManager->createSchema();
         $tables = $schema->getTables();
@@ -111,7 +90,7 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
             $progressBar->display();
 
             try {
-                $schema = $updater->updateAuditTable($schemaManager, $schema, $table, $em);
+                $schema = $updater->updateAuditTable($table);
             } catch (UpdateException $e) {
                 $errors[] = $e->getMessage();
                 $io->error($e->getMessage());

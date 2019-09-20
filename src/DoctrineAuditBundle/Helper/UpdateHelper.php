@@ -5,11 +5,9 @@ namespace DH\DoctrineAuditBundle\Helper;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\AuditManager;
 use DH\DoctrineAuditBundle\Exception\UpdateException;
-use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
-use Doctrine\ORM\EntityManager;
 
 class UpdateHelper
 {
@@ -92,22 +90,21 @@ class UpdateHelper
     /**
      * Ensures an audit table's structure is valid.
      *
-     * @param AbstractSchemaManager $schemaManager
-     * @param Schema                $schema
-     * @param Table                 $table
-     * @param EntityManager         $em
+     * @param Table $table
      *
      * @throws UpdateException
      * @throws \Doctrine\DBAL\Schema\SchemaException
      *
      * @return Schema
      */
-    public function updateAuditTable(AbstractSchemaManager $schemaManager, Schema $schema, Table $table, EntityManager $em): Schema
+    public function updateAuditTable(Table $table): Schema
     {
-        $fromSchema = $schema;
-        $toSchema = clone $schema;
+        $entityManager = $this->getConfiguration()->getEntityManager();
+        $schemaManager = $entityManager->getConnection()->getSchemaManager();
+        $fromSchema = $schemaManager->createSchema();
 
-        $table = $toSchema->getTable($table->getName());
+        $toSchema = clone $fromSchema;
+
         $columns = $schemaManager->listTableColumns($table->getName());
         $expectedColumns = $this->manager->getHelper()->getAuditTableColumns();
         $expectedIndices = $this->manager->getHelper()->getAuditTableIndices($table->getName());
@@ -151,7 +148,7 @@ class UpdateHelper
         $sql = $fromSchema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
         foreach ($sql as $query) {
             try {
-                $statement = $em->getConnection()->prepare($query);
+                $statement = $entityManager->getConnection()->prepare($query);
                 $statement->execute();
             } catch (\Exception $e) {
                 throw new UpdateException(sprintf('Failed to update/fix "%s" audit table.', $table->getName()));
