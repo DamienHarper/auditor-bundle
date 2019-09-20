@@ -5,8 +5,6 @@ namespace DH\DoctrineAuditBundle\Command;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
-use Doctrine\ORM\EntityManager;
-use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -58,24 +56,15 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
         $until->modify('-'.$keep.' month');
 
         /**
-         * @var RegistryInterface
+         * @var AuditReader
          */
-        $registry = $this->container->get('doctrine');
-
-        /**
-         * @var EntityManager
-         */
-        $em = $registry->getManager();
+        $reader = $this->container->get('dh_doctrine_audit.reader');
 
         /**
          * @var Connection
          */
-        $connection = $em->getConnection();
+        $connection = $reader->getConfiguration()->getEntityManager()->getConnection();
 
-        /**
-         * @var AuditReader
-         */
-        $reader = $this->container->get('dh_doctrine_audit.reader');
         $entities = $reader->getEntities();
 
         $message = sprintf(
