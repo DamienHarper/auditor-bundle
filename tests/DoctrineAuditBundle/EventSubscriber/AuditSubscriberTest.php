@@ -34,8 +34,8 @@ final class AuditSubscriberTest extends CoreTest
         $configuration = $this->createAuditConfiguration([], $this->getSecondaryEntityManager());
         $defaultEM = $this->getEntityManager();
 
-        static::assertNotNull($configuration->getCustomStorageEntityManager(), 'custom storage entity manager is not null');
-        static::assertNotSame($defaultEM, $configuration->getCustomStorageEntityManager(), 'custom storage entity manager is not default one');
+        static::assertNotNull($configuration->getEntityManager(), 'custom storage entity manager is not null');
+        static::assertNotSame($defaultEM, $configuration->getEntityManager(), 'custom storage entity manager is not default one');
     }
 
     public function testInsertWithoutRelation(): void

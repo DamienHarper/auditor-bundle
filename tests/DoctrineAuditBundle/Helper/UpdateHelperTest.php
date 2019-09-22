@@ -62,14 +62,16 @@ final class UpdateHelperTest extends BaseTest
         static::assertNull($this->getTable($schemaManager->listTables(), 'author_audit'), 'author_audit does not exist yet.');
 
         $fromSchema = $schemaManager->createSchema();
-        $toSchema = clone  $fromSchema;
-        $updater->createAuditTable($toSchema, $authorTable);
+        $toSchema = $updater->createAuditTable($authorTable);
 
         // apply changes
         $sql = $fromSchema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
         foreach ($sql as $query) {
-            $statement = $em->getConnection()->prepare($query);
-            $statement->execute();
+            try {
+                $statement = $em->getConnection()->prepare($query);
+                $statement->execute();
+            } catch (\Exception $e) {
+            }
         }
 
         $authorAuditTable = $this->getTable($schemaManager->listTables(), 'author_audit');
@@ -81,8 +83,8 @@ final class UpdateHelperTest extends BaseTest
      */
     public function testCreateAuditTableHasExpectedStructure(): void
     {
-        $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
+        $em = $configuration->getEntityManager();
         $helper = new AuditHelper($configuration);
         $manager = new AuditManager($configuration, $helper);
         $updater = new UpdateHelper($manager);
@@ -91,14 +93,16 @@ final class UpdateHelperTest extends BaseTest
         $authorTable = $this->getTable($schemaManager->listTables(), 'author');
 
         $fromSchema = $schemaManager->createSchema();
-        $toSchema = clone  $fromSchema;
-        $updater->createAuditTable($toSchema, $authorTable);
+        $toSchema = $updater->createAuditTable($authorTable);
 
         // apply changes
         $sql = $fromSchema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
         foreach ($sql as $query) {
-            $statement = $em->getConnection()->prepare($query);
-            $statement->execute();
+            try {
+                $statement = $em->getConnection()->prepare($query);
+                $statement->execute();
+            } catch (\Exception $e) {
+            }
         }
 
         $authorAuditTable = $this->getTable($schemaManager->listTables(), 'author_audit');
@@ -125,8 +129,8 @@ final class UpdateHelperTest extends BaseTest
      */
     public function testUpdateAuditTable(): void
     {
-        $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
+        $em = $configuration->getEntityManager();
         $helper = new AuditHelper($configuration);
         $manager = new AuditManager($configuration, $helper);
         $updater = new UpdateHelper($manager);
@@ -135,14 +139,16 @@ final class UpdateHelperTest extends BaseTest
         $authorTable = $this->getTable($schemaManager->listTables(), 'author');
 
         $fromSchema = $schemaManager->createSchema();
-        $toSchema = clone  $fromSchema;
-        $updater->createAuditTable($toSchema, $authorTable);
+        $toSchema = $updater->createAuditTable($authorTable);
 
         // apply changes
         $sql = $fromSchema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
         foreach ($sql as $query) {
-            $statement = $em->getConnection()->prepare($query);
-            $statement->execute();
+            try {
+                $statement = $em->getConnection()->prepare($query);
+                $statement->execute();
+            } catch (\Exception $e) {
+            }
         }
 
         // new expected structure
@@ -254,25 +260,27 @@ final class UpdateHelperTest extends BaseTest
             ->method('getAuditTableIndices')
             ->willReturn($expectedIndices)
         ;
-
         $manager->setHelper($helper);
 
-        $fromSchema = $schemaManager->createSchema();
-        $toSchema = clone  $fromSchema;
         $authorAuditTable = $this->getTable($schemaManager->listTables(), 'author_audit');
-        $updater->updateAuditTable($schemaManager, $fromSchema, $authorAuditTable, $em);
+        $fromSchema = clone $toSchema;
+        $toSchema = $updater->updateAuditTable($authorAuditTable);
 
         // apply changes
         $sql = $fromSchema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
         foreach ($sql as $query) {
-            $statement = $em->getConnection()->prepare($query);
-            $statement->execute();
+            try {
+                $statement = $em->getConnection()->prepare($query);
+                $statement->execute();
+            } catch (\Exception $e) {
+            }
         }
 
         $authorAuditTable = $this->getTable($schemaManager->listTables(), 'author_audit');
 
         // check expected columns
         $expected = $helper->getAuditTableColumns();
+//dump($expected);
         foreach ($expected as $name => $options) {
             static::assertTrue($authorAuditTable->hasColumn($name), 'audit table has a column named "'.$name.'".');
         }
@@ -323,7 +331,9 @@ final class UpdateHelperTest extends BaseTest
 
         $connection = $this->getConnection();
 
-        $this->setAuditConfiguration($this->createAuditConfiguration());
+        $this->em = EntityManager::create($connection, $config);
+
+        $this->setAuditConfiguration($this->createAuditConfiguration([], $this->em));
         $configuration = $this->getAuditConfiguration();
 
         $this->auditManager = new AuditManager($configuration, new AuditHelper($configuration));
@@ -335,8 +345,6 @@ final class UpdateHelperTest extends BaseTest
                 $evm->removeEventListener([$event], $listener);
             }
         }
-
-        $this->em = EntityManager::create($connection, $config);
 
         return $this->em;
     }

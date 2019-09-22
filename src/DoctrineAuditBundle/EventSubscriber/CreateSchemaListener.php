@@ -21,7 +21,7 @@ class CreateSchemaListener implements EventSubscriber
         $this->manager = $manager;
     }
 
-    public function postGenerateSchemaTable(GenerateSchemaTableEventArgs $eventArgs)
+    public function postGenerateSchemaTable(GenerateSchemaTableEventArgs $eventArgs): void
     {
         $cm = $eventArgs->getClassMetadata();
 
@@ -48,7 +48,7 @@ class CreateSchemaListener implements EventSubscriber
         }
 
         $updater = new UpdateHelper($this->manager);
-        $updater->createAuditTable($eventArgs->getSchema(), $eventArgs->getClassTable());
+        $updater->createAuditTable($eventArgs->getClassTable());
     }
 
     /**

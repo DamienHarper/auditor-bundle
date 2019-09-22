@@ -345,6 +345,6 @@ class AuditReader
      */
     private function selectStorage(): EntityManagerInterface
     {
-        return $this->configuration->getCustomStorageEntityManager() ?? $this->entityManager;
+        return $this->configuration->getEntityManager() ?? $this->entityManager;
     }
 }

@@ -214,7 +214,8 @@ final class AuditHelperTest extends CoreTest
             ],
             $configuration->getUserProvider(),
             $configuration->getRequestStack(),
-            new FirewallMap(new ContainerBuilder(), [])
+            new FirewallMap(new ContainerBuilder(), []),
+            $em
         );
         $helper = new AuditHelper($configuration);
 
@@ -277,7 +278,8 @@ final class AuditHelperTest extends CoreTest
             ],
             $configuration->getUserProvider(),
             $configuration->getRequestStack(),
-            new FirewallMap(new ContainerBuilder(), [])
+            new FirewallMap(new ContainerBuilder(), []),
+            $em
         );
         $helper = new AuditHelper($configuration);
 
@@ -392,7 +394,8 @@ final class AuditHelperTest extends CoreTest
             ],
             $this->getAuditConfiguration()->getUserProvider(),
             new RequestStack(),
-            new FirewallMap(new ContainerBuilder(), [])
+            new FirewallMap(new ContainerBuilder(), []),
+            $em
         );
         $helper = new AuditHelper($configuration);
 
@@ -420,7 +423,8 @@ final class AuditHelperTest extends CoreTest
             ],
             new TokenStorageUserProvider(new Security(new ContainerBuilder())),
             new RequestStack(),
-            new FirewallMap(new ContainerBuilder(), [])
+            new FirewallMap(new ContainerBuilder(), []),
+            $this->getEntityManager()
         );
         $helper = new AuditHelper($configuration);
 

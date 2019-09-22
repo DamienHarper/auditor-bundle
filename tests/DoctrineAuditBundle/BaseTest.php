@@ -35,7 +35,10 @@ abstract class BaseTest extends TestCase
      */
     protected $em;
 
-    protected $fixturesPath;
+    /**
+     * @var string
+     */
+    protected $fixturesPath = __DIR__.'/Fixtures';
 
     protected $auditConfiguration;
 
@@ -102,9 +105,24 @@ abstract class BaseTest extends TestCase
      */
     protected function tearDownEntitySchema(): void
     {
-        $classes = $this->getEntityManager()->getMetadataFactory()->getAllMetadata();
+        $em = $this->getEntityManager();
+        $schemaManager = $em->getConnection()->getSchemaManager();
+        $fromSchema = $schemaManager->createSchema();
+        $toSchema = clone $fromSchema;
 
-        $this->getSchemaTool()->dropSchema($classes);
+        $tables = $fromSchema->getTables();
+        foreach ($tables as $table) {
+            $toSchema = $toSchema->dropTable($table->getName());
+        }
+
+        $sql = $fromSchema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
+        foreach ($sql as $query) {
+            try {
+                $statement = $em->getConnection()->prepare($query);
+                $statement->execute();
+            } catch (\Exception $e) {
+            }
+        }
     }
 
     protected function getAuditConfiguration(): AuditConfiguration
@@ -133,7 +151,7 @@ abstract class BaseTest extends TestCase
             new TokenStorageUserProvider(new Security($container)),
             new RequestStack(),
             new FirewallMap($container, []),
-            $entityManager
+            $entityManager ?? $this->getEntityManager()
         );
     }
 
@@ -164,7 +182,9 @@ abstract class BaseTest extends TestCase
 
         $connection = $this->getSharedConnection();
 
-        $this->setAuditConfiguration($this->createAuditConfiguration());
+        $this->em = EntityManager::create($connection, $config);
+
+        $this->setAuditConfiguration($this->createAuditConfiguration([], $this->em));
         $configuration = $this->getAuditConfiguration();
 
         $this->auditManager = new AuditManager($configuration, new AuditHelper($configuration));
@@ -179,8 +199,6 @@ abstract class BaseTest extends TestCase
         $evm->addEventSubscriber(new AuditSubscriber($this->auditManager));
         $evm->addEventSubscriber(new CreateSchemaListener($this->auditManager));
         $evm->addEventSubscriber(new Gedmo\SoftDeleteable\SoftDeleteableListener());
-
-        $this->em = EntityManager::create($connection, $config);
 
         return $this->em;
     }

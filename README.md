@@ -212,26 +212,20 @@ reference to entity data in main database which doesn't reflect changes logged i
 audit data is for your application/business, missing audit data could be acceptable)
 
 It is possible to save audits in a different database than the one where audited entities live. 
-To do that you have to inject as third parameter of `AuditManager` an optional secondary entity manager
+To do that you have change the last argument of `dh_doctrine_audit.configuration` service to set the entity manager
 binded to that second database. 
-
- ```yaml
-// config/services.yaml (symfony >= 3.4)
-dh_doctrine_audit.manager:
-    class: DH\DoctrineAuditBundle\AuditManager
-    arguments: ["@dh_doctrine_audit.configuration", "@dh_doctrine_audit.helper", "@doctrine.orm.your_custom_entity_manager"]
- ```
-
-Also, to generate migrations from schema difference you have to also overwrite settings for schema listener:
 
 ```yaml
 // config/services.yaml (symfony >= 3.4)
-dh_doctrine_audit.event_subscriber.create_schema:
-    class: DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
-    arguments: ["@dh_doctrine_audit.manager"]
-    tags:
-        - { name: doctrine.event_subscriber, connection: connection_to_second_database }
-```
+dh_doctrine_audit.configuration:
+    class: DH\DoctrineAuditBundle\AuditConfiguration
+    arguments:
+        - "%dh_doctrine_audit.configuration%"
+        - "@dh_doctrine_audit.user_provider"
+        - "@request_stack"
+        - "@security.firewall.map"
+        - "@doctrine.orm.your_custom_entity_manager"
+ ```
 
 ### Audit viewer
 
@@ -248,34 +242,34 @@ dh_doctrine_audit:
 It is possible to filter results by event type by calling `AuditReader::filterBy` method 
 before getting the results.
 
-````php
-    /**
-     * @Route("/audit/details/{entity}/{id}", name="dh_doctrine_audit_show_audit_entry", methods={"GET"})
-     */
-    public function showAuditEntryAction(string $entity, int $id)
-    {
-        $reader = $this->container->get('dh_doctrine_audit.reader');
-        
-        $data = $reader
-             ->filterBy(AuditReader::UPDATE)   // add this to only get `update` entries.
-             ->getAudit($entity, $id)
-         ;
+```php
+/**
+ * @Route("/audit/details/{entity}/{id}", name="dh_doctrine_audit_show_audit_entry", methods={"GET"})
+ */
+public function showAuditEntryAction(string $entity, int $id)
+{
+    $reader = $this->container->get('dh_doctrine_audit.reader');
+    
+    $data = $reader
+         ->filterBy(AuditReader::UPDATE)   // add this to only get `update` entries.
+         ->getAudit($entity, $id)
+     ;
 
-        return $this->render('@DHDoctrineAudit/Audit/entity_audit_details.html.twig', [
-            'entity' => $entity,
-            'entry' => $data[0],
-        ]);
-    }
-````
+    return $this->render('@DHDoctrineAudit/Audit/entity_audit_details.html.twig', [
+        'entity' => $entity,
+        'entry' => $data[0],
+    ]);
+}
+```
 
 Available constants are:
-````php
-    AuditReader::UPDATE
-    AuditReader::ASSOCIATE
-    AuditReader::DISSOCIATE
-    AuditReader::INSERT
-    AuditReader::REMOVE
-````
+```php
+AuditReader::UPDATE
+AuditReader::ASSOCIATE
+AuditReader::DISSOCIATE
+AuditReader::INSERT
+AuditReader::REMOVE
+```
 
 ### Custom user provider
 
@@ -283,7 +277,7 @@ If you don't use Symfony's `TokenStorage` to save your current user, you can con
 a custom user provider. You just need to implement the `UserProviderInterface` and 
 configure it as a service named `dh_doctrine_audit.user_provider`.
 
-````php
+```php
 use DH\DoctrineAuditBundle\User\User;
 use DH\DoctrineAuditBundle\User\UserInterface;
 use DH\DoctrineAuditBundle\User\UserProviderInterface;
@@ -296,15 +290,15 @@ class CustomUserProvider implements UserProviderInterface
         return new User($yourUserId, $yourUsername);
     }
 }
-````
+```
 
 Then add this to your `services.yaml` file:
 
-````yml
+```yaml
 services:
     dh_doctrine_audit.user_provider:
         class: App\CustomUserProvider
-````
+```
 
 ### Enabling and disabling the auditing of entities
 
@@ -362,15 +356,15 @@ You can then re-enable audit logging at runtime by calling `AuditConfiguration::
 To disable auditing for an entity, you first have to inject the `dh_doctrine_audit.configuration` 
 service in your class, then use:
 
-````php
+```php
 $auditConfiguration->disableAuditFor(MyAuditedEntity1::class);
-````
+```
 
 To enable auditing afterwards, use:
 
-````php
+```php
 $auditConfiguration->enableAuditFor(MyAuditedEntity1::class);
-````
+```
 
 
 Usage

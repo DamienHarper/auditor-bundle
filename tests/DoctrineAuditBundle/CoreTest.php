@@ -259,7 +259,7 @@ abstract class CoreTest extends BaseTest
             new TokenStorageUserProvider($security),
             $requestStack,
             new FirewallMap($container, []),
-            $entityManager
+            $entityManager ?? $this->getEntityManager()
         );
     }
 }

@@ -469,6 +469,6 @@ class AuditManager
      */
     private function selectStorageSpace(EntityManagerInterface $em): EntityManagerInterface
     {
-        return $this->configuration->getCustomStorageEntityManager() ?? $em;
+        return $this->configuration->getEntityManager() ?? $em;
     }
 }
