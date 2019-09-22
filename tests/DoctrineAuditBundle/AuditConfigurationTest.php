@@ -6,6 +6,7 @@ use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
+use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -14,12 +15,16 @@ use Symfony\Component\Security\Core\Security;
 
 /**
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
+ * @covers \DH\DoctrineAuditBundle\AuditManager
+ * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
+ * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
+ * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
  *
  * @internal
  */
-final class AuditConfigurationTest extends TestCase
+final class AuditConfigurationTest extends BaseTest
 {
     public function testDefaultTablePrefix(): void
     {
@@ -380,14 +385,7 @@ final class AuditConfigurationTest extends TestCase
         static::assertSame('Europe/London', $configuration->getTimezone(), 'custom timezone is "Europe/London".');
     }
 
-    public function testCustomStorageEntityManagerIsNullByDefault(): void
-    {
-        $configuration = $this->getAuditConfiguration();
-
-        static::assertNull($configuration->getEntityManager(), 'custom storage entity manager is null by default');
-    }
-
-    protected function getAuditConfiguration(array $options = []): AuditConfiguration
+    protected function getAuditConfiguration(array $options = [], ?EntityManager $entityManager = null): AuditConfiguration
     {
         $container = new ContainerBuilder();
 
@@ -402,7 +400,16 @@ final class AuditConfigurationTest extends TestCase
             ], $options),
             new TokenStorageUserProvider(new Security($container)),
             new RequestStack(),
-            new FirewallMap($container, [])
+            new FirewallMap($container, []),
+            $entityManager ?? $this->getEntityManager()
         );
+    }
+
+    protected function setUp(): void
+    {
+    }
+
+    protected function tearDown(): void
+    {
     }
 }

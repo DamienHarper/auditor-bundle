@@ -212,26 +212,20 @@ reference to entity data in main database which doesn't reflect changes logged i
 audit data is for your application/business, missing audit data could be acceptable)
 
 It is possible to save audits in a different database than the one where audited entities live. 
-To do that you have to inject as third parameter of `AuditManager` an optional secondary entity manager
+To do that you have change the last argument of `dh_doctrine_audit.configuration` service to set the entity manager
 binded to that second database. 
 
  ```yaml
 // config/services.yaml (symfony >= 3.4)
-dh_doctrine_audit.manager:
-    class: DH\DoctrineAuditBundle\AuditManager
-    arguments: ["@dh_doctrine_audit.configuration", "@dh_doctrine_audit.helper", "@doctrine.orm.your_custom_entity_manager"]
+dh_doctrine_audit.configuration:
+    class: DH\DoctrineAuditBundle\AuditConfiguration
+    arguments:
+        - "%dh_doctrine_audit.configuration%"
+        - "@dh_doctrine_audit.user_provider"
+        - "@request_stack"
+        - "@security.firewall.map"
+        - "@doctrine.orm.your_custom_entity_manager"
  ```
-
-Also, to generate migrations from schema difference you have to also overwrite settings for schema listener:
-
-```yaml
-// config/services.yaml (symfony >= 3.4)
-dh_doctrine_audit.event_subscriber.create_schema:
-    class: DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
-    arguments: ["@dh_doctrine_audit.manager"]
-    tags:
-        - { name: doctrine.event_subscriber, connection: connection_to_second_database }
-```
 
 ### Audit viewer
 

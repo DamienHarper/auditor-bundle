@@ -101,9 +101,10 @@ class UpdateHelper
     {
         $entityManager = $this->getConfiguration()->getEntityManager();
         $schemaManager = $entityManager->getConnection()->getSchemaManager();
-        $fromSchema = $schemaManager->createSchema();
+        $toSchema = $schemaManager->createSchema();
+        $fromSchema = clone $toSchema;
 
-        $toSchema = clone $fromSchema;
+        $table = $toSchema->getTable($table->getName());
 
         $columns = $schemaManager->listTableColumns($table->getName());
         $expectedColumns = $this->manager->getHelper()->getAuditTableColumns();
