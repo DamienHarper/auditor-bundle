@@ -30,6 +30,7 @@ Follow instructions at [doctrine-audit-bundle-demo](https://github.com/DamienHar
 This bundle is inspired by [data-dog/audit-bundle](https://github.com/DATA-DOG/DataDogAuditBundle.git) and 
 [simplethings/entity-audit-bundle](https://github.com/simplethings/EntityAuditBundle.git)
 
+A changelog is available [here](CHANGELOG.md)
 
 
 Installation
