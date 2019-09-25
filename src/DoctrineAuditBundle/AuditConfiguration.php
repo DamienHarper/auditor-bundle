@@ -56,7 +56,7 @@ class AuditConfiguration
     private $firewallMap;
 
     /**
-     * @var null|EntityManagerInterface
+     * @var EntityManagerInterface
      */
     private $entityManager;
 
