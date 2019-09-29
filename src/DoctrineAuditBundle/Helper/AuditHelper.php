@@ -266,6 +266,13 @@ class AuditHelper
                     'notnull' => true,
                 ],
             ],
+            'discriminator' => [
+                'type' => Type::STRING,
+                'options' => [
+                    'default' => null,
+                    'notnull' => false,
+                ],
+            ],
             'transaction_hash' => [
                 'type' => Type::STRING,
                 'options' => [
@@ -341,6 +348,10 @@ class AuditHelper
             'object_id' => [
                 'type' => 'index',
                 'name' => 'object_id_'.md5($tablename).'_idx',
+            ],
+            'discriminator' => [
+                'type' => 'index',
+                'name' => 'discriminator_'.md5($tablename).'_idx',
             ],
             'transaction_hash' => [
                 'type' => 'index',
