@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Performance enhancements when saving a lot of entities at once (closes #70, thanks to @acanicatti).
 * Remove deprecated and manage the compatibility (thanks to @maxhelias).
 * Fixed an issue with `audit:schema:update` command when run against a database with no audit table (#85)
+* SINGLE_TABLE inheritance support
 
 ### Breaking changes
 * The structure of audit tables has changed so you have to run the migration command right after updating
@@ -29,7 +30,7 @@ or run
 composer require damienharper/doctrine-audit-bundle ^3.0
 ```
 
-Due to internal changes requiring a new column and `blame_id` column type change, run the migration command after updating the bundle to update the structure of your current audit tables.
+Due to internal changes requiring new columns and `blame_id` column type change, run the migration command after updating the bundle to update the structure of your current audit tables.
 ```bash
 bin/console audit:schema:update
 ```
