@@ -7,6 +7,7 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadata as ORMMetadata;
 use Pagerfanta\Adapter\DoctrineDbalSingleTableAdapter;
 use Pagerfanta\Pagerfanta;
 
@@ -118,12 +119,13 @@ class AuditReader
      * @param null|int      $page
      * @param null|int      $pageSize
      * @param null|string   $transactionHash
+     * @param null|bool     $strict
      *
      * @return array
      */
-    public function getAudits($entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null): array
+    public function getAudits($entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, ?bool $strict = true): array
     {
-        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id, $page, $pageSize, $transactionHash);
+        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id, $page, $pageSize, $transactionHash, $strict);
 
         /** @var Statement $statement */
         $statement = $queryBuilder->execute();
@@ -213,10 +215,11 @@ class AuditReader
      * @param int           $page
      * @param int           $pageSize
      * @param null|string   $transactionHash
+     * @param null|bool     $strict          Only applies with SINGLE_TABLE inheritance
      *
      * @return QueryBuilder
      */
-    private function getAuditsQueryBuilder($entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null): QueryBuilder
+    private function getAuditsQueryBuilder($entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, ?bool $strict = true): QueryBuilder
     {
         if (null !== $page && $page < 1) {
             throw new \InvalidArgumentException('$page must be greater or equal than 1.');
@@ -236,6 +239,14 @@ class AuditReader
             ->orderBy('created_at', 'DESC')
             ->addOrderBy('id', 'DESC')
         ;
+
+        $metadata = $this->getClassMetadata($entity);
+        if ($strict && ORMMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $metadata->inheritanceType) {
+            $queryBuilder
+                ->andWhere('discriminator = :discriminator')
+                ->setParameter('discriminator', \is_object($entity) ? \get_class($entity) : $entity)
+            ;
+        }
 
         if (null !== $pageSize) {
             $queryBuilder
