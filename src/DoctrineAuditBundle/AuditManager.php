@@ -195,7 +195,7 @@ class AuditManager
             'schema' => $meta->getSchemaName(),
             'id' => $this->helper->id($em, $source),
             'transaction_hash' => $this->getTransactionHash(),
-            'discriminator' => $meta->inheritanceType === ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE ? \get_class($entity) : null,
+            'discriminator' => $meta->inheritanceType === ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE ? \get_class($source) : null,
         ];
 
         if (isset($mapping['joinTable']['name'])) {
