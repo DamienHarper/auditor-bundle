@@ -6,6 +6,7 @@ use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\UnitOfWork;
 
 class AuditManager
 {
@@ -79,7 +80,7 @@ class AuditManager
             'schema' => $meta->getSchemaName(),
             'id' => $this->helper->id($em, $entity),
             'transaction_hash' => $this->getTransactionHash(),
-            'discriminator' => $meta->inheritanceType === ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE ? \get_class($entity) : null,
+            'discriminator' => ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $meta->inheritanceType ? \get_class($entity) : null,
         ]);
     }
 
@@ -108,7 +109,7 @@ class AuditManager
             'schema' => $meta->getSchemaName(),
             'id' => $this->helper->id($em, $entity),
             'transaction_hash' => $this->getTransactionHash(),
-            'discriminator' => $meta->inheritanceType === ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE ? \get_class($entity) : null,
+            'discriminator' => ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $meta->inheritanceType ? \get_class($entity) : null,
         ]);
     }
 
@@ -133,7 +134,7 @@ class AuditManager
             'schema' => $meta->getSchemaName(),
             'id' => $id,
             'transaction_hash' => $this->getTransactionHash(),
-            'discriminator' => $meta->inheritanceType === ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE ? \get_class($entity) : null,
+            'discriminator' => ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $meta->inheritanceType ? \get_class($entity) : null,
         ]);
     }
 
@@ -195,7 +196,7 @@ class AuditManager
             'schema' => $meta->getSchemaName(),
             'id' => $this->helper->id($em, $source),
             'transaction_hash' => $this->getTransactionHash(),
-            'discriminator' => $meta->inheritanceType === ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE ? \get_class($source) : null,
+            'discriminator' => ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $meta->inheritanceType ? \get_class($source) : null,
         ];
 
         if (isset($mapping['joinTable']['name'])) {
@@ -277,9 +278,9 @@ class AuditManager
     }
 
     /**
-     * @param \Doctrine\ORM\UnitOfWork $uow
+     * @param UnitOfWork $uow
      */
-    public function collectScheduledInsertions(\Doctrine\ORM\UnitOfWork $uow): void
+    public function collectScheduledInsertions(UnitOfWork $uow): void
     {
         foreach ($uow->getScheduledEntityInsertions() as $entity) {
             if ($this->configuration->isAudited($entity)) {
@@ -292,9 +293,9 @@ class AuditManager
     }
 
     /**
-     * @param \Doctrine\ORM\UnitOfWork $uow
+     * @param UnitOfWork $uow
      */
-    public function collectScheduledUpdates(\Doctrine\ORM\UnitOfWork $uow): void
+    public function collectScheduledUpdates(UnitOfWork $uow): void
     {
         foreach ($uow->getScheduledEntityUpdates() as $entity) {
             if ($this->configuration->isAudited($entity)) {
@@ -307,13 +308,13 @@ class AuditManager
     }
 
     /**
-     * @param \Doctrine\ORM\UnitOfWork $uow
-     * @param EntityManager            $em
+     * @param UnitOfWork    $uow
+     * @param EntityManager $em
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function collectScheduledDeletions(\Doctrine\ORM\UnitOfWork $uow, EntityManager $em): void
+    public function collectScheduledDeletions(UnitOfWork $uow, EntityManager $em): void
     {
         foreach ($uow->getScheduledEntityDeletions() as $entity) {
             if ($this->configuration->isAudited($entity)) {
@@ -327,13 +328,13 @@ class AuditManager
     }
 
     /**
-     * @param \Doctrine\ORM\UnitOfWork $uow
-     * @param EntityManager            $em
+     * @param UnitOfWork    $uow
+     * @param EntityManager $em
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function collectScheduledCollectionUpdates(\Doctrine\ORM\UnitOfWork $uow, EntityManager $em): void
+    public function collectScheduledCollectionUpdates(UnitOfWork $uow, EntityManager $em): void
     {
         foreach ($uow->getScheduledCollectionUpdates() as $collection) {
             if ($this->configuration->isAudited($collection->getOwner())) {
@@ -362,40 +363,39 @@ class AuditManager
     }
 
     /**
-     * @param \Doctrine\ORM\UnitOfWork $uow
-     * @param EntityManager            $em
+     * @param UnitOfWork    $uow
+     * @param EntityManager $em
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function collectScheduledCollectionDeletions(\Doctrine\ORM\UnitOfWork $uow, EntityManager $em): void
+    public function collectScheduledCollectionDeletions(UnitOfWork $uow, EntityManager $em): void
     {
         foreach ($uow->getScheduledCollectionDeletions() as $collection) {
             if ($this->configuration->isAudited($collection->getOwner())) {
                 $mapping = $collection->getMapping();
                 foreach ($collection->toArray() as $entity) {
-                    if (!$this->configuration->isAudited($entity)) {
-                        continue;
+                    if ($this->configuration->isAudited($entity)) {
+                        $this->dissociated[] = [
+                            $collection->getOwner(),
+                            $entity,
+                            $this->helper->id($em, $entity),
+                            $mapping,
+                        ];
                     }
-                    $this->dissociated[] = [
-                        $collection->getOwner(),
-                        $entity,
-                        $this->helper->id($em, $entity),
-                        $mapping,
-                    ];
                 }
             }
         }
     }
 
     /**
-     * @param EntityManager            $em
-     * @param \Doctrine\ORM\UnitOfWork $uow
+     * @param EntityManager $em
+     * @param UnitOfWork    $uow
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function processInsertions(EntityManager $em, \Doctrine\ORM\UnitOfWork $uow): void
+    public function processInsertions(EntityManager $em, UnitOfWork $uow): void
     {
         foreach ($this->inserted as list($entity, $ch)) {
             // the changeset might be updated from UOW extra updates
@@ -405,13 +405,13 @@ class AuditManager
     }
 
     /**
-     * @param EntityManager            $em
-     * @param \Doctrine\ORM\UnitOfWork $uow
+     * @param EntityManager $em
+     * @param UnitOfWork    $uow
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function processUpdates(EntityManager $em, \Doctrine\ORM\UnitOfWork $uow): void
+    public function processUpdates(EntityManager $em, UnitOfWork $uow): void
     {
         foreach ($this->updated as list($entity, $ch)) {
             // the changeset might be updated from UOW extra updates
