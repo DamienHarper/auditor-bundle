@@ -1,4 +1,5 @@
-# DoctrineAuditBundle [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Create%20audit%20logs%20for%20all%20Doctrine%20ORM%20database%20related%20changes%20with%20DoctrineAuditBundle.&url=https://github.com/DamienHarper/DoctrineAuditBundle&hashtags=doctrine-audit-log-bundle)
+DoctrineAuditBundle [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Create%20audit%20logs%20for%20all%20Doctrine%20ORM%20database%20related%20changes%20with%20DoctrineAuditBundle.&url=https://github.com/DamienHarper/DoctrineAuditBundle&hashtags=doctrine-audit-log-bundle)
+===================
 
 [![Latest Stable Version](https://poser.pugx.org/damienharper/doctrine-audit-bundle/v/stable)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
 [![Latest Unstable Version](https://poser.pugx.org/damienharper/doctrine-audit-bundle/v/unstable)](https://packagist.org/packages/damienharper/doctrine-audit-bundle)
@@ -155,6 +156,12 @@ You can configure the timezone the audit `created_at` is generated in. This by d
 dh_doctrine_audit:
     timezone: 'Europe/London'
 ```
+
+### Single Table Inheritance
+
+This bundle supports Doctrine SINGLE_TABLE inheritance.
+Configuring the root table to be audited does not suffice to get all child tables audited.
+You have to configure every child table that needs to be audited as well.
 
 ### Creating audit tables
 
@@ -429,6 +436,18 @@ FAQ:
 #### I don't use Symfony's `TokenStorage` to manage my users, how do I proceed?
 
 > Check the [Custom user provider](#custom-user-provider) section.
+
+#### I want to store audit data in a dedicated database, how to do it?
+
+> Check the [Custom database for storage audit](#custom-database-for-storage-audit) section.
+
+#### I use Doctrine SINGLE_TABLE inheritance and I've configured an entity to be audited but its child are not audited, how to proceed?
+
+> Check the [Single Table Inheritance](#single-table-inheritance) section.
+
+#### I want to disable or enable auditing dynamically, is this possible?
+
+> Check the [Enabling and disabling the auditing of entities](#enabling-and-disabling-the-auditing-of-entities) section.
 
 
 Contributing

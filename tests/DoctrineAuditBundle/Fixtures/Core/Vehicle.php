@@ -9,9 +9,9 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="vehicle")
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="type", type="string")
- * @ORM\DiscriminatorMap({"car": "Car", "bike": "Bike"})
+ * @ORM\DiscriminatorMap({"vehicle": "Vehicle", "car": "Car", "bike": "Bike"})
  */
-abstract class Vehicle
+class Vehicle
 {
     /**
      * @ORM\Id

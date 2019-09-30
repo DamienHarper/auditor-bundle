@@ -51,7 +51,32 @@ final class IssueTest extends BaseTest
         $em->persist($bike);
         $em->flush();
 
+        $tryke = new Vehicle();
+        $tryke->setLabel('Can-am Spyder');
+        $tryke->setWheels(3);
+        $em->persist($tryke);
+        $em->flush();
+
         $audits = $reader->getAudits(Vehicle::class);
+        static::assertCount(1, $audits, 'results count ok.');
+
+        $audits = $reader->getAudits(Vehicle::class, null, null, null, null, false);
+        static::assertCount(3, $audits, 'results count ok.');
+
+        $audits = $reader->getAudits(Car::class);
+        static::assertCount(1, $audits, 'results count ok.');
+
+        $audits = $reader->getAudits(Bike::class);
+        static::assertCount(1, $audits, 'results count ok.');
+
+        $car->setLabel('Taycan');
+        $em->persist($car);
+        $em->flush();
+
+        $audits = $reader->getAudits(Vehicle::class);
+        static::assertCount(1, $audits, 'results count ok.');
+
+        $audits = $reader->getAudits(Car::class);
         static::assertCount(2, $audits, 'results count ok.');
     }
 
@@ -143,6 +168,7 @@ final class IssueTest extends BaseTest
             CoreCase::class => ['enabled' => true],
             Locale::class => ['enabled' => true],
             User::class => ['enabled' => true],
+            Vehicle::class => ['enabled' => true],
             Car::class => ['enabled' => true],
             Bike::class => ['enabled' => true],
         ]);

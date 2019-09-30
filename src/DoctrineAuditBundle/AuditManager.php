@@ -5,6 +5,7 @@ namespace DH\DoctrineAuditBundle;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadata;
 
 class AuditManager
 {
@@ -78,6 +79,7 @@ class AuditManager
             'schema' => $meta->getSchemaName(),
             'id' => $this->helper->id($em, $entity),
             'transaction_hash' => $this->getTransactionHash(),
+            'discriminator' => $meta->inheritanceType === ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE ? \get_class($entity) : null,
         ]);
     }
 
@@ -106,6 +108,7 @@ class AuditManager
             'schema' => $meta->getSchemaName(),
             'id' => $this->helper->id($em, $entity),
             'transaction_hash' => $this->getTransactionHash(),
+            'discriminator' => $meta->inheritanceType === ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE ? \get_class($entity) : null,
         ]);
     }
 
@@ -130,6 +133,7 @@ class AuditManager
             'schema' => $meta->getSchemaName(),
             'id' => $id,
             'transaction_hash' => $this->getTransactionHash(),
+            'discriminator' => $meta->inheritanceType === ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE ? \get_class($entity) : null,
         ]);
     }
 
@@ -191,6 +195,7 @@ class AuditManager
             'schema' => $meta->getSchemaName(),
             'id' => $this->helper->id($em, $source),
             'transaction_hash' => $this->getTransactionHash(),
+            'discriminator' => $meta->inheritanceType === ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE ? \get_class($source) : null,
         ];
 
         if (isset($mapping['joinTable']['name'])) {
@@ -215,6 +220,7 @@ class AuditManager
         $fields = [
             'type' => ':type',
             'object_id' => ':object_id',
+            'discriminator' => ':discriminator',
             'transaction_hash' => ':transaction_hash',
             'diffs' => ':diffs',
             'blame_id' => ':blame_id',
@@ -238,6 +244,7 @@ class AuditManager
         $dt = new \DateTime('now', new \DateTimeZone($this->getConfiguration()->getTimezone()));
         $statement->bindValue('type', $data['action']);
         $statement->bindValue('object_id', (string) $data['id']);
+        $statement->bindValue('discriminator', $data['discriminator']);
         $statement->bindValue('transaction_hash', (string) $data['transaction_hash']);
         $statement->bindValue('diffs', json_encode($data['diff']));
         $statement->bindValue('blame_id', $data['blame']['user_id']);
