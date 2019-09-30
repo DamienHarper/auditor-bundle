@@ -80,6 +80,7 @@ class UpdateHelper
                     $statement = $entityManager->getConnection()->prepare($query);
                     $statement->execute();
                 } catch (\Exception $e) {
+                    // This should never happen
                 }
             }
         }
