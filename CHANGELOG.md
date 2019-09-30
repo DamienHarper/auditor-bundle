@@ -15,7 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Performance enhancements when saving a lot of entities at once (closes #70, thanks to @acanicatti).
 * Remove deprecated and manage the compatibility (thanks to @maxhelias).
 * Fixed an issue with `audit:schema:update` command when run against a database with no audit table (#85)
-* SINGLE_TABLE inheritance support
+* SINGLE_TABLE inheritance support (#73)
+  - `AuditReader::getAudits()` now accepts a boolean as sixth parameter to return either audits for the given entity only or audits for the given entity hierarchy.
 
 ### Breaking changes
 * The structure of audit tables has changed so you have to run the migration command right after updating
