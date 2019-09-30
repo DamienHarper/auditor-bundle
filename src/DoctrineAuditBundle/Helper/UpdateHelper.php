@@ -110,9 +110,36 @@ class UpdateHelper
         $columns = $schemaManager->listTableColumns($table->getName());
         $expectedColumns = $this->manager->getHelper()->getAuditTableColumns();
         $expectedIndices = $this->manager->getHelper()->getAuditTableIndices($table->getName());
-        $processed = [];
 
         // process columns
+        $this->processColumns($table, $columns, $expectedColumns);
+
+        // process indices
+        $this->processIndices($table, $expectedIndices);
+
+        // apply changes
+        $sql = $fromSchema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
+        foreach ($sql as $query) {
+            try {
+                $statement = $entityManager->getConnection()->prepare($query);
+                $statement->execute();
+            } catch (\Exception $e) {
+                throw new UpdateException(sprintf('Failed to update/fix "%s" audit table.', $table->getName()));
+            }
+        }
+
+        return $toSchema;
+    }
+
+    /**
+     * @param Table $table
+     * @param array $columns
+     * @param array $expectedColumns
+     */
+    private function processColumns(Table $table, array $columns, array $expectedColumns): void
+    {
+        $processed = [];
+
         foreach ($columns as $column) {
             if (\array_key_exists($column->getName(), $expectedColumns)) {
                 // column is part of expected columns
@@ -132,8 +159,16 @@ class UpdateHelper
                 $table->addColumn($columnName, $options['type'], $options['options']);
             }
         }
+    }
 
-        // process indices
+    /**
+     * @param Table $table
+     * @param array $expectedIndices
+     *
+     * @throws \Doctrine\DBAL\Schema\SchemaException
+     */
+    private function processIndices(Table $table, array $expectedIndices): void
+    {
         foreach ($expectedIndices as $columnName => $options) {
             if ('primary' === $options['type']) {
                 $table->dropPrimaryKey();
@@ -145,18 +180,5 @@ class UpdateHelper
                 $table->addIndex([$columnName], $options['name']);
             }
         }
-
-        // apply changes
-        $sql = $fromSchema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
-        foreach ($sql as $query) {
-            try {
-                $statement = $entityManager->getConnection()->prepare($query);
-                $statement->execute();
-            } catch (\Exception $e) {
-                throw new UpdateException(sprintf('Failed to update/fix "%s" audit table.', $table->getName()));
-            }
-        }
-
-        return $toSchema;
     }
 }
