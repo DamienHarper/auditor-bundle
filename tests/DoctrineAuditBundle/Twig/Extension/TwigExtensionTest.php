@@ -17,6 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\Manager\AuditManager
+ * @covers \DH\DoctrineAuditBundle\Manager\AuditTransaction
  * @covers \DH\DoctrineAuditBundle\Twig\Extension\TwigExtension
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
  *

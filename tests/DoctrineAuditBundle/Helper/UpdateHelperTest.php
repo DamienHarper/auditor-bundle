@@ -197,14 +197,14 @@ final class UpdateHelperTest extends BaseTest
                     'length' => 100,
                 ],
             ],
-            //            'ip' => [
-            //                'type' => Type::STRING,
-            //                'options' => [
-            //                    'default' => null,
-            //                    'notnull' => false,
-            //                    'length' => 45,
-            //                ],
-            //            ],
+//            'ip' => [
+//                'type' => Type::STRING,
+//                'options' => [
+//                    'default' => null,
+//                    'notnull' => false,
+//                    'length' => 45,
+//                ],
+//            ],
             'created_at' => [
                 'type' => Type::DATETIME,
                 'options' => [
@@ -280,7 +280,6 @@ final class UpdateHelperTest extends BaseTest
 
         // check expected columns
         $expected = $helper->getAuditTableColumns();
-//dump($expected);
         foreach ($expected as $name => $options) {
             static::assertTrue($authorAuditTable->hasColumn($name), 'audit table has a column named "'.$name.'".');
         }

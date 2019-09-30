@@ -26,6 +26,7 @@ use Symfony\Component\Security\Core\Security;
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\Helper\UpdateHelper
  * @covers \DH\DoctrineAuditBundle\Manager\AuditManager
+ * @covers \DH\DoctrineAuditBundle\Manager\AuditTransaction
  * @covers \DH\DoctrineAuditBundle\Reader\AuditEntry
  * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
