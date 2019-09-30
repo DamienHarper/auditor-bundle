@@ -1,23 +1,24 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests;
+namespace DH\DoctrineAuditBundle\Tests\Manager;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
-use DH\DoctrineAuditBundle\AuditManager;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
+use DH\DoctrineAuditBundle\Manager\AuditManager;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
+use DH\DoctrineAuditBundle\Tests\CoreTest;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
 
 /**
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
- * @covers \DH\DoctrineAuditBundle\AuditManager
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
  * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\Helper\UpdateHelper
+ * @covers \DH\DoctrineAuditBundle\Manager\AuditManager
  * @covers \DH\DoctrineAuditBundle\Reader\AuditEntry
  * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
@@ -45,7 +46,7 @@ final class AuditManagerTest extends CoreTest
         $manager->insert($em, $author, [
             'fullname' => [null, 'John Doe'],
             'email' => [null, 'john.doe@gmail.com'],
-        ]);
+        ], 'what-a-nice-transaction-hash');
 
         $audits = $reader->getAudits(Author::class);
         static::assertCount(1, $audits, 'AuditManager::insert() creates an audit entry.');
@@ -86,7 +87,7 @@ final class AuditManagerTest extends CoreTest
         $manager->update($em, $author, [
             'fullname' => ['John Doe', 'Dark Vador'],
             'email' => ['john.doe@gmail.com', 'dark.vador@gmail.com'],
-        ]);
+        ], 'what-a-nice-transaction-hash');
 
         $audits = $reader->getAudits(Author::class);
         static::assertCount(1, $audits, 'AuditManager::update() creates an audit entry.');
@@ -124,7 +125,7 @@ final class AuditManagerTest extends CoreTest
             ->setEmail('john.doe@gmail.com')
         ;
 
-        $manager->remove($em, $author, 1);
+        $manager->remove($em, $author, 1, 'what-a-nice-transaction-hash');
 
         $audits = $reader->getAudits(Author::class);
         static::assertCount(1, $audits, 'AuditManager::remove() creates an audit entry.');
@@ -188,7 +189,7 @@ final class AuditManagerTest extends CoreTest
             'isCascadeDetach' => false,
         ];
 
-        $manager->associate($em, $author, $post, $mapping);
+        $manager->associate($em, $author, $post, $mapping, 'what-a-nice-transaction-hash');
 
         $audits = $reader->getAudits(Author::class);
         static::assertCount(1, $audits, 'AuditManager::associate() creates an audit entry.');
@@ -257,7 +258,7 @@ final class AuditManagerTest extends CoreTest
             'isCascadeDetach' => false,
         ];
 
-        $manager->dissociate($em, $author, $post, $mapping);
+        $manager->dissociate($em, $author, $post, $mapping, 'what-a-nice-transaction-hash');
 
         $audits = $reader->getAudits(Author::class);
         static::assertCount(1, $audits, 'AuditManager::dissociate() creates an audit entry.');
@@ -372,8 +373,8 @@ final class AuditManagerTest extends CoreTest
             ],
         ];
 
-        $manager->associate($em, $post, $tag1, $mapping);
-        $manager->associate($em, $post, $tag2, $mapping);
+        $manager->associate($em, $post, $tag1, $mapping, 'what-a-nice-transaction-hash');
+        $manager->associate($em, $post, $tag2, $mapping, 'what-a-nice-transaction-hash');
 
         $audits = $reader->getAudits(Post::class);
         static::assertCount(2, $audits, 'AuditManager::associate() creates an audit entry per association.');
@@ -511,10 +512,10 @@ final class AuditManagerTest extends CoreTest
             ],
         ];
 
-        $manager->associate($em, $post, $tag1, $mapping);
-        $manager->associate($em, $post, $tag2, $mapping);
+        $manager->associate($em, $post, $tag1, $mapping, 'what-a-nice-transaction-hash');
+        $manager->associate($em, $post, $tag2, $mapping, 'what-a-nice-transaction-hash');
 
-        $manager->dissociate($em, $post, $tag2, $mapping);
+        $manager->dissociate($em, $post, $tag2, $mapping, 'what-a-nice-transaction-hash');
 
         $audits = $reader->getAudits(Post::class);
         static::assertCount(3, $audits, 'AuditManager::dissociate() creates an audit entry.');
@@ -540,31 +541,6 @@ final class AuditManagerTest extends CoreTest
             ],
             'table' => 'post__tag',
         ], $entry->getDiffs(), 'audit entry diffs is ok.');
-    }
-
-    public function testGetTransactionHash(): void
-    {
-        $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new AuditManager($configuration, $helper);
-
-        $transaction_hash = $manager->getTransactionHash();
-        static::assertNotNull($transaction_hash, 'transaction_hash is not null');
-        static::assertIsString($transaction_hash, 'transaction_hash is a string');
-        static::assertSame(40, mb_strlen($transaction_hash), 'transaction_hash is a string of 40 characters');
-    }
-
-    public function testTransactionHashAfterReset(): void
-    {
-        $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new AuditManager($configuration, $helper);
-
-        $before = $manager->getTransactionHash();
-        $manager->reset();
-        $after = $manager->getTransactionHash();
-
-        static::assertNotSame($after, $before, 'transaction_hash is reset by AuditManager::reset()');
     }
 
     public function testGetConfiguration(): void

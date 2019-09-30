@@ -2,9 +2,10 @@
 
 namespace DH\DoctrineAuditBundle\EventSubscriber;
 
-use DH\DoctrineAuditBundle\AuditManager;
 use DH\DoctrineAuditBundle\DBAL\AuditLogger;
 use DH\DoctrineAuditBundle\DBAL\AuditLoggerChain;
+use DH\DoctrineAuditBundle\Manager\AuditManager;
+use DH\DoctrineAuditBundle\Manager\AuditTransaction;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Logging\SQLLogger;
 use Doctrine\ORM\Event\OnFlushEventArgs;
@@ -41,22 +42,15 @@ class AuditSubscriber implements EventSubscriber
     public function onFlush(OnFlushEventArgs $args): void
     {
         $em = $args->getEntityManager();
-        $uow = $em->getUnitOfWork();
+        $transaction = new AuditTransaction($this->manager->getHelper());
 
         // extend the SQL logger
         $this->loggerBackup = $em->getConnection()->getConfiguration()->getSQLLogger();
-        $auditLogger = new AuditLogger(function () use ($em) {
+        $auditLogger = new AuditLogger(function () use ($em, $transaction) {
             // flushes pending data
             $em->getConnection()->getConfiguration()->setSQLLogger($this->loggerBackup);
-            $uow = $em->getUnitOfWork();
 
-            $this->manager->processInsertions($em, $uow);
-            $this->manager->processUpdates($em, $uow);
-            $this->manager->processAssociations($em);
-            $this->manager->processDissociations($em);
-            $this->manager->processDeletions($em);
-
-            $this->manager->reset();
+            $this->manager->process($transaction);
         });
 
         // Initialize a new LoggerChain with the new AuditLogger + the existing SQLLoggers.
@@ -72,11 +66,8 @@ class AuditSubscriber implements EventSubscriber
         }
         $em->getConnection()->getConfiguration()->setSQLLogger($loggerChain);
 
-        $this->manager->collectScheduledInsertions($uow);
-        $this->manager->collectScheduledUpdates($uow);
-        $this->manager->collectScheduledDeletions($uow, $em);
-        $this->manager->collectScheduledCollectionUpdates($uow, $em);
-        $this->manager->collectScheduledCollectionDeletions($uow, $em);
+        // Populate transaction
+        $transaction->collect();
     }
 
     /**
