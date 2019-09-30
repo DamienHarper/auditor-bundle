@@ -241,7 +241,7 @@ class AuditReader
         ;
 
         $metadata = $this->getClassMetadata($entity);
-        if ($strict && ORMMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $metadata->inheritanceType) {
+        if ($strict && $metadata instanceof ORMMetadata && ORMMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $metadata->inheritanceType) {
             $queryBuilder
                 ->andWhere('discriminator = :discriminator')
                 ->setParameter('discriminator', \is_object($entity) ? \get_class($entity) : $entity)
