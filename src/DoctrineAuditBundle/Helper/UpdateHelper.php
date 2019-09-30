@@ -61,16 +61,16 @@ class UpdateHelper
             $auditTable = $schema->createTable($auditTablename);
 
             // Add columns to audit table
-            foreach ($this->manager->getHelper()->getAuditTableColumns() as $name => $struct) {
-                $auditTable->addColumn($name, $struct['type'], $struct['options']);
+            foreach ($this->manager->getHelper()->getAuditTableColumns() as $columnName => $struct) {
+                $auditTable->addColumn($columnName, $struct['type'], $struct['options']);
             }
 
             // Add indices to audit table
-            foreach ($this->manager->getHelper()->getAuditTableIndices($auditTablename) as $column => $struct) {
+            foreach ($this->manager->getHelper()->getAuditTableIndices($auditTablename) as $columnName => $struct) {
                 if ('primary' === $struct['type']) {
-                    $auditTable->setPrimaryKey([$column]);
+                    $auditTable->setPrimaryKey([$columnName]);
                 } else {
-                    $auditTable->addIndex([$column], $struct['name']);
+                    $auditTable->addIndex([$columnName], $struct['name']);
                 }
             }
 
@@ -126,23 +126,23 @@ class UpdateHelper
             $processed[] = $column->getName();
         }
 
-        foreach ($expectedColumns as $column => $options) {
-            if (!\in_array($column, $processed, true)) {
+        foreach ($expectedColumns as $columnName => $options) {
+            if (!\in_array($columnName, $processed, true)) {
                 // expected column in not part of concrete ones so it's a new column, we need to add it
-                $table->addColumn($column, $options['type'], $options['options']);
+                $table->addColumn($columnName, $options['type'], $options['options']);
             }
         }
 
         // process indices
-        foreach ($expectedIndices as $column => $options) {
+        foreach ($expectedIndices as $columnName => $options) {
             if ('primary' === $options['type']) {
                 $table->dropPrimaryKey();
-                $table->setPrimaryKey([$column]);
+                $table->setPrimaryKey([$columnName]);
             } else {
                 if ($table->hasIndex($options['name'])) {
                     $table->dropIndex($options['name']);
                 }
-                $table->addIndex([$column], $options['name']);
+                $table->addIndex([$columnName], $options['name']);
             }
         }
 
