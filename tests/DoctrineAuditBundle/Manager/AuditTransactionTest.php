@@ -28,7 +28,7 @@ use Symfony\Component\Security\Core\Security;
  *
  * @internal
  */
-class AuditTransactionTest extends BaseTest
+final class AuditTransactionTest extends BaseTest
 {
     public function testGetTransactionHash(): void
     {
