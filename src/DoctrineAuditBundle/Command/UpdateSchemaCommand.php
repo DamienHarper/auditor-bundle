@@ -90,7 +90,7 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
             $progressBar->display();
 
             try {
-                $schema = $updater->updateAuditTable($table);
+                $updater->updateAuditTable($table);
             } catch (UpdateException $e) {
                 $errors[] = $e->getMessage();
                 $io->error($e->getMessage());
