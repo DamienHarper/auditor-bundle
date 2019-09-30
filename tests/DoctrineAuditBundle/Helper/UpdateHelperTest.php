@@ -3,9 +3,9 @@
 namespace DH\DoctrineAuditBundle\Tests\Helper;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
-use DH\DoctrineAuditBundle\AuditManager;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
+use DH\DoctrineAuditBundle\Manager\AuditManager;
 use DH\DoctrineAuditBundle\Tests\BaseTest;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\DBAL\Schema\Table;
@@ -17,13 +17,13 @@ use Gedmo;
 
 /**
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
- * @covers \DH\DoctrineAuditBundle\AuditManager
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
  * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\Helper\UpdateHelper
+ * @covers \DH\DoctrineAuditBundle\Manager\AuditManager
  * @covers \DH\DoctrineAuditBundle\Reader\AuditEntry
  * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider

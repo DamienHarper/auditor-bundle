@@ -2,9 +2,9 @@
 
 namespace DH\DoctrineAuditBundle\Command;
 
-use DH\DoctrineAuditBundle\AuditManager;
 use DH\DoctrineAuditBundle\Exception\UpdateException;
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
+use DH\DoctrineAuditBundle\Manager\AuditManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
 use Symfony\Component\Console\Helper\ProgressBar;

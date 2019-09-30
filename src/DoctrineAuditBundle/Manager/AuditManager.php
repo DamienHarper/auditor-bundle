@@ -1,7 +1,8 @@
 <?php
 
-namespace DH\DoctrineAuditBundle;
+namespace DH\DoctrineAuditBundle\Manager;
 
+use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;

@@ -28,7 +28,7 @@ services:
     public: true
 
   dh_doctrine_audit.manager:
-    class: DH\DoctrineAuditBundle\AuditManager
+    class: DH\DoctrineAuditBundle\Manager\AuditManager
     arguments: ["@dh_doctrine_audit.configuration", "@dh_doctrine_audit.helper"]
     public: true
 

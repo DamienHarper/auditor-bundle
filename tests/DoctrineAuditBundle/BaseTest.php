@@ -3,10 +3,10 @@
 namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
-use DH\DoctrineAuditBundle\AuditManager;
 use DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber;
 use DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
+use DH\DoctrineAuditBundle\Manager\AuditManager;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use Doctrine\Common\Cache\ArrayCache;

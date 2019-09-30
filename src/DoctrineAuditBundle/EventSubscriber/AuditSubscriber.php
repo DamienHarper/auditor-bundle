@@ -2,9 +2,9 @@
 
 namespace DH\DoctrineAuditBundle\EventSubscriber;
 
-use DH\DoctrineAuditBundle\AuditManager;
 use DH\DoctrineAuditBundle\DBAL\AuditLogger;
 use DH\DoctrineAuditBundle\DBAL\AuditLoggerChain;
+use DH\DoctrineAuditBundle\Manager\AuditManager;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Logging\SQLLogger;
 use Doctrine\ORM\Event\OnFlushEventArgs;

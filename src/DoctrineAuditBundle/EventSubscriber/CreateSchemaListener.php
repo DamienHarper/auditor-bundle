@@ -2,8 +2,8 @@
 
 namespace DH\DoctrineAuditBundle\EventSubscriber;
 
-use DH\DoctrineAuditBundle\AuditManager;
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
+use DH\DoctrineAuditBundle\Manager\AuditManager;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Tools\Event\GenerateSchemaTableEventArgs;
@@ -12,7 +12,7 @@ use Doctrine\ORM\Tools\ToolEvents;
 class CreateSchemaListener implements EventSubscriber
 {
     /**
-     * @var AuditManager
+     * @var \DH\DoctrineAuditBundle\Manager\AuditManager
      */
     protected $manager;
 

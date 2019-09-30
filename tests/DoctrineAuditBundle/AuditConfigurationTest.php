@@ -7,7 +7,6 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use Doctrine\ORM\EntityManager;
-use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -15,11 +14,11 @@ use Symfony\Component\Security\Core\Security;
 
 /**
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
- * @covers \DH\DoctrineAuditBundle\AuditManager
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
  * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
+ * @covers \DH\DoctrineAuditBundle\Manager\AuditManager
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
  *
  * @internal

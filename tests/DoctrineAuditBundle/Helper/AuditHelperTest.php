@@ -18,7 +18,6 @@ use Symfony\Component\Security\Core\Security;
 
 /**
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
- * @covers \DH\DoctrineAuditBundle\AuditManager
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLoggerChain
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
@@ -26,6 +25,7 @@ use Symfony\Component\Security\Core\Security;
  * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\Helper\UpdateHelper
+ * @covers \DH\DoctrineAuditBundle\Manager\AuditManager
  * @covers \DH\DoctrineAuditBundle\Reader\AuditEntry
  * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
  * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider

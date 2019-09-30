@@ -12,7 +12,7 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
 
 /**
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
- * @covers \DH\DoctrineAuditBundle\AuditManager
+ * @covers \DH\DoctrineAuditBundle\Manager\AuditManager
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLoggerChain
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
