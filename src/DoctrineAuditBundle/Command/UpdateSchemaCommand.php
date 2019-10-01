@@ -5,10 +5,11 @@ namespace DH\DoctrineAuditBundle\Command;
 use DH\DoctrineAuditBundle\Exception\UpdateException;
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
 use DH\DoctrineAuditBundle\Manager\AuditManager;
+use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -26,6 +27,8 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
     {
         $this
             ->setDescription('Update audit tables structure')
+            ->addOption('dump-sql', null, InputOption::VALUE_NONE, 'Dumps the generated SQL statements to the screen (does not execute them).')
+            ->addOption('force', 'f', InputOption::VALUE_NONE, 'Causes the generated SQL statements to be physically executed against your database.')
             ->setName(self::$defaultName)
         ;
     }
@@ -40,83 +43,124 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
 
         $io = new SymfonyStyle($input, $output);
 
+        $dumpSql = true === $input->getOption('dump-sql');
+        $force = true === $input->getOption('force');
+
         /**
          * @var AuditManager
          */
         $manager = $this->container->get('dh_doctrine_audit.manager');
 
         /**
+         * @var AuditReader
+         */
+        $reader = $this->container->get('dh_doctrine_audit.reader');
+
+        /**
          * @var UpdateHelper
          */
         $updater = new UpdateHelper($manager);
 
-        $io->writeln('Introspecting schema...');
+        $readerEntityManager = $reader->getEntityManager();
+        $readerSchemaManager = $readerEntityManager->getConnection()->getSchemaManager();
 
-        $entityManager = $manager->getConfiguration()->getEntityManager();
-        $schemaManager = $entityManager->getConnection()->getSchemaManager();
+        $auditEntityManager = $manager->getConfiguration()->getEntityManager();
+        $auditSchemaManager = $auditEntityManager->getConnection()->getSchemaManager();
 
-        $schema = $schemaManager->createSchema();
-        $tables = $schema->getTables();
-        $audits = [];
-        $errors = [];
+        $auditSchema = $auditSchemaManager->createSchema();
+        $fromSchema = clone $auditSchema;
+        $readerSchema = $readerSchemaManager->createSchema();
+        $tables = $readerSchema->getTables();
 
-        $regex = sprintf(
-            '#^%s(.*)%s$#',
-            preg_quote($updater->getConfiguration()->getTablePrefix(), '#'),
-            preg_quote($updater->getConfiguration()->getTableSuffix(), '#')
-        );
-
+        $entities = $reader->getEntities();
         foreach ($tables as $table) {
-            if (preg_match($regex, $table->getName())) {
-                $audits[] = $table;
+            if (\in_array($table->getName(), array_values($entities), true)) {
+                try {
+                    $auditTablename = preg_replace(
+                        sprintf('#^([^\.]+\.)?(%s)$#', preg_quote($table->getName(), '#')),
+                        sprintf(
+                            '$1%s$2%s',
+                            preg_quote($manager->getConfiguration()->getTablePrefix(), '#'),
+                            preg_quote($manager->getConfiguration()->getTableSuffix(), '#')
+                        ),
+                        $table->getName()
+                    );
+
+                    if ($auditSchema->hasTable($auditTablename)) {
+                        $updater->updateAuditTable($auditSchema->getTable($auditTablename), $auditSchema);
+                    } else {
+                        $updater->createAuditTable($table, $auditSchema);
+                    }
+                } catch (UpdateException $e) {
+                    $io->error($e->getMessage());
+                }
             }
         }
 
-        if (0 === \count($audits)) {
-            $io->warning('There are no audit table to upgrade.');
+        $sqls = $fromSchema->getMigrateToSql($auditSchema, $auditSchemaManager->getDatabasePlatform());
+
+        if (empty($sqls)) {
+            $io->success('Nothing to update - your database is already in sync with the current entity metadata.');
+
+            $this->release();
 
             return 0;
         }
 
-        $progressBar = new ProgressBar($output, \count($audits));
-        $progressBar->setBarWidth(70);
-        $progressBar->setFormat("%message%\n".$progressBar->getFormatDefinition('debug'));
+        if ($dumpSql) {
+            $io->text('The following SQL statements will be executed:');
+            $io->newLine();
 
-        $progressBar->setMessage('Starting...');
-        $progressBar->start();
-
-        foreach ($audits as $table) {
-            $progressBar->setMessage("Processing audit tables... (<info>{$table->getName()}</info>)");
-            $progressBar->display();
-
-            try {
-                $updater->updateAuditTable($table);
-            } catch (UpdateException $e) {
-                $errors[] = $e->getMessage();
-                $io->error($e->getMessage());
-            }
-
-            $progressBar->advance();
-        }
-
-        $progressBar->setMessage('Processing audit tables... (<info>done</info>)');
-        $progressBar->display();
-
-        $io->newLine(2);
-
-        if (empty($errors)) {
-            $io->success('Success.');
-        } else {
-            foreach ($errors as $error) {
-                $io->error($error);
+            foreach ($sqls as $sql) {
+                $io->text(sprintf('    %s;', $sql));
             }
         }
 
-        // if not released explicitly, Symfony releases the lock
-        // automatically when the execution of the command ends
+        if ($force) {
+            if ($dumpSql) {
+                $io->newLine();
+            }
+            $io->text('Updating database schema...');
+            $io->newLine();
+
+            foreach ($sqls as $sql) {
+                try {
+                    $statement = $auditEntityManager->getConnection()->prepare($sql);
+                    $statement->execute();
+                } catch (\Exception $e) {
+                    // something bad happened here :/
+                    throw new UpdateException(sprintf('Failed to create/update "%s" audit table.', $table->getName()));
+                }
+            }
+
+            $pluralization = (1 === \count($sqls)) ? 'query was' : 'queries were';
+
+            $io->text(sprintf('    <info>%s</info> %s executed', \count($sqls), $pluralization));
+            $io->success('Database schema updated successfully!');
+        }
+
+        if ($dumpSql || $force) {
+            $this->release();
+
+            return 0;
+        }
+
+        $io->caution('This operation should not be executed in a production environment!');
+
+        $io->text(
+            [
+                sprintf('The Schema-Tool would execute <info>"%s"</info> queries to update the database.', \count($sqls)),
+                '',
+                'Please run the operation by passing one - or both - of the following options:',
+                '',
+                sprintf('    <info>%s --force</info> to execute the command', $this->getName()),
+                sprintf('    <info>%s --dump-sql</info> to dump the SQL statements to the screen', $this->getName()),
+            ]
+        );
+
         $this->release();
 
-        return (int) empty($errors);
+        return 1;
     }
 
     public function setContainer(ContainerInterface $container = null): void
