@@ -133,18 +133,9 @@ abstract class BaseTest extends TestCase
         $helper = new AuditHelper($configuration);
         $manager = new AuditManager($configuration, $helper);
         $reader = $this->getReader($this->getAuditConfiguration());
-        $em = $configuration->getEntityManager();
 
         $updater = new UpdateHelper($manager, $reader);
-        $sqls = $updater->getUpdateAuditSchemaSql();
-
-        foreach ($sqls as $sql) {
-            try {
-                $statement = $em->getConnection()->prepare($sql);
-                $statement->execute();
-            } catch (\Exception $e) {
-            }
-        }
+        $updater->updateAuditSchema();
     }
 
     protected function tearDownAuditSchema(): void

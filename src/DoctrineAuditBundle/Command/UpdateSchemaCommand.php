@@ -88,14 +88,7 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
             $io->text('Updating database schema...');
             $io->newLine();
 
-            foreach ($sqls as $sql) {
-                try {
-                    $statement = $auditEntityManager->getConnection()->prepare($sql);
-                    $statement->execute();
-                } catch (\Exception $e) {
-                    // something bad happened here :/
-                }
-            }
+            $updater->updateAuditSchema($sqls);
 
             $pluralization = (1 === \count($sqls)) ? 'query was' : 'queries were';
 

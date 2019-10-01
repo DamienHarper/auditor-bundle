@@ -40,11 +40,13 @@ class UpdateHelper
         return $this->manager->getConfiguration();
     }
 
-    public function updateAuditSchema(): void
+    public function updateAuditSchema(?array $sqls = null): void
     {
         $auditEntityManager = $this->manager->getConfiguration()->getEntityManager();
 
-        $sqls = $this->getUpdateAuditSchemaSql();
+        if (null === $sqls) {
+            $sqls = $this->getUpdateAuditSchemaSql();
+        }
 
         foreach ($sqls as $sql) {
             try {
