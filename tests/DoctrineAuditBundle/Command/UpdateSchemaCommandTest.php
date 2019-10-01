@@ -19,7 +19,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLoggerChain
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
- * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
  * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\Helper\UpdateHelper
@@ -44,7 +43,7 @@ final class UpdateSchemaCommandTest extends CoreTest
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        static::assertStringContainsString('[OK] Success', $output);
+        static::assertStringContainsString('[OK] Nothing to update.', $output);
     }
 
     /**

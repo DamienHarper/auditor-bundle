@@ -2,7 +2,6 @@
 
 namespace DH\DoctrineAuditBundle\Command;
 
-use DH\DoctrineAuditBundle\Exception\UpdateException;
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
 use DH\DoctrineAuditBundle\Manager\AuditManager;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
@@ -59,48 +58,14 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
         /**
          * @var UpdateHelper
          */
-        $updater = new UpdateHelper($manager);
-
-        $readerEntityManager = $reader->getEntityManager();
-        $readerSchemaManager = $readerEntityManager->getConnection()->getSchemaManager();
+        $updater = new UpdateHelper($manager, $reader);
 
         $auditEntityManager = $manager->getConfiguration()->getEntityManager();
-        $auditSchemaManager = $auditEntityManager->getConnection()->getSchemaManager();
 
-        $auditSchema = $auditSchemaManager->createSchema();
-        $fromSchema = clone $auditSchema;
-        $readerSchema = $readerSchemaManager->createSchema();
-        $tables = $readerSchema->getTables();
-
-        $entities = $reader->getEntities();
-        foreach ($tables as $table) {
-            if (\in_array($table->getName(), array_values($entities), true)) {
-                try {
-                    $auditTablename = preg_replace(
-                        sprintf('#^([^\.]+\.)?(%s)$#', preg_quote($table->getName(), '#')),
-                        sprintf(
-                            '$1%s$2%s',
-                            preg_quote($manager->getConfiguration()->getTablePrefix(), '#'),
-                            preg_quote($manager->getConfiguration()->getTableSuffix(), '#')
-                        ),
-                        $table->getName()
-                    );
-
-                    if ($auditSchema->hasTable($auditTablename)) {
-                        $updater->updateAuditTable($auditSchema->getTable($auditTablename), $auditSchema);
-                    } else {
-                        $updater->createAuditTable($table, $auditSchema);
-                    }
-                } catch (UpdateException $e) {
-                    $io->error($e->getMessage());
-                }
-            }
-        }
-
-        $sqls = $fromSchema->getMigrateToSql($auditSchema, $auditSchemaManager->getDatabasePlatform());
+        $sqls = $updater->getUpdateAuditSchemaSql();
 
         if (empty($sqls)) {
-            $io->success('Nothing to update - your database is already in sync with the current entity metadata.');
+            $io->success('Nothing to update.');
 
             $this->release();
 
@@ -129,7 +94,6 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
                     $statement->execute();
                 } catch (\Exception $e) {
                     // something bad happened here :/
-                    throw new UpdateException(sprintf('Failed to create/update "%s" audit table.', $table->getName()));
                 }
             }
 

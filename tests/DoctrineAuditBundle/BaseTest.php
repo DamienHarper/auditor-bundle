@@ -4,8 +4,8 @@ namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber;
-use DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
+use DH\DoctrineAuditBundle\Helper\UpdateHelper;
 use DH\DoctrineAuditBundle\Manager\AuditManager;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
@@ -59,6 +59,7 @@ abstract class BaseTest extends TestCase
         $this->getEntityManager();
         $this->getSchemaTool();
         $this->setUpEntitySchema();
+        $this->setUpAuditSchema();
     }
 
     /**
@@ -67,6 +68,7 @@ abstract class BaseTest extends TestCase
      */
     protected function tearDown(): void
     {
+        $this->tearDownAuditSchema();
         $this->tearDownEntitySchema();
         $this->em = null;
         $this->schemaTool = null;
@@ -123,6 +125,30 @@ abstract class BaseTest extends TestCase
             } catch (\Exception $e) {
             }
         }
+    }
+
+    protected function setUpAuditSchema(): void
+    {
+        $configuration = $this->getAuditConfiguration();
+        $helper = new AuditHelper($configuration);
+        $manager = new AuditManager($configuration, $helper);
+        $reader = $this->getReader($this->getAuditConfiguration());
+        $em = $configuration->getEntityManager();
+
+        $updater = new UpdateHelper($manager, $reader);
+        $sqls = $updater->getUpdateAuditSchemaSql();
+
+        foreach ($sqls as $sql) {
+            try {
+                $statement = $em->getConnection()->prepare($sql);
+                $statement->execute();
+            } catch (\Exception $e) {
+            }
+        }
+    }
+
+    protected function tearDownAuditSchema(): void
+    {
     }
 
     protected function getAuditConfiguration(): AuditConfiguration
@@ -197,7 +223,6 @@ abstract class BaseTest extends TestCase
             }
         }
         $evm->addEventSubscriber(new AuditSubscriber($this->auditManager));
-        $evm->addEventSubscriber(new CreateSchemaListener($this->auditManager));
         $evm->addEventSubscriber(new Gedmo\SoftDeleteable\SoftDeleteableListener());
 
         return $this->em;

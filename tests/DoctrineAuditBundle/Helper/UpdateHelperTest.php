@@ -19,7 +19,6 @@ use Gedmo;
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
- * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
  * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\Helper\UpdateHelper
@@ -55,17 +54,17 @@ final class UpdateHelperTest extends BaseTest
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
         $manager = new AuditManager($configuration, $helper);
-        $updater = new UpdateHelper($manager);
+        $reader = $this->getReader($this->getAuditConfiguration());
+        $updater = new UpdateHelper($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
 
         $authorTable = $this->getTable($schemaManager->listTables(), 'author');
         static::assertNull($this->getTable($schemaManager->listTables(), 'author_audit'), 'author_audit does not exist yet.');
 
-        $fromSchema = $schemaManager->createSchema();
-        $toSchema = $updater->createAuditTable($authorTable);
+        $schema = $updater->createAuditTable($authorTable, $schemaManager->createSchema());
 
         // apply changes
-        $sql = $fromSchema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
+        $sql = $schema->toSql($schemaManager->getDatabasePlatform());
         foreach ($sql as $query) {
             try {
                 $statement = $em->getConnection()->prepare($query);
@@ -87,16 +86,16 @@ final class UpdateHelperTest extends BaseTest
         $em = $configuration->getEntityManager();
         $helper = new AuditHelper($configuration);
         $manager = new AuditManager($configuration, $helper);
-        $updater = new UpdateHelper($manager);
+        $reader = $this->getReader($this->getAuditConfiguration());
+        $updater = new UpdateHelper($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
 
         $authorTable = $this->getTable($schemaManager->listTables(), 'author');
 
-        $fromSchema = $schemaManager->createSchema();
-        $toSchema = $updater->createAuditTable($authorTable);
+        $schema = $updater->createAuditTable($authorTable, $schemaManager->createSchema());
 
         // apply changes
-        $sql = $fromSchema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
+        $sql = $schema->toSql($schemaManager->getDatabasePlatform());
         foreach ($sql as $query) {
             try {
                 $statement = $em->getConnection()->prepare($query);
@@ -133,16 +132,16 @@ final class UpdateHelperTest extends BaseTest
         $em = $configuration->getEntityManager();
         $helper = new AuditHelper($configuration);
         $manager = new AuditManager($configuration, $helper);
-        $updater = new UpdateHelper($manager);
+        $reader = $this->getReader($this->getAuditConfiguration());
+        $updater = new UpdateHelper($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
 
         $authorTable = $this->getTable($schemaManager->listTables(), 'author');
 
-        $fromSchema = $schemaManager->createSchema();
-        $toSchema = $updater->createAuditTable($authorTable);
+        $schema = $updater->createAuditTable($authorTable, $schemaManager->createSchema());
 
         // apply changes
-        $sql = $fromSchema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
+        $sql = $schema->toSql($schemaManager->getDatabasePlatform());
         foreach ($sql as $query) {
             try {
                 $statement = $em->getConnection()->prepare($query);
@@ -197,14 +196,6 @@ final class UpdateHelperTest extends BaseTest
                     'length' => 100,
                 ],
             ],
-//            'ip' => [
-//                'type' => Type::STRING,
-//                'options' => [
-//                    'default' => null,
-//                    'notnull' => false,
-//                    'length' => 45,
-//                ],
-//            ],
             'created_at' => [
                 'type' => Type::DATETIME,
                 'options' => [
@@ -263,11 +254,10 @@ final class UpdateHelperTest extends BaseTest
         $manager->setHelper($helper);
 
         $authorAuditTable = $this->getTable($schemaManager->listTables(), 'author_audit');
-        $fromSchema = clone $toSchema;
-        $toSchema = $updater->updateAuditTable($authorAuditTable);
+        $toSchema = $updater->updateAuditTable($authorAuditTable, clone $schema);
 
         // apply changes
-        $sql = $fromSchema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
+        $sql = $schema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
         foreach ($sql as $query) {
             try {
                 $statement = $em->getConnection()->prepare($query);
