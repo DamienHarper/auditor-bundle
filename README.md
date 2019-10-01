@@ -163,48 +163,32 @@ This bundle supports Doctrine SINGLE_TABLE inheritance.
 Configuring the root table to be audited does not suffice to get all child tables audited.
 You have to configure every child table that needs to be audited as well.
 
-### Creating audit tables
+### Creating (and updating) audit tables
 
 Open a command console, enter your project directory and execute the
-following command to review the new audit tables in the update schema queue.
+following command to review the new audit tables (and/or audit table transformations after upgrading the bundle
+to a newer major version) in the update schema queue.
 
 ```bash
 # symfony < 3.4
-app/console doctrine:schema:update --dump-sql 
+app/console audit:schema:update --dump-sql 
 ```
 
 ```bash
 # symfony >= 3.4
-bin/console doctrine:schema:update --dump-sql 
+bin/console audit:schema:update --dump-sql 
 ```
 
-**Notice**: DoctrineAuditBundle currently **only** works with a DBAL Connection and EntityManager named **"default"**.
-
-
-#### Using [Doctrine Migrations Bundle](http://symfony.com/doc/current/bundles/DoctrineMigrationsBundle/index.html)
-
-```bash
-# symfony < 3.4
-app/console doctrine:migrations:diff
-app/console doctrine:migrations:migrate
-```
-
-```bash
-# symfony >= 3.4
-bin/console doctrine:migrations:diff
-bin/console doctrine:migrations:migrate
-```
-
-#### Using Doctrine Schema
+Once you're done, execute the following command to apply.
     
 ```bash
 # symfony < 3.4
-app/console doctrine:schema:update --force
+app/console audit:schema:update --force
 ```
 
 ```bash
 # symfony >= 3.4
-bin/console doctrine:schema:update --force
+bin/console audit:schema:update --force
 ```
 
 ### Custom database for storage audit
