@@ -60,8 +60,6 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
          */
         $updater = new UpdateHelper($manager, $reader);
 
-        $auditEntityManager = $manager->getConfiguration()->getEntityManager();
-
         $sqls = $updater->getUpdateAuditSchemaSql();
 
         if (empty($sqls)) {
