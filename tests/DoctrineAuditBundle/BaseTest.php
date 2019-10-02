@@ -140,6 +140,30 @@ abstract class BaseTest extends TestCase
 
     protected function tearDownAuditSchema(): void
     {
+        $configuration = $this->getAuditConfiguration();
+        $em = $configuration->getEntityManager();
+        $schemaManager = $em->getConnection()->getSchemaManager();
+        $schema = $schemaManager->createSchema();
+        $fromSchema = clone $schema;
+
+        $tables = $schemaManager->listTables();
+        foreach ($tables as $table) {
+            $regex = '#^'.$configuration->getTablePrefix().'.*'.$configuration->getTableSuffix().'$#';
+            if (preg_match($regex, $table->getName())) {
+                $schema->dropTable($table->getName());
+            }
+        }
+
+        $sqls = $fromSchema->getMigrateToSql($schema, $schemaManager->getDatabasePlatform());
+
+        foreach ($sqls as $sql) {
+            try {
+                $statement = $em->getConnection()->prepare($sql);
+                $statement->execute();
+            } catch (\Exception $e) {
+                // something bad happened here :/
+            }
+        }
     }
 
     protected function getAuditConfiguration(): AuditConfiguration
