@@ -59,6 +59,11 @@ class AuditController extends AbstractController
         $entity = AuditHelper::paramToNamespace($entity);
 
         $reader = $this->container->get('dh_doctrine_audit.reader');
+
+        if (!$reader->getConfiguration()->isAuditable($entity)) {
+            throw $this->createNotFoundException();
+        }
+
         $entries = $reader->getAuditsPager($entity, $id, $page, AuditReader::PAGE_SIZE);
 
         return $this->render('@DHDoctrineAudit/Audit/entity_history.html.twig', [
