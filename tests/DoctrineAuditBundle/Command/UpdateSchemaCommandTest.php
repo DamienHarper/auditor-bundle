@@ -43,7 +43,7 @@ final class UpdateSchemaCommandTest extends CoreTest
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        static::assertStringContainsString('[OK] Nothing to update.', $output);
+        static::assertStringContainsString('[CAUTION] This operation should not be executed in a production environment!', $output);
     }
 
     /**
@@ -93,6 +93,8 @@ final class UpdateSchemaCommandTest extends CoreTest
         $command = new UpdateSchemaCommand();
         $command->setContainer($container);
         $command->unlock();
+
+        $this->tearDownAuditSchema();
 
         return $command;
     }
