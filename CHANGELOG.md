@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `AuditReader::getAudits()` now accepts a boolean as sixth parameter to return either audits for the given entity only or audits for the given entity hierarchy.
 
 ### Breaking changes
+* Doctrine's `doctrine:schema:update` command do not create audit tables automatically anymore (this command cannot work with multiple
+databases simultaneously), use the bundled migration command instead (supports the same options as Doctrine's command).
+  - `bin/console audit:schema:update --dump-sql` prints SQL queries that need be executed.
+  - `bin/console audit:schema:update --force` executes relevant SQL queries.
 * The structure of audit tables has changed so you have to run the migration command right after updating
 * `AuditEntry::getUserId()` now return a `string` or `null` instead of an `int`.
 * The bundle requires `mbstring` extension (cf. https://www.php.net/manual/en/mbstring.installation.php)
@@ -33,7 +37,7 @@ composer require damienharper/doctrine-audit-bundle ^3.0
 
 Due to internal changes requiring new columns and `blame_id` column type change, run the migration command after updating the bundle to update the structure of your current audit tables.
 ```bash
-bin/console audit:schema:update
+bin/console audit:schema:update --force
 ```
 
 

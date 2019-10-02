@@ -358,4 +358,12 @@ class AuditReader
     {
         return $this->configuration->getEntityManager() ?? $this->entityManager;
     }
+
+    /**
+     * @return EntityManagerInterface
+     */
+    public function getEntityManager(): EntityManagerInterface
+    {
+        return $this->entityManager;
+    }
 }

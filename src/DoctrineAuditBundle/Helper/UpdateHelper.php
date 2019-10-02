@@ -5,6 +5,7 @@ namespace DH\DoctrineAuditBundle\Helper;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Exception\UpdateException;
 use DH\DoctrineAuditBundle\Manager\AuditManager;
+use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
@@ -12,40 +13,105 @@ use Doctrine\DBAL\Schema\Table;
 class UpdateHelper
 {
     /**
-     * @var \DH\DoctrineAuditBundle\Manager\AuditManager
+     * @var AuditManager
      */
     private $manager;
 
     /**
-     * @param \DH\DoctrineAuditBundle\Manager\AuditManager $manager
+     * @var AuditReader
      */
-    public function __construct(AuditManager $manager)
+    private $reader;
+
+    /**
+     * @param AuditManager $manager
+     * @param AuditReader  $reader
+     */
+    public function __construct(AuditManager $manager, AuditReader $reader)
     {
         $this->manager = $manager;
+        $this->reader = $reader;
     }
 
     /**
-     * @return \DH\DoctrineAuditBundle\AuditConfiguration
+     * @return AuditConfiguration
      */
     public function getConfiguration(): AuditConfiguration
     {
         return $this->manager->getConfiguration();
     }
 
+    public function updateAuditSchema(?array $sqls = null): void
+    {
+        $auditEntityManager = $this->manager->getConfiguration()->getEntityManager();
+
+        if (null === $sqls) {
+            $sqls = $this->getUpdateAuditSchemaSql();
+        }
+
+        foreach ($sqls as $sql) {
+            try {
+                $statement = $auditEntityManager->getConnection()->prepare($sql);
+                $statement->execute();
+            } catch (\Exception $e) {
+                // something bad happened here :/
+            }
+        }
+    }
+
+    public function getUpdateAuditSchemaSql(): array
+    {
+        $readerEntityManager = $this->reader->getEntityManager();
+        $readerSchemaManager = $readerEntityManager->getConnection()->getSchemaManager();
+
+        $auditEntityManager = $this->manager->getConfiguration()->getEntityManager();
+        $auditSchemaManager = $auditEntityManager->getConnection()->getSchemaManager();
+
+        $auditSchema = $auditSchemaManager->createSchema();
+        $fromSchema = clone $auditSchema;
+        $readerSchema = $readerSchemaManager->createSchema();
+        $tables = $readerSchema->getTables();
+
+        $entities = $this->reader->getEntities();
+        foreach ($tables as $table) {
+            if (\in_array($table->getName(), array_values($entities), true)) {
+                $auditTablename = preg_replace(
+                    sprintf('#^([^\.]+\.)?(%s)$#', preg_quote($table->getName(), '#')),
+                    sprintf(
+                        '$1%s$2%s',
+                        preg_quote($this->manager->getConfiguration()->getTablePrefix(), '#'),
+                        preg_quote($this->manager->getConfiguration()->getTableSuffix(), '#')
+                    ),
+                    $table->getName()
+                );
+
+                if ($auditSchema->hasTable($auditTablename)) {
+                    $this->updateAuditTable($auditSchema->getTable($auditTablename), $auditSchema);
+                } else {
+                    $this->createAuditTable($table, $auditSchema);
+                }
+            }
+        }
+
+        return $fromSchema->getMigrateToSql($auditSchema, $auditSchemaManager->getDatabasePlatform());
+    }
+
     /**
      * Creates an audit table.
      *
-     * @param Table $table
+     * @param Table       $table
+     * @param null|Schema $schema
      *
      * @throws \Doctrine\DBAL\DBALException
      *
      * @return Schema
      */
-    public function createAuditTable(Table $table): Schema
+    public function createAuditTable(Table $table, ?Schema $schema = null): Schema
     {
         $entityManager = $this->getConfiguration()->getEntityManager();
         $schemaManager = $entityManager->getConnection()->getSchemaManager();
-        $schema = $schemaManager->createSchema();
+        if (null === $schema) {
+            $schema = $schemaManager->createSchema();
+        }
 
         $auditTablename = preg_replace(
             sprintf('#^([^\.]+\.)?(%s)$#', preg_quote($table->getName(), '#')),
@@ -73,16 +139,6 @@ class UpdateHelper
                     $auditTable->addIndex([$columnName], $struct['name']);
                 }
             }
-
-            $sql = $schema->toSql($entityManager->getConnection()->getDatabasePlatform());
-            foreach ($sql as $query) {
-                try {
-                    $statement = $entityManager->getConnection()->prepare($query);
-                    $statement->execute();
-                } catch (\Exception $e) {
-                    // This should never happen
-                }
-            }
         }
 
         return $schema;
@@ -91,21 +147,23 @@ class UpdateHelper
     /**
      * Ensures an audit table's structure is valid.
      *
-     * @param Table $table
+     * @param Table       $table
+     * @param null|Schema $schema
      *
      * @throws UpdateException
      * @throws \Doctrine\DBAL\Schema\SchemaException
      *
      * @return Schema
      */
-    public function updateAuditTable(Table $table): Schema
+    public function updateAuditTable(Table $table, ?Schema $schema = null): Schema
     {
         $entityManager = $this->getConfiguration()->getEntityManager();
         $schemaManager = $entityManager->getConnection()->getSchemaManager();
-        $toSchema = $schemaManager->createSchema();
-        $fromSchema = clone $toSchema;
+        if (null === $schema) {
+            $schema = $schemaManager->createSchema();
+        }
 
-        $table = $toSchema->getTable($table->getName());
+        $table = $schema->getTable($table->getName());
 
         $columns = $schemaManager->listTableColumns($table->getName());
         $expectedColumns = $this->manager->getHelper()->getAuditTableColumns();
@@ -117,18 +175,7 @@ class UpdateHelper
         // process indices
         $this->processIndices($table, $expectedIndices);
 
-        // apply changes
-        $sql = $fromSchema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
-        foreach ($sql as $query) {
-            try {
-                $statement = $entityManager->getConnection()->prepare($query);
-                $statement->execute();
-            } catch (\Exception $e) {
-                throw new UpdateException(sprintf('Failed to update/fix "%s" audit table.', $table->getName()));
-            }
-        }
-
-        return $toSchema;
+        return $schema;
     }
 
     /**

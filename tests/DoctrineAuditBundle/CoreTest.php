@@ -47,6 +47,7 @@ abstract class CoreTest extends BaseTest
         ]);
 
         $this->setUpEntitySchema();
+        $this->setUpAuditSchema();
         $this->setupEntities();
     }
 

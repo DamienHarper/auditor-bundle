@@ -131,7 +131,7 @@ class AuditConfiguration
     }
 
     /**
-     * Returns true if $entity is audited.
+     * Returns true if $entity is auditable.
      *
      * @param object|string $entity
      *

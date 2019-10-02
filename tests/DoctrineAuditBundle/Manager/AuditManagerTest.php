@@ -14,7 +14,6 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
 /**
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
- * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
  * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\Helper\UpdateHelper

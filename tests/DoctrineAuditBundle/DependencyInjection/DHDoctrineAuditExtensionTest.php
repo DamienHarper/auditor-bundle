@@ -6,7 +6,6 @@ use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand;
 use DH\DoctrineAuditBundle\DependencyInjection\DHDoctrineAuditExtension;
 use DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber;
-use DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\Twig\Extension\TwigExtension;
@@ -42,10 +41,6 @@ final class DHDoctrineAuditExtensionTest extends AbstractExtensionTestCase
         $this->assertContainerBuilderHasService('dh_doctrine_audit.event_subscriber.audit', AuditSubscriber::class);
         $this->assertContainerBuilderHasServiceDefinitionWithArgument('dh_doctrine_audit.event_subscriber.audit', 0, 'dh_doctrine_audit.manager');
         $this->assertContainerBuilderHasServiceDefinitionWithTag('dh_doctrine_audit.event_subscriber.audit', 'doctrine.event_subscriber', ['connection' => 'default']);
-
-        $this->assertContainerBuilderHasService('dh_doctrine_audit.event_subscriber.create_schema', CreateSchemaListener::class);
-        $this->assertContainerBuilderHasServiceDefinitionWithArgument('dh_doctrine_audit.event_subscriber.create_schema', 0, 'dh_doctrine_audit.manager');
-        $this->assertContainerBuilderHasServiceDefinitionWithTag('dh_doctrine_audit.event_subscriber.create_schema', 'doctrine.event_subscriber', ['connection' => 'default']);
 
         $this->assertContainerBuilderHasService('dh_doctrine_audit.twig_extension', TwigExtension::class);
         $this->assertContainerBuilderHasServiceDefinitionWithArgument('dh_doctrine_audit.twig_extension', 0, 'doctrine');
