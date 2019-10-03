@@ -51,6 +51,12 @@ services:
     tags:
       - { name: doctrine.event_subscriber, connection: default }
 
+  dh_doctrine_audit.event_subscriber.create_schema:
+    class: DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
+    arguments: ["@dh_doctrine_audit.manager", "@dh_doctrine_audit.reader"]
+    tags:
+      - { name: doctrine.event_subscriber, connection: default }
+
   dh_doctrine_audit.twig_extension:
     class: DH\DoctrineAuditBundle\Twig\Extension\TwigExtension
     arguments: ['@doctrine']

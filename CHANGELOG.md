@@ -8,25 +8,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.0] - Not yet released
 ### Changes
 * The bundle now supports non numeric IDs for the `User` objects (closes #66, thanks to @Gonzalo1987).
-* A transaction hash is now stored in audit tables and makes it easier to identify all operations performed in the same transaction (closes #69)
-  - The timeline now displays a transaction hash for each element. By clicking a transaction hash, you get a complete overview of all the operations included into the transaction.
-  - `AuditReader::getAudits()` now accepts a transaction hash as fifth parameter to return audits logged in the given transaction for the given entity.
-  - `AuditReader::getAuditsByTransactionHash()` accepts a transaction hash as parameter and returns all the audits logged in the given transaction.
+* A transaction hash is now stored in audit tables and makes it easier to identify all operations performed 
+in the same transaction (closes #69)
+  - The timeline now displays a transaction hash for each element. By clicking a transaction hash, 
+  you get a complete overview of all the operations included into the transaction.
+  - `AuditReader::getAudits()` now accepts a transaction hash as fifth parameter to return audits 
+  logged in the given transaction for the given entity.
+  - `AuditReader::getAuditsByTransactionHash()` accepts a transaction hash as parameter and returns 
+  all the audits logged in the given transaction.
 * Performance enhancements when saving a lot of entities at once (closes #70, thanks to @acanicatti).
 * Remove deprecated and manage the compatibility (thanks to @maxhelias).
 * Fixed an issue with `audit:schema:update` command when run against a database with no audit table (#85)
-* SINGLE_TABLE inheritance support (#73)
-  - `AuditReader::getAudits()` now accepts a boolean as sixth parameter to return either audits for the given entity only or audits for the given entity hierarchy.
+* `SINGLE_TABLE` inheritance support (#73)
+  - `AuditReader::getAudits()` now accepts a boolean as sixth parameter to return either audits 
+  for the given entity only or audits for the given entity hierarchy.
 
 ### Breaking changes
-* Doctrine's `doctrine:schema:update` command do not create audit tables automatically anymore (this command cannot work with multiple
-databases simultaneously), use the bundled migration command instead (supports the same options as Doctrine's command).
+* Doctrine's `doctrine:schema:update` command do not create audit tables automatically anymore 
+**when using a secondary database** (this command cannot work with multiple databases simultaneously), 
+use the bundled migration command instead which supports the same options as Doctrine's command.
   - `bin/console audit:schema:update --dump-sql` prints SQL queries that need be executed.
   - `bin/console audit:schema:update --force` executes relevant SQL queries.
 * The structure of audit tables has changed so you have to run the migration command right after updating
 * `AuditEntry::getUserId()` now return a `string` or `null` instead of an `int`.
 * The bundle requires `mbstring` extension (cf. https://www.php.net/manual/en/mbstring.installation.php)
-* Configuration has changed to use a secondary database: you now only need to inject the dedicated entity manager to `AuditConfiguration` service as described [here](https://github.com/DamienHarper/DoctrineAuditBundle#custom-database-for-storage-audit)
+* Configuration has changed to use a secondary database: you now only need to inject the dedicated 
+entity manager to `AuditConfiguration` service as described [here](https://github.com/DamienHarper/DoctrineAuditBundle#custom-database-for-storage-audit)
 
 ### How to upgrade?
 Either update your `composer.json` file manually to include `"damienharper/doctrine-audit-bundle": "^3.0"` 
