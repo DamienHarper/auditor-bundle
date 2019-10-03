@@ -159,15 +159,65 @@ dh_doctrine_audit:
 
 ### Single Table Inheritance
 
-This bundle supports Doctrine SINGLE_TABLE inheritance.
+This bundle supports Doctrine `SINGLE_TABLE` inheritance.
 Configuring the root table to be audited does not suffice to get all child tables audited.
 You have to configure every child table that needs to be audited as well.
 
-### Creating (and updating) audit tables
+### Creating audit tables
+
+The process of audit table creation differs depending on your current setup:
+- **single** database setup: audit tables are stored in the **same** database than audited ones (most common use case)
+- **dual** database setup: audit tables are stored in a **secondary** database
+
+#### Single database setup (most common use case)
 
 Open a command console, enter your project directory and execute the
-following command to review the new audit tables (and/or audit table transformations after upgrading the bundle
-to a newer major version) in the update schema queue.
+following command to review the new audit tables in the update schema queue.
+
+```bash
+# symfony < 3.4
+app/console doctrine:schema:update --dump-sql 
+```
+
+```bash
+# symfony >= 3.4
+bin/console doctrine:schema:update --dump-sql 
+```
+
+##### Using [DoctrineMigrationsBundle](http://symfony.com/doc/current/bundles/DoctrineMigrationsBundle/index.html)
+
+```bash
+# symfony < 3.4
+app/console doctrine:migrations:diff
+app/console doctrine:migrations:migrate
+```
+
+```bash
+# symfony >= 3.4
+bin/console doctrine:migrations:diff
+bin/console doctrine:migrations:migrate
+```
+
+##### Using Doctrine Schema
+    
+```bash
+# symfony < 3.4
+app/console doctrine:schema:update --force
+```
+
+```bash
+# symfony >= 3.4
+bin/console doctrine:schema:update --force
+```
+
+#### Dual database setup
+
+Doctrine `Schema-Tool` and `DoctrineMigrationsBundle` are not able to work with more than one
+database at once. To workaround that limitation, this bundle offers a migration command that 
+focuses on audit schema manipulation.
+
+Open a command console, enter your project directory and execute the following command to 
+review the new audit tables in the update schema queue.
 
 ```bash
 # symfony < 3.4
