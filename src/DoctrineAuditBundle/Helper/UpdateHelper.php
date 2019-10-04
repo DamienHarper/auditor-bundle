@@ -40,7 +40,11 @@ class UpdateHelper
         return $this->manager->getConfiguration();
     }
 
-    public function updateAuditSchema(?array $sqls = null): void
+    /**
+     * @param null|array    $sqls     SQL queries to execute
+     * @param null|callable $callback Callback executed after each query is run
+     */
+    public function updateAuditSchema(?array $sqls = null, callable $callback = null): void
     {
         $auditEntityManager = $this->manager->getConfiguration()->getEntityManager();
 
@@ -48,10 +52,17 @@ class UpdateHelper
             $sqls = $this->getUpdateAuditSchemaSql();
         }
 
-        foreach ($sqls as $sql) {
+        foreach ($sqls as $index => $sql) {
             try {
                 $statement = $auditEntityManager->getConnection()->prepare($sql);
                 $statement->execute();
+
+                if (null !== $callback) {
+                    $callback([
+                        'total' => \count($sqls),
+                        'current' => $index,
+                    ]);
+                }
             } catch (\Exception $e) {
                 // something bad happened here :/
             }
