@@ -7,6 +7,7 @@ use DH\DoctrineAuditBundle\Manager\AuditManager;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -86,7 +87,16 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
             $io->text('Updating database schema...');
             $io->newLine();
 
-            $updater->updateAuditSchema($sqls);
+            $progressBar = new ProgressBar($output, \count($sqls));
+            $progressBar->start();
+
+            $updater->updateAuditSchema($sqls, static function (array $progress) use ($progressBar) {
+                $progressBar->advance();
+            });
+
+            $progressBar->finish();
+
+            $io->newLine(2);
 
             $pluralization = (1 === \count($sqls)) ? 'query was' : 'queries were';
 
