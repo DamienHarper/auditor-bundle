@@ -4,6 +4,7 @@ namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber;
+use DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
 use DH\DoctrineAuditBundle\Manager\AuditManager;
@@ -238,6 +239,7 @@ abstract class BaseTest extends TestCase
             }
         }
         $evm->addEventSubscriber(new AuditSubscriber($this->auditManager));
+        $evm->addEventSubscriber(new CreateSchemaListener($this->auditManager, $this->getReader()));
         $evm->addEventSubscriber(new Gedmo\SoftDeleteable\SoftDeleteableListener());
 
         return $this->em;
