@@ -32,9 +32,30 @@ class CreateSchemaListener implements EventSubscriber
     {
         $metadata = $eventArgs->getClassMetadata();
 
+        // check inheritance type and returns if unsupported
+        if (!\in_array($metadata->inheritanceType, [
+            ClassMetadataInfo::INHERITANCE_TYPE_NONE,
+            ClassMetadataInfo::INHERITANCE_TYPE_JOINED,
+            ClassMetadataInfo::INHERITANCE_TYPE_SINGLE_TABLE,
+        ], true)) {
+            throw new \Exception(sprintf('Inheritance type "%s" is not yet supported', $metadata->inheritanceType));
+        }
+
+        // check reader and manager entity managers and returns if different
+        if ($this->reader->getEntityManager() !== $this->manager->getConfiguration()->getEntityManager()) {
+            return;
+        }
+
+        // check if entity or its children are audited
         if (!$this->manager->getConfiguration()->isAudited($metadata->name)) {
             $audited = false;
-            if ($metadata->rootEntityName === $metadata->name && ($metadata->isInheritanceTypeJoined() || $metadata->isInheritanceTypeSingleTable())) {
+            if (
+                $metadata->rootEntityName === $metadata->name &&
+                \in_array($metadata->inheritanceType, [
+                    ClassMetadataInfo::INHERITANCE_TYPE_JOINED,
+                    ClassMetadataInfo::INHERITANCE_TYPE_SINGLE_TABLE,
+                ], true)
+            ) {
                 foreach ($metadata->subClasses as $subClass) {
                     if ($this->manager->getConfiguration()->isAudited($subClass)) {
                         $audited = true;
@@ -46,19 +67,8 @@ class CreateSchemaListener implements EventSubscriber
             }
         }
 
-        if (!\in_array($metadata->inheritanceType, [
-            ClassMetadataInfo::INHERITANCE_TYPE_NONE,
-            ClassMetadataInfo::INHERITANCE_TYPE_JOINED,
-            ClassMetadataInfo::INHERITANCE_TYPE_SINGLE_TABLE,
-        ], true)) {
-            throw new \Exception(sprintf('Inheritance type "%s" is not yet supported', $metadata->inheritanceType));
-        }
-
-        if ($this->reader->getEntityManager() === $this->manager->getConfiguration()->getEntityManager()) {
-            // default_entity_manager
-            $updater = new UpdateHelper($this->manager, $this->reader);
-            $updater->createAuditTable($eventArgs->getClassTable(), $eventArgs->getSchema());
-        }
+        $updater = new UpdateHelper($this->manager, $this->reader);
+        $updater->createAuditTable($eventArgs->getClassTable(), $eventArgs->getSchema());
     }
 
     /**
