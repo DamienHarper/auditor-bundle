@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Tests\Helper;
 
+use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
@@ -216,7 +217,8 @@ final class AuditHelperTest extends CoreTest
             $configuration->getUserProvider(),
             $configuration->getRequestStack(),
             new FirewallMap(new ContainerBuilder(), []),
-            $em
+            $em,
+            new AnnotationLoader($em)
         );
         $helper = new AuditHelper($configuration);
 
@@ -280,7 +282,8 @@ final class AuditHelperTest extends CoreTest
             $configuration->getUserProvider(),
             $configuration->getRequestStack(),
             new FirewallMap(new ContainerBuilder(), []),
-            $em
+            $em,
+            new AnnotationLoader($em)
         );
         $helper = new AuditHelper($configuration);
 
@@ -396,7 +399,8 @@ final class AuditHelperTest extends CoreTest
             $this->getAuditConfiguration()->getUserProvider(),
             new RequestStack(),
             new FirewallMap(new ContainerBuilder(), []),
-            $em
+            $em,
+            new AnnotationLoader($em)
         );
         $helper = new AuditHelper($configuration);
 
@@ -413,6 +417,7 @@ final class AuditHelperTest extends CoreTest
 
     public function testBlameWhenNoUser(): void
     {
+        $em = $this->getEntityManager();
         $configuration = new AuditConfiguration(
             [
                 'enabled' => true,
@@ -425,7 +430,8 @@ final class AuditHelperTest extends CoreTest
             new TokenStorageUserProvider(new Security(new ContainerBuilder())),
             new RequestStack(),
             new FirewallMap(new ContainerBuilder(), []),
-            $this->getEntityManager()
+            $em,
+            new AnnotationLoader($em)
         );
         $helper = new AuditHelper($configuration);
 

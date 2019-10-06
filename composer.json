@@ -15,7 +15,8 @@
     "symfony/orm-pack": "^1.0",
     "symfony/security-bundle": "^3.4 || ^4.0",
     "pagerfanta/pagerfanta": "^2.1",
-    "white-october/pagerfanta-bundle": "^1.2"
+    "white-october/pagerfanta-bundle": "^1.2",
+    "doctrine/annotations": "^1.8"
   },
   "autoload": {
     "psr-4": {
