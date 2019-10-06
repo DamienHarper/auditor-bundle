@@ -1,8 +1,10 @@
 services:
-  dh_doctrine_audit.user_provider:
-    class: DH\DoctrineAuditBundle\User\TokenStorageUserProvider
-    arguments: ["@security.helper"]
-    public: true
+  dh_doctrine_audit.annotation_loader:
+    class: DH\DoctrineAuditBundle\Annotation\AnnotationLoader
+    arguments: ["@doctrine.orm.default_entity_manager"]
+
+  DH\DoctrineAuditBundle\Annotation\AnnotationLoader:
+    alias: dh_doctrine_audit.annotation_loader
 
   dh_doctrine_audit.configuration:
     class: DH\DoctrineAuditBundle\AuditConfiguration
@@ -12,11 +14,10 @@ services:
       - "@request_stack"
       - "@security.firewall.map"
       - "@doctrine.orm.default_entity_manager"
-    public: true
+      - "@dh_doctrine_audit.annotation_loader"
 
   DH\DoctrineAuditBundle\AuditConfiguration:
     alias: dh_doctrine_audit.configuration
-    public: true
 
   dh_doctrine_audit.reader:
     class: DH\DoctrineAuditBundle\Reader\AuditReader
@@ -32,18 +33,26 @@ services:
     arguments: ["@dh_doctrine_audit.configuration", "@dh_doctrine_audit.helper"]
     public: true
 
-  DH\DoctrineAuditBundle\AuditManager:
+  DH\DoctrineAuditBundle\Manager\AuditManager:
     alias: dh_doctrine_audit.manager
     public: true
 
   dh_doctrine_audit.helper:
     class: DH\DoctrineAuditBundle\Helper\AuditHelper
     arguments: ["@dh_doctrine_audit.configuration"]
-    public: true
 
   DH\DoctrineAuditBundle\Helper\AuditHelper:
     alias: dh_doctrine_audit.helper
-    public: true
+
+  dh_doctrine_audit.user_provider:
+    class: DH\DoctrineAuditBundle\User\TokenStorageUserProvider
+    arguments: ["@security.helper"]
+
+  dh_doctrine_audit.twig_extension:
+    class: DH\DoctrineAuditBundle\Twig\Extension\TwigExtension
+    arguments: ['@doctrine']
+    tags:
+      - { name: twig.extension }
 
   dh_doctrine_audit.event_subscriber.audit:
     class: DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
@@ -56,12 +65,6 @@ services:
     arguments: ["@dh_doctrine_audit.manager", "@dh_doctrine_audit.reader"]
     tags:
       - { name: doctrine.event_subscriber, connection: default }
-
-  dh_doctrine_audit.twig_extension:
-    class: DH\DoctrineAuditBundle\Twig\Extension\TwigExtension
-    arguments: ['@doctrine']
-    tags:
-      - { name: twig.extension }
 
   dh_doctrine_audit.command.clean:
     class: DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand

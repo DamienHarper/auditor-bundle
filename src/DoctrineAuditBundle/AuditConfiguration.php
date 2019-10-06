@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle;
 
+use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
 use DH\DoctrineAuditBundle\User\UserProviderInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -60,17 +61,24 @@ class AuditConfiguration
      */
     private $entityManager;
 
+    /**
+     * @var AnnotationLoader
+     */
+    private $annotationLoader;
+
     public function __construct(
         array $config,
         UserProviderInterface $userProvider,
         RequestStack $requestStack,
         FirewallMap $firewallMap,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        AnnotationLoader $annotationLoader
     ) {
         $this->userProvider = $userProvider;
         $this->requestStack = $requestStack;
         $this->firewallMap = $firewallMap;
         $this->entityManager = $entityManager;
+        $this->annotationLoader = $annotationLoader;
 
         $this->enabled = $config['enabled'];
         $this->tablePrefix = $config['table_prefix'];
@@ -84,6 +92,11 @@ class AuditConfiguration
                 $this->entities[$auditedEntity] = $entityOptions;
             }
         }
+
+        // Update config using annotations
+        $config = $this->annotationLoader->load();
+        $this->entities = array_merge($this->entities, $config);
+dump($this->entities);
     }
 
     /**
