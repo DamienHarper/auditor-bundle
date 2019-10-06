@@ -47,7 +47,7 @@ class CreateSchemaListener implements EventSubscriber
         }
 
         // check if entity or its children are audited
-        if (!$this->manager->getConfiguration()->isAudited($metadata->name)) {
+        if (!$this->manager->getConfiguration()->isAuditable($metadata->name)) {
             $audited = false;
             if (
                 $metadata->rootEntityName === $metadata->name &&
@@ -57,7 +57,7 @@ class CreateSchemaListener implements EventSubscriber
                 ], true)
             ) {
                 foreach ($metadata->subClasses as $subClass) {
-                    if ($this->manager->getConfiguration()->isAudited($subClass)) {
+                    if ($this->manager->getConfiguration()->isAuditable($subClass)) {
                         $audited = true;
                     }
                 }
