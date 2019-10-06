@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Tests;
 
+use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
@@ -388,6 +389,7 @@ final class AuditConfigurationTest extends BaseTest
     protected function getAuditConfiguration(array $options = [], ?EntityManager $entityManager = null): AuditConfiguration
     {
         $container = new ContainerBuilder();
+        $em = $entityManager ?? $this->getEntityManager();
 
         return new AuditConfiguration(
             array_merge([
@@ -401,7 +403,8 @@ final class AuditConfigurationTest extends BaseTest
             new TokenStorageUserProvider(new Security($container)),
             new RequestStack(),
             new FirewallMap($container, []),
-            $entityManager ?? $this->getEntityManager()
+            $em,
+            new AnnotationLoader($em)
         );
     }
 

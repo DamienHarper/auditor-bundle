@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Tests;
 
+use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment;
@@ -248,6 +249,8 @@ abstract class CoreTest extends BaseTest
         $requestStack = new RequestStack();
         $requestStack->push(new Request([], [], [], [], [], ['REMOTE_ADDR' => '1.2.3.4']));
 
+        $em = $entityManager ?? $this->getEntityManager();
+
         return new AuditConfiguration(
             array_merge([
                 'enabled' => true,
@@ -260,7 +263,8 @@ abstract class CoreTest extends BaseTest
             new TokenStorageUserProvider($security),
             $requestStack,
             new FirewallMap($container, []),
-            $entityManager ?? $this->getEntityManager()
+            $em,
+            new AnnotationLoader($em)
         );
     }
 }

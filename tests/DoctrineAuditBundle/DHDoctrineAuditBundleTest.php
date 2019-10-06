@@ -45,7 +45,7 @@ final class DHDoctrineAuditBundleTest extends TestCase
 
         $em = EntityManager::create(
             $connection,
-            Setup::createAnnotationMetadataConfiguration([])
+            Setup::createAnnotationMetadataConfiguration([__DIR__.'/Fixtures'])
         );
 
         $container->set('entity_manager', $em);

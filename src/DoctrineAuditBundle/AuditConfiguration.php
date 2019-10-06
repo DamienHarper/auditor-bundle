@@ -96,7 +96,6 @@ class AuditConfiguration
         // Update config using annotations
         $config = $this->annotationLoader->load();
         $this->entities = array_merge($this->entities, $config);
-dump($this->entities);
     }
 
     /**

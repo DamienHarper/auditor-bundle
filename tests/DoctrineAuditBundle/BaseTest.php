@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Tests;
 
+use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber;
 use DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener;
@@ -180,6 +181,7 @@ abstract class BaseTest extends TestCase
     protected function createAuditConfiguration(array $options = [], ?EntityManager $entityManager = null): AuditConfiguration
     {
         $container = new ContainerBuilder();
+        $em = $entityManager ?? $this->getEntityManager();
 
         return new AuditConfiguration(
             array_merge([
@@ -193,7 +195,8 @@ abstract class BaseTest extends TestCase
             new TokenStorageUserProvider(new Security($container)),
             new RequestStack(),
             new FirewallMap($container, []),
-            $entityManager ?? $this->getEntityManager()
+            $em,
+            new AnnotationLoader($em)
         );
     }
 
