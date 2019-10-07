@@ -433,7 +433,7 @@ class AuditReader
 
         $entities = $this->configuration->getEntities();
 
-        if (null === $entities[$entity]['roles']) {
+        if (!isset($entities[$entity]['roles']) || null === $entities[$entity]['roles']) {
             // If no roles are configured, consider access granted
             return;
         }
