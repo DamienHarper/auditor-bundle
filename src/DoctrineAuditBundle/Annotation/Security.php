@@ -3,6 +3,7 @@
 namespace DH\DoctrineAuditBundle\Annotation;
 
 use Doctrine\Common\Annotations\Annotation;
+use Doctrine\Common\Annotations\Annotation\Required;
 
 /**
  * @Annotation
@@ -12,7 +13,7 @@ use Doctrine\Common\Annotations\Annotation;
 final class Security extends Annotation
 {
     /**
-     * @Annotation\Required()
+     * @Required
      *
      * @var array<string>
      */
