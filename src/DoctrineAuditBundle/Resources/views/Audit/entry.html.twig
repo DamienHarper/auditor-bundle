@@ -26,9 +26,10 @@
             {% if entry.type in ['insert', 'update'] %}
                 <table class="table table-hover table-sm mt-2 mb-0">
                     <thead class="thead-light">
-                    <th width="30%">Property</th>
-                    <th width="35%">Old value</th>
-                    <th width="35%">New value</th>
+                    <th width="25%">Property</th>
+                    <th width="25%">Old value</th>
+                    <th width="25%">New value</th>
+                    <th width="25%">Revert</th>
                     </thead>
                     <tbody>
                     {% set diffs = entry.diffs|json_decode(true) %}
@@ -57,6 +58,7 @@
                                     {% endif %}
                                 {% endif %}
                             </td>
+                            <td><a href="{{ path('dh_revert', { id: entry.id, object: entry.object_id, field: key, entity: helper.namespaceToParam(entity)}) }}">Revert</a></td>
                         </tr>
                     {% endfor %}
                     </tbody>
