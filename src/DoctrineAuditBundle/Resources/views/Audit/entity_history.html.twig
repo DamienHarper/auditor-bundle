@@ -1,30 +1,35 @@
 {% extends "@DHDoctrineAudit/layout.html.twig" %}
 
-{% block dh_doctrine_audit_content %}
-    <h1>{{ entity }} history ({{ entries|length }} operations)</h1>
+{% import '@DHDoctrineAudit/Audit/bootstrap.html.twig' as bootstrap %}
+{% import '@DHDoctrineAudit/Audit/helper.html.twig' as helper %}
 
-    <table>
-        <thead>
-            <th>Id</th>
-            <th>Type</th>
-            <th>Object Id</th>
-            <th>User Id</th>
-            <th>Username</th>
-            <th>IP</th>
-            <th>Created At</th>
-        </thead>
-        <tbody>
+{% block dh_doctrine_audit_content %}
+<div class="card border-0">
+    <div class="card-body">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_list_audits') }}">Home</a></li>
+                <li class="breadcrumb-item {% if id is null %}active{% endif %}" aria-current="page"><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': helper.namespaceToParam(entity) }) }}">{{ entity }}</a></li>
+                {% if id is not null %}
+                <li class="breadcrumb-item active" aria-current="page"><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': helper.namespaceToParam(entity), 'id': id }) }}">{{ entity }}#{{ id }}</a></li>
+                {% endif %}
+            </ol>
+        </nav>
+
+        <h4 class="card-title float-left"><code>{{ entity }}{% if id is not null %}#{{ id }}{% endif %}</code> <em>(most recent first)</em></h4>
+        <h5 class="float-right">{{ bootstrap.badge(entries|length ~ ' operations', 'primary') }}</h5>
+
+        <div class="timeline-centered">
         {% for entry in entries %}
-            <tr>
-                <td><a href="{{ path('dh_doctrine_audit_show_audit_entry', { 'entity': entity, 'id': entry.id }) }}">{{ entry.id }}</a></td>
-                <td>{{ entry.getType() }}</td>
-                <td><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': entity, 'id': entry.getObjectId() }) }}">{{ entry.getObjectId() }}</a></td>
-                <td>{{ entry.getUserId() }}</td>
-                <td>{{ entry.getUsername() }}</td>
-                <td>{{ entry.getIp() }}</td>
-                <td>{{ entry.getCreatedAt() }}</td>
-            </tr>
+            {{ include('@DHDoctrineAudit/Audit/entry.html.twig', {'entry': entry}) }}
         {% endfor %}
-        </tbody>
-    </table>
+        </div>
+
+        {% if entries.haveToPaginate() %}
+        <div class="pagerfanta float-right">
+            {{ pagerfanta(entries, 'twitter_bootstrap4') }}
+        </div>
+        {% endif %}
+    </div>
+</div>
 {% endblock dh_doctrine_audit_content %}

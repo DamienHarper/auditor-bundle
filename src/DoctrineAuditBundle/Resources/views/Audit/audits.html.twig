@@ -1,0 +1,37 @@
+{% extends "@DHDoctrineAudit/layout.html.twig" %}
+
+{% import '@DHDoctrineAudit/Audit/bootstrap.html.twig' as bootstrap %}
+{% import '@DHDoctrineAudit/Audit/helper.html.twig' as helper %}
+
+{% block dh_doctrine_audit_content %}
+<div class="card border-0">
+    <div class="card-body">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active"><a href="{{ path('dh_doctrine_audit_list_audits') }}">Home</a></li>
+            </ol>
+        </nav>
+        <h4 class="card-title">{{ audited|length }} audited entities</h4>
+        <table class="table table-hover">
+            <thead class="thead-dark">
+            <th>Entity</th>
+            <th>Table</th>
+            <th>Activity</th>
+            <th width="10%"></th>
+            </thead>
+            <tbody>
+            {% for entity, table in audited %}
+                <tr>
+                    <td><code>{{ entity|escape }}</code></td>
+                    <td>{{ table|escape }}</td>
+                    <td>{{ bootstrap.badge(reader.getAuditsCount(entity) ~ ' operations') }}</td>
+                    <td>
+                        <a href="{{ path('dh_doctrine_audit_show_entity_history', {'entity': helper.namespaceToParam(entity)}) }}">View audits</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock dh_doctrine_audit_content %}

@@ -1,0 +1,67 @@
+{% import '@DHDoctrineAudit/Audit/bootstrap.html.twig' as bootstrap %}
+{% import '@DHDoctrineAudit/Audit/helper.html.twig' as helper %}
+
+<article class="timeline-entry">
+    <div class="timeline-entry-inner">
+        <time class="timeline-time" datetime="2014-01-10T03:45">
+            <span>{{ entry.created_at|date('H:i:s') }}</span> <span>{{ entry.created_at|date('l d F Y') }}</span>
+        </time>
+
+        <div class="timeline-icon bg-{{ bootstrap.label_type(entry.type) }}">
+            <i class="entypo-feather"></i>
+        </div>
+
+        <div class="timeline-label">
+            <div class="row">
+                <div class="col-lg-8"><h2 class="mb-0">{{ helper.humanize(entity, entry) }}</h2></div>
+                <div class="col-lg-3" align="right">
+                    {% if entry.transaction_hash is not empty %}
+                    <a href="{{ path('dh_doctrine_audit_show_transaction', {hash: entry.transaction_hash}) }}" class="badge badge-pill badge-light font-weight-light transaction-hash" title="View all operations within this transaction">
+                        <i class="fas fa-tag"></i>&nbsp;{{ entry.transaction_hash }}
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="col-lg-1" align="center">{{ bootstrap.badge(entry.type, bootstrap.label_type(entry.type)) }}</div>
+            </div>
+            {% if entry.type in ['insert', 'update'] %}
+                <table class="table table-hover table-sm mt-2 mb-0">
+                    <thead class="thead-light">
+                    <th width="30%">Property</th>
+                    <th width="35%">Old value</th>
+                    <th width="35%">New value</th>
+                    </thead>
+                    <tbody>
+                    {% set diffs = entry.diffs|json_decode(true) %}
+                    {% for key, values in diffs %}
+                        <tr>
+                            <td><code>{{ key }}</code></td>
+                            <td>
+                                {% if values.old is defined %}
+                                    {% if values.old is empty %}
+                                        {{ bootstrap.badge('null', 'secondary') }}
+                                    {% else %}
+                                        {{ bootstrap.text(helper.dump(values.old), 'danger') }}
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if values.new is defined %}
+                                    {% if values.new is empty %}
+                                        {{ bootstrap.badge('null', 'secondary') }}
+                                    {% else %}
+                                        {% if values.old is empty %}
+                                            {{ bootstrap.text(helper.dump(values.new), 'primary') }}
+                                        {% else %}
+                                            {{ bootstrap.text(helper.dump(values.new), 'success') }}
+                                        {% endif %}
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+    </div>
+</article>

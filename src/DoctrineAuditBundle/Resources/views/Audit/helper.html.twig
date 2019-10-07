@@ -1,0 +1,63 @@
+{% macro dump(value, separator) %}
+{% import _self as helper %}
+{% apply spaceless %}
+    {% if value.label is defined %}
+        {{ value.label }}
+    {% elseif value is iterable %}
+        {% for k, v in value %}
+            {{ k }}: {{ helper.dump(v) }}{{ separator|default('<br/>')|raw }}
+        {% endfor %}
+    {% else %}
+        {{ value }}
+    {% endif %}
+{% endapply %}
+{% endmacro dump %}
+
+{% macro namespaceToParam(entity) %}
+{{- entity|replace({'\\': '-'}) -}}
+{% endmacro namespaceToParam %}
+
+{% macro humanize(entity, entry) %}
+    {% import _self as helper %}
+
+    {% set diffs = entry.diffs|json_decode(true) %}
+    {% set subject = entity~'#'~entry.object_id %}
+
+    {% if entry.type == 'insert' %}
+        {% set action = 'inserted' %}
+    {% elseif entry.type == 'update' %}
+        {% set action = 'updated' %}
+    {% elseif entry.type == 'remove' %}
+        {% set action = 'deleted' %}
+        {% set source = diffs %}
+    {% elseif entry.type == 'associate' %}
+        {% set action = 'associated' %}
+        {% set source = diffs.source %}
+        {% set target = diffs.target %}
+        {% set direction = 'to' %}
+    {% elseif entry.type == 'dissociate' %}
+        {% set action = 'dissociated' %}
+        {% set source = diffs.source %}
+        {% set target = diffs.target %}
+        {% set direction = 'from' %}
+    {% else %}
+        {% set action = '???' %}
+    {% endif %}
+
+    <code><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': helper.namespaceToParam(entity), 'id': entry.object_id }) }}" class="code">{{ subject }}</a></code>
+    {% if source is defined and subject != source.label %}
+    <em>({{ source.label }})</em>
+    {% endif %}
+    has been <b>{{ action }}</b>
+    {% if target is defined %}
+        {% set subject = target.class~'#'~target.id %}
+        {{ direction }} <code><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': helper.namespaceToParam(target.class), 'id': target.id }) }}">{{ subject }}</a></code>
+        {% if subject != target.label %}
+            (<em>{{ helper.dump(target) }}</em>)
+        {% endif %}
+    {% endif %}
+    by <b>{{ entry.blame_user is null ? 'unknown user' : entry.blame_user }}</b>
+    {% if entry.ip is not empty %}
+        , IP: {{ entry.ip }}
+    {% endif %}
+{% endmacro %}
