@@ -1,25 +1,52 @@
 services:
+  dh_doctrine_audit.annotation_loader:
+    class: DH\DoctrineAuditBundle\Annotation\AnnotationLoader
+    arguments: ["@doctrine.orm.default_entity_manager"]
+
+  DH\DoctrineAuditBundle\Annotation\AnnotationLoader:
+    alias: dh_doctrine_audit.annotation_loader
+
   dh_doctrine_audit.configuration:
     class: DH\DoctrineAuditBundle\AuditConfiguration
-    arguments: ["%dh_doctrine_audit.configuration%", "@security.token_storage", "@request_stack"]
-    public: true
+    arguments:
+      - "%dh_doctrine_audit.configuration%"
+      - "@dh_doctrine_audit.user_provider"
+      - "@request_stack"
+      - "@security.firewall.map"
+      - "@doctrine.orm.default_entity_manager"
+      - "@dh_doctrine_audit.annotation_loader"
+
+  DH\DoctrineAuditBundle\AuditConfiguration:
+    alias: dh_doctrine_audit.configuration
 
   dh_doctrine_audit.reader:
-    class: DH\DoctrineAuditBundle\AuditReader
+    class: DH\DoctrineAuditBundle\Reader\AuditReader
     arguments: ["@dh_doctrine_audit.configuration", "@doctrine.orm.default_entity_manager"]
     public: true
 
-  dh_doctrine_audit.event_subscriber.audit:
-    class: DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
-    arguments: ["@dh_doctrine_audit.configuration"]
-    tags:
-      - { name: doctrine.event_subscriber, connection: default }
+  DH\DoctrineAuditBundle\Reader\AuditReader:
+    alias: dh_doctrine_audit.reader
+    public: true
 
-  dh_doctrine_audit.event_subscriber.create_schema:
-    class: DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
+  dh_doctrine_audit.manager:
+    class: DH\DoctrineAuditBundle\Manager\AuditManager
+    arguments: ["@dh_doctrine_audit.configuration", "@dh_doctrine_audit.helper"]
+    public: true
+
+  DH\DoctrineAuditBundle\Manager\AuditManager:
+    alias: dh_doctrine_audit.manager
+    public: true
+
+  dh_doctrine_audit.helper:
+    class: DH\DoctrineAuditBundle\Helper\AuditHelper
     arguments: ["@dh_doctrine_audit.configuration"]
-    tags:
-      - { name: doctrine.event_subscriber, connection: default }
+
+  DH\DoctrineAuditBundle\Helper\AuditHelper:
+    alias: dh_doctrine_audit.helper
+
+  dh_doctrine_audit.user_provider:
+    class: DH\DoctrineAuditBundle\User\TokenStorageUserProvider
+    arguments: ["@security.helper"]
 
   dh_doctrine_audit.twig_extension:
     class: DH\DoctrineAuditBundle\Twig\Extension\TwigExtension
@@ -27,6 +54,32 @@ services:
     tags:
       - { name: twig.extension }
 
-  DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand:
+  dh_doctrine_audit.event_subscriber.audit:
+    class: DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
+    arguments: ["@dh_doctrine_audit.manager"]
+    tags:
+      - { name: doctrine.event_subscriber, connection: default }
+
+  dh_doctrine_audit.event_subscriber.create_schema:
+    class: DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
+    arguments: ["@dh_doctrine_audit.manager", "@dh_doctrine_audit.reader"]
+    tags:
+      - { name: doctrine.event_subscriber, connection: default }
+
+  dh_doctrine_audit.command.clean:
+    class: DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand
     tags:
       - { name: 'console.command', command: 'audit:clean' }
+
+  DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand:
+    alias: dh_doctrine_audit.command.clean
+    public: true
+
+  dh_doctrine_audit.command.schema_update:
+    class: DH\DoctrineAuditBundle\Command\UpdateSchemaCommand
+    tags:
+      - { name: 'console.command', command: 'audit:schema:update' }
+
+  DH\DoctrineAuditBundle\Command\UpdateSchemaCommand:
+    alias: dh_doctrine_audit.command.schema_update
+    public: true

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/8.0/phpunit.xsd"
+         bootstrap="../../vendor/autoload.php"
+         executionOrder="depends,defects"
+         forceCoversAnnotation="true"
+         beStrictAboutCoversAnnotation="true"
+         beStrictAboutOutputDuringTests="true"
+         beStrictAboutTodoAnnotatedTests="true"
+         verbose="true">
+
+    <testsuites>
+        <testsuite name="DoctrineAuditBundle test suite">
+            <directory suffix="Test.php">../DoctrineAuditBundle</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist addUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">../../src</directory>
+            <exclude>
+                <file>../../src/DoctrineAuditBundle/DHDoctrineAuditBundle.php</file>
+                <file>../../src/DoctrineAuditBundle/Exception/UpdateException.php</file>
+                <file>../../src/DoctrineAuditBundle/User/UserInterface.php</file>
+                <file>../../src/DoctrineAuditBundle/User/UserProviderInterface.php</file>
+            </exclude>
+        </whitelist>
+    </filter>
+</phpunit>

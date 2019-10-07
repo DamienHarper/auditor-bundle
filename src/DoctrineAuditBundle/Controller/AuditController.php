@@ -2,49 +2,74 @@
 
 namespace DH\DoctrineAuditBundle\Controller;
 
+use DH\DoctrineAuditBundle\Helper\AuditHelper;
+use DH\DoctrineAuditBundle\Reader\AuditReader;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
-class AuditController extends Controller
+class AuditController extends AbstractController
 {
     /**
      * @Route("/audit", name="dh_doctrine_audit_list_audits", methods={"GET"})
      */
-    public function listAuditsAction()
+    public function listAuditsAction(): Response
     {
         $reader = $this->container->get('dh_doctrine_audit.reader');
-        $reader->getEntities();
 
-        return $this->render('@DHDoctrineAudit/Audit/audited_entities.html.twig', [
+        return $this->render('@DHDoctrineAudit/Audit/audits.html.twig', [
             'audited' => $reader->getEntities(),
+            'reader' => $reader,
+        ]);
+    }
+
+    /**
+     * @Route("/audit/transaction/{hash}", name="dh_doctrine_audit_show_transaction", methods={"GET"})
+     *
+     * @param string $hash
+     *
+     * @throws \Doctrine\ORM\ORMException
+     *
+     * @return Response
+     */
+    public function showTransactionAction(string $hash): Response
+    {
+        $reader = $this->container->get('dh_doctrine_audit.reader');
+        $audits = $reader->getAuditsByTransactionHash($hash);
+
+        return $this->render('@DHDoctrineAudit/Audit/transaction.html.twig', [
+            'hash' => $hash,
+            'audits' => $audits,
         ]);
     }
 
     /**
      * @Route("/audit/{entity}/{id}", name="dh_doctrine_audit_show_entity_history", methods={"GET"})
+     *
+     * @param Request    $request
+     * @param string     $entity
+     * @param int|string $id
+     *
+     * @return Response
      */
-    public function showEntityHistoryAction(string $entity, int $id = null, int $page = 1, int $pageSize = 50)
+    public function showEntityHistoryAction(Request $request, string $entity, $id = null): Response
     {
+        $page = (int) $request->query->get('page', 1);
+        $entity = AuditHelper::paramToNamespace($entity);
+
         $reader = $this->container->get('dh_doctrine_audit.reader');
-        $entries = $reader->getAudits($entity, $id, $page, $pageSize);
+
+        if (!$reader->getConfiguration()->isAuditable($entity)) {
+            throw $this->createNotFoundException();
+        }
+
+        $entries = $reader->getAuditsPager($entity, $id, $page, AuditReader::PAGE_SIZE);
 
         return $this->render('@DHDoctrineAudit/Audit/entity_history.html.twig', [
+            'id' => $id,
             'entity' => $entity,
             'entries' => $entries,
-        ]);
-    }
-
-    /**
-     * @Route("/audit/details/{entity}/{id}", name="dh_doctrine_audit_show_audit_entry", methods={"GET"})
-     */
-    public function showAuditEntryAction(string $entity, int $id)
-    {
-        $reader = $this->container->get('dh_doctrine_audit.reader');
-        $data = $reader->getAudit($entity, $id);
-
-        return $this->render('@DHDoctrineAudit/Audit/entity_audit_details.html.twig', [
-            'entity' => $entity,
-            'entry' => $data[0],
         ]);
     }
 }

@@ -2,8 +2,12 @@
 
 namespace DH\DoctrineAuditBundle;
 
+use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
+use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
+use DH\DoctrineAuditBundle\User\UserProviderInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
 class AuditConfiguration
 {
@@ -18,6 +22,11 @@ class AuditConfiguration
     private $tableSuffix;
 
     /**
+     * @var string
+     */
+    private $timezone;
+
+    /**
      * @var array
      */
     private $ignoredColumns = [];
@@ -28,22 +37,53 @@ class AuditConfiguration
     private $entities = [];
 
     /**
-     * @var TokenStorage
+     * @var bool
      */
-    protected $securityTokenStorage;
+    private $enabled = true;
+
+    /**
+     * @var UserProviderInterface
+     */
+    protected $userProvider;
 
     /**
      * @var RequestStack
      */
     protected $requestStack;
 
-    public function __construct(array $config, TokenStorage $securityTokenStorage, RequestStack $requestStack)
-    {
-        $this->securityTokenStorage = $securityTokenStorage;
-        $this->requestStack = $requestStack;
+    /**
+     * @var FirewallMap
+     */
+    private $firewallMap;
 
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+
+    /**
+     * @var AnnotationLoader
+     */
+    private $annotationLoader;
+
+    public function __construct(
+        array $config,
+        UserProviderInterface $userProvider,
+        RequestStack $requestStack,
+        FirewallMap $firewallMap,
+        EntityManagerInterface $entityManager,
+        AnnotationLoader $annotationLoader
+    ) {
+        $this->userProvider = $userProvider;
+        $this->requestStack = $requestStack;
+        $this->firewallMap = $firewallMap;
+        $this->entityManager = $entityManager;
+        $this->annotationLoader = $annotationLoader;
+
+        $this->enabled = $config['enabled'];
         $this->tablePrefix = $config['table_prefix'];
         $this->tableSuffix = $config['table_suffix'];
+        $this->timezone = $config['timezone'];
         $this->ignoredColumns = $config['ignored_columns'];
 
         if (isset($config['entities']) && !empty($config['entities'])) {
@@ -52,49 +92,149 @@ class AuditConfiguration
                 $this->entities[$auditedEntity] = $entityOptions;
             }
         }
+
+        // Update config using annotations
+        $config = $this->annotationLoader->load();
+        $this->entities = array_merge($this->entities, $config);
+    }
+
+    /**
+     * Set the value of entities.
+     *
+     * @param array $entities
+     */
+    public function setEntities(array $entities): void
+    {
+        $this->entities = $entities;
+    }
+
+    /**
+     * enabled audit.
+     *
+     * @return $this
+     */
+    public function enable(): self
+    {
+        $this->enabled = true;
+
+        return $this;
+    }
+
+    /**
+     * disable audit.
+     *
+     * @return $this
+     */
+    public function disable(): self
+    {
+        $this->enabled = false;
+
+        return $this;
+    }
+
+    /**
+     * Get enabled flag.
+     *
+     * @return bool
+     */
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
+    }
+
+    /**
+     * Returns true if $entity is auditable.
+     *
+     * @param object|string $entity
+     *
+     * @return bool
+     */
+    public function isAuditable($entity): bool
+    {
+        $class = DoctrineHelper::getRealClass($entity);
+
+        // is $entity part of audited entities?
+        if (!\array_key_exists($class, $this->entities)) {
+            // no => $entity is not audited
+            return false;
+        }
+
+        return true;
     }
 
     /**
      * Returns true if $entity is audited.
      *
-     * @param $entity
+     * @param object|string $entity
      *
      * @return bool
      */
     public function isAudited($entity): bool
     {
-        if (!empty($this->entities)) {
-            foreach (array_keys($this->entities) as $auditedEntity) {
-                if (\is_object($entity) && $entity instanceof $auditedEntity) {
-                    return true;
-                }
-                if (\is_string($entity) && $entity === $auditedEntity) {
-                    return true;
-                }
-            }
+        if (!$this->enabled) {
+            return false;
         }
 
-        return false;
+        $class = DoctrineHelper::getRealClass($entity);
+
+        // is $entity part of audited entities?
+        if (!\array_key_exists($class, $this->entities)) {
+            // no => $entity is not audited
+            return false;
+        }
+
+        $entityOptions = $this->entities[$class];
+
+        if (null === $entityOptions) {
+            // no option defined => $entity is audited
+            return true;
+        }
+
+        if (isset($entityOptions['enabled'])) {
+            return (bool) $entityOptions['enabled'];
+        }
+
+        return true;
     }
 
     /**
      * Returns true if $field is audited.
      *
-     * @param $entity
-     * @param $field
+     * @param object|string $entity
+     * @param string        $field
      *
      * @return bool
      */
-    public function isAuditedField($entity, $field): bool
+    public function isAuditedField($entity, string $field): bool
     {
-        if (!\in_array($field, $this->ignoredColumns, true) && $this->isAudited($entity)) {
-            $class = \is_object($entity) ? \Doctrine\Common\Util\ClassUtils::getRealClass(\get_class($entity)) : $entity;
-            $entityOptions = $this->entities[$class];
-
-            return !isset($entityOptions['ignored_columns']) || !\in_array($field, $entityOptions['ignored_columns'], true);
+        // is $field is part of globally ignored columns?
+        if (\in_array($field, $this->ignoredColumns, true)) {
+            // yes => $field is not audited
+            return false;
         }
 
-        return false;
+        // is $entity audited?
+        if (!$this->isAudited($entity)) {
+            // no => $field is not audited
+            return false;
+        }
+
+        $class = DoctrineHelper::getRealClass($entity);
+        $entityOptions = $this->entities[$class];
+
+        if (null === $entityOptions) {
+            // no option defined => $field is audited
+            return true;
+        }
+
+        // are columns excluded and is field part of them?
+        if (isset($entityOptions['ignored_columns']) &&
+            \in_array($field, $entityOptions['ignored_columns'], true)) {
+            // yes => $field is not audited
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -118,6 +258,16 @@ class AuditConfiguration
     }
 
     /**
+     * Get the value of timezone.
+     *
+     * @return string
+     */
+    public function getTimezone(): string
+    {
+        return $this->timezone;
+    }
+
+    /**
      * Get the value of excludedColumns.
      *
      * @return array
@@ -138,13 +288,45 @@ class AuditConfiguration
     }
 
     /**
-     * Get the value of securityTokenStorage.
+     * Enables auditing for a specific entity.
      *
-     * @return TokenStorage
+     * @param string $entity Entity class name
+     *
+     * @return $this
      */
-    public function getSecurityTokenStorage(): TokenStorage
+    public function enableAuditFor(string $entity): self
     {
-        return $this->securityTokenStorage;
+        if (isset($this->entities[$entity])) {
+            $this->entities[$entity]['enabled'] = true;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Disables auditing for a specific entity.
+     *
+     * @param string $entity Entity class name
+     *
+     * @return $this
+     */
+    public function disableAuditFor(string $entity): self
+    {
+        if (isset($this->entities[$entity])) {
+            $this->entities[$entity]['enabled'] = false;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get the value of userProvider.
+     *
+     * @return UserProviderInterface
+     */
+    public function getUserProvider(): ?UserProviderInterface
+    {
+        return $this->userProvider;
     }
 
     /**
@@ -155,5 +337,23 @@ class AuditConfiguration
     public function getRequestStack(): RequestStack
     {
         return $this->requestStack;
+    }
+
+    /**
+     * Gets the value of firewallMap.
+     *
+     * @return FirewallMap
+     */
+    public function getFirewallMap(): FirewallMap
+    {
+        return $this->firewallMap;
+    }
+
+    /**
+     * @return EntityManagerInterface
+     */
+    public function getEntityManager(): EntityManagerInterface
+    {
+        return $this->entityManager;
     }
 }

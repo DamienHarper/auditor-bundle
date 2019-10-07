@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\DependencyInjection;
 
+use Symfony\Component\Config\Definition\Builder\ParentNodeDefinitionInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -12,10 +13,18 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
+        $treeBuilder = new TreeBuilder('dh_doctrine_audit');
 
-        $treeBuilder->root('dh_doctrine_audit')
+        // Keep compatibility with symfony/config < 4.2
+        /** @var ParentNodeDefinitionInterface $rootNode */
+        $rootNode = method_exists($treeBuilder, 'getRootNode') ? $treeBuilder->getRootNode() : $treeBuilder->root('dh_doctrine_audit');
+
+        $rootNode
             ->children()
+                ->scalarNode('enabled')
+                    ->defaultTrue()
+                ->end()
+
                 ->scalarNode('table_prefix')
                     ->defaultValue('')
                 ->end()
@@ -28,6 +37,10 @@ class Configuration implements ConfigurationInterface
                     ->prototype('scalar')->end()
                 ->end()
 
+                ->scalarNode('timezone')
+                    ->defaultValue('UTC')
+                ->end()
+
                 ->arrayNode('entities')
                     ->canBeUnset()
                     ->prototype('array')
@@ -35,6 +48,9 @@ class Configuration implements ConfigurationInterface
                             ->arrayNode('ignored_columns')
                                 ->canBeUnset()
                                 ->prototype('scalar')->end()
+                            ->end()
+                            ->booleanNode('enabled')
+                                ->defaultTrue()
                             ->end()
                         ->end()
                     ->end()
