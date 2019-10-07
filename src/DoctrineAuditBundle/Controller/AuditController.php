@@ -27,6 +27,7 @@ class AuditController extends AbstractController
 
     /**
      * @Route("/audit/revert/{id}/{object}/{entity}/{field}", name="dh_doctrine_audit_revert")
+     *
      * @param $id
      * @param $object
      * @param $entity
@@ -54,13 +55,13 @@ class AuditController extends AbstractController
 
         $setMethod = "set{$field}";
 
-        $current_entity->$setMethod($field_value);
+        $current_entity->{$setMethod}($field_value);
 
         $em->persist($current_entity);
         $em->flush();
 
         return $this->redirectToRoute('dh_doctrine_audit_show_entity_history', [
-            'entity' => $entity
+            'entity' => $entity,
         ]);
     }
 
