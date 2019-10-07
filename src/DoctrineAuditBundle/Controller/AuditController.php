@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Controller;
 
+use DH\DoctrineAuditBundle\Exception\InvalidArgumentException;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,9 +30,10 @@ class AuditController extends AbstractController
      *
      * @param string $hash
      *
-     * @throws \Doctrine\ORM\ORMException
-     *
      * @return Response
+     * @throws InvalidArgumentException
+     *
+     * @throws \Doctrine\ORM\ORMException
      */
     public function showTransactionAction(string $hash): Response
     {
