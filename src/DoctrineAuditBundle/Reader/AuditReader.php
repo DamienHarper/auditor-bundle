@@ -118,19 +118,19 @@ class AuditReader
     /**
      * Returns an array of audited entries/operations.
      *
-     * @param object|string $entity
-     * @param int|string    $id
-     * @param null|int      $page
-     * @param null|int      $pageSize
-     * @param null|string   $transactionHash
-     * @param null|bool     $strict
+     * @param object|string   $entity
+     * @param null|int|string $id
+     * @param null|int        $page
+     * @param null|int        $pageSize
+     * @param null|string     $transactionHash
+     * @param null|bool       $strict
      *
      * @throws AccessDeniedException
      * @throws InvalidArgumentException
      *
      * @return array
      */
-    public function getAudits($entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, ?bool $strict = true): array
+    public function getAudits($entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, bool $strict = true): array
     {
         $this->checkAuditable($entity);
         $this->checkRoles($entity);
@@ -177,10 +177,13 @@ class AuditReader
     /**
      * Returns an array of audited entries/operations.
      *
-     * @param object|string $entity
-     * @param int|string    $id
-     * @param int           $page
-     * @param int           $pageSize
+     * @param $entity
+     * @param null|int|string $id
+     * @param int             $page
+     * @param int             $pageSize
+     *
+     * @throws AccessDeniedException
+     * @throws InvalidArgumentException
      *
      * @return Pagerfanta
      */
@@ -202,8 +205,11 @@ class AuditReader
     /**
      * Returns the amount of audited entries/operations.
      *
-     * @param object|string $entity
-     * @param int|string    $id
+     * @param $entity
+     * @param null|int|string $id
+     *
+     * @throws AccessDeniedException
+     * @throws InvalidArgumentException
      *
      * @return int
      */
@@ -226,11 +232,11 @@ class AuditReader
      * Returns an array of audited entries/operations.
      *
      * @param $entity
-     * @param null        $id
-     * @param null|int    $page
-     * @param null|int    $pageSize
-     * @param null|string $transactionHash
-     * @param null|bool   $strict
+     * @param null|int|string $id
+     * @param null|int        $page
+     * @param null|int        $pageSize
+     * @param null|string     $transactionHash
+     * @param null|bool       $strict
      *
      * @throws AccessDeniedException
      * @throws InvalidArgumentException
