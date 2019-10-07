@@ -7,15 +7,15 @@ use Doctrine\Common\Annotations\Annotation\Required;
 
 /**
  * @Annotation
- *
  * @Target("CLASS")
+ * @Attributes({
+ *     @Attribute("roles", required=true, type="array<string>"),
+ * })
  */
 final class Security extends Annotation
 {
     /**
      * @Required
-     *
-     * @var array<string>
      */
     public $roles;
 }
