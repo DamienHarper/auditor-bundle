@@ -12,6 +12,8 @@ use Doctrine\Common\Annotations\Annotation;
 final class Security extends Annotation
 {
     /**
+     * @Annotation\Required()
+     *
      * @var array<string>
      */
     public $roles;
