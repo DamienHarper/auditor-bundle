@@ -32,7 +32,7 @@ class AuditController extends AbstractController
      * @param $entity
      * @param $field
      *
-     * @return Symfony\Component\HttpFoundation\RedirectResponse
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function revertEntityHistoryAction($id, $object, $entity, $field)
     {
