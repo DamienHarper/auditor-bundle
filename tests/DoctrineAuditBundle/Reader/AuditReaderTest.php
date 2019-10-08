@@ -6,6 +6,8 @@ use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Reader\AuditEntry;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Annotation\AuditedEntity;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Annotation\UnauditedEntity;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Comment;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Post;
@@ -110,13 +112,15 @@ final class AuditReaderTest extends CoreTest
     public function testGetEntities(): void
     {
         $entities = [
+            AuditedEntity::class => null,
+            UnauditedEntity::class => null,
             Post::class => null,
             Comment::class => null,
         ];
 
         $expected = array_combine(
             array_keys($entities),
-            ['post', 'comment']
+            ['audited_entity', 'unaudited_entity', 'post', 'comment']
         );
         ksort($expected);
 

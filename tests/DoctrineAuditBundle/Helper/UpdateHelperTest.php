@@ -33,11 +33,6 @@ use Gedmo;
  */
 final class UpdateHelperTest extends BaseTest
 {
-    /**
-     * @var string
-     */
-    protected $fixturesPath = __DIR__.'/../Fixtures';
-
     private function getTable(array $tables, string $name): ?Table
     {
         foreach ($tables as $table) {

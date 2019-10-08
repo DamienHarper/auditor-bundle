@@ -4,6 +4,8 @@ namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\AuditConfiguration;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Annotation\AuditedEntity;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Annotation\UnauditedEntity;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Comment;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Post;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
@@ -101,13 +103,23 @@ final class AuditConfigurationTest extends BaseTest
         $entities = [
             Post::class => null,
             Comment::class => null,
+            AuditedEntity::class => [
+                'ignored_columns' => ['ignoredField'],
+                'enabled' => true,
+                'roles' => null,
+            ],
+            UnauditedEntity::class => [
+                'ignored_columns' => ['ignoredField'],
+                'enabled' => false,
+                'roles' => ['ROLE1', 'ROLE2'],
+            ],
         ];
 
         $configuration = $this->getAuditConfiguration([
             'entities' => $entities,
         ]);
 
-        static::assertSame($entities, $configuration->getEntities(), 'AuditConfiguration::getEntities() returns configured entities list.');
+        static::assertEquals($entities, $configuration->getEntities(), 'AuditConfiguration::getEntities() returns configured entities list.');
     }
 
     public function testGetUserProvider(): void

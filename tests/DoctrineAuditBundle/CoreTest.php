@@ -24,11 +24,6 @@ use Symfony\Component\Security\Core\Security;
 abstract class CoreTest extends BaseTest
 {
     /**
-     * @var string
-     */
-    protected $fixturesPath = __DIR__.'/Fixtures';
-
-    /**
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\Tools\ToolsException
