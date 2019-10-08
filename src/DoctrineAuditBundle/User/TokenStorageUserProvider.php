@@ -68,9 +68,9 @@ class TokenStorageUserProvider implements UserProviderInterface
     }
 
     /**
-     * @return Security
+     * @return null|Security
      */
-    public function getSecurity(): Security
+    public function getSecurity(): ?Security
     {
         return $this->security;
     }
