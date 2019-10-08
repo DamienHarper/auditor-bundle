@@ -3,6 +3,9 @@
 namespace DH\DoctrineAuditBundle\Reader;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
+use DH\DoctrineAuditBundle\Exception\AccessDeniedException;
+use DH\DoctrineAuditBundle\Exception\InvalidArgumentException;
+use DH\DoctrineAuditBundle\User\UserInterface;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Statement;
@@ -10,6 +13,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata as ORMMetadata;
 use Pagerfanta\Adapter\DoctrineDbalSingleTableAdapter;
 use Pagerfanta\Pagerfanta;
+use Symfony\Component\Security\Core\Security;
 
 class AuditReader
 {
@@ -114,17 +118,23 @@ class AuditReader
     /**
      * Returns an array of audited entries/operations.
      *
-     * @param object|string $entity
-     * @param int|string    $id
-     * @param null|int      $page
-     * @param null|int      $pageSize
-     * @param null|string   $transactionHash
-     * @param null|bool     $strict
+     * @param object|string   $entity
+     * @param null|int|string $id
+     * @param null|int        $page
+     * @param null|int        $pageSize
+     * @param null|string     $transactionHash
+     * @param null|bool       $strict
+     *
+     * @throws AccessDeniedException
+     * @throws InvalidArgumentException
      *
      * @return array
      */
-    public function getAudits($entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, ?bool $strict = true): array
+    public function getAudits($entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, bool $strict = true): array
     {
+        $this->checkAuditable($entity);
+        $this->checkRoles($entity);
+
         $queryBuilder = $this->getAuditsQueryBuilder($entity, $id, $page, $pageSize, $transactionHash, $strict);
 
         /** @var Statement $statement */
@@ -140,6 +150,7 @@ class AuditReader
      *
      * @param string $transactionHash
      *
+     * @throws InvalidArgumentException
      * @throws \Doctrine\ORM\ORMException
      *
      * @return array
@@ -150,9 +161,13 @@ class AuditReader
 
         $entities = $this->getEntities();
         foreach ($entities as $entity => $tablename) {
-            $audits = $this->getAudits($entity, null, null, null, $transactionHash);
-            if (\count($audits) > 0) {
-                $results[$entity] = $audits;
+            try {
+                $audits = $this->getAudits($entity, null, null, null, $transactionHash);
+                if (\count($audits) > 0) {
+                    $results[$entity] = $audits;
+                }
+            } catch (AccessDeniedException $e) {
+                // acces denied
             }
         }
 
@@ -162,10 +177,13 @@ class AuditReader
     /**
      * Returns an array of audited entries/operations.
      *
-     * @param object|string $entity
-     * @param int|string    $id
-     * @param int           $page
-     * @param int           $pageSize
+     * @param $entity
+     * @param null|int|string $id
+     * @param int             $page
+     * @param int             $pageSize
+     *
+     * @throws AccessDeniedException
+     * @throws InvalidArgumentException
      *
      * @return Pagerfanta
      */
@@ -187,8 +205,11 @@ class AuditReader
     /**
      * Returns the amount of audited entries/operations.
      *
-     * @param object|string $entity
-     * @param int|string    $id
+     * @param $entity
+     * @param null|int|string $id
+     *
+     * @throws AccessDeniedException
+     * @throws InvalidArgumentException
      *
      * @return int
      */
@@ -210,17 +231,23 @@ class AuditReader
     /**
      * Returns an array of audited entries/operations.
      *
-     * @param object|string $entity
-     * @param int|string    $id
-     * @param int           $page
-     * @param int           $pageSize
-     * @param null|string   $transactionHash
-     * @param null|bool     $strict          Only applies with SINGLE_TABLE inheritance
+     * @param $entity
+     * @param null|int|string $id
+     * @param null|int        $page
+     * @param null|int        $pageSize
+     * @param null|string     $transactionHash
+     * @param null|bool       $strict
+     *
+     * @throws AccessDeniedException
+     * @throws InvalidArgumentException
      *
      * @return QueryBuilder
      */
-    private function getAuditsQueryBuilder($entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, ?bool $strict = true): QueryBuilder
+    private function getAuditsQueryBuilder($entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, bool $strict = true): QueryBuilder
     {
+        $this->checkAuditable($entity);
+        $this->checkRoles($entity);
+
         if (null !== $page && $page < 1) {
             throw new \InvalidArgumentException('$page must be greater or equal than 1.');
         }
@@ -280,13 +307,19 @@ class AuditReader
     }
 
     /**
-     * @param object|string $entity
-     * @param int|string    $id
+     * @param $entity
+     * @param $id
      *
-     * @return mixed
+     * @throws AccessDeniedException
+     * @throws InvalidArgumentException
+     *
+     * @return mixed[]
      */
     public function getAudit($entity, $id)
     {
+        $this->checkAuditable($entity);
+        $this->checkRoles($entity);
+
         $connection = $this->entityManager->getConnection();
 
         /**
@@ -314,6 +347,11 @@ class AuditReader
         return $statement->fetchAll();
     }
 
+    /**
+     * @param $entity
+     *
+     * @return ClassMetadata
+     */
     private function getClassMetadata($entity): ClassMetadata
     {
         return $this
@@ -365,5 +403,56 @@ class AuditReader
     public function getEntityManager(): EntityManagerInterface
     {
         return $this->entityManager;
+    }
+
+    /**
+     * Throws an InvalidArgumentException if given entity is not auditable.
+     *
+     * @param $entity
+     *
+     * @throws InvalidArgumentException
+     */
+    private function checkAuditable($entity): void
+    {
+        if (!$this->configuration->isAuditable($entity)) {
+            throw new InvalidArgumentException('Entity '.$entity.' is not auditable.');
+        }
+    }
+
+    /**
+     * Throws an AccessDeniedException if user not is granted to access audits for the given entity.
+     *
+     * @param $entity
+     *
+     * @throws AccessDeniedException
+     */
+    private function checkRoles($entity): void
+    {
+        $userProvider = $this->configuration->getUserProvider();
+        $user = null === $userProvider ? null : $userProvider->getUser();
+        $security = null === $userProvider ? null : $userProvider->getSecurity();
+
+        if (!($user instanceof UserInterface) || !($security instanceof Security)) {
+            // If no security defined or no user identified, consider access granted
+            return;
+        }
+
+        $entities = $this->configuration->getEntities();
+
+        if (!isset($entities[$entity]['roles']) || null === $entities[$entity]['roles']) {
+            // If no roles are configured, consider access granted
+            return;
+        }
+
+        // roles are defined
+        foreach ($entities[$entity]['roles'] as $role) {
+            if ($security->isGranted($role)) {
+                // role granted => access granted
+                return;
+            }
+        }
+
+        // access denied
+        throw new AccessDeniedException('You are not allowed to access audits of '.$entity.' entity.');
     }
 }

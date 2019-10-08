@@ -16,6 +16,9 @@ class TokenStorageUserProvider implements UserProviderInterface
         $this->security = $security;
     }
 
+    /**
+     * @return null|UserInterface
+     */
     public function getUser(): ?UserInterface
     {
         try {
@@ -62,5 +65,13 @@ class TokenStorageUserProvider implements UserProviderInterface
         }
 
         return null;
+    }
+
+    /**
+     * @return null|Security
+     */
+    public function getSecurity(): ?Security
+    {
+        return $this->security;
     }
 }

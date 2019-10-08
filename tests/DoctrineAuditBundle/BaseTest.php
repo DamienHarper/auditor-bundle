@@ -40,7 +40,10 @@ abstract class BaseTest extends TestCase
     /**
      * @var string
      */
-    protected $fixturesPath = __DIR__.'/Fixtures';
+    protected $fixturesPath = [
+        __DIR__.'/../../src/DoctrineAuditBundle/Annotation',
+        __DIR__.'/Fixtures',
+    ];
 
     protected $auditConfiguration;
 

@@ -7,11 +7,12 @@ use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Manager\AuditManager;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Author;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Post;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Tag;
 
 /**
+ * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener

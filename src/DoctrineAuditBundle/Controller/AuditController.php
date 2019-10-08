@@ -2,6 +2,8 @@
 
 namespace DH\DoctrineAuditBundle\Controller;
 
+use DH\DoctrineAuditBundle\Exception\AccessDeniedException;
+use DH\DoctrineAuditBundle\Exception\InvalidArgumentException;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,6 +31,7 @@ class AuditController extends AbstractController
      *
      * @param string $hash
      *
+     * @throws InvalidArgumentException
      * @throws \Doctrine\ORM\ORMException
      *
      * @return Response
@@ -64,7 +67,11 @@ class AuditController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $entries = $reader->getAuditsPager($entity, $id, $page, AuditReader::PAGE_SIZE);
+        try {
+            $entries = $reader->getAuditsPager($entity, $id, $page, AuditReader::PAGE_SIZE);
+        } catch (AccessDeniedException $e) {
+            throw $this->createAccessDeniedException();
+        }
 
         return $this->render('@DHDoctrineAudit/Audit/entity_history.html.twig', [
             'id' => $id,

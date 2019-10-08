@@ -34,7 +34,9 @@ before_script:
     - if [ $(phpenv version-name) = "7.3" ]; then ./cc-test-reporter before-build; fi
 
 script:
-    - ./vendor/bin/phpunit -c tests/travis/$DB.travis.xml --coverage-clover clover.xml
+#    - ./vendor/bin/phpunit -c tests/travis/$DB.travis.xml --coverage-clover clover.xml
+    - ./vendor/bin/phpunit --dump-xdebug-filter tests/xdebug-filter.php
+    - ./vendor/bin/phpunit --prepend tests/xdebug-filter.php -c tests/travis/$DB.travis.xml --coverage-clover clover.xml
 
 after_script:
     - if [ $(phpenv version-name) = "7.3" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi

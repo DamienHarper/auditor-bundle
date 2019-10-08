@@ -1,6 +1,6 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core;
+namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard;
 
 use DH\DoctrineAuditBundle\User\User as BaseUser;
 use Symfony\Component\Security\Core\User\UserInterface;

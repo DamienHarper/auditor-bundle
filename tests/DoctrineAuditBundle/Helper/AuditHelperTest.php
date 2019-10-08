@@ -6,8 +6,8 @@ use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Author;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issue40\CoreCase;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issue40\DieselCase;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
 
 /**
+ * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLoggerChain
@@ -448,12 +449,12 @@ final class AuditHelperTest extends CoreTest
 
     public function testParamToNamespace(): void
     {
-        static::assertSame(Author::class, AuditHelper::paramToNamespace('DH-DoctrineAuditBundle-Tests-Fixtures-Core-Author'), 'AuditHelper::paramToNamespace() is ok.');
+        static::assertSame(Author::class, AuditHelper::paramToNamespace('DH-DoctrineAuditBundle-Tests-Fixtures-Core-Standard-Author'), 'AuditHelper::paramToNamespace() is ok.');
     }
 
     public function testNamespaceToParam(): void
     {
-        static::assertSame('DH-DoctrineAuditBundle-Tests-Fixtures-Core-Author', AuditHelper::namespaceToParam(Author::class), 'AuditHelper::namespaceToParam() is ok.');
+        static::assertSame('DH-DoctrineAuditBundle-Tests-Fixtures-Core-Standard-Author', AuditHelper::namespaceToParam(Author::class), 'AuditHelper::namespaceToParam() is ok.');
     }
 
     public function testGetConfiguration(): void
