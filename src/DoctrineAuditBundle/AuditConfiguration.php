@@ -72,7 +72,7 @@ class AuditConfiguration
         RequestStack $requestStack,
         FirewallMap $firewallMap,
         EntityManagerInterface $entityManager,
-        AnnotationLoader $annotationLoader
+        ?AnnotationLoader $annotationLoader = null
     ) {
         $this->userProvider = $userProvider;
         $this->requestStack = $requestStack;
@@ -94,8 +94,10 @@ class AuditConfiguration
         }
 
         // Update config using annotations
-        $config = $this->annotationLoader->load();
-        $this->entities = array_merge($this->entities, $config);
+        if (null !== $annotationLoader) {
+            $config = $this->annotationLoader->load();
+            $this->entities = array_merge($this->entities, $config);
+        }
     }
 
     /**
