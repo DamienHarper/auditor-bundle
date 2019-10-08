@@ -1,6 +1,6 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core;
+namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -221,7 +221,7 @@ class Post
     /**
      * Add Comment entity to collection (one to many).
      *
-     * @param Comment $comment
+     * @param \DH\DoctrineAuditBundle\Tests\Fixtures\Core\Basic\Blog\DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Comment $comment
      *
      * @return Post
      */
@@ -235,7 +235,7 @@ class Post
     /**
      * Remove Comment entity from collection (one to many).
      *
-     * @param Comment $comment
+     * @param \DH\DoctrineAuditBundle\Tests\Fixtures\Core\Basic\Blog\DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Comment $comment
      *
      * @return Post
      */

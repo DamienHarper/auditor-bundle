@@ -3,9 +3,9 @@
 namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\Reader\AuditReader;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Bike;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Car;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Vehicle;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Inheritance\Bike;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Inheritance\Car;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Inheritance\Vehicle;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issue37\Locale;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issue37\User;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issue40\CoreCase;

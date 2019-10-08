@@ -4,12 +4,12 @@ namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\AuditConfiguration;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\DummyEntity;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\User;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Author;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Comment;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\DummyEntity;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Post;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Tag;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\User;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;

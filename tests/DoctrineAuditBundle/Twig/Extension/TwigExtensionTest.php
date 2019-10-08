@@ -3,7 +3,7 @@
 namespace DH\DoctrineAuditBundle\Tests\Twig\Extension;
 
 use DH\DoctrineAuditBundle\Tests\BaseTest;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Author;
 use DH\DoctrineAuditBundle\Twig\Extension\TwigExtension;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Symfony\Component\DependencyInjection\ContainerBuilder;

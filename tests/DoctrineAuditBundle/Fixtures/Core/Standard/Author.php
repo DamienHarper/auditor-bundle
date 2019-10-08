@@ -1,6 +1,6 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core;
+namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

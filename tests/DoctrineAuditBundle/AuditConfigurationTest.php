@@ -4,8 +4,8 @@ namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\AuditConfiguration;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Comment;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Post;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;

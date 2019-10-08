@@ -1,6 +1,6 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core;
+namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -85,7 +85,7 @@ class Tag
     /**
      * Add Post entity to collection.
      *
-     * @param Post $post
+     * @param \DH\DoctrineAuditBundle\Tests\Fixtures\Core\Basic\Blog\DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Post $post
      *
      * @return Tag
      */
@@ -99,7 +99,7 @@ class Tag
     /**
      * Remove Post entity from collection.
      *
-     * @param Post $post
+     * @param \DH\DoctrineAuditBundle\Tests\Fixtures\Core\Basic\Blog\DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Post $post
      *
      * @return Tag
      */
