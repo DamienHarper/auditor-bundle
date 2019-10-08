@@ -17,7 +17,7 @@ class TokenStorageUserProvider implements UserProviderInterface
     }
 
     /**
-     * @return UserInterface|null
+     * @return null|UserInterface
      */
     public function getUser(): ?UserInterface
     {
