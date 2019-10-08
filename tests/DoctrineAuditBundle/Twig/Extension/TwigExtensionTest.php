@@ -9,6 +9,7 @@ use Doctrine\Bundle\DoctrineBundle\Registry;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
+ * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLoggerChain

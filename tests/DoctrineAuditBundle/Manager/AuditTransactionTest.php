@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
 
 /**
+ * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
@@ -43,19 +44,6 @@ final class AuditTransactionTest extends BaseTest
         static::assertIsString($transaction_hash, 'transaction_hash is a string');
         static::assertSame(40, mb_strlen($transaction_hash), 'transaction_hash is a string of 40 characters');
     }
-
-//    public function testTransactionHashAfterReset(): void
-//    {
-//        $configuration = $this->getAuditConfiguration();
-//        $helper = new AuditHelper($configuration);
-//        $manager = new AuditManager($configuration, $helper);
-//
-//        $before = $manager->getTransactionHash();
-//        $manager->reset();
-//        $after = $manager->getTransactionHash();
-//
-//        static::assertNotSame($after, $before, 'transaction_hash is reset by AuditManager::reset()');
-//    }
 
     protected function getAuditConfiguration(array $options = [], ?EntityManager $entityManager = null): AuditConfiguration
     {

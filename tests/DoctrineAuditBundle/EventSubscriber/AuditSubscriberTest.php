@@ -11,6 +11,7 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
 
 /**
+ * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLoggerChain

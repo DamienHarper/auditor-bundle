@@ -13,6 +13,7 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
 use Pagerfanta\Pagerfanta;
 
 /**
+ * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLoggerChain

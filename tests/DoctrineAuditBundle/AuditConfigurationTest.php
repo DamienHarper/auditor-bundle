@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
 
 /**
+ * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener

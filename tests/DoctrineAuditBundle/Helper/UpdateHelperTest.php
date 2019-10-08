@@ -16,6 +16,7 @@ use Doctrine\ORM\Proxy\ProxyFactory;
 use Gedmo;
 
 /**
+ * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
