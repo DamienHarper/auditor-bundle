@@ -36,7 +36,9 @@ before_script:
     - pecl install pcov
 
 script:
-    - php -d pcov.enabled=1 ./vendor/bin/phpunit -c tests/travis/$DB.travis.xml --coverage-clover clover.xml
+    - if [ $(phpenv version-name) = "7.1" ]; then ./vendor/bin/phpunit -c tests/travis/$DB.travis.xml --disable-coverage; fi
+    - if [ $(phpenv version-name) = "7.2" ]; then ./vendor/bin/phpunit -c tests/travis/$DB.travis.xml --disable-coverage; fi
+    - if [ $(phpenv version-name) = "7.3" ]; then php -d pcov.enabled=1 ./vendor/bin/phpunit -c tests/travis/$DB.travis.xml --coverage-clover clover.xml; fi
 
 after_script:
     - if [ $(phpenv version-name) = "7.3" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi
