@@ -32,11 +32,11 @@ before_script:
     - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
     - chmod +x ./cc-test-reporter
     - if [ $(phpenv version-name) = "7.3" ]; then ./cc-test-reporter before-build; fi
+    - phpenv config-rm xdebug.ini
+    - pecl install pcov
 
 script:
-#    - ./vendor/bin/phpunit -c tests/travis/$DB.travis.xml --coverage-clover clover.xml
-    - ./vendor/bin/phpunit --dump-xdebug-filter tests/xdebug-filter.php
-    - ./vendor/bin/phpunit --prepend tests/xdebug-filter.php -c tests/travis/$DB.travis.xml --coverage-clover clover.xml
+    - php -d pcov.enabled=1 ./vendor/bin/phpunit -c tests/travis/$DB.travis.xml --coverage-clover clover.xml
 
 after_script:
     - if [ $(phpenv version-name) = "7.3" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi
