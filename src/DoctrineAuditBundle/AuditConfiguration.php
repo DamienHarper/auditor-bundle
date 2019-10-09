@@ -94,7 +94,7 @@ class AuditConfiguration
         }
 
         // Update config using annotations
-        if (null !== $annotationLoader) {
+        if (null !== $this->annotationLoader) {
             $config = $this->annotationLoader->load();
             $this->entities = array_merge($this->entities, $config);
         }
