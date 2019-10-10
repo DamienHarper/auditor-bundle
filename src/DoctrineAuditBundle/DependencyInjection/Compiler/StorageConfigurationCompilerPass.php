@@ -19,9 +19,9 @@ class StorageConfigurationCompilerPass implements CompilerPassInterface
             return;
         }
 
-        $reference = new Reference($config['storage_entity_manager']);
-
-        $definition = $container->getDefinition('dh_doctrine_audit.configuration');
-        $definition->replaceArgument(4, $reference);
+        $container
+            ->getDefinition('dh_doctrine_audit.configuration')
+            ->replaceArgument(4, new Reference($config['storage_entity_manager']))
+        ;
     }
 }
