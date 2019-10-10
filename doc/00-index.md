@@ -7,10 +7,9 @@
 * Configuration
   * [General Configuration](20-general-configuration.md)
   * [Audit Configuration](21-audit-configuration.md)
-  * [Storage Configuration](22-storage-configuration.md)
-  * [Create audit tables](23-audit-schema.md)
-  * [Using a custom user provider](24-custom-user-provider.md)
-  * [Enabling and disabling audits](25-enabling-disabling-audits.md)
+  * [Create audit tables](22-audit-schema.md)
+  * [Using a custom user provider](23-custom-user-provider.md)
+  * [Enabling and disabling audits](24-enabling-disabling-audits.md)
 * Audit viewer
   * [Audit viewer](30-audit-viewer.md)
 * Audit maintenance
