@@ -69,8 +69,8 @@ final class DHDoctrineAuditExtensionTest extends AbstractExtensionTestCase
                 'enabled' => true,
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
-                'timezone' => 'UTC',
                 'ignored_columns' => [],
+                'timezone' => 'UTC',
                 'entities' => [],
             ]
         );
