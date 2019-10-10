@@ -45,7 +45,7 @@
     "twig/twig": "<1.40|<2.9"
   },
   "scripts": {
-    "test": "vendor/bin/phpunit",
+    "test": "php -d pcov.enabled=1 ./vendor/bin/phpunit",
     "csfixer": "vendor/bin/php-cs-fixer fix --config=.php_cs --cache-file=.php_cs.cache --verbose"
   }
 }
