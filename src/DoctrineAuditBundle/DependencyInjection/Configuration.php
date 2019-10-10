@@ -27,6 +27,7 @@ class Configuration implements ConfigurationInterface
 
                 ->scalarNode('storage_entity_manager')
                     ->cannotBeEmpty()
+                    ->defaultNull()
                 ->end()
 
                 ->scalarNode('table_prefix')

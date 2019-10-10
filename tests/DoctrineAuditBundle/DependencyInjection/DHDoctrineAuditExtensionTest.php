@@ -67,6 +67,7 @@ final class DHDoctrineAuditExtensionTest extends AbstractExtensionTestCase
             'dh_doctrine_audit.configuration',
             [
                 'enabled' => true,
+                'storage_entity_manager' => null,
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
                 'ignored_columns' => [],
