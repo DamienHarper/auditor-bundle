@@ -17,6 +17,7 @@ dh_doctrine_audit:
     enabled: true
 ```
 
+
 ## Per entity enable/disable
 Per entity enabling/disabling is done in the configuration file.
 
@@ -49,11 +50,11 @@ To disable auditing for an entity, you first have to inject the `dh_doctrine_aud
 service in your class, then use:
 
 ```php
-$auditConfiguration->disableAuditFor(MyAuditedEntity1::class);
+$auditConfiguration->disableAuditFor(MyEntity1::class);
 ```
 
 To enable auditing afterwards, use:
 
 ```php
-$auditConfiguration->enableAuditFor(MyAuditedEntity1::class);
+$auditConfiguration->enableAuditFor(MyEntity1::class);
 ```

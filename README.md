@@ -64,7 +64,7 @@ Though, we can only really support the ones we can test with [Travis CI](https:/
 
 ## Credits
 - Thanks to [all contributors](https://github.com/DamienHarper/DoctrineAuditBundle/graphs/contributors)
-- This bundle took some inspiration from [data-dog/audit-bundle](https://github.com/DATA-DOG/DataDogAuditBundle.git) and 
+- This bundle initially took some inspiration from [data-dog/audit-bundle](https://github.com/DATA-DOG/DataDogAuditBundle.git) and 
 [simplethings/entity-audit-bundle](https://github.com/simplethings/EntityAuditBundle.git)
 
 ## License

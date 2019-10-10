@@ -10,6 +10,7 @@ configure it as a service named `dh_doctrine_audit.user_provider`.
 use DH\DoctrineAuditBundle\User\User;
 use DH\DoctrineAuditBundle\User\UserInterface;
 use DH\DoctrineAuditBundle\User\UserProviderInterface;
+use Symfony\Component\Security\Core\Security;
 
 class CustomUserProvider implements UserProviderInterface
 {
@@ -17,6 +18,11 @@ class CustomUserProvider implements UserProviderInterface
     {
         // Your logic goes here...
         return new User($yourUserId, $yourUsername);
+    }
+
+    public function getSecurity(): ?Security
+    {
+        return $this->security;
     }
 }
 ```

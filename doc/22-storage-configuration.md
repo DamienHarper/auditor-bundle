@@ -2,7 +2,7 @@
 
 By default, DoctrineAuditBundle stores audits in the same database than the tables mapped to entities.
 
-However, the bundle lets you store audits into a secondary database.
+However, DoctrineAuditBundle lets you store audits into a secondary database (dual database setup).
 
 **WARNING:** Using a secondary database for storing audits **breaks atomicity** provided by the bundle by default. 
 Audits persistence operations are performed into different transactions than entity persistence operations.
