@@ -1,3 +1,5 @@
+# Documentation
+
 * Essentials
   * [Introduction](10-introduction.md)
   * [Installation](11-installation.md)
@@ -15,4 +17,5 @@
   * [Audit cleanup](40-audits-cleanup.md)
 * Help
   * [Troubleshooting](50-troubleshooting.md)
+  * [Changelog](../CHANGELOG.md)
 * [Contributing](../tests/README.md)
