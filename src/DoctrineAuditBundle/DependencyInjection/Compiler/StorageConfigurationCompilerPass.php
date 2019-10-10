@@ -2,10 +2,9 @@
 
 namespace DH\DoctrineAuditBundle\DependencyInjection\Compiler;
 
-use DH\DoctrineAuditBundle\Exception\InvalidArgumentException;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Reference;
 
 class StorageConfigurationCompilerPass implements CompilerPassInterface
 {
@@ -20,12 +19,9 @@ class StorageConfigurationCompilerPass implements CompilerPassInterface
             return;
         }
 
-        $entityManager = $container->get($config['storage_entity_manager']);
-        if (!($entityManager instanceof EntityManagerInterface)) {
-            throw new InvalidArgumentException(sprintf('Service "%s" must implement "%s".', $config['storage_entity_manager'], EntityManagerInterface::class));
-        }
+        $reference = new Reference($config['storage_entity_manager']);
 
         $definition = $container->getDefinition('dh_doctrine_audit.configuration');
-        $definition->replaceArgument(4, $entityManager);
+        $definition->replaceArgument(4, $reference);
     }
 }
