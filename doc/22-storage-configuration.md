@@ -18,7 +18,7 @@ secondary database **still can fail** which is bad but can be acceptable in some
 could be acceptable)
 ---
 
-To store audits in a secondary database, you have change the last argument of `dh_doctrine_audit.configuration` service 
+To store audits in a secondary database, you have change the fifth argument of `dh_doctrine_audit.configuration` service 
 to set the entity manager binded to that secondary database. 
 
 ```yaml
