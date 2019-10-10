@@ -5,7 +5,6 @@ namespace DH\DoctrineAuditBundle\Tests\Manager;
 use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
-use DH\DoctrineAuditBundle\Manager\AuditManager;
 use DH\DoctrineAuditBundle\Manager\AuditTransaction;
 use DH\DoctrineAuditBundle\Tests\BaseTest;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;

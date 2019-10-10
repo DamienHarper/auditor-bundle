@@ -19,6 +19,7 @@ use Symfony\Component\Security\Core\Security;
 /**
  * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
+ * @covers \DH\DoctrineAuditBundle\DependencyInjection\Compiler\StorageConfigurationCompilerPass
  * @covers \DH\DoctrineAuditBundle\DependencyInjection\Configuration
  * @covers \DH\DoctrineAuditBundle\DependencyInjection\DHDoctrineAuditExtension
  * @covers \DH\DoctrineAuditBundle\DHDoctrineAuditBundle
@@ -32,9 +33,6 @@ final class DHDoctrineAuditBundleTest extends TestCase
     public function testDefaultBuild(): void
     {
         $container = new ContainerBuilder();
-
-        $bundle = new DHDoctrineAuditBundle();
-        $bundle->build($container);
 
         $extension = new DHDoctrineAuditExtension();
         $extension->load([], $container);
@@ -50,7 +48,6 @@ final class DHDoctrineAuditBundleTest extends TestCase
         );
 
         $container->set('entity_manager', $em);
-
         $container->setAlias('doctrine.orm.default_entity_manager', 'entity_manager');
 
         $registry = new Registry(
@@ -72,9 +69,70 @@ final class DHDoctrineAuditBundleTest extends TestCase
         $firewallMap = new FirewallMap($container, []);
         $container->set('security.firewall.map', $firewallMap);
 
+        $bundle = new DHDoctrineAuditBundle();
+        $bundle->build($container);
+
         $container->compile();
 
         $auditReader = $container->get('dh_doctrine_audit.reader');
         static::assertInstanceOf(AuditReader::class, $auditReader);
+    }
+
+    public function testStorageCompilerPass(): void
+    {
+        $container = new ContainerBuilder();
+
+        $extension = new DHDoctrineAuditExtension();
+        $extension->load([
+            'dh_doctrine_audit' => [
+                'storage_entity_manager' => 'doctrine.orm.secondary_entity_manager',
+            ],
+        ], $container);
+
+        // main connection and entity manager
+        $connection = new Connection([], $this->createMock(Driver::class));
+        $em1 = EntityManager::create($connection, Setup::createAnnotationMetadataConfiguration([__DIR__.'/Fixtures']));
+
+        $container->set('entity_manager', $em1);
+        $container->setAlias('doctrine.orm.default_entity_manager', 'entity_manager');
+
+        // secondary connection and entity manager
+        $connection2 = new Connection([], $this->createMock(Driver::class));
+        $em2 = EntityManager::create($connection2, Setup::createAnnotationMetadataConfiguration([__DIR__.'/Fixtures']));
+
+        $container->set('entity_manager2', $em2);
+        $container->setAlias('doctrine.orm.secondary_entity_manager', 'entity_manager2');
+
+        $registry = new Registry(
+            $container,
+            [],
+            [
+                'default' => 'entity_manager',
+                'secondary' => 'entity_manager2',
+            ],
+            'default',
+            'default'
+        );
+
+        $container->set('doctrine', $registry);
+
+        $security = new Security($container);
+        $container->set('security.helper', $security);
+
+        $requestStack = new RequestStack();
+        $container->set('request_stack', $requestStack);
+
+        $firewallMap = new FirewallMap($container, []);
+        $container->set('security.firewall.map', $firewallMap);
+
+        $bundle = new DHDoctrineAuditBundle();
+        $bundle->build($container);
+
+        $container->compile();
+
+        $default_em = $container->get('entity_manager');
+        $custom_em = $container->get('dh_doctrine_audit.reader')->getConfiguration()->getEntityManager();
+
+        static::assertNotSame($custom_em, $default_em, 'AuditConfiguration entity manager is not the default one');
     }
 }

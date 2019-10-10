@@ -62,7 +62,7 @@ class AuditConfiguration
     private $entityManager;
 
     /**
-     * @var AnnotationLoader
+     * @var null|AnnotationLoader
      */
     private $annotationLoader;
 
@@ -357,5 +357,13 @@ class AuditConfiguration
     public function getEntityManager(): EntityManagerInterface
     {
         return $this->entityManager;
+    }
+
+    /**
+     * @return null|AnnotationLoader
+     */
+    public function getAnnotationLoader(): ?AnnotationLoader
+    {
+        return $this->annotationLoader;
     }
 }

@@ -25,6 +25,11 @@ class Configuration implements ConfigurationInterface
                     ->defaultTrue()
                 ->end()
 
+                ->scalarNode('storage_entity_manager')
+                    ->cannotBeEmpty()
+                    ->defaultNull()
+                ->end()
+
                 ->scalarNode('table_prefix')
                     ->defaultValue('')
                 ->end()
