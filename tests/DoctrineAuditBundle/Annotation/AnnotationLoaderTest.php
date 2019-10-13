@@ -3,6 +3,7 @@
 namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
+use DH\DoctrineAuditBundle\Annotation\Security;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Annotation\AuditedEntity;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Annotation\UnauditedEntity;
 
@@ -38,6 +39,9 @@ final class AnnotationLoaderTest extends BaseTest
         $options = $config[UnauditedEntity::class];
         static::assertSame($options['ignored_columns'], ['ignoredField']);
         static::assertFalse($options['enabled']);
-        static::assertSame(['ROLE1', 'ROLE2'], $options['roles']);
+        static::assertSame(
+            [Security::VIEW_SCOPE => ['ROLE1', 'ROLE2']],
+            $options['roles']
+        );
     }
 }

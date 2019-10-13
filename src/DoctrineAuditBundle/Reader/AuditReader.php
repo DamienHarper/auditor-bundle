@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Reader;
 
+use DH\DoctrineAuditBundle\Annotation\Security;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Exception\AccessDeniedException;
 use DH\DoctrineAuditBundle\Exception\InvalidArgumentException;
@@ -13,7 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata as ORMMetadata;
 use Pagerfanta\Adapter\DoctrineDbalSingleTableAdapter;
 use Pagerfanta\Pagerfanta;
-use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\Security as CoreSecurity;
 
 class AuditReader
 {
@@ -133,7 +134,7 @@ class AuditReader
     public function getAudits($entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, bool $strict = true): array
     {
         $this->checkAuditable($entity);
-        $this->checkRoles($entity);
+        $this->checkRoles($entity, Security::VIEW_SCOPE);
 
         $queryBuilder = $this->getAuditsQueryBuilder($entity, $id, $page, $pageSize, $transactionHash, $strict);
 
@@ -246,7 +247,7 @@ class AuditReader
     private function getAuditsQueryBuilder($entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, bool $strict = true): QueryBuilder
     {
         $this->checkAuditable($entity);
-        $this->checkRoles($entity);
+        $this->checkRoles($entity, Security::VIEW_SCOPE);
 
         if (null !== $page && $page < 1) {
             throw new \InvalidArgumentException('$page must be greater or equal than 1.');
@@ -318,7 +319,7 @@ class AuditReader
     public function getAudit($entity, $id)
     {
         $this->checkAuditable($entity);
-        $this->checkRoles($entity);
+        $this->checkRoles($entity, Security::VIEW_SCOPE);
 
         $connection = $this->entityManager->getConnection();
 
@@ -423,16 +424,17 @@ class AuditReader
      * Throws an AccessDeniedException if user not is granted to access audits for the given entity.
      *
      * @param $entity
+     * @param string $scope
      *
      * @throws AccessDeniedException
      */
-    private function checkRoles($entity): void
+    private function checkRoles($entity, string $scope): void
     {
         $userProvider = $this->configuration->getUserProvider();
         $user = null === $userProvider ? null : $userProvider->getUser();
         $security = null === $userProvider ? null : $userProvider->getSecurity();
 
-        if (!($user instanceof UserInterface) || !($security instanceof Security)) {
+        if (!($user instanceof UserInterface) || !($security instanceof CoreSecurity)) {
             // If no security defined or no user identified, consider access granted
             return;
         }
@@ -444,8 +446,13 @@ class AuditReader
             return;
         }
 
-        // roles are defined
-        foreach ($entities[$entity]['roles'] as $role) {
+        if (!isset($entities[$entity]['roles'][$scope]) || null === $entities[$entity]['roles'][$scope]) {
+            // If no roles for the given scope are configured, consider access granted
+            return;
+        }
+
+        // roles are defined for the give scope
+        foreach ($entities[$entity]['roles'][$scope] as $role) {
             if ($security->isGranted($role)) {
                 // role granted => access granted
                 return;

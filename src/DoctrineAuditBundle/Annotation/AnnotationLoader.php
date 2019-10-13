@@ -58,11 +58,18 @@ class AnnotationLoader
 
         // Check that we have an Security annotation
         $securityAnnotation = $this->reader->getClassAnnotation($reflection, Security::class);
+        if (null === $securityAnnotation) {
+            $roles = null;
+        } else {
+            $roles = [
+                Security::VIEW_SCOPE => $securityAnnotation->view
+            ];
+        }
 
         $config = [
             'ignored_columns' => [],
             'enabled' => $auditableAnnotation->enabled,
-            'roles' => null === $securityAnnotation ? null : $securityAnnotation->roles,
+            'roles' => $roles,
         ];
 
         // Are there any Ignore annotations?

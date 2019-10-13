@@ -9,13 +9,15 @@ use Doctrine\Common\Annotations\Annotation\Required;
  * @Annotation
  * @Target("CLASS")
  * @Attributes({
- *     @Attribute("roles", required=true, type="array<string>"),
+ *     @Attribute("view", required=true, type="array<string>"),
  * })
  */
 final class Security extends Annotation
 {
+    public const VIEW_SCOPE = 'view';
+
     /**
      * @Required
      */
-    public $roles;
+    public $view;
 }

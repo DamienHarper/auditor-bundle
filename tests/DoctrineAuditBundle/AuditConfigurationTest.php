@@ -3,6 +3,7 @@
 namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
+use DH\DoctrineAuditBundle\Annotation\Security;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Annotation\AuditedEntity;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Annotation\UnauditedEntity;
@@ -13,7 +14,7 @@ use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\Security as CoreSecurity;
 
 /**
  * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
@@ -111,7 +112,9 @@ final class AuditConfigurationTest extends BaseTest
             UnauditedEntity::class => [
                 'ignored_columns' => ['ignoredField'],
                 'enabled' => false,
-                'roles' => ['ROLE1', 'ROLE2'],
+                'roles' => [
+                    Security::VIEW_SCOPE => ['ROLE1', 'ROLE2'],
+                ],
             ],
         ];
 
@@ -413,7 +416,7 @@ final class AuditConfigurationTest extends BaseTest
                 'entities' => [],
                 'enabled' => true,
             ], $options),
-            new TokenStorageUserProvider(new Security($container)),
+            new TokenStorageUserProvider(new CoreSecurity($container)),
             new RequestStack(),
             new FirewallMap($container, []),
             $em,
