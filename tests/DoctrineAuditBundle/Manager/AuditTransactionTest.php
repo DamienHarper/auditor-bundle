@@ -11,14 +11,17 @@ use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
 
 /**
  * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
+ * @covers \DH\DoctrineAuditBundle\Event\AuditEvent
  * @covers \DH\DoctrineAuditBundle\Event\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\Event\CreateSchemaListener
+ * @covers \DH\DoctrineAuditBundle\Event\DoctrineSubscriber
  * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\Helper\UpdateHelper
@@ -62,7 +65,8 @@ final class AuditTransactionTest extends BaseTest
             new RequestStack(),
             new FirewallMap($container, []),
             $em,
-            new AnnotationLoader($em)
+            new AnnotationLoader($em),
+            new EventDispatcher()
         );
     }
 

@@ -19,8 +19,10 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * @covers \DH\DoctrineAuditBundle\Command\UpdateSchemaCommand
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLoggerChain
+ * @covers \DH\DoctrineAuditBundle\Event\AuditEvent
  * @covers \DH\DoctrineAuditBundle\Event\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\Event\CreateSchemaListener
+ * @covers \DH\DoctrineAuditBundle\Event\DoctrineSubscriber
  * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\Helper\UpdateHelper

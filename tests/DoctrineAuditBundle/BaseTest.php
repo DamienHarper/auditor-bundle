@@ -6,6 +6,7 @@ use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Event\AuditSubscriber;
 use DH\DoctrineAuditBundle\Event\CreateSchemaListener;
+use DH\DoctrineAuditBundle\Event\DoctrineSubscriber;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
 use DH\DoctrineAuditBundle\Manager\AuditManager;
@@ -22,8 +23,10 @@ use Gedmo;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 abstract class BaseTest extends TestCase
 {
@@ -36,6 +39,11 @@ abstract class BaseTest extends TestCase
      * @var EntityManager
      */
     protected $em;
+
+    /**
+     * @var EventDispatcherInterface
+     */
+    protected $dispatcher;
 
     /**
      * @var string
@@ -199,7 +207,8 @@ abstract class BaseTest extends TestCase
             new RequestStack(),
             new FirewallMap($container, []),
             $em,
-            new AnnotationLoader($em)
+            new AnnotationLoader($em),
+            new EventDispatcher()
         );
     }
 
@@ -237,6 +246,8 @@ abstract class BaseTest extends TestCase
 
         $this->auditManager = new AuditManager($configuration, new AuditHelper($configuration));
 
+        $configuration->getEventDispatcher()->addSubscriber(new AuditSubscriber($this->auditManager));
+
         // get rid of more global state
         $evm = $connection->getEventManager();
         foreach ($evm->getListeners() as $event => $listeners) {
@@ -244,7 +255,7 @@ abstract class BaseTest extends TestCase
                 $evm->removeEventListener([$event], $listener);
             }
         }
-        $evm->addEventSubscriber(new AuditSubscriber($this->auditManager));
+        $evm->addEventSubscriber(new DoctrineSubscriber($this->auditManager));
         $evm->addEventSubscriber(new CreateSchemaListener($this->auditManager, $this->getReader()));
         $evm->addEventSubscriber(new Gedmo\SoftDeleteable\SoftDeleteableListener());
 
@@ -263,6 +274,16 @@ abstract class BaseTest extends TestCase
         }
 
         return self::$conn;
+    }
+
+    protected function getEventDispatcher(AuditManager $manager): EventDispatcherInterface
+    {
+        if (null !== $this->dispatcher) {
+            $this->dispatcher = new EventDispatcher();
+            $this->dispatcher->addSubscriber(new AuditSubscriber($manager));
+        }
+
+        return $this->dispatcher;
     }
 
     /**

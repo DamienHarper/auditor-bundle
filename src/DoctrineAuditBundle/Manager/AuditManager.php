@@ -3,6 +3,7 @@
 namespace DH\DoctrineAuditBundle\Manager;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
+use DH\DoctrineAuditBundle\Event\AuditEvent;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -32,6 +33,14 @@ class AuditManager
     public function getConfiguration(): AuditConfiguration
     {
         return $this->configuration;
+    }
+
+    /**
+     * @param array $payload
+     */
+    public function notify(array $payload): void
+    {
+        $this->configuration->getEventDispatcher()->dispatch(new AuditEvent($payload));
     }
 
     /**
@@ -214,43 +223,25 @@ class AuditManager
     {
         $schema = $data['schema'] ? $data['schema'].'.' : '';
         $auditTable = $schema.$this->configuration->getTablePrefix().$data['table'].$this->configuration->getTableSuffix();
-        $fields = [
-            'type' => ':type',
-            'object_id' => ':object_id',
-            'discriminator' => ':discriminator',
-            'transaction_hash' => ':transaction_hash',
-            'diffs' => ':diffs',
-            'blame_id' => ':blame_id',
-            'blame_user' => ':blame_user',
-            'blame_user_fqdn' => ':blame_user_fqdn',
-            'blame_user_firewall' => ':blame_user_firewall',
-            'ip' => ':ip',
-            'created_at' => ':created_at',
+        $dt = new \DateTime('now', new \DateTimeZone($this->getConfiguration()->getTimezone()));
+
+        $payload = [
+            'table' => $auditTable,
+            'type' => $data['action'],
+            'object_id' => (string) $data['id'],
+            'discriminator' => $data['discriminator'],
+            'transaction_hash' => (string) $data['transaction_hash'],
+            'diffs' => json_encode($data['diff']),
+            'blame_id' => $data['blame']['user_id'],
+            'blame_user' => $data['blame']['username'],
+            'blame_user_fqdn' => $data['blame']['user_fqdn'],
+            'blame_user_firewall' => $data['blame']['user_firewall'],
+            'ip' => $data['blame']['client_ip'],
+            'created_at' => $dt->format('Y-m-d H:i:s'),
         ];
 
-        $query = sprintf(
-            'INSERT INTO %s (%s) VALUES (%s)',
-            $auditTable,
-            implode(', ', array_keys($fields)),
-            implode(', ', array_values($fields))
-        );
-
-        $storage = $this->selectStorageSpace($em);
-        $statement = $storage->getConnection()->prepare($query);
-
-        $dt = new \DateTime('now', new \DateTimeZone($this->getConfiguration()->getTimezone()));
-        $statement->bindValue('type', $data['action']);
-        $statement->bindValue('object_id', (string) $data['id']);
-        $statement->bindValue('discriminator', $data['discriminator']);
-        $statement->bindValue('transaction_hash', (string) $data['transaction_hash']);
-        $statement->bindValue('diffs', json_encode($data['diff']));
-        $statement->bindValue('blame_id', $data['blame']['user_id']);
-        $statement->bindValue('blame_user', $data['blame']['username']);
-        $statement->bindValue('blame_user_fqdn', $data['blame']['user_fqdn']);
-        $statement->bindValue('blame_user_firewall', $data['blame']['user_firewall']);
-        $statement->bindValue('ip', $data['blame']['client_ip']);
-        $statement->bindValue('created_at', $dt->format('Y-m-d H:i:s'));
-        $statement->execute();
+        // send an `AuditEvent` event
+        $this->notify($payload);
     }
 
     /**
@@ -354,7 +345,7 @@ class AuditManager
      *
      * @return EntityManagerInterface
      */
-    private function selectStorageSpace(EntityManagerInterface $em): EntityManagerInterface
+    public function selectStorageSpace(EntityManagerInterface $em): EntityManagerInterface
     {
         return $this->configuration->getEntityManager() ?? $em;
     }

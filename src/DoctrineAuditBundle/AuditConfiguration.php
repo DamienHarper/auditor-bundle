@@ -7,6 +7,8 @@ use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
 use DH\DoctrineAuditBundle\User\UserProviderInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\EventDispatcher\LegacyEventDispatcherProxy;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class AuditConfiguration
@@ -66,19 +68,26 @@ class AuditConfiguration
      */
     private $annotationLoader;
 
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $dispatcher;
+
     public function __construct(
         array $config,
         UserProviderInterface $userProvider,
         RequestStack $requestStack,
         FirewallMap $firewallMap,
         EntityManagerInterface $entityManager,
-        ?AnnotationLoader $annotationLoader = null
+        ?AnnotationLoader $annotationLoader,
+        EventDispatcherInterface $dispatcher
     ) {
         $this->userProvider = $userProvider;
         $this->requestStack = $requestStack;
         $this->firewallMap = $firewallMap;
         $this->entityManager = $entityManager;
         $this->annotationLoader = $annotationLoader;
+        $this->dispatcher = LegacyEventDispatcherProxy::decorate($dispatcher);
 
         $this->enabled = $config['enabled'];
         $this->tablePrefix = $config['table_prefix'];
@@ -365,5 +374,13 @@ class AuditConfiguration
     public function getAnnotationLoader(): ?AnnotationLoader
     {
         return $this->annotationLoader;
+    }
+
+    /**
+     * @return EventDispatcherInterface
+     */
+    public function getEventDispatcher(): EventDispatcherInterface
+    {
+        return $this->dispatcher;
     }
 }

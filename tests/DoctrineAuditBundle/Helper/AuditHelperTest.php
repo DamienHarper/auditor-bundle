@@ -14,6 +14,7 @@ use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use DH\DoctrineAuditBundle\User\User;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
 
@@ -22,8 +23,10 @@ use Symfony\Component\Security\Core\Security;
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLoggerChain
+ * @covers \DH\DoctrineAuditBundle\Event\AuditEvent
  * @covers \DH\DoctrineAuditBundle\Event\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\Event\CreateSchemaListener
+ * @covers \DH\DoctrineAuditBundle\Event\DoctrineSubscriber
  * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\Helper\UpdateHelper
@@ -219,7 +222,8 @@ final class AuditHelperTest extends CoreTest
             $configuration->getRequestStack(),
             new FirewallMap(new ContainerBuilder(), []),
             $em,
-            new AnnotationLoader($em)
+            new AnnotationLoader($em),
+            new EventDispatcher()
         );
         $helper = new AuditHelper($configuration);
 
@@ -284,7 +288,8 @@ final class AuditHelperTest extends CoreTest
             $configuration->getRequestStack(),
             new FirewallMap(new ContainerBuilder(), []),
             $em,
-            new AnnotationLoader($em)
+            new AnnotationLoader($em),
+            new EventDispatcher()
         );
         $helper = new AuditHelper($configuration);
 
@@ -401,7 +406,8 @@ final class AuditHelperTest extends CoreTest
             new RequestStack(),
             new FirewallMap(new ContainerBuilder(), []),
             $em,
-            new AnnotationLoader($em)
+            new AnnotationLoader($em),
+            new EventDispatcher()
         );
         $helper = new AuditHelper($configuration);
 
@@ -432,7 +438,8 @@ final class AuditHelperTest extends CoreTest
             new RequestStack(),
             new FirewallMap(new ContainerBuilder(), []),
             $em,
-            new AnnotationLoader($em)
+            new AnnotationLoader($em),
+            new EventDispatcher()
         );
         $helper = new AuditHelper($configuration);
 

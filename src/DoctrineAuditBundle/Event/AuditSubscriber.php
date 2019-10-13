@@ -2,79 +2,69 @@
 
 namespace DH\DoctrineAuditBundle\Event;
 
-use DH\DoctrineAuditBundle\DBAL\AuditLogger;
-use DH\DoctrineAuditBundle\DBAL\AuditLoggerChain;
 use DH\DoctrineAuditBundle\Manager\AuditManager;
-use DH\DoctrineAuditBundle\Manager\AuditTransaction;
-use Doctrine\Common\EventSubscriber;
-use Doctrine\DBAL\Logging\SQLLogger;
-use Doctrine\ORM\Event\OnFlushEventArgs;
-use Doctrine\ORM\Events;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-class AuditSubscriber implements EventSubscriber
+class AuditSubscriber implements EventSubscriberInterface
 {
     /**
      * @var AuditManager
      */
     private $manager;
 
-    /**
-     * @var ?SQLLogger
-     */
-    private $loggerBackup;
-
     public function __construct(AuditManager $manager)
     {
         $this->manager = $manager;
     }
 
-    /**
-     * It is called inside EntityManager#flush() after the changes to all the managed entities
-     * and their associations have been computed.
-     *
-     * @see https://www.doctrine-project.org/projects/doctrine-orm/en/latest/reference/events.html#onflush
-     *
-     * @param OnFlushEventArgs $args
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    public function onFlush(OnFlushEventArgs $args): void
+    public static function getSubscribedEvents()
     {
-        $em = $args->getEntityManager();
-        $transaction = new AuditTransaction($this->manager->getHelper());
-
-        // extend the SQL logger
-        $this->loggerBackup = $em->getConnection()->getConfiguration()->getSQLLogger();
-        $auditLogger = new AuditLogger(function () use ($em, $transaction) {
-            // flushes pending data
-            $em->getConnection()->getConfiguration()->setSQLLogger($this->loggerBackup);
-
-            $this->manager->process($transaction);
-        });
-
-        // Initialize a new LoggerChain with the new AuditLogger + the existing SQLLoggers.
-        $loggerChain = new AuditLoggerChain();
-        $loggerChain->addLogger($auditLogger);
-        if ($this->loggerBackup instanceof AuditLoggerChain) {
-            /** @var SQLLogger $logger */
-            foreach ($this->loggerBackup->getLoggers() as $logger) {
-                $loggerChain->addLogger($logger);
-            }
-        } elseif ($this->loggerBackup instanceof SQLLogger) {
-            $loggerChain->addLogger($this->loggerBackup);
-        }
-        $em->getConnection()->getConfiguration()->setSQLLogger($loggerChain);
-
-        // Populate transaction
-        $transaction->collect();
+        return [
+            AuditEvent::class => 'onAuditEvent',
+        ];
     }
 
     /**
-     * {@inheritdoc}
+     * @param AuditEvent $event
+     * @return AuditEvent
+     * @throws \Doctrine\DBAL\DBALException
      */
-    public function getSubscribedEvents(): array
+    public function onAuditEvent(AuditEvent $event): AuditEvent
     {
-        return [Events::onFlush];
+        $payload = $event->getPayload();
+        $auditTable = $payload['table'];
+        unset($payload['table']);
+
+        $fields = [
+            'type' => ':type',
+            'object_id' => ':object_id',
+            'discriminator' => ':discriminator',
+            'transaction_hash' => ':transaction_hash',
+            'diffs' => ':diffs',
+            'blame_id' => ':blame_id',
+            'blame_user' => ':blame_user',
+            'blame_user_fqdn' => ':blame_user_fqdn',
+            'blame_user_firewall' => ':blame_user_firewall',
+            'ip' => ':ip',
+            'created_at' => ':created_at',
+        ];
+
+        $query = sprintf(
+            'INSERT INTO %s (%s) VALUES (%s)',
+            $auditTable,
+            implode(', ', array_keys($fields)),
+            implode(', ', array_values($fields))
+        );
+
+        $storage = $this->manager->selectStorageSpace($this->manager->getConfiguration()->getEntityManager());
+        $statement = $storage->getConnection()->prepare($query);
+
+        foreach ($payload as $key => $value) {
+            $statement->bindValue($key, $value);
+        }
+
+        $statement->execute();
+
+        return $event;
     }
 }

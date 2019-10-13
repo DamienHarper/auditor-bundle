@@ -197,6 +197,32 @@ class AuditTransaction
         }
     }
 
+    /**
+     * @return array
+     */
+    public function getPayload(): array
+    {
+        $payload = [];
+
+        if (\count($this->getInserted()) > 0) {
+            $payload['inserted'] = $this->getInserted();
+        }
+        if (\count($this->getUpdated()) > 0) {
+            $payload['updated'] = $this->getUpdated();
+        }
+        if (\count($this->getRemoved()) > 0) {
+            $payload['removed'] = $this->getRemoved();
+        }
+        if (\count($this->getAssociated()) > 0) {
+            $payload['associated'] = $this->getAssociated();
+        }
+        if (\count($this->getDissociated()) > 0) {
+            $payload['dissociated'] = $this->getDissociated();
+        }
+
+        return $payload;
+    }
+
     public function getInserted(): array
     {
         return $this->inserted;
