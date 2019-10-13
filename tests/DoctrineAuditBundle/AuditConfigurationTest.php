@@ -19,8 +19,8 @@ use Symfony\Component\Security\Core\Security as CoreSecurity;
 /**
  * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
- * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
- * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
+ * @covers \DH\DoctrineAuditBundle\Event\AuditSubscriber
+ * @covers \DH\DoctrineAuditBundle\Event\CreateSchemaListener
  * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\Manager\AuditManager

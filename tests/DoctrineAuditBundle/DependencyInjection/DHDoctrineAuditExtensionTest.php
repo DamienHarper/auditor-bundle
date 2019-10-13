@@ -5,7 +5,7 @@ namespace DH\DoctrineAuditBundle\Tests\DependencyInjection;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand;
 use DH\DoctrineAuditBundle\DependencyInjection\DHDoctrineAuditExtension;
-use DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber;
+use DH\DoctrineAuditBundle\Event\AuditSubscriber;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\Twig\Extension\TwigExtension;

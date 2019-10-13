@@ -55,13 +55,13 @@ services:
       - { name: twig.extension }
 
   dh_doctrine_audit.event_subscriber.audit:
-    class: DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
+    class: DH\DoctrineAuditBundle\Event\AuditSubscriber
     arguments: ["@dh_doctrine_audit.manager"]
     tags:
       - { name: doctrine.event_subscriber, connection: default }
 
   dh_doctrine_audit.event_subscriber.create_schema:
-    class: DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
+    class: DH\DoctrineAuditBundle\Event\CreateSchemaListener
     arguments: ["@dh_doctrine_audit.manager", "@dh_doctrine_audit.reader"]
     tags:
       - { name: doctrine.event_subscriber, connection: default }

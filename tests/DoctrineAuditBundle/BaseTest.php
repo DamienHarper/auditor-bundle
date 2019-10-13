@@ -4,8 +4,8 @@ namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\AuditConfiguration;
-use DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber;
-use DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener;
+use DH\DoctrineAuditBundle\Event\AuditSubscriber;
+use DH\DoctrineAuditBundle\Event\CreateSchemaListener;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
 use DH\DoctrineAuditBundle\Manager\AuditManager;
