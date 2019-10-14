@@ -8,6 +8,7 @@ use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Reader\AuditEntry;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -35,29 +36,18 @@ class AuditController extends AbstractController
      * @param $entity
      * @param $field
      *
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
      */
     public function revertEntityHistoryAction($id, $object, $entity, $field)
     {
         // get audit reader service
         $reader = $this->container->get('dh_doctrine_audit.reader');
-        // $am = $this->container->get('dh_doctrine_audit.manager');
+        // get audit manager service
+        $am = $this->container->get('dh_doctrine_audit.manager');
         // get audit entity manager
         $em = $this->container->get('doctrine.orm.default_entity_manager');
 
-        /** @var AuditEntry $entity_audit */
-        $entity_audit = $reader->getAudit(AuditHelper::paramToNamespace($entity), $id);
-        $audited_entity = AuditHelper::paramToNamespace($entity);
-        $current_entity = $em->getRepository($audited_entity)->find($object);
-
-        // Get all differences
-        $diffs = $entity_audit[0]->getDiffs();
-        // get field value to revert
-        $field_value = $diffs[$field]['old'];
-
-        $setMethod = "set{$field}";
-
-        $current_entity->{$setMethod}($field_value);
+        $current_entity = $am->revert($reader, $em, $entity, $id, $object, $field);
 
         $em->persist($current_entity);
         $em->flush();

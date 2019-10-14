@@ -3,7 +3,11 @@
 namespace DH\DoctrineAuditBundle\Manager;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
+use DH\DoctrineAuditBundle\AuditEntry;
+use DH\DoctrineAuditBundle\Exception\AccessDeniedException;
+use DH\DoctrineAuditBundle\Exception\InvalidArgumentException;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
+use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -357,5 +361,36 @@ class AuditManager
     private function selectStorageSpace(EntityManagerInterface $em): EntityManagerInterface
     {
         return $this->configuration->getEntityManager() ?? $em;
+    }
+
+    /**
+     * @param AuditReader            $reader
+     * @param EntityManagerInterface $em
+     * @param                        $entity
+     * @param                        $id
+     * @param                        $object
+     * @param                        $field
+     *
+     * @return object|null
+     * @throws AccessDeniedException
+     * @throws InvalidArgumentException
+     */
+    public function revert(AuditReader $reader, EntityManagerInterface $em, $entity, $id, $object, $field)
+    {
+        /** @var AuditEntry $entity_audit */
+        $entity_audit = $reader->getAudit(AuditHelper::paramToNamespace($entity), $id);
+        $audited_entity = AuditHelper::paramToNamespace($entity);
+        $current_entity = $em->getRepository($audited_entity)->find($object);
+
+        // Get all differences
+        $diffs = $entity_audit[0]->getDiffs();
+        // get field value to revert
+        $field_value = $diffs[$field]['old'];
+
+        $setMethod = "set{$field}";
+
+        $current_entity->{$setMethod}($field_value);
+
+        return $current_entity;
     }
 }
