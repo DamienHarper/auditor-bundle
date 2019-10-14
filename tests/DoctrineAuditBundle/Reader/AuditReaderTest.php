@@ -6,13 +6,16 @@ use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Reader\AuditEntry;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Comment;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Tag;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Annotation\AuditedEntity;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Annotation\UnauditedEntity;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Author;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Comment;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Post;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Tag;
 use Pagerfanta\Pagerfanta;
 
 /**
+ * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLoggerChain
@@ -109,13 +112,15 @@ final class AuditReaderTest extends CoreTest
     public function testGetEntities(): void
     {
         $entities = [
+            AuditedEntity::class => null,
+            UnauditedEntity::class => null,
             Post::class => null,
             Comment::class => null,
         ];
 
         $expected = array_combine(
             array_keys($entities),
-            ['post', 'comment']
+            ['audited_entity', 'unaudited_entity', 'post', 'comment']
         );
         ksort($expected);
 

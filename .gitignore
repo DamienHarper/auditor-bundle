@@ -5,3 +5,4 @@
 /vendor/
 /tests/coverage/
 composer.lock
+/tests/xdebug-filter.php

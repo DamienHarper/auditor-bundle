@@ -27,7 +27,7 @@ class AnnotationLoader
 
     public function load(): array
     {
-        $configuration = array();
+        $configuration = [];
 
         $metadatas = $this->entityManager->getMetadataFactory()->getAllMetadata();
         foreach ($metadatas as $metadata) {
@@ -51,14 +51,25 @@ class AnnotationLoader
         }
 
         // Check that we have an Auditable annotation
-        $annotation = $this->reader->getClassAnnotation($reflection, Auditable::class);
-        if (null === $annotation) {
+        $auditableAnnotation = $this->reader->getClassAnnotation($reflection, Auditable::class);
+        if (null === $auditableAnnotation) {
             return null;
         }
 
-        $config =  [
+        // Check that we have an Security annotation
+        $securityAnnotation = $this->reader->getClassAnnotation($reflection, Security::class);
+        if (null === $securityAnnotation) {
+            $roles = null;
+        } else {
+            $roles = [
+                Security::VIEW_SCOPE => $securityAnnotation->view
+            ];
+        }
+
+        $config = [
             'ignored_columns' => [],
-            'enabled' => $annotation->enabled,
+            'enabled' => $auditableAnnotation->enabled,
+            'roles' => $roles,
         ];
 
         // Are there any Ignore annotations?

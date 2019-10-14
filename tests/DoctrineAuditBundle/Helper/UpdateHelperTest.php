@@ -16,6 +16,7 @@ use Doctrine\ORM\Proxy\ProxyFactory;
 use Gedmo;
 
 /**
+ * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
@@ -32,11 +33,6 @@ use Gedmo;
  */
 final class UpdateHelperTest extends BaseTest
 {
-    /**
-     * @var string
-     */
-    protected $fixturesPath = __DIR__.'/../Fixtures';
-
     private function getTable(array $tables, string $name): ?Table
     {
         foreach ($tables as $table) {

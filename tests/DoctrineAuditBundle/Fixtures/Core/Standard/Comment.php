@@ -1,6 +1,6 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core;
+namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;

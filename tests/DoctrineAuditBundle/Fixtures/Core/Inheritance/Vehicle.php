@@ -1,6 +1,6 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core;
+namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core\Inheritance;
 
 use Doctrine\ORM\Mapping as ORM;
 

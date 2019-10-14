@@ -3,7 +3,7 @@
 namespace DH\DoctrineAuditBundle\Tests\Helper;
 
 use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Post;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Post;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -15,7 +15,7 @@ final class DoctrineHelperTest extends TestCase
 {
     public function testGenerateProxyClassName(): void
     {
-        static::assertSame('DH\DoctrineAuditBundle\Tests\Fixtures\Core\__CG__\Post', DoctrineHelper::generateProxyClassName('Post', mb_substr(Post::class, 0, mb_strrpos(Post::class, '\\'))));
+        static::assertSame('DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\__CG__\Post', DoctrineHelper::generateProxyClassName('Post', mb_substr(Post::class, 0, mb_strrpos(Post::class, '\\'))));
     }
 
     /**

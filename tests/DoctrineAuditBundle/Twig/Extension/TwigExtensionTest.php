@@ -3,12 +3,13 @@
 namespace DH\DoctrineAuditBundle\Tests\Twig\Extension;
 
 use DH\DoctrineAuditBundle\Tests\BaseTest;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Author;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Author;
 use DH\DoctrineAuditBundle\Twig\Extension\TwigExtension;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
+ * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLoggerChain

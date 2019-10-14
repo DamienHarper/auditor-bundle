@@ -73,7 +73,6 @@ services:
 
   DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand:
     alias: dh_doctrine_audit.command.clean
-    public: true
 
   dh_doctrine_audit.command.schema_update:
     class: DH\DoctrineAuditBundle\Command\UpdateSchemaCommand
@@ -82,4 +81,3 @@ services:
 
   DH\DoctrineAuditBundle\Command\UpdateSchemaCommand:
     alias: dh_doctrine_audit.command.schema_update
-    public: true
