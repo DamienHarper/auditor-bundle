@@ -564,6 +564,36 @@ final class AuditManagerTest extends CoreTest
         static::assertInstanceOf(AuditHelper::class, $manager->getHelper(), 'helper instanceof AuditHelper::class');
     }
 
+    public function testRevert(): void
+    {
+        $em = $this->getEntityManager();
+        $configuration = $this->getAuditConfiguration();
+        $helper = new AuditHelper($configuration);
+        $manager = new AuditManager($configuration, $helper);
+        $reader = new AuditReader($configuration, $em);
+
+        $author = new Author();
+        $author
+            ->setId(1)
+            ->setFullname('John Doe')
+            ->setEmail('john.doe@gmail.com');
+
+        $manager->update($em, $author, [
+            'fullname' => ['John Doe', 'Dark Vador'],
+            'email' => ['john.doe@gmail.com', 'dark.vador@gmail.com'],
+        ], 'what-a-nice-transaction-hash');
+
+        $manager->update($em, $author, [
+            'fullname' => ['John Doe', 'Darth Vador'],
+            'email' => ['john.doe@gmail.com', 'darth.vador@gmail.com'],
+        ], 'what-a-nice-transaction-hash');
+
+        $audits = $reader->getAudits(Author::class);
+        $manager->revert($reader, $em, 'what-a-nice-transaction-hash', 'email');
+
+        self::assertEquals('dark.vador@gmail.com', $author->getEmail(), 'The email has been reverted.');
+    }
+
     protected function setupEntities(): void
     {
     }
