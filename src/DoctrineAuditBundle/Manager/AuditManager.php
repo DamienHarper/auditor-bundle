@@ -70,6 +70,7 @@ class AuditManager
      */
     public function insert(EntityManagerInterface $em, $entity, array $ch, string $transactionHash): void
     {
+        /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(\get_class($entity));
         $this->audit($em, [
             'action' => 'insert',
@@ -100,6 +101,7 @@ class AuditManager
         if (0 === \count($diff)) {
             return; // if there is no entity diff, do not log it
         }
+        /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(\get_class($entity));
         $this->audit($em, [
             'action' => 'update',
@@ -126,6 +128,7 @@ class AuditManager
      */
     public function remove(EntityManagerInterface $em, $entity, $id, string $transactionHash): void
     {
+        /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(\get_class($entity));
         $this->audit($em, [
             'action' => 'remove',
@@ -188,6 +191,7 @@ class AuditManager
      */
     private function associateOrDissociate(string $type, EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
     {
+        /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(\get_class($source));
         $data = [
             'action' => $type,

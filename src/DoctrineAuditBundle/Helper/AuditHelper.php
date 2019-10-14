@@ -6,6 +6,7 @@ use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\User\UserInterface;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadata;
 
 class AuditHelper
 {
@@ -43,6 +44,7 @@ class AuditHelper
      */
     public function id(EntityManagerInterface $em, $entity)
     {
+        /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(\get_class($entity));
         $pk = $meta->getSingleIdentifierFieldName();
 
@@ -83,6 +85,7 @@ class AuditHelper
      */
     public function diff(EntityManagerInterface $em, $entity, array $ch): array
     {
+        /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(\get_class($entity));
         $diff = [];
 
@@ -216,6 +219,7 @@ class AuditHelper
         }
 
         $em->getUnitOfWork()->initializeObject($entity); // ensure that proxies are initialized
+        /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(\get_class($entity));
         $pkName = $meta->getSingleIdentifierFieldName();
         $pkValue = $id ?? $this->id($em, $entity);
