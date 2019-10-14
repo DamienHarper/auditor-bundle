@@ -5,7 +5,6 @@ namespace DH\DoctrineAuditBundle\Controller;
 use DH\DoctrineAuditBundle\Exception\AccessDeniedException;
 use DH\DoctrineAuditBundle\Exception\InvalidArgumentException;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
-use DH\DoctrineAuditBundle\Reader\AuditEntry;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -31,10 +30,8 @@ class AuditController extends AbstractController
     /**
      * @Route("/audit/revert/{hash}/{field}", name="dh_doctrine_audit_revert")
      *
-     * @param $id
-     * @param $object
-     * @param $entity
      * @param $field
+     * @param mixed $hash
      *
      * @return RedirectResponse
      */
@@ -48,7 +45,7 @@ class AuditController extends AbstractController
         $em = $this->container->get('doctrine.orm.default_entity_manager');
 
         $reverted_entity = $am->revert($reader, $em, $hash, $field);
-        $entity_name = $em->getMetadataFactory()->getMetadataFor(get_class($reverted_entity))->getName();
+        $entity_name = $em->getMetadataFactory()->getMetadataFor(\get_class($reverted_entity))->getName();
 
         $em->persist($reverted_entity);
         $em->flush();
@@ -63,10 +60,10 @@ class AuditController extends AbstractController
      *
      * @param string $hash
      *
-     * @return Response
      * @throws \Doctrine\ORM\ORMException
-     *
      * @throws InvalidArgumentException
+     *
+     * @return Response
      */
     public function showTransactionAction(string $hash): Response
     {
@@ -90,7 +87,7 @@ class AuditController extends AbstractController
      */
     public function showEntityHistoryAction(Request $request, string $entity, $id = null): Response
     {
-        $page = (int)$request->query->get('page', 1);
+        $page = (int) $request->query->get('page', 1);
         $entity = AuditHelper::paramToNamespace($entity);
 
         $reader = $this->container->get('dh_doctrine_audit.reader');

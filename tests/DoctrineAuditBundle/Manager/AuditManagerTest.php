@@ -591,7 +591,7 @@ final class AuditManagerTest extends CoreTest
         $audits = $reader->getAudits(Author::class);
         $manager->revert($reader, $em, 'what-a-nice-transaction-hash', 'email');
 
-        self::assertEquals('dark.vador@gmail.com', $author->getEmail(), 'The email has been reverted.');
+        self::assertSame('dark.vador@gmail.com', $author->getEmail(), 'The email has been reverted.');
     }
 
     protected function setupEntities(): void

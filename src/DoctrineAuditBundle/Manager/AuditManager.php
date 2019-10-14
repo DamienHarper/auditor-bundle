@@ -366,12 +366,13 @@ class AuditManager
     /**
      * @param AuditReader            $reader
      * @param EntityManagerInterface $em
-     * @param String                 $hash
-     * @param String                 $field
+     * @param string                 $hash
+     * @param string                 $field
      *
-     * @return object|null
      * @throws AccessDeniedException
      * @throws InvalidArgumentException
+     *
+     * @return null|object
      */
     public function revert(AuditReader $reader, EntityManagerInterface $em, string $hash, string $field)
     {
