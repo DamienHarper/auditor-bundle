@@ -4,7 +4,7 @@ namespace DH\DoctrineAuditBundle\Event;
 
 use Symfony\Contracts\EventDispatcher\Event;
 
-final class AuditEvent extends Event
+abstract class AuditEvent extends Event
 {
     /**
      * @var array

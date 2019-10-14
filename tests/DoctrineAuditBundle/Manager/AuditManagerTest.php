@@ -18,6 +18,7 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Tag;
  * @covers \DH\DoctrineAuditBundle\Event\AuditSubscriber
  * @covers \DH\DoctrineAuditBundle\Event\CreateSchemaListener
  * @covers \DH\DoctrineAuditBundle\Event\DoctrineSubscriber
+ * @covers \DH\DoctrineAuditBundle\Event\LifecycleEvent
  * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\Helper\UpdateHelper

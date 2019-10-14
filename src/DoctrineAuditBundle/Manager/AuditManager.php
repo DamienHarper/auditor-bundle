@@ -3,7 +3,7 @@
 namespace DH\DoctrineAuditBundle\Manager;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
-use DH\DoctrineAuditBundle\Event\AuditEvent;
+use DH\DoctrineAuditBundle\Event\LifecycleEvent;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -40,7 +40,7 @@ class AuditManager
      */
     public function notify(array $payload): void
     {
-        $this->configuration->getEventDispatcher()->dispatch(new AuditEvent($payload));
+        $this->configuration->getEventDispatcher()->dispatch(new LifecycleEvent($payload));
     }
 
     /**

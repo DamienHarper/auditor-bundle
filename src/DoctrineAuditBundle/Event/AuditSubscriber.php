@@ -17,19 +17,19 @@ class AuditSubscriber implements EventSubscriberInterface
         $this->manager = $manager;
     }
 
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
-            AuditEvent::class => 'onAuditEvent',
+            LifecycleEvent::class => 'onAuditEvent',
         ];
     }
 
     /**
-     * @param AuditEvent $event
-     * @return AuditEvent
+     * @param LifecycleEvent $event
+     * @return LifecycleEvent
      * @throws \Doctrine\DBAL\DBALException
      */
-    public function onAuditEvent(AuditEvent $event): AuditEvent
+    public function onAuditEvent(LifecycleEvent $event): LifecycleEvent
     {
         $payload = $event->getPayload();
         $auditTable = $payload['table'];
