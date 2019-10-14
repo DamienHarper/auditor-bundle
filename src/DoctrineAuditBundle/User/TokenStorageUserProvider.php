@@ -58,7 +58,8 @@ class TokenStorageUserProvider implements UserProviderInterface
 
     private function getImpersonatorUser()
     {
-        foreach ($this->security->getToken()->getRoles() as $role) {
+        $roles = null === $this->security->getToken() ? [] : $this->security->getToken()->getRoles();
+        foreach ($roles as $role) {
             if ($role instanceof SwitchUserRole) {
                 return $role->getSource()->getUser();
             }

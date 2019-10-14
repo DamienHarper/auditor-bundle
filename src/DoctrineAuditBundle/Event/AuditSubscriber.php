@@ -26,8 +26,10 @@ class AuditSubscriber implements EventSubscriberInterface
 
     /**
      * @param LifecycleEvent $event
-     * @return LifecycleEvent
+     *
      * @throws \Doctrine\DBAL\DBALException
+     *
+     * @return LifecycleEvent
      */
     public function onAuditEvent(LifecycleEvent $event): LifecycleEvent
     {

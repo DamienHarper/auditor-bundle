@@ -124,7 +124,7 @@ class AuditReader
      * @param null|int        $page
      * @param null|int        $pageSize
      * @param null|string     $transactionHash
-     * @param null|bool       $strict
+     * @param bool            $strict
      *
      * @throws AccessDeniedException
      * @throws InvalidArgumentException
@@ -178,7 +178,7 @@ class AuditReader
     /**
      * Returns an array of audited entries/operations.
      *
-     * @param $entity
+     * @param object|string   $entity
      * @param null|int|string $id
      * @param int             $page
      * @param int             $pageSize
@@ -206,7 +206,7 @@ class AuditReader
     /**
      * Returns the amount of audited entries/operations.
      *
-     * @param $entity
+     * @param object|string   $entity
      * @param null|int|string $id
      *
      * @throws AccessDeniedException
@@ -232,12 +232,12 @@ class AuditReader
     /**
      * Returns an array of audited entries/operations.
      *
-     * @param $entity
+     * @param object|string   $entity
      * @param null|int|string $id
      * @param null|int        $page
      * @param null|int        $pageSize
      * @param null|string     $transactionHash
-     * @param null|bool       $strict
+     * @param bool            $strict
      *
      * @throws AccessDeniedException
      * @throws InvalidArgumentException
@@ -308,8 +308,8 @@ class AuditReader
     }
 
     /**
-     * @param $entity
-     * @param $id
+     * @param object|string $entity
+     * @param string        $id
      *
      * @throws AccessDeniedException
      * @throws InvalidArgumentException
@@ -349,16 +349,13 @@ class AuditReader
     }
 
     /**
-     * @param $entity
+     * @param object|string $entity
      *
      * @return ClassMetadata
      */
     private function getClassMetadata($entity): ClassMetadata
     {
-        return $this
-            ->entityManager
-            ->getClassMetadata($entity)
-        ;
+        return $this->entityManager->getClassMetadata($entity);
     }
 
     /**
@@ -370,15 +367,13 @@ class AuditReader
      */
     public function getEntityTableName($entity): string
     {
-        return $this->getClassMetadata($entity)
-            ->getTableName()
-        ;
+        return $this->getClassMetadata($entity)->getTableName();
     }
 
     /**
      * Returns the audit table name for $entity.
      *
-     * @param mixed $entity
+     * @param object|string $entity
      *
      * @return string
      */
@@ -409,7 +404,7 @@ class AuditReader
     /**
      * Throws an InvalidArgumentException if given entity is not auditable.
      *
-     * @param $entity
+     * @param object|string $entity
      *
      * @throws InvalidArgumentException
      */
@@ -423,8 +418,8 @@ class AuditReader
     /**
      * Throws an AccessDeniedException if user not is granted to access audits for the given entity.
      *
-     * @param $entity
-     * @param string $scope
+     * @param object|string $entity
+     * @param string        $scope
      *
      * @throws AccessDeniedException
      */

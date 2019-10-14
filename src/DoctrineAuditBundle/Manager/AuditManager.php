@@ -5,7 +5,6 @@ namespace DH\DoctrineAuditBundle\Manager;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Event\LifecycleEvent;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
@@ -61,15 +60,15 @@ class AuditManager
     /**
      * Adds an insert entry to the audit table.
      *
-     * @param EntityManager $em
-     * @param object        $entity
-     * @param array         $ch
-     * @param string        $transactionHash
+     * @param EntityManagerInterface $em
+     * @param object                 $entity
+     * @param array                  $ch
+     * @param string                 $transactionHash
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function insert(EntityManager $em, $entity, array $ch, string $transactionHash): void
+    public function insert(EntityManagerInterface $em, $entity, array $ch, string $transactionHash): void
     {
         $meta = $em->getClassMetadata(\get_class($entity));
         $this->audit($em, [
@@ -87,15 +86,15 @@ class AuditManager
     /**
      * Adds an update entry to the audit table.
      *
-     * @param EntityManager $em
-     * @param object        $entity
-     * @param array         $ch
-     * @param string        $transactionHash
+     * @param EntityManagerInterface $em
+     * @param object                 $entity
+     * @param array                  $ch
+     * @param string                 $transactionHash
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function update(EntityManager $em, $entity, array $ch, string $transactionHash): void
+    public function update(EntityManagerInterface $em, $entity, array $ch, string $transactionHash): void
     {
         $diff = $this->helper->diff($em, $entity, $ch);
         if (0 === \count($diff)) {
@@ -117,15 +116,15 @@ class AuditManager
     /**
      * Adds a remove entry to the audit table.
      *
-     * @param EntityManager $em
-     * @param object        $entity
-     * @param mixed         $id
-     * @param string        $transactionHash
+     * @param EntityManagerInterface $em
+     * @param object                 $entity
+     * @param mixed                  $id
+     * @param string                 $transactionHash
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function remove(EntityManager $em, $entity, $id, string $transactionHash): void
+    public function remove(EntityManagerInterface $em, $entity, $id, string $transactionHash): void
     {
         $meta = $em->getClassMetadata(\get_class($entity));
         $this->audit($em, [
@@ -143,16 +142,16 @@ class AuditManager
     /**
      * Adds an association entry to the audit table.
      *
-     * @param EntityManager $em
-     * @param object        $source
-     * @param object        $target
-     * @param array         $mapping
-     * @param string        $transactionHash
+     * @param EntityManagerInterface $em
+     * @param object                 $source
+     * @param object                 $target
+     * @param array                  $mapping
+     * @param string                 $transactionHash
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function associate(EntityManager $em, $source, $target, array $mapping, string $transactionHash): void
+    public function associate(EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
     {
         $this->associateOrDissociate('associate', $em, $source, $target, $mapping, $transactionHash);
     }
@@ -160,16 +159,16 @@ class AuditManager
     /**
      * Adds a dissociation entry to the audit table.
      *
-     * @param EntityManager $em
-     * @param object        $source
-     * @param object        $target
-     * @param array         $mapping
-     * @param string        $transactionHash
+     * @param EntityManagerInterface $em
+     * @param object                 $source
+     * @param object                 $target
+     * @param array                  $mapping
+     * @param string                 $transactionHash
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function dissociate(EntityManager $em, $source, $target, array $mapping, string $transactionHash): void
+    public function dissociate(EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
     {
         $this->associateOrDissociate('dissociate', $em, $source, $target, $mapping, $transactionHash);
     }
@@ -177,17 +176,17 @@ class AuditManager
     /**
      * Adds an association entry to the audit table.
      *
-     * @param string        $type
-     * @param EntityManager $em
-     * @param object        $source
-     * @param object        $target
-     * @param array         $mapping
-     * @param string        $transactionHash
+     * @param string                 $type
+     * @param EntityManagerInterface $em
+     * @param object                 $source
+     * @param object                 $target
+     * @param array                  $mapping
+     * @param string                 $transactionHash
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    private function associateOrDissociate(string $type, EntityManager $em, $source, $target, array $mapping, string $transactionHash): void
+    private function associateOrDissociate(string $type, EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
     {
         $meta = $em->getClassMetadata(\get_class($source));
         $data = [
@@ -214,12 +213,12 @@ class AuditManager
     /**
      * Adds an entry to the audit table.
      *
-     * @param EntityManager $em
-     * @param array         $data
+     * @param EntityManagerInterface $em
+     * @param array                  $data
      *
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Exception
      */
-    private function audit(EntityManager $em, array $data): void
+    private function audit(EntityManagerInterface $em, array $data): void
     {
         $schema = $data['schema'] ? $data['schema'].'.' : '';
         $auditTable = $schema.$this->configuration->getTablePrefix().$data['table'].$this->configuration->getTableSuffix();

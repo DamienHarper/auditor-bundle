@@ -5,7 +5,7 @@ namespace DH\DoctrineAuditBundle\Helper;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\User\UserInterface;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 
 class AuditHelper
 {
@@ -33,15 +33,15 @@ class AuditHelper
     /**
      * Returns the primary key value of an entity.
      *
-     * @param EntityManager $em
-     * @param object        $entity
+     * @param EntityManagerInterface $em
+     * @param object                 $entity
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      *
      * @return mixed
      */
-    public function id(EntityManager $em, $entity)
+    public function id(EntityManagerInterface $em, $entity)
     {
         $meta = $em->getClassMetadata(\get_class($entity));
         $pk = $meta->getSingleIdentifierFieldName();
@@ -72,16 +72,16 @@ class AuditHelper
     /**
      * Computes a usable diff.
      *
-     * @param EntityManager $em
-     * @param object        $entity
-     * @param array         $ch
+     * @param EntityManagerInterface $em
+     * @param object                 $entity
+     * @param array                  $ch
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      *
      * @return array
      */
-    public function diff(EntityManager $em, $entity, array $ch): array
+    public function diff(EntityManagerInterface $em, $entity, array $ch): array
     {
         $meta = $em->getClassMetadata(\get_class($entity));
         $diff = [];
@@ -123,15 +123,15 @@ class AuditHelper
     /**
      * Type converts the input value and returns it.
      *
-     * @param EntityManager $em
-     * @param Type          $type
-     * @param mixed         $value
+     * @param EntityManagerInterface $em
+     * @param Type                   $type
+     * @param mixed                  $value
      *
      * @throws \Doctrine\DBAL\DBALException
      *
      * @return mixed
      */
-    private function value(EntityManager $em, Type $type, $value)
+    private function value(EntityManagerInterface $em, Type $type, $value)
     {
         if (null === $value) {
             return null;
@@ -181,7 +181,7 @@ class AuditHelper
             $user_firewall = null === $this->configuration->getFirewallMap()->getFirewallConfig($request) ? null : $this->configuration->getFirewallMap()->getFirewallConfig($request)->getName();
         }
 
-        $user = $this->configuration->getUserProvider()->getUser();
+        $user = null === $this->configuration->getUserProvider() ? null : $this->configuration->getUserProvider()->getUser();
         if ($user instanceof UserInterface) {
             $user_id = $user->getId();
             $username = $user->getUsername();
@@ -200,16 +200,16 @@ class AuditHelper
     /**
      * Returns an array describing an entity.
      *
-     * @param EntityManager $em
-     * @param object        $entity
-     * @param mixed         $id
+     * @param EntityManagerInterface $em
+     * @param object                 $entity
+     * @param mixed                  $id
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      *
      * @return array
      */
-    public function summarize(EntityManager $em, $entity = null, $id = null): ?array
+    public function summarize(EntityManagerInterface $em, $entity = null, $id = null): ?array
     {
         if (null === $entity) {
             return null;
