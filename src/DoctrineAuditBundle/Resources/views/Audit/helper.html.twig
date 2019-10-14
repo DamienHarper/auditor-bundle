@@ -49,7 +49,7 @@
     <em>({{ source.label }})</em>
     {% endif %}
     has been <b>{{ action }}</b>
-    {% if target is defined %}
+    {% if target is defined and target is not null %}
         {% set subject = target.class~'#'~target.id %}
         {{ direction }} <code><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': helper.namespaceToParam(target.class), 'id': target.id }) }}">{{ subject }}</a></code>
         {% if subject != target.label %}
