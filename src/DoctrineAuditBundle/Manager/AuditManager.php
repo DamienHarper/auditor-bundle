@@ -392,6 +392,7 @@ class AuditManager
         // get field value to revert
         $field_value = $diffs[$field]['old'];
 
+        $field = ucfirst(strtolower($field));
         $setMethod = "set{$field}";
 
         $original_entity->{$setMethod}($field_value);
