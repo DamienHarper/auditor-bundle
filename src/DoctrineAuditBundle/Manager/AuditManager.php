@@ -366,31 +366,35 @@ class AuditManager
     /**
      * @param AuditReader            $reader
      * @param EntityManagerInterface $em
-     * @param                        $entity
-     * @param                        $id
-     * @param                        $object
-     * @param                        $field
+     * @param String                 $hash
+     * @param String                 $field
      *
      * @return object|null
      * @throws AccessDeniedException
      * @throws InvalidArgumentException
      */
-    public function revert(AuditReader $reader, EntityManagerInterface $em, $entity, $id, $object, $field)
+    public function revert(AuditReader $reader, EntityManagerInterface $em, string $hash, string $field)
     {
-        /** @var AuditEntry $entity_audit */
-        $entity_audit = $reader->getAudit(AuditHelper::paramToNamespace($entity), $id);
-        $audited_entity = AuditHelper::paramToNamespace($entity);
-        $current_entity = $em->getRepository($audited_entity)->find($object);
+        $current_audit = $reader->getAuditsByTransactionHash($hash);
+        // Get the fully qualified class name
+        $entity_fqcn = array_keys($current_audit);
+        $entity_fqcn = reset($entity_fqcn);
+        /** @var AuditEntry $audited_entry */
+        $audited_entry = $current_audit[$entity_fqcn];
+        $audited_entry = reset($audited_entry);
+
+        // get real entity
+        $original_entity = $em->getRepository($entity_fqcn)->find($audited_entry->getObjectId());
 
         // Get all differences
-        $diffs = $entity_audit[0]->getDiffs();
+        $diffs = $audited_entry->getDiffs();
         // get field value to revert
         $field_value = $diffs[$field]['old'];
 
         $setMethod = "set{$field}";
 
-        $current_entity->{$setMethod}($field_value);
+        $original_entity->{$setMethod}($field_value);
 
-        return $current_entity;
+        return $original_entity;
     }
 }

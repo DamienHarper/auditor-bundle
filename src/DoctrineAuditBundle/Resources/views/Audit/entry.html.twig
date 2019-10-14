@@ -58,7 +58,13 @@
                                     {% endif %}
                                 {% endif %}
                             </td>
-                            <td><a href="{{ path('dh_doctrine_audit_revert', { id: entry.id, object: entry.object_id, field: key, entity: helper.namespaceToParam(entity)}) }}">Revert</a></td>
+                            <td>
+                                {% if entry.transaction_hash is not empty %}
+                                    <a href="{{ path('dh_doctrine_audit_revert', { hash: entry.transaction_hash, field: key }) }}">Revert</a>
+                                {% else %}
+                                    Transaction hash is required
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>

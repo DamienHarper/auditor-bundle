@@ -29,7 +29,7 @@ class AuditController extends AbstractController
     }
 
     /**
-     * @Route("/audit/revert/{id}/{object}/{entity}/{field}", name="dh_doctrine_audit_revert")
+     * @Route("/audit/revert/{hash}/{field}", name="dh_doctrine_audit_revert")
      *
      * @param $id
      * @param $object
@@ -38,22 +38,23 @@ class AuditController extends AbstractController
      *
      * @return RedirectResponse
      */
-    public function revertEntityHistoryAction($id, $object, $entity, $field)
+    public function revertEntityHistoryAction($hash, $field)
     {
-        // get audit reader service
-        $reader = $this->container->get('dh_doctrine_audit.reader');
         // get audit manager service
         $am = $this->container->get('dh_doctrine_audit.manager');
+        // get audit reader service
+        $reader = $this->container->get('dh_doctrine_audit.reader');
         // get audit entity manager
         $em = $this->container->get('doctrine.orm.default_entity_manager');
 
-        $current_entity = $am->revert($reader, $em, $entity, $id, $object, $field);
+        $reverted_entity = $am->revert($reader, $em, $hash, $field);
+        $entity_name = $em->getMetadataFactory()->getMetadataFor(get_class($reverted_entity))->getName();
 
-        $em->persist($current_entity);
+        $em->persist($reverted_entity);
         $em->flush();
 
         return $this->redirectToRoute('dh_doctrine_audit_show_entity_history', [
-            'entity' => $entity,
+            'entity' => $entity_name,
         ]);
     }
 
@@ -62,10 +63,10 @@ class AuditController extends AbstractController
      *
      * @param string $hash
      *
-     * @throws InvalidArgumentException
+     * @return Response
      * @throws \Doctrine\ORM\ORMException
      *
-     * @return Response
+     * @throws InvalidArgumentException
      */
     public function showTransactionAction(string $hash): Response
     {
@@ -89,7 +90,7 @@ class AuditController extends AbstractController
      */
     public function showEntityHistoryAction(Request $request, string $entity, $id = null): Response
     {
-        $page = (int) $request->query->get('page', 1);
+        $page = (int)$request->query->get('page', 1);
         $entity = AuditHelper::paramToNamespace($entity);
 
         $reader = $this->container->get('dh_doctrine_audit.reader');
