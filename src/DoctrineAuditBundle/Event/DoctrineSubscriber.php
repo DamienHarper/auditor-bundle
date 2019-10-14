@@ -1,6 +1,6 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\EventSubscriber;
+namespace DH\DoctrineAuditBundle\Event;
 
 use DH\DoctrineAuditBundle\DBAL\AuditLogger;
 use DH\DoctrineAuditBundle\DBAL\AuditLoggerChain;
@@ -11,7 +11,7 @@ use Doctrine\DBAL\Logging\SQLLogger;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
 
-class AuditSubscriber implements EventSubscriber
+class DoctrineSubscriber implements EventSubscriber
 {
     /**
      * @var AuditManager
@@ -49,7 +49,6 @@ class AuditSubscriber implements EventSubscriber
         $auditLogger = new AuditLogger(function () use ($em, $transaction) {
             // flushes pending data
             $em->getConnection()->getConfiguration()->setSQLLogger($this->loggerBackup);
-
             $this->manager->process($transaction);
         });
 

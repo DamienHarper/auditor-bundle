@@ -13,6 +13,7 @@ use Doctrine\ORM\Tools\Setup;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
 
@@ -69,6 +70,9 @@ final class DHDoctrineAuditBundleTest extends TestCase
         $firewallMap = new FirewallMap($container, []);
         $container->set('security.firewall.map', $firewallMap);
 
+        $dispatcher = new EventDispatcher();
+        $container->set('event_dispatcher', $dispatcher);
+
         $bundle = new DHDoctrineAuditBundle();
         $bundle->build($container);
 
@@ -124,6 +128,9 @@ final class DHDoctrineAuditBundleTest extends TestCase
 
         $firewallMap = new FirewallMap($container, []);
         $container->set('security.firewall.map', $firewallMap);
+
+        $dispatcher = new EventDispatcher();
+        $container->set('event_dispatcher', $dispatcher);
 
         $bundle = new DHDoctrineAuditBundle();
         $bundle->build($container);

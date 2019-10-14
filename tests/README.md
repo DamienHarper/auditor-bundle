@@ -1,30 +1,61 @@
-Running Tests
-=============
+# Contributing
 
-Before running the test suite, you first need to install dev dependencies:
+Contribution are always welcome and much appreciated! 
+
+Before starting to contribute, you first need to install dev dependencies:
 
 ```bash
 composer install --dev
 ```
 
-Then you can run the test suite with different configuration (SQLite, MySQL or PostgreSQL):
+Also, in an effort to maintain an homogeneous code base, we strongly encourage contributors 
+to run [PHP-CS-Fixer](https://github.com/FriendsOfPHP/PHP-CS-Fixer) and [PHPStan](https://github.com/phpstan/phpstan)
+before submitting a Pull Request.
 
-### Default configuration (SQLite)
 
-This configuration uses an in memory SQLite database and generates code coverage report in `tests/coverage` folder (requires [Xdebug extension](https://xdebug.org/docs/install#configure-php)).
+## Coding standards
+Coding standards are enforced using [PHP-CS-Fixer](https://github.com/FriendsOfPHP/PHP-CS-Fixer)
 
 ```bash
-./vendor/bin/phpunit 
+composer csfixer
 ```
 
-You can also run tests using an in memory SQLite database and without generating code coverage report, it's the fastest configuration.
+
+## Static code analysis
+Static code analysis can be achieved using [PHPStan](https://github.com/phpstan/phpstan)
+
+```bash
+composer phpstan
+```
+
+
+## Running Tests
+By default, test suite is configured to use an SQLite in-memory database and generates 
+a code coverage report in `tests/coverage` folder.
+
+However, you can run the test suite using different configurations:
+- SQLite
+- MySQL
+- PostgreSQL
+
+
+### Default configuration (SQLite)
+This configuration uses an in memory SQLite database and generates code coverage report 
+in `tests/coverage` folder (requires [Xdebug extension](https://xdebug.org/docs/install#configure-php)).
+
+```bash
+composer test
+```
+
+You can also run tests using an in memory SQLite database and without generating code coverage report, 
+it's the fastest configuration.
 
 ```bash
 ./vendor/bin/phpunit -c tests/travis/sqlite.travis.xml 
 ```
 
-### MySQL configuration
 
+### MySQL configuration
 This configuration expects to connect to a MySQL database.
 
 ```bash
@@ -41,7 +72,6 @@ docker run --name mysql_db -e MYSQL_DATABASE=doctrine_audit -e MYSQL_ALLOW_EMPTY
 
 
 ### PostgreSQL configuration
-
 This configuration expects to connect to a PostgreSQL database.
 
 ```bash

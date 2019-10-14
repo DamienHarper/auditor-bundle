@@ -19,7 +19,7 @@ use Gedmo;
  * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
- * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
+ * @covers \DH\DoctrineAuditBundle\Event\DoctrineSubscriber
  * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\Helper\UpdateHelper

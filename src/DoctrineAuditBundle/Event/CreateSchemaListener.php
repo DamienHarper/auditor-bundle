@@ -1,6 +1,6 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\EventSubscriber;
+namespace DH\DoctrineAuditBundle\Event;
 
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
 use DH\DoctrineAuditBundle\Manager\AuditManager;

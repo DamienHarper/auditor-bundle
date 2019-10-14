@@ -3,7 +3,6 @@
 namespace DH\DoctrineAuditBundle\Manager;
 
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\UnitOfWork;
 
@@ -117,13 +116,13 @@ class AuditTransaction
     }
 
     /**
-     * @param UnitOfWork    $uow
-     * @param EntityManager $em
+     * @param UnitOfWork             $uow
+     * @param EntityManagerInterface $em
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function collectScheduledDeletions(UnitOfWork $uow, EntityManager $em): void
+    public function collectScheduledDeletions(UnitOfWork $uow, EntityManagerInterface $em): void
     {
         foreach ($uow->getScheduledEntityDeletions() as $entity) {
             if ($this->configuration->isAudited($entity)) {
@@ -137,13 +136,13 @@ class AuditTransaction
     }
 
     /**
-     * @param UnitOfWork    $uow
-     * @param EntityManager $em
+     * @param UnitOfWork             $uow
+     * @param EntityManagerInterface $em
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function collectScheduledCollectionUpdates(UnitOfWork $uow, EntityManager $em): void
+    public function collectScheduledCollectionUpdates(UnitOfWork $uow, EntityManagerInterface $em): void
     {
         foreach ($uow->getScheduledCollectionUpdates() as $collection) {
             if ($this->configuration->isAudited($collection->getOwner())) {
@@ -172,13 +171,13 @@ class AuditTransaction
     }
 
     /**
-     * @param UnitOfWork    $uow
-     * @param EntityManager $em
+     * @param UnitOfWork             $uow
+     * @param EntityManagerInterface $em
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function collectScheduledCollectionDeletions(UnitOfWork $uow, EntityManager $em): void
+    public function collectScheduledCollectionDeletions(UnitOfWork $uow, EntityManagerInterface $em): void
     {
         foreach ($uow->getScheduledCollectionDeletions() as $collection) {
             if ($this->configuration->isAudited($collection->getOwner())) {
