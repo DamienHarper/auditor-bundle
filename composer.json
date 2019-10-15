@@ -12,6 +12,7 @@
   ],
   "require": {
     "php": ">=7.1",
+    "symfony/lock": "^4.2",
     "symfony/orm-pack": "^1.0",
     "symfony/event-dispatcher": "^3.4 || ^4.0",
     "symfony/security-bundle": "^3.4 || ^4.0",
@@ -39,7 +40,6 @@
     "phpstan/phpstan-doctrine": "^0.11.1",
     "phpstan/phpstan-symfony": "^0.11.1",
     "twig/extensions": "^1.5",
-    "symfony/lock": "^4.2",
     "friendsofphp/php-cs-fixer": "^2.15"
   },
   "conflict": {
