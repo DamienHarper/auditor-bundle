@@ -64,6 +64,8 @@ class AuditHelper
         $targetEntity = $meta->getReflectionProperty($pk)->getValue($entity);
 
         $mapping = $meta->getAssociationMapping($pk);
+
+        /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata($mapping['targetEntity']);
         $pk = $meta->getSingleIdentifierFieldName();
         $type = Type::getType($meta->fieldMappings[$pk]['type']);
