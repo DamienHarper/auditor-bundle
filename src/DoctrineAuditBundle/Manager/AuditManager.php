@@ -3,12 +3,8 @@
 namespace DH\DoctrineAuditBundle\Manager;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
-use DH\DoctrineAuditBundle\AuditEntry;
-use DH\DoctrineAuditBundle\Exception\AccessDeniedException;
-use DH\DoctrineAuditBundle\Exception\InvalidArgumentException;
+use DH\DoctrineAuditBundle\Event\LifecycleEvent;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
-use DH\DoctrineAuditBundle\Reader\AuditReader;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
@@ -39,6 +35,14 @@ class AuditManager
     }
 
     /**
+     * @param array $payload
+     */
+    public function notify(array $payload): void
+    {
+        $this->configuration->getEventDispatcher()->dispatch(new LifecycleEvent($payload));
+    }
+
+    /**
      * @param AuditTransaction $transaction
      *
      * @throws \Doctrine\DBAL\DBALException
@@ -56,16 +60,17 @@ class AuditManager
     /**
      * Adds an insert entry to the audit table.
      *
-     * @param EntityManager $em
-     * @param object        $entity
-     * @param array         $ch
-     * @param string        $transactionHash
+     * @param EntityManagerInterface $em
+     * @param object                 $entity
+     * @param array                  $ch
+     * @param string                 $transactionHash
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function insert(EntityManager $em, $entity, array $ch, string $transactionHash): void
+    public function insert(EntityManagerInterface $em, $entity, array $ch, string $transactionHash): void
     {
+        /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(\get_class($entity));
         $this->audit($em, [
             'action' => 'insert',
@@ -82,20 +87,21 @@ class AuditManager
     /**
      * Adds an update entry to the audit table.
      *
-     * @param EntityManager $em
-     * @param object        $entity
-     * @param array         $ch
-     * @param string        $transactionHash
+     * @param EntityManagerInterface $em
+     * @param object                 $entity
+     * @param array                  $ch
+     * @param string                 $transactionHash
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function update(EntityManager $em, $entity, array $ch, string $transactionHash): void
+    public function update(EntityManagerInterface $em, $entity, array $ch, string $transactionHash): void
     {
         $diff = $this->helper->diff($em, $entity, $ch);
         if (0 === \count($diff)) {
             return; // if there is no entity diff, do not log it
         }
+        /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(\get_class($entity));
         $this->audit($em, [
             'action' => 'update',
@@ -112,16 +118,17 @@ class AuditManager
     /**
      * Adds a remove entry to the audit table.
      *
-     * @param EntityManager $em
-     * @param object        $entity
-     * @param mixed         $id
-     * @param string        $transactionHash
+     * @param EntityManagerInterface $em
+     * @param object                 $entity
+     * @param mixed                  $id
+     * @param string                 $transactionHash
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function remove(EntityManager $em, $entity, $id, string $transactionHash): void
+    public function remove(EntityManagerInterface $em, $entity, $id, string $transactionHash): void
     {
+        /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(\get_class($entity));
         $this->audit($em, [
             'action' => 'remove',
@@ -138,16 +145,16 @@ class AuditManager
     /**
      * Adds an association entry to the audit table.
      *
-     * @param EntityManager $em
-     * @param object        $source
-     * @param object        $target
-     * @param array         $mapping
-     * @param string        $transactionHash
+     * @param EntityManagerInterface $em
+     * @param object                 $source
+     * @param object                 $target
+     * @param array                  $mapping
+     * @param string                 $transactionHash
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function associate(EntityManager $em, $source, $target, array $mapping, string $transactionHash): void
+    public function associate(EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
     {
         $this->associateOrDissociate('associate', $em, $source, $target, $mapping, $transactionHash);
     }
@@ -155,16 +162,16 @@ class AuditManager
     /**
      * Adds a dissociation entry to the audit table.
      *
-     * @param EntityManager $em
-     * @param object        $source
-     * @param object        $target
-     * @param array         $mapping
-     * @param string        $transactionHash
+     * @param EntityManagerInterface $em
+     * @param object                 $source
+     * @param object                 $target
+     * @param array                  $mapping
+     * @param string                 $transactionHash
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function dissociate(EntityManager $em, $source, $target, array $mapping, string $transactionHash): void
+    public function dissociate(EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
     {
         $this->associateOrDissociate('dissociate', $em, $source, $target, $mapping, $transactionHash);
     }
@@ -172,18 +179,19 @@ class AuditManager
     /**
      * Adds an association entry to the audit table.
      *
-     * @param string        $type
-     * @param EntityManager $em
-     * @param object        $source
-     * @param object        $target
-     * @param array         $mapping
-     * @param string        $transactionHash
+     * @param string                 $type
+     * @param EntityManagerInterface $em
+     * @param object                 $source
+     * @param object                 $target
+     * @param array                  $mapping
+     * @param string                 $transactionHash
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    private function associateOrDissociate(string $type, EntityManager $em, $source, $target, array $mapping, string $transactionHash): void
+    private function associateOrDissociate(string $type, EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
     {
+        /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(\get_class($source));
         $data = [
             'action' => $type,
@@ -209,52 +217,34 @@ class AuditManager
     /**
      * Adds an entry to the audit table.
      *
-     * @param EntityManager $em
-     * @param array         $data
+     * @param EntityManagerInterface $em
+     * @param array                  $data
      *
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Exception
      */
-    private function audit(EntityManager $em, array $data): void
+    private function audit(EntityManagerInterface $em, array $data): void
     {
         $schema = $data['schema'] ? $data['schema'].'.' : '';
         $auditTable = $schema.$this->configuration->getTablePrefix().$data['table'].$this->configuration->getTableSuffix();
-        $fields = [
-            'type' => ':type',
-            'object_id' => ':object_id',
-            'discriminator' => ':discriminator',
-            'transaction_hash' => ':transaction_hash',
-            'diffs' => ':diffs',
-            'blame_id' => ':blame_id',
-            'blame_user' => ':blame_user',
-            'blame_user_fqdn' => ':blame_user_fqdn',
-            'blame_user_firewall' => ':blame_user_firewall',
-            'ip' => ':ip',
-            'created_at' => ':created_at',
+        $dt = new \DateTime('now', new \DateTimeZone($this->getConfiguration()->getTimezone()));
+
+        $payload = [
+            'table' => $auditTable,
+            'type' => $data['action'],
+            'object_id' => (string) $data['id'],
+            'discriminator' => $data['discriminator'],
+            'transaction_hash' => (string) $data['transaction_hash'],
+            'diffs' => json_encode($data['diff']),
+            'blame_id' => $data['blame']['user_id'],
+            'blame_user' => $data['blame']['username'],
+            'blame_user_fqdn' => $data['blame']['user_fqdn'],
+            'blame_user_firewall' => $data['blame']['user_firewall'],
+            'ip' => $data['blame']['client_ip'],
+            'created_at' => $dt->format('Y-m-d H:i:s'),
         ];
 
-        $query = sprintf(
-            'INSERT INTO %s (%s) VALUES (%s)',
-            $auditTable,
-            implode(', ', array_keys($fields)),
-            implode(', ', array_values($fields))
-        );
-
-        $storage = $this->selectStorageSpace($em);
-        $statement = $storage->getConnection()->prepare($query);
-
-        $dt = new \DateTime('now', new \DateTimeZone($this->getConfiguration()->getTimezone()));
-        $statement->bindValue('type', $data['action']);
-        $statement->bindValue('object_id', (string) $data['id']);
-        $statement->bindValue('discriminator', $data['discriminator']);
-        $statement->bindValue('transaction_hash', (string) $data['transaction_hash']);
-        $statement->bindValue('diffs', json_encode($data['diff']));
-        $statement->bindValue('blame_id', $data['blame']['user_id']);
-        $statement->bindValue('blame_user', $data['blame']['username']);
-        $statement->bindValue('blame_user_fqdn', $data['blame']['user_fqdn']);
-        $statement->bindValue('blame_user_firewall', $data['blame']['user_firewall']);
-        $statement->bindValue('ip', $data['blame']['client_ip']);
-        $statement->bindValue('created_at', $dt->format('Y-m-d H:i:s'));
-        $statement->execute();
+        // send an `AuditEvent` event
+        $this->notify($payload);
     }
 
     /**
@@ -358,7 +348,7 @@ class AuditManager
      *
      * @return EntityManagerInterface
      */
-    private function selectStorageSpace(EntityManagerInterface $em): EntityManagerInterface
+    public function selectStorageSpace(EntityManagerInterface $em): EntityManagerInterface
     {
         return $this->configuration->getEntityManager() ?? $em;
     }

@@ -14,6 +14,7 @@ use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
@@ -259,7 +260,8 @@ abstract class CoreTest extends BaseTest
             $requestStack,
             new FirewallMap($container, []),
             $em,
-            new AnnotationLoader($em)
+            new AnnotationLoader($em),
+            new EventDispatcher()
         );
     }
 }

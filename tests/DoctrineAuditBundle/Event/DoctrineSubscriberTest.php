@@ -1,6 +1,6 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests\EventSubscriber;
+namespace DH\DoctrineAuditBundle\Tests\Event;
 
 use DH\DoctrineAuditBundle\Reader\AuditEntry;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
@@ -15,8 +15,11 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Tag;
  * @covers \DH\DoctrineAuditBundle\AuditConfiguration
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
  * @covers \DH\DoctrineAuditBundle\DBAL\AuditLoggerChain
- * @covers \DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
- * @covers \DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
+ * @covers \DH\DoctrineAuditBundle\Event\AuditEvent
+ * @covers \DH\DoctrineAuditBundle\Event\AuditSubscriber
+ * @covers \DH\DoctrineAuditBundle\Event\CreateSchemaListener
+ * @covers \DH\DoctrineAuditBundle\Event\DoctrineSubscriber
+ * @covers \DH\DoctrineAuditBundle\Event\LifecycleEvent
  * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
  * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
  * @covers \DH\DoctrineAuditBundle\Helper\UpdateHelper
@@ -29,7 +32,7 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Tag;
  *
  * @internal
  */
-final class AuditSubscriberTest extends CoreTest
+final class DoctrineSubscriberTest extends CoreTest
 {
     public function testCustomStorageEntityManager(): void
     {

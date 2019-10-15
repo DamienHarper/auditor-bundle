@@ -51,18 +51,20 @@ class AnnotationLoader
         }
 
         // Check that we have an Auditable annotation
+        /** @var ?Auditable $auditableAnnotation */
         $auditableAnnotation = $this->reader->getClassAnnotation($reflection, Auditable::class);
         if (null === $auditableAnnotation) {
             return null;
         }
 
         // Check that we have an Security annotation
+        /** @var ?Security $securityAnnotation */
         $securityAnnotation = $this->reader->getClassAnnotation($reflection, Security::class);
         if (null === $securityAnnotation) {
             $roles = null;
         } else {
             $roles = [
-                Security::VIEW_SCOPE => $securityAnnotation->view
+                Security::VIEW_SCOPE => $securityAnnotation->view,
             ];
         }
 

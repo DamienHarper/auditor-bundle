@@ -15,13 +15,16 @@ services:
       - "@security.firewall.map"
       - "@doctrine.orm.default_entity_manager"
       - "@dh_doctrine_audit.annotation_loader"
+      - "@event_dispatcher"
 
   DH\DoctrineAuditBundle\AuditConfiguration:
     alias: dh_doctrine_audit.configuration
 
   dh_doctrine_audit.reader:
     class: DH\DoctrineAuditBundle\Reader\AuditReader
-    arguments: ["@dh_doctrine_audit.configuration", "@doctrine.orm.default_entity_manager"]
+    arguments:
+      - "@dh_doctrine_audit.configuration"
+      - "@doctrine.orm.default_entity_manager"
     public: true
 
   DH\DoctrineAuditBundle\Reader\AuditReader:
@@ -30,7 +33,9 @@ services:
 
   dh_doctrine_audit.manager:
     class: DH\DoctrineAuditBundle\Manager\AuditManager
-    arguments: ["@dh_doctrine_audit.configuration", "@dh_doctrine_audit.helper"]
+    arguments:
+      - "@dh_doctrine_audit.configuration"
+      - "@dh_doctrine_audit.helper"
     public: true
 
   DH\DoctrineAuditBundle\Manager\AuditManager:
@@ -55,13 +60,19 @@ services:
       - { name: twig.extension }
 
   dh_doctrine_audit.event_subscriber.audit:
-    class: DH\DoctrineAuditBundle\EventSubscriber\AuditSubscriber
+    class: DH\DoctrineAuditBundle\Event\AuditSubscriber
+    arguments: ["@dh_doctrine_audit.manager"]
+    tags:
+      - { name: kernel.event_subscriber }
+
+  dh_doctrine_audit.event_subscriber.doctrine:
+    class: DH\DoctrineAuditBundle\Event\DoctrineSubscriber
     arguments: ["@dh_doctrine_audit.manager"]
     tags:
       - { name: doctrine.event_subscriber, connection: default }
 
   dh_doctrine_audit.event_subscriber.create_schema:
-    class: DH\DoctrineAuditBundle\EventSubscriber\CreateSchemaListener
+    class: DH\DoctrineAuditBundle\Event\CreateSchemaListener
     arguments: ["@dh_doctrine_audit.manager", "@dh_doctrine_audit.reader"]
     tags:
       - { name: doctrine.event_subscriber, connection: default }
