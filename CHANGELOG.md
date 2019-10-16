@@ -6,7 +6,12 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [3.0.0] - Not yet released
-### Changes
+### What's new
+* Annotation support: audit configuration (audited entities, ignored columns, etc) can be configured 
+using annotations in your entities
+* Audit events: an audit event is dispatched for every audit entry. 
+This opens the doors to add custom behavior on audit entry creation.
+* Security controls: it is now possible to restrict audit access to specific roles.
 * The bundle now supports non numeric IDs for the `User` objects (closes #66, thanks to @Gonzalo1987).
 * A transaction hash is now stored in audit tables and makes it easier to identify all operations performed 
 in the same transaction (closes #69)
@@ -17,11 +22,12 @@ in the same transaction (closes #69)
   - `AuditReader::getAuditsByTransactionHash()` accepts a transaction hash as parameter and returns 
   all the audits logged in the given transaction.
 * Performance enhancements when saving a lot of entities at once (closes #70, thanks to @acanicatti).
-* Remove deprecated and manage the compatibility (thanks to @maxhelias).
+* Removed deprecation messages (thanks to @maxhelias).
 * Fixed an issue with `audit:schema:update` command when run against a database with no audit table (#85)
 * `SINGLE_TABLE` inheritance support (#73)
   - `AuditReader::getAudits()` now accepts a boolean as sixth parameter to return either audits 
   for the given entity only or audits for the given entity hierarchy.
+* Revamped documentation
 
 ### Breaking changes
 * Doctrine's `doctrine:schema:update` command do not create audit tables automatically anymore 
@@ -32,8 +38,8 @@ use the bundled migration command instead which supports the same options as Doc
 * The structure of audit tables has changed so you have to run the migration command right after updating
 * `AuditEntry::getUserId()` now return a `string` or `null` instead of an `int`.
 * The bundle requires `mbstring` extension (cf. https://www.php.net/manual/en/mbstring.installation.php)
-* Configuration has changed to use a secondary database: you now only need to inject the dedicated 
-entity manager to `AuditConfiguration` service as described [here](https://github.com/DamienHarper/DoctrineAuditBundle#custom-database-for-storage-audit)
+* Configuration has changed to use a secondary database: you now only need to declare the dedicated 
+entity manager in configuration file as described [here](https://github.com/DamienHarper/DoctrineAuditBundle/blob/master/doc/20-general-configuration.md#storage-configuration)
 
 ### How to upgrade?
 Either update your `composer.json` file manually to include `"damienharper/doctrine-audit-bundle": "^3.0"` 
