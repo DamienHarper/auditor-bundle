@@ -126,7 +126,7 @@ final class AuditConfigurationTest extends BaseTest
             'entities' => $entities,
         ]);
 
-        static::assertEquals($entities, $configuration->getEntities(), 'AuditConfiguration::getEntities() returns configured entities list.');
+        static::assertSame($entities, $configuration->getEntities(), 'AuditConfiguration::getEntities() returns configured entities list.');
     }
 
     public function testGetUserProvider(): void
