@@ -31,3 +31,19 @@
     {% endif %}
 {% endapply %}
 {% endmacro %}
+
+{% macro icon_type(value) %}
+{% apply spaceless %}
+    {% if value == 'insert' %}
+        {{ '<i class="fas fa-plus"></i>' }}
+    {% elseif value == 'update' %}
+        {{ '<i class="fas fa-not-equal"></i>' }}
+    {% elseif value == 'remove' %}
+        {{ '<i class="fas fa-minus"></i>' }}
+    {% elseif value == 'associate' %}
+        {{ '<i class="fas fa-link"></i>' }}
+    {% elseif value == 'dissociate' %}
+        {{ '<i class="fas fa-unlink"></i>' }}
+    {% endif %}
+{% endapply %}
+{% endmacro %}
