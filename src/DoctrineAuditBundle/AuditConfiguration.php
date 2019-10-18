@@ -8,7 +8,6 @@ use DH\DoctrineAuditBundle\User\UserProviderInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\EventDispatcher\LegacyEventDispatcherProxy;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class AuditConfiguration
@@ -73,6 +72,11 @@ class AuditConfiguration
      */
     private $dispatcher;
 
+    /**
+     * @var bool
+     */
+    private $is_pre43_dispatcher;
+
     public function __construct(
         array $config,
         UserProviderInterface $userProvider,
@@ -87,7 +91,10 @@ class AuditConfiguration
         $this->firewallMap = $firewallMap;
         $this->entityManager = $entityManager;
         $this->annotationLoader = $annotationLoader;
-        $this->dispatcher = LegacyEventDispatcherProxy::decorate($dispatcher);
+        $this->dispatcher = $dispatcher;
+
+        $r = new \ReflectionMethod($this->dispatcher, 'dispatch');
+        $this->is_pre43_dispatcher = 1 === \count($r->getParameters());
 
         $this->enabled = $config['enabled'];
         $this->tablePrefix = $config['table_prefix'];
@@ -107,6 +114,11 @@ class AuditConfiguration
             $config = $this->annotationLoader->load();
             $this->entities = array_merge($this->entities, $config);
         }
+    }
+
+    public function isPre43Dispatcher(): bool
+    {
+        return $this->is_pre43_dispatcher;
     }
 
     /**

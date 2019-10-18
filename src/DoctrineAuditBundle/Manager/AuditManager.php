@@ -39,7 +39,15 @@ class AuditManager
      */
     public function notify(array $payload): void
     {
-        $this->configuration->getEventDispatcher()->dispatch(new LifecycleEvent($payload));
+        $dispatcher = $this->configuration->getEventDispatcher();
+
+        if ($this->configuration->isPre43Dispatcher()) {
+            // Symfony 4.x
+            $dispatcher->dispatch(new LifecycleEvent($payload));
+        } else {
+            // Symfony 3.x
+            $dispatcher->dispatch(LifecycleEvent::class, new LifecycleEvent($payload));
+        }
     }
 
     /**
