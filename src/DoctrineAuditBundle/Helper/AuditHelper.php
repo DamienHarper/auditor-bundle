@@ -145,7 +145,6 @@ class AuditHelper
         $platform = $em->getConnection()->getDatabasePlatform();
 
         switch ($type->getName()) {
-            case Type::DECIMAL:
             case Type::BIGINT:
                 $convertedValue = (string) $value;
 
@@ -155,6 +154,7 @@ class AuditHelper
                 $convertedValue = (int) $value;
 
                 break;
+            case Type::DECIMAL:
             case Type::FLOAT:
             case Type::BOOLEAN:
                 $convertedValue = $type->convertToPHPValue($value, $platform);
