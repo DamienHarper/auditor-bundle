@@ -317,7 +317,7 @@ final class DoctrineSubscriberTest extends CoreTest
         static::assertEquals([
             'decimal_value' => [
                 'old' => null,
-                'new' => '10.2',
+                'new' => 10.2,
             ],
             'label' => [
                 'old' => null,
@@ -333,11 +333,51 @@ final class DoctrineSubscriberTest extends CoreTest
         $audits = $reader->getAudits(DummyEntity::class);
         static::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
         static::assertEquals([
+            'decimal_value' => [
+                'old' => 10.2,
+                'new' => '10.2',
+            ],
             'label' => [
                 'old' => 'decimal: null->10.2',
                 'new' => 'decimal: 10.2->"10.2"',
             ],
         ], $audits[0]->getDiffs(), 'decimal: 10.2->"10.2"');
+
+        $dummy->setLabel('decimal: "10.2"->5.0');
+        $dummy->setDecimalValue(5.0);
+        $em->persist($dummy);
+        $em->flush();
+
+        $audits = $reader->getAudits(DummyEntity::class);
+        static::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
+        static::assertEquals([
+            'decimal_value' => [
+                'old' => '10.2',
+                'new' => 5.0,
+            ],
+            'label' => [
+                'old' => 'decimal: 10.2->"10.2"',
+                'new' => 'decimal: "10.2"->5.0',
+            ],
+        ], $audits[0]->getDiffs(), 'decimal: "10.2"->5.0');
+
+        $dummy->setLabel('decimal: 5.0->"5.0"');
+        $dummy->setDecimalValue('5.0');
+        $em->persist($dummy);
+        $em->flush();
+
+        $audits = $reader->getAudits(DummyEntity::class);
+        static::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
+        static::assertEquals([
+            'decimal_value' => [
+                'old' => 5.0,
+                'new' => '5.0',
+            ],
+            'label' => [
+                'old' => 'decimal: "10.2"->5.0',
+                'new' => 'decimal: 5.0->"5.0"',
+            ],
+        ], $audits[0]->getDiffs(), 'decimal: 5.0->"5.0"');
     }
 
     /**
