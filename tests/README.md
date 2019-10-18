@@ -37,6 +37,7 @@ However, you can run the test suite using different configurations:
 - SQLite
 - MySQL
 - PostgreSQL
+- MariaDB
 
 
 ### Default configuration (SQLite)
@@ -84,4 +85,20 @@ Assuming you have docker installed, you can easily start a PostgreSQL server wit
 
 ```bash
 docker run --name postgres_db -e POSTGRES_DB=doctrine_audit -d -p 5432:5432 postgres
+```
+
+
+### MariaDB configuration
+This configuration expects to connect to a MariaDB database.
+
+```bash
+./vendor/bin/phpunit -c tests/travis/mariadb.travis.xml 
+```
+
+**Note**: connection parameters (username, password, host, port, etc) are set in `./tests/travis/mariadb.travis.xml` file.
+
+Assuming you have docker installed, you can easily start a MariaDB server with following command
+
+```bash
+docker run --name mariadb_db -e MYSQL_DATABASE=doctrine_audit -e MYSQL_ALLOW_EMPTY_PASSWORD=1 -p 3306:3306 mariadb
 ```
