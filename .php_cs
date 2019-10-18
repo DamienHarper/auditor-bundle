@@ -29,11 +29,9 @@ $config = PhpCsFixer\Config::create()
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()
-            ->notPath([
-                'src/DoctrineAuditBundle/DependencyInjection/Configuration.php',
-                'tests/DoctrineAuditBundle/Manager/AuditManagerTest.php',
-                'tests/DoctrineAuditBundle/Event/DoctrineSubscriberTest.php',
-            ])
+            ->notPath('src/DoctrineAuditBundle/DependencyInjection/Configuration.php')
+            ->notPath('tests/DoctrineAuditBundle/Manager/AuditManagerTest.php')
+            ->notPath('tests/DoctrineAuditBundle/Event/DoctrineSubscriberTest.php')
             ->in(__DIR__)
     )
 ;
