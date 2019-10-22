@@ -3,7 +3,7 @@
 namespace DH\DoctrineAuditBundle\Event;
 
 use Symfony\Component\EventDispatcher\Event as ComponentEvent;
-use Symfony\Contracts\EventDispatcher\Event as ContractEvent;
+use Symfony\Contracts\EventDispatcher\Event as ContractsEvent;
 
 if (class_exists(ComponentEvent::class)) {
     abstract class AuditEvent extends ComponentEvent
@@ -27,7 +27,7 @@ if (class_exists(ComponentEvent::class)) {
         }
     }
 } else {
-    abstract class AuditEvent extends ContractEvent
+    abstract class AuditEvent extends ContractsEvent
     {
         /**
          * @var array
