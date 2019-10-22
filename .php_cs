@@ -26,6 +26,7 @@ $config = PhpCsFixer\Config::create()
         'ordered_class_elements' => false,
         'ordered_interfaces' => true,
         'simplified_null_return' => false,
+        'php_unit_test_class_requires_covers' => false,
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()

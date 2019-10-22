@@ -16,19 +16,6 @@ use Doctrine\ORM\Proxy\ProxyFactory;
 use Gedmo;
 
 /**
- * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
- * @covers \DH\DoctrineAuditBundle\AuditConfiguration
- * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
- * @covers \DH\DoctrineAuditBundle\Event\DoctrineSubscriber
- * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
- * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
- * @covers \DH\DoctrineAuditBundle\Helper\UpdateHelper
- * @covers \DH\DoctrineAuditBundle\Manager\AuditManager
- * @covers \DH\DoctrineAuditBundle\Reader\AuditEntry
- * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
- * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
- * @covers \DH\DoctrineAuditBundle\User\User
- *
  * @internal
  */
 final class UpdateHelperTest extends BaseTest

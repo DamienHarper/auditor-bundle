@@ -18,15 +18,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
 
 /**
- * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
- * @covers \DH\DoctrineAuditBundle\AuditConfiguration
- * @covers \DH\DoctrineAuditBundle\DependencyInjection\Compiler\StorageConfigurationCompilerPass
- * @covers \DH\DoctrineAuditBundle\DependencyInjection\Configuration
- * @covers \DH\DoctrineAuditBundle\DependencyInjection\DHDoctrineAuditExtension
- * @covers \DH\DoctrineAuditBundle\DHDoctrineAuditBundle
- * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
- * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
- *
  * @internal
  */
 final class DHDoctrineAuditBundleTest extends TestCase

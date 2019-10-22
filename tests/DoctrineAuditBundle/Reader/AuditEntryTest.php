@@ -7,8 +7,6 @@ use DH\DoctrineAuditBundle\User\User;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \DH\DoctrineAuditBundle\Reader\AuditEntry
- *
  * @internal
  */
 final class AuditEntryTest extends TestCase

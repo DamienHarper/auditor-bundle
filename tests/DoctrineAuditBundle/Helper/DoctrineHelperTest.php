@@ -7,8 +7,6 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Post;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
- *
  * @internal
  */
 final class DoctrineHelperTest extends TestCase
