@@ -7,8 +7,6 @@ use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractCompilerPassTestCase
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
- * @covers \DH\DoctrineAuditBundle\DependencyInjection\Compiler\StorageConfigurationCompilerPass
- *
  * @internal
  */
 final class StorageConfigurationCompilerPassTest extends AbstractCompilerPassTestCase

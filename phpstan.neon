@@ -12,7 +12,8 @@ parameters:
     ignoreErrors:
         # false positives
         - '~Cannot cast array\<string\>\|string\|null to int~'
-        - '~Property DH\\DoctrineAuditBundle\\AuditConfiguration\:\:\$dispatcher \(Symfony\\Component\\EventDispatcher\\EventDispatcherInterface\) does not accept Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\|null~'
+        - '~Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters\, 1 required~'
+        - '~Parameter \#1 \$event of method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) expects object\, string given~'
         - '~Parameter \#1 \$name of method Symfony\\Component\\Console\\Command\\Command\:\:setName\(\) expects string, string\|null given~'
         - '~Parameter \#1 \$tableName of method Doctrine\\DBAL\\Schema\\Schema\:\:(has|get)Table\(\) expects string, string\|null given~'
         - '~Cannot call method fetchColumn\(\) on Doctrine\\DBAL\\Driver\\Statement\|int~'

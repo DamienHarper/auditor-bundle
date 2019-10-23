@@ -14,25 +14,6 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
- * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
- * @covers \DH\DoctrineAuditBundle\AuditConfiguration
- * @covers \DH\DoctrineAuditBundle\Command\UpdateSchemaCommand
- * @covers \DH\DoctrineAuditBundle\DBAL\AuditLogger
- * @covers \DH\DoctrineAuditBundle\DBAL\AuditLoggerChain
- * @covers \DH\DoctrineAuditBundle\Event\AuditEvent
- * @covers \DH\DoctrineAuditBundle\Event\AuditSubscriber
- * @covers \DH\DoctrineAuditBundle\Event\CreateSchemaListener
- * @covers \DH\DoctrineAuditBundle\Event\DoctrineSubscriber
- * @covers \DH\DoctrineAuditBundle\Event\LifecycleEvent
- * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
- * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
- * @covers \DH\DoctrineAuditBundle\Helper\UpdateHelper
- * @covers \DH\DoctrineAuditBundle\Manager\AuditManager
- * @covers \DH\DoctrineAuditBundle\Manager\AuditTransaction
- * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
- * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
- * @covers \DH\DoctrineAuditBundle\User\User
- *
  * @internal
  */
 final class UpdateSchemaCommandTest extends CoreTest

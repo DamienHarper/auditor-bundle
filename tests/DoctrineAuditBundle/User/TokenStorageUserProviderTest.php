@@ -13,9 +13,6 @@ use Symfony\Component\Security\Core\Role\SwitchUserRole;
 use Symfony\Component\Security\Core\Security;
 
 /**
- * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
- * @covers \DH\DoctrineAuditBundle\User\User
- *
  * @internal
  */
 final class TokenStorageUserProviderTest extends TestCase

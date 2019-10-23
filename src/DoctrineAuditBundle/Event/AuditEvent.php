@@ -2,25 +2,49 @@
 
 namespace DH\DoctrineAuditBundle\Event;
 
-use Symfony\Contracts\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\Event as ComponentEvent;
+use Symfony\Contracts\EventDispatcher\Event as ContractsEvent;
 
-abstract class AuditEvent extends Event
-{
-    /**
-     * @var array
-     */
-    private $payload;
-
-    public function __construct(array $payload)
+if (class_exists(ComponentEvent::class)) {
+    abstract class AuditEvent extends ComponentEvent
     {
-        $this->payload = $payload;
+        /**
+         * @var array
+         */
+        private $payload;
+
+        public function __construct(array $payload)
+        {
+            $this->payload = $payload;
+        }
+
+        /**
+         * @return array
+         */
+        public function getPayload(): array
+        {
+            return $this->payload;
+        }
     }
-
-    /**
-     * @return array
-     */
-    public function getPayload(): array
+} else {
+    abstract class AuditEvent extends ContractsEvent
     {
-        return $this->payload;
+        /**
+         * @var array
+         */
+        private $payload;
+
+        public function __construct(array $payload)
+        {
+            $this->payload = $payload;
+        }
+
+        /**
+         * @return array
+         */
+        public function getPayload(): array
+        {
+            return $this->payload;
+        }
     }
 }

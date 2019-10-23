@@ -8,20 +8,6 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Annotation\AuditedEntity;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Annotation\UnauditedEntity;
 
 /**
- * @covers \DH\DoctrineAuditBundle\Annotation\AnnotationLoader
- * @covers \DH\DoctrineAuditBundle\AuditConfiguration
- * @covers \DH\DoctrineAuditBundle\Event\AuditEvent
- * @covers \DH\DoctrineAuditBundle\Event\AuditSubscriber
- * @covers \DH\DoctrineAuditBundle\Event\CreateSchemaListener
- * @covers \DH\DoctrineAuditBundle\Event\DoctrineSubscriber
- * @covers \DH\DoctrineAuditBundle\Event\LifecycleEvent
- * @covers \DH\DoctrineAuditBundle\Helper\AuditHelper
- * @covers \DH\DoctrineAuditBundle\Helper\DoctrineHelper
- * @covers \DH\DoctrineAuditBundle\Helper\UpdateHelper
- * @covers \DH\DoctrineAuditBundle\Manager\AuditManager
- * @covers \DH\DoctrineAuditBundle\Reader\AuditReader
- * @covers \DH\DoctrineAuditBundle\User\TokenStorageUserProvider
- *
  * @internal
  */
 final class AnnotationLoaderTest extends BaseTest
