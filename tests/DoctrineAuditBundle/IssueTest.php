@@ -5,6 +5,8 @@ namespace DH\DoctrineAuditBundle\Tests;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Inheritance\Bike;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Inheritance\Car;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Inheritance\Cat;
+use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Inheritance\Dog;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Inheritance\Vehicle;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issue37\Locale;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issue37\User;
@@ -16,11 +18,6 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Issue40\DieselCase;
  */
 final class IssueTest extends BaseTest
 {
-    /**
-     * @var string
-     */
-    protected $fixturesPath = __DIR__.'/Fixtures';
-
     public function testAuditingSubclass(): void
     {
         $em = $this->getEntityManager();
@@ -44,6 +41,16 @@ final class IssueTest extends BaseTest
         $em->persist($tryke);
         $em->flush();
 
+        $cat = new Cat();
+        $cat->setLabel('cat');
+        $em->persist($cat);
+        $em->flush();
+
+        $dog = new Dog();
+        $dog->setLabel('dog');
+        $em->persist($dog);
+        $em->flush();
+
         $audits = $reader->getAudits(Vehicle::class);
         static::assertCount(1, $audits, 'results count ok.');
 
@@ -56,14 +63,30 @@ final class IssueTest extends BaseTest
         $audits = $reader->getAudits(Bike::class);
         static::assertCount(1, $audits, 'results count ok.');
 
+        $audits = $reader->getAudits(Cat::class);
+        static::assertCount(1, $audits, 'results count ok.');
+
+        $audits = $reader->getAudits(Dog::class);
+        static::assertCount(1, $audits, 'results count ok.');
+
         $car->setLabel('Taycan');
         $em->persist($car);
+        $em->flush();
+
+        $cat->setLabel('cat2');
+        $em->persist($cat);
         $em->flush();
 
         $audits = $reader->getAudits(Vehicle::class);
         static::assertCount(1, $audits, 'results count ok.');
 
         $audits = $reader->getAudits(Car::class);
+        static::assertCount(2, $audits, 'results count ok.');
+
+        $audits = $reader->getAudits(Dog::class);
+        static::assertCount(1, $audits, 'results count ok.');
+
+        $audits = $reader->getAudits(Cat::class);
         static::assertCount(2, $audits, 'results count ok.');
     }
 
@@ -158,6 +181,8 @@ final class IssueTest extends BaseTest
             Vehicle::class => ['enabled' => true],
             Car::class => ['enabled' => true],
             Bike::class => ['enabled' => true],
+            Cat::class => ['enabled' => true],
+            Dog::class => ['enabled' => true],
         ]);
 
         $this->setUpEntitySchema();
