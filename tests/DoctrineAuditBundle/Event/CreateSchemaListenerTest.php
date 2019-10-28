@@ -85,7 +85,9 @@ final class CreateSchemaListenerTest extends BaseTest
 
         static::assertContains('animal', $tableNames);
         static::assertContains('dog', $tableNames);
+        static::assertContains('dog_audit', $tableNames);
         static::assertContains('cat', $tableNames);
+        static::assertContains('cat_audit', $tableNames);
 
         static::assertNotContains('animal_audit', $tableNames);
     }
@@ -97,6 +99,7 @@ final class CreateSchemaListenerTest extends BaseTest
         static::assertNotContains('bike_audit', $tableNames);
         static::assertNotContains('car_audit', $tableNames);
         static::assertContains('vehicle', $tableNames);
+        static::assertContains('vehicle_audit', $tableNames);
     }
 
     public function testCorrectSchemaStandard()
