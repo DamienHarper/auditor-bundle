@@ -182,9 +182,13 @@ dh_doctrine_audit:
 ```
 
 
-## Single Table Inheritance
+## Inheritance (Doctrine)
 
-This bundle supports Doctrine [single table inheritance](https://www.doctrine-project.org/projects/doctrine-orm/en/2.6/reference/inheritance-mapping.html#single-table-inheritance).
+This bundle supports all of Doctrine inheritance types:
+ - [mapped superclass inheritance](https://www.doctrine-project.org/projects/doctrine-orm/en/2.6/reference/inheritance-mapping.html#mapped-superclasses)
+ - [single table inheritance](https://www.doctrine-project.org/projects/doctrine-orm/en/2.6/reference/inheritance-mapping.html#single-table-inheritance)
+ - [class table inheritance](https://www.doctrine-project.org/projects/doctrine-orm/en/2.6/reference/inheritance-mapping.html#class-table-inheritance)
 
-However, configuring the root table to be audited does not suffice to get all child tables audited.
-You have to configure every child table that needs to be audited as well.
+
+**Note**: configuring the root table to be audited does not suffice to get all child tables audited in a 
+**single table inheritance** context. You have to configure every child table that needs to be audited as well.

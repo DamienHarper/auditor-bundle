@@ -12,21 +12,22 @@ using annotations in entities.
 * **Audit events**: an audit event is dispatched for every audit entry opening the doors to add 
 custom behavior on audit entry creation.
 * **Security controls**: audit access can be now restricted to specific roles.
-* The bundle now supports non numeric IDs for the `User` objects (closes #66, thanks to @Gonzalo1987).
+* The bundle now supports non numeric IDs for the `User` objects (thanks to @Gonzalo1987).
 * A transaction hash is now stored in audit tables and makes it easier to identify all operations performed 
-in the same transaction (closes #69)
+in the same transaction
   - The timeline now displays a transaction hash for each element. By clicking a transaction hash, 
   you get a complete overview of all the operations included into the transaction.
   - `AuditReader::getAudits()` now accepts a transaction hash as fifth parameter to return audits 
   logged in the given transaction for the given entity.
   - `AuditReader::getAuditsByTransactionHash()` accepts a transaction hash as parameter and returns 
   all the audits logged in the given transaction.
-* Better `SINGLE_TABLE` inheritance support (#73)
+* Better single table (`SINGLE_TABLE`) inheritance support
   - `AuditReader::getAudits()` now accepts a boolean as sixth parameter to return either audits 
   for the given entity only or audits for the given entity hierarchy.
-* Performance enhancements when saving a lot of entities at once (closes #70, thanks to @acanicatti).
+* Add class table (`JOINED`) inheritance support (thanks to @versh23)
+* Performance enhancements when saving a lot of entities at once (thanks to @acanicatti).
 * Removed deprecation messages (thanks to @maxhelias).
-* Fixed an issue with `audit:schema:update` command when run against a database with no audit table (#85)
+* Fixed an issue with `audit:schema:update` command when run against a database with no audit table
 * A few icons have been added in the timeline.
 * Revamped documentation
 
