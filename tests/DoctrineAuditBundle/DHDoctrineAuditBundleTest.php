@@ -36,7 +36,7 @@ final class DHDoctrineAuditBundleTest extends TestCase
 
         $em = EntityManager::create(
             $connection,
-            Setup::createAnnotationMetadataConfiguration([__DIR__.'/Fixtures'])
+            Setup::createAnnotationMetadataConfiguration([__DIR__.'/Fixtures'], true)
         );
 
         $container->set('entity_manager', $em);
@@ -86,14 +86,14 @@ final class DHDoctrineAuditBundleTest extends TestCase
 
         // main connection and entity manager
         $connection = new Connection([], $this->createMock(Driver::class));
-        $em1 = EntityManager::create($connection, Setup::createAnnotationMetadataConfiguration([__DIR__.'/Fixtures']));
+        $em1 = EntityManager::create($connection, Setup::createAnnotationMetadataConfiguration([__DIR__.'/Fixtures'], true));
 
         $container->set('entity_manager', $em1);
         $container->setAlias('doctrine.orm.default_entity_manager', 'entity_manager');
 
         // secondary connection and entity manager
         $connection2 = new Connection([], $this->createMock(Driver::class));
-        $em2 = EntityManager::create($connection2, Setup::createAnnotationMetadataConfiguration([__DIR__.'/Fixtures']));
+        $em2 = EntityManager::create($connection2, Setup::createAnnotationMetadataConfiguration([__DIR__.'/Fixtures'], true));
 
         $container->set('entity_manager2', $em2);
         $container->setAlias('doctrine.orm.secondary_entity_manager', 'entity_manager2');

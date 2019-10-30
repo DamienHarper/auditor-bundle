@@ -77,6 +77,8 @@ class AuditConfiguration
      */
     private $is_pre43_dispatcher;
 
+    private $annotationLoaded = false;
+
     public function __construct(
         array $config,
         UserProviderInterface $userProvider,
@@ -108,12 +110,6 @@ class AuditConfiguration
                 $this->entities[$auditedEntity] = $entityOptions;
             }
         }
-
-        // Update config using annotations
-        if (null !== $this->annotationLoader) {
-            $config = $this->annotationLoader->load();
-            $this->entities = array_merge($this->entities, $config);
-        }
     }
 
     public function isPre43Dispatcher(): bool
@@ -124,10 +120,14 @@ class AuditConfiguration
     /**
      * Set the value of entities.
      *
+     * This method completely overrides entities configuration
+     * including annotation configuration
+     *
      * @param array $entities
      */
     public function setEntities(array $entities): void
     {
+        $this->annotationLoaded = true;
         $this->entities = $entities;
     }
 
@@ -177,7 +177,7 @@ class AuditConfiguration
         $class = DoctrineHelper::getRealClass($entity);
 
         // is $entity part of audited entities?
-        if (!\array_key_exists($class, $this->entities)) {
+        if (!\array_key_exists($class, $this->getEntities())) {
             // no => $entity is not audited
             return false;
         }
@@ -201,12 +201,12 @@ class AuditConfiguration
         $class = DoctrineHelper::getRealClass($entity);
 
         // is $entity part of audited entities?
-        if (!\array_key_exists($class, $this->entities)) {
+        if (!\array_key_exists($class, $this->getEntities())) {
             // no => $entity is not audited
             return false;
         }
 
-        $entityOptions = $this->entities[$class];
+        $entityOptions = $this->getEntities()[$class];
 
         if (null === $entityOptions) {
             // no option defined => $entity is audited
@@ -243,7 +243,7 @@ class AuditConfiguration
         }
 
         $class = DoctrineHelper::getRealClass($entity);
-        $entityOptions = $this->entities[$class];
+        $entityOptions = $this->getEntities()[$class];
 
         if (null === $entityOptions) {
             // no option defined => $field is audited
@@ -307,6 +307,13 @@ class AuditConfiguration
      */
     public function getEntities(): array
     {
+        if (false === $this->annotationLoaded && null !== $this->annotationLoader) {
+            // Update config using annotations
+            $config = $this->annotationLoader->load();
+            $this->entities = array_merge($this->entities, $config);
+            $this->annotationLoaded = true;
+        }
+
         return $this->entities;
     }
 
@@ -319,7 +326,7 @@ class AuditConfiguration
      */
     public function enableAuditFor(string $entity): self
     {
-        if (isset($this->entities[$entity])) {
+        if (isset($this->getEntities()[$entity])) {
             $this->entities[$entity]['enabled'] = true;
         }
 
@@ -335,7 +342,7 @@ class AuditConfiguration
      */
     public function disableAuditFor(string $entity): self
     {
-        if (isset($this->entities[$entity])) {
+        if (isset($this->getEntities()[$entity])) {
             $this->entities[$entity]['enabled'] = false;
         }
 
