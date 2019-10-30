@@ -120,6 +120,9 @@ class AuditConfiguration
     /**
      * Set the value of entities.
      *
+     * This method completely overrides entities configuration
+     * including annotation configuration
+     *
      * @param array $entities
      */
     public function setEntities(array $entities): void
