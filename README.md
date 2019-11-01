@@ -31,8 +31,8 @@ The official documentation can be found [here](doc/00-index.md).
 
 
 ## Version Information
- Version   | Status                  | PHP Version
-:----------|:------------------------|:------------
+ Version   | Status                  | Required PHP Version
+:----------|:------------------------|:--------------------
  3.x       | Active support :rocket: | >= 7.1
  2.x       | Active support          | >= 7.1
  1.x       | End of life             | >= 7.1

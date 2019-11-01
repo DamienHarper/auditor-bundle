@@ -14,22 +14,22 @@ custom behavior on audit entry creation.
 * **Security controls**: audit access can be now restricted to specific roles.
 * The bundle now supports non numeric IDs for the `User` objects (thanks to @Gonzalo1987).
 * A transaction hash is now stored in audit tables and makes it easier to identify all operations performed 
-in the same transaction
+in the same transaction.
   - The timeline now displays a transaction hash for each element. By clicking a transaction hash, 
   you get a complete overview of all the operations included into the transaction.
   - `AuditReader::getAudits()` now accepts a transaction hash as fifth parameter to return audits 
   logged in the given transaction for the given entity.
   - `AuditReader::getAuditsByTransactionHash()` accepts a transaction hash as parameter and returns 
   all the audits logged in the given transaction.
-* Better single table (`SINGLE_TABLE`) inheritance support
+* Better single table (`SINGLE_TABLE`) inheritance support.
   - `AuditReader::getAudits()` now accepts a boolean as sixth parameter to return either audits 
   for the given entity only or audits for the given entity hierarchy.
-* Add class table (`JOINED`) inheritance support (thanks to @versh23)
+* Add class table (`JOINED`) inheritance support (thanks to @versh23).
 * Performance enhancements when saving a lot of entities at once (thanks to @acanicatti).
 * Removed deprecation messages (thanks to @maxhelias).
-* Fixed an issue with `audit:schema:update` command when run against a database with no audit table
+* Fixed an issue with `audit:schema:update` command when run against a database with no audit table.
 * A few icons have been added in the timeline.
-* Revamped documentation
+* Revamped documentation.
 
 ### Breaking changes
 * The structure of audit tables has changed so you have to run the migration command right after updating
@@ -40,8 +40,8 @@ use the bundled migration command instead which supports the same options as Doc
   - `bin/console audit:schema:update --dump-sql` prints SQL queries that need be executed.
   - `bin/console audit:schema:update --force` executes relevant SQL queries.
 * Configuration has changed to use a secondary database: you now only need to declare the dedicated 
-entity manager in configuration file as described [here](https://github.com/DamienHarper/DoctrineAuditBundle/blob/master/doc/20-general-configuration.md#storage-configuration)
-* The bundle requires `mbstring` extension (cf. https://www.php.net/manual/en/mbstring.installation.php)
+entity manager in configuration file as described [here](https://github.com/DamienHarper/DoctrineAuditBundle/blob/master/doc/20-general-configuration.md#storage-configuration).
+* The bundle requires `mbstring` extension (cf. https://www.php.net/manual/en/mbstring.installation.php).
 
 ### How to upgrade?
 Either update your `composer.json` file manually to include `"damienharper/doctrine-audit-bundle": "^3.0"` 
