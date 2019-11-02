@@ -1,8 +1,8 @@
 {
   "name": "damienharper/doctrine-audit-bundle",
   "type": "symfony-bundle",
-  "description": "This bundle creates audit logs for all doctrine ORM database related changes.",
-  "keywords": ["doctrine", "audit"],
+  "description": "Doctrine audits logs made easy.",
+  "keywords": ["doctrine", "audit", "audit-log", "audit-trail"],
   "license": "MIT",
   "authors": [
     {
