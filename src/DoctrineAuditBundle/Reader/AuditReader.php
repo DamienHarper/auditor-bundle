@@ -8,6 +8,7 @@ use DH\DoctrineAuditBundle\Exception\AccessDeniedException;
 use DH\DoctrineAuditBundle\Exception\InvalidArgumentException;
 use DH\DoctrineAuditBundle\User\UserInterface;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,9 +39,9 @@ class AuditReader
     private $entityManager;
 
     /**
-     * @var ?string
+     * @var array
      */
-    private $filter;
+    private $filters = [];
 
     /**
      * AuditReader constructor.
@@ -65,19 +66,27 @@ class AuditReader
     }
 
     /**
-     * Set the filter for AuditEntry retrieving.
+     * Set the filter(s) for AuditEntry retrieving.
      *
-     * @param string $filter
+     * @param array|string $filter
      *
      * @return AuditReader
      */
-    public function filterBy(string $filter): self
+    public function filterBy($filter): self
     {
-        if (!\in_array($filter, [self::UPDATE, self::ASSOCIATE, self::DISSOCIATE, self::INSERT, self::REMOVE], true)) {
-            $this->filter = null;
-        } else {
-            $this->filter = $filter;
+        $filters = [];
+
+        if (!\is_array($filter)) {
+            $filter = [$filter];
         }
+
+        foreach ($filter as $f) {
+            if ($this->isAllowedFilter($f)) {
+                $filters[] = $f;
+            }
+        }
+
+        $this->filters = $filters;
 
         return $this;
     }
@@ -85,11 +94,11 @@ class AuditReader
     /**
      * Returns current filter.
      *
-     * @return null|string
+     * @return array
      */
-    public function getFilter(): ?string
+    public function getFilters(): array
     {
-        return $this->filter;
+        return $this->filters;
     }
 
     /**
@@ -257,10 +266,10 @@ class AuditReader
             ->setParameter('id', $id)
         ;
 
-        if (null !== $this->filter) {
+        if (!empty($this->filters)) {
             $queryBuilder
-                ->andWhere('type = :filter')
-                ->setParameter('filter', $this->filter)
+                ->andWhere('type IN (:filters)')
+                ->setParameter('filters', $this->filters, Connection::PARAM_STR_ARRAY)
             ;
         }
 
@@ -304,6 +313,11 @@ class AuditReader
     public function getEntityManager(): EntityManagerInterface
     {
         return $this->entityManager;
+    }
+
+    private function isAllowedFilter(string $filter): bool
+    {
+        return \in_array($filter, [self::UPDATE, self::ASSOCIATE, self::DISSOCIATE, self::INSERT, self::REMOVE], true);
     }
 
     /**
@@ -367,10 +381,10 @@ class AuditReader
             ;
         }
 
-        if (null !== $this->filter) {
+        if (!empty($this->filters)) {
             $queryBuilder
-                ->andWhere('type = :filter')
-                ->setParameter('filter', $this->filter)
+                ->andWhere('type IN (:filters)')
+                ->setParameter('filters', $this->filters, Connection::PARAM_STR_ARRAY)
             ;
         }
 
