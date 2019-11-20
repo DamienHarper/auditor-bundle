@@ -5,6 +5,7 @@ namespace DH\DoctrineAuditBundle\Helper;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\User\UserInterface;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
@@ -211,55 +212,55 @@ class AuditHelper
     {
         return [
             'id' => [
-                'type' => Type::INTEGER,
+                'type' => Types::INTEGER,
                 'options' => [
                     'autoincrement' => true,
                     'unsigned' => true,
                 ],
             ],
             'type' => [
-                'type' => Type::STRING,
+                'type' => Types::STRING,
                 'options' => [
                     'notnull' => true,
                     'length' => 10,
                 ],
             ],
             'object_id' => [
-                'type' => Type::STRING,
+                'type' => Types::STRING,
                 'options' => [
                     'notnull' => true,
                 ],
             ],
             'discriminator' => [
-                'type' => Type::STRING,
+                'type' => Types::STRING,
                 'options' => [
                     'default' => null,
                     'notnull' => false,
                 ],
             ],
             'transaction_hash' => [
-                'type' => Type::STRING,
+                'type' => Types::STRING,
                 'options' => [
                     'notnull' => false,
                     'length' => 40,
                 ],
             ],
             'diffs' => [
-                'type' => Type::JSON_ARRAY,
+                'type' => Types::JSON,
                 'options' => [
                     'default' => null,
                     'notnull' => false,
                 ],
             ],
             'blame_id' => [
-                'type' => Type::STRING,
+                'type' => Types::STRING,
                 'options' => [
                     'default' => null,
                     'notnull' => false,
                 ],
             ],
             'blame_user' => [
-                'type' => Type::STRING,
+                'type' => Types::STRING,
                 'options' => [
                     'default' => null,
                     'notnull' => false,
@@ -267,7 +268,7 @@ class AuditHelper
                 ],
             ],
             'blame_user_fqdn' => [
-                'type' => Type::STRING,
+                'type' => Types::STRING,
                 'options' => [
                     'default' => null,
                     'notnull' => false,
@@ -275,7 +276,7 @@ class AuditHelper
                 ],
             ],
             'blame_user_firewall' => [
-                'type' => Type::STRING,
+                'type' => Types::STRING,
                 'options' => [
                     'default' => null,
                     'notnull' => false,
@@ -283,7 +284,7 @@ class AuditHelper
                 ],
             ],
             'ip' => [
-                'type' => Type::STRING,
+                'type' => Types::STRING,
                 'options' => [
                     'default' => null,
                     'notnull' => false,
@@ -291,7 +292,7 @@ class AuditHelper
                 ],
             ],
             'created_at' => [
-                'type' => Type::DATETIME,
+                'type' => Types::DATETIME_IMMUTABLE,
                 'options' => [
                     'notnull' => true,
                 ],
@@ -362,18 +363,18 @@ class AuditHelper
         $platform = $em->getConnection()->getDatabasePlatform();
 
         switch ($type->getName()) {
-            case Type::BIGINT:
+            case Types::BIGINT:
                 $convertedValue = (string) $value;
 
                 break;
-            case Type::INTEGER:
-            case Type::SMALLINT:
+            case Types::INTEGER:
+            case Types::SMALLINT:
                 $convertedValue = (int) $value;
 
                 break;
-            case Type::DECIMAL:
-            case Type::FLOAT:
-            case Type::BOOLEAN:
+            case Types::DECIMAL:
+            case Types::FLOAT:
+            case Types::BOOLEAN:
                 $convertedValue = $type->convertToPHPValue($value, $platform);
 
                 break;
