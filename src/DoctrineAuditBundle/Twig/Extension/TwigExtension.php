@@ -2,7 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Twig\Extension;
 
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -27,7 +27,7 @@ class TwigExtension extends AbstractExtension
         ];
     }
 
-    public function __construct(RegistryInterface $doctrine)
+    public function __construct(ManagerRegistry $doctrine)
     {
         $this->doctrine = $doctrine;
     }

@@ -21,7 +21,10 @@ final class TwigExtensionTest extends BaseTest
     /**
      * @var string
      */
-    protected $fixturesPath = __DIR__.'/../../Fixtures';
+    protected $fixturesPath = [
+        __DIR__.'/../../../../src/DoctrineAuditBundle/Annotation',
+        __DIR__.'/../../Fixtures',
+    ];
 
     protected function setUp(): void
     {
