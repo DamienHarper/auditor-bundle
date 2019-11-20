@@ -14,28 +14,27 @@ use Doctrine\ORM\Mapping as ORM;
 abstract class Animal
 {
     /**
+     * @ORM\Column(type="string", length=50)
+     */
+    protected $label;
+    /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      * @ORM\Column(type="integer")
      */
     private $id;
 
-    public function getId()
+    final public function getId()
     {
         return $this->id;
     }
 
-    /**
-     * @ORM\Column(type="string", length=50)
-     */
-    protected $label;
-
-    public function getLabel()
+    final public function getLabel()
     {
         return $this->label;
     }
 
-    public function setLabel($label)
+    final public function setLabel($label)
     {
         $this->label = $label;
 

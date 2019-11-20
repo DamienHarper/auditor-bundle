@@ -14,6 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata as ORMMetadata;
 use Pagerfanta\Adapter\DoctrineDbalSingleTableAdapter;
 use Pagerfanta\Pagerfanta;
+use PDO;
 use Symfony\Component\Security\Core\Security as CoreSecurity;
 
 class AuditReader
@@ -140,7 +141,7 @@ class AuditReader
 
         /** @var Statement $statement */
         $statement = $queryBuilder->execute();
-        $statement->setFetchMode(\PDO::FETCH_CLASS, AuditEntry::class);
+        $statement->setFetchMode(PDO::FETCH_CLASS, AuditEntry::class);
 
         return $statement->fetchAll();
     }
@@ -230,6 +231,82 @@ class AuditReader
     }
 
     /**
+     * @param object|string $entity
+     * @param string        $id
+     *
+     * @throws AccessDeniedException
+     * @throws InvalidArgumentException
+     *
+     * @return mixed[]
+     */
+    public function getAudit($entity, $id)
+    {
+        $this->checkAuditable($entity);
+        $this->checkRoles($entity, Security::VIEW_SCOPE);
+
+        $connection = $this->entityManager->getConnection();
+
+        /**
+         * @var \Doctrine\DBAL\Query\QueryBuilder
+         */
+        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder
+            ->select('*')
+            ->from($this->getEntityAuditTableName($entity))
+            ->where('id = :id')
+            ->setParameter('id', $id)
+        ;
+
+        if (null !== $this->filter) {
+            $queryBuilder
+                ->andWhere('type = :filter')
+                ->setParameter('filter', $this->filter)
+            ;
+        }
+
+        /** @var Statement $statement */
+        $statement = $queryBuilder->execute();
+        $statement->setFetchMode(PDO::FETCH_CLASS, AuditEntry::class);
+
+        return $statement->fetchAll();
+    }
+
+    /**
+     * Returns the table name of $entity.
+     *
+     * @param object|string $entity
+     *
+     * @return string
+     */
+    public function getEntityTableName($entity): string
+    {
+        return $this->getClassMetadata($entity)->getTableName();
+    }
+
+    /**
+     * Returns the audit table name for $entity.
+     *
+     * @param object|string $entity
+     *
+     * @return string
+     */
+    public function getEntityAuditTableName($entity): string
+    {
+        $entityName = \is_string($entity) ? $entity : \get_class($entity);
+        $schema = $this->getClassMetadata($entityName)->getSchemaName() ? $this->getClassMetadata($entityName)->getSchemaName().'.' : '';
+
+        return sprintf('%s%s%s%s', $schema, $this->configuration->getTablePrefix(), $this->getEntityTableName($entityName), $this->configuration->getTableSuffix());
+    }
+
+    /**
+     * @return EntityManagerInterface
+     */
+    public function getEntityManager(): EntityManagerInterface
+    {
+        return $this->entityManager;
+    }
+
+    /**
      * Returns an array of audited entries/operations.
      *
      * @param object|string   $entity
@@ -309,47 +386,6 @@ class AuditReader
 
     /**
      * @param object|string $entity
-     * @param string        $id
-     *
-     * @throws AccessDeniedException
-     * @throws InvalidArgumentException
-     *
-     * @return mixed[]
-     */
-    public function getAudit($entity, $id)
-    {
-        $this->checkAuditable($entity);
-        $this->checkRoles($entity, Security::VIEW_SCOPE);
-
-        $connection = $this->entityManager->getConnection();
-
-        /**
-         * @var \Doctrine\DBAL\Query\QueryBuilder
-         */
-        $queryBuilder = $connection->createQueryBuilder();
-        $queryBuilder
-            ->select('*')
-            ->from($this->getEntityAuditTableName($entity))
-            ->where('id = :id')
-            ->setParameter('id', $id)
-        ;
-
-        if (null !== $this->filter) {
-            $queryBuilder
-                ->andWhere('type = :filter')
-                ->setParameter('filter', $this->filter)
-            ;
-        }
-
-        /** @var Statement $statement */
-        $statement = $queryBuilder->execute();
-        $statement->setFetchMode(\PDO::FETCH_CLASS, AuditEntry::class);
-
-        return $statement->fetchAll();
-    }
-
-    /**
-     * @param object|string $entity
      *
      * @return ClassMetadata
      */
@@ -359,46 +395,11 @@ class AuditReader
     }
 
     /**
-     * Returns the table name of $entity.
-     *
-     * @param object|string $entity
-     *
-     * @return string
-     */
-    public function getEntityTableName($entity): string
-    {
-        return $this->getClassMetadata($entity)->getTableName();
-    }
-
-    /**
-     * Returns the audit table name for $entity.
-     *
-     * @param object|string $entity
-     *
-     * @return string
-     */
-    public function getEntityAuditTableName($entity): string
-    {
-        $entityName = \is_string($entity) ? $entity : \get_class($entity);
-        $schema = $this->getClassMetadata($entityName)->getSchemaName() ? $this->getClassMetadata($entityName)->getSchemaName().'.' : '';
-
-        return sprintf('%s%s%s%s', $schema, $this->configuration->getTablePrefix(), $this->getEntityTableName($entityName), $this->configuration->getTableSuffix());
-    }
-
-    /**
      * @return EntityManagerInterface
      */
     private function selectStorage(): EntityManagerInterface
     {
         return $this->configuration->getEntityManager() ?? $this->entityManager;
-    }
-
-    /**
-     * @return EntityManagerInterface
-     */
-    public function getEntityManager(): EntityManagerInterface
-    {
-        return $this->entityManager;
     }
 
     /**

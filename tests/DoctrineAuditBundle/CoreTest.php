@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Tests;
 
+use DateTime;
 use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Author;
@@ -92,7 +93,7 @@ abstract class CoreTest extends BaseTest
             ->setAuthor($author1)
             ->setTitle('First post')
             ->setBody('Here is the body')
-            ->setCreatedAt(new \DateTime())
+            ->setCreatedAt(new DateTime())
         ;
         $em->persist($post1);
 
@@ -101,7 +102,7 @@ abstract class CoreTest extends BaseTest
             ->setPost($post1)
             ->setBody('First comment about post #1')
             ->setAuthor('Dark Vador')
-            ->setCreatedAt(new \DateTime())
+            ->setCreatedAt(new DateTime())
         ;
         $em->persist($comment1);
 
@@ -110,7 +111,7 @@ abstract class CoreTest extends BaseTest
             ->setAuthor($author1)
             ->setTitle('Second post')
             ->setBody('Here is another body')
-            ->setCreatedAt(new \DateTime())
+            ->setCreatedAt(new DateTime())
         ;
         $em->persist($post2);
 
@@ -126,7 +127,7 @@ abstract class CoreTest extends BaseTest
             ->setAuthor($author2)
             ->setTitle('Second post')
             ->setBody('Here is another body')
-            ->setCreatedAt(new \DateTime())
+            ->setCreatedAt(new DateTime())
         ;
         $em->persist($post3);
 
@@ -135,7 +136,7 @@ abstract class CoreTest extends BaseTest
             ->setPost($post3)
             ->setBody('First comment about post #3')
             ->setAuthor('Yoshi')
-            ->setCreatedAt(new \DateTime())
+            ->setCreatedAt(new DateTime())
         ;
         $em->persist($comment2);
 
@@ -144,7 +145,7 @@ abstract class CoreTest extends BaseTest
             ->setPost($post3)
             ->setBody('Second comment about post #3')
             ->setAuthor('Mario')
-            ->setCreatedAt(new \DateTime())
+            ->setCreatedAt(new DateTime())
         ;
         $em->persist($comment3);
 
@@ -165,7 +166,7 @@ abstract class CoreTest extends BaseTest
             ->setAuthor($author3)
             ->setTitle('First post')
             ->setBody('Here is the body')
-            ->setCreatedAt(new \DateTime())
+            ->setCreatedAt(new DateTime())
         ;
         $em->persist($post4);
 

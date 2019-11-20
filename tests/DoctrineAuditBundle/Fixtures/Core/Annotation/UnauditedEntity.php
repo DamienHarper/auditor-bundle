@@ -15,13 +15,6 @@ use Doctrine\ORM\Mapping as ORM;
 class UnauditedEntity
 {
     /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     * @ORM\Column(type="integer")
-     */
-    private $id;
-
-    /**
      * @var string
      */
     public $auditedField;
@@ -32,4 +25,10 @@ class UnauditedEntity
      * @Audit\Ignore
      */
     public $ignoredField;
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     * @ORM\Column(type="integer")
+     */
+    private $id;
 }

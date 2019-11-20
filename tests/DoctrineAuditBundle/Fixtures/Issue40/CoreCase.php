@@ -12,13 +12,6 @@ use Doctrine\ORM\Mapping as ORM;
 class CoreCase
 {
     /**
-     * @ORM\Column(type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     */
-    private $id;
-
-    /**
      * @ORM\Column(type="string", name="type", length=50)
      */
     public $type;
@@ -27,4 +20,10 @@ class CoreCase
      * @ORM\Column(type="string", name="status", length=50)
      */
     public $status;
+    /**
+     * @ORM\Column(type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    private $id;
 }

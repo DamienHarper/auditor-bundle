@@ -14,16 +14,15 @@ use Doctrine\ORM\Mapping as ORM;
 class Vehicle
 {
     /**
+     * @ORM\Column(type="string", length=50)
+     */
+    protected $label;
+    /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      * @ORM\Column(type="integer")
      */
     private $id;
-
-    /**
-     * @ORM\Column(type="string", length=50)
-     */
-    protected $label;
 
     /**
      * @ORM\Column(type="integer")

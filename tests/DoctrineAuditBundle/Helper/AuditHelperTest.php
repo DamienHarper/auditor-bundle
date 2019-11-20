@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Tests\Helper;
 
+use DateTime;
 use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
@@ -43,7 +44,7 @@ final class AuditHelperTest extends CoreTest
             'id' => 1,
         ];
 
-        static::assertSame($expected, $helper->summarize($em, $author), 'AuditHelper::summarize ok');
+        self::assertSame($expected, $helper->summarize($em, $author), 'AuditHelper::summarize ok');
 
         $post = new Post();
         $post
@@ -51,7 +52,7 @@ final class AuditHelperTest extends CoreTest
             ->setAuthor($author)
             ->setTitle('First post')
             ->setBody('Here is the body')
-            ->setCreatedAt(new \DateTime())
+            ->setCreatedAt(new DateTime())
         ;
 
         $expected = [
@@ -61,7 +62,7 @@ final class AuditHelperTest extends CoreTest
             'id' => 1,
         ];
 
-        static::assertSame($expected, $helper->summarize($em, $post), 'AuditHelper::summarize is ok.');
+        self::assertSame($expected, $helper->summarize($em, $post), 'AuditHelper::summarize is ok.');
     }
 
     public function testId(): void
@@ -77,7 +78,7 @@ final class AuditHelperTest extends CoreTest
             ->setEmail('john.doe@gmail.com')
         ;
 
-        static::assertSame(1, $helper->id($em, $author), 'AuditHelper::id() is ok.');
+        self::assertSame(1, $helper->id($em, $author), 'AuditHelper::id() is ok.');
 
         $dieselCore = new CoreCase();
         $dieselCore->type = 'type1';
@@ -91,8 +92,8 @@ final class AuditHelperTest extends CoreTest
         $em->persist($dieselCase);
         $em->flush();
 
-        static::assertSame(1, $helper->id($em, $dieselCore));
-        static::assertSame(1, $helper->id($em, $dieselCase));
+        self::assertSame(1, $helper->id($em, $dieselCore));
+        self::assertSame(1, $helper->id($em, $dieselCase));
 
         $dieselCore = new CoreCase();
         $dieselCore->type = 'type2';
@@ -104,8 +105,8 @@ final class AuditHelperTest extends CoreTest
         $em->persist($dieselCase);
         $em->flush();
 
-        static::assertSame(2, $helper->id($em, $dieselCore));
-        static::assertSame(2, $helper->id($em, $dieselCase));
+        self::assertSame(2, $helper->id($em, $dieselCore));
+        self::assertSame(2, $helper->id($em, $dieselCase));
     }
 
     public function testDiffInsert(): void
@@ -142,7 +143,7 @@ final class AuditHelperTest extends CoreTest
             ],
         ];
 
-        static::assertSame($expected, $helper->diff($em, $author, $changeset), 'AuditHelper::diff() / insert is ok.');
+        self::assertSame($expected, $helper->diff($em, $author, $changeset), 'AuditHelper::diff() / insert is ok.');
     }
 
     public function testDiffUpdate(): void
@@ -179,7 +180,7 @@ final class AuditHelperTest extends CoreTest
             ],
         ];
 
-        static::assertSame($expected, $helper->diff($em, $author, $changeset), 'AuditHelper::diff() / update is ok.');
+        self::assertSame($expected, $helper->diff($em, $author, $changeset), 'AuditHelper::diff() / update is ok.');
     }
 
     public function testDiffHonorsGloballyIgnoredColumns(): void
@@ -209,7 +210,7 @@ final class AuditHelperTest extends CoreTest
         );
         $helper = new AuditHelper($configuration);
 
-        $now = new \DateTime('now');
+        $now = new DateTime('now');
         $post = new Post();
         $post
             ->setTitle('First post')
@@ -243,7 +244,7 @@ final class AuditHelperTest extends CoreTest
             ],
         ];
 
-        static::assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() honors globally ignored columns.');
+        self::assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() honors globally ignored columns.');
     }
 
     public function testDiffHonorsLocallyIgnoredColumns(): void
@@ -275,7 +276,7 @@ final class AuditHelperTest extends CoreTest
         );
         $helper = new AuditHelper($configuration);
 
-        $now = new \DateTime('now');
+        $now = new DateTime('now');
         $post = new Post();
         $post
             ->setTitle('First post')
@@ -309,7 +310,7 @@ final class AuditHelperTest extends CoreTest
             ],
         ];
 
-        static::assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() honors locally ignored columns.');
+        self::assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() honors locally ignored columns.');
     }
 
     public function testDiffIgnoresUnchangedValues(): void
@@ -318,7 +319,7 @@ final class AuditHelperTest extends CoreTest
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
 
-        $now = new \DateTime('now');
+        $now = new DateTime('now');
         $post = new Post();
         $post
             ->setTitle('First post')
@@ -352,7 +353,7 @@ final class AuditHelperTest extends CoreTest
             ],
         ];
 
-        static::assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() ignores unchanged values.');
+        self::assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() ignores unchanged values.');
     }
 
     public function testBlame(): void
@@ -369,7 +370,7 @@ final class AuditHelperTest extends CoreTest
             'user_firewall' => null,
         ];
 
-        static::assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
+        self::assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
     }
 
     public function testBlameWhenNoRequest(): void
@@ -401,7 +402,7 @@ final class AuditHelperTest extends CoreTest
             'user_firewall' => null,
         ];
 
-        static::assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
+        self::assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
     }
 
     public function testBlameWhenNoUser(): void
@@ -433,17 +434,17 @@ final class AuditHelperTest extends CoreTest
             'user_firewall' => null,
         ];
 
-        static::assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
+        self::assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
     }
 
     public function testParamToNamespace(): void
     {
-        static::assertSame(Author::class, AuditHelper::paramToNamespace('DH-DoctrineAuditBundle-Tests-Fixtures-Core-Standard-Author'), 'AuditHelper::paramToNamespace() is ok.');
+        self::assertSame(Author::class, AuditHelper::paramToNamespace('DH-DoctrineAuditBundle-Tests-Fixtures-Core-Standard-Author'), 'AuditHelper::paramToNamespace() is ok.');
     }
 
     public function testNamespaceToParam(): void
     {
-        static::assertSame('DH-DoctrineAuditBundle-Tests-Fixtures-Core-Standard-Author', AuditHelper::namespaceToParam(Author::class), 'AuditHelper::namespaceToParam() is ok.');
+        self::assertSame('DH-DoctrineAuditBundle-Tests-Fixtures-Core-Standard-Author', AuditHelper::namespaceToParam(Author::class), 'AuditHelper::namespaceToParam() is ok.');
     }
 
     public function testGetConfiguration(): void
@@ -452,7 +453,7 @@ final class AuditHelperTest extends CoreTest
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
 
-        static::assertInstanceOf(AuditConfiguration::class, $helper->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
+        self::assertInstanceOf(AuditConfiguration::class, $helper->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
     }
 
     protected function setupEntities(): void

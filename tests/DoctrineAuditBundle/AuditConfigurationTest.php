@@ -22,18 +22,26 @@ use Symfony\Component\Security\Core\Security as CoreSecurity;
  */
 final class AuditConfigurationTest extends BaseTest
 {
+    protected function setUp(): void
+    {
+    }
+
+    protected function tearDown(): void
+    {
+    }
+
     public function testDefaultTablePrefix(): void
     {
         $configuration = $this->getAuditConfiguration();
 
-        static::assertSame('', $configuration->getTablePrefix(), 'table_prefix is empty by default.');
+        self::assertSame('', $configuration->getTablePrefix(), 'table_prefix is empty by default.');
     }
 
     public function testDefaultTableSuffix(): void
     {
         $configuration = $this->getAuditConfiguration();
 
-        static::assertSame('_audit', $configuration->getTableSuffix(), 'table_suffix is "_audit" by default.');
+        self::assertSame('_audit', $configuration->getTableSuffix(), 'table_suffix is "_audit" by default.');
     }
 
     public function testCustomTablePrefix(): void
@@ -42,7 +50,7 @@ final class AuditConfigurationTest extends BaseTest
             'table_prefix' => 'audit_',
         ]);
 
-        static::assertSame('audit_', $configuration->getTablePrefix(), 'custom table_prefix is "audit_".');
+        self::assertSame('audit_', $configuration->getTablePrefix(), 'custom table_prefix is "audit_".');
     }
 
     public function testCustomTableSuffix(): void
@@ -51,21 +59,21 @@ final class AuditConfigurationTest extends BaseTest
             'table_suffix' => '_audit_log',
         ]);
 
-        static::assertSame('_audit_log', $configuration->getTableSuffix(), 'custom table_suffix is "_audit_log".');
+        self::assertSame('_audit_log', $configuration->getTableSuffix(), 'custom table_suffix is "_audit_log".');
     }
 
     public function testDefaultEnabled(): void
     {
         $configuration = $this->getAuditConfiguration();
 
-        static::assertTrue($configuration->isEnabled(), 'Enabled by default.');
+        self::assertTrue($configuration->isEnabled(), 'Enabled by default.');
     }
 
     public function testEnabled(): void
     {
         $configuration = $this->getAuditConfiguration();
 
-        static::assertTrue($configuration->isEnabled(), 'Enabled by default.');
+        self::assertTrue($configuration->isEnabled(), 'Enabled by default.');
     }
 
     public function testDisabled(): void
@@ -73,7 +81,7 @@ final class AuditConfigurationTest extends BaseTest
         $configuration = $this->getAuditConfiguration();
         $configuration->disable();
 
-        static::assertFalse($configuration->isEnabled(), 'Disabled. Global enabled is set to false.');
+        self::assertFalse($configuration->isEnabled(), 'Disabled. Global enabled is set to false.');
     }
 
     public function testGloballyIgnoredColumns(): void
@@ -87,7 +95,7 @@ final class AuditConfigurationTest extends BaseTest
             'ignored_columns' => $ignored,
         ]);
 
-        static::assertSame($ignored, $configuration->getIgnoredColumns(), 'ignored columns are honored.');
+        self::assertSame($ignored, $configuration->getIgnoredColumns(), 'ignored columns are honored.');
     }
 
     public function testGetEntities(): void
@@ -113,21 +121,21 @@ final class AuditConfigurationTest extends BaseTest
             'entities' => $entities,
         ]);
 
-        static::assertSame($entities, $configuration->getEntities(), 'AuditConfiguration::getEntities() returns configured entities list.');
+        self::assertSame($entities, $configuration->getEntities(), 'AuditConfiguration::getEntities() returns configured entities list.');
     }
 
     public function testGetUserProvider(): void
     {
         $configuration = $this->getAuditConfiguration();
 
-        static::assertInstanceOf(TokenStorageUserProvider::class, $configuration->getUserProvider(), 'UserProvider instanceof TokenStorageUserProvider::class');
+        self::assertInstanceOf(TokenStorageUserProvider::class, $configuration->getUserProvider(), 'UserProvider instanceof TokenStorageUserProvider::class');
     }
 
     public function testGetRequestStack(): void
     {
         $configuration = $this->getAuditConfiguration();
 
-        static::assertInstanceOf(RequestStack::class, $configuration->getRequestStack(), 'RequestStack instanceof RequestStack::class');
+        self::assertInstanceOf(RequestStack::class, $configuration->getRequestStack(), 'RequestStack instanceof RequestStack::class');
     }
 
     public function testIsAudited(): void
@@ -140,8 +148,8 @@ final class AuditConfigurationTest extends BaseTest
             'entities' => $entities,
         ]);
 
-        static::assertTrue($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is audited.');
-        static::assertFalse($configuration->isAudited(Comment::class), 'entity "'.Comment::class.'" is not audited.');
+        self::assertTrue($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is audited.');
+        self::assertFalse($configuration->isAudited(Comment::class), 'entity "'.Comment::class.'" is not audited.');
     }
 
     public function testIsAuditable(): void
@@ -156,9 +164,9 @@ final class AuditConfigurationTest extends BaseTest
             'entities' => $entities,
         ]);
 
-        static::assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
-        static::assertTrue($configuration->isAuditable(Post::class), 'entity "'.Post::class.'" is auditable.');
-        static::assertFalse($configuration->isAudited(Comment::class), 'entity "'.Comment::class.'" is not audited.');
+        self::assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
+        self::assertTrue($configuration->isAuditable(Post::class), 'entity "'.Post::class.'" is auditable.');
+        self::assertFalse($configuration->isAudited(Comment::class), 'entity "'.Comment::class.'" is not audited.');
     }
 
     /**
@@ -176,7 +184,7 @@ final class AuditConfigurationTest extends BaseTest
             'entities' => $entities,
         ]);
 
-        static::assertTrue($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is audited.');
+        self::assertTrue($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is audited.');
 
         $entities = [
             Post::class => [
@@ -188,7 +196,7 @@ final class AuditConfigurationTest extends BaseTest
             'entities' => $entities,
         ]);
 
-        static::assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
+        self::assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
     }
 
     /**
@@ -208,7 +216,7 @@ final class AuditConfigurationTest extends BaseTest
 
         $configuration->enable();
 
-        static::assertTrue($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is audited.');
+        self::assertTrue($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is audited.');
 
         $entities = [
             Post::class => [
@@ -222,7 +230,7 @@ final class AuditConfigurationTest extends BaseTest
 
         $configuration->enable();
 
-        static::assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
+        self::assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
     }
 
     /**
@@ -240,11 +248,11 @@ final class AuditConfigurationTest extends BaseTest
             'entities' => $entities,
         ]);
 
-        static::assertTrue($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is audited.');
+        self::assertTrue($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is audited.');
 
         $configuration->disable();
 
-        static::assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
+        self::assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
     }
 
     /**
@@ -260,10 +268,10 @@ final class AuditConfigurationTest extends BaseTest
             'entities' => $entities,
         ]);
 
-        static::assertTrue($configuration->isAuditedField(Post::class, 'id'), 'any field is audited.');
-        static::assertTrue($configuration->isAuditedField(Post::class, 'title'), 'any field is audited.');
-        static::assertTrue($configuration->isAuditedField(Post::class, 'created_at'), 'any field is audited.');
-        static::assertTrue($configuration->isAuditedField(Post::class, 'updated_at'), 'any field is audited.');
+        self::assertTrue($configuration->isAuditedField(Post::class, 'id'), 'any field is audited.');
+        self::assertTrue($configuration->isAuditedField(Post::class, 'title'), 'any field is audited.');
+        self::assertTrue($configuration->isAuditedField(Post::class, 'created_at'), 'any field is audited.');
+        self::assertTrue($configuration->isAuditedField(Post::class, 'updated_at'), 'any field is audited.');
     }
 
     /**
@@ -284,10 +292,10 @@ final class AuditConfigurationTest extends BaseTest
             'entities' => $entities,
         ]);
 
-        static::assertTrue($configuration->isAuditedField(Post::class, 'id'), 'field "'.Post::class.'::$id" is audited.');
-        static::assertTrue($configuration->isAuditedField(Post::class, 'title'), 'field "'.Post::class.'::$title" is audited.');
-        static::assertFalse($configuration->isAuditedField(Post::class, 'created_at'), 'field "'.Post::class.'::$created_at" is not audited.');
-        static::assertFalse($configuration->isAuditedField(Post::class, 'updated_at'), 'field "'.Post::class.'::$updated_at" is not audited.');
+        self::assertTrue($configuration->isAuditedField(Post::class, 'id'), 'field "'.Post::class.'::$id" is audited.');
+        self::assertTrue($configuration->isAuditedField(Post::class, 'title'), 'field "'.Post::class.'::$title" is audited.');
+        self::assertFalse($configuration->isAuditedField(Post::class, 'created_at'), 'field "'.Post::class.'::$created_at" is not audited.');
+        self::assertFalse($configuration->isAuditedField(Post::class, 'updated_at'), 'field "'.Post::class.'::$updated_at" is not audited.');
     }
 
     /**
@@ -307,10 +315,10 @@ final class AuditConfigurationTest extends BaseTest
             'entities' => $entities,
         ]);
 
-        static::assertTrue($configuration->isAuditedField(Post::class, 'id'), 'field "'.Post::class.'::$id" is audited.');
-        static::assertTrue($configuration->isAuditedField(Post::class, 'title'), 'field "'.Post::class.'::$title" is audited.');
-        static::assertFalse($configuration->isAuditedField(Post::class, 'created_at'), 'field "'.Post::class.'::$created_at" is not audited.');
-        static::assertFalse($configuration->isAuditedField(Post::class, 'updated_at'), 'field "'.Post::class.'::$updated_at" is not audited.');
+        self::assertTrue($configuration->isAuditedField(Post::class, 'id'), 'field "'.Post::class.'::$id" is audited.');
+        self::assertTrue($configuration->isAuditedField(Post::class, 'title'), 'field "'.Post::class.'::$title" is audited.');
+        self::assertFalse($configuration->isAuditedField(Post::class, 'created_at'), 'field "'.Post::class.'::$created_at" is not audited.');
+        self::assertFalse($configuration->isAuditedField(Post::class, 'updated_at'), 'field "'.Post::class.'::$updated_at" is not audited.');
     }
 
     /**
@@ -330,7 +338,7 @@ final class AuditConfigurationTest extends BaseTest
             'entities' => $entities,
         ]);
 
-        static::assertFalse($configuration->isAuditedField(Comment::class, 'id'), 'field "'.Comment::class.'::$id" is audited but "'.Comment::class.'" entity is not.');
+        self::assertFalse($configuration->isAuditedField(Comment::class, 'id'), 'field "'.Comment::class.'::$id" is audited but "'.Comment::class.'" entity is not.');
     }
 
     /**
@@ -348,11 +356,11 @@ final class AuditConfigurationTest extends BaseTest
             'entities' => $entities,
         ]);
 
-        static::assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
+        self::assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
 
         $configuration->enableAuditFor(Post::class);
 
-        static::assertTrue($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is audited.');
+        self::assertTrue($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is audited.');
     }
 
     /**
@@ -370,18 +378,18 @@ final class AuditConfigurationTest extends BaseTest
             'entities' => $entities,
         ]);
 
-        static::assertTrue($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is audited.');
+        self::assertTrue($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is audited.');
 
         $configuration->disableAuditFor(Post::class);
 
-        static::assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
+        self::assertFalse($configuration->isAudited(Post::class), 'entity "'.Post::class.'" is not audited.');
     }
 
     public function testDefaultTimezone(): void
     {
         $configuration = $this->getAuditConfiguration();
 
-        static::assertSame('UTC', $configuration->getTimezone(), 'timezone is UTC by default.');
+        self::assertSame('UTC', $configuration->getTimezone(), 'timezone is UTC by default.');
     }
 
     public function testCustomTimezone(): void
@@ -390,7 +398,7 @@ final class AuditConfigurationTest extends BaseTest
             'timezone' => 'Europe/London',
         ]);
 
-        static::assertSame('Europe/London', $configuration->getTimezone(), 'custom timezone is "Europe/London".');
+        self::assertSame('Europe/London', $configuration->getTimezone(), 'custom timezone is "Europe/London".');
     }
 
     protected function getAuditConfiguration(array $options = [], ?EntityManager $entityManager = null): AuditConfiguration
@@ -414,13 +422,5 @@ final class AuditConfigurationTest extends BaseTest
             new AnnotationLoader($em),
             new EventDispatcher()
         );
-    }
-
-    protected function setUp(): void
-    {
-    }
-
-    protected function tearDown(): void
-    {
     }
 }

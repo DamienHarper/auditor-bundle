@@ -19,6 +19,7 @@ use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Proxy\ProxyFactory;
 use Doctrine\ORM\Tools\SchemaTool;
+use Exception;
 use Gedmo;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
@@ -135,7 +136,7 @@ abstract class BaseTest extends TestCase
             try {
                 $statement = $em->getConnection()->prepare($query);
                 $statement->execute();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
         }
     }
@@ -173,7 +174,7 @@ abstract class BaseTest extends TestCase
             try {
                 $statement = $em->getConnection()->prepare($sql);
                 $statement->execute();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // something bad happened here :/
             }
         }
@@ -383,7 +384,7 @@ abstract class BaseTest extends TestCase
         ]);
     }
 
-    protected function getReader(AuditConfiguration $configuration = null): AuditReader
+    protected function getReader(?AuditConfiguration $configuration = null): AuditReader
     {
         return new AuditReader($configuration ?? $this->createAuditConfiguration(), $this->getEntityManager());
     }

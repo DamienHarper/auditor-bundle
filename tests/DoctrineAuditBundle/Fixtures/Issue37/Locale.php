@@ -21,6 +21,11 @@ class Locale
      */
     protected $name;
 
+    public function __sleep()
+    {
+        return ['id', 'name'];
+    }
+
     /**
      * Get the value of id.
      *
@@ -67,10 +72,5 @@ class Locale
         $this->name = $name;
 
         return $this;
-    }
-
-    public function __sleep()
-    {
-        return ['id', 'name'];
     }
 }

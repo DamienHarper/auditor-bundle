@@ -18,17 +18,17 @@ final class AnnotationLoaderTest extends BaseTest
         $annotationLoader = new AnnotationLoader($em);
 
         $config = $annotationLoader->load();
-        static::assertCount(2, $config);
+        self::assertCount(2, $config);
 
         $options = $config[AuditedEntity::class];
-        static::assertSame($options['ignored_columns'], ['ignoredField']);
-        static::assertTrue($options['enabled']);
-        static::assertNull($options['roles']);
+        self::assertSame($options['ignored_columns'], ['ignoredField']);
+        self::assertTrue($options['enabled']);
+        self::assertNull($options['roles']);
 
         $options = $config[UnauditedEntity::class];
-        static::assertSame($options['ignored_columns'], ['ignoredField']);
-        static::assertFalse($options['enabled']);
-        static::assertSame(
+        self::assertSame($options['ignored_columns'], ['ignoredField']);
+        self::assertFalse($options['enabled']);
+        self::assertSame(
             [Security::VIEW_SCOPE => ['ROLE1', 'ROLE2']],
             $options['roles']
         );

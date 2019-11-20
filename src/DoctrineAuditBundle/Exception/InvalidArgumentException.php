@@ -2,6 +2,8 @@
 
 namespace DH\DoctrineAuditBundle\Exception;
 
-class InvalidArgumentException extends \Exception
+use Exception;
+
+class InvalidArgumentException extends Exception
 {
 }

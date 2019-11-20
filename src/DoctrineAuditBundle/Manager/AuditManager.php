@@ -2,11 +2,14 @@
 
 namespace DH\DoctrineAuditBundle\Manager;
 
+use DateTime;
+use DateTimeZone;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Event\LifecycleEvent;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Exception;
 
 class AuditManager
 {
@@ -185,77 +188,6 @@ class AuditManager
     }
 
     /**
-     * Adds an association entry to the audit table.
-     *
-     * @param string                 $type
-     * @param EntityManagerInterface $em
-     * @param object                 $source
-     * @param object                 $target
-     * @param array                  $mapping
-     * @param string                 $transactionHash
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    private function associateOrDissociate(string $type, EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
-    {
-        /** @var ClassMetadata $meta */
-        $meta = $em->getClassMetadata(\get_class($source));
-        $data = [
-            'action' => $type,
-            'blame' => $this->helper->blame(),
-            'diff' => [
-                'source' => $this->helper->summarize($em, $source),
-                'target' => $this->helper->summarize($em, $target),
-            ],
-            'table' => $meta->getTableName(),
-            'schema' => $meta->getSchemaName(),
-            'id' => $this->helper->id($em, $source),
-            'transaction_hash' => $transactionHash,
-            'discriminator' => ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $meta->inheritanceType ? \get_class($source) : null,
-        ];
-
-        if (isset($mapping['joinTable']['name'])) {
-            $data['diff']['table'] = $mapping['joinTable']['name'];
-        }
-
-        $this->audit($em, $data);
-    }
-
-    /**
-     * Adds an entry to the audit table.
-     *
-     * @param EntityManagerInterface $em
-     * @param array                  $data
-     *
-     * @throws \Exception
-     */
-    private function audit(EntityManagerInterface $em, array $data): void
-    {
-        $schema = $data['schema'] ? $data['schema'].'.' : '';
-        $auditTable = $schema.$this->configuration->getTablePrefix().$data['table'].$this->configuration->getTableSuffix();
-        $dt = new \DateTime('now', new \DateTimeZone($this->getConfiguration()->getTimezone()));
-
-        $payload = [
-            'table' => $auditTable,
-            'type' => $data['action'],
-            'object_id' => (string) $data['id'],
-            'discriminator' => $data['discriminator'],
-            'transaction_hash' => (string) $data['transaction_hash'],
-            'diffs' => json_encode($data['diff']),
-            'blame_id' => $data['blame']['user_id'],
-            'blame_user' => $data['blame']['username'],
-            'blame_user_fqdn' => $data['blame']['user_fqdn'],
-            'blame_user_firewall' => $data['blame']['user_firewall'],
-            'ip' => $data['blame']['client_ip'],
-            'created_at' => $dt->format('Y-m-d H:i:s'),
-        ];
-
-        // send an `AuditEvent` event
-        $this->notify($payload);
-    }
-
-    /**
      * Set the value of helper.
      *
      * @param AuditHelper $helper
@@ -359,5 +291,76 @@ class AuditManager
     public function selectStorageSpace(EntityManagerInterface $em): EntityManagerInterface
     {
         return $this->configuration->getEntityManager() ?? $em;
+    }
+
+    /**
+     * Adds an association entry to the audit table.
+     *
+     * @param string                 $type
+     * @param EntityManagerInterface $em
+     * @param object                 $source
+     * @param object                 $target
+     * @param array                  $mapping
+     * @param string                 $transactionHash
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    private function associateOrDissociate(string $type, EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
+    {
+        /** @var ClassMetadata $meta */
+        $meta = $em->getClassMetadata(\get_class($source));
+        $data = [
+            'action' => $type,
+            'blame' => $this->helper->blame(),
+            'diff' => [
+                'source' => $this->helper->summarize($em, $source),
+                'target' => $this->helper->summarize($em, $target),
+            ],
+            'table' => $meta->getTableName(),
+            'schema' => $meta->getSchemaName(),
+            'id' => $this->helper->id($em, $source),
+            'transaction_hash' => $transactionHash,
+            'discriminator' => ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $meta->inheritanceType ? \get_class($source) : null,
+        ];
+
+        if (isset($mapping['joinTable']['name'])) {
+            $data['diff']['table'] = $mapping['joinTable']['name'];
+        }
+
+        $this->audit($em, $data);
+    }
+
+    /**
+     * Adds an entry to the audit table.
+     *
+     * @param EntityManagerInterface $em
+     * @param array                  $data
+     *
+     * @throws Exception
+     */
+    private function audit(EntityManagerInterface $em, array $data): void
+    {
+        $schema = $data['schema'] ? $data['schema'].'.' : '';
+        $auditTable = $schema.$this->configuration->getTablePrefix().$data['table'].$this->configuration->getTableSuffix();
+        $dt = new DateTime('now', new DateTimeZone($this->getConfiguration()->getTimezone()));
+
+        $payload = [
+            'table' => $auditTable,
+            'type' => $data['action'],
+            'object_id' => (string) $data['id'],
+            'discriminator' => $data['discriminator'],
+            'transaction_hash' => (string) $data['transaction_hash'],
+            'diffs' => json_encode($data['diff']),
+            'blame_id' => $data['blame']['user_id'],
+            'blame_user' => $data['blame']['username'],
+            'blame_user_fqdn' => $data['blame']['user_fqdn'],
+            'blame_user_firewall' => $data['blame']['user_firewall'],
+            'ip' => $data['blame']['client_ip'],
+            'created_at' => $dt->format('Y-m-d H:i:s'),
+        ];
+
+        // send an `AuditEvent` event
+        $this->notify($payload);
     }
 }

@@ -13,6 +13,7 @@ use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Proxy\ProxyFactory;
+use Exception;
 use Gedmo;
 
 /**
@@ -20,17 +21,6 @@ use Gedmo;
  */
 final class UpdateHelperTest extends BaseTest
 {
-    private function getTable(array $tables, string $name): ?Table
-    {
-        foreach ($tables as $table) {
-            if ($name === $table->getName()) {
-                return $table;
-            }
-        }
-
-        return null;
-    }
-
     public function testCreateAuditTable(): void
     {
         $em = $this->getEntityManager();
@@ -42,7 +32,7 @@ final class UpdateHelperTest extends BaseTest
         $schemaManager = $em->getConnection()->getSchemaManager();
 
         $authorTable = $this->getTable($schemaManager->listTables(), 'author');
-        static::assertNull($this->getTable($schemaManager->listTables(), 'author_audit'), 'author_audit does not exist yet.');
+        self::assertNull($this->getTable($schemaManager->listTables(), 'author_audit'), 'author_audit does not exist yet.');
 
         $schema = $updater->createAuditTable($authorTable, $schemaManager->createSchema());
 
@@ -52,12 +42,12 @@ final class UpdateHelperTest extends BaseTest
             try {
                 $statement = $em->getConnection()->prepare($query);
                 $statement->execute();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
         }
 
         $authorAuditTable = $this->getTable($schemaManager->listTables(), 'author_audit');
-        static::assertNotNull($authorAuditTable, 'author_audit table has been created.');
+        self::assertNotNull($authorAuditTable, 'author_audit table has been created.');
     }
 
     /**
@@ -83,7 +73,7 @@ final class UpdateHelperTest extends BaseTest
             try {
                 $statement = $em->getConnection()->prepare($query);
                 $statement->execute();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
         }
 
@@ -92,16 +82,16 @@ final class UpdateHelperTest extends BaseTest
         // check expected columns
         $expected = $helper->getAuditTableColumns();
         foreach ($expected as $name => $options) {
-            static::assertTrue($authorAuditTable->hasColumn($name), 'audit table has a column named "'.$name.'".');
+            self::assertTrue($authorAuditTable->hasColumn($name), 'audit table has a column named "'.$name.'".');
         }
 
         // check expected indices
         $expected = $helper->getAuditTableIndices('author_audit');
         foreach ($expected as $name => $options) {
             if ('primary' === $options['type']) {
-                static::assertTrue($authorAuditTable->hasPrimaryKey(), 'audit table has a primary key named "'.$name.'".');
+                self::assertTrue($authorAuditTable->hasPrimaryKey(), 'audit table has a primary key named "'.$name.'".');
             } else {
-                static::assertTrue($authorAuditTable->hasIndex($options['name']), 'audit table has an index named "'.$name.'".');
+                self::assertTrue($authorAuditTable->hasIndex($options['name']), 'audit table has an index named "'.$name.'".');
             }
         }
     }
@@ -129,7 +119,7 @@ final class UpdateHelperTest extends BaseTest
             try {
                 $statement = $em->getConnection()->prepare($query);
                 $statement->execute();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
         }
 
@@ -245,7 +235,7 @@ final class UpdateHelperTest extends BaseTest
             try {
                 $statement = $em->getConnection()->prepare($query);
                 $statement->execute();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
         }
 
@@ -254,16 +244,16 @@ final class UpdateHelperTest extends BaseTest
         // check expected columns
         $expected = $helper->getAuditTableColumns();
         foreach ($expected as $name => $options) {
-            static::assertTrue($authorAuditTable->hasColumn($name), 'audit table has a column named "'.$name.'".');
+            self::assertTrue($authorAuditTable->hasColumn($name), 'audit table has a column named "'.$name.'".');
         }
 
         // check expected indices
         $expected = $helper->getAuditTableIndices('author_audit');
         foreach ($expected as $name => $options) {
             if ('primary' === $options['type']) {
-                static::assertTrue($authorAuditTable->hasPrimaryKey(), 'audit table has a primary key named "'.$name.'".');
+                self::assertTrue($authorAuditTable->hasPrimaryKey(), 'audit table has a primary key named "'.$name.'".');
             } else {
-                static::assertTrue($authorAuditTable->hasIndex($options['name']), 'audit table has an index named "'.$name.'".');
+                self::assertTrue($authorAuditTable->hasIndex($options['name']), 'audit table has an index named "'.$name.'".');
             }
         }
     }
@@ -274,7 +264,7 @@ final class UpdateHelperTest extends BaseTest
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
 
-        static::assertInstanceOf(AuditConfiguration::class, $helper->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
+        self::assertInstanceOf(AuditConfiguration::class, $helper->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
     }
 
     /**
@@ -319,5 +309,16 @@ final class UpdateHelperTest extends BaseTest
         }
 
         return $this->em;
+    }
+
+    private function getTable(array $tables, string $name): ?Table
+    {
+        foreach ($tables as $table) {
+            if ($name === $table->getName()) {
+                return $table;
+            }
+        }
+
+        return null;
     }
 }

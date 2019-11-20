@@ -29,7 +29,7 @@ final class UpdateSchemaCommandTest extends CoreTest
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        static::assertStringContainsString('[CAUTION] This operation should not be executed in a production environment!', $output);
+        self::assertStringContainsString('[CAUTION] This operation should not be executed in a production environment!', $output);
     }
 
     /**
@@ -46,7 +46,7 @@ final class UpdateSchemaCommandTest extends CoreTest
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        static::assertStringContainsString('The command is already running in another process.', $output);
+        self::assertStringContainsString('The command is already running in another process.', $output);
     }
 
     protected function createCommand(): Command

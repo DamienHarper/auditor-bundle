@@ -2,6 +2,8 @@
 
 namespace DH\DoctrineAuditBundle\Exception;
 
-class UpdateException extends \Exception
+use Exception;
+
+class UpdateException extends Exception
 {
 }

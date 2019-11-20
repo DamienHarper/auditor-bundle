@@ -11,6 +11,7 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Inheritance\Dog;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Inheritance\Vehicle;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\DummyEntity;
+use ReflectionException;
 
 /**
  * @internal
@@ -22,7 +23,7 @@ final class CreateSchemaListenerTest extends BaseTest
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\Tools\ToolsException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     protected function setUp(): void
     {
@@ -64,6 +65,40 @@ final class CreateSchemaListenerTest extends BaseTest
         $this->setUpAuditSchema();
     }
 
+    public function testCorrectSchemaForJoinedTableInheritance(): void
+    {
+        $tableNames = $this->getTables();
+
+        self::assertContains('animal', $tableNames);
+        self::assertContains('dog', $tableNames);
+        self::assertContains('dog_audit', $tableNames);
+        self::assertContains('cat', $tableNames);
+        self::assertContains('cat_audit', $tableNames);
+
+        self::assertNotContains('animal_audit', $tableNames);
+    }
+
+    public function testCorrectSchemaForSingleTableInheritance(): void
+    {
+        $tableNames = $this->getTables();
+
+        self::assertNotContains('bike_audit', $tableNames);
+        self::assertNotContains('car_audit', $tableNames);
+        self::assertContains('vehicle', $tableNames);
+        self::assertContains('vehicle_audit', $tableNames);
+    }
+
+    public function testCorrectSchemaStandard(): void
+    {
+        $tableNames = $this->getTables();
+
+        self::assertContains('author', $tableNames);
+        self::assertContains('author_audit', $tableNames);
+
+        self::assertContains('dummy_entity', $tableNames);
+        self::assertNotContains('dummy_entity_audit', $tableNames);
+    }
+
     private function getTables()
     {
         $configuration = $this->getAuditConfiguration();
@@ -77,39 +112,5 @@ final class CreateSchemaListenerTest extends BaseTest
         }
 
         return $tableNames;
-    }
-
-    public function testCorrectSchemaForJoinedTableInheritance()
-    {
-        $tableNames = $this->getTables();
-
-        static::assertContains('animal', $tableNames);
-        static::assertContains('dog', $tableNames);
-        static::assertContains('dog_audit', $tableNames);
-        static::assertContains('cat', $tableNames);
-        static::assertContains('cat_audit', $tableNames);
-
-        static::assertNotContains('animal_audit', $tableNames);
-    }
-
-    public function testCorrectSchemaForSingleTableInheritance()
-    {
-        $tableNames = $this->getTables();
-
-        static::assertNotContains('bike_audit', $tableNames);
-        static::assertNotContains('car_audit', $tableNames);
-        static::assertContains('vehicle', $tableNames);
-        static::assertContains('vehicle_audit', $tableNames);
-    }
-
-    public function testCorrectSchemaStandard()
-    {
-        $tableNames = $this->getTables();
-
-        static::assertContains('author', $tableNames);
-        static::assertContains('author_audit', $tableNames);
-
-        static::assertContains('dummy_entity', $tableNames);
-        static::assertNotContains('dummy_entity_audit', $tableNames);
     }
 }

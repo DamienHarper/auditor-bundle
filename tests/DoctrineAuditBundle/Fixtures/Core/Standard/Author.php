@@ -40,6 +40,11 @@ class Author
         $this->posts = new ArrayCollection();
     }
 
+    public function __sleep()
+    {
+        return ['id', 'fullname', 'email'];
+    }
+
     /**
      * Set the value of id.
      *
@@ -149,10 +154,5 @@ class Author
     public function getPosts(): Collection
     {
         return $this->posts;
-    }
-
-    public function __sleep()
-    {
-        return ['id', 'fullname', 'email'];
     }
 }

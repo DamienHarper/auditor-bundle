@@ -19,11 +19,21 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
 {
     use LockableTrait;
 
-    private $container;
-
     protected static $defaultName = 'audit:schema:update';
 
-    protected function configure()
+    private $container;
+
+    public function setContainer(?ContainerInterface $container = null): void
+    {
+        $this->container = $container;
+    }
+
+    public function unlock(): void
+    {
+        $this->release();
+    }
+
+    protected function configure(): void
     {
         $this
             ->setDescription('Update audit tables structure')
@@ -90,7 +100,7 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
             $progressBar = new ProgressBar($output, \count($sqls));
             $progressBar->start();
 
-            $updater->updateAuditSchema($sqls, static function (array $progress) use ($progressBar) {
+            $updater->updateAuditSchema($sqls, static function (array $progress) use ($progressBar): void {
                 $progressBar->advance();
             });
 
@@ -126,15 +136,5 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
         $this->release();
 
         return 1;
-    }
-
-    public function setContainer(ContainerInterface $container = null): void
-    {
-        $this->container = $container;
-    }
-
-    public function unlock()
-    {
-        $this->release();
     }
 }

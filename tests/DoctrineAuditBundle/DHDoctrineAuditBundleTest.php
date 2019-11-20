@@ -70,7 +70,7 @@ final class DHDoctrineAuditBundleTest extends TestCase
         $container->compile();
 
         $auditReader = $container->get('dh_doctrine_audit.reader');
-        static::assertInstanceOf(AuditReader::class, $auditReader);
+        self::assertInstanceOf(AuditReader::class, $auditReader);
     }
 
     public function testStorageCompilerPass(): void
@@ -131,6 +131,6 @@ final class DHDoctrineAuditBundleTest extends TestCase
         $default_em = $container->get('entity_manager');
         $custom_em = $container->get('dh_doctrine_audit.reader')->getConfiguration()->getEntityManager();
 
-        static::assertNotSame($custom_em, $default_em, 'AuditConfiguration entity manager is not the default one');
+        self::assertNotSame($custom_em, $default_em, 'AuditConfiguration entity manager is not the default one');
     }
 }

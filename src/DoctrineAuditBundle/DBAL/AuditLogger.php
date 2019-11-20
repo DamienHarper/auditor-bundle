@@ -19,7 +19,7 @@ class AuditLogger implements SQLLogger
     /**
      * {@inheritdoc}
      */
-    public function startQuery($sql, array $params = null, array $types = null)
+    public function startQuery($sql, ?array $params = null, ?array $types = null): void
     {
         // right before commit insert all audit entries
         if ('"COMMIT"' === $sql) {
@@ -30,7 +30,7 @@ class AuditLogger implements SQLLogger
     /**
      * {@inheritdoc}
      */
-    public function stopQuery()
+    public function stopQuery(): void
     {
     }
 }

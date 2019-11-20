@@ -9,6 +9,7 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Tools\Event\GenerateSchemaTableEventArgs;
 use Doctrine\ORM\Tools\ToolEvents;
+use Exception;
 
 class CreateSchemaListener implements EventSubscriber
 {
@@ -38,7 +39,7 @@ class CreateSchemaListener implements EventSubscriber
             ClassMetadataInfo::INHERITANCE_TYPE_JOINED,
             ClassMetadataInfo::INHERITANCE_TYPE_SINGLE_TABLE,
         ], true)) {
-            throw new \Exception(sprintf('Inheritance type "%s" is not yet supported', $metadata->inheritanceType));
+            throw new Exception(sprintf('Inheritance type "%s" is not yet supported', $metadata->inheritanceType));
         }
 
         // check reader and manager entity managers and returns if different

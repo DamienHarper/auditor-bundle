@@ -34,6 +34,11 @@ class Tag
         $this->posts = new ArrayCollection();
     }
 
+    public function __sleep()
+    {
+        return ['id', 'title'];
+    }
+
     /**
      * Set the value of id.
      *
@@ -118,10 +123,5 @@ class Tag
     public function getPosts(): Collection
     {
         return $this->posts;
-    }
-
-    public function __sleep()
-    {
-        return ['id', 'title'];
     }
 }

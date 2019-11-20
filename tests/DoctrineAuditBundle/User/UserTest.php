@@ -14,27 +14,27 @@ final class UserTest extends TestCase
     {
         $user = new User('1', 'john.doe');
 
-        static::assertSame('1', $user->getId());
+        self::assertSame('1', $user->getId());
     }
 
     public function testGetUsername(): void
     {
         $user = new User('1', 'john.doe');
 
-        static::assertSame('john.doe', $user->getUsername());
+        self::assertSame('john.doe', $user->getUsername());
     }
 
     public function testGetIdOnEmptyUser(): void
     {
         $user = new User();
 
-        static::assertNull($user->getId());
+        self::assertNull($user->getId());
     }
 
     public function testGetUsernameOnEmptyUser(): void
     {
         $user = new User();
 
-        static::assertNull($user->getUsername());
+        self::assertNull($user->getUsername());
     }
 }

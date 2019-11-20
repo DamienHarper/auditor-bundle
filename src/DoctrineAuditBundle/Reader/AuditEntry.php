@@ -59,7 +59,7 @@ class AuditEntry
      */
     protected $created_at;
 
-    public function __set($name, $value)
+    public function __set($name, $value): void
     {
         $this->{$name} = $value;
     }

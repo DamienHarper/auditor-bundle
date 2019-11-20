@@ -11,13 +11,6 @@ use Doctrine\ORM\Mapping as ORM;
 class DummyEntity
 {
     /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     * @ORM\Column(type="integer")
-     */
-    private $id;
-
-    /**
      * @ORM\Column(type="string", length=50)
      */
     protected $label;
@@ -51,6 +44,12 @@ class DummyEntity
      * @ORM\Column(type="simple_array", nullable=true)
      */
     protected $simple_array;
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     * @ORM\Column(type="integer")
+     */
+    private $id;
 
     public function getId()
     {

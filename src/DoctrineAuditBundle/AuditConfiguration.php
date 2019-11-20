@@ -6,12 +6,22 @@ use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
 use DH\DoctrineAuditBundle\User\UserProviderInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use ReflectionMethod;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class AuditConfiguration
 {
+    /**
+     * @var UserProviderInterface
+     */
+    protected $userProvider;
+
+    /**
+     * @var RequestStack
+     */
+    protected $requestStack;
     /**
      * @var string
      */
@@ -41,16 +51,6 @@ class AuditConfiguration
      * @var bool
      */
     private $enabled = true;
-
-    /**
-     * @var UserProviderInterface
-     */
-    protected $userProvider;
-
-    /**
-     * @var RequestStack
-     */
-    protected $requestStack;
 
     /**
      * @var FirewallMap
@@ -95,7 +95,7 @@ class AuditConfiguration
         $this->annotationLoader = $annotationLoader;
         $this->dispatcher = $dispatcher;
 
-        $r = new \ReflectionMethod($this->dispatcher, 'dispatch');
+        $r = new ReflectionMethod($this->dispatcher, 'dispatch');
         $this->is_pre43_dispatcher = 2 === \count($r->getParameters());
 
         $this->enabled = $config['enabled'];

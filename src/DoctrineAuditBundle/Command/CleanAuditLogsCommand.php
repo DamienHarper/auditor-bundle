@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Command;
 
+use DateTime;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
@@ -20,11 +21,21 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
 {
     use LockableTrait;
 
-    private $container;
-
     protected static $defaultName = 'audit:clean';
 
-    protected function configure()
+    private $container;
+
+    public function setContainer(?ContainerInterface $container = null): void
+    {
+        $this->container = $container;
+    }
+
+    public function unlock(): void
+    {
+        $this->release();
+    }
+
+    protected function configure(): void
     {
         $this
             ->setDescription('Cleans audit tables')
@@ -52,7 +63,7 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
             return 0;
         }
 
-        $until = new \DateTime();
+        $until = new DateTime();
         $until->modify('-'.$keep.' month');
 
         /**
@@ -121,15 +132,5 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
         $this->release();
 
         return 0;
-    }
-
-    public function setContainer(ContainerInterface $container = null): void
-    {
-        $this->container = $container;
-    }
-
-    public function unlock()
-    {
-        $this->release();
     }
 }

@@ -20,6 +20,14 @@ use Symfony\Component\Security\Core\Security;
  */
 final class AuditTransactionTest extends BaseTest
 {
+    protected function setUp(): void
+    {
+    }
+
+    protected function tearDown(): void
+    {
+    }
+
     public function testGetTransactionHash(): void
     {
         $configuration = $this->getAuditConfiguration();
@@ -27,9 +35,9 @@ final class AuditTransactionTest extends BaseTest
         $transaction = new AuditTransaction($helper);
 
         $transaction_hash = $transaction->getTransactionHash();
-        static::assertNotNull($transaction_hash, 'transaction_hash is not null');
-        static::assertIsString($transaction_hash, 'transaction_hash is a string');
-        static::assertSame(40, mb_strlen($transaction_hash), 'transaction_hash is a string of 40 characters');
+        self::assertNotNull($transaction_hash, 'transaction_hash is not null');
+        self::assertIsString($transaction_hash, 'transaction_hash is a string');
+        self::assertSame(40, mb_strlen($transaction_hash), 'transaction_hash is a string of 40 characters');
     }
 
     protected function getAuditConfiguration(array $options = [], ?EntityManager $entityManager = null): AuditConfiguration
@@ -53,13 +61,5 @@ final class AuditTransactionTest extends BaseTest
             new AnnotationLoader($em),
             new EventDispatcher()
         );
-    }
-
-    protected function setUp(): void
-    {
-    }
-
-    protected function tearDown(): void
-    {
     }
 }

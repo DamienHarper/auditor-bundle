@@ -126,48 +126,6 @@ class AuditHelper
     }
 
     /**
-     * Type converts the input value and returns it.
-     *
-     * @param EntityManagerInterface $em
-     * @param Type                   $type
-     * @param mixed                  $value
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     *
-     * @return mixed
-     */
-    private function value(EntityManagerInterface $em, Type $type, $value)
-    {
-        if (null === $value) {
-            return null;
-        }
-
-        $platform = $em->getConnection()->getDatabasePlatform();
-
-        switch ($type->getName()) {
-            case Type::BIGINT:
-                $convertedValue = (string) $value;
-
-                break;
-            case Type::INTEGER:
-            case Type::SMALLINT:
-                $convertedValue = (int) $value;
-
-                break;
-            case Type::DECIMAL:
-            case Type::FLOAT:
-            case Type::BOOLEAN:
-                $convertedValue = $type->convertToPHPValue($value, $platform);
-
-                break;
-            default:
-                $convertedValue = $type->convertToDatabaseValue($value, $platform);
-        }
-
-        return $convertedValue;
-    }
-
-    /**
      * Blames an audit operation.
      *
      * @return array
@@ -382,5 +340,47 @@ class AuditHelper
     public static function namespaceToParam(string $entity): string
     {
         return str_replace('\\', '-', $entity);
+    }
+
+    /**
+     * Type converts the input value and returns it.
+     *
+     * @param EntityManagerInterface $em
+     * @param Type                   $type
+     * @param mixed                  $value
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     *
+     * @return mixed
+     */
+    private function value(EntityManagerInterface $em, Type $type, $value)
+    {
+        if (null === $value) {
+            return null;
+        }
+
+        $platform = $em->getConnection()->getDatabasePlatform();
+
+        switch ($type->getName()) {
+            case Type::BIGINT:
+                $convertedValue = (string) $value;
+
+                break;
+            case Type::INTEGER:
+            case Type::SMALLINT:
+                $convertedValue = (int) $value;
+
+                break;
+            case Type::DECIMAL:
+            case Type::FLOAT:
+            case Type::BOOLEAN:
+                $convertedValue = $type->convertToPHPValue($value, $platform);
+
+                break;
+            default:
+                $convertedValue = $type->convertToDatabaseValue($value, $platform);
+        }
+
+        return $convertedValue;
     }
 }

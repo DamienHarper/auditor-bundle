@@ -11,6 +11,11 @@ class TwigExtension extends AbstractExtension
 {
     protected $doctrine;
 
+    public function __construct(ManagerRegistry $doctrine)
+    {
+        $this->doctrine = $doctrine;
+    }
+
     public function getFunctions(): array
     {
         return [
@@ -25,11 +30,6 @@ class TwigExtension extends AbstractExtension
         return [
             new TwigFilter('json_decode', 'json_decode'),
         ];
-    }
-
-    public function __construct(ManagerRegistry $doctrine)
-    {
-        $this->doctrine = $doctrine;
     }
 
     public function findUser($id, $repository)

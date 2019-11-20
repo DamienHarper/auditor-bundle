@@ -9,6 +9,7 @@ use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
+use Exception;
 
 class UpdateHelper
 {
@@ -44,7 +45,7 @@ class UpdateHelper
      * @param null|array    $sqls     SQL queries to execute
      * @param null|callable $callback Callback executed after each query is run
      */
-    public function updateAuditSchema(?array $sqls = null, callable $callback = null): void
+    public function updateAuditSchema(?array $sqls = null, ?callable $callback = null): void
     {
         $auditEntityManager = $this->manager->getConfiguration()->getEntityManager();
 
@@ -63,7 +64,7 @@ class UpdateHelper
                         'current' => $index,
                     ]);
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // something bad happened here :/
             }
         }

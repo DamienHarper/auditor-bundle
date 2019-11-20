@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard;
 
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -72,6 +73,16 @@ class Post
     {
         $this->comments = new ArrayCollection();
         $this->tags = new ArrayCollection();
+    }
+
+    public function __toString()
+    {
+        return $this->title;
+    }
+
+    public function __sleep()
+    {
+        return ['id', 'title', 'body', 'created_at', 'author_id'];
     }
 
     /**
@@ -149,11 +160,11 @@ class Post
     /**
      * Set the value of created_at.
      *
-     * @param ?\DateTime $created_at
+     * @param ?DateTime $created_at
      *
      * @return Post
      */
-    public function setCreatedAt(?\DateTime $created_at): self
+    public function setCreatedAt(?DateTime $created_at): self
     {
         $this->created_at = $created_at;
 
@@ -163,9 +174,9 @@ class Post
     /**
      * Get the value of created_at.
      *
-     * @return ?\DateTime
+     * @return ?DateTime
      */
-    public function getCreatedAt(): ?\DateTime
+    public function getCreatedAt(): ?DateTime
     {
         return $this->created_at;
     }
@@ -173,11 +184,11 @@ class Post
     /**
      * Set the value of deleted_at.
      *
-     * @param ?\DateTime $deleted_at
+     * @param ?DateTime $deleted_at
      *
      * @return Post
      */
-    public function setDeletedAt(?\DateTime $deleted_at): self
+    public function setDeletedAt(?DateTime $deleted_at): self
     {
         $this->deleted_at = $deleted_at;
 
@@ -187,9 +198,9 @@ class Post
     /**
      * Get the value of deleted_at.
      *
-     * @return ?\DateTime
+     * @return ?DateTime
      */
-    public function getDeletedAt(): ?\DateTime
+    public function getDeletedAt(): ?DateTime
     {
         return $this->deleted_at;
     }
@@ -319,15 +330,5 @@ class Post
     public function getTags(): Collection
     {
         return $this->tags;
-    }
-
-    public function __toString()
-    {
-        return $this->title;
-    }
-
-    public function __sleep()
-    {
-        return ['id', 'title', 'body', 'created_at', 'author_id'];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard;
 
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -49,6 +50,11 @@ class Comment
 
     public function __construct()
     {
+    }
+
+    public function __sleep()
+    {
+        return ['id', 'body', 'author', 'created_at', 'post_id'];
     }
 
     /**
@@ -126,11 +132,11 @@ class Comment
     /**
      * Set the value of created_at.
      *
-     * @param ?\DateTime $created_at
+     * @param ?DateTime $created_at
      *
      * @return Comment
      */
-    public function setCreatedAt(?\DateTime $created_at): self
+    public function setCreatedAt(?DateTime $created_at): self
     {
         $this->created_at = $created_at;
 
@@ -140,9 +146,9 @@ class Comment
     /**
      * Get the value of created_at.
      *
-     * @return ?\DateTime
+     * @return ?DateTime
      */
-    public function getCreatedAt(): ?\DateTime
+    public function getCreatedAt(): ?DateTime
     {
         return $this->created_at;
     }
@@ -193,10 +199,5 @@ class Comment
     public function getPost(): ?Post
     {
         return $this->post;
-    }
-
-    public function __sleep()
-    {
-        return ['id', 'body', 'author', 'created_at', 'post_id'];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Tests\Manager;
 
+use DateTime;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Manager\AuditManager;
@@ -37,15 +38,15 @@ final class AuditManagerTest extends CoreTest
         ], 'what-a-nice-transaction-hash');
 
         $audits = $reader->getAudits(Author::class);
-        static::assertCount(1, $audits, 'AuditManager::insert() creates an audit entry.');
+        self::assertCount(1, $audits, 'AuditManager::insert() creates an audit entry.');
 
         $entry = array_shift($audits);
-        static::assertSame(1, $entry->getId(), 'audit entry ID is ok.');
-        static::assertSame(AuditReader::INSERT, $entry->getType(), 'audit entry type is ok.');
-        static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
-        static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
-        static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertEquals([
+        self::assertSame(1, $entry->getId(), 'audit entry ID is ok.');
+        self::assertSame(AuditReader::INSERT, $entry->getType(), 'audit entry type is ok.');
+        self::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
+        self::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
+        self::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
+        self::assertEquals([
             'email' => [
                 'old' => null,
                 'new' => 'john.doe@gmail.com',
@@ -78,15 +79,15 @@ final class AuditManagerTest extends CoreTest
         ], 'what-a-nice-transaction-hash');
 
         $audits = $reader->getAudits(Author::class);
-        static::assertCount(1, $audits, 'AuditManager::update() creates an audit entry.');
+        self::assertCount(1, $audits, 'AuditManager::update() creates an audit entry.');
 
         $entry = array_shift($audits);
-        static::assertSame(1, $entry->getId(), 'audit entry ID is ok.');
-        static::assertSame(AuditReader::UPDATE, $entry->getType(), 'audit entry type is ok.');
-        static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
-        static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
-        static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertEquals([
+        self::assertSame(1, $entry->getId(), 'audit entry ID is ok.');
+        self::assertSame(AuditReader::UPDATE, $entry->getType(), 'audit entry type is ok.');
+        self::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
+        self::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
+        self::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
+        self::assertEquals([
             'email' => [
                 'old' => 'john.doe@gmail.com',
                 'new' => 'dark.vador@gmail.com',
@@ -116,15 +117,15 @@ final class AuditManagerTest extends CoreTest
         $manager->remove($em, $author, 1, 'what-a-nice-transaction-hash');
 
         $audits = $reader->getAudits(Author::class);
-        static::assertCount(1, $audits, 'AuditManager::remove() creates an audit entry.');
+        self::assertCount(1, $audits, 'AuditManager::remove() creates an audit entry.');
 
         $entry = array_shift($audits);
-        static::assertSame(1, $entry->getId(), 'audit entry ID is ok.');
-        static::assertSame(AuditReader::REMOVE, $entry->getType(), 'audit entry type is ok.');
-        static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
-        static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
-        static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertEquals([
+        self::assertSame(1, $entry->getId(), 'audit entry ID is ok.');
+        self::assertSame(AuditReader::REMOVE, $entry->getType(), 'audit entry type is ok.');
+        self::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
+        self::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
+        self::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
+        self::assertEquals([
             'label' => Author::class.'#1',
             'class' => Author::class,
             'table' => $em->getClassMetadata(Author::class)->getTableName(),
@@ -153,7 +154,7 @@ final class AuditManagerTest extends CoreTest
             ->setAuthor($author)
             ->setTitle('First post')
             ->setBody('Here is the body')
-            ->setCreatedAt(new \DateTime())
+            ->setCreatedAt(new DateTime())
         ;
 
         $mapping = [
@@ -180,15 +181,15 @@ final class AuditManagerTest extends CoreTest
         $manager->associate($em, $author, $post, $mapping, 'what-a-nice-transaction-hash');
 
         $audits = $reader->getAudits(Author::class);
-        static::assertCount(1, $audits, 'AuditManager::associate() creates an audit entry.');
+        self::assertCount(1, $audits, 'AuditManager::associate() creates an audit entry.');
 
         $entry = array_shift($audits);
-        static::assertSame(1, $entry->getId(), 'audit entry ID is ok.');
-        static::assertSame(AuditReader::ASSOCIATE, $entry->getType(), 'audit entry type is ok.');
-        static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
-        static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
-        static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertEquals([
+        self::assertSame(1, $entry->getId(), 'audit entry ID is ok.');
+        self::assertSame(AuditReader::ASSOCIATE, $entry->getType(), 'audit entry type is ok.');
+        self::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
+        self::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
+        self::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
+        self::assertEquals([
             'source' => [
                 'label' => Author::class.'#1',
                 'class' => Author::class,
@@ -225,7 +226,7 @@ final class AuditManagerTest extends CoreTest
             ->setAuthor($author)
             ->setTitle('First post')
             ->setBody('Here is the body')
-            ->setCreatedAt(new \DateTime())
+            ->setCreatedAt(new DateTime())
         ;
 
         $mapping = [
@@ -249,15 +250,15 @@ final class AuditManagerTest extends CoreTest
         $manager->dissociate($em, $author, $post, $mapping, 'what-a-nice-transaction-hash');
 
         $audits = $reader->getAudits(Author::class);
-        static::assertCount(1, $audits, 'AuditManager::dissociate() creates an audit entry.');
+        self::assertCount(1, $audits, 'AuditManager::dissociate() creates an audit entry.');
 
         $entry = array_shift($audits);
-        static::assertSame(1, $entry->getId(), 'audit entry ID is ok.');
-        static::assertSame(AuditReader::DISSOCIATE, $entry->getType(), 'audit entry type is ok.');
-        static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
-        static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
-        static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertEquals([
+        self::assertSame(1, $entry->getId(), 'audit entry ID is ok.');
+        self::assertSame(AuditReader::DISSOCIATE, $entry->getType(), 'audit entry type is ok.');
+        self::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
+        self::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
+        self::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
+        self::assertEquals([
             'source' => [
                 'label' => Author::class.'#1',
                 'class' => Author::class,
@@ -294,7 +295,7 @@ final class AuditManagerTest extends CoreTest
             ->setAuthor($author)
             ->setTitle('First post')
             ->setBody('Here is the body')
-            ->setCreatedAt(new \DateTime())
+            ->setCreatedAt(new DateTime())
         ;
 
         $tag1 = new Tag();
@@ -365,15 +366,15 @@ final class AuditManagerTest extends CoreTest
         $manager->associate($em, $post, $tag2, $mapping, 'what-a-nice-transaction-hash');
 
         $audits = $reader->getAudits(Post::class);
-        static::assertCount(2, $audits, 'AuditManager::associate() creates an audit entry per association.');
+        self::assertCount(2, $audits, 'AuditManager::associate() creates an audit entry per association.');
 
         $entry = array_shift($audits);
-        static::assertSame(2, $entry->getId(), 'audit entry ID is ok.');
-        static::assertSame(AuditReader::ASSOCIATE, $entry->getType(), 'audit entry type is ok.');
-        static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
-        static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
-        static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertEquals([
+        self::assertSame(2, $entry->getId(), 'audit entry ID is ok.');
+        self::assertSame(AuditReader::ASSOCIATE, $entry->getType(), 'audit entry type is ok.');
+        self::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
+        self::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
+        self::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
+        self::assertEquals([
             'source' => [
                 'label' => (string) $post,
                 'class' => Post::class,
@@ -390,12 +391,12 @@ final class AuditManagerTest extends CoreTest
         ], $entry->getDiffs(), 'audit entry diffs is ok.');
 
         $entry = array_shift($audits);
-        static::assertSame(1, $entry->getId(), 'audit entry ID is ok.');
-        static::assertSame(AuditReader::ASSOCIATE, $entry->getType(), 'audit entry type is ok.');
-        static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
-        static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
-        static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertEquals([
+        self::assertSame(1, $entry->getId(), 'audit entry ID is ok.');
+        self::assertSame(AuditReader::ASSOCIATE, $entry->getType(), 'audit entry type is ok.');
+        self::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
+        self::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
+        self::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
+        self::assertEquals([
             'source' => [
                 'label' => (string) $post,
                 'class' => Post::class,
@@ -433,7 +434,7 @@ final class AuditManagerTest extends CoreTest
             ->setAuthor($author)
             ->setTitle('First post')
             ->setBody('Here is the body')
-            ->setCreatedAt(new \DateTime())
+            ->setCreatedAt(new DateTime())
         ;
 
         $tag1 = new Tag();
@@ -506,15 +507,15 @@ final class AuditManagerTest extends CoreTest
         $manager->dissociate($em, $post, $tag2, $mapping, 'what-a-nice-transaction-hash');
 
         $audits = $reader->getAudits(Post::class);
-        static::assertCount(3, $audits, 'AuditManager::dissociate() creates an audit entry.');
+        self::assertCount(3, $audits, 'AuditManager::dissociate() creates an audit entry.');
 
         $entry = array_shift($audits);
-        static::assertSame(3, $entry->getId(), 'audit entry ID is ok.');
-        static::assertSame(AuditReader::DISSOCIATE, $entry->getType(), 'audit entry type is ok.');
-        static::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
-        static::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
-        static::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
-        static::assertEquals([
+        self::assertSame(3, $entry->getId(), 'audit entry ID is ok.');
+        self::assertSame(AuditReader::DISSOCIATE, $entry->getType(), 'audit entry type is ok.');
+        self::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
+        self::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
+        self::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
+        self::assertEquals([
             'source' => [
                 'label' => 'First post',
                 'class' => Post::class,
@@ -538,7 +539,7 @@ final class AuditManagerTest extends CoreTest
         $helper = new AuditHelper($configuration);
         $manager = new AuditManager($configuration, $helper);
 
-        static::assertInstanceOf(AuditConfiguration::class, $manager->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
+        self::assertInstanceOf(AuditConfiguration::class, $manager->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
     }
 
     public function testGetHelper(): void
@@ -548,7 +549,7 @@ final class AuditManagerTest extends CoreTest
         $helper = new AuditHelper($configuration);
         $manager = new AuditManager($configuration, $helper);
 
-        static::assertInstanceOf(AuditHelper::class, $manager->getHelper(), 'helper instanceof AuditHelper::class');
+        self::assertInstanceOf(AuditHelper::class, $manager->getHelper(), 'helper instanceof AuditHelper::class');
     }
 
     protected function setupEntities(): void

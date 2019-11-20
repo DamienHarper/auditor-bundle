@@ -18,6 +18,33 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Issue40\DieselCase;
  */
 final class IssueTest extends BaseTest
 {
+    /**
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\Tools\ToolsException
+     */
+    protected function setUp(): void
+    {
+        $this->getEntityManager();
+        $this->getSchemaTool();
+
+        $configuration = $this->getAuditConfiguration();
+        $configuration->setEntities([
+            DieselCase::class => ['enabled' => true],
+            CoreCase::class => ['enabled' => true],
+            Locale::class => ['enabled' => true],
+            User::class => ['enabled' => true],
+            Vehicle::class => ['enabled' => true],
+            Car::class => ['enabled' => true],
+            Bike::class => ['enabled' => true],
+            Cat::class => ['enabled' => true],
+            Dog::class => ['enabled' => true],
+        ]);
+
+        $this->setUpEntitySchema();
+        $this->setUpAuditSchema();
+    }
+
     public function testAuditingSubclass(): void
     {
         $em = $this->getEntityManager();
@@ -52,22 +79,22 @@ final class IssueTest extends BaseTest
         $em->flush();
 
         $audits = $reader->getAudits(Vehicle::class);
-        static::assertCount(1, $audits, 'results count ok.');
+        self::assertCount(1, $audits, 'results count ok.');
 
         $audits = $reader->getAudits(Vehicle::class, null, null, null, null, false);
-        static::assertCount(3, $audits, 'results count ok.');
+        self::assertCount(3, $audits, 'results count ok.');
 
         $audits = $reader->getAudits(Car::class);
-        static::assertCount(1, $audits, 'results count ok.');
+        self::assertCount(1, $audits, 'results count ok.');
 
         $audits = $reader->getAudits(Bike::class);
-        static::assertCount(1, $audits, 'results count ok.');
+        self::assertCount(1, $audits, 'results count ok.');
 
         $audits = $reader->getAudits(Cat::class);
-        static::assertCount(1, $audits, 'results count ok.');
+        self::assertCount(1, $audits, 'results count ok.');
 
         $audits = $reader->getAudits(Dog::class);
-        static::assertCount(1, $audits, 'results count ok.');
+        self::assertCount(1, $audits, 'results count ok.');
 
         $car->setLabel('Taycan');
         $em->persist($car);
@@ -78,16 +105,16 @@ final class IssueTest extends BaseTest
         $em->flush();
 
         $audits = $reader->getAudits(Vehicle::class);
-        static::assertCount(1, $audits, 'results count ok.');
+        self::assertCount(1, $audits, 'results count ok.');
 
         $audits = $reader->getAudits(Car::class);
-        static::assertCount(2, $audits, 'results count ok.');
+        self::assertCount(2, $audits, 'results count ok.');
 
         $audits = $reader->getAudits(Dog::class);
-        static::assertCount(1, $audits, 'results count ok.');
+        self::assertCount(1, $audits, 'results count ok.');
 
         $audits = $reader->getAudits(Cat::class);
-        static::assertCount(2, $audits, 'results count ok.');
+        self::assertCount(2, $audits, 'results count ok.');
     }
 
     public function testIssue40(): void
@@ -108,12 +135,12 @@ final class IssueTest extends BaseTest
         $em->flush();
 
         $audits = $reader->getAudits(CoreCase::class);
-        static::assertCount(1, $audits, 'results count ok.');
-        static::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
+        self::assertCount(1, $audits, 'results count ok.');
+        self::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
 
         $audits = $reader->getAudits(DieselCase::class);
-        static::assertCount(1, $audits, 'results count ok.');
-        static::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
+        self::assertCount(1, $audits, 'results count ok.');
+        self::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
     }
 
     public function testIssue37(): void
@@ -138,9 +165,9 @@ final class IssueTest extends BaseTest
         $em->flush();
 
         $audits = $reader->getAudits(Locale::class);
-        static::assertCount(2, $audits, 'results count ok.');
-        static::assertSame('en_US', $audits[0]->getObjectId(), 'AuditEntry::object_id is a string.');
-        static::assertSame('fr_FR', $audits[1]->getObjectId(), 'AuditEntry::object_id is a string.');
+        self::assertCount(2, $audits, 'results count ok.');
+        self::assertSame('en_US', $audits[0]->getObjectId(), 'AuditEntry::object_id is a string.');
+        self::assertSame('fr_FR', $audits[1]->getObjectId(), 'AuditEntry::object_id is a string.');
 
         $user1 = new User();
         $user1
@@ -159,33 +186,6 @@ final class IssueTest extends BaseTest
         $em->flush();
 
         $audits = $reader->getAudits(User::class);
-        static::assertCount(2, $audits, 'results count ok.');
-    }
-
-    /**
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\Tools\ToolsException
-     */
-    protected function setUp(): void
-    {
-        $this->getEntityManager();
-        $this->getSchemaTool();
-
-        $configuration = $this->getAuditConfiguration();
-        $configuration->setEntities([
-            DieselCase::class => ['enabled' => true],
-            CoreCase::class => ['enabled' => true],
-            Locale::class => ['enabled' => true],
-            User::class => ['enabled' => true],
-            Vehicle::class => ['enabled' => true],
-            Car::class => ['enabled' => true],
-            Bike::class => ['enabled' => true],
-            Cat::class => ['enabled' => true],
-            Dog::class => ['enabled' => true],
-        ]);
-
-        $this->setUpEntitySchema();
-        $this->setUpAuditSchema();
+        self::assertCount(2, $audits, 'results count ok.');
     }
 }

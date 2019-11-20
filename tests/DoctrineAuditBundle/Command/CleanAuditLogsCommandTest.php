@@ -30,7 +30,7 @@ final class CleanAuditLogsCommandTest extends CoreTest
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        static::assertStringContainsString("'keep' argument must be a positive number.", $output);
+        self::assertStringContainsString("'keep' argument must be a positive number.", $output);
     }
 
     /**
@@ -48,7 +48,7 @@ final class CleanAuditLogsCommandTest extends CoreTest
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        static::assertStringContainsString("'keep' argument must be a positive number.", $output);
+        self::assertStringContainsString("'keep' argument must be a positive number.", $output);
     }
 
     /**
@@ -65,7 +65,7 @@ final class CleanAuditLogsCommandTest extends CoreTest
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        static::assertStringContainsString('[OK] Success', $output);
+        self::assertStringContainsString('[OK] Success', $output);
     }
 
     /**
@@ -84,7 +84,7 @@ final class CleanAuditLogsCommandTest extends CoreTest
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        static::assertStringContainsString('The command is already running in another process.', $output);
+        self::assertStringContainsString('The command is already running in another process.', $output);
     }
 
     protected function createCommand(): Command

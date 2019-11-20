@@ -6,7 +6,9 @@ use Doctrine\DBAL\Logging\SQLLogger;
 
 class AuditLoggerChain implements SQLLogger
 {
-    /** @var SQLLogger[] */
+    /**
+     * @var SQLLogger[]
+     */
     private $loggers = [];
 
     /**
@@ -14,7 +16,7 @@ class AuditLoggerChain implements SQLLogger
      *
      * @param SQLLogger $logger
      */
-    public function addLogger(SQLLogger $logger)
+    public function addLogger(SQLLogger $logger): void
     {
         $this->loggers[] = $logger;
     }
@@ -22,7 +24,7 @@ class AuditLoggerChain implements SQLLogger
     /**
      * {@inheritdoc}
      */
-    public function startQuery($sql, ?array $params = null, ?array $types = null)
+    public function startQuery($sql, ?array $params = null, ?array $types = null): void
     {
         foreach ($this->loggers as $logger) {
             $logger->startQuery($sql, $params, $types);
@@ -32,7 +34,7 @@ class AuditLoggerChain implements SQLLogger
     /**
      * {@inheritdoc}
      */
-    public function stopQuery()
+    public function stopQuery(): void
     {
         foreach ($this->loggers as $logger) {
             $logger->stopQuery();

@@ -21,7 +21,7 @@ if (class_exists(ComponentEvent::class)) {
         /**
          * @return array
          */
-        public function getPayload(): array
+        final public function getPayload(): array
         {
             return $this->payload;
         }
@@ -42,7 +42,7 @@ if (class_exists(ComponentEvent::class)) {
         /**
          * @return array
          */
-        public function getPayload(): array
+        final public function getPayload(): array
         {
             return $this->payload;
         }
