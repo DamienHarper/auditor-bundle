@@ -83,7 +83,7 @@ class AuditManager
     {
         /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(\get_class($entity));
-        $this->audit($em, [
+        $this->audit([
             'action' => 'insert',
             'blame' => $this->helper->blame(),
             'diff' => $this->helper->diff($em, $entity, $ch),
@@ -114,7 +114,7 @@ class AuditManager
         }
         /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(\get_class($entity));
-        $this->audit($em, [
+        $this->audit([
             'action' => 'update',
             'blame' => $this->helper->blame(),
             'diff' => $diff,
@@ -141,7 +141,7 @@ class AuditManager
     {
         /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(\get_class($entity));
-        $this->audit($em, [
+        $this->audit([
             'action' => 'remove',
             'blame' => $this->helper->blame(),
             'diff' => $this->helper->summarize($em, $entity, $id),
@@ -328,18 +328,17 @@ class AuditManager
             $data['diff']['table'] = $mapping['joinTable']['name'];
         }
 
-        $this->audit($em, $data);
+        $this->audit($data);
     }
 
     /**
      * Adds an entry to the audit table.
      *
-     * @param EntityManagerInterface $em
-     * @param array                  $data
+     * @param array $data
      *
      * @throws Exception
      */
-    private function audit(EntityManagerInterface $em, array $data): void
+    private function audit(array $data): void
     {
         $schema = $data['schema'] ? $data['schema'].'.' : '';
         $auditTable = $schema.$this->configuration->getTablePrefix().$data['table'].$this->configuration->getTableSuffix();

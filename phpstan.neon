@@ -17,5 +17,4 @@ parameters:
         - '~Parameter \#1 \$name of method Symfony\\Component\\Console\\Command\\Command\:\:setName\(\) expects string, string\|null given~'
         - '~Parameter \#1 \$tableName of method Doctrine\\DBAL\\Schema\\Schema\:\:(has|get)Table\(\) expects string, string\|null given~'
         - '~Cannot call method fetchColumn\(\) on Doctrine\\DBAL\\Driver\\Statement\|int~'
-        - '~Call to an undefined method Doctrine\\Common\\Persistence\\Mapping\\ClassMetadata\:\:get(Schema|Table)Name\(\)~'
         - '~Possibly invalid array key type object\|string~'

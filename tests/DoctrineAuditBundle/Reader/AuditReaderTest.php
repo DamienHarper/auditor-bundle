@@ -28,34 +28,50 @@ final class AuditReaderTest extends CoreTest
         self::assertInstanceOf(AuditConfiguration::class, $reader->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
     }
 
-    public function testFilterIsNullByDefault(): void
+    public function testFilterIsEmptyByDefault(): void
     {
         $reader = $this->getReader();
 
-        self::assertNull($reader->getFilter(), 'filter is null by default.');
+        self::assertSame([], $reader->getFilters(), 'filters is empty by default.');
     }
 
-    public function testFilterCanOnlyBePartOfAllowedValues(): void
+    public function testFilterIsEmptyIfNotPartOfAllowedValues(): void
     {
         $reader = $this->getReader();
 
         $reader->filterBy('UNKNOWN');
-        self::assertNull($reader->getFilter(), 'filter is null when AuditReader::filterBy() parameter is not an allowed value.');
+        self::assertSame([], $reader->getFilters(), 'filters is empty when AuditReader::filterBy() parameter is not an allowed value.');
+
+        $reader->filterBy(['UNKNOWN1', 'UNKNOWN2']);
+        self::assertSame([], $reader->getFilters(), 'filters is empty when AuditReader::filterBy() parameter is not an allowed value.');
+    }
+
+    public function testFilterSingleValue(): void
+    {
+        $reader = $this->getReader();
 
         $reader->filterBy(AuditReader::ASSOCIATE);
-        self::assertSame(AuditReader::ASSOCIATE, $reader->getFilter(), 'filter is not null when AuditReader::filterBy() parameter is an allowed value.');
+        self::assertSame([AuditReader::ASSOCIATE], $reader->getFilters(), 'filter is not empty when AuditReader::filterBy() parameter is an allowed value.');
 
         $reader->filterBy(AuditReader::DISSOCIATE);
-        self::assertSame(AuditReader::DISSOCIATE, $reader->getFilter(), 'filter is not null when AuditReader::filterBy() parameter is an allowed value.');
+        self::assertSame([AuditReader::DISSOCIATE], $reader->getFilters(), 'filter is not empty when AuditReader::filterBy() parameter is an allowed value.');
 
         $reader->filterBy(AuditReader::INSERT);
-        self::assertSame(AuditReader::INSERT, $reader->getFilter(), 'filter is not null when AuditReader::filterBy() parameter is an allowed value.');
+        self::assertSame([AuditReader::INSERT], $reader->getFilters(), 'filter is not empty when AuditReader::filterBy() parameter is an allowed value.');
 
         $reader->filterBy(AuditReader::REMOVE);
-        self::assertSame(AuditReader::REMOVE, $reader->getFilter(), 'filter is not null when AuditReader::filterBy() parameter is an allowed value.');
+        self::assertSame([AuditReader::REMOVE], $reader->getFilters(), 'filter is not empty when AuditReader::filterBy() parameter is an allowed value.');
 
         $reader->filterBy(AuditReader::UPDATE);
-        self::assertSame(AuditReader::UPDATE, $reader->getFilter(), 'filter is not null when AuditReader::filterBy() parameter is an allowed value.');
+        self::assertSame([AuditReader::UPDATE], $reader->getFilters(), 'filter is not empty when AuditReader::filterBy() parameter is an allowed value.');
+    }
+
+    public function testFilterMultipleValues(): void
+    {
+        $reader = $this->getReader();
+
+        $reader->filterBy([AuditReader::ASSOCIATE, AuditReader::DISSOCIATE]);
+        self::assertSame([AuditReader::ASSOCIATE, AuditReader::DISSOCIATE], $reader->getFilters(), 'filter is not null when AuditReader::filterBy() parameter is composed of allowed value.');
     }
 
     public function testGetEntityTableName(): void
@@ -168,9 +184,7 @@ final class AuditReaderTest extends CoreTest
         $audits = $reader->getAudits(Tag::class, null, 1, 50);
 
         $i = 0;
-//        $this->assertCount(14, $audits, 'result count is ok.');
         self::assertCount(15, $audits, 'result count is ok.');
-//        $this->assertCount(12, $audits, 'result count is ok.');
         self::assertSame(AuditReader::DISSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is a dissociate operation.');
         self::assertSame(AuditReader::DISSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is a dissociate operation.');
         self::assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an associate operation.');
