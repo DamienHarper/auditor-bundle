@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2019-11-21
+
+### Changes
+* Fixed Doctrine deprecations
+* Ensure compatibility with doctrine/dbal <2.10.0
+* Fixed table layout in the timeline (thanks to @Jonathan-Lathiere)
+* Allow to filter audits using multiple filter values in `AuditReader::filterBy()`
+
+
 ## [3.0.0] - 2019-11-01
 ### What's new
 * **Annotation support**: audit configuration (audited entities, ignored columns, etc) can be done mostly 
