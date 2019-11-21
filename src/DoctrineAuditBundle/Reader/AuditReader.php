@@ -7,7 +7,6 @@ use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Exception\AccessDeniedException;
 use DH\DoctrineAuditBundle\Exception\InvalidArgumentException;
 use DH\DoctrineAuditBundle\User\UserInterface;
-use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Statement;
@@ -74,19 +73,11 @@ class AuditReader
      */
     public function filterBy($filter): self
     {
-        $filters = [];
+        $filters = \is_array($filter) ? $filter : [$filter];
 
-        if (!\is_array($filter)) {
-            $filter = [$filter];
-        }
-
-        foreach ($filter as $f) {
-            if ($this->isAllowedFilter($f)) {
-                $filters[] = $f;
-            }
-        }
-
-        $this->filters = $filters;
+        $this->filters = array_filter($filters, static function ($f) {
+            return \in_array($f, [self::UPDATE, self::ASSOCIATE, self::DISSOCIATE, self::INSERT, self::REMOVE], true);
+        });
 
         return $this;
     }
@@ -248,7 +239,7 @@ class AuditReader
      *
      * @return mixed[]
      */
-    public function getAudit($entity, $id)
+    public function getAudit($entity, $id): array
     {
         $this->checkAuditable($entity);
         $this->checkRoles($entity, Security::VIEW_SCOPE);
@@ -266,12 +257,7 @@ class AuditReader
             ->setParameter('id', $id)
         ;
 
-        if (!empty($this->filters)) {
-            $queryBuilder
-                ->andWhere('type IN (:filters)')
-                ->setParameter('filters', $this->filters, Connection::PARAM_STR_ARRAY)
-            ;
-        }
+        $this->filterByType($queryBuilder, $this->filters);
 
         /** @var Statement $statement */
         $statement = $queryBuilder->execute();
@@ -289,7 +275,9 @@ class AuditReader
      */
     public function getEntityTableName($entity): string
     {
-        return $this->getClassMetadata($entity)->getTableName();
+        $entityName = \is_string($entity) ? $entity : \get_class($entity);
+
+        return $this->entityManager->getClassMetadata($entityName)->getTableName();
     }
 
     /**
@@ -302,7 +290,11 @@ class AuditReader
     public function getEntityAuditTableName($entity): string
     {
         $entityName = \is_string($entity) ? $entity : \get_class($entity);
-        $schema = $this->getClassMetadata($entityName)->getSchemaName() ? $this->getClassMetadata($entityName)->getSchemaName().'.' : '';
+
+        $schema = '';
+        if ($this->entityManager->getClassMetadata($entityName)->getSchemaName()) {
+            $schema = $this->entityManager->getClassMetadata($entityName)->getSchemaName().'.';
+        }
 
         return sprintf('%s%s%s%s', $schema, $this->configuration->getTablePrefix(), $this->getEntityTableName($entityName), $this->configuration->getTableSuffix());
     }
@@ -315,9 +307,46 @@ class AuditReader
         return $this->entityManager;
     }
 
-    private function isAllowedFilter(string $filter): bool
+    private function filterByType(QueryBuilder $queryBuilder, array $filters): QueryBuilder
     {
-        return \in_array($filter, [self::UPDATE, self::ASSOCIATE, self::DISSOCIATE, self::INSERT, self::REMOVE], true);
+        if (!empty($filters)) {
+            $queryBuilder
+                ->andWhere('type IN (:filters)')
+                ->setParameter('filters', $filters, Connection::PARAM_STR_ARRAY)
+            ;
+        }
+
+        return $queryBuilder;
+    }
+
+    private function filterByTransaction(QueryBuilder $queryBuilder, ?string $transactionHash): QueryBuilder
+    {
+        if (null !== $transactionHash) {
+            $queryBuilder
+                ->andWhere('transaction_hash = :transaction_hash')
+                ->setParameter('transaction_hash', $transactionHash)
+            ;
+        }
+
+        return $queryBuilder;
+    }
+
+    /**
+     * @param QueryBuilder    $queryBuilder
+     * @param null|int|string $id
+     *
+     * @return QueryBuilder
+     */
+    private function filterByObjectId(QueryBuilder $queryBuilder, $id): QueryBuilder
+    {
+        if (null !== $id) {
+            $queryBuilder
+                ->andWhere('object_id = :object_id')
+                ->setParameter('object_id', $id)
+            ;
+        }
+
+        return $queryBuilder;
     }
 
     /**
@@ -337,6 +366,8 @@ class AuditReader
      */
     private function getAuditsQueryBuilder($entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, bool $strict = true): QueryBuilder
     {
+        $entityName = \is_string($entity) ? $entity : \get_class($entity);
+
         $this->checkAuditable($entity);
         $this->checkRoles($entity, Security::VIEW_SCOPE);
 
@@ -348,7 +379,7 @@ class AuditReader
             throw new \InvalidArgumentException('$pageSize must be greater or equal than 1.');
         }
 
-        $storage = $this->selectStorage();
+        $storage = $this->configuration->getEntityManager() ?? $this->entityManager;
         $connection = $storage->getConnection();
 
         $queryBuilder = $connection->createQueryBuilder();
@@ -359,13 +390,17 @@ class AuditReader
             ->addOrderBy('id', 'DESC')
         ;
 
-        $metadata = $this->getClassMetadata($entity);
+        $metadata = $this->entityManager->getClassMetadata($entityName);
         if ($strict && $metadata instanceof ORMMetadata && ORMMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $metadata->inheritanceType) {
             $queryBuilder
                 ->andWhere('discriminator = :discriminator')
                 ->setParameter('discriminator', \is_object($entity) ? \get_class($entity) : $entity)
             ;
         }
+
+        $this->filterByObjectId($queryBuilder, $id);
+        $this->filterByType($queryBuilder, $this->filters);
+        $this->filterByTransaction($queryBuilder, $transactionHash);
 
         if (null !== $pageSize) {
             $queryBuilder
@@ -374,46 +409,7 @@ class AuditReader
             ;
         }
 
-        if (null !== $id) {
-            $queryBuilder
-                ->andWhere('object_id = :object_id')
-                ->setParameter('object_id', $id)
-            ;
-        }
-
-        if (!empty($this->filters)) {
-            $queryBuilder
-                ->andWhere('type IN (:filters)')
-                ->setParameter('filters', $this->filters, Connection::PARAM_STR_ARRAY)
-            ;
-        }
-
-        if (null !== $transactionHash) {
-            $queryBuilder
-                ->andWhere('transaction_hash = :transaction_hash')
-                ->setParameter('transaction_hash', $transactionHash)
-            ;
-        }
-
         return $queryBuilder;
-    }
-
-    /**
-     * @param object|string $entity
-     *
-     * @return ClassMetadata
-     */
-    private function getClassMetadata($entity): ClassMetadata
-    {
-        return $this->entityManager->getClassMetadata($entity);
-    }
-
-    /**
-     * @return EntityManagerInterface
-     */
-    private function selectStorage(): EntityManagerInterface
-    {
-        return $this->configuration->getEntityManager() ?? $this->entityManager;
     }
 
     /**
