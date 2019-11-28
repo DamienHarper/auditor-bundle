@@ -42,7 +42,7 @@ final class DHDoctrineAuditExtensionTest extends AbstractExtensionTestCase
 
         $this->assertContainerBuilderHasService('dh_doctrine_audit.event_subscriber.doctrine', DoctrineSubscriber::class);
         $this->assertContainerBuilderHasServiceDefinitionWithArgument('dh_doctrine_audit.event_subscriber.doctrine', 0, 'dh_doctrine_audit.manager');
-        $this->assertContainerBuilderHasServiceDefinitionWithTag('dh_doctrine_audit.event_subscriber.doctrine', 'doctrine.event_subscriber', ['connection' => 'default']);
+        $this->assertContainerBuilderHasServiceDefinitionWithTag('dh_doctrine_audit.event_subscriber.doctrine', 'doctrine.event_subscriber', ['connection' => 'default', 'priority' => 1000000]);
 
         $this->assertContainerBuilderHasService('dh_doctrine_audit.twig_extension', TwigExtension::class);
         $this->assertContainerBuilderHasServiceDefinitionWithArgument('dh_doctrine_audit.twig_extension', 0, 'doctrine');

@@ -69,7 +69,7 @@ services:
     class: DH\DoctrineAuditBundle\Event\DoctrineSubscriber
     arguments: ["@dh_doctrine_audit.manager"]
     tags:
-      - { name: doctrine.event_subscriber, connection: default }
+      - { name: doctrine.event_subscriber, connection: default, priority: 1000000 }
 
   dh_doctrine_audit.event_subscriber.create_schema:
     class: DH\DoctrineAuditBundle\Event\CreateSchemaListener
