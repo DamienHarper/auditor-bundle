@@ -185,7 +185,7 @@ class AuditReader
      * @throws AccessDeniedException
      * @throws InvalidArgumentException
      *
-     * @return Paginator
+     * @return array
      */
     public function getAuditsPager($entity, $id = null, int $page = 1, int $pageSize = self::PAGE_SIZE): array
     {

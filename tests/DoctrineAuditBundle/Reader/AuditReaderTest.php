@@ -14,7 +14,6 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Comment;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Tag;
 use InvalidArgumentException;
-use Pagerfanta\Pagerfanta;
 
 /**
  * @internal
@@ -213,8 +212,8 @@ final class AuditReaderTest extends CoreTest
         /** @var AuditEntry[] $audits */
         $pager = $reader->getAuditsPager(Author::class, null, 1, 3);
 
-        self::assertInstanceOf(Pagerfanta::class, $pager, 'pager is a Pagerfanta instance.');
-        self::assertTrue($pager->haveToPaginate(), 'pager has to paginate.');
+        self::assertIsArray($pager);
+        self::assertTrue($pager['haveToPaginate'], 'pager has to paginate.');
     }
 
     public function testGetAuditsCount(): void
