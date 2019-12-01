@@ -92,3 +92,8 @@ services:
 
   DH\DoctrineAuditBundle\Command\UpdateSchemaCommand:
     alias: dh_doctrine_audit.command.schema_update
+
+  DH\DoctrineAuditBundle\Controller\AuditController:
+    calls:
+      - { method: setContainer, arguments: ['@service_container'] }
+    tags: ['controller.service_arguments']

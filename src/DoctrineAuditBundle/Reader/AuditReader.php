@@ -12,8 +12,6 @@ use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata as ORMMetadata;
-use Pagerfanta\Adapter\DoctrineDbalSingleTableAdapter;
-use Pagerfanta\Pagerfanta;
 use PDO;
 use Symfony\Component\Security\Core\Security as CoreSecurity;
 
@@ -187,21 +185,35 @@ class AuditReader
      * @throws AccessDeniedException
      * @throws InvalidArgumentException
      *
-     * @return Pagerfanta
+     * @return Paginator
      */
-    public function getAuditsPager($entity, $id = null, int $page = 1, int $pageSize = self::PAGE_SIZE): Pagerfanta
+    public function getAuditsPager($entity, $id = null, int $page = 1, int $pageSize = self::PAGE_SIZE): array
     {
         $queryBuilder = $this->getAuditsQueryBuilder($entity, $id);
 
-        $adapter = new DoctrineDbalSingleTableAdapter($queryBuilder, 'at.id');
+        $currentPage = $page < 1 ? 1 : $page;
+        $firstResult = ($currentPage - 1) * $pageSize;
 
-        $pagerfanta = new Pagerfanta($adapter);
-        $pagerfanta
-            ->setMaxPerPage($pageSize)
-            ->setCurrentPage($page)
+        $queryBuilder
+            ->setFirstResult($firstResult)
+            ->setMaxResults($pageSize)
         ;
 
-        return $pagerfanta;
+        $paginator = new Paginator($queryBuilder);
+        $numResults = $paginator->count();
+        $hasPreviousPage = $currentPage > 1;
+        $hasNextPage = ($currentPage * $pageSize) < $numResults;
+
+        return [
+            'results' => $paginator->getIterator(),
+            'currentPage' => $currentPage,
+            'hasPreviousPage' => $hasPreviousPage,
+            'hasNextPage' => $hasNextPage,
+            'previousPage' => $hasPreviousPage ? $currentPage - 1 : null,
+            'nextPage' => $hasNextPage ? $currentPage + 1 : null,
+            'numPages' => (int) ceil($numResults / $pageSize),
+            'haveToPaginate' => $numResults > $pageSize,
+        ];
     }
 
     /**
