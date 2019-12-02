@@ -7,6 +7,7 @@ use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Role\SwitchUserRole;
@@ -52,8 +53,13 @@ final class TokenStorageUserProviderTest extends TestCase
         $token1 = new UsernamePasswordToken($user1, '12345', 'provider', $user1->getRoles());
 
         $user2 = new User('2', 'dark.vador');
-        $user2->setRoles(['ROLE_USER', 'ROLE_PREVIOUS_ADMIN', new SwitchUserRole('ROLE_ADMIN', $token1)]);
-        $token2 = new UsernamePasswordToken($user2, '12345', 'provider', $user2->getRoles());
+
+        if (class_exists('\Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken')) {
+            $token2 = new SwitchUserToken($user2, '12345', 'provider', $user2->getRoles(), $token1);
+        } else {
+            $user2->setRoles(['ROLE_USER', 'ROLE_PREVIOUS_ADMIN', new SwitchUserRole('ROLE_ADMIN', $token1)]);
+            $token2 = new UsernamePasswordToken($user2, '12345', 'provider', $user2->getRoles());
+        }
 
         $this->tokenStorage->setToken($token2);
         $container->set('security.token_storage', $this->tokenStorage);

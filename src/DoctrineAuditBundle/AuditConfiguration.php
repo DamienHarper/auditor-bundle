@@ -96,7 +96,8 @@ class AuditConfiguration
         $this->dispatcher = $dispatcher;
 
         $r = new ReflectionMethod($this->dispatcher, 'dispatch');
-        $this->is_pre43_dispatcher = 2 === \count($r->getParameters());
+        $p = $r->getParameters();
+        $this->is_pre43_dispatcher = 2 === \count($p) && 'event' !== $p[0]->name;
 
         $this->enabled = $config['enabled'];
         $this->tablePrefix = $config['table_prefix'];

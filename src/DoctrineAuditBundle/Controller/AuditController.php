@@ -54,6 +54,8 @@ class AuditController extends AbstractController
      * @param string     $entity
      * @param int|string $id
      *
+     * @throws InvalidArgumentException
+     *
      * @return Response
      */
     public function showEntityHistoryAction(Request $request, string $entity, $id = null): Response
@@ -76,7 +78,14 @@ class AuditController extends AbstractController
         return $this->render('@DHDoctrineAudit/Audit/entity_history.html.twig', [
             'id' => $id,
             'entity' => $entity,
-            'entries' => $entries,
+            'paginator' => $entries,
+        ]);
+    }
+
+    public static function getSubscribedServices(): array
+    {
+        return array_merge(parent::getSubscribedServices(), [
+            'dh_doctrine_audit.reader' => AuditReader::class,
         ]);
     }
 }

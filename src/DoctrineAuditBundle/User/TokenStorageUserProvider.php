@@ -67,7 +67,21 @@ class TokenStorageUserProvider implements UserProviderInterface
 
     private function getImpersonatorUser()
     {
-        $roles = null === $this->security->getToken() ? [] : $this->security->getToken()->getRoles();
+        $token = $this->security->getToken();
+
+        // Symfony 5
+        if (class_exists('\Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken')) {
+            if ($token instanceof SwitchUserToken) {
+                return $token->getOriginalToken()->getUser();
+            }
+        }
+
+        // Pre Symfony 5
+        $roles = [];
+        if (null !== $token) {
+            $roles = method_exists($token, 'getRoleNames') ? $token->getRoleNames() : $token->getRoles();
+        }
+
         foreach ($roles as $role) {
             if ($role instanceof SwitchUserRole) {
                 return $role->getSource()->getUser();

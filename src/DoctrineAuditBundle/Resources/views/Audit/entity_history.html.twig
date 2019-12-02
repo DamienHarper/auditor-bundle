@@ -17,18 +17,38 @@
         </nav>
 
         <h4 class="card-title float-left"><code>{{ entity }}{% if id is not null %}#{{ id }}{% endif %}</code> <em>(most recent first)</em></h4>
-        <h5 class="float-right">{{ bootstrap.badge(entries|length ~ ' operations', 'primary') }}</h5>
+        <h5 class="float-right">{{ bootstrap.badge(paginator.results|length ~ ' operations', 'primary') }}</h5>
 
         <div class="timeline-centered">
-        {% for entry in entries %}
+        {% for entry in paginator.results %}
             {{ include('@DHDoctrineAudit/Audit/entry.html.twig', {'entry': entry}) }}
         {% endfor %}
         </div>
 
-        {% if entries.haveToPaginate() %}
-        <div class="pagerfanta float-right">
-            {{ pagerfanta(entries, 'twitter_bootstrap4') }}
-        </div>
+        {% if paginator.haveToPaginate %}
+        <nav class="float-right">
+            <ul class="pagination">
+                {% if paginator.hasPreviousPage %}
+                    <li class="page-item"><a href="{{ path('dh_doctrine_audit_show_entity_history', {entity: entity, page: paginator.previousPage}) }}" class="page-link" rel="previous"><i class="fa fw fa-arrow-left"></i> Previous</a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link"><i class="fa fw fa-arrow-left"></i> Previous</span></li>
+                {% endif %}
+
+                {% for i in 1..paginator.numPages %}
+                    {% if i == paginator.currentPage %}
+                        <li class="page-item active"><span class="page-link">{{ i }} <span class="sr-only">(current)</span></span></li>
+                    {% else %}
+                        <li class="page-item"><a href="{{ path('dh_doctrine_audit_show_entity_history', {entity: entity, page: i}) }}" class="page-link">{{ i }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if paginator.hasNextPage %}
+                    <li class="page-item"><a href="{{ path('dh_doctrine_audit_show_entity_history', {entity: entity, page: paginator.nextPage}) }}" class="page-link" rel="next">Next <i class="fa fw fa-arrow-right"></i></a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">Next <i class="fa fw fa-arrow-right"></i></span></li>
+                {% endif %}
+            </ul>
+        </nav>
         {% endif %}
     </div>
 </div>

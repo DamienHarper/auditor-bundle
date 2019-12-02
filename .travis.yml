@@ -14,6 +14,7 @@ php:
     - 7.1
     - 7.2
     - 7.3
+    - 7.4snapshot
 
 env:
     - DB=mysql
@@ -29,8 +30,8 @@ install:
     - COMPOSER_MEMORY_LIMIT=-1 composer update $COMPOSER_FLAGS --prefer-dist
 
 before_script:
-    - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-    - chmod +x ./cc-test-reporter
+    - if [ $(phpenv version-name) = "7.3" ]; then curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter; fi
+    - if [ $(phpenv version-name) = "7.3" ]; then chmod +x ./cc-test-reporter; fi
     - if [ $(phpenv version-name) = "7.3" ]; then ./cc-test-reporter before-build; fi
     - phpenv config-rm xdebug.ini
     - pecl install pcov
@@ -39,6 +40,7 @@ script:
     - if [ $(phpenv version-name) = "7.1" ]; then ./vendor/bin/phpunit -c tests/travis/$DB.travis.xml --disable-coverage; fi
     - if [ $(phpenv version-name) = "7.2" ]; then ./vendor/bin/phpunit -c tests/travis/$DB.travis.xml --disable-coverage; fi
     - if [ $(phpenv version-name) = "7.3" ]; then php -d pcov.enabled=1 ./vendor/bin/phpunit -c tests/travis/$DB.travis.xml --coverage-clover clover.xml; fi
+    - if [ $(phpenv version-name) = "7.4" ]; then ./vendor/bin/phpunit -c tests/travis/$DB.travis.xml --disable-coverage; fi
 
 after_script:
     - if [ $(phpenv version-name) = "7.3" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi
