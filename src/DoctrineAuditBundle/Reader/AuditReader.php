@@ -448,6 +448,8 @@ class AuditReader
      */
     private function checkRoles($entity, string $scope): void
     {
+        $entityName = \is_string($entity) ? $entity : \get_class($entity);
+
         $userProvider = $this->configuration->getUserProvider();
         $user = null === $userProvider ? null : $userProvider->getUser();
         $security = null === $userProvider ? null : $userProvider->getSecurity();
@@ -459,18 +461,18 @@ class AuditReader
 
         $entities = $this->configuration->getEntities();
 
-        if (!isset($entities[$entity]['roles']) || null === $entities[$entity]['roles']) {
+        if (!isset($entities[$entityName]['roles']) || null === $entities[$entityName]['roles']) {
             // If no roles are configured, consider access granted
             return;
         }
 
-        if (!isset($entities[$entity]['roles'][$scope]) || null === $entities[$entity]['roles'][$scope]) {
+        if (!isset($entities[$entityName]['roles'][$scope]) || null === $entities[$entityName]['roles'][$scope]) {
             // If no roles for the given scope are configured, consider access granted
             return;
         }
 
         // roles are defined for the give scope
-        foreach ($entities[$entity]['roles'][$scope] as $role) {
+        foreach ($entities[$entityName]['roles'][$scope] as $role) {
             if ($security->isGranted($role)) {
                 // role granted => access granted
                 return;
@@ -478,6 +480,6 @@ class AuditReader
         }
 
         // access denied
-        throw new AccessDeniedException('You are not allowed to access audits of '.$entity.' entity.');
+        throw new AccessDeniedException('You are not allowed to access audits of '.$entityName.' entity.');
     }
 }

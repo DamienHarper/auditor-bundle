@@ -79,7 +79,7 @@ class TokenStorageUserProvider implements UserProviderInterface
         // Pre Symfony 5
         $roles = [];
         if (null !== $token) {
-            $roles = method_exists($token, 'getRoleNames') ? $this->security->getToken()->getRoleNames() : $this->security->getToken()->getRoles();
+            $roles = method_exists($token, 'getRoleNames') ? $token->getRoleNames() : $token->getRoles();
         }
 
         foreach ($roles as $role) {
