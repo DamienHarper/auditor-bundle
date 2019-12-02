@@ -217,6 +217,32 @@ class AuditReader
     }
 
     /**
+     * Returns the amount of audited entries/operations.
+     *
+     * @param string          $entity
+     * @param null|int|string $id
+     *
+     * @throws AccessDeniedException
+     * @throws InvalidArgumentException
+     *
+     * @return int
+     */
+    public function getAuditsCount(string $entity, $id = null): int
+    {
+        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id);
+
+        $result = $queryBuilder
+            ->resetQueryPart('select')
+            ->resetQueryPart('orderBy')
+            ->select('COUNT(id)')
+            ->execute()
+            ->fetchColumn(0)
+        ;
+
+        return false === $result ? 0 : $result;
+    }
+
+    /**
      * @param string $entity
      * @param string $id
      *
