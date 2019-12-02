@@ -118,7 +118,7 @@ class AuditReader
     /**
      * Returns an array of audited entries/operations.
      *
-     * @param object|string   $entity
+     * @param string          $entity
      * @param null|int|string $id
      * @param null|int        $page
      * @param null|int        $pageSize
@@ -130,7 +130,7 @@ class AuditReader
      *
      * @return array
      */
-    public function getAudits($entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, bool $strict = true): array
+    public function getAudits(string $entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, bool $strict = true): array
     {
         $this->checkAuditable($entity);
         $this->checkRoles($entity, Security::VIEW_SCOPE);
@@ -177,7 +177,7 @@ class AuditReader
     /**
      * Returns an array of audited entries/operations.
      *
-     * @param object|string   $entity
+     * @param string          $entity
      * @param null|int|string $id
      * @param int             $page
      * @param int             $pageSize
@@ -187,7 +187,7 @@ class AuditReader
      *
      * @return array
      */
-    public function getAuditsPager($entity, $id = null, int $page = 1, int $pageSize = self::PAGE_SIZE): array
+    public function getAuditsPager(string $entity, $id = null, int $page = 1, int $pageSize = self::PAGE_SIZE): array
     {
         $queryBuilder = $this->getAuditsQueryBuilder($entity, $id);
 
@@ -217,41 +217,15 @@ class AuditReader
     }
 
     /**
-     * Returns the amount of audited entries/operations.
-     *
-     * @param object|string   $entity
-     * @param null|int|string $id
-     *
-     * @throws AccessDeniedException
-     * @throws InvalidArgumentException
-     *
-     * @return int
-     */
-    public function getAuditsCount($entity, $id = null): int
-    {
-        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id);
-
-        $result = $queryBuilder
-            ->resetQueryPart('select')
-            ->resetQueryPart('orderBy')
-            ->select('COUNT(id)')
-            ->execute()
-            ->fetchColumn(0)
-        ;
-
-        return false === $result ? 0 : $result;
-    }
-
-    /**
-     * @param object|string $entity
-     * @param string        $id
+     * @param string $entity
+     * @param string $id
      *
      * @throws AccessDeniedException
      * @throws InvalidArgumentException
      *
      * @return mixed[]
      */
-    public function getAudit($entity, $id): array
+    public function getAudit(string $entity, $id): array
     {
         $this->checkAuditable($entity);
         $this->checkRoles($entity, Security::VIEW_SCOPE);
@@ -281,34 +255,30 @@ class AuditReader
     /**
      * Returns the table name of $entity.
      *
-     * @param object|string $entity
+     * @param string $entity
      *
      * @return string
      */
-    public function getEntityTableName($entity): string
+    public function getEntityTableName(string $entity): string
     {
-        $entityName = \is_string($entity) ? $entity : \get_class($entity);
-
-        return $this->entityManager->getClassMetadata($entityName)->getTableName();
+        return $this->entityManager->getClassMetadata($entity)->getTableName();
     }
 
     /**
      * Returns the audit table name for $entity.
      *
-     * @param object|string $entity
+     * @param string $entity
      *
      * @return string
      */
-    public function getEntityAuditTableName($entity): string
+    public function getEntityAuditTableName(string $entity): string
     {
-        $entityName = \is_string($entity) ? $entity : \get_class($entity);
-
         $schema = '';
-        if ($this->entityManager->getClassMetadata($entityName)->getSchemaName()) {
-            $schema = $this->entityManager->getClassMetadata($entityName)->getSchemaName().'.';
+        if ($this->entityManager->getClassMetadata($entity)->getSchemaName()) {
+            $schema = $this->entityManager->getClassMetadata($entity)->getSchemaName().'.';
         }
 
-        return sprintf('%s%s%s%s', $schema, $this->configuration->getTablePrefix(), $this->getEntityTableName($entityName), $this->configuration->getTableSuffix());
+        return sprintf('%s%s%s%s', $schema, $this->configuration->getTablePrefix(), $this->getEntityTableName($entity), $this->configuration->getTableSuffix());
     }
 
     /**
@@ -364,7 +334,7 @@ class AuditReader
     /**
      * Returns an array of audited entries/operations.
      *
-     * @param object|string   $entity
+     * @param string          $entity
      * @param null|int|string $id
      * @param null|int        $page
      * @param null|int        $pageSize
@@ -376,10 +346,8 @@ class AuditReader
      *
      * @return QueryBuilder
      */
-    private function getAuditsQueryBuilder($entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, bool $strict = true): QueryBuilder
+    private function getAuditsQueryBuilder(string $entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, bool $strict = true): QueryBuilder
     {
-        $entityName = \is_string($entity) ? $entity : \get_class($entity);
-
         $this->checkAuditable($entity);
         $this->checkRoles($entity, Security::VIEW_SCOPE);
 
@@ -402,11 +370,11 @@ class AuditReader
             ->addOrderBy('id', 'DESC')
         ;
 
-        $metadata = $this->entityManager->getClassMetadata($entityName);
+        $metadata = $this->entityManager->getClassMetadata($entity);
         if ($strict && $metadata instanceof ORMMetadata && ORMMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $metadata->inheritanceType) {
             $queryBuilder
                 ->andWhere('discriminator = :discriminator')
-                ->setParameter('discriminator', \is_object($entity) ? \get_class($entity) : $entity)
+                ->setParameter('discriminator', $entity)
             ;
         }
 
@@ -427,11 +395,11 @@ class AuditReader
     /**
      * Throws an InvalidArgumentException if given entity is not auditable.
      *
-     * @param object|string $entity
+     * @param string $entity
      *
      * @throws InvalidArgumentException
      */
-    private function checkAuditable($entity): void
+    private function checkAuditable(string $entity): void
     {
         if (!$this->configuration->isAuditable($entity)) {
             throw new InvalidArgumentException('Entity '.$entity.' is not auditable.');
@@ -441,15 +409,13 @@ class AuditReader
     /**
      * Throws an AccessDeniedException if user not is granted to access audits for the given entity.
      *
-     * @param object|string $entity
-     * @param string        $scope
+     * @param string $entity
+     * @param string $scope
      *
      * @throws AccessDeniedException
      */
-    private function checkRoles($entity, string $scope): void
+    private function checkRoles(string $entity, string $scope): void
     {
-        $entityName = \is_string($entity) ? $entity : \get_class($entity);
-
         $userProvider = $this->configuration->getUserProvider();
         $user = null === $userProvider ? null : $userProvider->getUser();
         $security = null === $userProvider ? null : $userProvider->getSecurity();
@@ -461,18 +427,18 @@ class AuditReader
 
         $entities = $this->configuration->getEntities();
 
-        if (!isset($entities[$entityName]['roles']) || null === $entities[$entityName]['roles']) {
+        if (!isset($entities[$entity]['roles']) || null === $entities[$entity]['roles']) {
             // If no roles are configured, consider access granted
             return;
         }
 
-        if (!isset($entities[$entityName]['roles'][$scope]) || null === $entities[$entityName]['roles'][$scope]) {
+        if (!isset($entities[$entity]['roles'][$scope]) || null === $entities[$entity]['roles'][$scope]) {
             // If no roles for the given scope are configured, consider access granted
             return;
         }
 
         // roles are defined for the give scope
-        foreach ($entities[$entityName]['roles'][$scope] as $role) {
+        foreach ($entities[$entity]['roles'][$scope] as $role) {
             if ($security->isGranted($role)) {
                 // role granted => access granted
                 return;
@@ -480,6 +446,6 @@ class AuditReader
         }
 
         // access denied
-        throw new AccessDeniedException('You are not allowed to access audits of '.$entityName.' entity.');
+        throw new AccessDeniedException('You are not allowed to access audits of '.$entity.' entity.');
     }
 }

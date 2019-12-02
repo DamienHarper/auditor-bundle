@@ -216,16 +216,6 @@ final class AuditReaderTest extends CoreTest
         self::assertTrue($pager['haveToPaginate'], 'pager has to paginate.');
     }
 
-    public function testGetAuditsCount(): void
-    {
-        $reader = $this->getReader($this->getAuditConfiguration());
-
-        /** @var AuditEntry[] $audits */
-        $count = $reader->getAuditsCount(Author::class, null);
-
-        self::assertSame(5, $count, 'count is ok.');
-    }
-
     /**
      * @depends testGetAudits
      */
