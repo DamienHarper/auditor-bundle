@@ -88,7 +88,7 @@ the viewer to display audits of an entity. It has to be included in the entity c
  * @ORM\Entity
  *
  * @Audit\Auditable
- * @Audit\Security(roles={"ROLE1", "ROLE2"})
+ * @Audit\Security(view={"ROLE1", "ROLE2"})
  */
 class MyEntity
 {
@@ -101,7 +101,7 @@ class MyEntity
 }
 ```
 The above example makes the audit viewer allow access (viewing) to `MyEntity` audits if 
-the logged in user is granted either `ROLE1` or `ROLE2`
+the logged in user is granted either `ROLE1` or `ROLE2`.
 
 
 ### Example using annotations
@@ -117,7 +117,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  *
  * @Audit\Auditable
- * @Audit\Security(roles={"ROLE1", "ROLE2"})
+ * @Audit\Security(view={"ROLE1", "ROLE2"})
  */
 class AuditedEntity
 {
