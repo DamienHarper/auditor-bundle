@@ -12,21 +12,21 @@ class Paginator implements Countable, IteratorAggregate
     /**
      * @var QueryBuilder
      */
-    private $query;
+    private $queryBuilder;
 
     /**
      * @var int
      */
     private $count;
 
-    public function __construct($query)
+    public function __construct($queryBuilder)
     {
-        $this->query = $query;
+        $this->queryBuilder = $queryBuilder;
     }
 
     public function count()
     {
-        $queryBuilder = $this->cloneQuery($this->query);
+        $queryBuilder = $this->cloneQuery($this->queryBuilder);
 
         $result = $queryBuilder
             ->resetQueryPart('select')
@@ -45,10 +45,10 @@ class Paginator implements Countable, IteratorAggregate
 
     public function getIterator()
     {
-        $offset = $this->query->getFirstResult();
-        $length = $this->query->getMaxResults();
+        $offset = $this->queryBuilder->getFirstResult();
+        $length = $this->queryBuilder->getMaxResults();
 
-        $result = $this->cloneQuery($this->query)
+        $result = $this->cloneQuery($this->queryBuilder)
             ->setMaxResults($length)
             ->setFirstResult($offset)
             ->execute()
@@ -58,11 +58,11 @@ class Paginator implements Countable, IteratorAggregate
         return new ArrayIterator($result);
     }
 
-    private function cloneQuery(QueryBuilder $query): QueryBuilder
+    private function cloneQuery(QueryBuilder $queryBuilder): QueryBuilder
     {
         /** @var QueryBuilder $cloneQuery */
-        $cloneQuery = clone $query;
-        $cloneQuery->setParameters($query->getParameters());
+        $cloneQuery = clone $queryBuilder;
+        $cloneQuery->setParameters($queryBuilder->getParameters());
 
         return $cloneQuery;
     }

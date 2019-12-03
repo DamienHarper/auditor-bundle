@@ -1,0 +1,84 @@
+{% macro render(entity, paginator, proximity = 3, displayedPages = 10) %}
+    {% if paginator.haveToPaginate %}
+        {% set start = paginator.currentPage - proximity %}
+        {% set end = paginator.currentPage + proximity %}
+        {% if start < 1 %}
+            {% set end = min(end + (1 - start), paginator.numPages) %}
+            {% set start = 1 %}
+        {% endif %}
+        {% if end > paginator.numPages %}
+            {% set start = max(start - (end - paginator.numPages), 1) %}
+            {% set end = paginator.numPages %}
+        {% endif %}
+
+        <nav class="float-right">
+            <ul class="pagination">
+                {{ _self.first(entity, paginator) }}
+                {{ _self.previous(entity, paginator) }}
+                {{ _self.dotsIfStartIsOver3(entity, paginator, start) }}
+                {{ _self.pages(entity, paginator, start, end) }}
+                {{ _self.dotsIfEndIsUnder3ToLast(entity, paginator, end) }}
+                {{ _self.next(entity, paginator) }}
+                {{ _self.last(entity, paginator) }}
+            </ul>
+        </nav>
+    {% endif %}
+{% endmacro render %}
+
+{% macro first(entity, paginator) %}
+    {% if paginator.hasPreviousPage %}
+        <li class="page-item"><a href="{{ path('dh_doctrine_audit_show_entity_history', {entity: entity, page: 1}) }}" class="page-link" rel="previous"><i class="fa fw fa-angle-double-left"></i> First</a></li>
+    {% else %}
+        <li class="page-item disabled"><span class="page-link"><i class="fa fw fa-angle-double-left"></i> First</span></li>
+    {% endif %}
+{% endmacro first %}
+
+{% macro previous(entity, paginator) %}
+    {% if paginator.hasPreviousPage %}
+        <li class="page-item"><a href="{{ path('dh_doctrine_audit_show_entity_history', {entity: entity, page: paginator.previousPage}) }}" class="page-link" rel="previous"><i class="fa fw fa-angle-left"></i> Previous</a></li>
+    {% else %}
+        <li class="page-item disabled"><span class="page-link"><i class="fa fw fa-angle-left"></i> Previous</span></li>
+    {% endif %}
+{% endmacro previous %}
+
+{% macro dotsIfStartIsOver3(entity, paginator, start) %}
+    {% if start > 1 %}
+        <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+    {% endif %}
+{% endmacro dotsIfStartIsOver3 %}
+
+{% macro pages(entity, paginator, start, end) %}
+    {% for i in start..end %}
+        {{ _self.page(entity, paginator, i) }}
+    {% endfor %}
+{% endmacro pages %}
+
+{% macro dotsIfEndIsUnder3ToLast(entity, paginator, end) %}
+    {% if end < paginator.numPages %}
+        <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+    {% endif %}
+{% endmacro dotsIfEndIsUnder3ToLast %}
+
+{% macro next(entity, paginator) %}
+    {% if paginator.hasNextPage %}
+        <li class="page-item"><a href="{{ path('dh_doctrine_audit_show_entity_history', {entity: entity, page: paginator.nextPage}) }}" class="page-link" rel="next">Next <i class="fa fw fa-angle-right"></i></a></li>
+    {% else %}
+        <li class="page-item disabled"><span class="page-link">Next <i class="fa fw fa-angle-right"></i></span></li>
+    {% endif %}
+{% endmacro next %}
+
+{% macro last(entity, paginator) %}
+    {% if paginator.hasNextPage %}
+        <li class="page-item"><a href="{{ path('dh_doctrine_audit_show_entity_history', {entity: entity, page: paginator.numPages}) }}" class="page-link" rel="previous">Last <i class="fa fw fa-angle-double-right"></i></a></li>
+    {% else %}
+        <li class="page-item disabled"><span class="page-link">Last <i class="fa fw fa-angle-double-right"></i></span></li>
+    {% endif %}
+{% endmacro last %}
+
+{% macro page(entity, paginator, page) %}
+    {% if page == paginator.currentPage %}
+        <li class="page-item active"><span class="page-link">{{ page }} <span class="sr-only">(current)</span></span></li>
+    {% else %}
+        <li class="page-item"><a href="{{ path('dh_doctrine_audit_show_entity_history', {entity: entity, page: page}) }}" class="page-link">{{ page }}</a></li>
+    {% endif %}
+{% endmacro page %}
