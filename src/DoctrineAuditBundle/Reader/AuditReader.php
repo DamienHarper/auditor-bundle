@@ -189,18 +189,12 @@ class AuditReader
      */
     public function getAuditsPager(string $entity, $id = null, int $page = 1, int $pageSize = self::PAGE_SIZE): array
     {
-        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id);
-
-        $currentPage = $page < 1 ? 1 : $page;
-        $firstResult = ($currentPage - 1) * $pageSize;
-
-        $queryBuilder
-            ->setFirstResult($firstResult)
-            ->setMaxResults($pageSize)
-        ;
+        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id, $page, $pageSize);
 
         $paginator = new Paginator($queryBuilder);
         $numResults = $paginator->count();
+
+        $currentPage = $page < 1 ? 1 : $page;
         $hasPreviousPage = $currentPage > 1;
         $hasNextPage = ($currentPage * $pageSize) < $numResults;
 
