@@ -39,10 +39,10 @@
     "symfony/var-dumper": "^4.2|^5.0",
     "twig/extensions": "^1.5",
     "friendsofphp/php-cs-fixer": "^2.15",
-    "phpstan/phpstan-doctrine": "^0.11",
-    "phpstan/phpstan-strict-rules": "^0.11",
-    "phpstan/phpstan-symfony": "^0.11",
-    "phpstan/phpstan-shim": "^0.11"
+    "phpstan/phpstan-doctrine": "^0.12",
+    "phpstan/phpstan-strict-rules": "^0.12",
+    "phpstan/phpstan-symfony": "^0.12",
+    "phpstan/phpstan": "^0.12"
   },
   "scripts": {
     "test": "php -d pcov.enabled=1 ./vendor/bin/phpunit",
