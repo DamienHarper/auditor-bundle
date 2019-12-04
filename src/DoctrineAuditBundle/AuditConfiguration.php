@@ -77,6 +77,9 @@ class AuditConfiguration
      */
     private $is_pre43_dispatcher;
 
+    /**
+     * @var bool
+     */
     private $annotationLoaded = false;
 
     public function __construct(

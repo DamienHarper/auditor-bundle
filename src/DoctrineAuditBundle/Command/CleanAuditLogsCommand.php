@@ -23,6 +23,9 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
 
     protected static $defaultName = 'audit:clean';
 
+    /**
+     * @var ContainerInterface
+     */
     private $container;
 
     public function setContainer(?ContainerInterface $container = null): void

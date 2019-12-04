@@ -21,6 +21,9 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
 
     protected static $defaultName = 'audit:schema:update';
 
+    /**
+     * @var ContainerInterface
+     */
     private $container;
 
     public function setContainer(?ContainerInterface $container = null): void
