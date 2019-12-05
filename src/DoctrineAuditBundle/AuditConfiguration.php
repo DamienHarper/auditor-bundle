@@ -6,6 +6,7 @@ use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
 use DH\DoctrineAuditBundle\User\UserProviderInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use ReflectionException;
 use ReflectionMethod;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -38,12 +39,12 @@ class AuditConfiguration
     private $timezone;
 
     /**
-     * @var array
+     * @var array<string>
      */
     private $ignoredColumns = [];
 
     /**
-     * @var array
+     * @var array<string, array>
      */
     private $entities = [];
 
@@ -82,6 +83,19 @@ class AuditConfiguration
      */
     private $annotationLoaded = false;
 
+    /**
+     * AuditConfiguration constructor.
+     *
+     * @param array{enabled: bool, table_prefix: string, table_suffix: string, timezone: string, ignored_columns: array, entities: array}     $config
+     * @param UserProviderInterface    $userProvider
+     * @param RequestStack             $requestStack
+     * @param FirewallMap              $firewallMap
+     * @param EntityManagerInterface   $entityManager
+     * @param null|AnnotationLoader    $annotationLoader
+     * @param EventDispatcherInterface $dispatcher
+     *
+     * @throws ReflectionException
+     */
     public function __construct(
         array $config,
         UserProviderInterface $userProvider,
@@ -127,7 +141,7 @@ class AuditConfiguration
      * This method completely overrides entities configuration
      * including annotation configuration
      *
-     * @param array $entities
+     * @param array<string, array> $entities
      */
     public function setEntities(array $entities): void
     {
@@ -297,7 +311,7 @@ class AuditConfiguration
     /**
      * Get the value of excludedColumns.
      *
-     * @return array
+     * @return array<string>
      */
     public function getIgnoredColumns(): array
     {

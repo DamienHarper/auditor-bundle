@@ -25,6 +25,9 @@ class AnnotationLoader
         $this->reader = new AnnotationReader();
     }
 
+    /**
+     * @return array<string, array>
+     */
     public function load(): array
     {
         $configuration = [];
@@ -40,6 +43,11 @@ class AnnotationLoader
         return $configuration;
     }
 
+    /**
+     * @param ClassMetadata $metadata
+     *
+     * @return null|array<string, array<int|string, string>|bool|null>
+     */
     private function getEntityConfiguration(ClassMetadata $metadata): ?array
     {
         $reflection = $metadata->getReflectionClass();
