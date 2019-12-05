@@ -1,0 +1,17 @@
+{% macro dump(value, separator) %}
+    {% deprecated 'The "@DHDoctrineAudit/Audit/helper.html.twig" template is deprecated and will be removed in 4.0.0, use "@DHDoctrineAudit/Audit/helpers/helper.html.twig" instead.' %}
+    {% import "@DHDoctrineAudit/Audit/helpers/helper.html.twig" as new_helper %}
+    {{ new_helper.dump(value, separator) }}
+{% endmacro dump %}
+
+{% macro namespaceToParam(entity) %}
+    {% deprecated 'The "@DHDoctrineAudit/Audit/helper.html.twig" template is deprecated and will be removed in 4.0.0, use "@DHDoctrineAudit/Audit/helpers/helper.html.twig" instead.' %}
+    {% import "@DHDoctrineAudit/Audit/helpers/helper.html.twig" as new_helper %}
+    {{ new_helper.namespaceToParam(entity) }}
+{% endmacro namespaceToParam %}
+
+{% macro humanize(entity, entry) %}
+    {% deprecated 'The "@DHDoctrineAudit/Audit/helper.html.twig" template is deprecated and will be removed in 4.0.0, use "@DHDoctrineAudit/Audit/helpers/helper.html.twig" instead.' %}
+    {% import "@DHDoctrineAudit/Audit/helpers/helper.html.twig" as new_helper %}
+    {{ new_helper.humanize(entity, entry) }}
+{% endmacro %}
