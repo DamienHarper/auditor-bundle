@@ -1,0 +1,23 @@
+{% macro badge(text, type) %}
+    {% deprecated 'The "@DHDoctrineAudit/Audit/bootstrap.html.twig" template is deprecated and will be removed in 4.0.0, use "@DHDoctrineAudit/Audit/helpers/bootstrap.html.twig" instead.' %}
+    {% import "@DHDoctrineAudit/Audit/helpers/bootstrap.html.twig" as new_bootstrap %}
+    {{ new_bootstrap.badge(text, type) }}
+{% endmacro %}
+
+{% macro text(text, type) %}
+    {% deprecated 'The "@DHDoctrineAudit/Audit/bootstrap.html.twig" template is deprecated and will be removed in 4.0.0, use "@DHDoctrineAudit/Audit/helpers/bootstrap.html.twig" instead.' %}
+    {% import "@DHDoctrineAudit/Audit/helpers/bootstrap.html.twig" as new_bootstrap %}
+    {{ new_bootstrap.text(text, type) }}
+{% endmacro %}
+
+{% macro label_type(value) %}
+    {% deprecated 'The "@DHDoctrineAudit/Audit/bootstrap.html.twig" template is deprecated and will be removed in 4.0.0, use "@DHDoctrineAudit/Audit/helpers/bootstrap.html.twig" instead.' %}
+    {% import "@DHDoctrineAudit/Audit/helpers/bootstrap.html.twig" as new_bootstrap %}
+    {{ new_bootstrap.label_type(value) }}
+{% endmacro %}
+
+{% macro icon_type(value) %}
+    {% deprecated 'The "@DHDoctrineAudit/Audit/bootstrap.html.twig" template is deprecated and will be removed in 4.0.0, use "@DHDoctrineAudit/Audit/helpers/bootstrap.html.twig" instead.' %}
+    {% import "@DHDoctrineAudit/Audit/helpers/bootstrap.html.twig" as new_bootstrap %}
+    {{ new_bootstrap.icon_type(value) }}
+{% endmacro %}
