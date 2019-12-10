@@ -8,7 +8,6 @@ use DH\DoctrineAuditBundle\Manager\AuditManager;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
 use Doctrine\Bundle\DoctrineBundle\Registry;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -49,7 +48,7 @@ final class UpdateSchemaCommandTest extends CoreTest
         self::assertStringContainsString('The command is already running in another process.', $output);
     }
 
-    protected function createCommand(): Command
+    protected function createCommand(): UpdateSchemaCommand
     {
         $this->fixturesPath = __DIR__.'/../Fixtures';
 
