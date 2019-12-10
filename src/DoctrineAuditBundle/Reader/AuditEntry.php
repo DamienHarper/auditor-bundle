@@ -59,17 +59,26 @@ class AuditEntry
      */
     protected $created_at;
 
-    public function __set($name, $value): void
+    /**
+     * @param string          $name
+     * @param null|int|string $value
+     */
+    public function __set(string $name, $value): void
     {
         $this->{$name} = $value;
     }
 
-    public function __get($name)
+    /**
+     * @param string $name
+     *
+     * @return null|int|string
+     */
+    public function __get(string $name)
     {
         return $this->{$name};
     }
 
-    public function __isset($name)
+    public function __isset(string $name): bool
     {
         return property_exists($this, $name);
     }

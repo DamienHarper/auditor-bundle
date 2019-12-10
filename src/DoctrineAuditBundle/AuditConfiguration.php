@@ -39,12 +39,12 @@ class AuditConfiguration
     private $timezone;
 
     /**
-     * @var array<string>
+     * @var array
      */
     private $ignoredColumns = [];
 
     /**
-     * @var array<string, array>
+     * @var array
      */
     private $entities = [];
 
@@ -86,7 +86,7 @@ class AuditConfiguration
     /**
      * AuditConfiguration constructor.
      *
-     * @param array{enabled: bool, table_prefix: string, table_suffix: string, timezone: string, ignored_columns: array, entities: array}     $config
+     * @param array                    $config
      * @param UserProviderInterface    $userProvider
      * @param RequestStack             $requestStack
      * @param FirewallMap              $firewallMap

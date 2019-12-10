@@ -26,7 +26,7 @@ class AnnotationLoader
     }
 
     /**
-     * @return array<string, array>
+     * @return array
      */
     public function load(): array
     {
@@ -46,7 +46,7 @@ class AnnotationLoader
     /**
      * @param ClassMetadata $metadata
      *
-     * @return null|array<string, array<int|string, string>|bool|null>
+     * @return null|array
      */
     private function getEntityConfiguration(ClassMetadata $metadata): ?array
     {

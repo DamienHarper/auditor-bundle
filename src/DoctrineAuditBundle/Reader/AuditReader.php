@@ -447,18 +447,22 @@ class AuditReader
 
         $entities = $this->configuration->getEntities();
 
-        if (!isset($entities[$entity]['roles']) || null === $entities[$entity]['roles']) {
+        $roles = $entities[$entity]['roles'] ?? null;
+
+        if (null === $roles) {
             // If no roles are configured, consider access granted
             return;
         }
 
-        if (!isset($entities[$entity]['roles'][$scope]) || null === $entities[$entity]['roles'][$scope]) {
+        $scope = $roles[$scope] ?? null;
+
+        if (null === $scope) {
             // If no roles for the given scope are configured, consider access granted
             return;
         }
 
         // roles are defined for the give scope
-        foreach ($entities[$entity]['roles'][$scope] as $role) {
+        foreach ($scope as $role) {
             if ($security->isGranted($role)) {
                 // role granted => access granted
                 return;

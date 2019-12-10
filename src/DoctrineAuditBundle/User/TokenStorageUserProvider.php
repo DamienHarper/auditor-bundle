@@ -65,6 +65,9 @@ class TokenStorageUserProvider implements UserProviderInterface
         return $this->security;
     }
 
+    /**
+     * @return null|object|string
+     */
     private function getImpersonatorUser()
     {
         $token = $this->security->getToken();

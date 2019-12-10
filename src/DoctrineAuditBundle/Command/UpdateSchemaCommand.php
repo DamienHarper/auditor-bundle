@@ -7,6 +7,7 @@ use DH\DoctrineAuditBundle\Manager\AuditManager;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
+use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -22,7 +23,7 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
     protected static $defaultName = 'audit:schema:update';
 
     /**
-     * @var ContainerInterface
+     * @var null|ContainerInterface
      */
     private $container;
 
@@ -48,6 +49,10 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        if (null === $this->container) {
+            throw new RuntimeException('No container.');
+        }
+
         if (!$this->lock()) {
             $output->writeln('The command is already running in another process.');
 

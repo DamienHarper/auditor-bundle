@@ -19,12 +19,12 @@ class Paginator implements Countable, IteratorAggregate
      */
     private $count;
 
-    public function __construct($queryBuilder)
+    public function __construct(QueryBuilder $queryBuilder)
     {
         $this->queryBuilder = $queryBuilder;
     }
 
-    public function count()
+    public function count(): int
     {
         $queryBuilder = $this->cloneQuery($this->queryBuilder);
 
