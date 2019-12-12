@@ -21,8 +21,8 @@ final class DoctrineHelperTest extends TestCase
      */
     public function testGetRealName(): void
     {
-        self::assertNotSame('Post', DoctrineHelper::getRealClass(Post::class));
-        self::assertSame(Post::class, DoctrineHelper::getRealClass(Post::class));
-        self::assertSame(Post::class, DoctrineHelper::getRealClass(DoctrineHelper::generateProxyClassName(Post::class, mb_substr(Post::class, 0, mb_strrpos(Post::class, '\\')))));
+        self::assertNotSame('Post', DoctrineHelper::getRealClassName(Post::class));
+        self::assertSame(Post::class, DoctrineHelper::getRealClassName(Post::class));
+        self::assertSame(Post::class, DoctrineHelper::getRealClassName(DoctrineHelper::generateProxyClassName(Post::class, mb_substr(Post::class, 0, mb_strrpos(Post::class, '\\')))));
     }
 }
