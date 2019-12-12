@@ -1,6 +1,5 @@
 language: php
-
-sudo: false
+os: linux
 
 branches:
     only:
@@ -14,7 +13,7 @@ php:
     - 7.1
     - 7.2
     - 7.3
-    - 7.4snapshot
+    - 7.4
 
 env:
     - DB=mysql
@@ -45,5 +44,5 @@ script:
 after_script:
     - if [ $(phpenv version-name) = "7.3" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi
 
-matrix:
+jobs:
     fast_finish: true
