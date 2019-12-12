@@ -8,6 +8,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
+use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,6 +24,9 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
 
     protected static $defaultName = 'audit:clean';
 
+    /**
+     * @var null|ContainerInterface
+     */
     private $container;
 
     public function setContainer(?ContainerInterface $container = null): void
@@ -47,6 +51,10 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        if (null === $this->container) {
+            throw new RuntimeException('No container.');
+        }
+
         if (!$this->lock()) {
             $output->writeln('The command is already running in another process.');
 

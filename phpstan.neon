@@ -5,6 +5,8 @@ includes:
 parameters:
     level: max
     inferPrivatePropertyTypeFromConstructor: true
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
 
     excludes_analyse:
         - '%currentWorkingDirectory%/src/DoctrineAuditBundle/DependencyInjection/Configuration.php'

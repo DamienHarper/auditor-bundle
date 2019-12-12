@@ -17,6 +17,7 @@ final class Security extends Annotation
     public const VIEW_SCOPE = 'view';
 
     /**
+     * @var string
      * @Required
      */
     public $view;
