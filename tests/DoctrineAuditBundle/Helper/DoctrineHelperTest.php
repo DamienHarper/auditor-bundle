@@ -11,18 +11,12 @@ use PHPUnit\Framework\TestCase;
  */
 final class DoctrineHelperTest extends TestCase
 {
-    public function testGenerateProxyClassName(): void
-    {
-        self::assertSame('DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\__CG__\Post', DoctrineHelper::generateProxyClassName('Post', mb_substr(Post::class, 0, mb_strrpos(Post::class, '\\'))));
-    }
-
     /**
-     * @depends testGenerateProxyClassName
+     * 
      */
     public function testGetRealName(): void
     {
         self::assertNotSame('Post', DoctrineHelper::getRealClassName(Post::class));
         self::assertSame(Post::class, DoctrineHelper::getRealClassName(Post::class));
-        self::assertSame(Post::class, DoctrineHelper::getRealClassName(DoctrineHelper::generateProxyClassName(Post::class, mb_substr(Post::class, 0, mb_strrpos(Post::class, '\\')))));
     }
 }
