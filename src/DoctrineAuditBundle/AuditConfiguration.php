@@ -192,7 +192,7 @@ class AuditConfiguration
      */
     public function isAuditable($entity): bool
     {
-        $class = DoctrineHelper::getRealClass($entity);
+        $class = DoctrineHelper::getRealClassName($entity);
 
         // is $entity part of audited entities?
         if (!\array_key_exists($class, $this->getEntities())) {
@@ -216,7 +216,7 @@ class AuditConfiguration
             return false;
         }
 
-        $class = DoctrineHelper::getRealClass($entity);
+        $class = DoctrineHelper::getRealClassName($entity);
 
         // is $entity part of audited entities?
         if (!\array_key_exists($class, $this->getEntities())) {
@@ -260,7 +260,7 @@ class AuditConfiguration
             return false;
         }
 
-        $class = DoctrineHelper::getRealClass($entity);
+        $class = DoctrineHelper::getRealClassName($entity);
         $entityOptions = $this->getEntities()[$class];
 
         if (null === $entityOptions) {
