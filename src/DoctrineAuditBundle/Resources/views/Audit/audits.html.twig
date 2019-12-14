@@ -8,15 +8,15 @@
     <div class="card-body">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item active"><a href="{{ path('dh_doctrine_audit_list_audits') }}">Home</a></li>
+                <li class="breadcrumb-item active"><a href="{{ path('dh_doctrine_audit_list_audits') }}">{% trans %}home{% endtrans %}</a></li>
             </ol>
         </nav>
-        <h4 class="card-title">{{ audited|length }} audited entities</h4>
+        <h4 class="card-title">{{ audited|length }} {% trans %}audited_entities{% endtrans %}</h4>
         <table class="table table-hover">
             <thead class="thead-dark">
-            <th>Entity</th>
-            <th>Table</th>
-            <th>Activity</th>
+            <th>{% trans %}entity{% endtrans %}</th>
+            <th>{% trans %}table{% endtrans %}</th>
+            <th>{% trans %}activity{% endtrans %}</th>
             <th width="10%"></th>
             </thead>
             <tbody>
@@ -26,7 +26,7 @@
                     <td>{{ table|escape }}</td>
                     <td>{{ bootstrap.badge(reader.getAuditsCount(entity) ~ ' operations') }}</td>
                     <td>
-                        <a href="{{ path('dh_doctrine_audit_show_entity_history', {'entity': helper.namespaceToParam(entity)}) }}">View audits</a>
+                        <a href="{{ path('dh_doctrine_audit_show_entity_history', {'entity': helper.namespaceToParam(entity)}) }}">{% trans %}view_audit{% endtrans %}</a>
                     </td>
                 </tr>
             {% endfor %}
