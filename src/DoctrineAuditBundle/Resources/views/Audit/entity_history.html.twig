@@ -9,7 +9,7 @@
     <div class="card-body">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_list_audits') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_list_audits') }}">{% trans %}audit.header.home{% endtrans %}</a></li>
                 <li class="breadcrumb-item {% if id is null %}active{% endif %}" aria-current="page"><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': helper.namespaceToParam(entity) }) }}">{{ entity }}</a></li>
                 {% if id is not null %}
                 <li class="breadcrumb-item active" aria-current="page"><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': helper.namespaceToParam(entity), 'id': id }) }}">{{ entity }}#{{ id }}</a></li>
@@ -17,7 +17,7 @@
             </ol>
         </nav>
 
-        <h4 class="card-title float-left"><code>{{ entity }}{% if id is not null %}#{{ id }}{% endif %}</code> <em>(most recent first)</em></h4>
+        <h4 class="card-title float-left"><code>{{ entity }}{% if id is not null %}#{{ id }}{% endif %}</code> <em>{% trans %}audit.audit_details.most_recent{% endtrans %}</em></h4>
         <h5 class="float-right">{{ bootstrap.badge(paginator.results|length ~ ' operations', 'primary') }}</h5>
 
         <div class="timeline-centered">

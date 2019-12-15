@@ -1,0 +1,24 @@
+audit:
+  header:
+    home: Home
+    audited_entities: entidades auditadas
+  table_headers:
+    entity: Entidad
+    table: Tabla
+    activity: Actividad
+  audit_details:
+    view_audit: Ver audit
+    most_recent:  (el más reciente primero)
+    entry_title: Ver todas las operaciones dentro de esta transacción
+    property: Propiedad
+    old_value: Viejo valor
+    new_value: Nuevo valor
+    transaction: Transacción
+    entity_per_entity: (entidad por entidad)
+  pager:
+    first: Primero
+    previous: Anterior
+    last: Ultimo
+    next: Siguente
+    current:  Actual
+
