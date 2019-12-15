@@ -62,7 +62,7 @@ class Paginator implements Countable, IteratorAggregate
     {
         /** @var QueryBuilder $cloneQuery */
         $cloneQuery = clone $queryBuilder;
-        $cloneQuery->setParameters($queryBuilder->getParameters());
+        $cloneQuery->setParameters($queryBuilder->getParameters(), $queryBuilder->getParameterTypes());
 
         return $cloneQuery;
     }
