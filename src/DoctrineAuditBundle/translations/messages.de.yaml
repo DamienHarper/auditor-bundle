@@ -1,18 +1,24 @@
-home: Home
-audited_entities: geprüfte Unternehmen
-entity: Einheit
-table: Tabelle
-activity: Aktivität
-view_audit: Audits anzeigen
-most_recent: (neueste zuerst)
-entry_title: Alle Operationen in dieser Transaktion anzeigen
-property: Eigentum
-old_value: Alter Wert
-new_value: Neuer Wert
-transaction: Transaktion
-entity_per_entity: (Entität pro Entität)
-first: Zuerst
-previous: Vorherige
-last: Letzte
-next: Weiter
-curreent:  aktuell
+audit:
+  header:
+    home: Home
+    audited_entities: geprüfte Unternehmen
+  tableHeaders:
+    entity: Einheit
+    table: Tabelle
+    activity: Aktivität
+  auditDetails:
+    view_audit: Audits anzeigen
+    most_recent: (neueste zuerst)
+    entry_title: Alle Operationen in dieser Transaktion anzeigen
+    property: Eigentum
+    old_value: Alter Wert
+    new_value: Neuer Wert
+    transaction: Transaktion
+    entity_per_entity: (Entität pro Entität)
+  pager:
+    first: Zuerst
+    previous: Vorherige
+    last: Letzte
+    next: Weiter
+    current: aktuell
+
