@@ -2,11 +2,11 @@ audit:
   header:
     home: Home
     audited_entities: entidades auditadas
-  tableHeaders:
+  table_headers:
     entity: Entidad
     table: Tabla
     activity: Actividad
-  auditDetails:
+  audit_details:
     view_audit: Ver audit
     most_recent:  (el más reciente primero)
     entry_title: Ver todas las operaciones dentro de esta transacción
