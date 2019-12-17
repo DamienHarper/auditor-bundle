@@ -49,5 +49,10 @@
     "test": "php -d pcov.enabled=1 ./vendor/bin/phpunit",
     "csfixer": "vendor/bin/php-cs-fixer fix --config=.php_cs --using-cache=no --verbose",
     "phpstan": "vendor/bin/phpstan analyse src"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "3.2.x-dev"
+    }
   }
 }
