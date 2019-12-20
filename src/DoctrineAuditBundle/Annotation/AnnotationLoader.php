@@ -3,9 +3,9 @@
 namespace DH\DoctrineAuditBundle\Annotation;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\Entity;
+use Doctrine\Persistence\Mapping\ClassMetadata;
 
 class AnnotationLoader
 {

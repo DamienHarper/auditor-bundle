@@ -2,7 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Twig\Extension;
 
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 

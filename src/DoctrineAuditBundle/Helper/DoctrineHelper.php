@@ -2,7 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Helper;
 
-use Doctrine\Common\Persistence\Proxy;
+use Doctrine\Persistence\Proxy;
 
 class DoctrineHelper
 {
