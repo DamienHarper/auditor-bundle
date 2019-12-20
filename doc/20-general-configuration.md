@@ -26,7 +26,7 @@ dh_doctrine_audit:
 
 
 ## Ignored properties (globally)
-By default, DoctrineAuditBundle audits every property of entities declared auditable (cf. [Audit Configuration](21-audit-configuration.md) section)
+By default, DoctrineAuditBundle audits every property of entities declared auditable (cf. [Audit Configuration](21-audit-configuration.md#ignore) section)
 But, you can define some properties to be always ignored by the audit process.
 
 ```yaml
@@ -38,10 +38,10 @@ dh_doctrine_audit:
 
 
 ## Enabling/Disabling audits (globally)
-By default, DoctrineAuditBundle audits every entity declared auditable (cf. [Audit Configuration](21-audit-configuration.md) section).
+By default, DoctrineAuditBundle audits every entity declared auditable (cf. [Audit Configuration](21-audit-configuration.md#auditable) section).
 
 It is however possible to disable audits by default. In this case, **nothing is audited** 
-until auditing is enabled [at runtime](25-enabling-disabling-audits#at-runtime-enabledisable).
+until auditing is enabled [at runtime](24-enabling-disabling-audits.md#at-runtime-enabledisable).
 
 ```yaml
 dh_doctrine_audit:
