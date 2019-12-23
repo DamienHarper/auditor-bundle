@@ -19,7 +19,7 @@ use ReflectionException;
 final class CreateSchemaListenerTest extends BaseTest
 {
     /**
-     * @throws \Doctrine\Common\Persistence\Mapping\MappingException
+     * @throws \Doctrine\Persistence\Mapping\MappingException
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\Tools\ToolsException
