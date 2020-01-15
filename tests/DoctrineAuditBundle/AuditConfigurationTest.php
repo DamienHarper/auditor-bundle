@@ -84,6 +84,29 @@ final class AuditConfigurationTest extends BaseTest
         self::assertFalse($configuration->isEnabled(), 'Disabled. Global enabled is set to false.');
     }
 
+    public function testEnabledViewerDefault(): void
+    {
+        $configuration = $this->getAuditConfiguration();
+
+        self::assertTrue($configuration->isEnabledViewer(), 'enableViewer enabled by default.');
+    }
+
+    public function testEnabledViewer(): void
+    {
+        $configuration = $this->getAuditConfiguration();
+        $configuration->enableViewer();
+
+        self::assertTrue($configuration->isEnabledViewer(), 'Enabled by default.');
+    }
+
+    public function testDisabledViewer(): void
+    {
+        $configuration = $this->getAuditConfiguration();
+        $configuration->disableViewer();
+
+        self::assertFalse($configuration->isEnabledViewer(), 'Disabled. Global enabledViewer enabled is set to false.');
+    }
+
     public function testGloballyIgnoredColumns(): void
     {
         $ignored = [
@@ -414,6 +437,7 @@ final class AuditConfigurationTest extends BaseTest
                 'ignored_columns' => [],
                 'entities' => [],
                 'enabled' => true,
+                'enabled_viewer' => true,
             ], $options),
             new TokenStorageUserProvider(new CoreSecurity($container)),
             new RequestStack(),

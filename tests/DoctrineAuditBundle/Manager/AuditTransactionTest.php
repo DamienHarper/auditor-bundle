@@ -53,6 +53,7 @@ final class AuditTransactionTest extends BaseTest
                 'ignored_columns' => [],
                 'entities' => [],
                 'enabled' => true,
+                'enabled_viewer' => true,
             ], $options),
             new TokenStorageUserProvider(new Security($container)),
             new RequestStack(),

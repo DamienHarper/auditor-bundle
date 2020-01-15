@@ -54,6 +54,11 @@ class AuditConfiguration
     private $enabled = true;
 
     /**
+     * @var bool
+     */
+    private $enabledViewer = true;
+
+    /**
      * @var FirewallMap
      */
     private $firewallMap;
@@ -117,6 +122,7 @@ class AuditConfiguration
         $this->is_pre43_dispatcher = 2 === \count($p) && 'event' !== $p[0]->name;
 
         $this->enabled = $config['enabled'];
+        $this->enabledViewer = $config['enabled_viewer'];
         $this->tablePrefix = $config['table_prefix'];
         $this->tableSuffix = $config['table_suffix'];
         $this->timezone = $config['timezone'];
@@ -181,6 +187,40 @@ class AuditConfiguration
     public function isEnabled(): bool
     {
         return $this->enabled;
+    }
+
+    /**
+     * enable audit Controller and its routing.
+     *
+     * @return $this
+     */
+    public function enableViewer(): self
+    {
+        $this->enabledViewer = true;
+
+        return $this;
+    }
+
+    /**
+     * disable audit Controller and its routing.
+     *
+     * @return $this
+     */
+    public function disableViewer(): self
+    {
+        $this->enabledViewer = false;
+
+        return $this;
+    }
+
+    /**
+     * Get enabled flag.
+     *
+     * @return bool
+     */
+    public function isEnabledViewer(): bool
+    {
+        return $this->enabledViewer;
     }
 
     /**

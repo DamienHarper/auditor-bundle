@@ -190,6 +190,7 @@ final class AuditHelperTest extends CoreTest
         $configuration = new AuditConfiguration(
             [
                 'enabled' => true,
+                'enabled_viewer' => true,
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
                 'timezone' => 'UTC',
@@ -254,6 +255,7 @@ final class AuditHelperTest extends CoreTest
         $configuration = new AuditConfiguration(
             [
                 'enabled' => true,
+                'enabled_viewer' => true,
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
                 'timezone' => 'UTC',
@@ -379,6 +381,7 @@ final class AuditHelperTest extends CoreTest
         $configuration = new AuditConfiguration(
             [
                 'enabled' => true,
+                'enabled_viewer' => true,
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
                 'timezone' => 'UTC',
@@ -411,6 +414,7 @@ final class AuditHelperTest extends CoreTest
         $configuration = new AuditConfiguration(
             [
                 'enabled' => true,
+                'enabled_viewer' => true,
                 'table_prefix' => '',
                 'table_suffix' => '_audit',
                 'timezone' => 'UTC',

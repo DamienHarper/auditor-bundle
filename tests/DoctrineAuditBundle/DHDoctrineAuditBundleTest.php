@@ -2,15 +2,18 @@
 
 namespace DH\DoctrineAuditBundle\Tests;
 
+use DH\DoctrineAuditBundle\Controller\AuditController;
 use DH\DoctrineAuditBundle\DependencyInjection\DHDoctrineAuditExtension;
 use DH\DoctrineAuditBundle\DHDoctrineAuditBundle;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Setup;
 use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\FrameworkBundle\Routing\AnnotatedRouteControllerLoader;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -51,6 +54,10 @@ final class DHDoctrineAuditBundleTest extends TestCase
         );
 
         $container->set('doctrine', $registry);
+
+        $reader = new AnnotationReader();
+        $routeLoaderAnnotation = new AnnotatedRouteControllerLoader($reader);
+        $container->set('routing.loader.annotation', $routeLoaderAnnotation);
 
         $security = new Security($container);
         $container->set('security.helper', $security);
@@ -111,6 +118,10 @@ final class DHDoctrineAuditBundleTest extends TestCase
 
         $container->set('doctrine', $registry);
 
+        $reader = new AnnotationReader();
+        $routeLoaderAnnotation = new AnnotatedRouteControllerLoader($reader);
+        $container->set('routing.loader.annotation', $routeLoaderAnnotation);
+
         $security = new Security($container);
         $container->set('security.helper', $security);
 
@@ -132,5 +143,122 @@ final class DHDoctrineAuditBundleTest extends TestCase
         $custom_em = $container->get('dh_doctrine_audit.reader')->getConfiguration()->getEntityManager();
 
         self::assertNotSame($custom_em, $default_em, 'AuditConfiguration entity manager is not the default one');
+    }
+
+    public function testDisableAuditViewerPassIsTrue(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new DHDoctrineAuditExtension();
+        $extension->load([
+            'dh_doctrine_audit' => [
+                'enabled_viewer' => true,
+            ],
+        ], $container);
+
+        // main connection and entity manager
+        $connection = new Connection([], $this->createMock(Driver::class));
+        $em1 = EntityManager::create($connection, Setup::createAnnotationMetadataConfiguration([__DIR__.'/Fixtures'], true));
+
+        $container->set('entity_manager', $em1);
+        $container->setAlias('doctrine.orm.default_entity_manager', 'entity_manager');
+
+        $registry = new Registry(
+            $container,
+            [],
+            [
+                'default' => 'entity_manager',
+            ],
+            'default',
+            'default'
+        );
+
+        $container->set('doctrine', $registry);
+
+        $reader = new AnnotationReader();
+        $routeLoaderAnnotation = new AnnotatedRouteControllerLoader($reader);
+        $container->set('routing.loader.annotation', $routeLoaderAnnotation);
+
+        $security = new Security($container);
+        $container->set('security.helper', $security);
+
+        $requestStack = new RequestStack();
+        $container->set('request_stack', $requestStack);
+
+        $firewallMap = new FirewallMap($container, []);
+        $container->set('security.firewall.map', $firewallMap);
+
+        $dispatcher = new EventDispatcher();
+        $container->set('event_dispatcher', $dispatcher);
+
+        $bundle = new DHDoctrineAuditBundle();
+        $def = $container->getDefinition(AuditController::class);
+        $def->setPublic(true);
+
+        $bundle->build($container);
+        $container->compile();
+
+        $configuration = $container->getParameter('dh_doctrine_audit.configuration');
+
+        self::assertTrue($configuration['enabled_viewer']);
+        self::assertTrue($container->hasDefinition(AuditController::class));
+    }
+
+    public function testDisableAuditViewerPassIsFalse(): void
+    {
+        $container = new ContainerBuilder();
+        $extension = new DHDoctrineAuditExtension();
+
+        $extension->load([
+            'dh_doctrine_audit' => [
+                'enabled_viewer' => false,
+            ],
+        ], $container);
+
+        // main connection and entity manager
+        $connection = new Connection([], $this->createMock(Driver::class));
+        $em1 = EntityManager::create($connection, Setup::createAnnotationMetadataConfiguration([__DIR__.'/Fixtures'], true));
+
+        $container->set('entity_manager', $em1);
+        $container->setAlias('doctrine.orm.default_entity_manager', 'entity_manager');
+
+        $registry = new Registry(
+            $container,
+            [],
+            [
+                'default' => 'entity_manager',
+            ],
+            'default',
+            'default'
+        );
+
+        $container->set('doctrine', $registry);
+
+        $reader = new AnnotationReader();
+        $routeLoaderAnnotation = new AnnotatedRouteControllerLoader($reader);
+        $container->set('routing.loader.annotation', $routeLoaderAnnotation);
+
+        $security = new Security($container);
+        $container->set('security.helper', $security);
+
+        $requestStack = new RequestStack();
+        $container->set('request_stack', $requestStack);
+
+        $firewallMap = new FirewallMap($container, []);
+        $container->set('security.firewall.map', $firewallMap);
+
+        $dispatcher = new EventDispatcher();
+        $container->set('event_dispatcher', $dispatcher);
+
+        $bundle2 = new DHDoctrineAuditBundle();
+        $def = $container->getDefinition(AuditController::class);
+        $def->setPublic(true);
+
+        $bundle2->build($container);
+        $container->compile();
+
+        $configuration = $container->getParameter('dh_doctrine_audit.configuration');
+
+        self::assertFalse($configuration['enabled_viewer']);
+        self::assertFalse($container->hasDefinition(AuditController::class));
     }
 }
