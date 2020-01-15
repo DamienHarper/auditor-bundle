@@ -1,0 +1,3 @@
+dh_doctrine_audit:
+    resource: "@DHDoctrineAuditBundle/Controller/"
+    type: audit_loader

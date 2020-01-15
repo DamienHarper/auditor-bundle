@@ -25,6 +25,10 @@ class Configuration implements ConfigurationInterface
                     ->defaultTrue()
                 ->end()
 
+                ->scalarNode('enabled_viewer')
+                    ->defaultTrue()
+                ->end()
+
                 ->scalarNode('storage_entity_manager')
                     ->cannotBeEmpty()
                     ->defaultNull()
