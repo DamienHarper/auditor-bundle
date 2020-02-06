@@ -49,6 +49,18 @@ dh_doctrine_audit:
 ```
 
 
+## Enabling/Disabling audit viewer
+DoctrineAuditBundle provides an [audit viewer](30-audit-viewer.md) letting you review the full history of any audited entity.
+This viewer is enabled by default and can be accessed at `/audit`. 
+
+It is however possible to disable the audit viewer.
+
+```yaml
+dh_doctrine_audit:
+    enabled_viewer: false
+```
+
+
 ## Storage Configuration
 By default, DoctrineAuditBundle stores audits in the same database than the tables mapped to entities.
 
