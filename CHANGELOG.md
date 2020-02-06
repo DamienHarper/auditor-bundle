@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2020-02-06
+### What's new
+* Add a configuration option for enabling/disabling audit viewer (thanks to @p365labs)
+* Add french, english, spanish, italian and german translations (thanks to @p365labs)
+
+### Changes
+* Fixed some Doctrine deprecations
+* Fixed pager when viewing a entity history with lots of entries
+* Fixed display of boolean values in the audit viewer
+* PHPStan fixes (thanks to @patrickmatsumura, @DamienHarper)
+* Documentation updates (thanks to @Jonathan-Lathiere, @DamienHarper)
+
+
 ## [3.2.3] - 2019-12-05
 
 ### Changes
