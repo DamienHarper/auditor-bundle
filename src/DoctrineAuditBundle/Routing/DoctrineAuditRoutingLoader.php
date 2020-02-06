@@ -11,8 +11,14 @@ use Symfony\Component\Routing\RouteCollection;
 
 class DoctrineAuditRoutingLoader extends Loader implements LoaderInterface
 {
+    /**
+     * @var AnnotatedRouteControllerLoader
+     */
     private $annotationLoader;
 
+    /**
+     * @var array
+     */
     private $configuration;
 
     public function load($resource, ?string $type = null): RouteCollection
@@ -35,7 +41,7 @@ class DoctrineAuditRoutingLoader extends Loader implements LoaderInterface
         $this->annotationLoader = $loader;
     }
 
-    public function setConfiguration(iterable $configuration): void
+    public function setConfiguration(array $configuration): void
     {
         $this->configuration = $configuration;
     }
