@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace DH\DoctrineAuditBundle\Routing;
 
+use DH\DoctrineAuditBundle\Controller\AuditController;
 use Symfony\Bundle\FrameworkBundle\Routing\AnnotatedRouteControllerLoader;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Config\Loader\LoaderInterface;
@@ -21,17 +20,17 @@ class DoctrineAuditRoutingLoader extends Loader implements LoaderInterface
      */
     private $configuration;
 
-    public function load($resource, ?string $type = null): RouteCollection
+    public function load($resource, $type = null): RouteCollection
     {
         $routeCollection = new RouteCollection();
         if (true === $this->configuration['enabled_viewer']) {
-            $routeCollection = $this->annotationLoader->load('DH\DoctrineAuditBundle\Controller\AuditController');
+            $routeCollection = $this->annotationLoader->load(AuditController::class);
         }
 
         return $routeCollection;
     }
 
-    public function supports($resource, ?string $type = null): bool
+    public function supports($resource, $type = null): bool
     {
         return 'audit_loader' === $type;
     }

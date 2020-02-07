@@ -21,3 +21,5 @@ parameters:
         - '~Cannot call method fetchColumn\(\) on Doctrine\\DBAL\\Driver\\Statement\|int~'
         - '~Cannot call method fetchAll\(\) on Doctrine\\DBAL\\Driver\\Statement\|int~'
         - '~Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required.~'
+        - '~Method DH\\DoctrineAuditBundle\\Routing\\DoctrineAuditRoutingLoader\:\:load\(\) has parameter \$type with no typehint specified.~'
+        - '~Method DH\\DoctrineAuditBundle\\Routing\\DoctrineAuditRoutingLoader\:\:supports\(\) has parameter \$type with no typehint specified.~'
