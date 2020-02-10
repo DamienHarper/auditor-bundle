@@ -45,7 +45,7 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
             ->setDescription('Cleans audit tables')
             ->setName(self::$defaultName)
             ->addOption('no-confirm', null, InputOption::VALUE_NONE, 'No interaction mode')
-            ->addArgument('keep', InputArgument::OPTIONAL, 'Keep last N months of audit.', '12')
+            ->addArgument('keep', InputArgument::OPTIONAL, 'Audits retention period (must be expressed as an ISO 8601 date interval, e.g. P12M to keep the last 12 months or P7D to keep the last 7 days).', 'P12M')
         ;
     }
 
@@ -63,16 +63,37 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
 
         $io = new SymfonyStyle($input, $output);
 
-        $keep = (int) $input->getArgument('keep');
-        if ($keep <= 0) {
-            $io->error("'keep' argument must be a positive number.");
-            $this->release();
+        if (is_numeric($input->getArgument('keep'))) {
+            $deprecationMessage = "Providing an integer value for the 'keep' argument is deprecated. Please use the ISO 8601 duration format (e.g. P12M).";
+            @\trigger_error($deprecationMessage, E_USER_DEPRECATED);
+            $io->writeln($deprecationMessage);
 
-            return 0;
+            $keep = (int) $input->getArgument('keep');
+
+            if ($keep <= 0) {
+                $io->error("'keep' argument must be a positive number.");
+                $this->release();
+    
+                return 0;
+            }
+
+            $until = new DateTime();
+            $until->modify('-'.$keep.' month');
+        } else {
+            $keep = strval($input->getArgument('keep'));
+
+            try {
+                $dateInterval = new \DateInterval($keep);
+            } catch (\Exception $e) {
+                $io->error(sprintf("'keep' argument must be a valid ISO 8601 date interval. '%s' given.", $keep));
+                $this->release();
+                
+                return 0;
+            }
+            
+            $until = new DateTime();
+            $until->sub($dateInterval);
         }
-
-        $until = new DateTime();
-        $until->modify('-'.$keep.' month');
 
         /**
          * @var AuditReader
@@ -87,8 +108,7 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
         $entities = $reader->getEntities();
 
         $message = sprintf(
-            "You are about to clean audits older than %d months (up to <comment>%s</comment>): %d entities involved.\n Do you want to proceed?",
-            $keep,
+            "You are about to clean audits created before <comment>%s</comment>: %d entities involved.\n Do you want to proceed?",
             $until->format('Y-m-d'),
             \count($entities)
         );
