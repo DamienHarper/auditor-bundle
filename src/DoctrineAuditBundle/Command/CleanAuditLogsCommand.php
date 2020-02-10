@@ -45,7 +45,7 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
             ->setDescription('Cleans audit tables')
             ->setName(self::$defaultName)
             ->addOption('no-confirm', null, InputOption::VALUE_NONE, 'No interaction mode')
-            ->addArgument('keep', InputArgument::OPTIONAL, 'Keep audits up to a date subtracted by a ISO 8601 date interval (e.g. P12M for 12 months or P7D for 7 days).', 'P12M')
+            ->addArgument('keep', InputArgument::OPTIONAL, 'Audits retention period (must be expressed as an ISO 8601 date interval, e.g. P12M to keep the last 12 months or P7D to keep the last 7 days).', 'P12M')
         ;
     }
 
