@@ -174,7 +174,38 @@ class AuditReader
         return $results;
     }
 
-    /**
+	/**
+	 * Returns an array of audited entries/operations.
+	 *
+	 * @param string          $entity
+	 * @param null|int|string $id
+	 * @param null|\DateTime  $startDate
+	 * @param null|\DateTime  $endDate
+	 * @param null|int        $page
+	 * @param null|int        $pageSize
+	 * @param null|string     $transactionHash
+	 * @param bool            $strict
+	 *
+	 * @throws AccessDeniedException
+	 * @throws InvalidArgumentException
+	 *
+	 * @return array
+	 */
+	public function getAuditsByDate(string $entity, $id = null, ?\DateTime $startDate = null, ?\DateTime $endDate = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, bool $strict = true): array
+	{
+		$this->checkAuditable($entity);
+		$this->checkRoles($entity, Security::VIEW_SCOPE);
+
+		$queryBuilder = $this->getAuditsQueryBuilder($entity, $id, $page, $pageSize, $transactionHash, $strict, $startDate, $endDate);
+
+		/** @var Statement $statement */
+		$statement = $queryBuilder->execute();
+		$statement->setFetchMode(PDO::FETCH_CLASS, AuditEntry::class);
+
+		return $statement->fetchAll();
+	}
+
+	/**
      * Returns an array of audited entries/operations.
      *
      * @param string          $entity
@@ -210,7 +241,7 @@ class AuditReader
         ];
     }
 
-    /**
+	/**
      * Returns the amount of audited entries/operations.
      *
      * @param string          $entity
@@ -333,6 +364,25 @@ class AuditReader
         return $queryBuilder;
     }
 
+	private function filterByDate(QueryBuilder $queryBuilder, \DateTime $startDate, ?\DateTime $endDate): QueryBuilder
+	{
+		if (null !== $startDate) {
+			$queryBuilder
+				->andWhere('created_at >= :start_date')
+				->setParameter('start_date', $startDate)
+			;
+		}
+
+		if (null !== $endDate) {
+			$queryBuilder
+				->andWhere('created_at <= :end_date')
+				->setParameter('end_date', $endDate)
+			;
+		}
+
+		return $queryBuilder;
+	}
+
     /**
      * @param QueryBuilder    $queryBuilder
      * @param null|int|string $id
@@ -360,22 +410,24 @@ class AuditReader
      * @param null|int        $pageSize
      * @param null|string     $transactionHash
      * @param bool            $strict
+     * @param null|\DateTime  $startDate
+     * @param null|\DateTime  $endDate
      *
      * @throws AccessDeniedException
      * @throws InvalidArgumentException
      *
      * @return QueryBuilder
      */
-    private function getAuditsQueryBuilder(string $entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, bool $strict = true): QueryBuilder
+    private function getAuditsQueryBuilder(string $entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, bool $strict = true, ?\DateTime $startDate = null, ?\DateTime $endDate = null): QueryBuilder
     {
         $this->checkAuditable($entity);
         $this->checkRoles($entity, Security::VIEW_SCOPE);
 
-        if (null !== $page && $page < 1) {
+        if (null !== $page && $page < 1 && null === $startDate) {
             throw new \InvalidArgumentException('$page must be greater or equal than 1.');
         }
 
-        if (null !== $pageSize && $pageSize < 1) {
+        if (null !== $pageSize && $pageSize < 1 && null === $startDate) {
             throw new \InvalidArgumentException('$pageSize must be greater or equal than 1.');
         }
 
@@ -401,6 +453,7 @@ class AuditReader
         $this->filterByObjectId($queryBuilder, $id);
         $this->filterByType($queryBuilder, $this->filters);
         $this->filterByTransaction($queryBuilder, $transactionHash);
+        $this->filterByDate($queryBuilder, $startDate, $endDate);
 
         if (null !== $pageSize) {
             $queryBuilder
