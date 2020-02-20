@@ -216,6 +216,36 @@ final class AuditReaderTest extends CoreTest
         self::assertTrue($pager['haveToPaginate'], 'pager has to paginate.');
     }
 
+	public function testGetAuditsByDate(): void
+	{
+		$reader = $this->getReader($this->getAuditConfiguration());
+
+		/** @var AuditEntry[] $audits */
+		$audits = $reader->getAuditsByDate(Author::class, null, new \DateTime('-1 day'), null);
+
+		$i = 0;
+		self::assertCount(5, $audits, 'result count is ok.');
+		self::assertSame(AuditReader::REMOVE, $audits[$i++]->getType(), 'entry'.$i.' is a remove operation.');
+		self::assertSame(AuditReader::UPDATE, $audits[$i++]->getType(), 'entry'.$i.' is an update operation.');
+		self::assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an insert operation.');
+		self::assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an insert operation.');
+		self::assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an insert operation.');
+
+		/** @var AuditEntry[] $audits */
+		$audits = $reader->getAuditsByDate(Author::class, null, new \DateTime('-5 days'), new \DateTime('-4 days'));
+
+		self::assertCount(0, $audits, 'result count is ok.');
+
+		/** @var AuditEntry[] $audits */
+		$audits = $reader->getAuditsByDate(Author::class, null, new \DateTime('-1 day'), null, 1, 2);
+
+		self::assertCount(2, $audits, 'result count is ok.');
+
+		$this->expectException(InvalidArgumentException::class);
+		$reader->getAudits(Post::class, null, 0, 50);
+		$reader->getAudits(Post::class, null, -1, 50);
+	}
+
     public function testGetAuditsCount(): void
     {
         $reader = $this->getReader($this->getAuditConfiguration());
