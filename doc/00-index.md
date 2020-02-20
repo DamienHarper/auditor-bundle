@@ -14,6 +14,7 @@
   * [Audit viewer](30-audit-viewer.md)
 * Advanced usage
   * [Audit events](40-audit-events.md)
+  * [Access audit entries](41-accessing-audit-entries.md)
 * Audit maintenance
   * [Audit cleanup](50-audits-cleanup.md)
 * Help
