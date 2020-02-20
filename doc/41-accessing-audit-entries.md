@@ -29,7 +29,7 @@ Note: Dates are inclusive.
 
 ```php
 $entityId = $entity->getId(); // Of type EntityObject, refer to your entity configured previously
-$startDate = new \DateTime('-1 week'); // Default
+$startDate = new \DateTime('-1 week');
 $endDate = new \DateTime('now'); // Optional
 
 $audits = $reader->getAuditsByDate(EntityObject::class, $entityId, $startDate, $endDate);
