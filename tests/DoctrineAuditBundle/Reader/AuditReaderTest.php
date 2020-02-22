@@ -242,8 +242,10 @@ final class AuditReaderTest extends CoreTest
 		self::assertCount(2, $audits, 'result count is ok.');
 
 		$this->expectException(InvalidArgumentException::class);
-		$reader->getAudits(Post::class, null, 0, 50);
-		$reader->getAudits(Post::class, null, -1, 50);
+		$reader->getAuditsByDate(Post::class, null, new \DateTime('-1 day'), new \DateTime('now'), 0, 50);
+		$reader->getAuditsByDate(Post::class, null, new \DateTime('-1 day'), new \DateTime('now'), -1, 50);
+		$reader->getAuditsByDate(Post::class, null, new \DateTime('now'), new \DateTime('-1 day'));
+
 	}
 
     public function testGetAuditsCount(): void

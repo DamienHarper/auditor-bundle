@@ -367,6 +367,10 @@ class AuditReader
 
     private function filterByDate(QueryBuilder $queryBuilder, ?DateTime $startDate, ?DateTime $endDate): QueryBuilder
     {
+    	if (null !== $startDate && null !== $endDate && $endDate < $startDate) {
+		    throw new \InvalidArgumentException('$endDate must be greater than $startDate.');
+	    }
+
         if (null !== $startDate) {
             $queryBuilder
                 ->andWhere('created_at >= :start_date')
@@ -424,11 +428,11 @@ class AuditReader
         $this->checkAuditable($entity);
         $this->checkRoles($entity, Security::VIEW_SCOPE);
 
-        if (null !== $page && $page < 1 && null === $startDate) {
+        if (null !== $page && $page < 1) {
             throw new \InvalidArgumentException('$page must be greater or equal than 1.');
         }
 
-        if (null !== $pageSize && $pageSize < 1 && null === $startDate) {
+        if (null !== $pageSize && $pageSize < 1) {
             throw new \InvalidArgumentException('$pageSize must be greater or equal than 1.');
         }
 
