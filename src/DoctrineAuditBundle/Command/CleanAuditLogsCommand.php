@@ -2,10 +2,12 @@
 
 namespace DH\DoctrineAuditBundle\Command;
 
+use DateInterval;
 use DateTime;
 use DH\DoctrineAuditBundle\Reader\AuditReader;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
 use Symfony\Component\Console\Exception\RuntimeException;
@@ -65,7 +67,7 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
 
         if (is_numeric($input->getArgument('keep'))) {
             $deprecationMessage = "Providing an integer value for the 'keep' argument is deprecated. Please use the ISO 8601 duration format (e.g. P12M).";
-            @\trigger_error($deprecationMessage, E_USER_DEPRECATED);
+            @trigger_error($deprecationMessage, E_USER_DEPRECATED);
             $io->writeln($deprecationMessage);
 
             $keep = (int) $input->getArgument('keep');
@@ -73,24 +75,24 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
             if ($keep <= 0) {
                 $io->error("'keep' argument must be a positive number.");
                 $this->release();
-    
+
                 return 0;
             }
 
             $until = new DateTime();
             $until->modify('-'.$keep.' month');
         } else {
-            $keep = strval($input->getArgument('keep'));
+            $keep = (string) ($input->getArgument('keep'));
 
             try {
-                $dateInterval = new \DateInterval($keep);
-            } catch (\Exception $e) {
+                $dateInterval = new DateInterval($keep);
+            } catch (Exception $e) {
                 $io->error(sprintf("'keep' argument must be a valid ISO 8601 date interval. '%s' given.", $keep));
                 $this->release();
-                
+
                 return 0;
             }
-            
+
             $until = new DateTime();
             $until->sub($dateInterval);
         }
