@@ -36,6 +36,7 @@ class AuditSubscriber implements EventSubscriberInterface
         $payload = $event->getPayload();
         $auditTable = $payload['table'];
         unset($payload['table']);
+        unset($payload['entity']);
 
         $fields = [
             'type' => ':type',

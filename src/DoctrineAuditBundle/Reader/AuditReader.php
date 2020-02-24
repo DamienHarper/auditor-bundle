@@ -180,8 +180,8 @@ class AuditReader
      *
      * @param string          $entity
      * @param null|int|string $id
-     * @param null|DateTime   $startDate - Expected in configured timezone
-     * @param null|DateTime   $endDate - Expected in configured timezone
+     * @param null|DateTime   $startDate       - Expected in configured timezone
+     * @param null|DateTime   $endDate         - Expected in configured timezone
      * @param null|int        $page
      * @param null|int        $pageSize
      * @param null|string     $transactionHash
@@ -367,9 +367,9 @@ class AuditReader
 
     private function filterByDate(QueryBuilder $queryBuilder, ?DateTime $startDate, ?DateTime $endDate): QueryBuilder
     {
-    	if (null !== $startDate && null !== $endDate && $endDate < $startDate) {
-		    throw new \InvalidArgumentException('$endDate must be greater than $startDate.');
-	    }
+        if (null !== $startDate && null !== $endDate && $endDate < $startDate) {
+            throw new \InvalidArgumentException('$endDate must be greater than $startDate.');
+        }
 
         if (null !== $startDate) {
             $queryBuilder
