@@ -26,3 +26,4 @@ parameters:
         - '~Call to an undefined method Symfony\\Component\\Security\\Core\\Authentication\\Token\\TokenInterface\:\:getRoles\(\)\.~'
         - '~Call to method getSource\(\) on an unknown class Symfony\\Component\\Security\\Core\\Role\\SwitchUserRole\.~'
         - '~Class Symfony\\Component\\Security\\Core\\Role\\SwitchUserRole not found\.~'
+        - '~Method DH\\DoctrineAuditBundle\\User\\UserInterface\:\:getId\(\) has no return typehint specified\.~'
