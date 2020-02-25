@@ -92,7 +92,7 @@ class AuditManager
             'id' => $this->helper->id($em, $entity),
             'transaction_hash' => $transactionHash,
             'discriminator' => ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $meta->inheritanceType ? \get_class($entity) : null,
-            'entity' => \get_class($entity),
+            'entity' => $meta->getName(),
         ]);
     }
 
@@ -124,7 +124,7 @@ class AuditManager
             'id' => $this->helper->id($em, $entity),
             'transaction_hash' => $transactionHash,
             'discriminator' => ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $meta->inheritanceType ? \get_class($entity) : null,
-            'entity' => \get_class($entity),
+            'entity' => $meta->getName(),
         ]);
     }
 
@@ -152,7 +152,7 @@ class AuditManager
             'id' => $id,
             'transaction_hash' => $transactionHash,
             'discriminator' => ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $meta->inheritanceType ? \get_class($entity) : null,
-            'entity' => \get_class($entity),
+            'entity' => $meta->getName(),
         ]);
     }
 
@@ -325,7 +325,7 @@ class AuditManager
             'id' => $this->helper->id($em, $source),
             'transaction_hash' => $transactionHash,
             'discriminator' => ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $meta->inheritanceType ? \get_class($source) : null,
-            'entity' => \get_class($source),
+            'entity' => $meta->getName(),
         ];
 
         if (isset($mapping['joinTable']['name'])) {
