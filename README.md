@@ -31,12 +31,12 @@ The official documentation can be found [here](doc/00-index.md).
 
 
 ## Version Information
- Version   | Status                  | Required PHP Version | Required Symfony Version
-:----------|:------------------------|:---------------------|:------------------------
- 4.x       | Active support :rocket: | >= 7.2               | >= 3.4
- 3.x       | Active support :rocket: | >= 7.1               | >= 3.4
- 2.x       | End of life             | >= 7.1               | >= 3.4
- 1.x       | End of life             | >= 7.1               | >= 3.4
+ Version   | Status                      | Required PHP Version | Required Symfony Version
+:----------|:----------------------------|:---------------------|:------------------------
+ 4.x       | Active development :rocket: | >= 7.2               | >= 3.4
+ 3.x       | Active support :rocket:     | >= 7.1               | >= 3.4
+ 2.x       | End of life                 | >= 7.1               | >= 3.4
+ 1.x       | End of life                 | >= 7.1               | >= 3.4
 
 Changelog is available [here](CHANGELOG.md)
 

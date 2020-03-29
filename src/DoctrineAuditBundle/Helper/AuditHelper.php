@@ -5,7 +5,6 @@ namespace DH\DoctrineAuditBundle\Helper;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\User\UserInterface;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
@@ -203,136 +202,6 @@ class AuditHelper
         ];
     }
 
-    /**
-     * Return columns of audit tables.
-     *
-     * @return array
-     */
-    public function getAuditTableColumns(): array
-    {
-        return [
-            'id' => [
-                'type' => self::getDoctrineType('INTEGER'),
-                'options' => [
-                    'autoincrement' => true,
-                    'unsigned' => true,
-                ],
-            ],
-            'type' => [
-                'type' => self::getDoctrineType('STRING'),
-                'options' => [
-                    'notnull' => true,
-                    'length' => 10,
-                ],
-            ],
-            'object_id' => [
-                'type' => self::getDoctrineType('STRING'),
-                'options' => [
-                    'notnull' => true,
-                ],
-            ],
-            'discriminator' => [
-                'type' => self::getDoctrineType('STRING'),
-                'options' => [
-                    'default' => null,
-                    'notnull' => false,
-                ],
-            ],
-            'transaction_hash' => [
-                'type' => self::getDoctrineType('STRING'),
-                'options' => [
-                    'notnull' => false,
-                    'length' => 40,
-                ],
-            ],
-            'diffs' => [
-                'type' => self::getDoctrineType('JSON'),
-                'options' => [
-                    'default' => null,
-                    'notnull' => false,
-                ],
-            ],
-            'blame_id' => [
-                'type' => self::getDoctrineType('STRING'),
-                'options' => [
-                    'default' => null,
-                    'notnull' => false,
-                ],
-            ],
-            'blame_user' => [
-                'type' => self::getDoctrineType('STRING'),
-                'options' => [
-                    'default' => null,
-                    'notnull' => false,
-                    'length' => 255,
-                ],
-            ],
-            'blame_user_fqdn' => [
-                'type' => self::getDoctrineType('STRING'),
-                'options' => [
-                    'default' => null,
-                    'notnull' => false,
-                    'length' => 255,
-                ],
-            ],
-            'blame_user_firewall' => [
-                'type' => self::getDoctrineType('STRING'),
-                'options' => [
-                    'default' => null,
-                    'notnull' => false,
-                    'length' => 100,
-                ],
-            ],
-            'ip' => [
-                'type' => self::getDoctrineType('STRING'),
-                'options' => [
-                    'default' => null,
-                    'notnull' => false,
-                    'length' => 45,
-                ],
-            ],
-            'created_at' => [
-                'type' => self::getDoctrineType('DATETIME_IMMUTABLE'),
-                'options' => [
-                    'notnull' => true,
-                ],
-            ],
-        ];
-    }
-
-    public function getAuditTableIndices(string $tablename): array
-    {
-        return [
-            'id' => [
-                'type' => 'primary',
-            ],
-            'type' => [
-                'type' => 'index',
-                'name' => 'type_'.md5($tablename).'_idx',
-            ],
-            'object_id' => [
-                'type' => 'index',
-                'name' => 'object_id_'.md5($tablename).'_idx',
-            ],
-            'discriminator' => [
-                'type' => 'index',
-                'name' => 'discriminator_'.md5($tablename).'_idx',
-            ],
-            'transaction_hash' => [
-                'type' => 'index',
-                'name' => 'transaction_hash_'.md5($tablename).'_idx',
-            ],
-            'blame_id' => [
-                'type' => 'index',
-                'name' => 'blame_id_'.md5($tablename).'_idx',
-            ],
-            'created_at' => [
-                'type' => 'index',
-                'name' => 'created_at_'.md5($tablename).'_idx',
-            ],
-        ];
-    }
-
     public static function paramToNamespace(string $entity): string
     {
         return str_replace('-', '\\', $entity);
@@ -363,18 +232,18 @@ class AuditHelper
         $platform = $em->getConnection()->getDatabasePlatform();
 
         switch ($type->getName()) {
-            case self::getDoctrineType('BIGINT'):
+            case DoctrineHelper::getDoctrineType('BIGINT'):
                 $convertedValue = (string) $value;
 
                 break;
-            case self::getDoctrineType('INTEGER'):
-            case self::getDoctrineType('SMALLINT'):
+            case DoctrineHelper::getDoctrineType('INTEGER'):
+            case DoctrineHelper::getDoctrineType('SMALLINT'):
                 $convertedValue = (int) $value;
 
                 break;
-            case self::getDoctrineType('DECIMAL'):
-            case self::getDoctrineType('FLOAT'):
-            case self::getDoctrineType('BOOLEAN'):
+            case DoctrineHelper::getDoctrineType('DECIMAL'):
+            case DoctrineHelper::getDoctrineType('FLOAT'):
+            case DoctrineHelper::getDoctrineType('BOOLEAN'):
                 $convertedValue = $type->convertToPHPValue($value, $platform);
 
                 break;
@@ -383,10 +252,5 @@ class AuditHelper
         }
 
         return $convertedValue;
-    }
-
-    private static function getDoctrineType(string $type): string
-    {
-        return \constant((class_exists(Types::class, false) ? Types::class : Type::class).'::'.$type);
     }
 }

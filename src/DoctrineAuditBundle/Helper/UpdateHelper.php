@@ -139,12 +139,12 @@ class UpdateHelper
             $auditTable = $schema->createTable($auditTablename);
 
             // Add columns to audit table
-            foreach ($this->manager->getHelper()->getAuditTableColumns() as $columnName => $struct) {
+            foreach (AuditSchemaHelper::getAuditTableColumns() as $columnName => $struct) {
                 $auditTable->addColumn($columnName, $struct['type'], $struct['options']);
             }
 
             // Add indices to audit table
-            foreach ($this->manager->getHelper()->getAuditTableIndices($auditTablename) as $columnName => $struct) {
+            foreach (AuditSchemaHelper::getAuditTableIndices($auditTablename) as $columnName => $struct) {
                 if ('primary' === $struct['type']) {
                     $auditTable->setPrimaryKey([$columnName]);
                 } else {
@@ -161,13 +161,15 @@ class UpdateHelper
      *
      * @param Table       $table
      * @param null|Schema $schema
+     * @param null|array  $expectedColumns
+     * @param null|array  $expectedIndices
      *
      * @throws UpdateException
      * @throws \Doctrine\DBAL\Schema\SchemaException
      *
      * @return Schema
      */
-    public function updateAuditTable(Table $table, ?Schema $schema = null): Schema
+    public function updateAuditTable(Table $table, ?Schema $schema = null, ?array $expectedColumns = null, ?array $expectedIndices = null): Schema
     {
         $entityManager = $this->getConfiguration()->getEntityManager();
         $schemaManager = $entityManager->getConnection()->getSchemaManager();
@@ -178,14 +180,12 @@ class UpdateHelper
         $table = $schema->getTable($table->getName());
 
         $columns = $schemaManager->listTableColumns($table->getName());
-        $expectedColumns = $this->manager->getHelper()->getAuditTableColumns();
-        $expectedIndices = $this->manager->getHelper()->getAuditTableIndices($table->getName());
 
         // process columns
-        $this->processColumns($table, $columns, $expectedColumns);
+        $this->processColumns($table, $columns, $expectedColumns ?? AuditSchemaHelper::getAuditTableColumns());
 
         // process indices
-        $this->processIndices($table, $expectedIndices);
+        $this->processIndices($table, $expectedIndices ?? AuditSchemaHelper::getAuditTableIndices($table->getName()));
 
         return $schema;
     }

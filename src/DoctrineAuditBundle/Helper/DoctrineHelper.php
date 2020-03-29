@@ -2,6 +2,8 @@
 
 namespace DH\DoctrineAuditBundle\Helper;
 
+use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\Persistence\Proxy;
 
 class DoctrineHelper
@@ -38,5 +40,10 @@ class DoctrineHelper
             8 + $positionPm,
             mb_strrpos($className, '\\') - ($positionPm + 8)
         );
+    }
+
+    public static function getDoctrineType(string $type): string
+    {
+        return \constant((class_exists(Types::class, false) ? Types::class : Type::class).'::'.$type);
     }
 }
