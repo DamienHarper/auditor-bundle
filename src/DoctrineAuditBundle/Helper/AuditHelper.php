@@ -46,7 +46,7 @@ class AuditHelper
     public function id(EntityManagerInterface $em, $entity)
     {
         /** @var ClassMetadata $meta */
-        $meta = $em->getClassMetadata(\get_class($entity));
+        $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
         $pk = $meta->getSingleIdentifierFieldName();
 
         if (isset($meta->fieldMappings[$pk])) {
@@ -89,7 +89,7 @@ class AuditHelper
     public function diff(EntityManagerInterface $em, $entity, array $ch): array
     {
         /** @var ClassMetadata $meta */
-        $meta = $em->getClassMetadata(\get_class($entity));
+        $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
         $diff = [];
 
         foreach ($ch as $fieldName => list($old, $new)) {
@@ -149,7 +149,7 @@ class AuditHelper
         if ($user instanceof UserInterface) {
             $user_id = $user->getId();
             $username = $user->getUsername();
-            $user_fqdn = \get_class($user);
+            $user_fqdn = DoctrineHelper::getRealClassName($user);
         }
 
         return [
@@ -181,7 +181,7 @@ class AuditHelper
 
         $em->getUnitOfWork()->initializeObject($entity); // ensure that proxies are initialized
         /** @var ClassMetadata $meta */
-        $meta = $em->getClassMetadata(\get_class($entity));
+        $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
         $pkName = $meta->getSingleIdentifierFieldName();
         $pkValue = $id ?? $this->id($em, $entity);
         // An added guard for proxies that fail to initialize.
@@ -192,7 +192,7 @@ class AuditHelper
         if (method_exists($entity, '__toString')) {
             $label = (string) $entity;
         } else {
-            $label = \get_class($entity).'#'.$pkValue;
+            $label = DoctrineHelper::getRealClassName($entity).'#'.$pkValue;
         }
 
         return [
