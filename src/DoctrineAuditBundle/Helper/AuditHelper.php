@@ -212,55 +212,55 @@ class AuditHelper
     {
         return [
             'id' => [
-                'type' => self::getDoctrineType('INTEGER'),
+                'type' => DoctrineHelper::getDoctrineType('INTEGER'),
                 'options' => [
                     'autoincrement' => true,
                     'unsigned' => true,
                 ],
             ],
             'type' => [
-                'type' => self::getDoctrineType('STRING'),
+                'type' => DoctrineHelper::getDoctrineType('STRING'),
                 'options' => [
                     'notnull' => true,
                     'length' => 10,
                 ],
             ],
             'object_id' => [
-                'type' => self::getDoctrineType('STRING'),
+                'type' => DoctrineHelper::getDoctrineType('STRING'),
                 'options' => [
                     'notnull' => true,
                 ],
             ],
             'discriminator' => [
-                'type' => self::getDoctrineType('STRING'),
+                'type' => DoctrineHelper::getDoctrineType('STRING'),
                 'options' => [
                     'default' => null,
                     'notnull' => false,
                 ],
             ],
             'transaction_hash' => [
-                'type' => self::getDoctrineType('STRING'),
+                'type' => DoctrineHelper::getDoctrineType('STRING'),
                 'options' => [
                     'notnull' => false,
                     'length' => 40,
                 ],
             ],
             'diffs' => [
-                'type' => self::getDoctrineType('JSON'),
+                'type' => DoctrineHelper::getDoctrineType('JSON'),
                 'options' => [
                     'default' => null,
                     'notnull' => false,
                 ],
             ],
             'blame_id' => [
-                'type' => self::getDoctrineType('STRING'),
+                'type' => DoctrineHelper::getDoctrineType('STRING'),
                 'options' => [
                     'default' => null,
                     'notnull' => false,
                 ],
             ],
             'blame_user' => [
-                'type' => self::getDoctrineType('STRING'),
+                'type' => DoctrineHelper::getDoctrineType('STRING'),
                 'options' => [
                     'default' => null,
                     'notnull' => false,
@@ -268,7 +268,7 @@ class AuditHelper
                 ],
             ],
             'blame_user_fqdn' => [
-                'type' => self::getDoctrineType('STRING'),
+                'type' => DoctrineHelper::getDoctrineType('STRING'),
                 'options' => [
                     'default' => null,
                     'notnull' => false,
@@ -276,7 +276,7 @@ class AuditHelper
                 ],
             ],
             'blame_user_firewall' => [
-                'type' => self::getDoctrineType('STRING'),
+                'type' => DoctrineHelper::getDoctrineType('STRING'),
                 'options' => [
                     'default' => null,
                     'notnull' => false,
@@ -284,7 +284,7 @@ class AuditHelper
                 ],
             ],
             'ip' => [
-                'type' => self::getDoctrineType('STRING'),
+                'type' => DoctrineHelper::getDoctrineType('STRING'),
                 'options' => [
                     'default' => null,
                     'notnull' => false,
@@ -292,7 +292,7 @@ class AuditHelper
                 ],
             ],
             'created_at' => [
-                'type' => self::getDoctrineType('DATETIME_IMMUTABLE'),
+                'type' => DoctrineHelper::getDoctrineType('DATETIME_IMMUTABLE'),
                 'options' => [
                     'notnull' => true,
                 ],
@@ -363,18 +363,18 @@ class AuditHelper
         $platform = $em->getConnection()->getDatabasePlatform();
 
         switch ($type->getName()) {
-            case self::getDoctrineType('BIGINT'):
+            case DoctrineHelper::getDoctrineType('BIGINT'):
                 $convertedValue = (string) $value;
 
                 break;
-            case self::getDoctrineType('INTEGER'):
-            case self::getDoctrineType('SMALLINT'):
+            case DoctrineHelper::getDoctrineType('INTEGER'):
+            case DoctrineHelper::getDoctrineType('SMALLINT'):
                 $convertedValue = (int) $value;
 
                 break;
-            case self::getDoctrineType('DECIMAL'):
-            case self::getDoctrineType('FLOAT'):
-            case self::getDoctrineType('BOOLEAN'):
+            case DoctrineHelper::getDoctrineType('DECIMAL'):
+            case DoctrineHelper::getDoctrineType('FLOAT'):
+            case DoctrineHelper::getDoctrineType('BOOLEAN'):
                 $convertedValue = $type->convertToPHPValue($value, $platform);
 
                 break;
@@ -385,8 +385,4 @@ class AuditHelper
         return $convertedValue;
     }
 
-    private static function getDoctrineType(string $type): string
-    {
-        return \constant((class_exists(Types::class, false) ? Types::class : Type::class).'::'.$type);
-    }
 }
