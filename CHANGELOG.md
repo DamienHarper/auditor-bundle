@@ -5,19 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.4.0] - not released yet
+## [3.4.0] - 2020-03-29
+
+Starting today (2020-03-29), `4.x` development begins in `master` branch.
+A `3.x` branch has also been created and will host any 3.x related development.
+
+Note that `4.x` will drop support of PHP 7.1 and Symfony 3.4 support.
+
+### What's new
+* Added support for reading audits by date range (thanks to @McAnix)
+* Cleanup command accepts an ISO 8601 date interval (thanks to @patrickmatsumura)
 
 ### Changes
-* Added support for reading audits by date range
+* Added audited entity FQCN to event payload
+* Avoid proxy references in audit entries
 
-#
+### Fixes
+* [#144 - Let the cleanup command accept an ISO 8601 duration](https://github.com/DamienHarper/DoctrineAuditBundle/issues/144)
+* [#169 - why DH\DoctrineAuditBundle\User\UserInterface::getId() must return int|string|null?](https://github.com/DamienHarper/DoctrineAuditBundle/issues/169)
+* [#171 - Add class name of the audited entity to the data array](https://github.com/DamienHarper/DoctrineAuditBundle/issues/171)
+* [#177 - Delete operations save the proxy discriminator](https://github.com/DamienHarper/DoctrineAuditBundle/issues/177)
+
+
 ## [3.3.3] - 2020-02-07
 
 ### Changes
 * Fixed PHP 7.1 BC break
 
 
-#
 ## [3.3.2] - 2020-02-07
 
 ### Changes
