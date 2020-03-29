@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Starting today (2020-03-29), `4.x` development begins in `master` branch.
 A `3.x` branch has also been created and will host any 3.x related development.
 
-Note that `4.x` will drop support of PHP 7.1 and Symfony 3.4 support.
+Note that `4.x` will drop PHP 7.1 support.
 
 ### What's new
 * Added support for reading audits by date range (thanks to @McAnix)
