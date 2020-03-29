@@ -4,12 +4,13 @@ namespace DH\DoctrineAuditBundle\Tests\Helper;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
+use DH\DoctrineAuditBundle\Helper\AuditSchemaHelper;
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
 use DH\DoctrineAuditBundle\Manager\AuditManager;
 use DH\DoctrineAuditBundle\Tests\BaseTest;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\DBAL\Schema\Table;
-use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Proxy\ProxyFactory;
@@ -80,13 +81,13 @@ final class UpdateHelperTest extends BaseTest
         $authorAuditTable = $this->getTable($schemaManager->listTables(), 'author_audit');
 
         // check expected columns
-        $expected = AuditHelper::getAuditTableColumns();
+        $expected = AuditSchemaHelper::getAuditTableColumns();
         foreach ($expected as $name => $options) {
             self::assertTrue($authorAuditTable->hasColumn($name), 'audit table has a column named "'.$name.'".');
         }
 
         // check expected indices
-        $expected = AuditHelper::getAuditTableIndices('author_audit');
+        $expected = AuditSchemaHelper::getAuditTableIndices('author_audit');
         foreach ($expected as $name => $options) {
             if ('primary' === $options['type']) {
                 self::assertTrue($authorAuditTable->hasPrimaryKey(), 'audit table has a primary key named "'.$name.'".');
@@ -123,38 +124,60 @@ final class UpdateHelperTest extends BaseTest
             }
         }
 
+        $expectedColumns = AuditSchemaHelper::getAuditTableColumns();
+        foreach ($schemaManager->listTables() as $table) {
+            if (!preg_match('#_audit$#', $table->getName())) {
+                continue;
+            }
+
+            // check expected columns
+            foreach ($expectedColumns as $name => $options) {
+                self::assertTrue($table->hasColumn($name), '"'.$table->getName().'" audit table has a column named "'.$name.'".');
+            }
+
+            // check expected indices
+            $expectedIndices = AuditSchemaHelper::getAuditTableIndices($table->getName());
+            foreach ($expectedIndices as $name => $options) {
+                if ('primary' === $options['type']) {
+                    self::assertTrue($table->hasPrimaryKey(), 'audit table has a primary key named "'.$name.'".');
+                } else {
+                    self::assertTrue($table->hasIndex($options['name']), 'audit table has an index named "'.$name.'".');
+                }
+            }
+        }
+
         // new expected structure
         $expectedColumns = [
             'id' => [
-                'type' => Type::INTEGER,
+                'type' => Types::INTEGER,
                 'options' => [
                     'autoincrement' => true,
                     'unsigned' => true,
                 ],
             ],
             'type' => [
-                'type' => Type::STRING,
+                'type' => Types::STRING,
                 'options' => [
                     'notnull' => true,
                     'length' => 10,
                 ],
             ],
             'object_id' => [
-                'type' => Type::STRING,
+                'type' => Types::STRING,
                 'options' => [
                     'notnull' => true,
                     'length' => 50,
                 ],
             ],
             'diffs' => [
-                'type' => Type::JSON_ARRAY,
+                'type' => Types::JSON_ARRAY,
                 'options' => [
                     'default' => null,
                     'notnull' => false,
                 ],
             ],
             'blame_id' => [
-                'type' => Type::STRING,
+                'type' => Types::STRING,
                 'options' => [
                     'default' => null,
                     'notnull' => false,
@@ -162,7 +185,7 @@ final class UpdateHelperTest extends BaseTest
                 ],
             ],
             'blame_user' => [
-                'type' => Type::STRING,
+                'type' => Types::STRING,
                 'options' => [
                     'default' => null,
                     'notnull' => false,
@@ -170,13 +193,13 @@ final class UpdateHelperTest extends BaseTest
                 ],
             ],
             'created_at' => [
-                'type' => Type::DATETIME,
+                'type' => Types::DATETIME_IMMUTABLE,
                 'options' => [
                     'notnull' => true,
                 ],
             ],
             'locale' => [
-                'type' => Type::STRING,
+                'type' => Types::STRING,
                 'options' => [
                     'default' => null,
                     'notnull' => false,
@@ -184,7 +207,7 @@ final class UpdateHelperTest extends BaseTest
                 ],
             ],
             'version' => [
-                'type' => Type::INTEGER,
+                'type' => Types::INTEGER,
                 'options' => [
                     'default' => null,
                     'notnull' => true,
@@ -215,19 +238,8 @@ final class UpdateHelperTest extends BaseTest
             ],
         ];
 
-        $helper = $this->createMock(AuditHelper::class);
-        $helper
-            ->method('getAuditTableColumns')
-            ->willReturn($expectedColumns)
-        ;
-        $helper
-            ->method('getAuditTableIndices')
-            ->willReturn($expectedIndices)
-        ;
-        $manager->setHelper($helper);
-
         $authorAuditTable = $this->getTable($schemaManager->listTables(), 'author_audit');
-        $toSchema = $updater->updateAuditTable($authorAuditTable, clone $schema);
+        $toSchema = $updater->updateAuditTable($authorAuditTable, clone $schema, $expectedColumns, $expectedIndices);
 
         // apply changes
         $sql = $schema->getMigrateToSql($toSchema, $schemaManager->getDatabasePlatform());
@@ -242,14 +254,12 @@ final class UpdateHelperTest extends BaseTest
         $authorAuditTable = $this->getTable($schemaManager->listTables(), 'author_audit');
 
         // check expected columns
-        $expected = AuditHelper::getAuditTableColumns();
-        foreach ($expected as $name => $options) {
+        foreach ($expectedColumns as $name => $options) {
             self::assertTrue($authorAuditTable->hasColumn($name), 'audit table has a column named "'.$name.'".');
         }
 
         // check expected indices
-        $expected = AuditHelper::getAuditTableIndices('author_audit');
-        foreach ($expected as $name => $options) {
+        foreach ($expectedIndices as $name => $options) {
             if ('primary' === $options['type']) {
                 self::assertTrue($authorAuditTable->hasPrimaryKey(), 'audit table has a primary key named "'.$name.'".');
             } else {
