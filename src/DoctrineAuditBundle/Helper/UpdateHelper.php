@@ -139,12 +139,12 @@ class UpdateHelper
             $auditTable = $schema->createTable($auditTablename);
 
             // Add columns to audit table
-            foreach ($this->manager->getHelper()->getAuditTableColumns() as $columnName => $struct) {
+            foreach (AuditHelper::getAuditTableColumns() as $columnName => $struct) {
                 $auditTable->addColumn($columnName, $struct['type'], $struct['options']);
             }
 
             // Add indices to audit table
-            foreach ($this->manager->getHelper()->getAuditTableIndices($auditTablename) as $columnName => $struct) {
+            foreach (AuditHelper::getAuditTableIndices($auditTablename) as $columnName => $struct) {
                 if ('primary' === $struct['type']) {
                     $auditTable->setPrimaryKey([$columnName]);
                 } else {
@@ -178,8 +178,8 @@ class UpdateHelper
         $table = $schema->getTable($table->getName());
 
         $columns = $schemaManager->listTableColumns($table->getName());
-        $expectedColumns = $this->manager->getHelper()->getAuditTableColumns();
-        $expectedIndices = $this->manager->getHelper()->getAuditTableIndices($table->getName());
+        $expectedColumns = AuditHelper::getAuditTableColumns();
+        $expectedIndices = AuditHelper::getAuditTableIndices($table->getName());
 
         // process columns
         $this->processColumns($table, $columns, $expectedColumns);

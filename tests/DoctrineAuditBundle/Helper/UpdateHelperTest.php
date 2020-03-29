@@ -80,13 +80,13 @@ final class UpdateHelperTest extends BaseTest
         $authorAuditTable = $this->getTable($schemaManager->listTables(), 'author_audit');
 
         // check expected columns
-        $expected = $helper->getAuditTableColumns();
+        $expected = AuditHelper::getAuditTableColumns();
         foreach ($expected as $name => $options) {
             self::assertTrue($authorAuditTable->hasColumn($name), 'audit table has a column named "'.$name.'".');
         }
 
         // check expected indices
-        $expected = $helper->getAuditTableIndices('author_audit');
+        $expected = AuditHelper::getAuditTableIndices('author_audit');
         foreach ($expected as $name => $options) {
             if ('primary' === $options['type']) {
                 self::assertTrue($authorAuditTable->hasPrimaryKey(), 'audit table has a primary key named "'.$name.'".');
@@ -242,13 +242,13 @@ final class UpdateHelperTest extends BaseTest
         $authorAuditTable = $this->getTable($schemaManager->listTables(), 'author_audit');
 
         // check expected columns
-        $expected = $helper->getAuditTableColumns();
+        $expected = AuditHelper::getAuditTableColumns();
         foreach ($expected as $name => $options) {
             self::assertTrue($authorAuditTable->hasColumn($name), 'audit table has a column named "'.$name.'".');
         }
 
         // check expected indices
-        $expected = $helper->getAuditTableIndices('author_audit');
+        $expected = AuditHelper::getAuditTableIndices('author_audit');
         foreach ($expected as $name => $options) {
             if ('primary' === $options['type']) {
                 self::assertTrue($authorAuditTable->hasPrimaryKey(), 'audit table has a primary key named "'.$name.'".');

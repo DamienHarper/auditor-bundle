@@ -5,7 +5,6 @@ namespace DH\DoctrineAuditBundle\Helper;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\User\UserInterface;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
@@ -208,7 +207,7 @@ class AuditHelper
      *
      * @return array
      */
-    public function getAuditTableColumns(): array
+    public static function getAuditTableColumns(): array
     {
         return [
             'id' => [
@@ -300,7 +299,7 @@ class AuditHelper
         ];
     }
 
-    public function getAuditTableIndices(string $tablename): array
+    public static function getAuditTableIndices(string $tablename): array
     {
         return [
             'id' => [
@@ -384,5 +383,4 @@ class AuditHelper
 
         return $convertedValue;
     }
-
 }
