@@ -21,6 +21,7 @@ parameters:
         - '~Cannot call method fetchColumn\(\) on Doctrine\\DBAL\\Driver\\Statement\|int~'
         - '~Cannot call method fetchAll\(\) on Doctrine\\DBAL\\Driver\\Statement\|int~'
         - '~Cannot cast array\<string\>\|string\|null to string\.~'
+        - '~Cannot cast array\<string\>\|string\|null to int\.~'
         - '~Method DH\\DoctrineAuditBundle\\Routing\\DoctrineAuditRoutingLoader\:\:load\(\) has parameter \$type with no typehint specified.~'
         - '~Method DH\\DoctrineAuditBundle\\Routing\\DoctrineAuditRoutingLoader\:\:supports\(\) has parameter \$type with no typehint specified.~'
         - '~Call to an undefined method Symfony\\Component\\Security\\Core\\Authentication\\Token\\TokenInterface\:\:getRoles\(\)\.~'
