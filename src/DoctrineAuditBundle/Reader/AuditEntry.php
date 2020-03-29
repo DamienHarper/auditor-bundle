@@ -22,6 +22,11 @@ class AuditEntry
     /**
      * @var null|string
      */
+    protected $discriminator;
+
+    /**
+     * @var null|string
+     */
     protected $transaction_hash;
 
     /**
@@ -111,6 +116,16 @@ class AuditEntry
     public function getObjectId(): string
     {
         return $this->object_id;
+    }
+
+    /**
+     * Get the value of discriminator.
+     *
+     * @return null|string
+     */
+    public function getDiscriminator(): ?string
+    {
+        return $this->discriminator;
     }
 
     /**
