@@ -7,6 +7,7 @@ use DateTimeZone;
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Event\LifecycleEvent;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
+use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
@@ -82,7 +83,7 @@ class AuditManager
     public function insert(EntityManagerInterface $em, $entity, array $ch, string $transactionHash): void
     {
         /** @var ClassMetadata $meta */
-        $meta = $em->getClassMetadata(\get_class($entity));
+        $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
         $this->audit([
             'action' => 'insert',
             'blame' => $this->helper->blame(),
@@ -91,7 +92,7 @@ class AuditManager
             'schema' => $meta->getSchemaName(),
             'id' => $this->helper->id($em, $entity),
             'transaction_hash' => $transactionHash,
-            'discriminator' => ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $meta->inheritanceType ? \get_class($entity) : null,
+            'discriminator' => $this->getDiscriminator($entity, $meta->inheritanceType),
             'entity' => $meta->getName(),
         ]);
     }
@@ -114,7 +115,7 @@ class AuditManager
             return; // if there is no entity diff, do not log it
         }
         /** @var ClassMetadata $meta */
-        $meta = $em->getClassMetadata(\get_class($entity));
+        $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
         $this->audit([
             'action' => 'update',
             'blame' => $this->helper->blame(),
@@ -123,7 +124,7 @@ class AuditManager
             'schema' => $meta->getSchemaName(),
             'id' => $this->helper->id($em, $entity),
             'transaction_hash' => $transactionHash,
-            'discriminator' => ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $meta->inheritanceType ? \get_class($entity) : null,
+            'discriminator' => $this->getDiscriminator($entity, $meta->inheritanceType),
             'entity' => $meta->getName(),
         ]);
     }
@@ -142,7 +143,7 @@ class AuditManager
     public function remove(EntityManagerInterface $em, $entity, $id, string $transactionHash): void
     {
         /** @var ClassMetadata $meta */
-        $meta = $em->getClassMetadata(\get_class($entity));
+        $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
         $this->audit([
             'action' => 'remove',
             'blame' => $this->helper->blame(),
@@ -151,7 +152,7 @@ class AuditManager
             'schema' => $meta->getSchemaName(),
             'id' => $id,
             'transaction_hash' => $transactionHash,
-            'discriminator' => ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $meta->inheritanceType ? \get_class($entity) : null,
+            'discriminator' => $this->getDiscriminator($entity, $meta->inheritanceType),
             'entity' => $meta->getName(),
         ]);
     }
@@ -312,7 +313,7 @@ class AuditManager
     private function associateOrDissociate(string $type, EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
     {
         /** @var ClassMetadata $meta */
-        $meta = $em->getClassMetadata(\get_class($source));
+        $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($source));
         $data = [
             'action' => $type,
             'blame' => $this->helper->blame(),
@@ -324,7 +325,7 @@ class AuditManager
             'schema' => $meta->getSchemaName(),
             'id' => $this->helper->id($em, $source),
             'transaction_hash' => $transactionHash,
-            'discriminator' => ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $meta->inheritanceType ? \get_class($source) : null,
+            'discriminator' => $this->getDiscriminator($source, $meta->inheritanceType),
             'entity' => $meta->getName(),
         ];
 
@@ -366,5 +367,16 @@ class AuditManager
 
         // send an `AuditEvent` event
         $this->notify($payload);
+    }
+
+    /**
+     * @param object $entity
+     * @param int    $inheritanceType
+     *
+     * @return null|string
+     */
+    private function getDiscriminator($entity, int $inheritanceType): ?string
+    {
+        return ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $inheritanceType ? DoctrineHelper::getRealClassName($entity) : null;
     }
 }
