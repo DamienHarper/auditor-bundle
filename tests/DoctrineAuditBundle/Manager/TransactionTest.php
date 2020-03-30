@@ -3,9 +3,9 @@
 namespace DH\DoctrineAuditBundle\Tests\Manager;
 
 use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
-use DH\DoctrineAuditBundle\AuditConfiguration;
+use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
-use DH\DoctrineAuditBundle\Manager\AuditTransaction;
+use DH\DoctrineAuditBundle\Manager\Transaction;
 use DH\DoctrineAuditBundle\Tests\BaseTest;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use Doctrine\ORM\EntityManager;
@@ -18,7 +18,7 @@ use Symfony\Component\Security\Core\Security;
 /**
  * @internal
  */
-final class AuditTransactionTest extends BaseTest
+final class TransactionTest extends BaseTest
 {
     protected function setUp(): void
     {
@@ -32,7 +32,7 @@ final class AuditTransactionTest extends BaseTest
     {
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
-        $transaction = new AuditTransaction($helper);
+        $transaction = new Transaction($helper);
 
         $transaction_hash = $transaction->getTransactionHash();
         self::assertNotNull($transaction_hash, 'transaction_hash is not null');
@@ -40,12 +40,12 @@ final class AuditTransactionTest extends BaseTest
         self::assertSame(40, mb_strlen($transaction_hash), 'transaction_hash is a string of 40 characters');
     }
 
-    protected function getAuditConfiguration(array $options = [], ?EntityManager $entityManager = null): AuditConfiguration
+    protected function getAuditConfiguration(array $options = [], ?EntityManager $entityManager = null): Configuration
     {
         $container = new ContainerBuilder();
         $em = $entityManager ?? $this->getEntityManager();
 
-        return new AuditConfiguration(
+        return new Configuration(
             array_merge([
                 'table_prefix' => '',
                 'table_suffix' => '_audit',

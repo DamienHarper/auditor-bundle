@@ -3,8 +3,8 @@
 namespace DH\DoctrineAuditBundle\Event;
 
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
-use DH\DoctrineAuditBundle\Manager\AuditManager;
-use DH\DoctrineAuditBundle\Reader\AuditReader;
+use DH\DoctrineAuditBundle\Manager\Manager;
+use DH\DoctrineAuditBundle\Reader\Reader;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Tools\Event\GenerateSchemaTableEventArgs;
@@ -14,16 +14,16 @@ use Exception;
 class CreateSchemaListener implements EventSubscriber
 {
     /**
-     * @var AuditManager
+     * @var Manager
      */
     protected $manager;
 
     /**
-     * @var AuditReader
+     * @var Reader
      */
     protected $reader;
 
-    public function __construct(AuditManager $manager, AuditReader $reader)
+    public function __construct(Manager $manager, Reader $reader)
     {
         $this->manager = $manager;
         $this->reader = $reader;

@@ -4,7 +4,7 @@ namespace DH\DoctrineAuditBundle\Reader;
 
 use DateTime;
 use DH\DoctrineAuditBundle\Annotation\Security;
-use DH\DoctrineAuditBundle\AuditConfiguration;
+use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Exception\AccessDeniedException;
 use DH\DoctrineAuditBundle\Exception\InvalidArgumentException;
 use DH\DoctrineAuditBundle\User\UserInterface;
@@ -16,7 +16,7 @@ use Doctrine\ORM\Mapping\ClassMetadata as ORMMetadata;
 use PDO;
 use Symfony\Component\Security\Core\Security as CoreSecurity;
 
-class AuditReader
+class Reader
 {
     public const UPDATE = 'update';
     public const ASSOCIATE = 'associate';
@@ -27,7 +27,7 @@ class AuditReader
     public const PAGE_SIZE = 50;
 
     /**
-     * @var AuditConfiguration
+     * @var Configuration
      */
     private $configuration;
 
@@ -44,11 +44,11 @@ class AuditReader
     /**
      * AuditReader constructor.
      *
-     * @param AuditConfiguration     $configuration
+     * @param Configuration          $configuration
      * @param EntityManagerInterface $entityManager
      */
     public function __construct(
-        AuditConfiguration $configuration,
+        Configuration $configuration,
         EntityManagerInterface $entityManager
     ) {
         $this->configuration = $configuration;
@@ -56,9 +56,9 @@ class AuditReader
     }
 
     /**
-     * @return AuditConfiguration
+     * @return Configuration
      */
-    public function getConfiguration(): AuditConfiguration
+    public function getConfiguration(): Configuration
     {
         return $this->configuration;
     }
@@ -68,7 +68,7 @@ class AuditReader
      *
      * @param array|string $filter
      *
-     * @return AuditReader
+     * @return Reader
      */
     public function filterBy($filter): self
     {
@@ -140,7 +140,7 @@ class AuditReader
 
         /** @var Statement $statement */
         $statement = $queryBuilder->execute();
-        $statement->setFetchMode(PDO::FETCH_CLASS, AuditEntry::class);
+        $statement->setFetchMode(PDO::FETCH_CLASS, Entry::class);
 
         return $statement->fetchAll();
     }
@@ -201,7 +201,7 @@ class AuditReader
 
         /** @var Statement $statement */
         $statement = $queryBuilder->execute();
-        $statement->setFetchMode(PDO::FETCH_CLASS, AuditEntry::class);
+        $statement->setFetchMode(PDO::FETCH_CLASS, Entry::class);
 
         return $statement->fetchAll();
     }
@@ -299,7 +299,7 @@ class AuditReader
 
         /** @var Statement $statement */
         $statement = $queryBuilder->execute();
-        $statement->setFetchMode(PDO::FETCH_CLASS, AuditEntry::class);
+        $statement->setFetchMode(PDO::FETCH_CLASS, Entry::class);
 
         return $statement->fetchAll();
     }

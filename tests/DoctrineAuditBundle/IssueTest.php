@@ -2,7 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Tests;
 
-use DH\DoctrineAuditBundle\Reader\AuditReader;
+use DH\DoctrineAuditBundle\Reader\Reader;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Inheritance\Bike;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Inheritance\Car;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Inheritance\Cat;
@@ -136,11 +136,11 @@ final class IssueTest extends BaseTest
 
         $audits = $reader->getAudits(CoreCase::class);
         self::assertCount(1, $audits, 'results count ok.');
-        self::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
+        self::assertSame(Reader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
 
         $audits = $reader->getAudits(DieselCase::class);
         self::assertCount(1, $audits, 'results count ok.');
-        self::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
+        self::assertSame(Reader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
     }
 
     public function testIssue37(): void

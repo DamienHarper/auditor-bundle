@@ -7,7 +7,7 @@ services:
     alias: dh_doctrine_audit.annotation_loader
 
   dh_doctrine_audit.configuration:
-    class: DH\DoctrineAuditBundle\AuditConfiguration
+    class: DH\DoctrineAuditBundle\Configuration
     arguments:
       - "%dh_doctrine_audit.configuration%"
       - "@dh_doctrine_audit.user_provider"
@@ -17,28 +17,28 @@ services:
       - "@dh_doctrine_audit.annotation_loader"
       - "@event_dispatcher"
 
-  DH\DoctrineAuditBundle\AuditConfiguration:
+  DH\DoctrineAuditBundle\Configuration:
     alias: dh_doctrine_audit.configuration
 
   dh_doctrine_audit.reader:
-    class: DH\DoctrineAuditBundle\Reader\AuditReader
+    class: DH\DoctrineAuditBundle\Reader\Reader
     arguments:
       - "@dh_doctrine_audit.configuration"
       - "@doctrine.orm.default_entity_manager"
     public: true
 
-  DH\DoctrineAuditBundle\Reader\AuditReader:
+  DH\DoctrineAuditBundle\Reader\Reader:
     alias: dh_doctrine_audit.reader
     public: true
 
   dh_doctrine_audit.manager:
-    class: DH\DoctrineAuditBundle\Manager\AuditManager
+    class: DH\DoctrineAuditBundle\Manager\Manager
     arguments:
       - "@dh_doctrine_audit.configuration"
       - "@dh_doctrine_audit.helper"
     public: true
 
-  DH\DoctrineAuditBundle\Manager\AuditManager:
+  DH\DoctrineAuditBundle\Manager\Manager:
     alias: dh_doctrine_audit.manager
     public: true
 
@@ -93,7 +93,7 @@ services:
   DH\DoctrineAuditBundle\Command\UpdateSchemaCommand:
     alias: dh_doctrine_audit.command.schema_update
 
-  DH\DoctrineAuditBundle\Controller\AuditController:
+  DH\DoctrineAuditBundle\Controller\ViewerController:
     calls:
       - { method: setContainer, arguments: ['@service_container'] }
     tags: ['controller.service_arguments']

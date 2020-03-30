@@ -3,7 +3,7 @@
 namespace DH\DoctrineAuditBundle\Tests\Command;
 
 use DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand;
-use DH\DoctrineAuditBundle\Reader\AuditReader;
+use DH\DoctrineAuditBundle\Reader\Reader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Symfony\Component\Console\Command\LockableTrait;
@@ -135,7 +135,7 @@ final class CleanAuditLogsCommandTest extends CoreTest
 
         $container->set('doctrine', $registry);
 
-        $reader = new AuditReader($this->getAuditConfiguration(), $em);
+        $reader = new Reader($this->getAuditConfiguration(), $em);
         $container->set('dh_doctrine_audit.reader', $reader);
 
         $command = new CleanAuditLogsCommand();

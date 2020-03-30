@@ -2,7 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Helper;
 
-use DH\DoctrineAuditBundle\AuditConfiguration;
+use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\User\UserInterface;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
@@ -11,22 +11,22 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 class AuditHelper
 {
     /**
-     * @var \DH\DoctrineAuditBundle\AuditConfiguration
+     * @var \DH\DoctrineAuditBundle\Configuration
      */
     private $configuration;
 
     /**
-     * @param AuditConfiguration $configuration
+     * @param Configuration $configuration
      */
-    public function __construct(AuditConfiguration $configuration)
+    public function __construct(Configuration $configuration)
     {
         $this->configuration = $configuration;
     }
 
     /**
-     * @return \DH\DoctrineAuditBundle\AuditConfiguration
+     * @return \DH\DoctrineAuditBundle\Configuration
      */
-    public function getConfiguration(): AuditConfiguration
+    public function getConfiguration(): Configuration
     {
         return $this->configuration;
     }

@@ -2,7 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Helper;
 
-class AuditSchemaHelper
+class SchemaHelper
 {
     /**
      * Return columns of audit tables.

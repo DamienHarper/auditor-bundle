@@ -4,7 +4,7 @@ namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\Annotation\Security;
-use DH\DoctrineAuditBundle\AuditConfiguration;
+use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Annotation\AuditedEntity;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Annotation\UnauditedEntity;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Comment;
@@ -20,7 +20,7 @@ use Symfony\Component\Security\Core\Security as CoreSecurity;
 /**
  * @internal
  */
-final class AuditConfigurationTest extends BaseTest
+final class ConfigurationTest extends BaseTest
 {
     protected function setUp(): void
     {
@@ -424,12 +424,12 @@ final class AuditConfigurationTest extends BaseTest
         self::assertSame('Europe/London', $configuration->getTimezone(), 'custom timezone is "Europe/London".');
     }
 
-    protected function getAuditConfiguration(array $options = [], ?EntityManager $entityManager = null): AuditConfiguration
+    protected function getAuditConfiguration(array $options = [], ?EntityManager $entityManager = null): Configuration
     {
         $container = new ContainerBuilder();
         $em = $entityManager ?? $this->getEntityManager();
 
-        return new AuditConfiguration(
+        return new Configuration(
             array_merge([
                 'table_prefix' => '',
                 'table_suffix' => '_audit',

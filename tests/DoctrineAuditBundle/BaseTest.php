@@ -3,14 +3,14 @@
 namespace DH\DoctrineAuditBundle\Tests;
 
 use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
-use DH\DoctrineAuditBundle\AuditConfiguration;
+use DH\DoctrineAuditBundle\Configuration as AuditConfiguration;
 use DH\DoctrineAuditBundle\Event\AuditSubscriber;
 use DH\DoctrineAuditBundle\Event\CreateSchemaListener;
 use DH\DoctrineAuditBundle\Event\DoctrineSubscriber;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
-use DH\DoctrineAuditBundle\Manager\AuditManager;
-use DH\DoctrineAuditBundle\Reader\AuditReader;
+use DH\DoctrineAuditBundle\Manager\Manager;
+use DH\DoctrineAuditBundle\Reader\Reader;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\DBAL\Connection;
@@ -145,7 +145,7 @@ abstract class BaseTest extends TestCase
     {
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
-        $manager = new AuditManager($configuration, $helper);
+        $manager = new Manager($configuration, $helper);
         $reader = $this->getReader($this->getAuditConfiguration());
 
         $updater = new UpdateHelper($manager, $reader);
@@ -246,7 +246,7 @@ abstract class BaseTest extends TestCase
         $this->setAuditConfiguration($this->createAuditConfiguration([], $this->em));
         $configuration = $this->getAuditConfiguration();
 
-        $this->auditManager = new AuditManager($configuration, new AuditHelper($configuration));
+        $this->auditManager = new Manager($configuration, new AuditHelper($configuration));
 
         $configuration->getEventDispatcher()->addSubscriber(new AuditSubscriber($this->auditManager));
 
@@ -278,7 +278,7 @@ abstract class BaseTest extends TestCase
         return self::$conn;
     }
 
-    protected function getEventDispatcher(AuditManager $manager): EventDispatcherInterface
+    protected function getEventDispatcher(Manager $manager): EventDispatcherInterface
     {
         if (null !== $this->dispatcher) {
             $this->dispatcher = new EventDispatcher();
@@ -385,8 +385,8 @@ abstract class BaseTest extends TestCase
         ]);
     }
 
-    protected function getReader(?AuditConfiguration $configuration = null): AuditReader
+    protected function getReader(?AuditConfiguration $configuration = null): Reader
     {
-        return new AuditReader($configuration ?? $this->createAuditConfiguration(), $this->getEntityManager());
+        return new Reader($configuration ?? $this->createAuditConfiguration(), $this->getEntityManager());
     }
 }
