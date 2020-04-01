@@ -2,10 +2,10 @@
 
 namespace DH\DoctrineAuditBundle\Helper;
 
-use DH\DoctrineAuditBundle\AuditConfiguration;
+use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Exception\UpdateException;
-use DH\DoctrineAuditBundle\Manager\AuditManager;
-use DH\DoctrineAuditBundle\Reader\AuditReader;
+use DH\DoctrineAuditBundle\Manager\Manager;
+use DH\DoctrineAuditBundle\Reader\Reader;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
@@ -14,29 +14,29 @@ use Exception;
 class UpdateHelper
 {
     /**
-     * @var AuditManager
+     * @var Manager
      */
     private $manager;
 
     /**
-     * @var AuditReader
+     * @var Reader
      */
     private $reader;
 
     /**
-     * @param AuditManager $manager
-     * @param AuditReader  $reader
+     * @param Manager $manager
+     * @param Reader  $reader
      */
-    public function __construct(AuditManager $manager, AuditReader $reader)
+    public function __construct(Manager $manager, Reader $reader)
     {
         $this->manager = $manager;
         $this->reader = $reader;
     }
 
     /**
-     * @return AuditConfiguration
+     * @return Configuration
      */
-    public function getConfiguration(): AuditConfiguration
+    public function getConfiguration(): Configuration
     {
         return $this->manager->getConfiguration();
     }
@@ -139,12 +139,12 @@ class UpdateHelper
             $auditTable = $schema->createTable($auditTablename);
 
             // Add columns to audit table
-            foreach (AuditSchemaHelper::getAuditTableColumns() as $columnName => $struct) {
+            foreach (SchemaHelper::getAuditTableColumns() as $columnName => $struct) {
                 $auditTable->addColumn($columnName, $struct['type'], $struct['options']);
             }
 
             // Add indices to audit table
-            foreach (AuditSchemaHelper::getAuditTableIndices($auditTablename) as $columnName => $struct) {
+            foreach (SchemaHelper::getAuditTableIndices($auditTablename) as $columnName => $struct) {
                 if ('primary' === $struct['type']) {
                     $auditTable->setPrimaryKey([$columnName]);
                 } else {
@@ -182,10 +182,10 @@ class UpdateHelper
         $columns = $schemaManager->listTableColumns($table->getName());
 
         // process columns
-        $this->processColumns($table, $columns, $expectedColumns ?? AuditSchemaHelper::getAuditTableColumns());
+        $this->processColumns($table, $columns, $expectedColumns ?? SchemaHelper::getAuditTableColumns());
 
         // process indices
-        $this->processIndices($table, $expectedIndices ?? AuditSchemaHelper::getAuditTableIndices($table->getName()));
+        $this->processIndices($table, $expectedIndices ?? SchemaHelper::getAuditTableIndices($table->getName()));
 
         return $schema;
     }

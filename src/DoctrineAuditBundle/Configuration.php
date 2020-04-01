@@ -12,7 +12,7 @@ use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class AuditConfiguration
+class Configuration
 {
     /**
      * @var UserProviderInterface

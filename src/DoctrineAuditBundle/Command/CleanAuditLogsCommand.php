@@ -4,7 +4,7 @@ namespace DH\DoctrineAuditBundle\Command;
 
 use DateInterval;
 use DateTime;
-use DH\DoctrineAuditBundle\Reader\AuditReader;
+use DH\DoctrineAuditBundle\Reader\Reader;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Exception;
@@ -98,7 +98,7 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
         }
 
         /**
-         * @var AuditReader
+         * @var Reader
          */
         $reader = $this->container->get('dh_doctrine_audit.reader');
 

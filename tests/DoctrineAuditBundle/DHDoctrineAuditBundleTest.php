@@ -2,10 +2,10 @@
 
 namespace DH\DoctrineAuditBundle\Tests;
 
-use DH\DoctrineAuditBundle\Controller\AuditController;
+use DH\DoctrineAuditBundle\Controller\ViewerController;
 use DH\DoctrineAuditBundle\DependencyInjection\DHDoctrineAuditExtension;
 use DH\DoctrineAuditBundle\DHDoctrineAuditBundle;
-use DH\DoctrineAuditBundle\Reader\AuditReader;
+use DH\DoctrineAuditBundle\Reader\Reader;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\DBAL\Connection;
@@ -77,7 +77,7 @@ final class DHDoctrineAuditBundleTest extends TestCase
         $container->compile();
 
         $auditReader = $container->get('dh_doctrine_audit.reader');
-        self::assertInstanceOf(AuditReader::class, $auditReader);
+        self::assertInstanceOf(Reader::class, $auditReader);
     }
 
     public function testStorageCompilerPass(): void
@@ -191,7 +191,7 @@ final class DHDoctrineAuditBundleTest extends TestCase
         $container->set('event_dispatcher', $dispatcher);
 
         $bundle = new DHDoctrineAuditBundle();
-        $def = $container->getDefinition(AuditController::class);
+        $def = $container->getDefinition(ViewerController::class);
         $def->setPublic(true);
 
         $bundle->build($container);
@@ -200,7 +200,7 @@ final class DHDoctrineAuditBundleTest extends TestCase
         $configuration = $container->getParameter('dh_doctrine_audit.configuration');
 
         self::assertTrue($configuration['enabled_viewer']);
-        self::assertTrue($container->hasDefinition(AuditController::class));
+        self::assertTrue($container->hasDefinition(ViewerController::class));
     }
 
     public function testDisableAuditViewerPassIsFalse(): void
@@ -250,7 +250,7 @@ final class DHDoctrineAuditBundleTest extends TestCase
         $container->set('event_dispatcher', $dispatcher);
 
         $bundle2 = new DHDoctrineAuditBundle();
-        $def = $container->getDefinition(AuditController::class);
+        $def = $container->getDefinition(ViewerController::class);
         $def->setPublic(true);
 
         $bundle2->build($container);
@@ -259,6 +259,6 @@ final class DHDoctrineAuditBundleTest extends TestCase
         $configuration = $container->getParameter('dh_doctrine_audit.configuration');
 
         self::assertFalse($configuration['enabled_viewer']);
-        self::assertFalse($container->hasDefinition(AuditController::class));
+        self::assertFalse($container->hasDefinition(ViewerController::class));
     }
 }

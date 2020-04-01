@@ -4,7 +4,7 @@ namespace DH\DoctrineAuditBundle\Tests;
 
 use DateTime;
 use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
-use DH\DoctrineAuditBundle\AuditConfiguration;
+use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Comment;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\DummyEntity;
@@ -222,7 +222,7 @@ abstract class CoreTest extends BaseTest
         $em->flush();
     }
 
-    protected function createAuditConfiguration(array $options = [], ?EntityManager $entityManager = null): AuditConfiguration
+    protected function createAuditConfiguration(array $options = [], ?EntityManager $entityManager = null): Configuration
     {
         $container = new ContainerBuilder();
         $security = new Security($container);
@@ -248,7 +248,7 @@ abstract class CoreTest extends BaseTest
 
         $em = $entityManager ?? $this->getEntityManager();
 
-        return new AuditConfiguration(
+        return new Configuration(
             array_merge([
                 'enabled' => true,
                 'enabled_viewer' => true,

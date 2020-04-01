@@ -2,7 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Reader;
 
-class AuditEntry
+class Entry
 {
     /**
      * @var int

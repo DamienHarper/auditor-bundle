@@ -3,8 +3,8 @@
 namespace DH\DoctrineAuditBundle\Tests\Event;
 
 use DateTime;
-use DH\DoctrineAuditBundle\Reader\AuditEntry;
-use DH\DoctrineAuditBundle\Reader\AuditReader;
+use DH\DoctrineAuditBundle\Reader\Entry;
+use DH\DoctrineAuditBundle\Reader\Reader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\DummyEntity;
@@ -41,10 +41,10 @@ final class DoctrineSubscriberTest extends CoreTest
         $audits = $reader->getAudits(Author::class);
         self::assertCount(1, $audits, 'persisting a new entity (no relation set) creates 1 entry in the audit table.');
 
-        /** @var AuditEntry $entry */
+        /** @var Entry $entry */
         $entry = $audits[0];
         self::assertSame(1, $entry->getId(), 'audit entry ID is ok.');
-        self::assertSame(AuditReader::INSERT, $entry->getType(), 'audit entry type is ok.');
+        self::assertSame(Reader::INSERT, $entry->getType(), 'audit entry type is ok.');
         self::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         self::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         self::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
@@ -82,10 +82,10 @@ final class DoctrineSubscriberTest extends CoreTest
         $audits = $reader->getAudits(Author::class);
         self::assertCount(2, $audits, 'persisting an updated entity (no relation set) creates 2 entries in the audit table.');
 
-        /** @var AuditEntry $entry */
+        /** @var Entry $entry */
         $entry = $audits[1];
         self::assertSame(1, $entry->getId(), 'audit entry ID is ok.');
-        self::assertSame(AuditReader::INSERT, $entry->getType(), 'audit entry type is ok.');
+        self::assertSame(Reader::INSERT, $entry->getType(), 'audit entry type is ok.');
         self::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         self::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         self::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
@@ -102,7 +102,7 @@ final class DoctrineSubscriberTest extends CoreTest
 
         $entry = $audits[0];
         self::assertSame(2, $entry->getId(), 'audit entry ID is ok.');
-        self::assertSame(AuditReader::UPDATE, $entry->getType(), 'audit entry type is ok.');
+        self::assertSame(Reader::UPDATE, $entry->getType(), 'audit entry type is ok.');
         self::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         self::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         self::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
@@ -141,10 +141,10 @@ final class DoctrineSubscriberTest extends CoreTest
 
         self::assertSame($beforeCount + 1, $afterCount, 'removing an entity (no relation set) adds 1 entry in the audit table.');
 
-        /** @var AuditEntry $entry */
+        /** @var Entry $entry */
         $entry = $audits[0];
         self::assertSame(2, $entry->getId(), 'audit entry ID is ok.');
-        self::assertSame(AuditReader::REMOVE, $entry->getType(), 'audit entry type is ok.');
+        self::assertSame(Reader::REMOVE, $entry->getType(), 'audit entry type is ok.');
         self::assertSame('1', $entry->getUserId(), 'audit entry blame_id is ok.');
         self::assertSame('dark.vador', $entry->getUsername(), 'audit entry blame_user is ok.');
         self::assertSame('1.2.3.4', $entry->getIp(), 'audit entry IP is ok.');
@@ -171,7 +171,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
+        self::assertSame(Reader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
         self::assertEquals([
             'int_value' => [
                 'old' => null,
@@ -189,7 +189,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
+        self::assertSame(Reader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
         self::assertEquals([
             'int_value' => [
                 'old' => 17,
@@ -207,7 +207,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
+        self::assertSame(Reader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
         self::assertEquals([
             'int_value' => [
                 'old' => null,
@@ -225,7 +225,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
+        self::assertSame(Reader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
         self::assertEquals([
             'label' => [
                 'old' => 'int: null->24',
@@ -239,7 +239,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
+        self::assertSame(Reader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
         self::assertEquals([
             'label' => [
                 'old' => 'int: 24->"24"',
@@ -253,7 +253,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
+        self::assertSame(Reader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
         self::assertEquals([
             'label' => [
                 'old' => 'int: "24"->24',
@@ -267,7 +267,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
+        self::assertSame(Reader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
         self::assertEquals([
             'int_value' => [
                 'old' => 24,
@@ -295,7 +295,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
+        self::assertSame(Reader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
         self::assertEquals([
             'decimal_value' => [
                 'old' => null,
@@ -313,7 +313,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
+        self::assertSame(Reader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
         self::assertEquals([
             'decimal_value' => [
                 'old' => 10.2,
@@ -331,7 +331,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
+        self::assertSame(Reader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
         self::assertEquals([
             'decimal_value' => [
                 'old' => '10.2',
@@ -349,7 +349,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
+        self::assertSame(Reader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
         self::assertEquals([
             'decimal_value' => [
                 'old' => 5.0,
@@ -376,7 +376,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
+        self::assertSame(Reader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
         self::assertEquals([
             'label' => [
                 'old' => null,
@@ -390,7 +390,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
+        self::assertSame(Reader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
         self::assertEquals([
             'bool_value' => [
                 'old' => null,
@@ -408,7 +408,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
+        self::assertSame(Reader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
         self::assertEquals([
             'bool_value' => [
                 'old' => true,
@@ -426,7 +426,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
+        self::assertSame(Reader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
         self::assertEquals([
             'bool_value' => [
                 'old' => null,
@@ -444,7 +444,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
+        self::assertSame(Reader::UPDATE, $audits[0]->getType(), 'AuditReader::UPDATE operation.');
         self::assertEquals([
             'bool_value' => [
                 'old' => false,
@@ -472,7 +472,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
+        self::assertSame(Reader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
         self::assertEquals([
             'label' => [
                 'old' => null,
@@ -500,7 +500,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
+        self::assertSame(Reader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
         self::assertEquals([
             'json_array' => [
                 'old' => null,
@@ -528,7 +528,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->flush();
 
         $audits = $reader->getAudits(DummyEntity::class);
-        self::assertSame(AuditReader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
+        self::assertSame(Reader::INSERT, $audits[0]->getType(), 'AuditReader::INSERT operation.');
         self::assertEquals([
             'label' => [
                 'old' => null,
@@ -578,14 +578,14 @@ final class DoctrineSubscriberTest extends CoreTest
         $author->addPost($post2);
         $em->flush();
 
-        /** @var AuditEntry[] $audits */
+        /** @var Entry[] $audits */
         $audits = $reader->getAudits(Author::class, null, 1, 50);
 
         $i = 0;
         self::assertCount(3, $audits, 'result count is ok.');
-        self::assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
-        self::assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
-        self::assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
+        self::assertSame(Reader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
+        self::assertSame(Reader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
+        self::assertSame(Reader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
 
         self::assertEquals([
             'source' => [
@@ -659,16 +659,16 @@ final class DoctrineSubscriberTest extends CoreTest
         $author->removePost($post2);
         $em->flush();
 
-        /** @var AuditEntry[] $audits */
+        /** @var Entry[] $audits */
         $audits = $reader->getAudits(Author::class, null, 1, 50);
 
         $i = 0;
         self::assertCount(5, $audits, 'result count is ok.');
-        self::assertSame(AuditReader::DISSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::DISSOCIATE operation.');
-        self::assertSame(AuditReader::DISSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::DISSOCIATE operation.');
-        self::assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
-        self::assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
-        self::assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
+        self::assertSame(Reader::DISSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::DISSOCIATE operation.');
+        self::assertSame(Reader::DISSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::DISSOCIATE operation.');
+        self::assertSame(Reader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
+        self::assertSame(Reader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
+        self::assertSame(Reader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
 
         self::assertEquals([
             'source' => [
@@ -744,15 +744,15 @@ final class DoctrineSubscriberTest extends CoreTest
         $post->addTag($tag3);
         $em->flush();
 
-        /** @var AuditEntry[] $audits */
+        /** @var Entry[] $audits */
         $audits = $reader->getAudits(Post::class, null, 1, 50);
 
         $i = 0;
         self::assertCount(4, $audits, 'result count is ok.');
-        self::assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
-        self::assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
-        self::assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
-        self::assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
+        self::assertSame(Reader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
+        self::assertSame(Reader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
+        self::assertSame(Reader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
+        self::assertSame(Reader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
 
         self::assertEquals([
             'source' => [
@@ -849,16 +849,16 @@ final class DoctrineSubscriberTest extends CoreTest
         $post->removeTag($tag2);
         $em->flush();
 
-        /** @var AuditEntry[] $audits */
+        /** @var Entry[] $audits */
         $audits = $reader->getAudits(Post::class, null, 1, 50);
 
         $i = 0;
         self::assertCount(5, $audits, 'result count is ok.');
-        self::assertSame(AuditReader::DISSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::DISSOCIATE operation.');
-        self::assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
-        self::assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
-        self::assertSame(AuditReader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
-        self::assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
+        self::assertSame(Reader::DISSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::DISSOCIATE operation.');
+        self::assertSame(Reader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
+        self::assertSame(Reader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
+        self::assertSame(Reader::ASSOCIATE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::ASSOCIATE operation.');
+        self::assertSame(Reader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
 
         self::assertEquals([
             'source' => [
@@ -905,8 +905,8 @@ final class DoctrineSubscriberTest extends CoreTest
 
         $i = 0;
         self::assertCount(2, $audits, 'result count is ok.');
-        self::assertSame(AuditReader::REMOVE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::REMOVE operation.');
-        self::assertSame(AuditReader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
+        self::assertSame(Reader::REMOVE, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::REMOVE operation.');
+        self::assertSame(Reader::INSERT, $audits[$i++]->getType(), 'entry'.$i.' is an AuditReader::INSERT operation.');
     }
 
     public function testTransactionHash(): void
@@ -931,13 +931,13 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->persist($post);
         $em->flush();
 
-        /** @var AuditEntry[] $audits */
+        /** @var Entry[] $audits */
         $audits = $reader->getAudits(Author::class);
 
         self::assertCount(1, $audits, 'result count is ok.');
         $author_transaction_hash = $audits[0]->getTransactionHash();
 
-        /** @var AuditEntry[] $audits */
+        /** @var Entry[] $audits */
         $audits = $reader->getAudits(Post::class);
 
         self::assertCount(1, $audits, 'result count is ok.');
@@ -948,7 +948,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->remove($post);
         $em->flush();
 
-        /** @var AuditEntry[] $audits */
+        /** @var Entry[] $audits */
         $audits = $reader->getAudits(Post::class);
 
         self::assertCount(2, $audits, 'result count is ok.');

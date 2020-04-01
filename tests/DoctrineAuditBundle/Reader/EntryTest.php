@@ -2,18 +2,18 @@
 
 namespace DH\DoctrineAuditBundle\Tests\Reader;
 
-use DH\DoctrineAuditBundle\Reader\AuditEntry;
+use DH\DoctrineAuditBundle\Reader\Entry;
 use DH\DoctrineAuditBundle\User\User;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
  */
-final class AuditEntryTest extends TestCase
+final class EntryTest extends TestCase
 {
     public function testAccessors(): void
     {
-        $entry = new AuditEntry();
+        $entry = new Entry();
         $entry->id = 1;
         $entry->type = 'type';
         $entry->object_id = '1';
@@ -50,7 +50,7 @@ final class AuditEntryTest extends TestCase
 
     public function testUndefinedUser(): void
     {
-        $entry = new AuditEntry();
+        $entry = new Entry();
 
         self::assertNull($entry->getUserId(), 'AuditEntry::getUserId() is ok with undefined user.');
         self::assertNull($entry->getUsername(), 'AuditEntry::getUsername() is ok with undefined user.');
@@ -58,7 +58,7 @@ final class AuditEntryTest extends TestCase
 
     public function testGetDiffsReturnsAnArray(): void
     {
-        $entry = new AuditEntry();
+        $entry = new Entry();
         $entry->diffs = '{}';
 
         self::assertIsArray($entry->getDiffs(), 'AuditEntry::getDiffs() returns an array.');

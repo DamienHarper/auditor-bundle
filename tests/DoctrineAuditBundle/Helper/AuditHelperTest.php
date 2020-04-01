@@ -4,7 +4,7 @@ namespace DH\DoctrineAuditBundle\Tests\Helper;
 
 use DateTime;
 use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
-use DH\DoctrineAuditBundle\AuditConfiguration;
+use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Author;
@@ -187,7 +187,7 @@ final class AuditHelperTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $configuration = new AuditConfiguration(
+        $configuration = new Configuration(
             [
                 'enabled' => true,
                 'enabled_viewer' => true,
@@ -252,7 +252,7 @@ final class AuditHelperTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $configuration = new AuditConfiguration(
+        $configuration = new Configuration(
             [
                 'enabled' => true,
                 'enabled_viewer' => true,
@@ -378,7 +378,7 @@ final class AuditHelperTest extends CoreTest
     public function testBlameWhenNoRequest(): void
     {
         $em = $this->getEntityManager();
-        $configuration = new AuditConfiguration(
+        $configuration = new Configuration(
             [
                 'enabled' => true,
                 'enabled_viewer' => true,
@@ -411,7 +411,7 @@ final class AuditHelperTest extends CoreTest
     public function testBlameWhenNoUser(): void
     {
         $em = $this->getEntityManager();
-        $configuration = new AuditConfiguration(
+        $configuration = new Configuration(
             [
                 'enabled' => true,
                 'enabled_viewer' => true,
@@ -457,7 +457,7 @@ final class AuditHelperTest extends CoreTest
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
 
-        self::assertInstanceOf(AuditConfiguration::class, $helper->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
+        self::assertInstanceOf(Configuration::class, $helper->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
     }
 
     protected function setupEntities(): void

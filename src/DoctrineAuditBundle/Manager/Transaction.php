@@ -6,10 +6,10 @@ use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\UnitOfWork;
 
-class AuditTransaction
+class Transaction
 {
     /**
-     * @var \DH\DoctrineAuditBundle\AuditConfiguration
+     * @var \DH\DoctrineAuditBundle\Configuration
      */
     private $configuration;
 

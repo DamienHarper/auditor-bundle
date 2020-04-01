@@ -4,7 +4,7 @@ namespace DH\DoctrineAuditBundle\Manager;
 
 use DateTime;
 use DateTimeZone;
-use DH\DoctrineAuditBundle\AuditConfiguration;
+use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Event\LifecycleEvent;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
@@ -12,10 +12,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
-class AuditManager
+class Manager
 {
     /**
-     * @var \DH\DoctrineAuditBundle\AuditConfiguration
+     * @var \DH\DoctrineAuditBundle\Configuration
      */
     private $configuration;
 
@@ -24,16 +24,16 @@ class AuditManager
      */
     private $helper;
 
-    public function __construct(AuditConfiguration $configuration, AuditHelper $helper)
+    public function __construct(Configuration $configuration, AuditHelper $helper)
     {
         $this->configuration = $configuration;
         $this->helper = $helper;
     }
 
     /**
-     * @return \DH\DoctrineAuditBundle\AuditConfiguration
+     * @return \DH\DoctrineAuditBundle\Configuration
      */
-    public function getConfiguration(): AuditConfiguration
+    public function getConfiguration(): Configuration
     {
         return $this->configuration;
     }
@@ -55,12 +55,12 @@ class AuditManager
     }
 
     /**
-     * @param AuditTransaction $transaction
+     * @param Transaction $transaction
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function process(AuditTransaction $transaction): void
+    public function process(Transaction $transaction): void
     {
         $this->processInsertions($transaction);
         $this->processUpdates($transaction);
@@ -212,12 +212,12 @@ class AuditManager
     }
 
     /**
-     * @param AuditTransaction $transaction
+     * @param Transaction $transaction
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function processInsertions(AuditTransaction $transaction): void
+    public function processInsertions(Transaction $transaction): void
     {
         $em = $transaction->getEntityManager();
         $uow = $em->getUnitOfWork();
@@ -229,12 +229,12 @@ class AuditManager
     }
 
     /**
-     * @param AuditTransaction $transaction
+     * @param Transaction $transaction
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function processUpdates(AuditTransaction $transaction): void
+    public function processUpdates(Transaction $transaction): void
     {
         $em = $transaction->getEntityManager();
         $uow = $em->getUnitOfWork();
@@ -246,12 +246,12 @@ class AuditManager
     }
 
     /**
-     * @param AuditTransaction $transaction
+     * @param Transaction $transaction
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function processAssociations(AuditTransaction $transaction): void
+    public function processAssociations(Transaction $transaction): void
     {
         $em = $transaction->getEntityManager();
         foreach ($transaction->getAssociated() as list($source, $target, $mapping)) {
@@ -260,12 +260,12 @@ class AuditManager
     }
 
     /**
-     * @param AuditTransaction $transaction
+     * @param Transaction $transaction
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function processDissociations(AuditTransaction $transaction): void
+    public function processDissociations(Transaction $transaction): void
     {
         $em = $transaction->getEntityManager();
         foreach ($transaction->getDissociated() as list($source, $target, $id, $mapping)) {
@@ -274,12 +274,12 @@ class AuditManager
     }
 
     /**
-     * @param AuditTransaction $transaction
+     * @param Transaction $transaction
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function processDeletions(AuditTransaction $transaction): void
+    public function processDeletions(Transaction $transaction): void
     {
         $em = $transaction->getEntityManager();
         foreach ($transaction->getRemoved() as list($entity, $id)) {

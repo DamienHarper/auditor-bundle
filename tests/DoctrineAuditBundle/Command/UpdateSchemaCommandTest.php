@@ -4,8 +4,8 @@ namespace DH\DoctrineAuditBundle\Tests\Command;
 
 use DH\DoctrineAuditBundle\Command\UpdateSchemaCommand;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
-use DH\DoctrineAuditBundle\Manager\AuditManager;
-use DH\DoctrineAuditBundle\Reader\AuditReader;
+use DH\DoctrineAuditBundle\Manager\Manager;
+use DH\DoctrineAuditBundle\Reader\Reader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Symfony\Component\Console\Command\LockableTrait;
@@ -69,10 +69,10 @@ final class UpdateSchemaCommandTest extends CoreTest
         $container->set('doctrine', $registry);
 
         $helper = new AuditHelper($this->getAuditConfiguration());
-        $manager = new AuditManager($this->getAuditConfiguration(), $helper);
+        $manager = new Manager($this->getAuditConfiguration(), $helper);
         $container->set('dh_doctrine_audit.manager', $manager);
 
-        $reader = new AuditReader($this->getAuditConfiguration(), $em);
+        $reader = new Reader($this->getAuditConfiguration(), $em);
         $container->set('dh_doctrine_audit.reader', $reader);
 
         $command = new UpdateSchemaCommand();

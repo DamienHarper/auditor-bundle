@@ -5,13 +5,13 @@ namespace DH\DoctrineAuditBundle\Controller;
 use DH\DoctrineAuditBundle\Exception\AccessDeniedException;
 use DH\DoctrineAuditBundle\Exception\InvalidArgumentException;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
-use DH\DoctrineAuditBundle\Reader\AuditReader;
+use DH\DoctrineAuditBundle\Reader\Reader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class AuditController extends AbstractController
+class ViewerController extends AbstractController
 {
     /**
      * @Route("/audit", name="dh_doctrine_audit_list_audits", methods={"GET"})
@@ -70,7 +70,7 @@ class AuditController extends AbstractController
         }
 
         try {
-            $entries = $reader->getAuditsPager($entity, $id, $page, AuditReader::PAGE_SIZE);
+            $entries = $reader->getAuditsPager($entity, $id, $page, Reader::PAGE_SIZE);
         } catch (AccessDeniedException $e) {
             throw $this->createAccessDeniedException();
         }
@@ -85,7 +85,7 @@ class AuditController extends AbstractController
     public static function getSubscribedServices(): array
     {
         return array_merge(parent::getSubscribedServices(), [
-            'dh_doctrine_audit.reader' => AuditReader::class,
+            'dh_doctrine_audit.reader' => Reader::class,
         ]);
     }
 }

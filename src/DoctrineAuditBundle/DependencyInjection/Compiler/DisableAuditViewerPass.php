@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace DH\DoctrineAuditBundle\DependencyInjection\Compiler;
 
-use DH\DoctrineAuditBundle\Controller\AuditController;
+use DH\DoctrineAuditBundle\Controller\ViewerController;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -22,7 +22,7 @@ class DisableAuditViewerPass implements CompilerPassInterface
         }
 
         if (false === $config['enabled_viewer']) {
-            $container->removeDefinition(AuditController::class);
+            $container->removeDefinition(ViewerController::class);
         }
     }
 }

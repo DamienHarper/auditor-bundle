@@ -4,7 +4,7 @@ namespace DH\DoctrineAuditBundle\DBAL;
 
 use Doctrine\DBAL\Logging\SQLLogger;
 
-class AuditLoggerChain implements SQLLogger
+class LoggerChain implements SQLLogger
 {
     /**
      * @var SQLLogger[]
