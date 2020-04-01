@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - not yet released
+### What's new
+* PHP 7.1 is not supported anymore.
+
+
+### Breaking changes
+* Templating helpers have been moved to a dedicated `templates/helper` folder.
+* Many classes have been renamed to simplify their name by removing the useless `Audit` prefix.
+
+### How to upgrade?
+
+
+---
+
 ## [3.4.0] - 2020-03-29
 
 Starting today (2020-03-29), `4.x` development begins in `master` branch.
@@ -147,6 +161,7 @@ Due to internal changes requiring new columns and `blame_id` column type change,
 bin/console audit:schema:update --force
 ```
 
+---
 
 ## [2.5.0] - 2019-09-04
 
@@ -230,6 +245,7 @@ Due to internal changes requiring new columns and `object_id` column type change
 bin/console audit:schema:update
 ```
 
+---
 
 ## [1.6.0] - 2019-03-04
 
