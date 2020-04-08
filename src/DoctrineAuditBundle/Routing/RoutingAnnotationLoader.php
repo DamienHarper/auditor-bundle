@@ -31,7 +31,7 @@ class RoutingAnnotationLoader extends Loader
 
     public function supports($resource, ?string $type = null): bool
     {
-        return 'annotation' === $type;
+        return 'audit_annotation' === $type;
     }
 
     public function setAnnotatedRouteControllerLoader(AnnotatedRouteControllerLoader $annotatedRouteController): void
