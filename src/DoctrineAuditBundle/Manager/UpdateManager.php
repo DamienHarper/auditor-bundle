@@ -1,9 +1,10 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Helper;
+namespace DH\DoctrineAuditBundle\Manager;
 
 use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Exception\UpdateException;
+use DH\DoctrineAuditBundle\Helper\SchemaHelper;
 use DH\DoctrineAuditBundle\Manager\TransactionManager;
 use DH\DoctrineAuditBundle\Reader\Reader;
 use Doctrine\DBAL\Schema\Column;
@@ -11,7 +12,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
 use Exception;
 
-class UpdateHelper
+class UpdateManager
 {
     /**
      * @var TransactionManager

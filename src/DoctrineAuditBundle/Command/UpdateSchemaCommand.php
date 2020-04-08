@@ -2,7 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Command;
 
-use DH\DoctrineAuditBundle\Helper\UpdateHelper;
+use DH\DoctrineAuditBundle\Manager\UpdateManager;
 use DH\DoctrineAuditBundle\Manager\TransactionManager;
 use DH\DoctrineAuditBundle\Reader\Reader;
 use Symfony\Component\Console\Command\Command;
@@ -75,9 +75,9 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
         $reader = $this->container->get('dh_doctrine_audit.reader');
 
         /**
-         * @var UpdateHelper
+         * @var \DH\DoctrineAuditBundle\Manager\UpdateManager
          */
-        $updater = new UpdateHelper($manager, $reader);
+        $updater = new UpdateManager($manager, $reader);
 
         $sqls = $updater->getUpdateAuditSchemaSql();
 

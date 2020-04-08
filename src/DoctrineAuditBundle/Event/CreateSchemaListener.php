@@ -2,7 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Event;
 
-use DH\DoctrineAuditBundle\Helper\UpdateHelper;
+use DH\DoctrineAuditBundle\Manager\UpdateManager;
 use DH\DoctrineAuditBundle\Manager\TransactionManager;
 use DH\DoctrineAuditBundle\Reader\Reader;
 use Doctrine\Common\EventSubscriber;
@@ -65,7 +65,7 @@ class CreateSchemaListener implements EventSubscriber
             }
         }
 
-        $updater = new UpdateHelper($this->manager, $this->reader);
+        $updater = new UpdateManager($this->manager, $this->reader);
         $updater->createAuditTable($eventArgs->getClassTable(), $eventArgs->getSchema());
     }
 

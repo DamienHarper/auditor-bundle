@@ -1,11 +1,11 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests\Helper;
+namespace DH\DoctrineAuditBundle\Tests\Manager;
 
 use DH\DoctrineAuditBundle\Configuration as AuditConfiguration;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Helper\SchemaHelper;
-use DH\DoctrineAuditBundle\Helper\UpdateHelper;
+use DH\DoctrineAuditBundle\Manager\UpdateManager;
 use DH\DoctrineAuditBundle\Manager\TransactionManager;
 use DH\DoctrineAuditBundle\Tests\BaseTest;
 use Doctrine\Common\Cache\ArrayCache;
@@ -20,7 +20,7 @@ use Gedmo;
 /**
  * @internal
  */
-final class UpdateHelperTest extends BaseTest
+final class UpdateManagerTest extends BaseTest
 {
     public function testCreateAuditTable(): void
     {
@@ -29,7 +29,7 @@ final class UpdateHelperTest extends BaseTest
         $helper = new AuditHelper($configuration);
         $manager = new TransactionManager($configuration, $helper);
         $reader = $this->getReader($this->getAuditConfiguration());
-        $updater = new UpdateHelper($manager, $reader);
+        $updater = new \DH\DoctrineAuditBundle\Manager\UpdateManager($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
 
         $authorTable = $this->getTable($schemaManager->listTables(), 'author');
@@ -61,7 +61,7 @@ final class UpdateHelperTest extends BaseTest
         $helper = new AuditHelper($configuration);
         $manager = new TransactionManager($configuration, $helper);
         $reader = $this->getReader($this->getAuditConfiguration());
-        $updater = new UpdateHelper($manager, $reader);
+        $updater = new \DH\DoctrineAuditBundle\Manager\UpdateManager($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
 
         $authorTable = $this->getTable($schemaManager->listTables(), 'author');
@@ -107,7 +107,7 @@ final class UpdateHelperTest extends BaseTest
         $helper = new AuditHelper($configuration);
         $manager = new TransactionManager($configuration, $helper);
         $reader = $this->getReader($this->getAuditConfiguration());
-        $updater = new UpdateHelper($manager, $reader);
+        $updater = new UpdateManager($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
 
         $authorTable = $this->getTable($schemaManager->listTables(), 'author');

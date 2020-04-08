@@ -8,7 +8,7 @@ use DH\DoctrineAuditBundle\Event\AuditSubscriber;
 use DH\DoctrineAuditBundle\Event\CreateSchemaListener;
 use DH\DoctrineAuditBundle\Event\DoctrineSubscriber;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
-use DH\DoctrineAuditBundle\Helper\UpdateHelper;
+use DH\DoctrineAuditBundle\Manager\UpdateManager;
 use DH\DoctrineAuditBundle\Manager\TransactionManager;
 use DH\DoctrineAuditBundle\Reader\Reader;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
@@ -148,7 +148,7 @@ abstract class BaseTest extends TestCase
         $manager = new TransactionManager($configuration, $helper);
         $reader = $this->getReader($this->getAuditConfiguration());
 
-        $updater = new UpdateHelper($manager, $reader);
+        $updater = new UpdateManager($manager, $reader);
         $updater->updateAuditSchema();
     }
 
