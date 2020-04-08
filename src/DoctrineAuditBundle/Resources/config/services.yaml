@@ -69,13 +69,13 @@ services:
     class: DH\DoctrineAuditBundle\Event\DoctrineSubscriber
     arguments: ["@dh_doctrine_audit.manager"]
     tags:
-      - { name: doctrine.event_subscriber, connection: default, priority: 1000000 }
+      - { name: doctrine.event_subscriber, priority: 1000000 }
 
   dh_doctrine_audit.event_subscriber.create_schema:
     class: DH\DoctrineAuditBundle\Event\CreateSchemaListener
     arguments: ["@dh_doctrine_audit.manager", "@dh_doctrine_audit.reader"]
     tags:
-      - { name: doctrine.event_subscriber, connection: default }
+      - { name: doctrine.event_subscriber }
 
   dh_doctrine_audit.command.clean:
     class: DH\DoctrineAuditBundle\Command\CleanAuditLogsCommand
