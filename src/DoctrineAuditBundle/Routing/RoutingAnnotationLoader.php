@@ -34,4 +34,14 @@ class RoutingAnnotationLoader extends Loader implements LoaderInterface
     {
         return 'audit_loader' === $type;
     }
+
+    public function setRoutingLoaderAnnotation(AnnotatedRouteControllerLoader $loader): void
+    {
+        $this->annotationLoader = $loader;
+    }
+
+    public function setConfiguration(array $configuration): void
+    {
+        $this->configuration = $configuration;
+    }
 }
