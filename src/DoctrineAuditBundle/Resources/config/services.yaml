@@ -98,8 +98,8 @@ services:
       - { method: setContainer, arguments: ['@service_container'] }
     tags: ['controller.service_arguments']
 
-  DH\DoctrineAuditBundle\Routing\DoctrineAuditRoutingLoader:
+  DH\DoctrineAuditBundle\Routing\RoutingAnnotationLoader:
     tags: [routing.loader]
     calls:
-      - { method: setRoutingLoaderAnnotation, arguments: ['@routing.loader.annotation'] }
+      - { method: setAnnotatedRouteControllerLoader, arguments: ['@routing.loader.annotation'] }
       - { method: setConfiguration, arguments: ['%dh_doctrine_audit.configuration%'] }

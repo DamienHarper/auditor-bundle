@@ -5,15 +5,14 @@ namespace DH\DoctrineAuditBundle\Routing;
 use DH\DoctrineAuditBundle\Controller\ViewerController;
 use Symfony\Bundle\FrameworkBundle\Routing\AnnotatedRouteControllerLoader;
 use Symfony\Component\Config\Loader\Loader;
-use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Routing\RouteCollection;
 
-class RoutingAnnotationLoader extends Loader implements LoaderInterface
+class RoutingAnnotationLoader extends Loader
 {
     /**
      * @var AnnotatedRouteControllerLoader
      */
-    private $annotationLoader;
+    private $annotatedRouteControllerLoader;
 
     /**
      * @var array
@@ -24,7 +23,7 @@ class RoutingAnnotationLoader extends Loader implements LoaderInterface
     {
         $routeCollection = new RouteCollection();
         if (true === $this->configuration['enabled_viewer']) {
-            $routeCollection = $this->annotationLoader->load(ViewerController::class);
+            $routeCollection = $this->annotatedRouteControllerLoader->load(ViewerController::class);
         }
 
         return $routeCollection;
@@ -32,6 +31,16 @@ class RoutingAnnotationLoader extends Loader implements LoaderInterface
 
     public function supports($resource, ?string $type = null): bool
     {
-        return 'audit_loader' === $type;
+        return 'annotation' === $type;
+    }
+
+    public function setAnnotatedRouteControllerLoader(AnnotatedRouteControllerLoader $annotatedRouteController): void
+    {
+        $this->annotatedRouteControllerLoader = $annotatedRouteController;
+    }
+
+    public function setConfiguration(array $configuration): void
+    {
+        $this->configuration = $configuration;
     }
 }
