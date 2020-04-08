@@ -1,6 +1,6 @@
 {% macro dump(value, separator) %}
 {% import _self as helper %}
-{% import '@DHDoctrineAudit/Audit/bootstrap.html.twig' as bootstrap %}
+{% import '@DHDoctrineAudit/Audit/helpers/bootstrap.html.twig' as bootstrap %}
 {% apply spaceless %}
     {% if value.label is defined %}
         {{ value.label }}
