@@ -4,7 +4,7 @@ namespace DH\DoctrineAuditBundle\Event;
 
 use DH\DoctrineAuditBundle\DBAL\Logger;
 use DH\DoctrineAuditBundle\DBAL\LoggerChain;
-use DH\DoctrineAuditBundle\Manager\Manager;
+use DH\DoctrineAuditBundle\Manager\TransactionManager;
 use DH\DoctrineAuditBundle\Model\Transaction;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Logging\SQLLogger;
@@ -14,7 +14,7 @@ use Doctrine\ORM\Events;
 class DoctrineSubscriber implements EventSubscriber
 {
     /**
-     * @var Manager
+     * @var TransactionManager
      */
     private $manager;
 
@@ -23,7 +23,7 @@ class DoctrineSubscriber implements EventSubscriber
      */
     private $loggerBackup;
 
-    public function __construct(Manager $manager)
+    public function __construct(TransactionManager $manager)
     {
         $this->manager = $manager;
     }

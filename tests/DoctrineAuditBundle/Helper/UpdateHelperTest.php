@@ -6,7 +6,7 @@ use DH\DoctrineAuditBundle\Configuration as AuditConfiguration;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Helper\SchemaHelper;
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
-use DH\DoctrineAuditBundle\Manager\Manager;
+use DH\DoctrineAuditBundle\Manager\TransactionManager;
 use DH\DoctrineAuditBundle\Tests\BaseTest;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\DBAL\Schema\Table;
@@ -27,7 +27,7 @@ final class UpdateHelperTest extends BaseTest
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $manager = new TransactionManager($configuration, $helper);
         $reader = $this->getReader($this->getAuditConfiguration());
         $updater = new UpdateHelper($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
@@ -59,7 +59,7 @@ final class UpdateHelperTest extends BaseTest
         $configuration = $this->getAuditConfiguration();
         $em = $configuration->getEntityManager();
         $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $manager = new TransactionManager($configuration, $helper);
         $reader = $this->getReader($this->getAuditConfiguration());
         $updater = new UpdateHelper($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
@@ -105,7 +105,7 @@ final class UpdateHelperTest extends BaseTest
         $configuration = $this->getAuditConfiguration();
         $em = $configuration->getEntityManager();
         $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $manager = new TransactionManager($configuration, $helper);
         $reader = $this->getReader($this->getAuditConfiguration());
         $updater = new UpdateHelper($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
@@ -308,7 +308,7 @@ final class UpdateHelperTest extends BaseTest
         $this->setAuditConfiguration($this->createAuditConfiguration([], $this->em));
         $configuration = $this->getAuditConfiguration();
 
-        $this->auditManager = new Manager($configuration, new AuditHelper($configuration));
+        $this->auditManager = new TransactionManager($configuration, new AuditHelper($configuration));
 
         // get rid of more global state
         $evm = $connection->getEventManager();

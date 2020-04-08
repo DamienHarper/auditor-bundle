@@ -4,7 +4,7 @@ namespace DH\DoctrineAuditBundle\Helper;
 
 use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Exception\UpdateException;
-use DH\DoctrineAuditBundle\Manager\Manager;
+use DH\DoctrineAuditBundle\Manager\TransactionManager;
 use DH\DoctrineAuditBundle\Reader\Reader;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Schema;
@@ -14,7 +14,7 @@ use Exception;
 class UpdateHelper
 {
     /**
-     * @var Manager
+     * @var TransactionManager
      */
     private $manager;
 
@@ -24,10 +24,10 @@ class UpdateHelper
     private $reader;
 
     /**
-     * @param Manager $manager
+     * @param TransactionManager $manager
      * @param Reader  $reader
      */
-    public function __construct(Manager $manager, Reader $reader)
+    public function __construct(TransactionManager $manager, Reader $reader)
     {
         $this->manager = $manager;
         $this->reader = $reader;

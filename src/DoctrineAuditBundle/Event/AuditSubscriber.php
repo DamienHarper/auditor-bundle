@@ -2,17 +2,17 @@
 
 namespace DH\DoctrineAuditBundle\Event;
 
-use DH\DoctrineAuditBundle\Manager\Manager;
+use DH\DoctrineAuditBundle\Manager\TransactionManager;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class AuditSubscriber implements EventSubscriberInterface
 {
     /**
-     * @var Manager
+     * @var TransactionManager
      */
     private $manager;
 
-    public function __construct(Manager $manager)
+    public function __construct(TransactionManager $manager)
     {
         $this->manager = $manager;
     }

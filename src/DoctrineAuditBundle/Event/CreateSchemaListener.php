@@ -3,7 +3,7 @@
 namespace DH\DoctrineAuditBundle\Event;
 
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
-use DH\DoctrineAuditBundle\Manager\Manager;
+use DH\DoctrineAuditBundle\Manager\TransactionManager;
 use DH\DoctrineAuditBundle\Reader\Reader;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
@@ -14,7 +14,7 @@ use Exception;
 class CreateSchemaListener implements EventSubscriber
 {
     /**
-     * @var Manager
+     * @var TransactionManager
      */
     protected $manager;
 
@@ -23,7 +23,7 @@ class CreateSchemaListener implements EventSubscriber
      */
     protected $reader;
 
-    public function __construct(Manager $manager, Reader $reader)
+    public function __construct(TransactionManager $manager, Reader $reader)
     {
         $this->manager = $manager;
         $this->reader = $reader;

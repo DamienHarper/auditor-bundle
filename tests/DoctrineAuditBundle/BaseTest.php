@@ -9,7 +9,7 @@ use DH\DoctrineAuditBundle\Event\CreateSchemaListener;
 use DH\DoctrineAuditBundle\Event\DoctrineSubscriber;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Helper\UpdateHelper;
-use DH\DoctrineAuditBundle\Manager\Manager;
+use DH\DoctrineAuditBundle\Manager\TransactionManager;
 use DH\DoctrineAuditBundle\Reader\Reader;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use Doctrine\Common\Cache\ArrayCache;
@@ -145,7 +145,7 @@ abstract class BaseTest extends TestCase
     {
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $manager = new TransactionManager($configuration, $helper);
         $reader = $this->getReader($this->getAuditConfiguration());
 
         $updater = new UpdateHelper($manager, $reader);
@@ -246,7 +246,7 @@ abstract class BaseTest extends TestCase
         $this->setAuditConfiguration($this->createAuditConfiguration([], $this->em));
         $configuration = $this->getAuditConfiguration();
 
-        $this->auditManager = new Manager($configuration, new AuditHelper($configuration));
+        $this->auditManager = new TransactionManager($configuration, new AuditHelper($configuration));
 
         $configuration->getEventDispatcher()->addSubscriber(new AuditSubscriber($this->auditManager));
 
@@ -278,7 +278,7 @@ abstract class BaseTest extends TestCase
         return self::$conn;
     }
 
-    protected function getEventDispatcher(Manager $manager): EventDispatcherInterface
+    protected function getEventDispatcher(TransactionManager $manager): EventDispatcherInterface
     {
         if (null !== $this->dispatcher) {
             $this->dispatcher = new EventDispatcher();

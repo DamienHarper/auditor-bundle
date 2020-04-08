@@ -5,7 +5,7 @@ namespace DH\DoctrineAuditBundle\Tests\Manager;
 use DateTime;
 use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
-use DH\DoctrineAuditBundle\Manager\Manager;
+use DH\DoctrineAuditBundle\Manager\TransactionManager;
 use DH\DoctrineAuditBundle\Reader\Reader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Author;
@@ -15,14 +15,14 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Tag;
 /**
  * @internal
  */
-final class ManagerTest extends CoreTest
+final class TransactionManagerTest extends CoreTest
 {
     public function testInsert(): void
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $manager = new TransactionManager($configuration, $helper);
         $reader = new Reader($configuration, $em);
 
         $author = new Author();
@@ -63,7 +63,7 @@ final class ManagerTest extends CoreTest
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $manager = new TransactionManager($configuration, $helper);
         $reader = new Reader($configuration, $em);
 
         $author = new Author();
@@ -104,7 +104,7 @@ final class ManagerTest extends CoreTest
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $manager = new TransactionManager($configuration, $helper);
         $reader = new Reader($configuration, $em);
 
         $author = new Author();
@@ -138,7 +138,7 @@ final class ManagerTest extends CoreTest
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $manager = new TransactionManager($configuration, $helper);
         $reader = new Reader($configuration, $em);
 
         $author = new Author();
@@ -210,7 +210,7 @@ final class ManagerTest extends CoreTest
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $manager = new TransactionManager($configuration, $helper);
         $reader = new Reader($configuration, $em);
 
         $author = new Author();
@@ -279,7 +279,7 @@ final class ManagerTest extends CoreTest
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $manager = new TransactionManager($configuration, $helper);
         $reader = new Reader($configuration, $em);
 
         $author = new Author();
@@ -418,7 +418,7 @@ final class ManagerTest extends CoreTest
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $manager = new TransactionManager($configuration, $helper);
         $reader = new Reader($configuration, $em);
 
         $author = new Author();
@@ -537,7 +537,7 @@ final class ManagerTest extends CoreTest
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $manager = new TransactionManager($configuration, $helper);
 
         self::assertInstanceOf(Configuration::class, $manager->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
     }
@@ -547,7 +547,7 @@ final class ManagerTest extends CoreTest
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
         $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $manager = new TransactionManager($configuration, $helper);
 
         self::assertInstanceOf(AuditHelper::class, $manager->getHelper(), 'helper instanceof AuditHelper::class');
     }

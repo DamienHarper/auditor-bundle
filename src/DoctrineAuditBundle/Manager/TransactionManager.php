@@ -13,7 +13,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
-class Manager
+class TransactionManager
 {
     /**
      * @var \DH\DoctrineAuditBundle\Configuration
