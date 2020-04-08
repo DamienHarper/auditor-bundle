@@ -2,8 +2,8 @@
 
 namespace DH\DoctrineAuditBundle\Event;
 
-use DH\DoctrineAuditBundle\Manager\UpdateManager;
 use DH\DoctrineAuditBundle\Manager\TransactionManager;
+use DH\DoctrineAuditBundle\Manager\UpdateManager;
 use DH\DoctrineAuditBundle\Reader\Reader;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;

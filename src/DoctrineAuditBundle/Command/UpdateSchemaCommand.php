@@ -2,8 +2,8 @@
 
 namespace DH\DoctrineAuditBundle\Command;
 
-use DH\DoctrineAuditBundle\Manager\UpdateManager;
 use DH\DoctrineAuditBundle\Manager\TransactionManager;
+use DH\DoctrineAuditBundle\Manager\UpdateManager;
 use DH\DoctrineAuditBundle\Reader\Reader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
