@@ -7,6 +7,7 @@ use DH\DoctrineAuditBundle\Annotation\Security;
 use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Exception\AccessDeniedException;
 use DH\DoctrineAuditBundle\Exception\InvalidArgumentException;
+use DH\DoctrineAuditBundle\Model\Entry;
 use DH\DoctrineAuditBundle\User\UserInterface;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;

@@ -4,7 +4,7 @@ namespace DH\DoctrineAuditBundle\Tests\Reader;
 
 use DateTime;
 use DH\DoctrineAuditBundle\Configuration;
-use DH\DoctrineAuditBundle\Reader\Entry;
+use DH\DoctrineAuditBundle\Model\Entry;
 use DH\DoctrineAuditBundle\Reader\Reader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Annotation\AuditedEntity;
@@ -274,7 +274,7 @@ final class ReaderTest extends CoreTest
 
         self::assertCount(3, $audits, 'result count is ok.');
 
-        /** @var Entry[] $audits */
+        /** @var \DH\DoctrineAuditBundle\Model\Entry[] $audits */
         $audits = $reader->getAudits(Comment::class, 1, 1, 50);
 
         self::assertCount(1, $audits, 'result count is ok.');

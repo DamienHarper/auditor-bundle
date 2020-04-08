@@ -1,6 +1,6 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Reader;
+namespace DH\DoctrineAuditBundle\Model;
 
 class Entry
 {
