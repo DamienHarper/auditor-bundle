@@ -2,8 +2,12 @@
 
 namespace DH\DoctrineAuditBundle\Helper;
 
-class SchemaHelper
+final class SchemaHelper
 {
+    private function __construct()
+    {
+    }
+
     /**
      * Return columns of audit tables.
      *
