@@ -1,11 +1,11 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests\Manager;
+namespace DH\DoctrineAuditBundle\Tests\Model;
 
 use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
-use DH\DoctrineAuditBundle\Manager\Transaction;
+use DH\DoctrineAuditBundle\Model\Transaction;
 use DH\DoctrineAuditBundle\Tests\BaseTest;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use Doctrine\ORM\EntityManager;

@@ -3,7 +3,7 @@
 namespace DH\DoctrineAuditBundle\Tests\Event;
 
 use DateTime;
-use DH\DoctrineAuditBundle\Reader\Entry;
+use DH\DoctrineAuditBundle\Model\Entry;
 use DH\DoctrineAuditBundle\Reader\Reader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Author;
@@ -931,7 +931,7 @@ final class DoctrineSubscriberTest extends CoreTest
         $em->persist($post);
         $em->flush();
 
-        /** @var Entry[] $audits */
+        /** @var \DH\DoctrineAuditBundle\Model\Entry[] $audits */
         $audits = $reader->getAudits(Author::class);
 
         self::assertCount(1, $audits, 'result count is ok.');

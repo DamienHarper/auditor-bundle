@@ -8,6 +8,7 @@ use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Event\LifecycleEvent;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
+use DH\DoctrineAuditBundle\Model\Transaction;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;

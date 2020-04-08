@@ -5,7 +5,7 @@ namespace DH\DoctrineAuditBundle\Event;
 use DH\DoctrineAuditBundle\DBAL\Logger;
 use DH\DoctrineAuditBundle\DBAL\LoggerChain;
 use DH\DoctrineAuditBundle\Manager\Manager;
-use DH\DoctrineAuditBundle\Manager\Transaction;
+use DH\DoctrineAuditBundle\Model\Transaction;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Logging\SQLLogger;
 use Doctrine\ORM\Event\OnFlushEventArgs;
