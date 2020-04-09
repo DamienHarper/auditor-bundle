@@ -17,7 +17,7 @@ use Exception;
 class TransactionManager
 {
     /**
-     * @var \DH\DoctrineAuditBundle\Configuration
+     * @var Configuration
      */
     private $configuration;
 
@@ -39,7 +39,7 @@ class TransactionManager
     }
 
     /**
-     * @return \DH\DoctrineAuditBundle\Configuration
+     * @return Configuration
      */
     public function getConfiguration(): Configuration
     {
@@ -220,6 +220,27 @@ class TransactionManager
     }
 
     /**
+     * @param EntityManagerInterface $em
+     *
+     * @return EntityManagerInterface
+     */
+    public function selectStorageSpace(EntityManagerInterface $em): EntityManagerInterface
+    {
+        return $this->configuration->getEntityManager() ?? $em;
+    }
+
+    public function populate(Transaction $transaction): void
+    {
+        $uow = $this->em->getUnitOfWork();
+
+        $this->populateWithScheduledInsertions($transaction, $uow);
+        $this->populateWithScheduledUpdates($transaction, $uow);
+        $this->populateWithScheduledDeletions($transaction, $uow, $this->em);
+        $this->populateWithScheduledCollectionUpdates($transaction, $uow, $this->em);
+        $this->populateWithScheduledCollectionDeletions($transaction, $uow, $this->em);
+    }
+
+    /**
      * @param Transaction $transaction
      *
      * @throws \Doctrine\DBAL\DBALException
@@ -288,29 +309,6 @@ class TransactionManager
         foreach ($transaction->getRemoved() as [$entity, $id]) {
             $this->remove($this->em, $entity, $id, $transaction->getTransactionHash());
         }
-    }
-
-    /**
-     * @param EntityManagerInterface $em
-     *
-     * @return EntityManagerInterface
-     */
-    public function selectStorageSpace(EntityManagerInterface $em): EntityManagerInterface
-    {
-        return $this->configuration->getEntityManager() ?? $em;
-    }
-
-    //
-
-    public function populate(Transaction $transaction): void
-    {
-        $uow = $this->em->getUnitOfWork();
-
-        $this->populateWithScheduledInsertions($transaction, $uow);
-        $this->populateWithScheduledUpdates($transaction, $uow);
-        $this->populateWithScheduledDeletions($transaction, $uow, $this->em);
-        $this->populateWithScheduledCollectionUpdates($transaction, $uow, $this->em);
-        $this->populateWithScheduledCollectionDeletions($transaction, $uow, $this->em);
     }
 
     /**
