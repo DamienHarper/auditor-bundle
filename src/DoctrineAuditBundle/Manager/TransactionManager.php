@@ -42,22 +42,6 @@ class TransactionManager
     }
 
     /**
-     * @param array $payload
-     */
-    public function notify(array $payload): void
-    {
-        $dispatcher = $this->configuration->getEventDispatcher();
-
-        if ($this->configuration->isPre43Dispatcher()) {
-            // Symfony 3.x
-            $dispatcher->dispatch(LifecycleEvent::class, new LifecycleEvent($payload));
-        } else {
-            // Symfony 4.x
-            $dispatcher->dispatch(new LifecycleEvent($payload));
-        }
-    }
-
-    /**
      * @param Transaction $transaction
      *
      * @throws \Doctrine\DBAL\DBALException
@@ -91,6 +75,22 @@ class TransactionManager
         $this->populateWithScheduledDeletions($transaction, $uow, $this->em);
         $this->populateWithScheduledCollectionUpdates($transaction, $uow, $this->em);
         $this->populateWithScheduledCollectionDeletions($transaction, $uow, $this->em);
+    }
+
+    /**
+     * @param array $payload
+     */
+    private function notify(array $payload): void
+    {
+        $dispatcher = $this->configuration->getEventDispatcher();
+
+        if ($this->configuration->isPre43Dispatcher()) {
+            // Symfony 3.x
+            $dispatcher->dispatch(LifecycleEvent::class, new LifecycleEvent($payload));
+        } else {
+            // Symfony 4.x
+            $dispatcher->dispatch(new LifecycleEvent($payload));
+        }
     }
 
     /**
