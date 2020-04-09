@@ -2,14 +2,19 @@
 
 namespace DH\DoctrineAuditBundle\Model;
 
+use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\UnitOfWork;
 
 class Transaction
 {
+    public const INSERT = 'inserted';
+    public const UPDATE = 'updated';
+    public const REMOVE = 'removed';
+    public const ASSOCIATE = 'associated';
+    public const DISSOCIATE = 'dissociated';
+
     /**
-     * @var \DH\DoctrineAuditBundle\Configuration
+     * @var Configuration
      */
     private $configuration;
 
@@ -48,16 +53,10 @@ class Transaction
      */
     private $dissociated = [];  // [$source, $target, $id, $mapping]
 
-    /**
-     * @var EntityManagerInterface
-     */
-    private $em;
-
     public function __construct(AuditHelper $helper)
     {
         $this->helper = $helper;
         $this->configuration = $helper->getConfiguration();
-        $this->em = $this->configuration->getEntityManager();
     }
 
     /**
@@ -72,128 +71,6 @@ class Transaction
         }
 
         return $this->transaction_hash;
-    }
-
-    public function collect(): void
-    {
-        $uow = $this->em->getUnitOfWork();
-
-        $this->collectScheduledInsertions($uow);
-        $this->collectScheduledUpdates($uow);
-        $this->collectScheduledDeletions($uow, $this->em);
-        $this->collectScheduledCollectionUpdates($uow, $this->em);
-        $this->collectScheduledCollectionDeletions($uow, $this->em);
-    }
-
-    /**
-     * @param UnitOfWork $uow
-     */
-    public function collectScheduledInsertions(UnitOfWork $uow): void
-    {
-        foreach ($uow->getScheduledEntityInsertions() as $entity) {
-            if ($this->configuration->isAudited($entity)) {
-                $this->inserted[] = [
-                    $entity,
-                    $uow->getEntityChangeSet($entity),
-                ];
-            }
-        }
-    }
-
-    /**
-     * @param UnitOfWork $uow
-     */
-    public function collectScheduledUpdates(UnitOfWork $uow): void
-    {
-        foreach ($uow->getScheduledEntityUpdates() as $entity) {
-            if ($this->configuration->isAudited($entity)) {
-                $this->updated[] = [
-                    $entity,
-                    $uow->getEntityChangeSet($entity),
-                ];
-            }
-        }
-    }
-
-    /**
-     * @param UnitOfWork             $uow
-     * @param EntityManagerInterface $em
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    public function collectScheduledDeletions(UnitOfWork $uow, EntityManagerInterface $em): void
-    {
-        foreach ($uow->getScheduledEntityDeletions() as $entity) {
-            if ($this->configuration->isAudited($entity)) {
-                $uow->initializeObject($entity);
-                $this->removed[] = [
-                    $entity,
-                    $this->helper->id($em, $entity),
-                ];
-            }
-        }
-    }
-
-    /**
-     * @param UnitOfWork             $uow
-     * @param EntityManagerInterface $em
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    public function collectScheduledCollectionUpdates(UnitOfWork $uow, EntityManagerInterface $em): void
-    {
-        foreach ($uow->getScheduledCollectionUpdates() as $collection) {
-            if ($this->configuration->isAudited($collection->getOwner())) {
-                $mapping = $collection->getMapping();
-                foreach ($collection->getInsertDiff() as $entity) {
-                    if ($this->configuration->isAudited($entity)) {
-                        $this->associated[] = [
-                            $collection->getOwner(),
-                            $entity,
-                            $mapping,
-                        ];
-                    }
-                }
-                foreach ($collection->getDeleteDiff() as $entity) {
-                    if ($this->configuration->isAudited($entity)) {
-                        $this->dissociated[] = [
-                            $collection->getOwner(),
-                            $entity,
-                            $this->helper->id($em, $entity),
-                            $mapping,
-                        ];
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * @param UnitOfWork             $uow
-     * @param EntityManagerInterface $em
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
-     */
-    public function collectScheduledCollectionDeletions(UnitOfWork $uow, EntityManagerInterface $em): void
-    {
-        foreach ($uow->getScheduledCollectionDeletions() as $collection) {
-            if ($this->configuration->isAudited($collection->getOwner())) {
-                $mapping = $collection->getMapping();
-                foreach ($collection->toArray() as $entity) {
-                    if ($this->configuration->isAudited($entity)) {
-                        $this->dissociated[] = [
-                            $collection->getOwner(),
-                            $entity,
-                            $this->helper->id($em, $entity),
-                            $mapping,
-                        ];
-                    }
-                }
-            }
-        }
     }
 
     public function getInserted(): array
@@ -221,8 +98,8 @@ class Transaction
         return $this->dissociated;
     }
 
-    public function getEntityManager(): EntityManagerInterface
+    public function trackAuditEvent(string $type, array $data): void
     {
-        return $this->em;
+        $this->{$type}[] = $data;
     }
 }

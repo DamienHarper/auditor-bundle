@@ -66,7 +66,7 @@ class DoctrineSubscriber implements EventSubscriber
         $em->getConnection()->getConfiguration()->setSQLLogger($loggerChain);
 
         // Populate transaction
-        $transaction->collect();
+        $this->manager->populate($transaction);
     }
 
     /**

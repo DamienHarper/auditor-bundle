@@ -11,6 +11,7 @@ use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
 use DH\DoctrineAuditBundle\Model\Transaction;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\UnitOfWork;
 use Exception;
 
 class TransactionManager
@@ -25,10 +26,16 @@ class TransactionManager
      */
     private $helper;
 
+    /**
+     * @var EntityManagerInterface
+     */
+    private $em;
+
     public function __construct(Configuration $configuration, AuditHelper $helper)
     {
         $this->configuration = $configuration;
         $this->helper = $helper;
+        $this->em = $this->configuration->getEntityManager();
     }
 
     /**
@@ -220,12 +227,11 @@ class TransactionManager
      */
     public function processInsertions(Transaction $transaction): void
     {
-        $em = $transaction->getEntityManager();
-        $uow = $em->getUnitOfWork();
+        $uow = $this->em->getUnitOfWork();
         foreach ($transaction->getInserted() as list($entity, $ch)) {
             // the changeset might be updated from UOW extra updates
             $ch = array_merge($ch, $uow->getEntityChangeSet($entity));
-            $this->insert($em, $entity, $ch, $transaction->getTransactionHash());
+            $this->insert($this->em, $entity, $ch, $transaction->getTransactionHash());
         }
     }
 
@@ -237,12 +243,11 @@ class TransactionManager
      */
     public function processUpdates(Transaction $transaction): void
     {
-        $em = $transaction->getEntityManager();
-        $uow = $em->getUnitOfWork();
+        $uow = $this->em->getUnitOfWork();
         foreach ($transaction->getUpdated() as list($entity, $ch)) {
             // the changeset might be updated from UOW extra updates
             $ch = array_merge($ch, $uow->getEntityChangeSet($entity));
-            $this->update($em, $entity, $ch, $transaction->getTransactionHash());
+            $this->update($this->em, $entity, $ch, $transaction->getTransactionHash());
         }
     }
 
@@ -254,9 +259,8 @@ class TransactionManager
      */
     public function processAssociations(Transaction $transaction): void
     {
-        $em = $transaction->getEntityManager();
         foreach ($transaction->getAssociated() as list($source, $target, $mapping)) {
-            $this->associate($em, $source, $target, $mapping, $transaction->getTransactionHash());
+            $this->associate($this->em, $source, $target, $mapping, $transaction->getTransactionHash());
         }
     }
 
@@ -268,9 +272,8 @@ class TransactionManager
      */
     public function processDissociations(Transaction $transaction): void
     {
-        $em = $transaction->getEntityManager();
         foreach ($transaction->getDissociated() as list($source, $target, $id, $mapping)) {
-            $this->dissociate($em, $source, $target, $mapping, $transaction->getTransactionHash());
+            $this->dissociate($this->em, $source, $target, $mapping, $transaction->getTransactionHash());
         }
     }
 
@@ -282,9 +285,8 @@ class TransactionManager
      */
     public function processDeletions(Transaction $transaction): void
     {
-        $em = $transaction->getEntityManager();
         foreach ($transaction->getRemoved() as list($entity, $id)) {
-            $this->remove($em, $entity, $id, $transaction->getTransactionHash());
+            $this->remove($this->em, $entity, $id, $transaction->getTransactionHash());
         }
     }
 
@@ -296,6 +298,130 @@ class TransactionManager
     public function selectStorageSpace(EntityManagerInterface $em): EntityManagerInterface
     {
         return $this->configuration->getEntityManager() ?? $em;
+    }
+
+    //
+
+    public function populate(Transaction $transaction): void
+    {
+        $uow = $this->em->getUnitOfWork();
+
+        $this->populateWithScheduledInsertions($transaction, $uow);
+        $this->populateWithScheduledUpdates($transaction, $uow);
+        $this->populateWithScheduledDeletions($transaction, $uow, $this->em);
+        $this->populateWithScheduledCollectionUpdates($transaction, $uow, $this->em);
+        $this->populateWithScheduledCollectionDeletions($transaction, $uow, $this->em);
+    }
+
+    /**
+     * @param UnitOfWork $uow
+     */
+    public function populateWithScheduledInsertions(Transaction $transaction, UnitOfWork $uow): void
+    {
+        foreach ($uow->getScheduledEntityInsertions() as $entity) {
+            if ($this->configuration->isAudited($entity)) {
+                $transaction->trackAuditEvent(Transaction::INSERT, [
+                    $entity,
+                    $uow->getEntityChangeSet($entity),
+                ]);
+            }
+        }
+    }
+
+    /**
+     * @param UnitOfWork $uow
+     */
+    public function populateWithScheduledUpdates(Transaction $transaction, UnitOfWork $uow): void
+    {
+        foreach ($uow->getScheduledEntityUpdates() as $entity) {
+            if ($this->configuration->isAudited($entity)) {
+                $transaction->trackAuditEvent(Transaction::UPDATE, [
+                    $entity,
+                    $uow->getEntityChangeSet($entity),
+                ]);
+            }
+        }
+    }
+
+    /**
+     * @param UnitOfWork             $uow
+     * @param EntityManagerInterface $em
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    public function populateWithScheduledDeletions(Transaction $transaction, UnitOfWork $uow, EntityManagerInterface $em): void
+    {
+        foreach ($uow->getScheduledEntityDeletions() as $entity) {
+            if ($this->configuration->isAudited($entity)) {
+                $uow->initializeObject($entity);
+                $transaction->trackAuditEvent(Transaction::REMOVE, [
+                    $entity,
+                    $this->helper->id($em, $entity),
+                ]);
+            }
+        }
+    }
+
+    /**
+     * @param UnitOfWork             $uow
+     * @param EntityManagerInterface $em
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    public function populateWithScheduledCollectionUpdates(Transaction $transaction, UnitOfWork $uow, EntityManagerInterface $em): void
+    {
+        foreach ($uow->getScheduledCollectionUpdates() as $collection) {
+            if ($this->configuration->isAudited($collection->getOwner())) {
+                $mapping = $collection->getMapping();
+                foreach ($collection->getInsertDiff() as $entity) {
+                    if ($this->configuration->isAudited($entity)) {
+                        $transaction->trackAuditEvent(Transaction::ASSOCIATE, [
+                            $collection->getOwner(),
+                            $entity,
+                            $mapping,
+                        ]);
+                    }
+                }
+                foreach ($collection->getDeleteDiff() as $entity) {
+                    if ($this->configuration->isAudited($entity)) {
+                        $transaction->trackAuditEvent(Transaction::DISSOCIATE, [
+                            $collection->getOwner(),
+                            $entity,
+                            $this->helper->id($em, $entity),
+                            $mapping,
+                        ]);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param UnitOfWork             $uow
+     * @param EntityManagerInterface $em
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     */
+    public function populateWithScheduledCollectionDeletions(Transaction $transaction, UnitOfWork $uow, EntityManagerInterface $em): void
+    {
+        foreach ($uow->getScheduledCollectionDeletions() as $collection) {
+            if ($this->configuration->isAudited($collection->getOwner())) {
+                $mapping = $collection->getMapping();
+                foreach ($collection->toArray() as $entity) {
+                    if ($this->configuration->isAudited($entity)) {
+                        $transaction->trackAuditEvent(Transaction::DISSOCIATE, [
+                            $collection->getOwner(),
+                            $entity,
+                            $this->helper->id($em, $entity),
+                            $mapping,
+                        ]);
+                    }
+                }
+            }
+        }
     }
 
     /**
