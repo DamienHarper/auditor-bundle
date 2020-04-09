@@ -42,7 +42,7 @@ class DoctrineSubscriber implements EventSubscriber
     public function onFlush(OnFlushEventArgs $args): void
     {
         $em = $args->getEntityManager();
-        $transaction = new Transaction($this->manager->getHelper());
+        $transaction = new Transaction();
 
         // extend the SQL logger
         $this->loggerBackup = $em->getConnection()->getConfiguration()->getSQLLogger();

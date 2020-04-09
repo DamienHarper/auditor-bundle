@@ -2,9 +2,6 @@
 
 namespace DH\DoctrineAuditBundle\Model;
 
-use DH\DoctrineAuditBundle\Configuration;
-use DH\DoctrineAuditBundle\Helper\AuditHelper;
-
 class Transaction
 {
     public const INSERT = 'inserted';
@@ -12,16 +9,6 @@ class Transaction
     public const REMOVE = 'removed';
     public const ASSOCIATE = 'associated';
     public const DISSOCIATE = 'dissociated';
-
-    /**
-     * @var Configuration
-     */
-    private $configuration;
-
-    /**
-     * @var AuditHelper
-     */
-    private $helper;
 
     /**
      * @var null|string
@@ -52,12 +39,6 @@ class Transaction
      * @var array
      */
     private $dissociated = [];  // [$source, $target, $id, $mapping]
-
-    public function __construct(AuditHelper $helper)
-    {
-        $this->helper = $helper;
-        $this->configuration = $helper->getConfiguration();
-    }
 
     /**
      * Returns transaction hash.
