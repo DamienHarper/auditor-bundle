@@ -8,7 +8,7 @@ Add the following routes to the routing configuration to enable the included aud
 ```yaml
 dh_doctrine_audit:
     resource: "@DHDoctrineAuditBundle/Controller/"
-    type: audit_annotation
+    type: audit
 ``` 
 
 ## Security / Access control

@@ -92,6 +92,6 @@ services:
 
   DH\DoctrineAuditBundle\Routing\RoutingAnnotationLoader:
     tags: [routing.loader]
-    calls:
-      - { method: setAnnotatedRouteControllerLoader, arguments: ['@routing.loader.annotation'] }
-      - { method: setConfiguration, arguments: ['%dh_doctrine_audit.configuration%'] }
+    arguments:
+      - '@routing.loader.annotation'
+      - '%dh_doctrine_audit.configuration%'
