@@ -9,6 +9,8 @@ use DH\DoctrineAuditBundle\Event\LifecycleEvent;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
 use DH\DoctrineAuditBundle\Model\Transaction;
+use DH\DoctrineAuditBundle\User\UserInterface;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\UnitOfWork;
@@ -94,11 +96,11 @@ class TransactionManager
         $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
         $this->audit([
             'action' => 'insert',
-            'blame' => $this->helper->blame(),
-            'diff' => $this->helper->diff($em, $entity, $ch),
+            'blame' => $this->blame(),
+            'diff' => $this->diff($em, $entity, $ch),
             'table' => $meta->getTableName(),
             'schema' => $meta->getSchemaName(),
-            'id' => $this->helper->id($em, $entity),
+            'id' => $this->id($em, $entity),
             'transaction_hash' => $transactionHash,
             'discriminator' => $this->getDiscriminator($entity, $meta->inheritanceType),
             'entity' => $meta->getName(),
@@ -118,7 +120,7 @@ class TransactionManager
      */
     public function update(EntityManagerInterface $em, $entity, array $ch, string $transactionHash): void
     {
-        $diff = $this->helper->diff($em, $entity, $ch);
+        $diff = $this->diff($em, $entity, $ch);
         if (0 === \count($diff)) {
             return; // if there is no entity diff, do not log it
         }
@@ -126,11 +128,11 @@ class TransactionManager
         $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
         $this->audit([
             'action' => 'update',
-            'blame' => $this->helper->blame(),
+            'blame' => $this->blame(),
             'diff' => $diff,
             'table' => $meta->getTableName(),
             'schema' => $meta->getSchemaName(),
-            'id' => $this->helper->id($em, $entity),
+            'id' => $this->id($em, $entity),
             'transaction_hash' => $transactionHash,
             'discriminator' => $this->getDiscriminator($entity, $meta->inheritanceType),
             'entity' => $meta->getName(),
@@ -154,8 +156,8 @@ class TransactionManager
         $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
         $this->audit([
             'action' => 'remove',
-            'blame' => $this->helper->blame(),
-            'diff' => $this->helper->summarize($em, $entity, $id),
+            'blame' => $this->blame(),
+            'diff' => $this->summarize($em, $entity, $id),
             'table' => $meta->getTableName(),
             'schema' => $meta->getSchemaName(),
             'id' => $id,
@@ -238,6 +240,177 @@ class TransactionManager
         $this->populateWithScheduledDeletions($transaction, $uow, $this->em);
         $this->populateWithScheduledCollectionUpdates($transaction, $uow, $this->em);
         $this->populateWithScheduledCollectionDeletions($transaction, $uow, $this->em);
+    }
+
+    /**
+     * Blames an audit operation.
+     *
+     * @return array
+     */
+    public function blame(): array
+    {
+        $user_id = null;
+        $username = null;
+        $client_ip = null;
+        $user_fqdn = null;
+        $user_firewall = null;
+
+        $request = $this->configuration->getRequestStack()->getCurrentRequest();
+        if (null !== $request) {
+            $client_ip = $request->getClientIp();
+            $user_firewall = null === $this->configuration->getFirewallMap()->getFirewallConfig($request) ? null : $this->configuration->getFirewallMap()->getFirewallConfig($request)->getName();
+        }
+
+        $user = null === $this->configuration->getUserProvider() ? null : $this->configuration->getUserProvider()->getUser();
+        if ($user instanceof UserInterface) {
+            $user_id = $user->getId();
+            $username = $user->getUsername();
+            $user_fqdn = DoctrineHelper::getRealClassName($user);
+        }
+
+        return [
+            'user_id' => $user_id,
+            'username' => $username,
+            'client_ip' => $client_ip,
+            'user_fqdn' => $user_fqdn,
+            'user_firewall' => $user_firewall,
+        ];
+    }
+
+    /**
+     * Returns the primary key value of an entity.
+     *
+     * @param EntityManagerInterface $em
+     * @param object                 $entity
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     *
+     * @return mixed
+     */
+    public function id(EntityManagerInterface $em, $entity)
+    {
+        /** @var ClassMetadata $meta */
+        $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
+        $pk = $meta->getSingleIdentifierFieldName();
+
+        if (isset($meta->fieldMappings[$pk])) {
+            $type = Type::getType($meta->fieldMappings[$pk]['type']);
+
+            return $this->value($em, $type, $meta->getReflectionProperty($pk)->getValue($entity));
+        }
+
+        /**
+         * Primary key is not part of fieldMapping.
+         *
+         * @see https://github.com/DamienHarper/DoctrineAuditBundle/issues/40
+         * @see https://www.doctrine-project.org/projects/doctrine-orm/en/latest/tutorials/composite-primary-keys.html#identity-through-foreign-entities
+         * We try to get it from associationMapping (will throw a MappingException if not available)
+         */
+        $targetEntity = $meta->getReflectionProperty($pk)->getValue($entity);
+
+        $mapping = $meta->getAssociationMapping($pk);
+
+        /** @var ClassMetadata $meta */
+        $meta = $em->getClassMetadata($mapping['targetEntity']);
+        $pk = $meta->getSingleIdentifierFieldName();
+        $type = Type::getType($meta->fieldMappings[$pk]['type']);
+
+        return $this->value($em, $type, $meta->getReflectionProperty($pk)->getValue($targetEntity));
+    }
+
+    /**
+     * Computes a usable diff.
+     *
+     * @param EntityManagerInterface $em
+     * @param object                 $entity
+     * @param array                  $ch
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     *
+     * @return array
+     */
+    public function diff(EntityManagerInterface $em, $entity, array $ch): array
+    {
+        /** @var ClassMetadata $meta */
+        $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
+        $diff = [];
+
+        foreach ($ch as $fieldName => list($old, $new)) {
+            $o = null;
+            $n = null;
+
+            if (
+                $meta->hasField($fieldName) &&
+                !isset($meta->embeddedClasses[$fieldName]) &&
+                $this->configuration->isAuditedField($entity, $fieldName)
+            ) {
+                $mapping = $meta->fieldMappings[$fieldName];
+                $type = Type::getType($mapping['type']);
+                $o = $this->value($em, $type, $old);
+                $n = $this->value($em, $type, $new);
+            } elseif (
+                $meta->hasAssociation($fieldName) &&
+                $meta->isSingleValuedAssociation($fieldName) &&
+                $this->configuration->isAuditedField($entity, $fieldName)
+            ) {
+                $o = $this->summarize($em, $old);
+                $n = $this->summarize($em, $new);
+            }
+
+            if ($o !== $n) {
+                $diff[$fieldName] = [
+                    'old' => $o,
+                    'new' => $n,
+                ];
+            }
+        }
+        ksort($diff);
+
+        return $diff;
+    }
+
+    /**
+     * Returns an array describing an entity.
+     *
+     * @param EntityManagerInterface $em
+     * @param object                 $entity
+     * @param mixed                  $id
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\Mapping\MappingException
+     *
+     * @return array
+     */
+    public function summarize(EntityManagerInterface $em, $entity = null, $id = null): ?array
+    {
+        if (null === $entity) {
+            return null;
+        }
+
+        $em->getUnitOfWork()->initializeObject($entity); // ensure that proxies are initialized
+        /** @var ClassMetadata $meta */
+        $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
+        $pkName = $meta->getSingleIdentifierFieldName();
+        $pkValue = $id ?? $this->id($em, $entity);
+        // An added guard for proxies that fail to initialize.
+        if (null === $pkValue) {
+            return null;
+        }
+
+        if (method_exists($entity, '__toString')) {
+            $label = (string) $entity;
+        } else {
+            $label = DoctrineHelper::getRealClassName($entity).'#'.$pkValue;
+        }
+
+        return [
+            'label' => $label,
+            'class' => $meta->name,
+            'table' => $meta->getTableName(),
+            $pkName => $pkValue,
+        ];
     }
 
     /**
@@ -355,7 +528,7 @@ class TransactionManager
                 $uow->initializeObject($entity);
                 $transaction->trackAuditEvent(Transaction::REMOVE, [
                     $entity,
-                    $this->helper->id($em, $entity),
+                    $this->id($em, $entity),
                 ]);
             }
         }
@@ -387,7 +560,7 @@ class TransactionManager
                         $transaction->trackAuditEvent(Transaction::DISSOCIATE, [
                             $collection->getOwner(),
                             $entity,
-                            $this->helper->id($em, $entity),
+                            $this->id($em, $entity),
                             $mapping,
                         ]);
                     }
@@ -413,7 +586,7 @@ class TransactionManager
                         $transaction->trackAuditEvent(Transaction::DISSOCIATE, [
                             $collection->getOwner(),
                             $entity,
-                            $this->helper->id($em, $entity),
+                            $this->id($em, $entity),
                             $mapping,
                         ]);
                     }
@@ -441,14 +614,14 @@ class TransactionManager
         $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($source));
         $data = [
             'action' => $type,
-            'blame' => $this->helper->blame(),
+            'blame' => $this->blame(),
             'diff' => [
-                'source' => $this->helper->summarize($em, $source),
-                'target' => $this->helper->summarize($em, $target),
+                'source' => $this->summarize($em, $source),
+                'target' => $this->summarize($em, $target),
             ],
             'table' => $meta->getTableName(),
             'schema' => $meta->getSchemaName(),
-            'id' => $this->helper->id($em, $source),
+            'id' => $this->id($em, $source),
             'transaction_hash' => $transactionHash,
             'discriminator' => $this->getDiscriminator($source, $meta->inheritanceType),
             'entity' => $meta->getName(),
@@ -503,5 +676,47 @@ class TransactionManager
     private function getDiscriminator($entity, int $inheritanceType): ?string
     {
         return ClassMetadata::INHERITANCE_TYPE_SINGLE_TABLE === $inheritanceType ? DoctrineHelper::getRealClassName($entity) : null;
+    }
+
+    /**
+     * Type converts the input value and returns it.
+     *
+     * @param EntityManagerInterface $em
+     * @param Type                   $type
+     * @param mixed                  $value
+     *
+     * @throws \Doctrine\DBAL\DBALException
+     *
+     * @return mixed
+     */
+    private function value(EntityManagerInterface $em, Type $type, $value)
+    {
+        if (null === $value) {
+            return null;
+        }
+
+        $platform = $em->getConnection()->getDatabasePlatform();
+
+        switch ($type->getName()) {
+            case DoctrineHelper::getDoctrineType('BIGINT'):
+                $convertedValue = (string) $value;
+
+                break;
+            case DoctrineHelper::getDoctrineType('INTEGER'):
+            case DoctrineHelper::getDoctrineType('SMALLINT'):
+                $convertedValue = (int) $value;
+
+                break;
+            case DoctrineHelper::getDoctrineType('DECIMAL'):
+            case DoctrineHelper::getDoctrineType('FLOAT'):
+            case DoctrineHelper::getDoctrineType('BOOLEAN'):
+                $convertedValue = $type->convertToPHPValue($value, $platform);
+
+                break;
+            default:
+                $convertedValue = $type->convertToDatabaseValue($value, $platform);
+        }
+
+        return $convertedValue;
     }
 }
