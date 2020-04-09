@@ -13,6 +13,7 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Tag;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issue40\CoreCase;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issue40\DieselCase;
+use DH\DoctrineAuditBundle\Tests\ReflectionTrait;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use DH\DoctrineAuditBundle\User\User;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
@@ -26,12 +27,16 @@ use Symfony\Component\Security\Core\Security;
  */
 final class TransactionManagerTest extends CoreTest
 {
+    use ReflectionTrait;
+
     public function testInsert(): void
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
         $manager = new TransactionManager($configuration);
         $reader = new Reader($configuration, $em);
+
+        $method = $this->reflectMethod(TransactionManager::class, 'insert');
 
         $author = new Author();
         $author
@@ -40,10 +45,15 @@ final class TransactionManagerTest extends CoreTest
             ->setEmail('john.doe@gmail.com')
         ;
 
-        $manager->insert($em, $author, [
-            'fullname' => [null, 'John Doe'],
-            'email' => [null, 'john.doe@gmail.com'],
-        ], 'what-a-nice-transaction-hash');
+        $method->invokeArgs($manager, [
+            $em,
+            $author,
+            [
+                'fullname' => [null, 'John Doe'],
+                'email' => [null, 'john.doe@gmail.com'],
+            ],
+            'what-a-nice-transaction-hash'
+        ]);
 
         $audits = $reader->getAudits(Author::class);
         self::assertCount(1, $audits, 'Manager::insert() creates an audit entry.');
@@ -73,6 +83,8 @@ final class TransactionManagerTest extends CoreTest
         $manager = new TransactionManager($configuration);
         $reader = new Reader($configuration, $em);
 
+        $method = $this->reflectMethod(TransactionManager::class, 'update');
+
         $author = new Author();
         $author
             ->setId(1)
@@ -80,10 +92,14 @@ final class TransactionManagerTest extends CoreTest
             ->setEmail('john.doe@gmail.com')
         ;
 
-        $manager->update($em, $author, [
-            'fullname' => ['John Doe', 'Dark Vador'],
-            'email' => ['john.doe@gmail.com', 'dark.vador@gmail.com'],
-        ], 'what-a-nice-transaction-hash');
+        $method->invokeArgs($manager, [
+            $em,
+            $author, [
+                'fullname' => ['John Doe', 'Dark Vador'],
+                'email' => ['john.doe@gmail.com', 'dark.vador@gmail.com'],
+            ],
+            'what-a-nice-transaction-hash'
+        ]);
 
         $audits = $reader->getAudits(Author::class);
         self::assertCount(1, $audits, 'Manager::update() creates an audit entry.');
@@ -113,6 +129,8 @@ final class TransactionManagerTest extends CoreTest
         $manager = new TransactionManager($configuration);
         $reader = new Reader($configuration, $em);
 
+        $method = $this->reflectMethod(TransactionManager::class, 'remove');
+
         $author = new Author();
         $author
             ->setId(1)
@@ -120,7 +138,7 @@ final class TransactionManagerTest extends CoreTest
             ->setEmail('john.doe@gmail.com')
         ;
 
-        $manager->remove($em, $author, 1, 'what-a-nice-transaction-hash');
+        $method->invokeArgs($manager, [$em, $author, 1, 'what-a-nice-transaction-hash']);
 
         $audits = $reader->getAudits(Author::class);
         self::assertCount(1, $audits, 'Manager::remove() creates an audit entry.');
@@ -145,6 +163,8 @@ final class TransactionManagerTest extends CoreTest
         $configuration = $this->getAuditConfiguration();
         $manager = new TransactionManager($configuration);
         $reader = new Reader($configuration, $em);
+
+        $method = $this->reflectMethod(TransactionManager::class, 'associate');
 
         $author = new Author();
         $author
@@ -183,7 +203,7 @@ final class TransactionManagerTest extends CoreTest
             'isCascadeDetach' => false,
         ];
 
-        $manager->associate($em, $author, $post, $mapping, 'what-a-nice-transaction-hash');
+        $method->invokeArgs($manager, [$em, $author, $post, $mapping, 'what-a-nice-transaction-hash']);
 
         $audits = $reader->getAudits(Author::class);
         self::assertCount(1, $audits, 'Manager::associate() creates an audit entry.');
@@ -216,6 +236,8 @@ final class TransactionManagerTest extends CoreTest
         $configuration = $this->getAuditConfiguration();
         $manager = new TransactionManager($configuration);
         $reader = new Reader($configuration, $em);
+
+        $method = $this->reflectMethod(TransactionManager::class, 'dissociate');
 
         $author = new Author();
         $author
@@ -251,7 +273,7 @@ final class TransactionManagerTest extends CoreTest
             'isCascadeDetach' => false,
         ];
 
-        $manager->dissociate($em, $author, $post, $mapping, 'what-a-nice-transaction-hash');
+        $method->invokeArgs($manager, [$em, $author, $post, $mapping, 'what-a-nice-transaction-hash']);
 
         $audits = $reader->getAudits(Author::class);
         self::assertCount(1, $audits, 'Manager::dissociate() creates an audit entry.');
@@ -284,6 +306,8 @@ final class TransactionManagerTest extends CoreTest
         $configuration = $this->getAuditConfiguration();
         $manager = new TransactionManager($configuration);
         $reader = new Reader($configuration, $em);
+
+        $method = $this->reflectMethod(TransactionManager::class, 'associate');
 
         $author = new Author();
         $author
@@ -365,8 +389,8 @@ final class TransactionManagerTest extends CoreTest
             ],
         ];
 
-        $manager->associate($em, $post, $tag1, $mapping, 'what-a-nice-transaction-hash');
-        $manager->associate($em, $post, $tag2, $mapping, 'what-a-nice-transaction-hash');
+        $method->invokeArgs($manager, [$em, $post, $tag1, $mapping, 'what-a-nice-transaction-hash']);
+        $method->invokeArgs($manager, [$em, $post, $tag2, $mapping, 'what-a-nice-transaction-hash']);
 
         $audits = $reader->getAudits(Post::class);
         self::assertCount(2, $audits, 'Manager::associate() creates an audit entry per association.');
@@ -423,6 +447,9 @@ final class TransactionManagerTest extends CoreTest
         $manager = new TransactionManager($configuration);
         $reader = new Reader($configuration, $em);
 
+        $associateMethod = $this->reflectMethod(TransactionManager::class, 'associate');
+        $dissociateMethod = $this->reflectMethod(TransactionManager::class, 'dissociate');
+
         $author = new Author();
         $author
             ->setId(1)
@@ -503,10 +530,10 @@ final class TransactionManagerTest extends CoreTest
             ],
         ];
 
-        $manager->associate($em, $post, $tag1, $mapping, 'what-a-nice-transaction-hash');
-        $manager->associate($em, $post, $tag2, $mapping, 'what-a-nice-transaction-hash');
+        $associateMethod->invokeArgs($manager, [$em, $post, $tag1, $mapping, 'what-a-nice-transaction-hash']);
+        $associateMethod->invokeArgs($manager, [$em, $post, $tag2, $mapping, 'what-a-nice-transaction-hash']);
 
-        $manager->dissociate($em, $post, $tag2, $mapping, 'what-a-nice-transaction-hash');
+        $dissociateMethod->invokeArgs($manager, [$em, $post, $tag2, $mapping, 'what-a-nice-transaction-hash']);
 
         $audits = $reader->getAudits(Post::class);
         self::assertCount(3, $audits, 'Manager::dissociate() creates an audit entry.');
@@ -548,9 +575,7 @@ final class TransactionManagerTest extends CoreTest
         $configuration = $this->getAuditConfiguration();
         $manager = new TransactionManager($configuration);
 
-        $class = new \ReflectionClass(TransactionManager::class);
-        $method = $class->getMethod('blame');
-        $method->setAccessible(true);
+        $method = $this->reflectMethod(TransactionManager::class, 'blame');
 
         $expected = [
             'user_id' => 1,
@@ -585,9 +610,7 @@ final class TransactionManagerTest extends CoreTest
         );
         $manager = new TransactionManager($configuration);
 
-        $class = new \ReflectionClass(TransactionManager::class);
-        $method = $class->getMethod('blame');
-        $method->setAccessible(true);
+        $method = $this->reflectMethod(TransactionManager::class, 'blame');
 
         $expected = [
             'user_id' => 1,
@@ -622,9 +645,7 @@ final class TransactionManagerTest extends CoreTest
         );
         $manager = new TransactionManager($configuration);
 
-        $class = new \ReflectionClass(TransactionManager::class);
-        $method = $class->getMethod('blame');
-        $method->setAccessible(true);
+        $method = $this->reflectMethod(TransactionManager::class, 'blame');
 
         $expected = [
             'user_id' => null,
@@ -643,9 +664,7 @@ final class TransactionManagerTest extends CoreTest
         $configuration = $this->getAuditConfiguration();
         $manager = new TransactionManager($configuration);
 
-        $class = new \ReflectionClass(TransactionManager::class);
-        $method = $class->getMethod('summarize');
-        $method->setAccessible(true);
+        $method = $this->reflectMethod(TransactionManager::class, 'summarize');
 
         $author = new Author();
         $author
@@ -688,9 +707,7 @@ final class TransactionManagerTest extends CoreTest
         $configuration = $this->getAuditConfiguration();
         $manager = new TransactionManager($configuration);
 
-        $class = new \ReflectionClass(TransactionManager::class);
-        $method = $class->getMethod('id');
-        $method->setAccessible(true);
+        $method = $this->reflectMethod(TransactionManager::class, 'id');
 
         $author = new Author();
         $author
@@ -736,9 +753,7 @@ final class TransactionManagerTest extends CoreTest
         $configuration = $this->getAuditConfiguration();
         $manager = new TransactionManager($configuration);
 
-        $class = new \ReflectionClass(TransactionManager::class);
-        $method = $class->getMethod('diff');
-        $method->setAccessible(true);
+        $method = $this->reflectMethod(TransactionManager::class, 'diff');
 
         $author = new Author();
         $author
@@ -777,9 +792,7 @@ final class TransactionManagerTest extends CoreTest
         $configuration = $this->getAuditConfiguration();
         $manager = new TransactionManager($configuration);
 
-        $class = new \ReflectionClass(TransactionManager::class);
-        $method = $class->getMethod('diff');
-        $method->setAccessible(true);
+        $method = $this->reflectMethod(TransactionManager::class, 'diff');
 
         $author = new Author();
         $author
@@ -840,9 +853,7 @@ final class TransactionManagerTest extends CoreTest
         );
         $manager = new TransactionManager($configuration);
 
-        $class = new \ReflectionClass(TransactionManager::class);
-        $method = $class->getMethod('diff');
-        $method->setAccessible(true);
+        $method = $this->reflectMethod(TransactionManager::class, 'diff');
 
         $now = new DateTime('now');
         $post = new Post();
@@ -911,9 +922,7 @@ final class TransactionManagerTest extends CoreTest
         );
         $manager = new TransactionManager($configuration);
 
-        $class = new \ReflectionClass(TransactionManager::class);
-        $method = $class->getMethod('diff');
-        $method->setAccessible(true);
+        $method = $this->reflectMethod(TransactionManager::class, 'diff');
 
         $now = new DateTime('now');
         $post = new Post();
@@ -958,9 +967,7 @@ final class TransactionManagerTest extends CoreTest
         $configuration = $this->getAuditConfiguration();
         $manager = new TransactionManager($configuration);
 
-        $class = new \ReflectionClass(TransactionManager::class);
-        $method = $class->getMethod('diff');
-        $method->setAccessible(true);
+        $method = $this->reflectMethod(TransactionManager::class, 'diff');
 
         $now = new DateTime('now');
         $post = new Post();

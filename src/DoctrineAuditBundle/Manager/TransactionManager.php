@@ -73,6 +73,27 @@ class TransactionManager
     }
 
     /**
+     * @param EntityManagerInterface $em
+     *
+     * @return EntityManagerInterface
+     */
+    public function selectStorageSpace(EntityManagerInterface $em): EntityManagerInterface
+    {
+        return $this->configuration->getEntityManager() ?? $em;
+    }
+
+    public function populate(Transaction $transaction): void
+    {
+        $uow = $this->em->getUnitOfWork();
+
+        $this->populateWithScheduledInsertions($transaction, $uow);
+        $this->populateWithScheduledUpdates($transaction, $uow);
+        $this->populateWithScheduledDeletions($transaction, $uow, $this->em);
+        $this->populateWithScheduledCollectionUpdates($transaction, $uow, $this->em);
+        $this->populateWithScheduledCollectionDeletions($transaction, $uow, $this->em);
+    }
+
+    /**
      * Adds an insert entry to the audit table.
      *
      * @param EntityManagerInterface $em
@@ -83,7 +104,7 @@ class TransactionManager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function insert(EntityManagerInterface $em, $entity, array $ch, string $transactionHash): void
+    private function insert(EntityManagerInterface $em, $entity, array $ch, string $transactionHash): void
     {
         /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
@@ -111,7 +132,7 @@ class TransactionManager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function update(EntityManagerInterface $em, $entity, array $ch, string $transactionHash): void
+    private function update(EntityManagerInterface $em, $entity, array $ch, string $transactionHash): void
     {
         $diff = $this->diff($em, $entity, $ch);
         if (0 === \count($diff)) {
@@ -143,7 +164,7 @@ class TransactionManager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function remove(EntityManagerInterface $em, $entity, $id, string $transactionHash): void
+    private function remove(EntityManagerInterface $em, $entity, $id, string $transactionHash): void
     {
         /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
@@ -172,7 +193,7 @@ class TransactionManager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function associate(EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
+    private function associate(EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
     {
         $this->associateOrDissociate('associate', $em, $source, $target, $mapping, $transactionHash);
     }
@@ -189,30 +210,9 @@ class TransactionManager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function dissociate(EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
+    private function dissociate(EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
     {
         $this->associateOrDissociate('dissociate', $em, $source, $target, $mapping, $transactionHash);
-    }
-
-    /**
-     * @param EntityManagerInterface $em
-     *
-     * @return EntityManagerInterface
-     */
-    public function selectStorageSpace(EntityManagerInterface $em): EntityManagerInterface
-    {
-        return $this->configuration->getEntityManager() ?? $em;
-    }
-
-    public function populate(Transaction $transaction): void
-    {
-        $uow = $this->em->getUnitOfWork();
-
-        $this->populateWithScheduledInsertions($transaction, $uow);
-        $this->populateWithScheduledUpdates($transaction, $uow);
-        $this->populateWithScheduledDeletions($transaction, $uow, $this->em);
-        $this->populateWithScheduledCollectionUpdates($transaction, $uow, $this->em);
-        $this->populateWithScheduledCollectionDeletions($transaction, $uow, $this->em);
     }
 
     /**
