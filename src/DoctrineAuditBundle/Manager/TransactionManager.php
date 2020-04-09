@@ -228,7 +228,7 @@ class TransactionManager
     private function processInsertions(Transaction $transaction): void
     {
         $uow = $this->em->getUnitOfWork();
-        foreach ($transaction->getInserted() as list($entity, $ch)) {
+        foreach ($transaction->getInserted() as [$entity, $ch]) {
             // the changeset might be updated from UOW extra updates
             $ch = array_merge($ch, $uow->getEntityChangeSet($entity));
             $this->insert($this->em, $entity, $ch, $transaction->getTransactionHash());
@@ -244,7 +244,7 @@ class TransactionManager
     private function processUpdates(Transaction $transaction): void
     {
         $uow = $this->em->getUnitOfWork();
-        foreach ($transaction->getUpdated() as list($entity, $ch)) {
+        foreach ($transaction->getUpdated() as [$entity, $ch]) {
             // the changeset might be updated from UOW extra updates
             $ch = array_merge($ch, $uow->getEntityChangeSet($entity));
             $this->update($this->em, $entity, $ch, $transaction->getTransactionHash());
@@ -259,7 +259,7 @@ class TransactionManager
      */
     private function processAssociations(Transaction $transaction): void
     {
-        foreach ($transaction->getAssociated() as list($source, $target, $mapping)) {
+        foreach ($transaction->getAssociated() as [$source, $target, $mapping]) {
             $this->associate($this->em, $source, $target, $mapping, $transaction->getTransactionHash());
         }
     }
@@ -272,7 +272,7 @@ class TransactionManager
      */
     private function processDissociations(Transaction $transaction): void
     {
-        foreach ($transaction->getDissociated() as list($source, $target, $id, $mapping)) {
+        foreach ($transaction->getDissociated() as [$source, $target, $id, $mapping]) {
             $this->dissociate($this->em, $source, $target, $mapping, $transaction->getTransactionHash());
         }
     }
@@ -285,7 +285,7 @@ class TransactionManager
      */
     private function processDeletions(Transaction $transaction): void
     {
-        foreach ($transaction->getRemoved() as list($entity, $id)) {
+        foreach ($transaction->getRemoved() as [$entity, $id]) {
             $this->remove($this->em, $entity, $id, $transaction->getTransactionHash());
         }
     }
