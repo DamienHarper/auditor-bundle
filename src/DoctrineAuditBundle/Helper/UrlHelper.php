@@ -2,7 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Helper;
 
-final class AuditHelper
+final class UrlHelper
 {
     private function __construct()
     {
