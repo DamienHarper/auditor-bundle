@@ -545,9 +545,12 @@ final class TransactionManagerTest extends CoreTest
 
     public function testBlame(): void
     {
-        $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
         $manager = new TransactionManager($configuration);
+
+        $class = new \ReflectionClass(TransactionManager::class);
+        $method = $class->getMethod('blame');
+        $method->setAccessible(true);
 
         $expected = [
             'user_id' => 1,
@@ -557,7 +560,7 @@ final class TransactionManagerTest extends CoreTest
             'user_firewall' => null,
         ];
 
-        self::assertSame($expected, $manager->blame(), 'AuditHelper::blame() is ok.');
+        self::assertSame($expected, $method->invokeArgs($manager, []), 'AuditHelper::blame() is ok.');
     }
 
     public function testBlameWhenNoRequest(): void
@@ -582,6 +585,10 @@ final class TransactionManagerTest extends CoreTest
         );
         $manager = new TransactionManager($configuration);
 
+        $class = new \ReflectionClass(TransactionManager::class);
+        $method = $class->getMethod('blame');
+        $method->setAccessible(true);
+
         $expected = [
             'user_id' => 1,
             'username' => 'dark.vador',
@@ -590,7 +597,7 @@ final class TransactionManagerTest extends CoreTest
             'user_firewall' => null,
         ];
 
-        self::assertSame($expected, $manager->blame(), 'AuditHelper::blame() is ok.');
+        self::assertSame($expected, $method->invokeArgs($manager, []), 'AuditHelper::blame() is ok.');
     }
 
     public function testBlameWhenNoUser(): void
@@ -615,6 +622,10 @@ final class TransactionManagerTest extends CoreTest
         );
         $manager = new TransactionManager($configuration);
 
+        $class = new \ReflectionClass(TransactionManager::class);
+        $method = $class->getMethod('blame');
+        $method->setAccessible(true);
+
         $expected = [
             'user_id' => null,
             'username' => null,
@@ -623,7 +634,7 @@ final class TransactionManagerTest extends CoreTest
             'user_firewall' => null,
         ];
 
-        self::assertSame($expected, $manager->blame(), 'AuditHelper::blame() is ok.');
+        self::assertSame($expected, $method->invokeArgs($manager, []), 'AuditHelper::blame() is ok.');
     }
 
     public function testSummarize(): void
@@ -631,6 +642,10 @@ final class TransactionManagerTest extends CoreTest
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
         $manager = new TransactionManager($configuration);
+
+        $class = new \ReflectionClass(TransactionManager::class);
+        $method = $class->getMethod('summarize');
+        $method->setAccessible(true);
 
         $author = new Author();
         $author
@@ -646,7 +661,7 @@ final class TransactionManagerTest extends CoreTest
             'id' => 1,
         ];
 
-        self::assertSame($expected, $manager->summarize($em, $author), 'AuditHelper::summarize ok');
+        self::assertSame($expected, $method->invokeArgs($manager, [$em, $author]), 'AuditHelper::summarize ok');
 
         $post = new Post();
         $post
@@ -664,7 +679,7 @@ final class TransactionManagerTest extends CoreTest
             'id' => 1,
         ];
 
-        self::assertSame($expected, $manager->summarize($em, $post), 'AuditHelper::summarize is ok.');
+        self::assertSame($expected, $method->invokeArgs($manager, [$em, $post]), 'AuditHelper::summarize is ok.');
     }
 
     public function testId(): void
@@ -673,6 +688,10 @@ final class TransactionManagerTest extends CoreTest
         $configuration = $this->getAuditConfiguration();
         $manager = new TransactionManager($configuration);
 
+        $class = new \ReflectionClass(TransactionManager::class);
+        $method = $class->getMethod('id');
+        $method->setAccessible(true);
+
         $author = new Author();
         $author
             ->setId(1)
@@ -680,7 +699,7 @@ final class TransactionManagerTest extends CoreTest
             ->setEmail('john.doe@gmail.com')
         ;
 
-        self::assertSame(1, $manager->id($em, $author), 'AuditHelper::id() is ok.');
+        self::assertSame(1, $method->invokeArgs($manager, [$em, $author]), 'AuditHelper::id() is ok.');
 
         $dieselCore = new CoreCase();
         $dieselCore->type = 'type1';
@@ -694,8 +713,8 @@ final class TransactionManagerTest extends CoreTest
         $em->persist($dieselCase);
         $em->flush();
 
-        self::assertSame(1, $manager->id($em, $dieselCore));
-        self::assertSame(1, $manager->id($em, $dieselCase));
+        self::assertSame(1, $method->invokeArgs($manager, [$em, $dieselCore]));
+        self::assertSame(1, $method->invokeArgs($manager, [$em, $dieselCase]));
 
         $dieselCore = new CoreCase();
         $dieselCore->type = 'type2';
@@ -707,8 +726,8 @@ final class TransactionManagerTest extends CoreTest
         $em->persist($dieselCase);
         $em->flush();
 
-        self::assertSame(2, $manager->id($em, $dieselCore));
-        self::assertSame(2, $manager->id($em, $dieselCase));
+        self::assertSame(2, $method->invokeArgs($manager, [$em, $dieselCore]));
+        self::assertSame(2, $method->invokeArgs($manager, [$em, $dieselCase]));
     }
 
     public function testDiffInsert(): void
@@ -716,6 +735,10 @@ final class TransactionManagerTest extends CoreTest
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
         $manager = new TransactionManager($configuration);
+
+        $class = new \ReflectionClass(TransactionManager::class);
+        $method = $class->getMethod('diff');
+        $method->setAccessible(true);
 
         $author = new Author();
         $author
@@ -745,7 +768,7 @@ final class TransactionManagerTest extends CoreTest
             ],
         ];
 
-        self::assertSame($expected, $manager->diff($em, $author, $changeset), 'AuditHelper::diff() / insert is ok.');
+        self::assertSame($expected, $method->invokeArgs($manager, [$em, $author, $changeset]), 'AuditHelper::diff() / insert is ok.');
     }
 
     public function testDiffUpdate(): void
@@ -753,6 +776,10 @@ final class TransactionManagerTest extends CoreTest
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
         $manager = new TransactionManager($configuration);
+
+        $class = new \ReflectionClass(TransactionManager::class);
+        $method = $class->getMethod('diff');
+        $method->setAccessible(true);
 
         $author = new Author();
         $author
@@ -782,7 +809,7 @@ final class TransactionManagerTest extends CoreTest
             ],
         ];
 
-        self::assertSame($expected, $manager->diff($em, $author, $changeset), 'AuditHelper::diff() / update is ok.');
+        self::assertSame($expected, $method->invokeArgs($manager, [$em, $author, $changeset]), 'AuditHelper::diff() / update is ok.');
     }
 
     public function testDiffHonorsGloballyIgnoredColumns(): void
@@ -812,6 +839,10 @@ final class TransactionManagerTest extends CoreTest
             new EventDispatcher()
         );
         $manager = new TransactionManager($configuration);
+
+        $class = new \ReflectionClass(TransactionManager::class);
+        $method = $class->getMethod('diff');
+        $method->setAccessible(true);
 
         $now = new DateTime('now');
         $post = new Post();
@@ -847,7 +878,7 @@ final class TransactionManagerTest extends CoreTest
             ],
         ];
 
-        self::assertSame($expected, $manager->diff($em, $post, $changeset), 'AuditHelper::diff() honors globally ignored columns.');
+        self::assertSame($expected, $method->invokeArgs($manager, [$em, $post, $changeset]), 'AuditHelper::diff() honors globally ignored columns.');
     }
 
     public function testDiffHonorsLocallyIgnoredColumns(): void
@@ -880,6 +911,10 @@ final class TransactionManagerTest extends CoreTest
         );
         $manager = new TransactionManager($configuration);
 
+        $class = new \ReflectionClass(TransactionManager::class);
+        $method = $class->getMethod('diff');
+        $method->setAccessible(true);
+
         $now = new DateTime('now');
         $post = new Post();
         $post
@@ -914,7 +949,7 @@ final class TransactionManagerTest extends CoreTest
             ],
         ];
 
-        self::assertSame($expected, $manager->diff($em, $post, $changeset), 'AuditHelper::diff() honors locally ignored columns.');
+        self::assertSame($expected, $method->invokeArgs($manager, [$em, $post, $changeset]), 'AuditHelper::diff() honors locally ignored columns.');
     }
 
     public function testDiffIgnoresUnchangedValues(): void
@@ -922,6 +957,10 @@ final class TransactionManagerTest extends CoreTest
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
         $manager = new TransactionManager($configuration);
+
+        $class = new \ReflectionClass(TransactionManager::class);
+        $method = $class->getMethod('diff');
+        $method->setAccessible(true);
 
         $now = new DateTime('now');
         $post = new Post();
@@ -957,7 +996,7 @@ final class TransactionManagerTest extends CoreTest
             ],
         ];
 
-        self::assertSame($expected, $manager->diff($em, $post, $changeset), 'AuditHelper::diff() ignores unchanged values.');
+        self::assertSame($expected, $method->invokeArgs($manager, [$em, $post, $changeset]), 'AuditHelper::diff() ignores unchanged values.');
     }
 
     protected function setupEntities(): void

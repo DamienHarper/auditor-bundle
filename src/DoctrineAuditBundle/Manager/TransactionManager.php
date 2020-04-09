@@ -216,41 +216,6 @@ class TransactionManager
     }
 
     /**
-     * Blames an audit operation.
-     *
-     * @return array
-     */
-    public function blame(): array
-    {
-        $user_id = null;
-        $username = null;
-        $client_ip = null;
-        $user_fqdn = null;
-        $user_firewall = null;
-
-        $request = $this->configuration->getRequestStack()->getCurrentRequest();
-        if (null !== $request) {
-            $client_ip = $request->getClientIp();
-            $user_firewall = null === $this->configuration->getFirewallMap()->getFirewallConfig($request) ? null : $this->configuration->getFirewallMap()->getFirewallConfig($request)->getName();
-        }
-
-        $user = null === $this->configuration->getUserProvider() ? null : $this->configuration->getUserProvider()->getUser();
-        if ($user instanceof UserInterface) {
-            $user_id = $user->getId();
-            $username = $user->getUsername();
-            $user_fqdn = DoctrineHelper::getRealClassName($user);
-        }
-
-        return [
-            'user_id' => $user_id,
-            'username' => $username,
-            'client_ip' => $client_ip,
-            'user_fqdn' => $user_fqdn,
-            'user_firewall' => $user_firewall,
-        ];
-    }
-
-    /**
      * Returns the primary key value of an entity.
      *
      * @param EntityManagerInterface $em
@@ -261,7 +226,7 @@ class TransactionManager
      *
      * @return mixed
      */
-    public function id(EntityManagerInterface $em, $entity)
+    private function id(EntityManagerInterface $em, $entity)
     {
         /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
@@ -304,7 +269,7 @@ class TransactionManager
      *
      * @return array
      */
-    public function diff(EntityManagerInterface $em, $entity, array $ch): array
+    private function diff(EntityManagerInterface $em, $entity, array $ch): array
     {
         /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
@@ -356,7 +321,7 @@ class TransactionManager
      *
      * @return array
      */
-    public function summarize(EntityManagerInterface $em, $entity = null, $id = null): ?array
+    private function summarize(EntityManagerInterface $em, $entity = null, $id = null): ?array
     {
         if (null === $entity) {
             return null;
@@ -383,6 +348,41 @@ class TransactionManager
             'class' => $meta->name,
             'table' => $meta->getTableName(),
             $pkName => $pkValue,
+        ];
+    }
+
+    /**
+     * Blames an audit operation.
+     *
+     * @return array
+     */
+    private function blame(): array
+    {
+        $user_id = null;
+        $username = null;
+        $client_ip = null;
+        $user_fqdn = null;
+        $user_firewall = null;
+
+        $request = $this->configuration->getRequestStack()->getCurrentRequest();
+        if (null !== $request) {
+            $client_ip = $request->getClientIp();
+            $user_firewall = null === $this->configuration->getFirewallMap()->getFirewallConfig($request) ? null : $this->configuration->getFirewallMap()->getFirewallConfig($request)->getName();
+        }
+
+        $user = null === $this->configuration->getUserProvider() ? null : $this->configuration->getUserProvider()->getUser();
+        if ($user instanceof UserInterface) {
+            $user_id = $user->getId();
+            $username = $user->getUsername();
+            $user_fqdn = DoctrineHelper::getRealClassName($user);
+        }
+
+        return [
+            'user_id' => $user_id,
+            'username' => $username,
+            'client_ip' => $client_ip,
+            'user_fqdn' => $user_fqdn,
+            'user_firewall' => $user_firewall,
         ];
     }
 
