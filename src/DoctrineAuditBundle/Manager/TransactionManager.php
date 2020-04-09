@@ -225,7 +225,7 @@ class TransactionManager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function processInsertions(Transaction $transaction): void
+    private function processInsertions(Transaction $transaction): void
     {
         $uow = $this->em->getUnitOfWork();
         foreach ($transaction->getInserted() as list($entity, $ch)) {
@@ -241,7 +241,7 @@ class TransactionManager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function processUpdates(Transaction $transaction): void
+    private function processUpdates(Transaction $transaction): void
     {
         $uow = $this->em->getUnitOfWork();
         foreach ($transaction->getUpdated() as list($entity, $ch)) {
@@ -257,7 +257,7 @@ class TransactionManager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function processAssociations(Transaction $transaction): void
+    private function processAssociations(Transaction $transaction): void
     {
         foreach ($transaction->getAssociated() as list($source, $target, $mapping)) {
             $this->associate($this->em, $source, $target, $mapping, $transaction->getTransactionHash());
@@ -270,7 +270,7 @@ class TransactionManager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function processDissociations(Transaction $transaction): void
+    private function processDissociations(Transaction $transaction): void
     {
         foreach ($transaction->getDissociated() as list($source, $target, $id, $mapping)) {
             $this->dissociate($this->em, $source, $target, $mapping, $transaction->getTransactionHash());
@@ -283,7 +283,7 @@ class TransactionManager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function processDeletions(Transaction $transaction): void
+    private function processDeletions(Transaction $transaction): void
     {
         foreach ($transaction->getRemoved() as list($entity, $id)) {
             $this->remove($this->em, $entity, $id, $transaction->getTransactionHash());
@@ -316,7 +316,7 @@ class TransactionManager
     /**
      * @param UnitOfWork $uow
      */
-    public function populateWithScheduledInsertions(Transaction $transaction, UnitOfWork $uow): void
+    private function populateWithScheduledInsertions(Transaction $transaction, UnitOfWork $uow): void
     {
         foreach ($uow->getScheduledEntityInsertions() as $entity) {
             if ($this->configuration->isAudited($entity)) {
@@ -331,7 +331,7 @@ class TransactionManager
     /**
      * @param UnitOfWork $uow
      */
-    public function populateWithScheduledUpdates(Transaction $transaction, UnitOfWork $uow): void
+    private function populateWithScheduledUpdates(Transaction $transaction, UnitOfWork $uow): void
     {
         foreach ($uow->getScheduledEntityUpdates() as $entity) {
             if ($this->configuration->isAudited($entity)) {
@@ -350,7 +350,7 @@ class TransactionManager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function populateWithScheduledDeletions(Transaction $transaction, UnitOfWork $uow, EntityManagerInterface $em): void
+    private function populateWithScheduledDeletions(Transaction $transaction, UnitOfWork $uow, EntityManagerInterface $em): void
     {
         foreach ($uow->getScheduledEntityDeletions() as $entity) {
             if ($this->configuration->isAudited($entity)) {
@@ -370,7 +370,7 @@ class TransactionManager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function populateWithScheduledCollectionUpdates(Transaction $transaction, UnitOfWork $uow, EntityManagerInterface $em): void
+    private function populateWithScheduledCollectionUpdates(Transaction $transaction, UnitOfWork $uow, EntityManagerInterface $em): void
     {
         foreach ($uow->getScheduledCollectionUpdates() as $collection) {
             if ($this->configuration->isAudited($collection->getOwner())) {
@@ -405,7 +405,7 @@ class TransactionManager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function populateWithScheduledCollectionDeletions(Transaction $transaction, UnitOfWork $uow, EntityManagerInterface $em): void
+    private function populateWithScheduledCollectionDeletions(Transaction $transaction, UnitOfWork $uow, EntityManagerInterface $em): void
     {
         foreach ($uow->getScheduledCollectionDeletions() as $collection) {
             if ($this->configuration->isAudited($collection->getOwner())) {
