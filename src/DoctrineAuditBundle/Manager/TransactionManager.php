@@ -6,7 +6,6 @@ use DateTime;
 use DateTimeZone;
 use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Event\LifecycleEvent;
-use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
 use DH\DoctrineAuditBundle\Model\Transaction;
 use DH\DoctrineAuditBundle\User\UserInterface;
@@ -24,19 +23,13 @@ class TransactionManager
     private $configuration;
 
     /**
-     * @var AuditHelper
-     */
-    private $helper;
-
-    /**
      * @var EntityManagerInterface
      */
     private $em;
 
-    public function __construct(Configuration $configuration, AuditHelper $helper)
+    public function __construct(Configuration $configuration)
     {
         $this->configuration = $configuration;
-        $this->helper = $helper;
         $this->em = $this->configuration->getEntityManager();
     }
 
@@ -199,26 +192,6 @@ class TransactionManager
     public function dissociate(EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
     {
         $this->associateOrDissociate('dissociate', $em, $source, $target, $mapping, $transactionHash);
-    }
-
-    /**
-     * Set the value of helper.
-     *
-     * @param AuditHelper $helper
-     */
-    public function setHelper(AuditHelper $helper): void
-    {
-        $this->helper = $helper;
-    }
-
-    /**
-     * Get the value of helper.
-     *
-     * @return AuditHelper
-     */
-    public function getHelper(): AuditHelper
-    {
-        return $this->helper;
     }
 
     /**

@@ -5,7 +5,6 @@ namespace DH\DoctrineAuditBundle\Tests\Manager;
 use DateTime;
 use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\Configuration;
-use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Manager\TransactionManager;
 use DH\DoctrineAuditBundle\Reader\Reader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
@@ -31,8 +30,7 @@ final class TransactionManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
         $reader = new Reader($configuration, $em);
 
         $author = new Author();
@@ -72,8 +70,7 @@ final class TransactionManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
         $reader = new Reader($configuration, $em);
 
         $author = new Author();
@@ -113,8 +110,7 @@ final class TransactionManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
         $reader = new Reader($configuration, $em);
 
         $author = new Author();
@@ -147,8 +143,7 @@ final class TransactionManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
         $reader = new Reader($configuration, $em);
 
         $author = new Author();
@@ -219,8 +214,7 @@ final class TransactionManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
         $reader = new Reader($configuration, $em);
 
         $author = new Author();
@@ -288,8 +282,7 @@ final class TransactionManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
         $reader = new Reader($configuration, $em);
 
         $author = new Author();
@@ -427,8 +420,7 @@ final class TransactionManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
         $reader = new Reader($configuration, $em);
 
         $author = new Author();
@@ -546,28 +538,16 @@ final class TransactionManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
 
         self::assertInstanceOf(Configuration::class, $manager->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
-    }
-
-    public function testGetHelper(): void
-    {
-        $em = $this->getEntityManager();
-        $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
-
-        self::assertInstanceOf(AuditHelper::class, $manager->getHelper(), 'helper instanceof AuditHelper::class');
     }
 
     public function testBlame(): void
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
 
         $expected = [
             'user_id' => 1,
@@ -600,8 +580,7 @@ final class TransactionManagerTest extends CoreTest
             new AnnotationLoader($em),
             new EventDispatcher()
         );
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
 
         $expected = [
             'user_id' => 1,
@@ -634,8 +613,7 @@ final class TransactionManagerTest extends CoreTest
             new AnnotationLoader($em),
             new EventDispatcher()
         );
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
 
         $expected = [
             'user_id' => null,
@@ -652,8 +630,7 @@ final class TransactionManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
 
         $author = new Author();
         $author
@@ -694,8 +671,7 @@ final class TransactionManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
 
         $author = new Author();
         $author
@@ -739,8 +715,7 @@ final class TransactionManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
 
         $author = new Author();
         $author
@@ -777,8 +752,7 @@ final class TransactionManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
 
         $author = new Author();
         $author
@@ -837,8 +811,7 @@ final class TransactionManagerTest extends CoreTest
             new AnnotationLoader($em),
             new EventDispatcher()
         );
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
 
         $now = new DateTime('now');
         $post = new Post();
@@ -905,8 +878,7 @@ final class TransactionManagerTest extends CoreTest
             new AnnotationLoader($em),
             new EventDispatcher()
         );
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
 
         $now = new DateTime('now');
         $post = new Post();
@@ -949,8 +921,7 @@ final class TransactionManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
 
         $now = new DateTime('now');
         $post = new Post();

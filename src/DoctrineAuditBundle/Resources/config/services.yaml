@@ -35,19 +35,11 @@ services:
     class: DH\DoctrineAuditBundle\Manager\TransactionManager
     arguments:
       - "@dh_doctrine_audit.configuration"
-      - "@dh_doctrine_audit.helper"
     public: true
 
   DH\DoctrineAuditBundle\Manager\TransactionManager:
     alias: dh_doctrine_audit.manager
     public: true
-
-  dh_doctrine_audit.helper:
-    class: DH\DoctrineAuditBundle\Helper\AuditHelper
-    arguments: ["@dh_doctrine_audit.configuration"]
-
-  DH\DoctrineAuditBundle\Helper\AuditHelper:
-    alias: dh_doctrine_audit.helper
 
   dh_doctrine_audit.user_provider:
     class: DH\DoctrineAuditBundle\User\TokenStorageUserProvider

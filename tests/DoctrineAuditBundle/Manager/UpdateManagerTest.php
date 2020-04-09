@@ -2,8 +2,6 @@
 
 namespace DH\DoctrineAuditBundle\Tests\Manager;
 
-use DH\DoctrineAuditBundle\Configuration as AuditConfiguration;
-use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Helper\SchemaHelper;
 use DH\DoctrineAuditBundle\Manager\TransactionManager;
 use DH\DoctrineAuditBundle\Manager\UpdateManager;
@@ -26,10 +24,9 @@ final class UpdateManagerTest extends BaseTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
         $reader = $this->getReader($this->getAuditConfiguration());
-        $updater = new \DH\DoctrineAuditBundle\Manager\UpdateManager($manager, $reader);
+        $updater = new UpdateManager($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
 
         $authorTable = $this->getTable($schemaManager->listTables(), 'author');
@@ -58,8 +55,7 @@ final class UpdateManagerTest extends BaseTest
     {
         $configuration = $this->getAuditConfiguration();
         $em = $configuration->getEntityManager();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
         $reader = $this->getReader($this->getAuditConfiguration());
         $updater = new \DH\DoctrineAuditBundle\Manager\UpdateManager($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
@@ -104,8 +100,7 @@ final class UpdateManagerTest extends BaseTest
     {
         $configuration = $this->getAuditConfiguration();
         $em = $configuration->getEntityManager();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
         $reader = $this->getReader($this->getAuditConfiguration());
         $updater = new UpdateManager($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
@@ -268,15 +263,6 @@ final class UpdateManagerTest extends BaseTest
         }
     }
 
-    public function testGetConfiguration(): void
-    {
-        $em = $this->getEntityManager();
-        $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-
-        self::assertInstanceOf(AuditConfiguration::class, $helper->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
-    }
-
     /**
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
@@ -308,7 +294,7 @@ final class UpdateManagerTest extends BaseTest
         $this->setAuditConfiguration($this->createAuditConfiguration([], $this->em));
         $configuration = $this->getAuditConfiguration();
 
-        $this->auditManager = new TransactionManager($configuration, new AuditHelper($configuration));
+        $this->auditManager = new TransactionManager($configuration);
 
         // get rid of more global state
         $evm = $connection->getEventManager();

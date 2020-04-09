@@ -7,7 +7,6 @@ use DH\DoctrineAuditBundle\Configuration as AuditConfiguration;
 use DH\DoctrineAuditBundle\Event\AuditSubscriber;
 use DH\DoctrineAuditBundle\Event\CreateSchemaListener;
 use DH\DoctrineAuditBundle\Event\DoctrineSubscriber;
-use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Manager\TransactionManager;
 use DH\DoctrineAuditBundle\Manager\UpdateManager;
 use DH\DoctrineAuditBundle\Reader\Reader;
@@ -144,8 +143,7 @@ abstract class BaseTest extends TestCase
     protected function setUpAuditSchema(): void
     {
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new TransactionManager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
         $reader = $this->getReader($this->getAuditConfiguration());
 
         $updater = new UpdateManager($manager, $reader);
@@ -246,7 +244,7 @@ abstract class BaseTest extends TestCase
         $this->setAuditConfiguration($this->createAuditConfiguration([], $this->em));
         $configuration = $this->getAuditConfiguration();
 
-        $this->auditManager = new TransactionManager($configuration, new AuditHelper($configuration));
+        $this->auditManager = new TransactionManager($configuration);
 
         $configuration->getEventDispatcher()->addSubscriber(new AuditSubscriber($this->auditManager));
 

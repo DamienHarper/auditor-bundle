@@ -2,29 +2,10 @@
 
 namespace DH\DoctrineAuditBundle\Helper;
 
-use DH\DoctrineAuditBundle\Configuration;
-
-class AuditHelper
+final class AuditHelper
 {
-    /**
-     * @var \DH\DoctrineAuditBundle\Configuration
-     */
-    private $configuration;
-
-    /**
-     * @param Configuration $configuration
-     */
-    public function __construct(Configuration $configuration)
+    private function __construct()
     {
-        $this->configuration = $configuration;
-    }
-
-    /**
-     * @return \DH\DoctrineAuditBundle\Configuration
-     */
-    public function getConfiguration(): Configuration
-    {
-        return $this->configuration;
     }
 
     public static function paramToNamespace(string $entity): string
