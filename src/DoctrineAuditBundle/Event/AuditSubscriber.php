@@ -2,7 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Event;
 
-use DH\DoctrineAuditBundle\Manager\TransactionManager;
+use DH\DoctrineAuditBundle\Transaction\TransactionManager;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class AuditSubscriber implements EventSubscriberInterface

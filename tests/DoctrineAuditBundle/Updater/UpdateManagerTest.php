@@ -1,11 +1,11 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests\Manager;
+namespace DH\DoctrineAuditBundle\Tests\Updater;
 
 use DH\DoctrineAuditBundle\Helper\SchemaHelper;
-use DH\DoctrineAuditBundle\Manager\TransactionManager;
-use DH\DoctrineAuditBundle\Manager\UpdateManager;
 use DH\DoctrineAuditBundle\Tests\BaseTest;
+use DH\DoctrineAuditBundle\Transaction\TransactionManager;
+use DH\DoctrineAuditBundle\Updater\UpdateManager;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
@@ -24,7 +24,7 @@ final class UpdateManagerTest extends BaseTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $manager = new TransactionManager($configuration);
+        $manager = new \DH\DoctrineAuditBundle\Transaction\TransactionManager($configuration);
         $reader = $this->getReader($this->getAuditConfiguration());
         $updater = new UpdateManager($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
@@ -57,7 +57,7 @@ final class UpdateManagerTest extends BaseTest
         $em = $configuration->getEntityManager();
         $manager = new TransactionManager($configuration);
         $reader = $this->getReader($this->getAuditConfiguration());
-        $updater = new \DH\DoctrineAuditBundle\Manager\UpdateManager($manager, $reader);
+        $updater = new \DH\DoctrineAuditBundle\Updater\UpdateManager($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
 
         $authorTable = $this->getTable($schemaManager->listTables(), 'author');
@@ -100,7 +100,7 @@ final class UpdateManagerTest extends BaseTest
     {
         $configuration = $this->getAuditConfiguration();
         $em = $configuration->getEntityManager();
-        $manager = new TransactionManager($configuration);
+        $manager = new \DH\DoctrineAuditBundle\Transaction\TransactionManager($configuration);
         $reader = $this->getReader($this->getAuditConfiguration());
         $updater = new UpdateManager($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
@@ -294,7 +294,7 @@ final class UpdateManagerTest extends BaseTest
         $this->setAuditConfiguration($this->createAuditConfiguration([], $this->em));
         $configuration = $this->getAuditConfiguration();
 
-        $this->auditManager = new TransactionManager($configuration);
+        $this->auditManager = new \DH\DoctrineAuditBundle\Transaction\TransactionManager($configuration);
 
         // get rid of more global state
         $evm = $connection->getEventManager();

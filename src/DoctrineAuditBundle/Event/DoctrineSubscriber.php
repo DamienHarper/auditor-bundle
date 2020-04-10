@@ -4,8 +4,8 @@ namespace DH\DoctrineAuditBundle\Event;
 
 use DH\DoctrineAuditBundle\DBAL\Logger;
 use DH\DoctrineAuditBundle\DBAL\LoggerChain;
-use DH\DoctrineAuditBundle\Manager\TransactionManager;
 use DH\DoctrineAuditBundle\Model\Transaction;
+use DH\DoctrineAuditBundle\Transaction\TransactionManager;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Logging\SQLLogger;
 use Doctrine\ORM\Event\OnFlushEventArgs;
@@ -14,7 +14,7 @@ use Doctrine\ORM\Events;
 class DoctrineSubscriber implements EventSubscriber
 {
     /**
-     * @var TransactionManager
+     * @var \DH\DoctrineAuditBundle\Transaction\TransactionManager
      */
     private $manager;
 

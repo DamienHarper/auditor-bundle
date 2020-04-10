@@ -1,11 +1,9 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Manager;
+namespace DH\DoctrineAuditBundle\Transaction;
 
 use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Model\Transaction;
-use DH\DoctrineAuditBundle\Transaction\TransactionHydrator;
-use DH\DoctrineAuditBundle\Transaction\TransactionProcessor;
 use Doctrine\ORM\EntityManagerInterface;
 
 class TransactionManager

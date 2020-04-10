@@ -3,9 +3,9 @@
 namespace DH\DoctrineAuditBundle\Tests\Command;
 
 use DH\DoctrineAuditBundle\Command\UpdateSchemaCommand;
-use DH\DoctrineAuditBundle\Manager\TransactionManager;
 use DH\DoctrineAuditBundle\Reader\Reader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
+use DH\DoctrineAuditBundle\Transaction\TransactionManager;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Symfony\Component\Console\Command\LockableTrait;
 use Symfony\Component\Console\Tester\CommandTester;

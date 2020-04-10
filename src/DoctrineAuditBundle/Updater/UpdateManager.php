@@ -1,11 +1,12 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Manager;
+namespace DH\DoctrineAuditBundle\Updater;
 
 use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Exception\UpdateException;
 use DH\DoctrineAuditBundle\Helper\SchemaHelper;
 use DH\DoctrineAuditBundle\Reader\Reader;
+use DH\DoctrineAuditBundle\Transaction\TransactionManager;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;

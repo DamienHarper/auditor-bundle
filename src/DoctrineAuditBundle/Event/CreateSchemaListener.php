@@ -2,9 +2,9 @@
 
 namespace DH\DoctrineAuditBundle\Event;
 
-use DH\DoctrineAuditBundle\Manager\TransactionManager;
-use DH\DoctrineAuditBundle\Manager\UpdateManager;
 use DH\DoctrineAuditBundle\Reader\Reader;
+use DH\DoctrineAuditBundle\Transaction\TransactionManager;
+use DH\DoctrineAuditBundle\Updater\UpdateManager;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Tools\Event\GenerateSchemaTableEventArgs;
@@ -14,7 +14,7 @@ use Exception;
 class CreateSchemaListener implements EventSubscriber
 {
     /**
-     * @var TransactionManager
+     * @var \DH\DoctrineAuditBundle\Transaction\TransactionManager
      */
     protected $manager;
 
