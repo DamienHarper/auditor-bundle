@@ -31,12 +31,12 @@ The official documentation can be found [here](doc/00-index.md).
 
 
 ## Version Information
- Version   | Status                      | Required PHP Version | Required Symfony Version | Badges
-:----------|:----------------------------|:---------------------|:-------------------------|:-----------
- 4.x       | Active development :rocket: | >= 7.2               | >= 3.4                   | [![Build Status](https://travis-ci.com/DamienHarper/DoctrineAuditBundle.svg?branch=master)](https://travis-ci.com/DamienHarper/DoctrineAuditBundle) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DamienHarper/DoctrineAuditBundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/DamienHarper/DoctrineAuditBundle/?branch=master)
- 3.x       | Active support :rocket:     | >= 7.1               | >= 3.4                   | [![Build Status](https://travis-ci.com/DamienHarper/DoctrineAuditBundle.svg?branch=3.x)](https://travis-ci.com/DamienHarper/DoctrineAuditBundle) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DamienHarper/DoctrineAuditBundle/badges/quality-score.png?b=3.x)](https://scrutinizer-ci.com/g/DamienHarper/DoctrineAuditBundle/?branch=3.x)
- 2.x       | End of life                 | >= 7.1               | >= 3.4                   |
- 1.x       | End of life                 | >= 7.1               | >= 3.4                   |
+ Version   | Status                      | PHP requirements | Symfony requirements | Badges
+:----------|:----------------------------|:-----------------|:---------------------|:-----------
+ 4.x       | Active development :rocket: | >= 7.2           | >= 3.4               | [![Build Status](https://travis-ci.com/DamienHarper/DoctrineAuditBundle.svg?branch=master)](https://travis-ci.com/DamienHarper/DoctrineAuditBundle) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DamienHarper/DoctrineAuditBundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/DamienHarper/DoctrineAuditBundle/?branch=master)
+ 3.x       | Active support :rocket:     | >= 7.1           | >= 3.4               | [![Build Status](https://travis-ci.com/DamienHarper/DoctrineAuditBundle.svg?branch=3.x)](https://travis-ci.com/DamienHarper/DoctrineAuditBundle) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DamienHarper/DoctrineAuditBundle/badges/quality-score.png?b=3.x)](https://scrutinizer-ci.com/g/DamienHarper/DoctrineAuditBundle/?branch=3.x)
+ 2.x       | End of life                 | >= 7.1           | >= 3.4               |
+ 1.x       | End of life                 | >= 7.1           | >= 3.4               |
 
 Changelog is available [here](CHANGELOG.md)
 
