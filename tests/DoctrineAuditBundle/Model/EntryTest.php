@@ -1,8 +1,8 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests\Reader;
+namespace DH\DoctrineAuditBundle\Tests\Model;
 
-use DH\DoctrineAuditBundle\Reader\Entry;
+use DH\DoctrineAuditBundle\Model\Entry;
 use DH\DoctrineAuditBundle\User\User;
 use PHPUnit\Framework\TestCase;
 
@@ -50,7 +50,7 @@ final class EntryTest extends TestCase
 
     public function testUndefinedUser(): void
     {
-        $entry = new Entry();
+        $entry = new \DH\DoctrineAuditBundle\Model\Entry();
 
         self::assertNull($entry->getUserId(), 'AuditEntry::getUserId() is ok with undefined user.');
         self::assertNull($entry->getUsername(), 'AuditEntry::getUsername() is ok with undefined user.');

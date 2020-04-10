@@ -1,29 +1,31 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests\Manager;
+namespace DH\DoctrineAuditBundle\Tests\Transaction;
 
 use DateTime;
-use DH\DoctrineAuditBundle\Configuration;
-use DH\DoctrineAuditBundle\Helper\AuditHelper;
-use DH\DoctrineAuditBundle\Manager\Manager;
 use DH\DoctrineAuditBundle\Reader\Reader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Tag;
+use DH\DoctrineAuditBundle\Tests\ReflectionTrait;
+use DH\DoctrineAuditBundle\Transaction\TransactionProcessor;
 
 /**
  * @internal
  */
-final class ManagerTest extends CoreTest
+final class TransactionProcessorTest extends CoreTest
 {
+    use ReflectionTrait;
+
     public function testInsert(): void
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $processor = new TransactionProcessor($configuration);
         $reader = new Reader($configuration, $em);
+
+        $method = $this->reflectMethod(TransactionProcessor::class, 'insert');
 
         $author = new Author();
         $author
@@ -32,10 +34,15 @@ final class ManagerTest extends CoreTest
             ->setEmail('john.doe@gmail.com')
         ;
 
-        $manager->insert($em, $author, [
-            'fullname' => [null, 'John Doe'],
-            'email' => [null, 'john.doe@gmail.com'],
-        ], 'what-a-nice-transaction-hash');
+        $method->invokeArgs($processor, [
+            $em,
+            $author,
+            [
+                'fullname' => [null, 'John Doe'],
+                'email' => [null, 'john.doe@gmail.com'],
+            ],
+            'what-a-nice-transaction-hash',
+        ]);
 
         $audits = $reader->getAudits(Author::class);
         self::assertCount(1, $audits, 'Manager::insert() creates an audit entry.');
@@ -62,9 +69,10 @@ final class ManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $processor = new TransactionProcessor($configuration);
         $reader = new Reader($configuration, $em);
+
+        $method = $this->reflectMethod(TransactionProcessor::class, 'update');
 
         $author = new Author();
         $author
@@ -73,10 +81,14 @@ final class ManagerTest extends CoreTest
             ->setEmail('john.doe@gmail.com')
         ;
 
-        $manager->update($em, $author, [
-            'fullname' => ['John Doe', 'Dark Vador'],
-            'email' => ['john.doe@gmail.com', 'dark.vador@gmail.com'],
-        ], 'what-a-nice-transaction-hash');
+        $method->invokeArgs($processor, [
+            $em,
+            $author, [
+                'fullname' => ['John Doe', 'Dark Vador'],
+                'email' => ['john.doe@gmail.com', 'dark.vador@gmail.com'],
+            ],
+            'what-a-nice-transaction-hash',
+        ]);
 
         $audits = $reader->getAudits(Author::class);
         self::assertCount(1, $audits, 'Manager::update() creates an audit entry.');
@@ -103,9 +115,10 @@ final class ManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $processor = new TransactionProcessor($configuration);
         $reader = new Reader($configuration, $em);
+
+        $method = $this->reflectMethod(TransactionProcessor::class, 'remove');
 
         $author = new Author();
         $author
@@ -114,7 +127,7 @@ final class ManagerTest extends CoreTest
             ->setEmail('john.doe@gmail.com')
         ;
 
-        $manager->remove($em, $author, 1, 'what-a-nice-transaction-hash');
+        $method->invokeArgs($processor, [$em, $author, 1, 'what-a-nice-transaction-hash']);
 
         $audits = $reader->getAudits(Author::class);
         self::assertCount(1, $audits, 'Manager::remove() creates an audit entry.');
@@ -137,9 +150,10 @@ final class ManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $processor = new TransactionProcessor($configuration);
         $reader = new Reader($configuration, $em);
+
+        $method = $this->reflectMethod(TransactionProcessor::class, 'associate');
 
         $author = new Author();
         $author
@@ -178,7 +192,7 @@ final class ManagerTest extends CoreTest
             'isCascadeDetach' => false,
         ];
 
-        $manager->associate($em, $author, $post, $mapping, 'what-a-nice-transaction-hash');
+        $method->invokeArgs($processor, [$em, $author, $post, $mapping, 'what-a-nice-transaction-hash']);
 
         $audits = $reader->getAudits(Author::class);
         self::assertCount(1, $audits, 'Manager::associate() creates an audit entry.');
@@ -209,9 +223,10 @@ final class ManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $processor = new TransactionProcessor($configuration);
         $reader = new Reader($configuration, $em);
+
+        $method = $this->reflectMethod(TransactionProcessor::class, 'dissociate');
 
         $author = new Author();
         $author
@@ -247,7 +262,7 @@ final class ManagerTest extends CoreTest
             'isCascadeDetach' => false,
         ];
 
-        $manager->dissociate($em, $author, $post, $mapping, 'what-a-nice-transaction-hash');
+        $method->invokeArgs($processor, [$em, $author, $post, $mapping, 'what-a-nice-transaction-hash']);
 
         $audits = $reader->getAudits(Author::class);
         self::assertCount(1, $audits, 'Manager::dissociate() creates an audit entry.');
@@ -278,9 +293,10 @@ final class ManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $processor = new TransactionProcessor($configuration);
         $reader = new Reader($configuration, $em);
+
+        $method = $this->reflectMethod(TransactionProcessor::class, 'associate');
 
         $author = new Author();
         $author
@@ -362,8 +378,8 @@ final class ManagerTest extends CoreTest
             ],
         ];
 
-        $manager->associate($em, $post, $tag1, $mapping, 'what-a-nice-transaction-hash');
-        $manager->associate($em, $post, $tag2, $mapping, 'what-a-nice-transaction-hash');
+        $method->invokeArgs($processor, [$em, $post, $tag1, $mapping, 'what-a-nice-transaction-hash']);
+        $method->invokeArgs($processor, [$em, $post, $tag2, $mapping, 'what-a-nice-transaction-hash']);
 
         $audits = $reader->getAudits(Post::class);
         self::assertCount(2, $audits, 'Manager::associate() creates an audit entry per association.');
@@ -417,9 +433,11 @@ final class ManagerTest extends CoreTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $processor = new TransactionProcessor($configuration);
         $reader = new Reader($configuration, $em);
+
+        $associateMethod = $this->reflectMethod(TransactionProcessor::class, 'associate');
+        $dissociateMethod = $this->reflectMethod(TransactionProcessor::class, 'dissociate');
 
         $author = new Author();
         $author
@@ -501,10 +519,10 @@ final class ManagerTest extends CoreTest
             ],
         ];
 
-        $manager->associate($em, $post, $tag1, $mapping, 'what-a-nice-transaction-hash');
-        $manager->associate($em, $post, $tag2, $mapping, 'what-a-nice-transaction-hash');
+        $associateMethod->invokeArgs($processor, [$em, $post, $tag1, $mapping, 'what-a-nice-transaction-hash']);
+        $associateMethod->invokeArgs($processor, [$em, $post, $tag2, $mapping, 'what-a-nice-transaction-hash']);
 
-        $manager->dissociate($em, $post, $tag2, $mapping, 'what-a-nice-transaction-hash');
+        $dissociateMethod->invokeArgs($processor, [$em, $post, $tag2, $mapping, 'what-a-nice-transaction-hash']);
 
         $audits = $reader->getAudits(Post::class);
         self::assertCount(3, $audits, 'Manager::dissociate() creates an audit entry.');
@@ -530,26 +548,6 @@ final class ManagerTest extends CoreTest
             ],
             'table' => 'post__tag',
         ], $entry->getDiffs(), 'audit entry diffs is ok.');
-    }
-
-    public function testGetConfiguration(): void
-    {
-        $em = $this->getEntityManager();
-        $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
-
-        self::assertInstanceOf(Configuration::class, $manager->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
-    }
-
-    public function testGetHelper(): void
-    {
-        $em = $this->getEntityManager();
-        $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
-
-        self::assertInstanceOf(AuditHelper::class, $manager->getHelper(), 'helper instanceof AuditHelper::class');
     }
 
     protected function setupEntities(): void

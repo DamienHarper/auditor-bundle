@@ -446,14 +446,6 @@ class Configuration
     }
 
     /**
-     * @return null|AnnotationLoader
-     */
-    public function getAnnotationLoader(): ?AnnotationLoader
-    {
-        return $this->annotationLoader;
-    }
-
-    /**
      * @return EventDispatcherInterface
      */
     public function getEventDispatcher(): EventDispatcherInterface

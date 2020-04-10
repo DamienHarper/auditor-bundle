@@ -4,7 +4,7 @@ namespace DH\DoctrineAuditBundle\Controller;
 
 use DH\DoctrineAuditBundle\Exception\AccessDeniedException;
 use DH\DoctrineAuditBundle\Exception\InvalidArgumentException;
-use DH\DoctrineAuditBundle\Helper\AuditHelper;
+use DH\DoctrineAuditBundle\Helper\UrlHelper;
 use DH\DoctrineAuditBundle\Reader\Reader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -61,7 +61,7 @@ class ViewerController extends AbstractController
     public function showEntityHistoryAction(Request $request, string $entity, $id = null): Response
     {
         $page = (int) $request->query->get('page', 1);
-        $entity = AuditHelper::paramToNamespace($entity);
+        $entity = UrlHelper::paramToNamespace($entity);
 
         $reader = $this->container->get('dh_doctrine_audit.reader');
 

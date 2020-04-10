@@ -1,13 +1,11 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests\Helper;
+namespace DH\DoctrineAuditBundle\Tests\Updater;
 
-use DH\DoctrineAuditBundle\Configuration as AuditConfiguration;
-use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Helper\SchemaHelper;
-use DH\DoctrineAuditBundle\Helper\UpdateHelper;
-use DH\DoctrineAuditBundle\Manager\Manager;
 use DH\DoctrineAuditBundle\Tests\BaseTest;
+use DH\DoctrineAuditBundle\Transaction\TransactionManager;
+use DH\DoctrineAuditBundle\Updater\UpdateManager;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
@@ -20,16 +18,15 @@ use Gedmo;
 /**
  * @internal
  */
-final class UpdateHelperTest extends BaseTest
+final class UpdateManagerTest extends BaseTest
 {
     public function testCreateAuditTable(): void
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $manager = new \DH\DoctrineAuditBundle\Transaction\TransactionManager($configuration);
         $reader = $this->getReader($this->getAuditConfiguration());
-        $updater = new UpdateHelper($manager, $reader);
+        $updater = new UpdateManager($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
 
         $authorTable = $this->getTable($schemaManager->listTables(), 'author');
@@ -58,10 +55,9 @@ final class UpdateHelperTest extends BaseTest
     {
         $configuration = $this->getAuditConfiguration();
         $em = $configuration->getEntityManager();
-        $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
         $reader = $this->getReader($this->getAuditConfiguration());
-        $updater = new UpdateHelper($manager, $reader);
+        $updater = new \DH\DoctrineAuditBundle\Updater\UpdateManager($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
 
         $authorTable = $this->getTable($schemaManager->listTables(), 'author');
@@ -104,10 +100,9 @@ final class UpdateHelperTest extends BaseTest
     {
         $configuration = $this->getAuditConfiguration();
         $em = $configuration->getEntityManager();
-        $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $manager = new \DH\DoctrineAuditBundle\Transaction\TransactionManager($configuration);
         $reader = $this->getReader($this->getAuditConfiguration());
-        $updater = new UpdateHelper($manager, $reader);
+        $updater = new UpdateManager($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
 
         $authorTable = $this->getTable($schemaManager->listTables(), 'author');
@@ -268,15 +263,6 @@ final class UpdateHelperTest extends BaseTest
         }
     }
 
-    public function testGetConfiguration(): void
-    {
-        $em = $this->getEntityManager();
-        $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-
-        self::assertInstanceOf(AuditConfiguration::class, $helper->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
-    }
-
     /**
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\ORMException
@@ -308,7 +294,7 @@ final class UpdateHelperTest extends BaseTest
         $this->setAuditConfiguration($this->createAuditConfiguration([], $this->em));
         $configuration = $this->getAuditConfiguration();
 
-        $this->auditManager = new Manager($configuration, new AuditHelper($configuration));
+        $this->auditManager = new \DH\DoctrineAuditBundle\Transaction\TransactionManager($configuration);
 
         // get rid of more global state
         $evm = $connection->getEventManager();

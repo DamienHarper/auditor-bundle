@@ -4,8 +4,8 @@ namespace DH\DoctrineAuditBundle\Event;
 
 use DH\DoctrineAuditBundle\DBAL\Logger;
 use DH\DoctrineAuditBundle\DBAL\LoggerChain;
-use DH\DoctrineAuditBundle\Manager\Manager;
-use DH\DoctrineAuditBundle\Manager\Transaction;
+use DH\DoctrineAuditBundle\Model\Transaction;
+use DH\DoctrineAuditBundle\Transaction\TransactionManager;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Logging\SQLLogger;
 use Doctrine\ORM\Event\OnFlushEventArgs;
@@ -14,7 +14,7 @@ use Doctrine\ORM\Events;
 class DoctrineSubscriber implements EventSubscriber
 {
     /**
-     * @var Manager
+     * @var \DH\DoctrineAuditBundle\Transaction\TransactionManager
      */
     private $manager;
 
@@ -23,7 +23,7 @@ class DoctrineSubscriber implements EventSubscriber
      */
     private $loggerBackup;
 
-    public function __construct(Manager $manager)
+    public function __construct(TransactionManager $manager)
     {
         $this->manager = $manager;
     }
@@ -42,7 +42,7 @@ class DoctrineSubscriber implements EventSubscriber
     public function onFlush(OnFlushEventArgs $args): void
     {
         $em = $args->getEntityManager();
-        $transaction = new Transaction($this->manager->getHelper());
+        $transaction = new Transaction();
 
         // extend the SQL logger
         $this->loggerBackup = $em->getConnection()->getConfiguration()->getSQLLogger();
@@ -66,7 +66,7 @@ class DoctrineSubscriber implements EventSubscriber
         $em->getConnection()->getConfiguration()->setSQLLogger($loggerChain);
 
         // Populate transaction
-        $transaction->collect();
+        $this->manager->populate($transaction);
     }
 
     /**

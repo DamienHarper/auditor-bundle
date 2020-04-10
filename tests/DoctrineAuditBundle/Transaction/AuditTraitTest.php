@@ -1,16 +1,17 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Tests\Helper;
+namespace DH\DoctrineAuditBundle\Tests\Transaction;
 
 use DateTime;
 use DH\DoctrineAuditBundle\Annotation\AnnotationLoader;
 use DH\DoctrineAuditBundle\Configuration;
-use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Author;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Post;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issue40\CoreCase;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issue40\DieselCase;
+use DH\DoctrineAuditBundle\Tests\ReflectionTrait;
+use DH\DoctrineAuditBundle\Transaction\TransactionProcessor;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use DH\DoctrineAuditBundle\User\User;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
@@ -22,54 +23,17 @@ use Symfony\Component\Security\Core\Security;
 /**
  * @internal
  */
-final class AuditHelperTest extends CoreTest
+final class AuditTraitTest extends CoreTest
 {
-    public function testSummarize(): void
-    {
-        $em = $this->getEntityManager();
-        $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-
-        $author = new Author();
-        $author
-            ->setId(1)
-            ->setFullname('John Doe')
-            ->setEmail('john.doe@gmail.com')
-        ;
-
-        $expected = [
-            'label' => Author::class.'#1',
-            'class' => Author::class,
-            'table' => 'author',
-            'id' => 1,
-        ];
-
-        self::assertSame($expected, $helper->summarize($em, $author), 'AuditHelper::summarize ok');
-
-        $post = new Post();
-        $post
-            ->setId(1)
-            ->setAuthor($author)
-            ->setTitle('First post')
-            ->setBody('Here is the body')
-            ->setCreatedAt(new DateTime())
-        ;
-
-        $expected = [
-            'label' => 'First post',
-            'class' => Post::class,
-            'table' => 'post',
-            'id' => 1,
-        ];
-
-        self::assertSame($expected, $helper->summarize($em, $post), 'AuditHelper::summarize is ok.');
-    }
+    use ReflectionTrait;
 
     public function testId(): void
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
+        $processor = new TransactionProcessor($configuration);
+
+        $method = $this->reflectMethod(TransactionProcessor::class, 'id');
 
         $author = new Author();
         $author
@@ -78,7 +42,7 @@ final class AuditHelperTest extends CoreTest
             ->setEmail('john.doe@gmail.com')
         ;
 
-        self::assertSame(1, $helper->id($em, $author), 'AuditHelper::id() is ok.');
+        self::assertSame(1, $method->invokeArgs($processor, [$em, $author]), 'AuditHelper::id() is ok.');
 
         $dieselCore = new CoreCase();
         $dieselCore->type = 'type1';
@@ -92,8 +56,8 @@ final class AuditHelperTest extends CoreTest
         $em->persist($dieselCase);
         $em->flush();
 
-        self::assertSame(1, $helper->id($em, $dieselCore));
-        self::assertSame(1, $helper->id($em, $dieselCase));
+        self::assertSame(1, $method->invokeArgs($processor, [$em, $dieselCore]));
+        self::assertSame(1, $method->invokeArgs($processor, [$em, $dieselCase]));
 
         $dieselCore = new CoreCase();
         $dieselCore->type = 'type2';
@@ -105,15 +69,17 @@ final class AuditHelperTest extends CoreTest
         $em->persist($dieselCase);
         $em->flush();
 
-        self::assertSame(2, $helper->id($em, $dieselCore));
-        self::assertSame(2, $helper->id($em, $dieselCase));
+        self::assertSame(2, $method->invokeArgs($processor, [$em, $dieselCore]));
+        self::assertSame(2, $method->invokeArgs($processor, [$em, $dieselCase]));
     }
 
     public function testDiffInsert(): void
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
+        $processor = new TransactionProcessor($configuration);
+
+        $method = $this->reflectMethod(TransactionProcessor::class, 'diff');
 
         $author = new Author();
         $author
@@ -143,14 +109,16 @@ final class AuditHelperTest extends CoreTest
             ],
         ];
 
-        self::assertSame($expected, $helper->diff($em, $author, $changeset), 'AuditHelper::diff() / insert is ok.');
+        self::assertSame($expected, $method->invokeArgs($processor, [$em, $author, $changeset]), 'AuditHelper::diff() / insert is ok.');
     }
 
     public function testDiffUpdate(): void
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
+        $processor = new TransactionProcessor($configuration);
+
+        $method = $this->reflectMethod(TransactionProcessor::class, 'diff');
 
         $author = new Author();
         $author
@@ -180,7 +148,7 @@ final class AuditHelperTest extends CoreTest
             ],
         ];
 
-        self::assertSame($expected, $helper->diff($em, $author, $changeset), 'AuditHelper::diff() / update is ok.');
+        self::assertSame($expected, $method->invokeArgs($processor, [$em, $author, $changeset]), 'AuditHelper::diff() / update is ok.');
     }
 
     public function testDiffHonorsGloballyIgnoredColumns(): void
@@ -209,7 +177,9 @@ final class AuditHelperTest extends CoreTest
             new AnnotationLoader($em),
             new EventDispatcher()
         );
-        $helper = new AuditHelper($configuration);
+        $processor = new TransactionProcessor($configuration);
+
+        $method = $this->reflectMethod(TransactionProcessor::class, 'diff');
 
         $now = new DateTime('now');
         $post = new Post();
@@ -245,7 +215,7 @@ final class AuditHelperTest extends CoreTest
             ],
         ];
 
-        self::assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() honors globally ignored columns.');
+        self::assertSame($expected, $method->invokeArgs($processor, [$em, $post, $changeset]), 'AuditHelper::diff() honors globally ignored columns.');
     }
 
     public function testDiffHonorsLocallyIgnoredColumns(): void
@@ -276,7 +246,9 @@ final class AuditHelperTest extends CoreTest
             new AnnotationLoader($em),
             new EventDispatcher()
         );
-        $helper = new AuditHelper($configuration);
+        $processor = new TransactionProcessor($configuration);
+
+        $method = $this->reflectMethod(TransactionProcessor::class, 'diff');
 
         $now = new DateTime('now');
         $post = new Post();
@@ -312,14 +284,16 @@ final class AuditHelperTest extends CoreTest
             ],
         ];
 
-        self::assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() honors locally ignored columns.');
+        self::assertSame($expected, $method->invokeArgs($processor, [$em, $post, $changeset]), 'AuditHelper::diff() honors locally ignored columns.');
     }
 
     public function testDiffIgnoresUnchangedValues(): void
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
+        $processor = new TransactionProcessor($configuration);
+
+        $method = $this->reflectMethod(TransactionProcessor::class, 'diff');
 
         $now = new DateTime('now');
         $post = new Post();
@@ -355,14 +329,58 @@ final class AuditHelperTest extends CoreTest
             ],
         ];
 
-        self::assertSame($expected, $helper->diff($em, $post, $changeset), 'AuditHelper::diff() ignores unchanged values.');
+        self::assertSame($expected, $method->invokeArgs($processor, [$em, $post, $changeset]), 'AuditHelper::diff() ignores unchanged values.');
+    }
+
+    public function testSummarize(): void
+    {
+        $em = $this->getEntityManager();
+        $configuration = $this->getAuditConfiguration();
+        $processor = new TransactionProcessor($configuration);
+
+        $method = $this->reflectMethod(TransactionProcessor::class, 'summarize');
+
+        $author = new Author();
+        $author
+            ->setId(1)
+            ->setFullname('John Doe')
+            ->setEmail('john.doe@gmail.com')
+        ;
+
+        $expected = [
+            'label' => Author::class.'#1',
+            'class' => Author::class,
+            'table' => 'author',
+            'id' => 1,
+        ];
+
+        self::assertSame($expected, $method->invokeArgs($processor, [$em, $author]), 'AuditHelper::summarize ok');
+
+        $post = new Post();
+        $post
+            ->setId(1)
+            ->setAuthor($author)
+            ->setTitle('First post')
+            ->setBody('Here is the body')
+            ->setCreatedAt(new DateTime())
+        ;
+
+        $expected = [
+            'label' => 'First post',
+            'class' => Post::class,
+            'table' => 'post',
+            'id' => 1,
+        ];
+
+        self::assertSame($expected, $method->invokeArgs($processor, [$em, $post]), 'AuditHelper::summarize is ok.');
     }
 
     public function testBlame(): void
     {
-        $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
+        $processor = new TransactionProcessor($configuration);
+
+        $method = $this->reflectMethod(TransactionProcessor::class, 'blame');
 
         $expected = [
             'user_id' => 1,
@@ -372,7 +390,7 @@ final class AuditHelperTest extends CoreTest
             'user_firewall' => null,
         ];
 
-        self::assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
+        self::assertSame($expected, $method->invokeArgs($processor, []), 'AuditHelper::blame() is ok.');
     }
 
     public function testBlameWhenNoRequest(): void
@@ -395,7 +413,9 @@ final class AuditHelperTest extends CoreTest
             new AnnotationLoader($em),
             new EventDispatcher()
         );
-        $helper = new AuditHelper($configuration);
+        $processor = new TransactionProcessor($configuration);
+
+        $method = $this->reflectMethod(TransactionProcessor::class, 'blame');
 
         $expected = [
             'user_id' => 1,
@@ -405,7 +425,7 @@ final class AuditHelperTest extends CoreTest
             'user_firewall' => null,
         ];
 
-        self::assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
+        self::assertSame($expected, $method->invokeArgs($processor, []), 'AuditHelper::blame() is ok.');
     }
 
     public function testBlameWhenNoUser(): void
@@ -428,7 +448,9 @@ final class AuditHelperTest extends CoreTest
             new AnnotationLoader($em),
             new EventDispatcher()
         );
-        $helper = new AuditHelper($configuration);
+        $processor = new TransactionProcessor($configuration);
+
+        $method = $this->reflectMethod(TransactionProcessor::class, 'blame');
 
         $expected = [
             'user_id' => null,
@@ -438,26 +460,7 @@ final class AuditHelperTest extends CoreTest
             'user_firewall' => null,
         ];
 
-        self::assertSame($expected, $helper->blame(), 'AuditHelper::blame() is ok.');
-    }
-
-    public function testParamToNamespace(): void
-    {
-        self::assertSame(Author::class, AuditHelper::paramToNamespace('DH-DoctrineAuditBundle-Tests-Fixtures-Core-Standard-Author'), 'AuditHelper::paramToNamespace() is ok.');
-    }
-
-    public function testNamespaceToParam(): void
-    {
-        self::assertSame('DH-DoctrineAuditBundle-Tests-Fixtures-Core-Standard-Author', AuditHelper::namespaceToParam(Author::class), 'AuditHelper::namespaceToParam() is ok.');
-    }
-
-    public function testGetConfiguration(): void
-    {
-        $em = $this->getEntityManager();
-        $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-
-        self::assertInstanceOf(Configuration::class, $helper->getConfiguration(), 'configuration instanceof AuditConfiguration::class');
+        self::assertSame($expected, $method->invokeArgs($processor, []), 'AuditHelper::blame() is ok.');
     }
 
     protected function setupEntities(): void

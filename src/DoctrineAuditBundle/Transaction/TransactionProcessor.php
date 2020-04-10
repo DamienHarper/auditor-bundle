@@ -1,57 +1,36 @@
 <?php
 
-namespace DH\DoctrineAuditBundle\Manager;
+namespace DH\DoctrineAuditBundle\Transaction;
 
 use DateTime;
 use DateTimeZone;
 use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Event\LifecycleEvent;
-use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
+use DH\DoctrineAuditBundle\Model\Transaction;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
-class Manager
+class TransactionProcessor
 {
+    use AuditTrait;
+
     /**
-     * @var \DH\DoctrineAuditBundle\Configuration
+     * @var Configuration
      */
     private $configuration;
 
     /**
-     * @var AuditHelper
+     * @var EntityManagerInterface
      */
-    private $helper;
+    private $em;
 
-    public function __construct(Configuration $configuration, AuditHelper $helper)
+    public function __construct(Configuration $configuration)
     {
         $this->configuration = $configuration;
-        $this->helper = $helper;
-    }
-
-    /**
-     * @return \DH\DoctrineAuditBundle\Configuration
-     */
-    public function getConfiguration(): Configuration
-    {
-        return $this->configuration;
-    }
-
-    /**
-     * @param array $payload
-     */
-    public function notify(array $payload): void
-    {
-        $dispatcher = $this->configuration->getEventDispatcher();
-
-        if ($this->configuration->isPre43Dispatcher()) {
-            // Symfony 3.x
-            $dispatcher->dispatch(LifecycleEvent::class, new LifecycleEvent($payload));
-        } else {
-            // Symfony 4.x
-            $dispatcher->dispatch(new LifecycleEvent($payload));
-        }
+        $this->em = $this->configuration->getEntityManager();
     }
 
     /**
@@ -70,6 +49,22 @@ class Manager
     }
 
     /**
+     * @param array $payload
+     */
+    private function notify(array $payload): void
+    {
+        $dispatcher = $this->configuration->getEventDispatcher();
+
+        if ($this->configuration->isPre43Dispatcher()) {
+            // Symfony 3.x
+            $dispatcher->dispatch(LifecycleEvent::class, new LifecycleEvent($payload));
+        } else {
+            // Symfony 4.x
+            $dispatcher->dispatch(new LifecycleEvent($payload));
+        }
+    }
+
+    /**
      * Adds an insert entry to the audit table.
      *
      * @param EntityManagerInterface $em
@@ -80,17 +75,17 @@ class Manager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function insert(EntityManagerInterface $em, $entity, array $ch, string $transactionHash): void
+    private function insert(EntityManagerInterface $em, $entity, array $ch, string $transactionHash): void
     {
         /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
         $this->audit([
             'action' => 'insert',
-            'blame' => $this->helper->blame(),
-            'diff' => $this->helper->diff($em, $entity, $ch),
+            'blame' => $this->blame(),
+            'diff' => $this->diff($em, $entity, $ch),
             'table' => $meta->getTableName(),
             'schema' => $meta->getSchemaName(),
-            'id' => $this->helper->id($em, $entity),
+            'id' => $this->id($em, $entity),
             'transaction_hash' => $transactionHash,
             'discriminator' => $this->getDiscriminator($entity, $meta->inheritanceType),
             'entity' => $meta->getName(),
@@ -108,9 +103,9 @@ class Manager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function update(EntityManagerInterface $em, $entity, array $ch, string $transactionHash): void
+    private function update(EntityManagerInterface $em, $entity, array $ch, string $transactionHash): void
     {
-        $diff = $this->helper->diff($em, $entity, $ch);
+        $diff = $this->diff($em, $entity, $ch);
         if (0 === \count($diff)) {
             return; // if there is no entity diff, do not log it
         }
@@ -118,11 +113,11 @@ class Manager
         $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
         $this->audit([
             'action' => 'update',
-            'blame' => $this->helper->blame(),
+            'blame' => $this->blame(),
             'diff' => $diff,
             'table' => $meta->getTableName(),
             'schema' => $meta->getSchemaName(),
-            'id' => $this->helper->id($em, $entity),
+            'id' => $this->id($em, $entity),
             'transaction_hash' => $transactionHash,
             'discriminator' => $this->getDiscriminator($entity, $meta->inheritanceType),
             'entity' => $meta->getName(),
@@ -140,14 +135,14 @@ class Manager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function remove(EntityManagerInterface $em, $entity, $id, string $transactionHash): void
+    private function remove(EntityManagerInterface $em, $entity, $id, string $transactionHash): void
     {
         /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
         $this->audit([
             'action' => 'remove',
-            'blame' => $this->helper->blame(),
-            'diff' => $this->helper->summarize($em, $entity, $id),
+            'blame' => $this->blame(),
+            'diff' => $this->summarize($em, $entity, $id),
             'table' => $meta->getTableName(),
             'schema' => $meta->getSchemaName(),
             'id' => $id,
@@ -169,7 +164,7 @@ class Manager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function associate(EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
+    private function associate(EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
     {
         $this->associateOrDissociate('associate', $em, $source, $target, $mapping, $transactionHash);
     }
@@ -186,45 +181,24 @@ class Manager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function dissociate(EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
+    private function dissociate(EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
     {
         $this->associateOrDissociate('dissociate', $em, $source, $target, $mapping, $transactionHash);
     }
 
     /**
-     * Set the value of helper.
-     *
-     * @param AuditHelper $helper
-     */
-    public function setHelper(AuditHelper $helper): void
-    {
-        $this->helper = $helper;
-    }
-
-    /**
-     * Get the value of helper.
-     *
-     * @return AuditHelper
-     */
-    public function getHelper(): AuditHelper
-    {
-        return $this->helper;
-    }
-
-    /**
      * @param Transaction $transaction
      *
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function processInsertions(Transaction $transaction): void
+    private function processInsertions(Transaction $transaction): void
     {
-        $em = $transaction->getEntityManager();
-        $uow = $em->getUnitOfWork();
-        foreach ($transaction->getInserted() as list($entity, $ch)) {
+        $uow = $this->em->getUnitOfWork();
+        foreach ($transaction->getInserted() as [$entity, $ch]) {
             // the changeset might be updated from UOW extra updates
             $ch = array_merge($ch, $uow->getEntityChangeSet($entity));
-            $this->insert($em, $entity, $ch, $transaction->getTransactionHash());
+            $this->insert($this->em, $entity, $ch, $transaction->getTransactionHash());
         }
     }
 
@@ -234,14 +208,13 @@ class Manager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function processUpdates(Transaction $transaction): void
+    private function processUpdates(Transaction $transaction): void
     {
-        $em = $transaction->getEntityManager();
-        $uow = $em->getUnitOfWork();
-        foreach ($transaction->getUpdated() as list($entity, $ch)) {
+        $uow = $this->em->getUnitOfWork();
+        foreach ($transaction->getUpdated() as [$entity, $ch]) {
             // the changeset might be updated from UOW extra updates
             $ch = array_merge($ch, $uow->getEntityChangeSet($entity));
-            $this->update($em, $entity, $ch, $transaction->getTransactionHash());
+            $this->update($this->em, $entity, $ch, $transaction->getTransactionHash());
         }
     }
 
@@ -251,11 +224,10 @@ class Manager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function processAssociations(Transaction $transaction): void
+    private function processAssociations(Transaction $transaction): void
     {
-        $em = $transaction->getEntityManager();
-        foreach ($transaction->getAssociated() as list($source, $target, $mapping)) {
-            $this->associate($em, $source, $target, $mapping, $transaction->getTransactionHash());
+        foreach ($transaction->getAssociated() as [$source, $target, $mapping]) {
+            $this->associate($this->em, $source, $target, $mapping, $transaction->getTransactionHash());
         }
     }
 
@@ -265,11 +237,10 @@ class Manager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function processDissociations(Transaction $transaction): void
+    private function processDissociations(Transaction $transaction): void
     {
-        $em = $transaction->getEntityManager();
-        foreach ($transaction->getDissociated() as list($source, $target, $id, $mapping)) {
-            $this->dissociate($em, $source, $target, $mapping, $transaction->getTransactionHash());
+        foreach ($transaction->getDissociated() as [$source, $target, $id, $mapping]) {
+            $this->dissociate($this->em, $source, $target, $mapping, $transaction->getTransactionHash());
         }
     }
 
@@ -279,22 +250,11 @@ class Manager
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\Mapping\MappingException
      */
-    public function processDeletions(Transaction $transaction): void
+    private function processDeletions(Transaction $transaction): void
     {
-        $em = $transaction->getEntityManager();
-        foreach ($transaction->getRemoved() as list($entity, $id)) {
-            $this->remove($em, $entity, $id, $transaction->getTransactionHash());
+        foreach ($transaction->getRemoved() as [$entity, $id]) {
+            $this->remove($this->em, $entity, $id, $transaction->getTransactionHash());
         }
-    }
-
-    /**
-     * @param EntityManagerInterface $em
-     *
-     * @return EntityManagerInterface
-     */
-    public function selectStorageSpace(EntityManagerInterface $em): EntityManagerInterface
-    {
-        return $this->configuration->getEntityManager() ?? $em;
     }
 
     /**
@@ -316,14 +276,14 @@ class Manager
         $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($source));
         $data = [
             'action' => $type,
-            'blame' => $this->helper->blame(),
+            'blame' => $this->blame(),
             'diff' => [
-                'source' => $this->helper->summarize($em, $source),
-                'target' => $this->helper->summarize($em, $target),
+                'source' => $this->summarize($em, $source),
+                'target' => $this->summarize($em, $target),
             ],
             'table' => $meta->getTableName(),
             'schema' => $meta->getSchemaName(),
-            'id' => $this->helper->id($em, $source),
+            'id' => $this->id($em, $source),
             'transaction_hash' => $transactionHash,
             'discriminator' => $this->getDiscriminator($source, $meta->inheritanceType),
             'entity' => $meta->getName(),
@@ -347,7 +307,7 @@ class Manager
     {
         $schema = $data['schema'] ? $data['schema'].'.' : '';
         $auditTable = $schema.$this->configuration->getTablePrefix().$data['table'].$this->configuration->getTableSuffix();
-        $dt = new DateTime('now', new DateTimeZone($this->getConfiguration()->getTimezone()));
+        $dt = new DateTime('now', new DateTimeZone($this->configuration->getTimezone()));
 
         $payload = [
             'entity' => $data['entity'],

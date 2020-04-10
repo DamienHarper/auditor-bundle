@@ -2,9 +2,8 @@
 
 namespace DH\DoctrineAuditBundle\Command;
 
-use DH\DoctrineAuditBundle\Helper\UpdateHelper;
-use DH\DoctrineAuditBundle\Manager\Manager;
 use DH\DoctrineAuditBundle\Reader\Reader;
+use DH\DoctrineAuditBundle\Updater\UpdateManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
 use Symfony\Component\Console\Exception\RuntimeException;
@@ -65,7 +64,7 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
         $force = true === $input->getOption('force');
 
         /**
-         * @var Manager
+         * @var \DH\DoctrineAuditBundle\Transaction\TransactionManager
          */
         $manager = $this->container->get('dh_doctrine_audit.manager');
 
@@ -75,9 +74,9 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
         $reader = $this->container->get('dh_doctrine_audit.reader');
 
         /**
-         * @var UpdateHelper
+         * @var \DH\DoctrineAuditBundle\Updater\UpdateManager
          */
-        $updater = new UpdateHelper($manager, $reader);
+        $updater = new UpdateManager($manager, $reader);
 
         $sqls = $updater->getUpdateAuditSchemaSql();
 

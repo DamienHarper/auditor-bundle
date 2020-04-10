@@ -7,10 +7,9 @@ use DH\DoctrineAuditBundle\Configuration as AuditConfiguration;
 use DH\DoctrineAuditBundle\Event\AuditSubscriber;
 use DH\DoctrineAuditBundle\Event\CreateSchemaListener;
 use DH\DoctrineAuditBundle\Event\DoctrineSubscriber;
-use DH\DoctrineAuditBundle\Helper\AuditHelper;
-use DH\DoctrineAuditBundle\Helper\UpdateHelper;
-use DH\DoctrineAuditBundle\Manager\Manager;
 use DH\DoctrineAuditBundle\Reader\Reader;
+use DH\DoctrineAuditBundle\Transaction\TransactionManager;
+use DH\DoctrineAuditBundle\Updater\UpdateManager;
 use DH\DoctrineAuditBundle\User\TokenStorageUserProvider;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\DBAL\Connection;
@@ -144,11 +143,10 @@ abstract class BaseTest extends TestCase
     protected function setUpAuditSchema(): void
     {
         $configuration = $this->getAuditConfiguration();
-        $helper = new AuditHelper($configuration);
-        $manager = new Manager($configuration, $helper);
+        $manager = new TransactionManager($configuration);
         $reader = $this->getReader($this->getAuditConfiguration());
 
-        $updater = new UpdateHelper($manager, $reader);
+        $updater = new UpdateManager($manager, $reader);
         $updater->updateAuditSchema();
     }
 
@@ -246,7 +244,7 @@ abstract class BaseTest extends TestCase
         $this->setAuditConfiguration($this->createAuditConfiguration([], $this->em));
         $configuration = $this->getAuditConfiguration();
 
-        $this->auditManager = new Manager($configuration, new AuditHelper($configuration));
+        $this->auditManager = new TransactionManager($configuration);
 
         $configuration->getEventDispatcher()->addSubscriber(new AuditSubscriber($this->auditManager));
 
@@ -278,7 +276,7 @@ abstract class BaseTest extends TestCase
         return self::$conn;
     }
 
-    protected function getEventDispatcher(Manager $manager): EventDispatcherInterface
+    protected function getEventDispatcher(TransactionManager $manager): EventDispatcherInterface
     {
         if (null !== $this->dispatcher) {
             $this->dispatcher = new EventDispatcher();

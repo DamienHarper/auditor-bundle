@@ -32,22 +32,14 @@ services:
     public: true
 
   dh_doctrine_audit.manager:
-    class: DH\DoctrineAuditBundle\Manager\Manager
+    class: DH\DoctrineAuditBundle\Transaction\TransactionManager
     arguments:
       - "@dh_doctrine_audit.configuration"
-      - "@dh_doctrine_audit.helper"
     public: true
 
-  DH\DoctrineAuditBundle\Manager\Manager:
+  DH\DoctrineAuditBundle\Transaction\TransactionManager:
     alias: dh_doctrine_audit.manager
     public: true
-
-  dh_doctrine_audit.helper:
-    class: DH\DoctrineAuditBundle\Helper\AuditHelper
-    arguments: ["@dh_doctrine_audit.configuration"]
-
-  DH\DoctrineAuditBundle\Helper\AuditHelper:
-    alias: dh_doctrine_audit.helper
 
   dh_doctrine_audit.user_provider:
     class: DH\DoctrineAuditBundle\User\TokenStorageUserProvider
@@ -100,6 +92,6 @@ services:
 
   DH\DoctrineAuditBundle\Routing\RoutingAnnotationLoader:
     tags: [routing.loader]
-    calls:
-      - { method: setAnnotatedRouteControllerLoader, arguments: ['@routing.loader.annotation'] }
-      - { method: setConfiguration, arguments: ['%dh_doctrine_audit.configuration%'] }
+    arguments:
+      - '@routing.loader.annotation'
+      - '%dh_doctrine_audit.configuration%'
