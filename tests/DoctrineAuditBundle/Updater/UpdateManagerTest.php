@@ -24,7 +24,7 @@ final class UpdateManagerTest extends BaseTest
     {
         $em = $this->getEntityManager();
         $configuration = $this->getAuditConfiguration();
-        $manager = new \DH\DoctrineAuditBundle\Transaction\TransactionManager($configuration);
+        $manager = new TransactionManager($configuration);
         $reader = $this->getReader($this->getAuditConfiguration());
         $updater = new UpdateManager($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
@@ -100,7 +100,7 @@ final class UpdateManagerTest extends BaseTest
     {
         $configuration = $this->getAuditConfiguration();
         $em = $configuration->getEntityManager();
-        $manager = new \DH\DoctrineAuditBundle\Transaction\TransactionManager($configuration);
+        $manager = new TransactionManager($configuration);
         $reader = $this->getReader($this->getAuditConfiguration());
         $updater = new UpdateManager($manager, $reader);
         $schemaManager = $em->getConnection()->getSchemaManager();
@@ -294,7 +294,7 @@ final class UpdateManagerTest extends BaseTest
         $this->setAuditConfiguration($this->createAuditConfiguration([], $this->em));
         $configuration = $this->getAuditConfiguration();
 
-        $this->auditManager = new \DH\DoctrineAuditBundle\Transaction\TransactionManager($configuration);
+        $this->transactionManager = new TransactionManager($configuration);
 
         // get rid of more global state
         $evm = $connection->getEventManager();

@@ -14,18 +14,18 @@ use Doctrine\ORM\Events;
 class DoctrineSubscriber implements EventSubscriber
 {
     /**
-     * @var \DH\DoctrineAuditBundle\Transaction\TransactionManager
+     * @var TransactionManager
      */
-    private $manager;
+    private $transactionManager;
 
     /**
      * @var ?SQLLogger
      */
     private $loggerBackup;
 
-    public function __construct(TransactionManager $manager)
+    public function __construct(TransactionManager $transactionManager)
     {
-        $this->manager = $manager;
+        $this->transactionManager = $transactionManager;
     }
 
     /**
@@ -49,7 +49,7 @@ class DoctrineSubscriber implements EventSubscriber
         $auditLogger = new Logger(function () use ($em, $transaction): void {
             // flushes pending data
             $em->getConnection()->getConfiguration()->setSQLLogger($this->loggerBackup);
-            $this->manager->process($transaction);
+            $this->transactionManager->process($transaction);
         });
 
         // Initialize a new LoggerChain with the new AuditLogger + the existing SQLLoggers.
@@ -66,7 +66,7 @@ class DoctrineSubscriber implements EventSubscriber
         $em->getConnection()->getConfiguration()->setSQLLogger($loggerChain);
 
         // Populate transaction
-        $this->manager->populate($transaction);
+        $this->transactionManager->populate($transaction);
     }
 
     /**

@@ -55,7 +55,7 @@ abstract class BaseTest extends TestCase
 
     protected $auditConfiguration;
 
-    protected $auditManager;
+    protected $transactionManager;
 
     /**
      * @var SchemaTool
@@ -244,9 +244,9 @@ abstract class BaseTest extends TestCase
         $this->setAuditConfiguration($this->createAuditConfiguration([], $this->em));
         $configuration = $this->getAuditConfiguration();
 
-        $this->auditManager = new TransactionManager($configuration);
+        $this->transactionManager = new TransactionManager($configuration);
 
-        $configuration->getEventDispatcher()->addSubscriber(new AuditSubscriber($this->auditManager));
+        $configuration->getEventDispatcher()->addSubscriber(new AuditSubscriber($this->transactionManager));
 
         // get rid of more global state
         $evm = $connection->getEventManager();
@@ -255,8 +255,8 @@ abstract class BaseTest extends TestCase
                 $evm->removeEventListener([$event], $listener);
             }
         }
-        $evm->addEventSubscriber(new DoctrineSubscriber($this->auditManager));
-        $evm->addEventSubscriber(new CreateSchemaListener($this->auditManager, $this->getReader()));
+        $evm->addEventSubscriber(new DoctrineSubscriber($this->transactionManager));
+        $evm->addEventSubscriber(new CreateSchemaListener($this->transactionManager, $this->getReader()));
         $evm->addEventSubscriber(new Gedmo\SoftDeleteable\SoftDeleteableListener());
 
         return $this->em;

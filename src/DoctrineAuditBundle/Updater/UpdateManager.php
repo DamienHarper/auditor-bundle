@@ -17,7 +17,7 @@ class UpdateManager
     /**
      * @var TransactionManager
      */
-    private $manager;
+    private $transactionManager;
 
     /**
      * @var Reader
@@ -25,12 +25,12 @@ class UpdateManager
     private $reader;
 
     /**
-     * @param TransactionManager $manager
+     * @param TransactionManager $transactionManager
      * @param Reader             $reader
      */
-    public function __construct(TransactionManager $manager, Reader $reader)
+    public function __construct(TransactionManager $transactionManager, Reader $reader)
     {
-        $this->manager = $manager;
+        $this->transactionManager = $transactionManager;
         $this->reader = $reader;
     }
 
@@ -39,7 +39,7 @@ class UpdateManager
      */
     public function getConfiguration(): Configuration
     {
-        return $this->manager->getConfiguration();
+        return $this->transactionManager->getConfiguration();
     }
 
     /**
@@ -48,7 +48,7 @@ class UpdateManager
      */
     public function updateAuditSchema(?array $sqls = null, ?callable $callback = null): void
     {
-        $auditEntityManager = $this->manager->getConfiguration()->getEntityManager();
+        $auditEntityManager = $this->transactionManager->getConfiguration()->getEntityManager();
 
         if (null === $sqls) {
             $sqls = $this->getUpdateAuditSchemaSql();
@@ -76,7 +76,7 @@ class UpdateManager
         $readerEntityManager = $this->reader->getEntityManager();
         $readerSchemaManager = $readerEntityManager->getConnection()->getSchemaManager();
 
-        $auditEntityManager = $this->manager->getConfiguration()->getEntityManager();
+        $auditEntityManager = $this->transactionManager->getConfiguration()->getEntityManager();
         $auditSchemaManager = $auditEntityManager->getConnection()->getSchemaManager();
 
         $auditSchema = $auditSchemaManager->createSchema();
@@ -91,8 +91,8 @@ class UpdateManager
                     sprintf('#^([^\.]+\.)?(%s)$#', preg_quote($table->getName(), '#')),
                     sprintf(
                         '$1%s$2%s',
-                        preg_quote($this->manager->getConfiguration()->getTablePrefix(), '#'),
-                        preg_quote($this->manager->getConfiguration()->getTableSuffix(), '#')
+                        preg_quote($this->transactionManager->getConfiguration()->getTablePrefix(), '#'),
+                        preg_quote($this->transactionManager->getConfiguration()->getTableSuffix(), '#')
                     ),
                     $table->getName()
                 );

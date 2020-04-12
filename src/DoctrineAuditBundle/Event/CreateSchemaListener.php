@@ -14,18 +14,18 @@ use Exception;
 class CreateSchemaListener implements EventSubscriber
 {
     /**
-     * @var \DH\DoctrineAuditBundle\Transaction\TransactionManager
+     * @var TransactionManager
      */
-    protected $manager;
+    protected $transactionManager;
 
     /**
      * @var Reader
      */
     protected $reader;
 
-    public function __construct(TransactionManager $manager, Reader $reader)
+    public function __construct(TransactionManager $transactionManager, Reader $reader)
     {
-        $this->manager = $manager;
+        $this->transactionManager = $transactionManager;
         $this->reader = $reader;
     }
 
@@ -43,19 +43,19 @@ class CreateSchemaListener implements EventSubscriber
         }
 
         // check reader and manager entity managers and returns if different
-        if ($this->reader->getEntityManager() !== $this->manager->getConfiguration()->getEntityManager()) {
+        if ($this->reader->getEntityManager() !== $this->transactionManager->getConfiguration()->getEntityManager()) {
             return;
         }
 
         // check if entity or its children are audited
-        if (!$this->manager->getConfiguration()->isAuditable($metadata->name)) {
+        if (!$this->transactionManager->getConfiguration()->isAuditable($metadata->name)) {
             $audited = false;
             if (
                 $metadata->rootEntityName === $metadata->name &&
                 ClassMetadataInfo::INHERITANCE_TYPE_SINGLE_TABLE === $metadata->inheritanceType
             ) {
                 foreach ($metadata->subClasses as $subClass) {
-                    if ($this->manager->getConfiguration()->isAuditable($subClass)) {
+                    if ($this->transactionManager->getConfiguration()->isAuditable($subClass)) {
                         $audited = true;
                     }
                 }
@@ -65,7 +65,7 @@ class CreateSchemaListener implements EventSubscriber
             }
         }
 
-        $updater = new UpdateManager($this->manager, $this->reader);
+        $updater = new UpdateManager($this->transactionManager, $this->reader);
         $updater->createAuditTable($eventArgs->getClassTable(), $eventArgs->getSchema());
     }
 

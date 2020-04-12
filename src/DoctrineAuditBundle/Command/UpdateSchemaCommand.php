@@ -3,6 +3,7 @@
 namespace DH\DoctrineAuditBundle\Command;
 
 use DH\DoctrineAuditBundle\Reader\Reader;
+use DH\DoctrineAuditBundle\Transaction\TransactionManager;
 use DH\DoctrineAuditBundle\Updater\UpdateManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LockableTrait;
@@ -64,7 +65,7 @@ class UpdateSchemaCommand extends Command implements ContainerAwareInterface
         $force = true === $input->getOption('force');
 
         /**
-         * @var \DH\DoctrineAuditBundle\Transaction\TransactionManager
+         * @var TransactionManager
          */
         $manager = $this->container->get('dh_doctrine_audit.manager');
 

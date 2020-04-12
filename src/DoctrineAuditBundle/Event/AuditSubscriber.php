@@ -10,11 +10,11 @@ class AuditSubscriber implements EventSubscriberInterface
     /**
      * @var TransactionManager
      */
-    private $manager;
+    private $transactionManager;
 
-    public function __construct(TransactionManager $manager)
+    public function __construct(TransactionManager $transactionManager)
     {
-        $this->manager = $manager;
+        $this->transactionManager = $transactionManager;
     }
 
     public static function getSubscribedEvents(): array
@@ -58,7 +58,7 @@ class AuditSubscriber implements EventSubscriberInterface
             implode(', ', array_values($fields))
         );
 
-        $storage = $this->manager->selectStorageSpace($this->manager->getConfiguration()->getEntityManager());
+        $storage = $this->transactionManager->selectStorageSpace($this->transactionManager->getConfiguration()->getEntityManager());
         $statement = $storage->getConnection()->prepare($query);
 
         foreach ($payload as $key => $value) {
