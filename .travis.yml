@@ -1,11 +1,6 @@
 language: php
 os: linux
 
-branches:
-    only:
-        - master
-        - 3.x
-
 cache:
     directories:
         - $HOME/.composer/cache

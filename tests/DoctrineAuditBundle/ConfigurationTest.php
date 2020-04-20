@@ -131,6 +131,16 @@ final class ConfigurationTest extends BaseTest
                 'enabled' => true,
                 'roles' => null,
             ],
+            \DH\DoctrineAuditBundle\Tests\Fixtures\IssueX\Post::class => [
+                'ignored_columns' => [],
+                'enabled' => true,
+                'roles' => null,
+            ],
+            \DH\DoctrineAuditBundle\Tests\Fixtures\IssueX\Comment::class => [
+                'ignored_columns' => [],
+                'enabled' => true,
+                'roles' => null,
+            ],
             UnauditedEntity::class => [
                 'ignored_columns' => ['ignoredField'],
                 'enabled' => false,

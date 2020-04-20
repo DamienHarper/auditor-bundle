@@ -18,7 +18,7 @@ final class AnnotationLoaderTest extends BaseTest
         $annotationLoader = new AnnotationLoader($em);
 
         $config = $annotationLoader->load();
-        self::assertCount(2, $config);
+        self::assertCount(4, $config);
 
         $options = $config[AuditedEntity::class];
         self::assertSame($options['ignored_columns'], ['ignoredField']);

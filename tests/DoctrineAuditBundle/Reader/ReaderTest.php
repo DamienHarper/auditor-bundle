@@ -117,11 +117,13 @@ final class ReaderTest extends CoreTest
             UnauditedEntity::class => null,
             Post::class => null,
             Comment::class => null,
+            \DH\DoctrineAuditBundle\Tests\Fixtures\IssueX\Comment::class => null,
+            \DH\DoctrineAuditBundle\Tests\Fixtures\IssueX\Post::class => null,
         ];
 
         $expected = array_combine(
             array_keys($entities),
-            ['audited_entity', 'unaudited_entity', 'post', 'comment']
+            ['audited_entity', 'unaudited_entity', 'post', 'comment', 'fixture_comment', 'fixture_post']
         );
         ksort($expected);
 

@@ -16,6 +16,7 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\IssueX\Comment;
 use DH\DoctrineAuditBundle\Tests\Fixtures\IssueX\DataFixtures;
 use DH\DoctrineAuditBundle\Tests\Fixtures\IssueX\DependentDataFixture;
 use DH\DoctrineAuditBundle\Tests\Fixtures\IssueX\Post;
+use Doctrine\Common\DataFixtures\Event\Listener\ORMReferenceListener;
 use Doctrine\Common\DataFixtures\ProxyReferenceRepository;
 use Doctrine\Common\DataFixtures\ReferenceRepository;
 use Doctrine\DBAL\DriverManager;
@@ -213,6 +214,15 @@ final class IssueTest extends BaseTest
         $dependentDataFixture = new DependentDataFixture();
 
         $referenceRepository = new ProxyReferenceRepository($em);
+
+        $listener = new ORMReferenceListener($referenceRepository);
+
+        $em->getEventManager()->removeEventListener(
+            $listener->getSubscribedEvents(),
+            $listener
+        );
+
+        $em->getEventManager()->addEventSubscriber($listener);
 
         $dependentDataFixture->setReferenceRepository($referenceRepository);
         $dependentDataFixture->load($em);
