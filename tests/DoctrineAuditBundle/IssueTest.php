@@ -12,6 +12,14 @@ use DH\DoctrineAuditBundle\Tests\Fixtures\Issue37\Locale;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issue37\User;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issue40\CoreCase;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Issue40\DieselCase;
+use DH\DoctrineAuditBundle\Tests\Fixtures\IssueX\Comment;
+use DH\DoctrineAuditBundle\Tests\Fixtures\IssueX\DataFixtures;
+use DH\DoctrineAuditBundle\Tests\Fixtures\IssueX\DependentDataFixture;
+use DH\DoctrineAuditBundle\Tests\Fixtures\IssueX\Post;
+use Doctrine\Common\DataFixtures\ProxyReferenceRepository;
+use Doctrine\Common\DataFixtures\ReferenceRepository;
+use Doctrine\DBAL\DriverManager;
+use Doctrine\ORM\EntityManager;
 
 /**
  * @internal
@@ -39,6 +47,8 @@ final class IssueTest extends BaseTest
             Bike::class => ['enabled' => true],
             Cat::class => ['enabled' => true],
             Dog::class => ['enabled' => true],
+            Post::class => ['enabled' => true],
+            Comment::class => ['enabled' => true],
         ]);
 
         $this->setUpEntitySchema();
@@ -187,5 +197,41 @@ final class IssueTest extends BaseTest
 
         $audits = $reader->getAudits(User::class);
         self::assertCount(2, $audits, 'results count ok.');
+    }
+
+    public function testIssueNext(): void
+    {
+        $em = $this->getEntityManager();
+
+        $cacheDriver = $em->getMetadataFactory()->getCacheDriver();
+
+        if ($cacheDriver) {
+            $cacheDriver->deleteAll();
+        }
+
+        $dataFixture = new DataFixtures();
+        $dependentDataFixture = new DependentDataFixture();
+
+        $referenceRepository = new ProxyReferenceRepository($em);
+
+        $dependentDataFixture->setReferenceRepository($referenceRepository);
+        $dependentDataFixture->load($em);
+        $em->clear();
+
+        $dataFixture->setReferenceRepository($referenceRepository);
+        $dataFixture->load($em);
+        $em->clear();
+
+        $post = $referenceRepository->getReference('post_1');
+
+        $this->assertEquals(1, $post->getId());
+
+        $comment1 = $referenceRepository->getReference('comment_1');
+        $this->assertEquals(1, $comment1->getId());
+        $this->assertEquals('Comment One', $comment1->getBody());
+
+        $comment2 = $referenceRepository->getReference('comment_2');
+        $this->assertEquals(2, $comment2->getId());
+        $this->assertEquals('Comment Two', $comment2->getBody());
     }
 }
