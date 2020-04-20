@@ -41,7 +41,7 @@
     "phpstan/phpstan-strict-rules": "^0.12",
     "phpstan/phpstan-symfony": "^0.12",
     "phpunit/phpunit": "^7.0|^8.0",
-    "symfony/var-dumper": "^4.2|^5.0",
+    "symfony/var-dumper": "^3.4|^4.2|^5.0",
     "twig/extensions": "^1.5"
   },
   "conflict": {
