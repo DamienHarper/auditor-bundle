@@ -4,9 +4,11 @@ namespace DH\DoctrineAuditBundle\Transaction;
 
 use DH\DoctrineAuditBundle\Helper\DoctrineHelper;
 use DH\DoctrineAuditBundle\User\UserInterface;
+use Doctrine\Common\Persistence\Proxy;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\PersistentCollection;
 
 trait AuditTrait
 {
@@ -164,7 +166,15 @@ trait AuditTrait
             return null;
         }
 
-        $em->getUnitOfWork()->initializeObject($entity); // ensure that proxies are initialized
+        // ensure that proxies are initialized
+        if (
+            ($entity instanceof Proxy && !$entity->__isInitialized()) ||
+            ($entity instanceof PersistentCollection && !$entity->isInitialized())
+        ) {
+            $em->initializeObject($entity);
+        }
+
+
         /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
         $pkName = $meta->getSingleIdentifierFieldName();
