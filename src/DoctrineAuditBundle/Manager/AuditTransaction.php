@@ -90,7 +90,7 @@ class AuditTransaction
      */
     public function collectScheduledInsertions(UnitOfWork $uow): void
     {
-        foreach ($uow->getScheduledEntityInsertions() as $entity) {
+        foreach (array_reverse($uow->getScheduledEntityInsertions()) as $entity) {
             if ($this->configuration->isAudited($entity)) {
                 $this->inserted[] = [
                     $entity,
@@ -105,7 +105,7 @@ class AuditTransaction
      */
     public function collectScheduledUpdates(UnitOfWork $uow): void
     {
-        foreach ($uow->getScheduledEntityUpdates() as $entity) {
+        foreach (array_reverse($uow->getScheduledEntityUpdates()) as $entity) {
             if ($this->configuration->isAudited($entity)) {
                 $this->updated[] = [
                     $entity,
@@ -124,7 +124,7 @@ class AuditTransaction
      */
     public function collectScheduledDeletions(UnitOfWork $uow, EntityManagerInterface $em): void
     {
-        foreach ($uow->getScheduledEntityDeletions() as $entity) {
+        foreach (array_reverse($uow->getScheduledEntityDeletions()) as $entity) {
             if ($this->configuration->isAudited($entity)) {
                 $uow->initializeObject($entity);
                 $this->removed[] = [
@@ -144,7 +144,7 @@ class AuditTransaction
      */
     public function collectScheduledCollectionUpdates(UnitOfWork $uow, EntityManagerInterface $em): void
     {
-        foreach ($uow->getScheduledCollectionUpdates() as $collection) {
+        foreach (array_reverse($uow->getScheduledCollectionUpdates()) as $collection) {
             if ($this->configuration->isAudited($collection->getOwner())) {
                 $mapping = $collection->getMapping();
                 foreach ($collection->getInsertDiff() as $entity) {
@@ -179,7 +179,7 @@ class AuditTransaction
      */
     public function collectScheduledCollectionDeletions(UnitOfWork $uow, EntityManagerInterface $em): void
     {
-        foreach ($uow->getScheduledCollectionDeletions() as $collection) {
+        foreach (array_reverse($uow->getScheduledCollectionDeletions()) as $collection) {
             if ($this->configuration->isAudited($collection->getOwner())) {
                 $mapping = $collection->getMapping();
                 foreach ($collection->toArray() as $entity) {
