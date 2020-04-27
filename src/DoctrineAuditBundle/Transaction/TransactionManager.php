@@ -8,6 +8,12 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class TransactionManager
 {
+    public const OPERATION_TYPE_INSERT = 'insert';
+    public const OPERATION_TYPE_UPDATE = 'update';
+    public const OPERATION_TYPE_REMOVE = 'remove';
+    public const OPERATION_TYPE_ASSOCIATE = 'associate';
+    public const OPERATION_TYPE_DISSOCIATE = 'dissociate';
+
     /**
      * @var Configuration
      */

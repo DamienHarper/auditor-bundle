@@ -80,7 +80,7 @@ class TransactionProcessor
         /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
         $this->audit([
-            'action' => 'insert',
+            'action' => TransactionManager::OPERATION_TYPE_INSERT,
             'blame' => $this->blame(),
             'diff' => $this->diff($em, $entity, $ch),
             'table' => $meta->getTableName(),
@@ -112,7 +112,7 @@ class TransactionProcessor
         /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
         $this->audit([
-            'action' => 'update',
+            'action' => TransactionManager::OPERATION_TYPE_UPDATE,
             'blame' => $this->blame(),
             'diff' => $diff,
             'table' => $meta->getTableName(),
@@ -140,7 +140,7 @@ class TransactionProcessor
         /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
         $this->audit([
-            'action' => 'remove',
+            'action' => TransactionManager::OPERATION_TYPE_REMOVE,
             'blame' => $this->blame(),
             'diff' => $this->summarize($em, $entity, $id),
             'table' => $meta->getTableName(),
@@ -166,7 +166,7 @@ class TransactionProcessor
      */
     private function associate(EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
     {
-        $this->associateOrDissociate('associate', $em, $source, $target, $mapping, $transactionHash);
+        $this->associateOrDissociate(TransactionManager::OPERATION_TYPE_ASSOCIATE, $em, $source, $target, $mapping, $transactionHash);
     }
 
     /**
@@ -183,7 +183,7 @@ class TransactionProcessor
      */
     private function dissociate(EntityManagerInterface $em, $source, $target, array $mapping, string $transactionHash): void
     {
-        $this->associateOrDissociate('dissociate', $em, $source, $target, $mapping, $transactionHash);
+        $this->associateOrDissociate(TransactionManager::OPERATION_TYPE_DISSOCIATE, $em, $source, $target, $mapping, $transactionHash);
     }
 
     /**
