@@ -43,7 +43,7 @@ class TransactionHydrator
      */
     private function hydrateWithScheduledInsertions(Transaction $transaction, UnitOfWork $uow): void
     {
-        foreach ($uow->getScheduledEntityInsertions() as $entity) {
+        foreach (array_reverse($uow->getScheduledEntityInsertions()) as $entity) {
             if ($this->configuration->isAudited($entity)) {
                 $transaction->trackAuditEvent(Transaction::INSERT, [
                     $entity,
@@ -58,7 +58,7 @@ class TransactionHydrator
      */
     private function hydrateWithScheduledUpdates(Transaction $transaction, UnitOfWork $uow): void
     {
-        foreach ($uow->getScheduledEntityUpdates() as $entity) {
+        foreach (array_reverse($uow->getScheduledEntityUpdates()) as $entity) {
             if ($this->configuration->isAudited($entity)) {
                 $transaction->trackAuditEvent(Transaction::UPDATE, [
                     $entity,
@@ -77,7 +77,7 @@ class TransactionHydrator
      */
     private function hydrateWithScheduledDeletions(Transaction $transaction, UnitOfWork $uow, EntityManagerInterface $em): void
     {
-        foreach ($uow->getScheduledEntityDeletions() as $entity) {
+        foreach (array_reverse($uow->getScheduledEntityDeletions()) as $entity) {
             if ($this->configuration->isAudited($entity)) {
                 $uow->initializeObject($entity);
                 $transaction->trackAuditEvent(Transaction::REMOVE, [
@@ -97,7 +97,7 @@ class TransactionHydrator
      */
     private function hydrateWithScheduledCollectionUpdates(Transaction $transaction, UnitOfWork $uow, EntityManagerInterface $em): void
     {
-        foreach ($uow->getScheduledCollectionUpdates() as $collection) {
+        foreach (array_reverse($uow->getScheduledCollectionUpdates()) as $collection) {
             if ($this->configuration->isAudited($collection->getOwner())) {
                 $mapping = $collection->getMapping();
                 foreach ($collection->getInsertDiff() as $entity) {
@@ -132,7 +132,7 @@ class TransactionHydrator
      */
     private function hydrateWithScheduledCollectionDeletions(Transaction $transaction, UnitOfWork $uow, EntityManagerInterface $em): void
     {
-        foreach ($uow->getScheduledCollectionDeletions() as $collection) {
+        foreach (array_reverse($uow->getScheduledCollectionDeletions()) as $collection) {
             if ($this->configuration->isAudited($collection->getOwner())) {
                 $mapping = $collection->getMapping();
                 foreach ($collection->toArray() as $entity) {
