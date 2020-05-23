@@ -15,15 +15,21 @@ class AuditController extends AbstractController
 {
     /**
      * @Route("/audit", name="dh_doctrine_audit_list_audits", methods={"GET"})
+     *
+     * @param Request $request
+     *
+     * @return Response
      */
-    public function listAuditsAction(): Response
+    public function listAuditsAction(Request $request): Response
     {
         $reader = $this->container->get('dh_doctrine_audit.reader');
 
-        return $this->render('@DHDoctrineAudit/Audit/audits.html.twig', [
-            'audited' => $reader->getEntities(),
-            'reader' => $reader,
-        ]);
+        return $this->render(
+            '@DHDoctrineAudit/Audit/audits.html.twig', [
+                'audited' => $reader->getEntities($request->query->get('blame')),
+                'blamed' => $reader->getBlames(),
+                'reader' => $reader,
+            ]);
     }
 
     /**
@@ -61,6 +67,7 @@ class AuditController extends AbstractController
     public function showEntityHistoryAction(Request $request, string $entity, $id = null): Response
     {
         $page = (int) $request->query->get('page', 1);
+        $blame = $request->query->get('blame');
         $entity = AuditHelper::paramToNamespace($entity);
 
         $reader = $this->container->get('dh_doctrine_audit.reader');
@@ -70,7 +77,17 @@ class AuditController extends AbstractController
         }
 
         try {
-            $entries = $reader->getAuditsPager($entity, $id, $page, AuditReader::PAGE_SIZE);
+            $entries = $reader->getAuditsPager(
+                $entity,
+                $id,
+                $page,
+                AuditReader::PAGE_SIZE,
+                null,
+                true,
+                null,
+                null,
+                $blame
+            );
         } catch (AccessDeniedException $e) {
             throw $this->createAccessDeniedException();
         }
@@ -78,6 +95,7 @@ class AuditController extends AbstractController
         return $this->render('@DHDoctrineAudit/Audit/entity_history.html.twig', [
             'id' => $id,
             'entity' => $entity,
+            'blamed' => $reader->getBlame($entity),
             'paginator' => $entries,
         ]);
     }

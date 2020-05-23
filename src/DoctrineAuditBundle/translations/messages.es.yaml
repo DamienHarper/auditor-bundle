@@ -2,6 +2,7 @@ audit:
   header:
     home: Home
     audited_entities: entidades auditadas
+    blamed_users: usuarios culpados
   table_headers:
     entity: Entidad
     table: Tabla

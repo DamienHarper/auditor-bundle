@@ -94,11 +94,13 @@ class AuditReader
     /**
      * Returns an array of audit table names indexed by entity FQN.
      *
+     * @param null|string $blameId
+     *
      * @throws \Doctrine\ORM\ORMException
      *
      * @return array
      */
-    public function getEntities(): array
+    public function getEntities(?string $blameId = null): array
     {
         $metadataDriver = $this->entityManager->getConfiguration()->getMetadataDriverImpl();
         $entities = [];
@@ -106,8 +108,10 @@ class AuditReader
             $entities = $metadataDriver->getAllClassNames();
         }
         $audited = [];
+
         foreach ($entities as $entity) {
-            if ($this->configuration->isAuditable($entity)) {
+            if ($this->configuration->isAuditable($entity)
+                && (!$blameId || !empty($this->getBlame($entity, $blameId)))) {
                 $audited[$entity] = $this->getEntityTableName($entity);
             }
         }
@@ -213,15 +217,39 @@ class AuditReader
      * @param null|int|string $id
      * @param int             $page
      * @param int             $pageSize
+     * @param null|string     $transactionHash
+     * @param bool            $strict
+     * @param null|DateTime   $startDate
+     * @param null|DateTime   $endDate
+     * @param null|string     $userId
      *
      * @throws AccessDeniedException
      * @throws InvalidArgumentException
      *
      * @return array
      */
-    public function getAuditsPager(string $entity, $id = null, int $page = 1, int $pageSize = self::PAGE_SIZE): array
-    {
-        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id, $page, $pageSize);
+    public function getAuditsPager(
+        string $entity,
+        $id = null,
+        ?int $page = 1,
+        ?int $pageSize = self::PAGE_SIZE,
+        ?string $transactionHash = null,
+        bool $strict = true,
+        ?DateTime $startDate = null,
+        ?DateTime $endDate = null,
+        ?string $userId = null
+    ): array {
+        $queryBuilder = $this->getAuditsQueryBuilder(
+            $entity,
+            $id,
+            $page,
+            $pageSize,
+            $transactionHash,
+            $strict,
+            $startDate,
+            $endDate,
+            $userId
+        );
 
         $paginator = new Paginator($queryBuilder);
         $numResults = $paginator->count();
@@ -247,15 +275,16 @@ class AuditReader
      *
      * @param string          $entity
      * @param null|int|string $id
+     * @param null|string     $blameId
      *
      * @throws AccessDeniedException
      * @throws InvalidArgumentException
      *
      * @return int
      */
-    public function getAuditsCount(string $entity, $id = null): int
+    public function getAuditsCount(string $entity, $id = null, ?string $blameId = null): int
     {
-        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id);
+        $queryBuilder = $this->getAuditsQueryBuilder($entity, $id, null, null, null, true, null, null, $blameId);
 
         $result = $queryBuilder
             ->resetQueryPart('select')
@@ -302,6 +331,44 @@ class AuditReader
         $statement->setFetchMode(PDO::FETCH_CLASS, AuditEntry::class);
 
         return $statement->fetchAll();
+    }
+
+    public function getBlames(): array
+    {
+        $blames = [];
+
+        foreach ($this->getEntities() as $entity => $tablename) {
+            $blames[] = $this->getBlame($entity);
+        }
+
+        $blames = array_unique(array_merge(...$blames));
+
+        asort($blames);
+
+        return $blames;
+    }
+
+    public function getBlame(string $entity, ?string $blameId = null): array
+    {
+        $blame = [];
+
+        $results = $this->getAuditsQueryBuilder($entity, null, null, null, null, true, null, null, $blameId)
+            ->resetQueryPart('orderBy')
+            ->select('blame_id, blame_user')
+            ->groupBy('blame_id')
+            ->addGroupBy('blame_user')
+            ->execute()
+            ->fetchAll()
+        ;
+
+        foreach ($results as $result) {
+            //set the key to null and the user to System/Anonymous if the blame id is null
+            $blame[$result['blame_id'] ?? 'null'] = $result['blame_user'] ?? ' System/Anonymous';
+        }
+
+        asort($blame);
+
+        return $blame;
     }
 
     /**
@@ -407,6 +474,35 @@ class AuditReader
     }
 
     /**
+     * @param QueryBuilder    $queryBuilder
+     * @param null|int|string $id
+     *
+     * @return QueryBuilder
+     */
+    private function filterByBlameId(QueryBuilder $queryBuilder, $id): QueryBuilder
+    {
+        switch ($id) {
+            case null:
+                //no user selected
+                break;
+            case 'null':
+                $queryBuilder
+                    ->andWhere('blame_id IS NULL')
+                ;
+                break;
+            default:
+                //a specific user only
+                $queryBuilder
+                    ->andWhere('blame_id = :blame_id')
+                    ->setParameter('blame_id', $id)
+                ;
+                break;
+        }
+
+        return $queryBuilder;
+    }
+
+    /**
      * Returns an array of audited entries/operations.
      *
      * @param string          $entity
@@ -417,14 +513,24 @@ class AuditReader
      * @param bool            $strict
      * @param null|DateTime   $startDate
      * @param null|DateTime   $endDate
+     * @param null|string     $blameId
      *
      * @throws AccessDeniedException
      * @throws InvalidArgumentException
      *
      * @return QueryBuilder
      */
-    private function getAuditsQueryBuilder(string $entity, $id = null, ?int $page = null, ?int $pageSize = null, ?string $transactionHash = null, bool $strict = true, ?DateTime $startDate = null, ?DateTime $endDate = null): QueryBuilder
-    {
+    private function getAuditsQueryBuilder(
+        string $entity,
+        $id = null,
+        ?int $page = null,
+        ?int $pageSize = null,
+        ?string $transactionHash = null,
+        bool $strict = true,
+        ?DateTime $startDate = null,
+        ?DateTime $endDate = null,
+        ?string $blameId = null
+    ): QueryBuilder {
         $this->checkAuditable($entity);
         $this->checkRoles($entity, Security::VIEW_SCOPE);
 
@@ -459,6 +565,7 @@ class AuditReader
         $this->filterByType($queryBuilder, $this->filters);
         $this->filterByTransaction($queryBuilder, $transactionHash);
         $this->filterByDate($queryBuilder, $startDate, $endDate);
+        $this->filterByBlameId($queryBuilder, $blameId);
 
         if (null !== $pageSize) {
             $queryBuilder

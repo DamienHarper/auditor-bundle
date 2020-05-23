@@ -9,13 +9,35 @@
     <div class="card-body">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_list_audits') }}">{% trans %}audit.header.home{% endtrans %}</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('dh_doctrine_audit_list_audits', {'blame': app.request.query.get('blame')}) }}">{% trans %}audit.header.home{% endtrans %}</a></li>
                 <li class="breadcrumb-item {% if id is null %}active{% endif %}" aria-current="page"><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': helper.namespaceToParam(entity) }) }}">{{ entity }}</a></li>
                 {% if id is not null %}
                 <li class="breadcrumb-item active" aria-current="page"><a href="{{ path('dh_doctrine_audit_show_entity_history', { 'entity': helper.namespaceToParam(entity), 'id': id }) }}">{{ entity }}#{{ id }}</a></li>
                 {% endif %}
             </ol>
         </nav>
+
+        {# don't show blame select if user is looking at a specific entity id #}
+        {% if id is empty %}
+            <div class="row">
+                <div class="col-sm-12 col-md"></div>
+                <div class="col-sm-12 col-md">
+                    <div class="row">
+                        <div class="col block">
+                            <h4 class="card-title">{{ blamed|length }} {% trans %}audit.header.blamed_users{% endtrans %}</h4>
+                        </div>
+                        <div class="col">
+                            <select class="form-control" id="blame" style="margin-top: -.3rem" data-url="{{ path('dh_doctrine_audit_show_entity_history', {'entity': entity}) }}">
+                                <option></option>
+                                {% for blame_id, blame_user in blamed %}
+                                    <option value="{{ blame_id }}" {{ app.request.query.get('blame') == blame_id ? 'selected' }}>{{ blame_user }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
 
         <h4 class="card-title float-left"><code>{{ entity }}{% if id is not null %}#{{ id }}{% endif %}</code> <em>{% trans %}audit.audit_details.most_recent{% endtrans %}</em></h4>
         <h5 class="float-right">{{ bootstrap.badge(paginator.results|length ~ ' operations', 'primary') }}</h5>
@@ -30,3 +52,21 @@
     </div>
 </div>
 {% endblock dh_doctrine_audit_content %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    let select = $('#blame');
+    let route = select.data('url');
+
+    select.on('change', (event) => {
+        let blame = $(event.currentTarget).val();
+
+        if (blame === '') {
+            location.replace(route);
+        } else {
+            location.replace(route + '?blame=' + $(event.currentTarget).val());
+        }
+    });
+</script>
+{% endblock %}
