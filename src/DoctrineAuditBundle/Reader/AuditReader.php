@@ -8,7 +8,7 @@ use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Exception\AccessDeniedException;
 use DH\DoctrineAuditBundle\Exception\InvalidArgumentException;
 use DH\DoctrineAuditBundle\User\UserInterface;
-use Doctrine\DBAL\Connection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Statement;
 use Doctrine\ORM\EntityManagerInterface;
@@ -42,6 +42,11 @@ class AuditReader
     private $filters = [];
 
     /**
+     * @var ArrayCollection
+     */
+    private $conditions;
+
+    /**
      * AuditReader constructor.
      *
      * @param AuditConfiguration     $configuration
@@ -53,6 +58,8 @@ class AuditReader
     ) {
         $this->configuration = $configuration;
         $this->entityManager = $entityManager;
+
+        $this->conditions    = new ArrayCollection();
     }
 
     /**
@@ -79,6 +86,65 @@ class AuditReader
         });
 
         return $this;
+    }
+
+    /**
+     * Add a condition (if it was not yet added)
+     *
+     * @param ConditionInterface $condition
+     *
+     * @return Reader
+     */
+    public function addCondition(ConditionInterface $condition): self
+    {
+        if (!$this->conditions->contains($condition)) {
+            $this->conditions->add($condition);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Check if a condition was set
+     *
+     * @param ConditionInterface $condition
+     *
+     * @return bool
+     */
+    public function hasCondition(ConditionInterface $condition): bool
+    {
+        return $this->conditions->contains($condition);
+    }
+
+    /**
+     * Set all conditions
+     *
+     * @param ArrayCollection $conditions
+     *
+     * @return Reader
+     */
+    public function setConditions(ArrayCollection $conditions): self
+    {
+        $this->conditions = $conditions;
+
+        return $this;
+    }
+
+    /**
+     * Remove a Condition and returns the removed condition
+     *
+     * @param ConditionInterface $condition
+     * @return ConditionInterface
+     */
+    public function removeCondition(ConditionInterface $condition): ConditionInterface
+    {
+        if (!$this->conditions->contains($condition)) {
+            throw new \RuntimeException('Can not remove a condition that was not set');
+        }
+
+        $index = $this->conditions->indexOf($condition);
+
+        return $this->conditions->remove($index);
     }
 
     /**
@@ -343,47 +409,21 @@ class AuditReader
 
     private function filterByType(QueryBuilder $queryBuilder, array $filters): QueryBuilder
     {
-        if (!empty($filters)) {
-            $queryBuilder
-                ->andWhere('type IN (:filters)')
-                ->setParameter('filters', $filters, Connection::PARAM_STR_ARRAY)
-            ;
-        }
+        (new TypesCondition($filters))->apply($queryBuilder);
 
         return $queryBuilder;
     }
 
     private function filterByTransaction(QueryBuilder $queryBuilder, ?string $transactionHash): QueryBuilder
     {
-        if (null !== $transactionHash) {
-            $queryBuilder
-                ->andWhere('transaction_hash = :transaction_hash')
-                ->setParameter('transaction_hash', $transactionHash)
-            ;
-        }
+        (new TransactionCondition($transactionHash))->apply($queryBuilder);
 
         return $queryBuilder;
     }
 
     private function filterByDate(QueryBuilder $queryBuilder, ?DateTime $startDate, ?DateTime $endDate): QueryBuilder
     {
-        if (null !== $startDate && null !== $endDate && $endDate < $startDate) {
-            throw new \InvalidArgumentException('$endDate must be greater than $startDate.');
-        }
-
-        if (null !== $startDate) {
-            $queryBuilder
-                ->andWhere('created_at >= :start_date')
-                ->setParameter('start_date', $startDate->format('Y-m-d H:i:s'))
-            ;
-        }
-
-        if (null !== $endDate) {
-            $queryBuilder
-                ->andWhere('created_at <= :end_date')
-                ->setParameter('end_date', $endDate->format('Y-m-d H:i:s'))
-            ;
-        }
+        (new DateRangeCondition($startDate, $endDate))->apply($queryBuilder);
 
         return $queryBuilder;
     }
@@ -396,12 +436,7 @@ class AuditReader
      */
     private function filterByObjectId(QueryBuilder $queryBuilder, $id): QueryBuilder
     {
-        if (null !== $id) {
-            $queryBuilder
-                ->andWhere('object_id = :object_id')
-                ->setParameter('object_id', $id)
-            ;
-        }
+        (new ObjectIdCondition($id))->apply($queryBuilder);
 
         return $queryBuilder;
     }
@@ -459,6 +494,7 @@ class AuditReader
         $this->filterByType($queryBuilder, $this->filters);
         $this->filterByTransaction($queryBuilder, $transactionHash);
         $this->filterByDate($queryBuilder, $startDate, $endDate);
+        $this->filterByConditions($queryBuilder);
 
         if (null !== $pageSize) {
             $queryBuilder
@@ -529,5 +565,12 @@ class AuditReader
 
         // access denied
         throw new AccessDeniedException('You are not allowed to access audits of '.$entity.' entity.');
+    }
+
+    private function filterByConditions(QueryBuilder $queryBuilder)
+    {
+        foreach ($this->conditions as $condition) {
+            $condition->apply($queryBuilder);
+        }
     }
 }
