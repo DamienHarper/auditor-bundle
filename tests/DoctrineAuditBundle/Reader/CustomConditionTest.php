@@ -2,18 +2,11 @@
 
 namespace DH\DoctrineAuditBundle\Tests\Reader;
 
-use DateTime;
 use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Model\Entry;
 use DH\DoctrineAuditBundle\Reader\Reader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Annotation\AuditedEntity;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Annotation\UnauditedEntity;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Author;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Comment;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Post;
-use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Tag;
-use InvalidArgumentException;
 
 /**
  * @internal

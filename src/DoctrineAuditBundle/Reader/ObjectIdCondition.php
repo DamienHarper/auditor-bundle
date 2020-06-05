@@ -1,10 +1,7 @@
 <?php
 
-
 namespace DH\DoctrineAuditBundle\Reader;
 
-
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 
 class ObjectIdCondition implements ConditionInterface

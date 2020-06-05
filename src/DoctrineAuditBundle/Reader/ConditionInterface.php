@@ -1,8 +1,6 @@
 <?php
 
-
 namespace DH\DoctrineAuditBundle\Reader;
-
 
 use Doctrine\DBAL\Query\QueryBuilder;
 
