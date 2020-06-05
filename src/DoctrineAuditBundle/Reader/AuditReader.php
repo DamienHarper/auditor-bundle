@@ -490,11 +490,8 @@ class AuditReader
             ;
         }
 
-        $this->filterByObjectId($queryBuilder, $id);
-        $this->filterByType($queryBuilder, $this->filters);
-        $this->filterByTransaction($queryBuilder, $transactionHash);
-        $this->filterByDate($queryBuilder, $startDate, $endDate);
-        $this->filterByConditions($queryBuilder);
+        $this->applyArgumentFilters($queryBuilder, $id, $transactionHash, $startDate, $endDate);
+        $this->applyConditions($queryBuilder);
 
         if (null !== $pageSize) {
             $queryBuilder
@@ -567,10 +564,38 @@ class AuditReader
         throw new AccessDeniedException('You are not allowed to access audits of '.$entity.' entity.');
     }
 
-    private function filterByConditions(QueryBuilder $queryBuilder)
+    private function applyConditions(QueryBuilder $queryBuilder)
     {
         foreach ($this->conditions as $condition) {
             $condition->apply($queryBuilder);
+        }
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param $id
+     * @param string|null $transactionHash
+     * @param DateTime|null $startDate
+     * @param DateTime|null $endDate
+     */
+    private function applyArgumentFilters(
+        QueryBuilder $queryBuilder,
+        $id,
+        ?string $transactionHash,
+        ?DateTime $startDate,
+        ?DateTime $endDate
+    ): void {
+        if (isset($id)) {
+            $this->filterByObjectId($queryBuilder, $id);
+        }
+        if (isset($this->filters)) {
+            $this->filterByType($queryBuilder, $this->filters);
+        }
+        if (isset($transactionHash)) {
+            $this->filterByTransaction($queryBuilder, $transactionHash);
+        }
+        if (isset($startDate) && isset($endDate)) {
+            $this->filterByDate($queryBuilder, $startDate, $endDate);
         }
     }
 }
