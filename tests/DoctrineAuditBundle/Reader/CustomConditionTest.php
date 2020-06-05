@@ -4,7 +4,7 @@ namespace DH\DoctrineAuditBundle\Tests\Reader;
 
 use DH\DoctrineAuditBundle\Configuration;
 use DH\DoctrineAuditBundle\Model\Entry;
-use DH\DoctrineAuditBundle\Reader\Reader;
+use DH\DoctrineAuditBundle\Reader\AuditReader as Reader;
 use DH\DoctrineAuditBundle\Tests\CoreTest;
 use DH\DoctrineAuditBundle\Tests\Fixtures\Core\Standard\Author;
 
