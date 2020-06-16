@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/8.0/phpunit.xsd"
-         bootstrap="vendor/autoload.php"
+         bootstrap="tests/bootstrap.php"
          executionOrder="depends,defects"
          forceCoversAnnotation="false"
          beStrictAboutCoversAnnotation="false"
@@ -13,23 +13,31 @@
         <log type="coverage-html" target="tests/coverage" />
     </logging>
 
+    <php>
+        <ini name="error_reporting" value="-1" />
+        <server name="KERNEL_CLASS" value="DH\AuditorBundle\Tests\App\Kernel" />
+        <server name="APP_ENV" value="test" force="true" />
+        <server name="SHELL_VERBOSITY" value="-1" />
+        <env name="BOOTSTRAP_CLEAR_CACHE_ENV" value="test"/>
+    </php>
+
     <testsuites>
-        <testsuite name="DoctrineAuditBundle test suite">
-            <directory suffix="Test.php">tests/DoctrineAuditBundle</directory>
+        <testsuite name="AuditBundle test suite">
+            <directory suffix="Test.php">tests</directory>
         </testsuite>
     </testsuites>
 
     <filter>
         <whitelist addUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">src</directory>
-            <exclude>
-                <file>src/DoctrineAuditBundle/DHDoctrineAuditBundle.php</file>
-                <file>src/DoctrineAuditBundle/Exception/AccessDeniedException.php</file>
-                <file>src/DoctrineAuditBundle/Exception/InvalidArgumentException.php</file>
-                <file>src/DoctrineAuditBundle/Exception/UpdateException.php</file>
-                <file>src/DoctrineAuditBundle/User/UserInterface.php</file>
-                <file>src/DoctrineAuditBundle/User/UserProviderInterface.php</file>
-            </exclude>
+<!--            <exclude>-->
+<!--                <file>src/AuditorBundle/DHAuditBundle.php</file>-->
+<!--                <file>src/AuditorBundle/Exception/AccessDeniedException.php</file>-->
+<!--                <file>src/AuditorBundle/Exception/InvalidArgumentException.php</file>-->
+<!--                <file>src/AuditorBundle/Exception/UpdateException.php</file>-->
+<!--                <file>src/AuditorBundle/User/UserInterface.php</file>-->
+<!--                <file>src/AuditorBundle/User/UserProviderInterface.php</file>-->
+<!--            </exclude>-->
         </whitelist>
     </filter>
 </phpunit>

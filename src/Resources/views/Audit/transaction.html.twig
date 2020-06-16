@@ -1,0 +1,36 @@
+{% extends "@DHAuditor/layout.html.twig" %}
+
+{% import '@DHAuditor/Audit/helpers/bootstrap.html.twig' as bootstrap %}
+{% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
+
+{% block dh_auditor_content %}
+    <div class="card border-0">
+        <div class="card-body">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ path('dh_auditor_list_audits') }}">{% trans %}audit.header.home{% endtrans %}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page"><a href="{{ path('dh_auditor_show_transaction', {hash: hash}) }}">{% trans %}transaction{% endtrans %} #{{ hash }}</a></li>
+                </ol>
+            </nav>
+
+            <h4 class="card-title float-left"><code>{% trans %}audit.audit_details.transaction{% endtrans %} #{{ hash }}</code> <em>{% trans %}audit.audit_details.entity_per_entity{% endtrans %}</em></h4>
+            {% set amount = 0 %}
+            {% for entity, entries in audits %}
+                {% set amount = amount + entries|length %}
+            {% endfor %}
+            <h5 class="float-right">{{ bootstrap.badge(amount ~ ' operations', 'primary') }}</h5>
+            <div style="clear: both"></div>
+
+            {% for entity, entries in audits %}
+            <hr class="mt-0" />
+            <h4 class="card-title float-left"><code>{{ entity }}</code> <em>{% trans %}audit.audit_details.most_recent{% endtrans %}</em></h4>
+            <h5 class="float-right">{{ bootstrap.badge(entries|length ~ ' operations', 'primary') }}</h5>
+            <div class="timeline-centered">
+                {% for entry in entries %}
+                    {{ include('@DHAuditor/Audit/entry.html.twig', {'entry': entry}) }}
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock dh_auditor_content %}

@@ -1,0 +1,38 @@
+doctrine:
+    dbal:
+        default_connection: default
+        connections:
+            default:
+                # configure these for your database server
+                driver: 'pdo_sqlite'
+                charset: utf8mb4
+                default_table_options:
+                    charset: utf8mb4
+                    collate: utf8mb4_unicode_ci
+                url: 'sqlite:///%kernel.project_dir%/var/data.db'
+            audits:
+                # configure these for your database server
+                driver: 'pdo_sqlite'
+                charset: utf8mb4
+                default_table_options:
+                    charset: utf8mb4
+                    collate: utf8mb4_unicode_ci
+                url: 'sqlite:///%kernel.project_dir%/var/audits.db'
+    orm:
+        default_entity_manager: default
+        auto_generate_proxy_classes: true
+        entity_managers:
+            default:
+                connection: default
+                naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+                auto_mapping: true
+                mappings:
+                    App:
+                        is_bundle: false
+                        type: annotation
+                        dir: '%kernel.project_dir%/vendor/damienharper/auditor/tests/Provider/Doctrine/Fixtures/Entity/Standard/Blog'
+                        prefix: 'DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog'
+                        alias: App
+            audits:
+                connection: audits
+                naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
