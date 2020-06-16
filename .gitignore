@@ -3,6 +3,7 @@
 .php_cs.cache
 .phpunit.result.cache
 /vendor/
-/tests/coverage/
 composer.lock
-/tests/xdebug-filter.php
+/tests/coverage/
+*.sqlite
+var/

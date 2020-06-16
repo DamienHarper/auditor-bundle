@@ -1,0 +1,93 @@
+services:
+  DH\Auditor\Configuration:
+    class: DH\Auditor\Configuration
+    arguments:
+      - '%dh_auditor.configuration%'
+
+  DH\Auditor\Auditor:
+    class: DH\Auditor\Auditor
+    arguments:
+      - '@DH\Auditor\Configuration'
+      - '@event_dispatcher'
+
+  # DoctrineProvider services
+  DH\Auditor\Provider\Doctrine\Configuration:
+    class: DH\Auditor\Provider\Doctrine\Configuration
+    arguments:
+      - '%dh_auditor.provider.doctrine.configuration%'
+
+  DH\Auditor\Provider\Doctrine\DoctrineProvider:
+    class: DH\Auditor\Provider\Doctrine\DoctrineProvider
+    arguments:
+      - '@DH\Auditor\Provider\Doctrine\Configuration'
+    calls:
+      - [setAuditor, ['@DH\Auditor\Auditor']]
+      - [setUserProvider, ['@DH\AuditorBundle\User\UserProvider']]
+      - [setRoleChecker, ['@DH\AuditorBundle\Security\RoleChecker']]
+      - [setIpProvider, ['@DH\AuditorBundle\Security\IpProvider']]
+    tags:
+      - { name: dh_auditor.provider }
+  dh_auditor.provider.doctrine: '@DH\Auditor\Provider\Doctrine\DoctrineProvider'
+
+  DH\AuditorBundle\Routing\RoutingAnnotationLoader:
+    arguments:
+      - '@routing.loader.annotation'
+      - '%dh_auditor.provider.doctrine.configuration%'
+    tags:
+      - { name: routing.loader }
+
+  DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader:
+    class: DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader
+    arguments:
+      - '@DH\Auditor\Provider\Doctrine\DoctrineProvider'
+
+  DH\Auditor\Provider\Doctrine\Persistence\Event\CreateSchemaListener:
+    class: DH\Auditor\Provider\Doctrine\Persistence\Event\CreateSchemaListener
+    arguments: ['@DH\Auditor\Provider\Doctrine\DoctrineProvider']
+    tags:
+      - { name: doctrine.event_subscriber }
+
+  DH\Auditor\Provider\Doctrine\Persistence\Command\CleanAuditLogsCommand:
+    class: DH\Auditor\Provider\Doctrine\Persistence\Command\CleanAuditLogsCommand
+    tags:
+      - { name: 'console.command', command: 'audit:clean' }
+    calls:
+      - [setAuditor, ['@DH\Auditor\Auditor']]
+
+  DH\Auditor\Provider\Doctrine\Persistence\Command\UpdateSchemaCommand:
+    class: DH\Auditor\Provider\Doctrine\Persistence\Command\UpdateSchemaCommand
+    tags:
+      - { name: 'console.command', command: 'audit:schema:update' }
+    calls:
+      - [setAuditor, ['@DH\Auditor\Auditor']]
+
+  # Bundle related services
+  DH\AuditorBundle\Controller\ViewerController:
+    calls:
+      - { method: setContainer, arguments: ['@service_container'] }
+    tags: ['controller.service_arguments']
+
+  DH\AuditorBundle\Twig\Extension\TwigExtension:
+    class: DH\AuditorBundle\Twig\Extension\TwigExtension
+    arguments:
+      - '@doctrine'
+    tags:
+      - { name: twig.extension }
+
+  DH\AuditorBundle\User\UserProvider:
+    class: DH\AuditorBundle\User\UserProvider
+    arguments: ['@security.helper', '@DH\Auditor\Provider\Doctrine\Configuration']
+
+  DH\AuditorBundle\Security\IpProvider:
+    class: DH\AuditorBundle\Security\IpProvider
+    arguments: ['@request_stack', '@security.firewall.map']
+
+  DH\AuditorBundle\Security\RoleChecker:
+    class: DH\AuditorBundle\Security\RoleChecker
+    arguments: ['@security.helper', '@DH\Auditor\Provider\Doctrine\Configuration']
+
+  DH\AuditorBundle\Event\ViewerEventSubscriber:
+    class: DH\AuditorBundle\Event\ViewerEventSubscriber
+    arguments: ['@DH\Auditor\Auditor']
+    tags:
+      - { name: kernel.event_subscriber }

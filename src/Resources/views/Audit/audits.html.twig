@@ -1,0 +1,37 @@
+{% extends "@DHAuditor/layout.html.twig" %}
+
+{% import '@DHAuditor/Audit/helpers/bootstrap.html.twig' as bootstrap %}
+{% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
+
+{% block dh_auditor_content %}
+<div class="card border-0">
+    <div class="card-body">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active"><a href="{{ path('dh_auditor_list_audits') }}">{% trans %}audit.header.home{% endtrans %}</a></li>
+            </ol>
+        </nav>
+        <h4 class="card-title">{{ audited|length }} {% trans %}audit.header.audited_entities{% endtrans %}</h4>
+        <table class="table table-hover">
+            <thead class="thead-dark">
+            <th>{% trans %}audit.table_headers.entity{% endtrans %}</th>
+            <th>{% trans %}audit.table_headers.table{% endtrans %}</th>
+            <th>{% trans %}audit.table_headers.activity{% endtrans %}</th>
+            <th width="10%"></th>
+            </thead>
+            <tbody>
+            {% for entity, table in audited %}
+                <tr>
+                    <td><code>{{ entity|escape }}</code></td>
+                    <td>{{ table|escape }}</td>
+                    <td>{{ bootstrap.badge(reader.createQuery(entity).count() ~ ' operations') }}</td>
+                    <td>
+                        <a href="{{ path('dh_auditor_show_entity_history', {'entity': helper.namespaceToParam(entity)}) }}">{% trans %}audit.audit_details.view_audit{% endtrans %}</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock dh_auditor_content %}
