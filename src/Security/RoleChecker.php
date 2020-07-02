@@ -25,10 +25,10 @@ class RoleChecker implements RoleCheckerInterface
         $this->configuration = $configuration;
     }
 
-    public function isGranted(string $entity, string $scope): bool
+    public function __invoke(string $entity, string $scope): bool
     {
         $userProvider = $this->configuration->getUserProvider();
-        $user = null === $userProvider ? null : $userProvider->call($this);
+        $user = null === $userProvider ? null : $userProvider();
         $security = null === $userProvider ? null : $this->security;
 
         if (!($user instanceof UserInterface) || !($security instanceof Security)) {

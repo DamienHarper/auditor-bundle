@@ -92,8 +92,13 @@ class Configuration implements ConfigurationInterface
                     // "doctrine.orm.default_entity_manager" is the default "auditing_services"
                     if (\array_key_exists('auditing_services', $v['doctrine']) && \is_string($v['doctrine']['auditing_services'])) {
                         $v['doctrine']['auditing_services'] = [$v['doctrine']['auditing_services']];
-                    } elseif (!\array_key_exists('storage_services', $v['doctrine']) || !\is_array($v['doctrine']['auditing_services'])) {
+                    } elseif (!\array_key_exists('auditing_services', $v['doctrine']) || !\is_array($v['doctrine']['auditing_services'])) {
                         $v['doctrine']['auditing_services'] = ['doctrine.orm.default_entity_manager'];
+                    }
+
+                    // "viewer" is enabled by default
+                    if (!\array_key_exists('viewer', $v['doctrine']) || !\is_bool($v['doctrine']['viewer'])) {
+                        $v['doctrine']['viewer'] = true;
                     }
 
                     // "storage_mapper" is null by default
@@ -101,24 +106,19 @@ class Configuration implements ConfigurationInterface
                         $v['doctrine']['storage_mapper'] = null;
                     }
 
-                    // "roles_checker" is null by default
-                    if (!\array_key_exists('roles_checker', $v['doctrine']) || !\is_string($v['doctrine']['roles_checker'])) {
-                        $v['doctrine']['roles_checker'] = null;
+                    // "role_checker" is null by default
+                    if (!\array_key_exists('role_checker', $v['doctrine']) || !\is_string($v['doctrine']['role_checker'])) {
+                        $v['doctrine']['role_checker'] = 'dh_auditor.role_checker';
                     }
 
                     // "user_provider" is null by default
                     if (!\array_key_exists('user_provider', $v['doctrine']) || !\is_string($v['doctrine']['user_provider'])) {
-                        $v['doctrine']['user_provider'] = null;
+                        $v['doctrine']['user_provider'] = 'dh_auditor.user_provider';
                     }
 
                     // "security_provider" is null by default
                     if (!\array_key_exists('security_provider', $v['doctrine']) || !\is_string($v['doctrine']['security_provider'])) {
-                        $v['doctrine']['security_provider'] = null;
-                    }
-
-                    // "viewer" is enabled by default
-                    if (!\array_key_exists('viewer', $v['doctrine']) || !\is_bool($v['doctrine']['viewer'])) {
-                        $v['doctrine']['viewer'] = true;
+                        $v['doctrine']['security_provider'] = 'dh_auditor.security_provider';
                     }
 
                     return $v;

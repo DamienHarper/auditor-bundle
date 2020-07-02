@@ -10,7 +10,7 @@ use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
-use DH\AuditorBundle\Security\IpProvider;
+use DH\AuditorBundle\Security\SecurityProvider;
 use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\AbstractBrowser;
@@ -313,11 +313,11 @@ final class ViewerControllerTest extends WebTestCase
             ->willReturn($this->client->getRequest())
         ;
 
-        $reflectedClass = new ReflectionClass(IpProvider::class);
+        $reflectedClass = new ReflectionClass(SecurityProvider::class);
         $reflectedProperty = $reflectedClass->getProperty('requestStack');
         $reflectedProperty->setAccessible(true);
 
-        $reflectedProperty->setValue(self::$container->get(IpProvider::class), $requestStack);
+        $reflectedProperty->setValue(self::$container->get(SecurityProvider::class), $requestStack);
     }
 
     private function createAndInitDoctrineProvider(): void

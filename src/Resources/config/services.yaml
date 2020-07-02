@@ -22,9 +22,6 @@ services:
       - '@DH\Auditor\Provider\Doctrine\Configuration'
     calls:
       - [setAuditor, ['@DH\Auditor\Auditor']]
-      - [setUserProvider, ['@DH\AuditorBundle\User\UserProvider']]
-      - [setRoleChecker, ['@DH\AuditorBundle\Security\RoleChecker']]
-      - [setIpProvider, ['@DH\AuditorBundle\Security\IpProvider']]
     tags:
       - { name: dh_auditor.provider }
   dh_auditor.provider.doctrine: '@DH\Auditor\Provider\Doctrine\DoctrineProvider'
@@ -77,14 +74,17 @@ services:
   DH\AuditorBundle\User\UserProvider:
     class: DH\AuditorBundle\User\UserProvider
     arguments: ['@security.helper', '@DH\Auditor\Provider\Doctrine\Configuration']
+  dh_auditor.user_provider: '@DH\AuditorBundle\User\UserProvider'
 
-  DH\AuditorBundle\Security\IpProvider:
-    class: DH\AuditorBundle\Security\IpProvider
+  DH\AuditorBundle\Security\SecurityProvider:
+    class: DH\AuditorBundle\Security\SecurityProvider
     arguments: ['@request_stack', '@security.firewall.map']
+  dh_auditor.security_provider: '@DH\AuditorBundle\Security\SecurityProvider'
 
   DH\AuditorBundle\Security\RoleChecker:
     class: DH\AuditorBundle\Security\RoleChecker
     arguments: ['@security.helper', '@DH\Auditor\Provider\Doctrine\Configuration']
+  dh_auditor.role_checker: '@DH\AuditorBundle\Security\RoleChecker'
 
   DH\AuditorBundle\Event\ViewerEventSubscriber:
     class: DH\AuditorBundle\Event\ViewerEventSubscriber

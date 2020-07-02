@@ -2,11 +2,11 @@
 
 namespace DH\AuditorBundle\Security;
 
-use DH\Auditor\Security\IpProviderInterface;
+use DH\Auditor\Security\SecurityProviderInterface;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class IpProvider implements IpProviderInterface
+class SecurityProvider implements SecurityProviderInterface
 {
     private $requestStack;
     private $firewallMap;
@@ -17,7 +17,7 @@ class IpProvider implements IpProviderInterface
         $this->firewallMap = $firewallMap;
     }
 
-    public function getClientIpAndFirewall(): array
+    public function __invoke(): array
     {
         $clientIp = null;
         $firewallName = null;

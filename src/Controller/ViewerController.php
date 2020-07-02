@@ -37,7 +37,7 @@ class ViewerController extends AbstractController
                         $configuration = $reader->getProvider()->getConfiguration();
                         $roleChecker = $configuration->getRoleChecker();
 
-                        return null === $roleChecker ? true : $roleChecker->call($this, $entity, $scope);
+                        return null === $roleChecker ? true : $roleChecker($entity, $scope);
                     },
                     ARRAY_FILTER_USE_KEY
                 )

@@ -11,16 +11,16 @@ dh_auditor:
 
             # columns ignored from auditing
             ignored_columns:
-                - createdAt
-                - updatedAt
+                - 'createdAt'
+                - 'updatedAt'
 
             # audited entities
             entities:
                 DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author:
                     roles:
                         view:
-                            - ROLE1
-                            - ROLE2
+                            - 'ROLE1'
+                            - 'ROLE2'
                 DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post: ~
                 DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Comment: ~
                 DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag: ~
@@ -33,17 +33,17 @@ dh_auditor:
             auditing_services:
                 - '@doctrine.orm.default_entity_manager'
 
-            # Closure that maps audit events to storage services
-            storage_mapper: ~
-
-            # Closure that checks roles
-            roles_checker: ~
-
-            # Closure that provides user information
-            user_provider: ~
-
-            # Closure that provides security information (IP, firewall name, etc)
-            security_provider: ~
-
             # Switch to enable/disable the audit viewer
             viewer: true
+
+            # Invokable service (callable) that maps audit events to storage services
+            storage_mapper: ~
+
+            # Invokable service (callable) that checks roles
+            role_checker: 'dh_auditor.role_checker'
+
+            # Invokable service (callable) that provides user information
+            user_provider: 'dh_auditor.user_provider'
+
+            # Invokable service (callable) that provides security information (IP, firewall name, etc)
+            security_provider: 'dh_auditor.security_provider'

@@ -3,6 +3,7 @@
 namespace DH\AuditorBundle;
 
 use DH\AuditorBundle\DependencyInjection\Compiler\AddProviderCompilerPass;
+use DH\AuditorBundle\DependencyInjection\Compiler\CustomConfigurationCompilerPass;
 use DH\AuditorBundle\DependencyInjection\Compiler\StorageConfigurationCompilerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
@@ -15,5 +16,6 @@ class DHAuditorBundle extends Bundle
 
         $container->addCompilerPass(new AddProviderCompilerPass());
         $container->addCompilerPass(new StorageConfigurationCompilerPass());
+        $container->addCompilerPass(new CustomConfigurationCompilerPass());
     }
 }

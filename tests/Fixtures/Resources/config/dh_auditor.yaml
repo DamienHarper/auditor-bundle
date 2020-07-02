@@ -6,40 +6,8 @@ dh_auditor:
 
     providers:
         doctrine:
-            table_prefix: ~
-            table_suffix: '_audit'
-
-            # columns ignored from auditing
-            ignored_columns:
-                - createdAt
-                - updatedAt
-
-            # audited entities
             entities:
                 DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author: ~
                 DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post: ~
                 DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Comment: ~
                 DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag: ~
-
-            # storage entity managers (storage services)
-            storage_services:
-                - '@doctrine.orm.default_entity_manager'
-
-            # auditing entity managers (auditing services)
-            auditing_services:
-                - '@doctrine.orm.default_entity_manager'
-
-            # Closure that maps audit events to storage services
-            storage_mapper: ~
-
-            # Closure that checks roles
-            roles_checker: ~
-
-            # Closure that provides user information
-            user_provider: ~
-
-            # Closure that provides security information (IP, firewall name, etc)
-            security_provider: ~
-
-            # Switch to enable/disable the audit viewer
-            viewer: true

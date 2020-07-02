@@ -30,7 +30,7 @@ class UserProvider implements UserProviderInterface
         $this->configuration = $configuration;
     }
 
-    public function getUser(): ?AuditorUserInterface
+    public function __invoke(): ?AuditorUserInterface
     {
         $tokenUser = $this->getTokenUser();
         $impersonatorUser = $this->getImpersonatorUser();
@@ -60,7 +60,7 @@ class UserProvider implements UserProviderInterface
     /**
      * @return null|string|UserInterface
      */
-    public function getTokenUser()
+    private function getTokenUser()
     {
         try {
             $token = $this->security->getToken();
