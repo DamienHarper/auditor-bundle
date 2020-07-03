@@ -4,6 +4,15 @@ dh_auditor:
     enabled: true
     timezone: 'UTC'
 
+    # Invokable service (callable) that checks roles
+    role_checker: 'dh_auditor.role_checker'
+
+    # Invokable service (callable) that provides user information
+    user_provider: 'dh_auditor.user_provider'
+
+    # Invokable service (callable) that provides security information (IP, firewall name, etc)
+    security_provider: 'dh_auditor.security_provider'
+
     providers:
         doctrine:
             table_prefix: ~
@@ -38,12 +47,3 @@ dh_auditor:
 
             # Invokable service (callable) that maps audit events to storage services
             storage_mapper: ~
-
-            # Invokable service (callable) that checks roles
-            role_checker: 'dh_auditor.role_checker'
-
-            # Invokable service (callable) that provides user information
-            user_provider: 'dh_auditor.user_provider'
-
-            # Invokable service (callable) that provides security information (IP, firewall name, etc)
-            security_provider: 'dh_auditor.security_provider'

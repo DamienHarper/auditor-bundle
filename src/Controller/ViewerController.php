@@ -4,7 +4,6 @@ namespace DH\AuditorBundle\Controller;
 
 use DH\Auditor\Exception\AccessDeniedException;
 use DH\Auditor\Provider\Doctrine\Auditing\Annotation\Security;
-use DH\Auditor\Provider\Doctrine\Configuration;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\Auditor\Provider\Doctrine\Persistence\Schema\SchemaManager;
 use DH\Auditor\Provider\Doctrine\Service\AuditingService;
@@ -33,9 +32,7 @@ class ViewerController extends AbstractController
                 array_filter(
                     $schemaManager->getAuditableTableNames($auditingService->getEntityManager()),
                     function ($entity) use ($reader, $scope) {
-                        /** @var Configuration $configuration */
-                        $configuration = $reader->getProvider()->getConfiguration();
-                        $roleChecker = $configuration->getRoleChecker();
+                        $roleChecker = $reader->getProvider()->getAuditor()->getConfiguration()->getRoleChecker();
 
                         return null === $roleChecker ? true : $roleChecker($entity, $scope);
                     },

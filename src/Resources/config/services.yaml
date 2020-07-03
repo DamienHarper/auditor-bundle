@@ -83,7 +83,7 @@ services:
 
   DH\AuditorBundle\Security\RoleChecker:
     class: DH\AuditorBundle\Security\RoleChecker
-    arguments: ['@security.helper', '@DH\Auditor\Provider\Doctrine\Configuration']
+    arguments: ['@security.helper', '@DH\Auditor\Provider\Doctrine\DoctrineProvider']
   dh_auditor.role_checker: '@DH\AuditorBundle\Security\RoleChecker'
 
   DH\AuditorBundle\Event\ViewerEventSubscriber:

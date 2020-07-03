@@ -2,7 +2,7 @@
 
 namespace DH\AuditorBundle\DependencyInjection\Compiler;
 
-use DH\Auditor\Provider\Doctrine\DoctrineProvider;
+use DH\Auditor\Configuration;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
@@ -11,17 +11,16 @@ class CustomConfigurationCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container): void
     {
-        if (!$container->hasDefinition(DoctrineProvider::class)) {
+        if (!$container->hasDefinition(Configuration::class)) {
             return;
         }
 
-        $doctrineProviderConfigurationKey = 'dh_auditor.provider.doctrine.configuration';
-        if (!$container->hasParameter($doctrineProviderConfigurationKey)) {
+        if (!$container->hasParameter('dh_auditor.configuration')) {
             return;
         }
 
-        $providerDefinition = $container->getDefinition(DoctrineProvider::class);
-        $config = $container->getParameter($doctrineProviderConfigurationKey);
+        $providerDefinition = $container->getDefinition(Configuration::class);
+        $config = $container->getParameter('dh_auditor.configuration');
 
         // User provider service
         $serviceId = $config['user_provider'];

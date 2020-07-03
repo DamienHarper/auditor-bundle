@@ -23,6 +23,15 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('timezone')
                     ->defaultValue('UTC')
                 ->end()
+                ->scalarNode('user_provider')
+                    ->defaultValue('dh_auditor.user_provider')
+                ->end()
+                ->scalarNode('security_provider')
+                    ->defaultValue('dh_auditor.security_provider')
+                ->end()
+                ->scalarNode('role_checker')
+                    ->defaultValue('dh_auditor.role_checker')
+                ->end()
                 ->append($this->getProvidersNode())
             ->end()
         ;
@@ -104,21 +113,6 @@ class Configuration implements ConfigurationInterface
                     // "storage_mapper" is null by default
                     if (!\array_key_exists('storage_mapper', $v['doctrine']) || !\is_string($v['doctrine']['storage_mapper'])) {
                         $v['doctrine']['storage_mapper'] = null;
-                    }
-
-                    // "role_checker" is null by default
-                    if (!\array_key_exists('role_checker', $v['doctrine']) || !\is_string($v['doctrine']['role_checker'])) {
-                        $v['doctrine']['role_checker'] = 'dh_auditor.role_checker';
-                    }
-
-                    // "user_provider" is null by default
-                    if (!\array_key_exists('user_provider', $v['doctrine']) || !\is_string($v['doctrine']['user_provider'])) {
-                        $v['doctrine']['user_provider'] = 'dh_auditor.user_provider';
-                    }
-
-                    // "security_provider" is null by default
-                    if (!\array_key_exists('security_provider', $v['doctrine']) || !\is_string($v['doctrine']['security_provider'])) {
-                        $v['doctrine']['security_provider'] = 'dh_auditor.security_provider';
                     }
 
                     return $v;

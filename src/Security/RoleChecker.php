@@ -2,7 +2,7 @@
 
 namespace DH\AuditorBundle\Security;
 
-use DH\Auditor\Provider\Doctrine\Configuration;
+use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Security\RoleCheckerInterface;
 use DH\Auditor\User\UserInterface;
 use Symfony\Component\Security\Core\Security;
@@ -15,19 +15,19 @@ class RoleChecker implements RoleCheckerInterface
     private $security;
 
     /**
-     * @var Configuration
+     * @var DoctrineProvider
      */
-    private $configuration;
+    private $provider;
 
-    public function __construct(Security $security, Configuration $configuration)
+    public function __construct(Security $security, DoctrineProvider $doctrineProvider)
     {
         $this->security = $security;
-        $this->configuration = $configuration;
+        $this->provider = $doctrineProvider;
     }
 
     public function __invoke(string $entity, string $scope): bool
     {
-        $userProvider = $this->configuration->getUserProvider();
+        $userProvider = $this->provider->getAuditor()->getConfiguration()->getUserProvider();
         $user = null === $userProvider ? null : $userProvider();
         $security = null === $userProvider ? null : $this->security;
 
@@ -36,7 +36,7 @@ class RoleChecker implements RoleCheckerInterface
             return true;
         }
 
-        $entities = $this->configuration->getEntities();
+        $entities = $this->provider->getConfiguration()->getEntities();
         $roles = $entities[$entity]['roles'] ?? null;
 
         if (null === $roles) {
