@@ -3,6 +3,7 @@
 namespace DH\DoctrineAuditBundle\Event;
 
 use DH\DoctrineAuditBundle\Manager\AuditManager;
+use Doctrine\DBAL\Exception\TableNotFoundException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class AuditSubscriber implements EventSubscriberInterface
@@ -61,11 +62,18 @@ class AuditSubscriber implements EventSubscriberInterface
         $storage = $this->manager->selectStorageSpace($this->manager->getConfiguration()->getEntityManager());
         $statement = $storage->getConnection()->prepare($query);
 
-        foreach ($payload as $key => $value) {
+        foreach ($payload as $key => $value)
+        {
             $statement->bindValue($key, $value);
         }
 
-        $statement->execute();
+        try
+        {
+            $statement->execute();
+        }
+        catch (TableNotFoundException $e)
+        {
+        }
 
         return $event;
     }
