@@ -25,6 +25,10 @@ if (class_exists(ContractsEvent::class)) {
         {
             return $this->payload;
         }
+        final public function setPayload(array $payload): void
+        {
+            $this->payload = $payload;
+        }
     }
 } else {
     abstract class AuditEvent extends ComponentEvent
@@ -46,5 +50,10 @@ if (class_exists(ContractsEvent::class)) {
         {
             return $this->payload;
         }
+        final public function setPayload(array $payload): void
+        {
+            $this->payload = $payload;
+        }
+
     }
 }
