@@ -23,12 +23,18 @@ final class TokenStorageUserProviderTest extends TestCase
 
     protected function setUp(): void
     {
+        // The ROLE_PREVIOUS_ADMIN role is deprecated since 5.1 and will be removed in version 6.0.
+        $impersonationAttribute
+            = \defined('\Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter::IS_IMPERSONATOR')
+            ? 'IS_IMPERSONATOR'
+            : 'ROLE_PREVIOUS_ADMIN';
+
         $this->tokenStorage = new TokenStorage();
         $this->authorizationChecker = $this->getMockBuilder(AuthorizationCheckerInterface::class)->getMock();
         $this->authorizationChecker
             ->expects(self::any())
             ->method('isGranted')
-            ->with('ROLE_PREVIOUS_ADMIN')
+            ->with($impersonationAttribute)
             ->willReturn(true)
         ;
     }
@@ -57,7 +63,12 @@ final class TokenStorageUserProviderTest extends TestCase
         if (class_exists('\Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken')) {
             $token2 = new SwitchUserToken($user2, '12345', 'provider', $user2->getRoles(), $token1);
         } else {
-            $user2->setRoles(['ROLE_USER', 'ROLE_PREVIOUS_ADMIN', new SwitchUserRole('ROLE_ADMIN', $token1)]);
+            // The ROLE_PREVIOUS_ADMIN role is deprecated since Symfony 5.1 and will be removed in version 6.0.
+            $impersonationAttribute
+                = \defined('\Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter::IS_IMPERSONATOR')
+                ? 'IS_IMPERSONATOR'
+                : 'ROLE_PREVIOUS_ADMIN';
+            $user2->setRoles(['ROLE_USER', $impersonationAttribute, new SwitchUserRole('ROLE_ADMIN', $token1)]);
             $token2 = new UsernamePasswordToken($user2, '12345', 'provider', $user2->getRoles());
         }
 

@@ -38,7 +38,12 @@ class TokenStorageUserProvider implements UserProviderInterface
         }
 
         $impersonation = '';
-        if ($this->security->isGranted('ROLE_PREVIOUS_ADMIN')) {
+        // The ROLE_PREVIOUS_ADMIN role is deprecated since Symfony 5.1 and will be removed in version 6.0.
+        $impersonationAttribute
+            = \defined('\Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter::IS_IMPERSONATOR')
+            ? 'IS_IMPERSONATOR'
+            : 'ROLE_PREVIOUS_ADMIN';
+        if ($this->security->isGranted($impersonationAttribute)) {
             // Symfony > 4.3
             if ($token instanceof SwitchUserToken) {
                 $impersonatorUser = $token->getOriginalToken()->getUser();

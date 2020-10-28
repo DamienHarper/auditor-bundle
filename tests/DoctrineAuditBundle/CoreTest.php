@@ -232,11 +232,16 @@ abstract class CoreTest extends BaseTest
         $user->setRoles(['ROLE_ADMIN']);
         $tokenStorage->setToken(new UsernamePasswordToken($user, '12345', 'provider', $user->getRoles()));
 
+        // The ROLE_PREVIOUS_ADMIN role is deprecated since Symfony 5.1 and will be removed in version 6.0.
+        $impersonationAttribute
+            = \defined('\Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter::IS_IMPERSONATOR')
+            ? 'IS_IMPERSONATOR'
+            : 'ROLE_PREVIOUS_ADMIN';
         $authorizationChecker = $this->getMockBuilder(AuthorizationCheckerInterface::class)->getMock();
         $authorizationChecker
             ->expects(static::any())
             ->method('isGranted')
-            ->with('ROLE_PREVIOUS_ADMIN')
+            ->with($impersonationAttribute)
             ->willReturn(true)
         ;
 
