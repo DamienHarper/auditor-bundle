@@ -15,7 +15,7 @@ Follow instructions at [auditor-bundle-demo](https://github.com/DamienHarper/aud
 
 
 ## Official Documentation
-`auditor-bundle` official documentation can be found [here](doc/00-index.md).
+`auditor-bundle` official documentation can be found [here](https://damienharper.github.io/auditor-docs/docs/auditor-bundle/index.html).
 
 
 ## Version Information
@@ -26,11 +26,11 @@ Follow instructions at [auditor-bundle-demo](https://github.com/DamienHarper/aud
  2.x       | End of life                 | >= 7.1           | >= 3.4               |
  1.x       | End of life                 | >= 7.1           | >= 3.4               |
 
-Changelog is available [here](CHANGELOG.md)
+Changelog is available [here](https://damienharper.github.io/auditor-docs/docs/auditor-bundle/release-notes.html)
 
 
 ## Usage
-Once [installed](doc/11-installation.md) and [configured](doc/20-general-configuration.md), any database change 
+Once [installed](https://damienharper.github.io/auditor-docs/docs/auditor-bundle/installation.html) and [configured](https://damienharper.github.io/auditor-docs/docs/auditor-bundle/configuration/general.html), any database change 
 affecting audited entities will be logged to audit logs automatically.
 Also, running schema update or similar will automatically setup audit logs for every 
 new auditable entity.
