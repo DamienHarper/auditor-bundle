@@ -58,7 +58,7 @@ class UserProvider implements UserProviderInterface
     }
 
     /**
-     * @return null|string|UserInterface
+     * @return null|UserInterface
      */
     private function getTokenUser()
     {

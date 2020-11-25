@@ -2,6 +2,7 @@
 
 namespace DH\AuditorBundle\Security;
 
+use DH\Auditor\Provider\Doctrine\Configuration;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Security\RoleCheckerInterface;
 use DH\Auditor\User\UserInterface;
@@ -36,6 +37,7 @@ class RoleChecker implements RoleCheckerInterface
             return true;
         }
 
+        \assert($this->provider->getConfiguration() instanceof Configuration);
         $entities = $this->provider->getConfiguration()->getEntities();
         $roles = $entities[$entity]['roles'] ?? null;
 
