@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.2] - 2020-11-26
+
+### Fixes
+* [#200 - Template static datetime fix](https://github.com/DamienHarper/auditor-bundle/pull/200)
+* [#221 - Remove the ROLE_PREVIOUS_ADMIN deprecation warning from Symfony 5.1](https://github.com/DamienHarper/auditor-bundle/pull/221)
+* [#214 - Handle TableNotFoundException](https://github.com/DamienHarper/auditor-bundle/pull/214)
+* [#204 - Migration postUp](https://github.com/DamienHarper/auditor-bundle/pull/204)
+
+
 ## [3.4.1] - 2020-04-27
 
 ### Changes
