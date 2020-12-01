@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  schedule:
+    - cron: 0 0 * * *
+  pull_request:
+  push:
+    branches:
+      - master
+      - 3.x
+
+jobs:
+  tests:
+    name: Tests PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php:
+          - '7.2'
+          - '7.3'
+          - '7.4'
+        symfony:
+          - '3.4.*'
+          - '4.4.*'
+          - '5.*'
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: composer:v2, flex, pcov
+          coverage: pcov
+
+      - name: Configure Symfony
+        run: composer config extra.symfony.require "${{ matrix.symfony }}"
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ matrix.php }}-composer-
+
+      - name: Update project dependencies
+        run: composer update --no-progress --ansi --prefer-stable
+
+      - name: Validate composer
+        run: composer validate --strict --no-check-lock
+
+      - name: Run tests
+        run: vendor/bin/phpunit
