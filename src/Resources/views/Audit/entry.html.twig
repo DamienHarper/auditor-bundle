@@ -3,7 +3,7 @@
 
 <article class="timeline-entry">
     <div class="timeline-entry-inner">
-        <time class="timeline-time" datetime="2014-01-10T03:45">
+        <time class="timeline-time" datetime="{{ entry.getCreatedAt()|date('Y-m-d H:i:s') }}">
             <span>{{ entry.getCreatedAt()|date('H:i:s') }}</span> <span>{{ entry.getCreatedAt()|date('l d F Y') }}</span>
         </time>
 
@@ -13,7 +13,9 @@
 
         <div class="timeline-label">
             <div class="row">
-                <div class="col-lg-8"><h2 class="mb-0">{{ helper.humanize(entity, entry) }}</h2></div>
+                <div class="col-lg-8">
+                    <h2 class="mb-0">{{ helper.humanize(entity, entry) }}</h2>
+                </div>
                 <div class="col-lg-3" align="right">
                     {% if entry.getTransactionHash() is not empty %}
                     <a href="{{ path('dh_auditor_show_transaction', {hash: entry.getTransactionHash()}) }}" class="badge badge-pill badge-light font-weight-light transaction-hash" title="{% trans %}audit.audit_details.entry_title{% endtrans %}">
@@ -34,7 +36,9 @@
                     {% set diffs = entry.getDiffs() %}
                     {% for key, values in diffs %}
                         <tr>
-                            <td><code>{{ key }}</code></td>
+                            <td>
+                                <code>{{ key }}</code>
+                            </td>
                             <td>
                                 {% if values.old is defined %}
                                     {% if values.old is null %}
