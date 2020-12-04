@@ -2,7 +2,6 @@
 [![Latest Stable Version](https://poser.pugx.org/damienharper/auditor-bundle/v/stable)](https://packagist.org/packages/damienharper/auditor-bundle)
 [![Latest Unstable Version](https://poser.pugx.org/damienharper/auditor-bundle/v/unstable)](https://packagist.org/packages/damienharper/auditor-bundle)
 ![CI](https://github.com/DamienHarper/auditor-bundle/workflows/CI/badge.svg?branch=master)
-[![Build Status](https://travis-ci.com/DamienHarper/auditor-bundle.svg?branch=master)](https://travis-ci.com/DamienHarper/auditor-bundle)
 [![License](https://poser.pugx.org/damienharper/auditor-bundle/license)](https://packagist.org/packages/damienharper/auditor-bundle)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/?branch=master)
 [![Total Downloads](https://poser.pugx.org/damienharper/auditor-bundle/downloads)](https://packagist.org/packages/damienharper/auditor-bundle)
@@ -11,6 +10,8 @@
 
 `auditor-bundle`, formerly known as `DoctrineAuditBundle` integrates `auditor` library into any Symfony 3.4+ application.
 
+
+## Demo
 You can try out this bundle by cloning its companion demo app. 
 Follow instructions at [auditor-bundle-demo](https://github.com/DamienHarper/auditor-bundle-demo).
 
@@ -20,12 +21,12 @@ Follow instructions at [auditor-bundle-demo](https://github.com/DamienHarper/aud
 
 
 ## Version Information
- Version   | Status                      | PHP requirements | Symfony requirements | Badges
-:----------|:----------------------------|:-----------------|:---------------------|:-----------
- 4.x       | Active development :rocket: | >= 7.2           | >= 3.4               | [![Build Status](https://travis-ci.com/DamienHarper/auditor-bundle.svg?branch=master)](https://travis-ci.com/DamienHarper/auditor-bundle) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/?branch=master)
- 3.x       | Active support :rocket:     | >= 7.1           | >= 3.4               | [![Build Status](https://travis-ci.com/DamienHarper/auditor-bundle.svg?branch=3.x)](https://travis-ci.com/DamienHarper/auditor-bundle) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/badges/quality-score.png?b=3.x)](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/?branch=3.x)
- 2.x       | End of life                 | >= 7.1           | >= 3.4               |
- 1.x       | End of life                 | >= 7.1           | >= 3.4               |
+ Version   | Status                      | Requirements               | Badges
+:----------|:----------------------------|:---------------------------|:-----------
+ 4.x       | Active development :rocket: | PHP >= 7.2, Symfony >= 3.4 | ![CI](https://github.com/DamienHarper/auditor-bundle/workflows/CI/badge.svg?branch=master) <br/>[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/?branch=master)
+ 3.x       | Active support :rocket:     | PHP >= 7.1, Symfony >= 3.4 | ![CI](https://github.com/DamienHarper/auditor-bundle/workflows/CI/badge.svg?branch=3.x) <br/>[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/badges/quality-score.png?b=3.x)](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/?branch=3.x)
+ 2.x       | End of life                 | PHP >= 7.1, Symfony >= 3.4 |
+ 1.x       | End of life                 | PHP >= 7.1, Symfony >= 3.4 |
 
 Changelog is available [here](https://damienharper.github.io/auditor-docs/docs/auditor-bundle/release-notes.html)
 
