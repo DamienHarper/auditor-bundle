@@ -16,3 +16,6 @@ parameters:
         - '~Call to an undefined method Symfony\\Component\\Security\\Core\\Authentication\\Token\\TokenInterface\:\:getRoles\(\)\.~'
         - '~Call to method getSource\(\) on an unknown class Symfony\\Component\\Security\\Core\\Role\\SwitchUserRole\.~'
         - '~Class Symfony\\Component\\Security\\Core\\Role\\SwitchUserRole not found\.~'
+        # required for Symfony 4.4 compatibility
+        - '~Method DH\\AuditorBundle\\Routing\\RoutingAnnotationLoader\:\:load\(\) has parameter \$type with no typehint specified.~'
+        - '~Method DH\\AuditorBundle\\Routing\\RoutingAnnotationLoader\:\:supports\(\) has parameter \$type with no typehint specified.~'
