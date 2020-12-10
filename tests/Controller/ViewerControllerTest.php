@@ -72,7 +72,7 @@ final class ViewerControllerTest extends WebTestCase
             $cells = $row->filter('td');
             self::assertSame(4, $cells->count(), 'Each row is composed of 4 cells.');
             $cells->each(function ($cell, $cellIndex) use ($expected, $rowIndex): void {
-                self::assertSame($expected[$rowIndex][$cellIndex], $cell->text(), sprintf('Cell #%s of row #%s is ok.', $cellIndex, $rowIndex));
+                self::assertSame($expected[$rowIndex][$cellIndex], trim($cell->text()), sprintf('Cell #%s of row #%s is ok.', $cellIndex, $rowIndex));
             });
         });
     }
@@ -106,7 +106,7 @@ final class ViewerControllerTest extends WebTestCase
             $cells = $row->filter('td');
             self::assertSame(4, $cells->count(), 'Each row is composed of 4 cells.');
             $cells->each(function ($cell, $cellIndex) use ($expected, $rowIndex): void {
-                self::assertSame($expected[$rowIndex][$cellIndex], $cell->text(), sprintf('Cell #%s of row #%s is ok.', $cellIndex, $rowIndex));
+                self::assertSame($expected[$rowIndex][$cellIndex], trim($cell->text()), sprintf('Cell #%s of row #%s is ok.', $cellIndex, $rowIndex));
             });
         });
     }
@@ -141,7 +141,7 @@ final class ViewerControllerTest extends WebTestCase
             $cells = $row->filter('td');
             self::assertSame(4, $cells->count(), 'Each row is composed of 4 cells.');
             $cells->each(function ($cell, $cellIndex) use ($expected, $rowIndex): void {
-                self::assertSame($expected[$rowIndex][$cellIndex], $cell->text(), sprintf('Cell #%s of row #%s is ok.', $cellIndex, $rowIndex));
+                self::assertSame($expected[$rowIndex][$cellIndex], trim($cell->text()), sprintf('Cell #%s of row #%s is ok.', $cellIndex, $rowIndex));
             });
         });
     }
