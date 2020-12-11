@@ -54,6 +54,7 @@ $config = PhpCsFixer\Config::create()
     ->setFinder(PhpCsFixer\Finder::create()
         ->in(__DIR__)
         ->notPath('tests/App/var/')
+        ->notPath('tests/App/cache/')
         ->notPath('src/DependencyInjection/Configuration.php')
     )
 ;

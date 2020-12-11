@@ -8,6 +8,7 @@ use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Nyholm\BundleTest\BaseBundleTestCase;
 use Nyholm\BundleTest\CompilerPass\PublicServicePass;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
+use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * @internal
@@ -18,6 +19,10 @@ final class TwigExtensionTest extends BaseBundleTestCase
 
     protected function setUp(): void
     {
+        if (3 === Kernel::MAJOR_VERSION) {
+            self::markTestSkipped('Test skipped for Symfony <= 3.4');
+        }
+
         parent::setUp();
 
         // Make services public
