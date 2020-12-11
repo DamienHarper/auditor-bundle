@@ -33,8 +33,10 @@ class DHAuditorExtension extends Extension
         foreach ($config['providers'] as $providerName => $providerConfig) {
             $container->setParameter('dh_auditor.provider.'.$providerName.'.configuration', $providerConfig);
 
-            $serviceId = 'dh_auditor.provider.'.$providerName;
-            $container->registerAliasForArgument($serviceId, ProviderInterface::class, "{$providerName}Provider");
+            if (method_exists($container, 'registerAliasForArgument')) {
+                $serviceId = 'dh_auditor.provider.'.$providerName;
+                $container->registerAliasForArgument($serviceId, ProviderInterface::class, "{$providerName}Provider");
+            }
         }
     }
 }

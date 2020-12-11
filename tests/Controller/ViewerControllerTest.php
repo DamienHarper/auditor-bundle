@@ -17,6 +17,7 @@ use Symfony\Component\BrowserKit\AbstractBrowser;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\User\User;
@@ -43,13 +44,6 @@ final class ViewerControllerTest extends WebTestCase
         $this->login();
         $crawler = $this->client->request('GET', '/audit');
 
-        // asserts a specific 200 status code
-//        self::assertEquals(200, $this->client->getResponse()->getStatusCode(), 'Response status is 200');
-//        self::assertEquals(Response::HTTP_OK, $this->client->getResponse()->getStatusCode(), 'Response status is 200');
-
-        // asserts that the response status code is 404
-//        self::assertTrue($this->client->getResponse()->isNotFound(), 'Response status is 404');
-
         // asserts that the response status code is 2xx
         self::assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
 
@@ -72,7 +66,7 @@ final class ViewerControllerTest extends WebTestCase
             $cells = $row->filter('td');
             self::assertSame(4, $cells->count(), 'Each row is composed of 4 cells.');
             $cells->each(function ($cell, $cellIndex) use ($expected, $rowIndex): void {
-                self::assertSame($expected[$rowIndex][$cellIndex], $cell->text(), sprintf('Cell #%s of row #%s is ok.', $cellIndex, $rowIndex));
+                self::assertSame($expected[$rowIndex][$cellIndex], trim($cell->text()), sprintf('Cell #%s of row #%s is ok.', $cellIndex, $rowIndex));
             });
         });
     }
@@ -106,7 +100,7 @@ final class ViewerControllerTest extends WebTestCase
             $cells = $row->filter('td');
             self::assertSame(4, $cells->count(), 'Each row is composed of 4 cells.');
             $cells->each(function ($cell, $cellIndex) use ($expected, $rowIndex): void {
-                self::assertSame($expected[$rowIndex][$cellIndex], $cell->text(), sprintf('Cell #%s of row #%s is ok.', $cellIndex, $rowIndex));
+                self::assertSame($expected[$rowIndex][$cellIndex], trim($cell->text()), sprintf('Cell #%s of row #%s is ok.', $cellIndex, $rowIndex));
             });
         });
     }
@@ -141,7 +135,7 @@ final class ViewerControllerTest extends WebTestCase
             $cells = $row->filter('td');
             self::assertSame(4, $cells->count(), 'Each row is composed of 4 cells.');
             $cells->each(function ($cell, $cellIndex) use ($expected, $rowIndex): void {
-                self::assertSame($expected[$rowIndex][$cellIndex], $cell->text(), sprintf('Cell #%s of row #%s is ok.', $cellIndex, $rowIndex));
+                self::assertSame($expected[$rowIndex][$cellIndex], trim($cell->text()), sprintf('Cell #%s of row #%s is ok.', $cellIndex, $rowIndex));
             });
         });
     }
@@ -322,6 +316,10 @@ final class ViewerControllerTest extends WebTestCase
 
     private function createAndInitDoctrineProvider(): void
     {
+        if (3 === Kernel::MAJOR_VERSION) {
+            self::markTestSkipped('Test skipped for Symfony <= 3.4');
+        }
+
         if (!self::$booted) {
             $this->client = self::createClient(); // boots the Kernel and populates container
         }

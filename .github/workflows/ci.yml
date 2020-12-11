@@ -38,7 +38,9 @@ jobs:
           coverage: pcov
 
       - name: Configure Symfony
-        run: composer config extra.symfony.require "${{ matrix.symfony }}"
+        run: |
+          composer global require --no-progress --no-scripts --no-plugins symfony/flex
+          composer config extra.symfony.require "${{ matrix.symfony }}"
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -51,7 +53,16 @@ jobs:
           key: ${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}
           restore-keys: ${{ matrix.php }}-composer-
 
-      - name: Update project dependencies
+      - name: Update project dependencies (3.4.*)
+        if: matrix.symfony == '3.4.*'
+        run: SYMFONY_REQUIRE="^3.4" composer update --no-progress --ansi --prefer-stable
+
+      - name: Update project dependencies (4.4.*)
+        if: matrix.symfony == '4.4.*'
+        run: SYMFONY_REQUIRE="^4.4" composer update --no-progress --ansi --prefer-stable
+
+      - name: Update project dependencies (5.*)
+        if: matrix.symfony == '5.*'
         run: composer update --no-progress --ansi --prefer-stable
 
       - name: Validate composer

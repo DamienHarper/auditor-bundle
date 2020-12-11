@@ -8,3 +8,4 @@ composer.lock
 *.sqlite
 var/
 /tests/App/.preload.php
+/tests/App/cache/

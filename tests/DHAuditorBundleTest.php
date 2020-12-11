@@ -15,6 +15,7 @@ use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Nyholm\BundleTest\BaseBundleTestCase;
 use Nyholm\BundleTest\CompilerPass\PublicServicePass;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
+use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * @internal
@@ -31,6 +32,10 @@ final class DHAuditorBundleTest extends BaseBundleTestCase
 
     public function testInitBundle(): void
     {
+        if (3 === Kernel::MAJOR_VERSION) {
+            self::markTestSkipped('Test skipped for Symfony <= 3.4');
+        }
+
         $kernel = $this->createKernel();
 
         $kernel->addConfigFile(__DIR__.'/Fixtures/Resources/config/dh_auditor.yaml');

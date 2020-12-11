@@ -12,7 +12,7 @@ security:
             security: false
         main:
             anonymous: true
-            lazy: true
+#            lazy: true
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
