@@ -2,7 +2,7 @@
 
 namespace DH\AuditorBundle\Tests\DependencyInjection\Compiler;
 
-use DH\AuditorBundle\DependencyInjection\Compiler\StorageConfigurationCompilerPass;
+use DH\AuditorBundle\DependencyInjection\Compiler\DoctrineProviderConfigurationCompilerPass;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractCompilerPassTestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -13,7 +13,7 @@ final class StorageConfigurationCompilerPassTest extends AbstractCompilerPassTes
 {
     protected function registerCompilerPass(ContainerBuilder $container): void
     {
-        $container->addCompilerPass(new StorageConfigurationCompilerPass());
+        $container->addCompilerPass(new DoctrineProviderConfigurationCompilerPass());
     }
 
 //    public function testCompilerPass(): void
