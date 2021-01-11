@@ -3,6 +3,8 @@
 namespace DH\AuditorBundle\DependencyInjection\Compiler;
 
 use DH\Auditor\Provider\Doctrine\Auditing\Annotation\AnnotationLoader;
+use DH\Auditor\Provider\Doctrine\Auditing\Event\DoctrineSubscriber;
+use DH\Auditor\Provider\Doctrine\Auditing\Transaction\TransactionManager;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Provider\Doctrine\Service\AuditingService;
 use DH\Auditor\Provider\Doctrine\Service\StorageService;
@@ -11,7 +13,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
-class StorageConfigurationCompilerPass implements CompilerPassInterface
+class DoctrineProviderConfigurationCompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container): void
     {
@@ -39,6 +41,11 @@ class StorageConfigurationCompilerPass implements CompilerPassInterface
 
             $providerDefinition->addMethodCall('registerStorageService', [$serviceReference]);
         }
+
+        $transactionManagerReference = new Definition(TransactionManager::class, [$providerDefinition]);
+        $doctrineSubscriberDefinition = new Definition(DoctrineSubscriber::class, [$transactionManagerReference]);
+        $doctrineSubscriberDefinition->addTag('doctrine.event_subscriber');
+        $container->setDefinition(DoctrineSubscriber::class, $doctrineSubscriberDefinition);
 
         foreach ($config['auditing_services'] as $service) {
             $service = str_replace('@', '', $service);
