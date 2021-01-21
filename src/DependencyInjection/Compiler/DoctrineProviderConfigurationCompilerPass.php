@@ -42,11 +42,6 @@ class DoctrineProviderConfigurationCompilerPass implements CompilerPassInterface
             $providerDefinition->addMethodCall('registerStorageService', [$serviceReference]);
         }
 
-        $transactionManagerReference = new Definition(TransactionManager::class, [$providerDefinition]);
-        $doctrineSubscriberDefinition = new Definition(DoctrineSubscriber::class, [$transactionManagerReference]);
-        $doctrineSubscriberDefinition->addTag('doctrine.event_subscriber');
-        $container->setDefinition(DoctrineSubscriber::class, $doctrineSubscriberDefinition);
-
         foreach ($config['auditing_services'] as $service) {
             $service = str_replace('@', '', $service);
             $entityManagerReference = new Reference($service);
