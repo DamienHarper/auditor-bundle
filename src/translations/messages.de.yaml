@@ -1,22 +1,22 @@
 audit:
   header:
-    home: Home
-    audited_entities: geprüfte Unternehmen
+    home: Startseite
+    audited_entities: geprüfte Objekte
   table_headers:
-    entity: Einheit
+    entity: Objekt
     table: Tabelle
     activity: Aktivität
   audit_details:
     view_audit: Audits anzeigen
     most_recent: (neueste zuerst)
-    entry_title: Alle Operationen in dieser Transaktion anzeigen
-    property: Eigentum
+    entry_title: Alle Operationen dieser Transaktion anzeigen
+    property: Eigenschaft
     old_value: Alter Wert
     new_value: Neuer Wert
     transaction: Transaktion
-    entity_per_entity: (Entität pro Entität)
+    entity_per_entity: (Objekt pro Objekt)
   pager:
-    first: Zuerst
+    first: Erste
     previous: Vorherige
     last: Letzte
     next: Weiter
