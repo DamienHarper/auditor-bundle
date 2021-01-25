@@ -1,0 +1,24 @@
+audit:
+  header:
+    home: Kodu
+    audited_entities: auditeeritud kirjed
+  table_headers:
+    entity: Kirje
+    table: Tabel
+    activity: Toiming
+  audit_details:
+    view_audit: Vaata auditit
+    most_recent: (hiljuti lisatud eespool)
+    entry_title: Vaatle kõiki selle transaktsiooni toiminguid
+    property: Rekvisiit
+    old_value: Vana väärtus
+    new_value: Uus väärtus
+    transaction: Transaktsioon
+    entity_per_entity: (kirje kaupa)
+  pager:
+    first: Esimene
+    previous: Eelmine
+    last: Viimane
+    next: Järgmine
+    current: Praegune
+
