@@ -8,7 +8,7 @@ use DH\Auditor\Provider\Doctrine\Configuration as DoctrineProviderConfiguration;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\AuditorBundle\Controller\ViewerController;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Event\ControllerEvent;
+use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -24,8 +24,13 @@ class ViewerEventSubscriber implements EventSubscriberInterface
         $this->auditor = $auditor;
     }
 
-    public function onKernelController(ControllerEvent $event): void
+    public function onKernelController(KernelEvent $event): void
     {
+        // Symfony 3.4+ compatibility (no ControllerEvent typehint)
+        if (!method_exists($event, 'getController')) {
+            throw new NotFoundHttpException();
+        }
+
         $controller = $event->getController();
 
         // when a controller class defines multiple action methods, the controller
