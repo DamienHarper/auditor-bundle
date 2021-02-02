@@ -16,7 +16,7 @@
         "doctrine/annotations": "^1.8",
         "doctrine/doctrine-bundle": "^1.9|^2.0",
         "doctrine/orm": "^2.7",
-        "symfony/doctrine-bridge": "3.4|^4.0|^5.0, !=5.2.0, !=5.2.1",
+        "symfony/doctrine-bridge": "^3.4|^4.4.19|^5.2.2",
         "symfony/event-dispatcher": "^3.4|^4.0|^5.0",
         "symfony/lock": "^3.4|^4.0|^5.0",
         "symfony/security-bundle": "^3.4|^4.0|^5.0",
