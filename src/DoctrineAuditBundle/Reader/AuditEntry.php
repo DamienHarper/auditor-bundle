@@ -5,7 +5,7 @@ namespace DH\DoctrineAuditBundle\Reader;
 class AuditEntry
 {
     /**
-     * @var int
+     * @var string
      */
     protected $id;
 
@@ -91,9 +91,9 @@ class AuditEntry
     /**
      * Get the value of id.
      *
-     * @return int
+     * @return string
      */
-    public function getId(): int
+    public function getId(): string
     {
         return $this->id;
     }

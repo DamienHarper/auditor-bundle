@@ -2,7 +2,8 @@
 
 namespace DH\DoctrineAuditBundle\Helper;
 
-use Doctrine\Persistence\Proxy;
+use function get_class;
+use function is_object;
 
 class DoctrineHelper
 {
@@ -18,7 +19,7 @@ class DoctrineHelper
      */
     public static function getRealClassName($class): string
     {
-        $class = \is_object($class) ? \get_class($class) : $class;
+        $class = is_object($class) ? get_class($class) : $class;
 
         // __CG__: Doctrine Common Marker for Proxy (ODM < 2.0 and ORM < 3.0)
         // __PM__: Ocramius Proxy Manager (ODM >= 2.0)

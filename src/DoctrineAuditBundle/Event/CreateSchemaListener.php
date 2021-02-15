@@ -23,18 +23,27 @@ class CreateSchemaListener implements EventSubscriber
      */
     protected $reader;
 
+    /**
+     * CreateSchemaListener constructor.
+     * @param AuditManager $manager
+     * @param AuditReader $reader
+     */
     public function __construct(AuditManager $manager, AuditReader $reader)
     {
         $this->manager = $manager;
         $this->reader = $reader;
     }
 
+    /**
+     * @param GenerateSchemaTableEventArgs $eventArgs
+     * @throws Exception
+     */
     public function postGenerateSchemaTable(GenerateSchemaTableEventArgs $eventArgs): void
     {
         $metadata = $eventArgs->getClassMetadata();
 
         // check inheritance type and returns if unsupported
-        if (!\in_array($metadata->inheritanceType, [
+        if (!in_array($metadata->inheritanceType, [
             ClassMetadataInfo::INHERITANCE_TYPE_NONE,
             ClassMetadataInfo::INHERITANCE_TYPE_JOINED,
             ClassMetadataInfo::INHERITANCE_TYPE_SINGLE_TABLE,

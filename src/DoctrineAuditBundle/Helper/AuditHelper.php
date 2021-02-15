@@ -4,15 +4,18 @@ namespace DH\DoctrineAuditBundle\Helper;
 
 use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\User\UserInterface;
+use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Mapping\MappingException;
+use function constant;
 
 class AuditHelper
 {
     /**
-     * @var \DH\DoctrineAuditBundle\AuditConfiguration
+     * @var AuditConfiguration
      */
     private $configuration;
 
@@ -25,7 +28,7 @@ class AuditHelper
     }
 
     /**
-     * @return \DH\DoctrineAuditBundle\AuditConfiguration
+     * @return AuditConfiguration
      */
     public function getConfiguration(): AuditConfiguration
     {
@@ -38,14 +41,13 @@ class AuditHelper
      * @param EntityManagerInterface $em
      * @param object                 $entity
      *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
+     * @throws DBALException
+     * @throws MappingException
      *
      * @return mixed
      */
     public function id(EntityManagerInterface $em, $entity)
     {
-        /** @var ClassMetadata $meta */
         $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
         $pk = $meta->getSingleIdentifierFieldName();
 
@@ -81,14 +83,14 @@ class AuditHelper
      * @param object                 $entity
      * @param array                  $ch
      *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
+     * @throws DBALException
+     * @throws MappingException
      *
      * @return array
      */
     public function diff(EntityManagerInterface $em, $entity, array $ch): array
     {
-        /** @var ClassMetadata $meta */
+
         $meta = $em->getClassMetadata(DoctrineHelper::getRealClassName($entity));
         $diff = [];
 
@@ -168,8 +170,8 @@ class AuditHelper
      * @param object                 $entity
      * @param mixed                  $id
      *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
+     * @throws DBALException
+     * @throws MappingException
      *
      * @return array
      */
@@ -212,10 +214,8 @@ class AuditHelper
     {
         return [
             'id' => [
-                'type' => self::getDoctrineType('INTEGER'),
+                'type' => self::getDoctrineType('GUID'),
                 'options' => [
-                    'autoincrement' => true,
-                    'unsigned' => true,
                 ],
             ],
             'type' => [
@@ -350,7 +350,7 @@ class AuditHelper
      * @param Type                   $type
      * @param mixed                  $value
      *
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      *
      * @return mixed
      */
@@ -387,6 +387,6 @@ class AuditHelper
 
     private static function getDoctrineType(string $type): string
     {
-        return \constant((class_exists(Types::class, false) ? Types::class : Type::class).'::'.$type);
+        return constant((class_exists(Types::class, false) ? Types::class : Type::class).'::'.$type);
     }
 }

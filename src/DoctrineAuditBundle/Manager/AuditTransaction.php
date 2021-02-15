@@ -2,6 +2,7 @@
 
 namespace DH\DoctrineAuditBundle\Manager;
 
+use DH\DoctrineAuditBundle\AuditConfiguration;
 use DH\DoctrineAuditBundle\Helper\AuditHelper;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\UnitOfWork;
@@ -9,7 +10,7 @@ use Doctrine\ORM\UnitOfWork;
 class AuditTransaction
 {
     /**
-     * @var \DH\DoctrineAuditBundle\AuditConfiguration
+     * @var AuditConfiguration
      */
     private $configuration;
 
@@ -53,11 +54,12 @@ class AuditTransaction
      */
     private $em;
 
-    public function __construct(AuditHelper $helper)
+    public function __construct(AuditHelper $helper, EntityManagerInterface $em)
     {
         $this->helper = $helper;
         $this->configuration = $helper->getConfiguration();
-        $this->em = $this->configuration->getEntityManager();
+//        $this->em = $this->configuration->getEntityManager();
+        $this->em = $em;
     }
 
     /**
@@ -74,6 +76,10 @@ class AuditTransaction
         return $this->transaction_hash;
     }
 
+    /**
+     * @throws DBALException
+     * @throws MappingException
+     */
     public function collect(): void
     {
         $uow = $this->em->getUnitOfWork();

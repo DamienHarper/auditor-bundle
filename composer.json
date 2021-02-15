@@ -19,7 +19,9 @@
     "symfony/lock": "^3.4|^4.0|^5.0",
     "symfony/security-bundle": "^3.4|^4.0|^5.0",
     "symfony/translation": "^3.4|^4.0|^5.0",
-    "symfony/twig-bundle": "^3.4|^4.0|^5.0"
+    "symfony/twig-bundle": "^3.4|^4.0|^5.0",
+    "ext-json": "*",
+    "ext-pdo": "*"
   },
   "autoload": {
     "psr-4": {
@@ -36,10 +38,6 @@
     "friendsofphp/php-cs-fixer": "^2.15",
     "gedmo/doctrine-extensions": "^2.4",
     "matthiasnoback/symfony-dependency-injection-test": "^3.1|^4.0",
-    "phpstan/phpstan": "^0.12",
-    "phpstan/phpstan-doctrine": "^0.12",
-    "phpstan/phpstan-strict-rules": "^0.12",
-    "phpstan/phpstan-symfony": "^0.12",
     "phpunit/phpunit": "^7.0|^8.0",
     "symfony/var-dumper": "^4.2|^5.0",
     "twig/extensions": "^1.5"

@@ -3,6 +3,7 @@
 namespace DH\DoctrineAuditBundle\DBAL;
 
 use Doctrine\DBAL\Logging\SQLLogger;
+use function call_user_func;
 
 class AuditLogger implements SQLLogger
 {
@@ -23,7 +24,7 @@ class AuditLogger implements SQLLogger
     {
         // right before commit insert all audit entries
         if ('"COMMIT"' === $sql) {
-            \call_user_func($this->flusher);
+            call_user_func($this->flusher);
         }
     }
 

@@ -7,9 +7,11 @@ use DH\DoctrineAuditBundle\DBAL\AuditLoggerChain;
 use DH\DoctrineAuditBundle\Manager\AuditManager;
 use DH\DoctrineAuditBundle\Manager\AuditTransaction;
 use Doctrine\Common\EventSubscriber;
+use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Logging\SQLLogger;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
+use Doctrine\ORM\Mapping\MappingException;
 
 class DoctrineSubscriber implements EventSubscriber
 {
@@ -36,13 +38,13 @@ class DoctrineSubscriber implements EventSubscriber
      *
      * @param OnFlushEventArgs $args
      *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\Mapping\MappingException
+     * @throws DBALException
+     * @throws MappingException
      */
     public function onFlush(OnFlushEventArgs $args): void
     {
         $em = $args->getEntityManager();
-        $transaction = new AuditTransaction($this->manager->getHelper());
+        $transaction = new AuditTransaction($this->manager->getHelper(), $em);
 
         // extend the SQL logger
         $this->loggerBackup = $em->getConnection()->getConfiguration()->getSQLLogger();
@@ -56,7 +58,6 @@ class DoctrineSubscriber implements EventSubscriber
         $loggerChain = new AuditLoggerChain();
         $loggerChain->addLogger($auditLogger);
         if ($this->loggerBackup instanceof AuditLoggerChain) {
-            /** @var SQLLogger $logger */
             foreach ($this->loggerBackup->getLoggers() as $logger) {
                 $loggerChain->addLogger($logger);
             }
