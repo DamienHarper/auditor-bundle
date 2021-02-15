@@ -1,5 +1,5 @@
 {
-  "name": "damienharper/doctrine-audit-bundle",
+  "name": "grabomska/auditor-bundle",
   "type": "symfony-bundle",
   "description": "Doctrine audits logs made easy.",
   "keywords": ["doctrine", "audit", "audit-log", "audit-trail"],
