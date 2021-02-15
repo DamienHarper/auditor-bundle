@@ -47,10 +47,18 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
             ->setDescription('Cleans audit tables')
             ->setName(self::$defaultName)
             ->addOption('no-confirm', null, InputOption::VALUE_NONE, 'No interaction mode')
-            ->addArgument('keep', InputArgument::OPTIONAL, 'Audits retention period (must be expressed as an ISO 8601 date interval, e.g. P12M to keep the last 12 months or P7D to keep the last 7 days).', 'P12M')
-        ;
+            ->addArgument(
+                'keep',
+                InputArgument::OPTIONAL,
+                'Audits retention period (must be expressed as an ISO 8601 date interval, e.g. P12M to keep the last 12 months or P7D to keep the last 7 days).',
+                'P12M');
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         if (null === $this->container) {
@@ -112,13 +120,13 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
         $message = sprintf(
             "You are about to clean audits created before <comment>%s</comment>: %d entities involved.\n Do you want to proceed?",
             $until->format('Y-m-d'),
-            \count($entities)
+            count($entities)
         );
 
         $confirm = $input->getOption('no-confirm') ? true : $io->confirm($message, false);
 
         if ($confirm) {
-            $progressBar = new ProgressBar($output, \count($entities));
+            $progressBar = new ProgressBar($output, count($entities));
             $progressBar->setBarWidth(70);
             $progressBar->setFormat("%message%\n".$progressBar->getFormatDefinition('debug'));
 
@@ -139,7 +147,7 @@ class CleanAuditLogsCommand extends Command implements ContainerAwareInterface
                 $queryBuilder
                     ->delete($auditTable)
                     ->where('created_at < :until')
-                    ->setParameter(':until', $until->format('Y-m-d'))
+                    ->setParameter(':until', $until->format('Y-m-d\T00:00:00'))
                     ->execute()
                 ;
 
