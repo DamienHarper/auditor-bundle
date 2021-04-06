@@ -1,0 +1,23 @@
+audit:
+  header:
+    home: Hoofdpagina
+    audited_entities: gecontroleerde entiteiten
+  table_headers:
+    entity: Entiteit
+    table: Tabel
+    activity: Activiteit
+  audit_details:
+    view_audit: Bekijk versie
+    most_recent: (meest recente eerst)
+    entry_title: Bekijk alle operaties binnen deze transactie
+    property: Veld
+    old_value: Oude waarde
+    new_value: Nieuwe waarde
+    transaction: Transactie
+    entity_per_entity: (entiteit per entiteit)
+  pager:
+    first: Eerste
+    previous: Vorige
+    last: Laatste
+    next: Volgende
+    current: Huidige
