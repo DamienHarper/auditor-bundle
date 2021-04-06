@@ -107,7 +107,7 @@ class Configuration implements ConfigurationInterface
 
                     // "viewer" is enabled by default
                     if (!\array_key_exists('viewer', $v['doctrine']) || !\is_bool($v['doctrine']['viewer'])) {
-                        $v['doctrine']['viewer'] = true;
+                        $v['doctrine']['viewer'] = false;
                     }
 
                     // "storage_mapper" is null by default
