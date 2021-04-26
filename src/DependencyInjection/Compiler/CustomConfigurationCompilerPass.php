@@ -23,6 +23,7 @@ class CustomConfigurationCompilerPass implements CompilerPassInterface
         $config = $container->getParameter('dh_auditor.configuration');
 
         // User provider service
+        \assert(\is_array($config) && \array_key_exists('user_provider', $config));
         $serviceId = $config['user_provider'];
         if (null !== $serviceId) {
             $reference = new Reference($serviceId);
@@ -30,6 +31,7 @@ class CustomConfigurationCompilerPass implements CompilerPassInterface
         }
 
         // Role checker service
+        \assert(\is_array($config) && \array_key_exists('role_checker', $config));
         $serviceId = $config['role_checker'];
         if (null !== $serviceId) {
             $reference = new Reference($serviceId);
@@ -37,6 +39,7 @@ class CustomConfigurationCompilerPass implements CompilerPassInterface
         }
 
         // Security service
+        \assert(\is_array($config) && \array_key_exists('security_provider', $config));
         $serviceId = $config['security_provider'];
         if (null !== $serviceId) {
             $reference = new Reference($serviceId);
