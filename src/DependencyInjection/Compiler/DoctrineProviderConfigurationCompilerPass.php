@@ -26,30 +26,35 @@ class DoctrineProviderConfigurationCompilerPass implements CompilerPassInterface
 
         $providerDefinition = $container->getDefinition(DoctrineProvider::class);
         $config = $container->getParameter($doctrineProviderConfigurationKey);
-        foreach ($config['storage_services'] as $service) {
-            $service = str_replace('@', '', $service);
-            $entityManagerReference = new Reference($service);
 
+        \assert(\is_array($config) && \array_key_exists('storage_services', $config));
+        foreach (array_unique($config['storage_services']) as $entityManagerName) {
+            $entityManagerName = str_replace('@', '', $entityManagerName);
+            $entityManagerReference = new Reference($entityManagerName);
+
+            $service = 'dh_auditor.provider.doctrine.storage_services.'.$entityManagerName;
             $serviceDefinition = new Definition(StorageService::class, [
-                'dh_auditor.provider.doctrine.storage_services.'.$service,
+                $service,
                 $entityManagerReference,
             ]);
-            $container->setDefinition(StorageService::class, $serviceDefinition);
-            $serviceReference = new Reference(StorageService::class);
+            $container->setDefinition($service, $serviceDefinition);
+            $serviceReference = new Reference($service);
 
             $providerDefinition->addMethodCall('registerStorageService', [$serviceReference]);
         }
 
-        foreach ($config['auditing_services'] as $service) {
-            $service = str_replace('@', '', $service);
-            $entityManagerReference = new Reference($service);
+        \assert(\is_array($config) && \array_key_exists('auditing_services', $config));
+        foreach (array_unique($config['auditing_services']) as $entityManagerName) {
+            $entityManagerName = str_replace('@', '', $entityManagerName);
+            $entityManagerReference = new Reference($entityManagerName);
 
+            $service = 'dh_auditor.provider.doctrine.auditing_services.'.$entityManagerName;
             $serviceDefinition = new Definition(AuditingService::class, [
-                'dh_auditor.provider.doctrine.auditing_services.'.$service,
+                $service,
                 $entityManagerReference,
             ]);
-            $container->setDefinition(AuditingService::class, $serviceDefinition);
-            $serviceReference = new Reference(AuditingService::class);
+            $container->setDefinition($service, $serviceDefinition);
+            $serviceReference = new Reference($service);
 
             $annotationLoaderDefinition = new Definition(AnnotationLoader::class, [$entityManagerReference]);
             $container->setDefinition(AnnotationLoader::class, $annotationLoaderDefinition);
