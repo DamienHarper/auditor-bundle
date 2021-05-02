@@ -27,17 +27,17 @@
 
 {% macro first(entity, id, paginator) %}
     {% if paginator.hasPreviousPage %}
-        <li class="page-item"><a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: 1}) }}" class="page-link" rel="previous"><i class="fa fw fa-angle-double-left"></i> {% trans %}audit.pager.first{% endtrans %}</a></li>
+        <li class="page-item"><a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: 1}) }}" class="page-link" rel="previous"><i class="fa fw fa-angle-double-left"></i> {% trans from 'auditor' %}audit.pager.first{% endtrans %}</a></li>
     {% else %}
-        <li class="page-item disabled"><span class="page-link"><i class="fa fw fa-angle-double-left"></i> {% trans %}audit.pager.first{% endtrans %}</span></li>
+        <li class="page-item disabled"><span class="page-link"><i class="fa fw fa-angle-double-left"></i> {% trans from 'auditor' %}audit.pager.first{% endtrans %}</span></li>
     {% endif %}
 {% endmacro first %}
 
 {% macro previous(entity, id, paginator) %}
     {% if paginator.hasPreviousPage %}
-        <li class="page-item"><a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: paginator.previousPage}) }}" class="page-link" rel="previous"><i class="fa fw fa-angle-left"></i> {% trans %}audit.pager.previous{% endtrans %}</a></li>
+        <li class="page-item"><a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: paginator.previousPage}) }}" class="page-link" rel="previous"><i class="fa fw fa-angle-left"></i> {% trans from 'auditor' %}audit.pager.previous{% endtrans %}</a></li>
     {% else %}
-        <li class="page-item disabled"><span class="page-link"><i class="fa fw fa-angle-left"></i> {% trans %}audit.pager.previous{% endtrans %}</span></li>
+        <li class="page-item disabled"><span class="page-link"><i class="fa fw fa-angle-left"></i> {% trans from 'auditor' %}audit.pager.previous{% endtrans %}</span></li>
     {% endif %}
 {% endmacro previous %}
 
@@ -61,23 +61,23 @@
 
 {% macro next(entity, id, paginator) %}
     {% if paginator.hasNextPage %}
-        <li class="page-item"><a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: paginator.nextPage}) }}" class="page-link" rel="next">{% trans %}audit.pager.next{% endtrans %} <i class="fa fw fa-angle-right"></i></a></li>
+        <li class="page-item"><a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: paginator.nextPage}) }}" class="page-link" rel="next">{% trans from 'auditor' %}audit.pager.next{% endtrans %} <i class="fa fw fa-angle-right"></i></a></li>
     {% else %}
-        <li class="page-item disabled"><span class="page-link">{% trans %}audit.pager.next{% endtrans %} <i class="fa fw fa-angle-right"></i></span></li>
+        <li class="page-item disabled"><span class="page-link">{% trans from 'auditor' %}audit.pager.next{% endtrans %} <i class="fa fw fa-angle-right"></i></span></li>
     {% endif %}
 {% endmacro next %}
 
 {% macro last(entity, id, paginator) %}
     {% if paginator.hasNextPage %}
-        <li class="page-item"><a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: paginator.numPages}) }}" class="page-link" rel="previous">{% trans %}audit.pager.last{% endtrans %} <i class="fa fw fa-angle-double-right"></i></a></li>
+        <li class="page-item"><a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: paginator.numPages}) }}" class="page-link" rel="previous">{% trans from 'auditor' %}audit.pager.last{% endtrans %} <i class="fa fw fa-angle-double-right"></i></a></li>
     {% else %}
-        <li class="page-item disabled"><span class="page-link">{% trans %}audit.pager.last{% endtrans %} <i class="fa fw fa-angle-double-right"></i></span></li>
+        <li class="page-item disabled"><span class="page-link">{% trans from 'auditor' %}audit.pager.last{% endtrans %} <i class="fa fw fa-angle-double-right"></i></span></li>
     {% endif %}
 {% endmacro last %}
 
 {% macro page(entity, id, paginator, page) %}
     {% if page == paginator.currentPage %}
-        <li class="page-item active"><span class="page-link">{{ page }} <span class="sr-only">{% trans %}audit.pager.current{% endtrans %}</span></span></li>
+        <li class="page-item active"><span class="page-link">{{ page }} <span class="sr-only">{% trans from 'auditor' %}audit.pager.current{% endtrans %}</span></span></li>
     {% else %}
         <li class="page-item"><a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: page}) }}" class="page-link">{{ page }}</a></li>
     {% endif %}
