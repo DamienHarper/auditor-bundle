@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class AuditController extends AbstractController
 {
     /**
-     * @Route("/audit", name="dh_doctrine_audit_list_audits", methods={"GET"})
+     * @Route(path="/audit", name="dh_doctrine_audit_list_audits", methods={"GET"})
      */
     public function listAuditsAction(): Response
     {
@@ -27,7 +27,7 @@ class AuditController extends AbstractController
     }
 
     /**
-     * @Route("/audit/transaction/{hash}", name="dh_doctrine_audit_show_transaction", methods={"GET"})
+     * @Route(path="/audit/transaction/{hash}", name="dh_doctrine_audit_show_transaction", methods={"GET"})
      *
      * @param string $hash
      *
@@ -48,7 +48,7 @@ class AuditController extends AbstractController
     }
 
     /**
-     * @Route("/audit/{entity}/{id}", name="dh_doctrine_audit_show_entity_history", methods={"GET"})
+     * @Route(path="/audit/{entity}/{id}", name="dh_doctrine_audit_show_entity_history", methods={"GET"})
      *
      * @param Request    $request
      * @param string     $entity
