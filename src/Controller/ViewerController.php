@@ -15,6 +15,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ViewerController extends AbstractController
 {
+    private $environment;
+
+    public function __construct(\Twig\Environment $environment)
+    {
+        $this->environment = $environment;
+    }
+
     /**
      * @Route("/audit", name="dh_auditor_list_audits", methods={"GET"})
      */
@@ -89,5 +96,10 @@ class ViewerController extends AbstractController
             'entity' => $entity,
             'paginator' => $pager,
         ]);
+    }
+
+    protected function renderView(string $view, array $parameters = []): string
+    {
+        return $this->environment->render($view, $parameters);
     }
 }
