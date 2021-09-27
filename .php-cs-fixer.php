@@ -1,6 +1,7 @@
 <?php
 
-$config = PhpCsFixer\Config::create()
+$config = new PhpCsFixer\Config();
+$config
     ->setRiskyAllowed(true)
     ->setRules([
         '@PhpCsFixer' => true,
