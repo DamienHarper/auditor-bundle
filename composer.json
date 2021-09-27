@@ -11,17 +11,18 @@
         }
     ],
     "require": {
-        "php": ">=7.2",
-        "damienharper/auditor": "^1.0",
+        "php": ">=7.3",
+        "ext-json": "*",
+        "damienharper/auditor": "^2.0-dev",
         "doctrine/annotations": "^1.8",
         "doctrine/doctrine-bundle": "^1.9|^2.0",
         "doctrine/orm": "^2.7",
-        "symfony/doctrine-bridge": "^3.4|^4.4.19|^5.2.2",
-        "symfony/event-dispatcher": "^3.4|^4.0|^5.0",
-        "symfony/lock": "^3.4|^4.0|^5.0",
-        "symfony/security-bundle": "^3.4|^4.0|^5.0",
-        "symfony/translation": "^3.4|^4.0|^5.0",
-        "symfony/twig-bundle": "^3.4|^4.0|^5.0"
+        "symfony/doctrine-bridge": "^4.4.19|^5.2.2",
+        "symfony/event-dispatcher": "^4.0|^5.0",
+        "symfony/lock": "^4.0|^5.0",
+        "symfony/security-bundle": "^4.0|^5.0",
+        "symfony/translation": "^4.0|^5.0",
+        "symfony/twig-bundle": "^4.0|^5.0"
     },
     "autoload": {
         "psr-4": {
@@ -45,10 +46,10 @@
         "phpstan/phpstan-strict-rules": "^0.12",
         "phpstan/phpstan-symfony": "^0.12",
         "phpunit/phpunit": "^8.0|^9.0",
-        "symfony/browser-kit": "^3.4|^4.0|^5.1",
+        "symfony/browser-kit": "^4.0|^5.1",
         "symfony/css-selector": "^5.1",
-        "symfony/framework-bundle": "^3.4.26|^4.4|^5.0",
-        "symfony/var-dumper": "^3.4|^4.0|^5.0",
+        "symfony/framework-bundle": "^4.4|^5.0",
+        "symfony/var-dumper": "^4.0|^5.0",
         "twig/extensions": "^1.5"
     },
     "conflict": {
@@ -56,9 +57,8 @@
     },
     "scripts": {
         "test": "php -d pcov.enabled=1 ./vendor/bin/phpunit --colors=always",
-        "csfixer": "vendor/bin/php-cs-fixer fix --config=.php_cs --using-cache=no --verbose --ansi",
+        "csfixer": "vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --using-cache=no --verbose --ansi",
         "stan": "vendor/bin/phpstan --ansi analyse src",
-        "setup34": "SYMFONY_REQUIRE='^3.4' composer update --prefer-stable",
         "setup44": "SYMFONY_REQUIRE='^4.4' composer update --prefer-stable",
         "setup5": "composer update --prefer-stable"
     },
@@ -67,7 +67,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "4.x-dev"
+            "dev-master": "5.x-dev"
         }
     }
 }
