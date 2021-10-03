@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "@symfony/webpack-encore": "^1.6.1",
+    "autoprefixer": "^10.3.6",
+    "postcss-loader": "^6.1.1",
+    "tailwindcss": "^2.2.16"
+  }
+}
