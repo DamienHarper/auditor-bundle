@@ -2,7 +2,11 @@
   "devDependencies": {
     "@symfony/webpack-encore": "^1.6.1",
     "autoprefixer": "^10.3.6",
+    "glob-all": "^3.2.1",
+    "postcss": "^8.3.8",
     "postcss-loader": "^6.1.1",
+    "purgecss": "^4.0.3",
+    "purgecss-webpack-plugin": "^4.0.3",
     "tailwindcss": "^2.2.16"
   }
 }
