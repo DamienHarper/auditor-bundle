@@ -11,39 +11,71 @@
             {% set end = paginator.numPages %}
         {% endif %}
 
-        <nav class="float-right">
-            <ul class="pagination">
-                {{ _self.first(entity, id, paginator) }}
+        {% if paginator.currentPage > 1 %}
+            {% set pageStart = (paginator.currentPage - 1) * paginator.pageSize + 1 %}
+            {% set pageEnd = ((paginator.currentPage - 1) * paginator.pageSize) < paginator.numResults ? (paginator.currentPage * paginator.pageSize) : paginator.numResults %}
+        {% else %}
+            {% set pageStart = 1 %}
+            {% set pageEnd = (paginator.currentPage * paginator.pageSize) < paginator.numResults ? (paginator.currentPage * paginator.pageSize) : paginator.numResults %}
+        {% endif %}
+
+        <div class="bg-white px-0 py-6 flex items-center justify-between border-t border-gray-200">
+            <div class="flex-1 flex justify-between sm:hidden">
                 {{ _self.previous(entity, id, paginator) }}
-                {{ _self.dotsIfStartIsOver3(entity, id, paginator, start) }}
-                {{ _self.pages(entity, id, paginator, start, end) }}
-                {{ _self.dotsIfEndIsUnder3ToLast(entity, id, paginator, end) }}
                 {{ _self.next(entity, id, paginator) }}
-                {{ _self.last(entity, id, paginator) }}
-            </ul>
-        </nav>
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700">
+                        {% trans with { '%pageStart%': pageStart, '%pageEnd%': pageEnd, '%numResults%': paginator.numResults } from 'auditor' %}audit.pager.info{% endtrans %}
+                    </p>
+                </div>
+                <div>
+                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        {{ _self.previous(entity, id, paginator) }}
+                        {{ _self.dotsIfStartIsOver3(entity, id, paginator, start) }}
+                        {{ _self.pages(entity, id, paginator, start, end) }}
+                        {{ _self.dotsIfEndIsUnder3ToLast(entity, id, paginator, end) }}
+                        {{ _self.next(entity, id, paginator) }}
+                    </nav>
+                </div>
+            </div>
+        </div>
     {% endif %}
 {% endmacro render %}
 
-{% macro first(entity, id, paginator) %}
-    {% if paginator.hasPreviousPage %}
-        <li class="page-item"><a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: 1}) }}" class="page-link" rel="previous"><i class="fa fw fa-angle-double-left"></i> {% trans from 'auditor' %}audit.pager.first{% endtrans %}</a></li>
-    {% else %}
-        <li class="page-item disabled"><span class="page-link"><i class="fa fw fa-angle-double-left"></i> {% trans from 'auditor' %}audit.pager.first{% endtrans %}</span></li>
-    {% endif %}
-{% endmacro first %}
+{#{% macro first(entity, id, paginator) %}#}
+{#    {% if paginator.hasPreviousPage %}#}
+{#        <li class="page-item"><a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: 1}) }}" class="page-link" rel="previous"><i class="fa fw fa-angle-double-left"></i> {% trans from 'auditor' %}audit.pager.first{% endtrans %}</a></li>#}
+{#    {% else %}#}
+{#        <li class="page-item disabled"><span class="page-link"><i class="fa fw fa-angle-double-left"></i> {% trans from 'auditor' %}audit.pager.first{% endtrans %}</span></li>#}
+{#    {% endif %}#}
+{#{% endmacro first %}#}
 
 {% macro previous(entity, id, paginator) %}
     {% if paginator.hasPreviousPage %}
-        <li class="page-item"><a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: paginator.previousPage}) }}" class="page-link" rel="previous"><i class="fa fw fa-angle-left"></i> {% trans from 'auditor' %}audit.pager.previous{% endtrans %}</a></li>
+        <a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: paginator.previousPage}) }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            <span class="sr-only">{% trans from 'auditor' %}audit.pager.previous{% endtrans %}</span>
+            <!-- Heroicon name: solid/chevron-left -->
+            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+        </a>
     {% else %}
-        <li class="page-item disabled"><span class="page-link"><i class="fa fw fa-angle-left"></i> {% trans from 'auditor' %}audit.pager.previous{% endtrans %}</span></li>
+        <span class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-300">
+            <!-- Heroicon name: solid/chevron-left -->
+            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+        </span>
     {% endif %}
 {% endmacro previous %}
 
 {% macro dotsIfStartIsOver3(entity, id, paginator, start) %}
     {% if start > 1 %}
-        <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+          ...
+        </span>
     {% endif %}
 {% endmacro dotsIfStartIsOver3 %}
 
@@ -61,24 +93,39 @@
 
 {% macro next(entity, id, paginator) %}
     {% if paginator.hasNextPage %}
-        <li class="page-item"><a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: paginator.nextPage}) }}" class="page-link" rel="next">{% trans from 'auditor' %}audit.pager.next{% endtrans %} <i class="fa fw fa-angle-right"></i></a></li>
+        <a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: paginator.nextPage}) }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            <span class="sr-only">{% trans from 'auditor' %}audit.pager.next{% endtrans %}</span>
+            <!-- Heroicon name: solid/chevron-right -->
+            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+        </a>
     {% else %}
-        <li class="page-item disabled"><span class="page-link">{% trans from 'auditor' %}audit.pager.next{% endtrans %} <i class="fa fw fa-angle-right"></i></span></li>
+        <span class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-300">
+            <!-- Heroicon name: solid/chevron-right -->
+            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+        </span>
     {% endif %}
 {% endmacro next %}
 
-{% macro last(entity, id, paginator) %}
-    {% if paginator.hasNextPage %}
-        <li class="page-item"><a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: paginator.numPages}) }}" class="page-link" rel="previous">{% trans from 'auditor' %}audit.pager.last{% endtrans %} <i class="fa fw fa-angle-double-right"></i></a></li>
-    {% else %}
-        <li class="page-item disabled"><span class="page-link">{% trans from 'auditor' %}audit.pager.last{% endtrans %} <i class="fa fw fa-angle-double-right"></i></span></li>
-    {% endif %}
-{% endmacro last %}
+{#{% macro last(entity, id, paginator) %}#}
+{#    {% if paginator.hasNextPage %}#}
+{#        <li class="page-item"><a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: paginator.numPages}) }}" class="page-link" rel="previous">{% trans from 'auditor' %}audit.pager.last{% endtrans %} <i class="fa fw fa-angle-double-right"></i></a></li>#}
+{#    {% else %}#}
+{#        <li class="page-item disabled"><span class="page-link">{% trans from 'auditor' %}audit.pager.last{% endtrans %} <i class="fa fw fa-angle-double-right"></i></span></li>#}
+{#    {% endif %}#}
+{#{% endmacro last %}#}
 
 {% macro page(entity, id, paginator, page) %}
     {% if page == paginator.currentPage %}
-        <li class="page-item active"><span class="page-link">{{ page }} <span class="sr-only">{% trans from 'auditor' %}audit.pager.current{% endtrans %}</span></span></li>
+        <a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: page}) }}" aria-current="page" class="z-10 bg-indigo-50 border-indigo-500 text-indigo-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+            {{ page }}
+        </a>
     {% else %}
-        <li class="page-item"><a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: page}) }}" class="page-link">{{ page }}</a></li>
+        <a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: page}) }}" aria-current="page" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+            {{ page }}
+        </a>
     {% endif %}
 {% endmacro page %}

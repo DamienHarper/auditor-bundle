@@ -2,10 +2,6 @@ audit:
   header:
     home: Home
     audited_entities: audited entities
-  table_headers:
-    entity: Entity
-    table: Table
-    activity: Activity
   audit_details:
     view_audit: View audit
     most_recent: (most recent first)
@@ -15,6 +11,7 @@ audit:
     new_value: New value
     transaction: Transaction
     entity_per_entity: (entity per entity)
+    operations: "%count% operations"
   pager:
     first: First
     previous: Previous
