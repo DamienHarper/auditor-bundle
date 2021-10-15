@@ -33,7 +33,7 @@
 
             {% if id is null %}
             <div>
-                <span class="bg-purple-500 rounded text-sm text-white px-2 py-1">{{ paginator.results|length ~ ' operations' }}</span>
+                <span class="bg-purple-500 rounded text-sm text-white px-2 py-1">{% trans with { '%count%': paginator.results|length } from 'auditor' %}audit.audit_details.operations{% endtrans %}</span>
             </div>
             {% endif %}
         </li>
@@ -51,7 +51,7 @@
             </div>
 
             <div>
-                <span class="bg-purple-500 rounded text-sm text-white px-2 py-1">{{ paginator.results|length ~ ' operations' }}</span>
+                <span class="bg-purple-500 rounded text-sm text-white px-2 py-1">{% trans with { '%count%': paginator.results|length } from 'auditor' %}audit.audit_details.operations{% endtrans %}</span>
             </div>
         </li>
         {% endif %}

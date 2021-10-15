@@ -35,7 +35,7 @@
                 {% set amount = amount + entries|length %}
             {% endfor %}
             <div>
-                <span class="bg-purple-500 rounded text-sm text-white px-2 py-1">{{ amount ~ ' operations' }}</span>
+                <span class="bg-purple-500 rounded text-sm text-white px-2 py-1">{% trans with { '%count%': amount } from 'auditor' %}audit.audit_details.operations{% endtrans %}</span>
             </div>
         </li>
     </ol>
@@ -58,7 +58,7 @@
             <span class="ml-2 italic text-gray-400 font-light">{% trans from 'auditor' %}audit.audit_details.most_recent{% endtrans %}</span>
         </div>
         <div>
-            <span class="bg-purple-500 rounded text-sm text-white px-2 py-1">{{ entries|length ~ ' operations' }}</span>
+            <span class="bg-purple-500 rounded text-sm text-white px-2 py-1">{% trans with { '%count%': entries|length } from 'auditor' %}audit.audit_details.operations{% endtrans %}</span>
         </div>
     </div>
 

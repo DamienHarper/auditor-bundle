@@ -11,11 +11,11 @@ audit:
     new_value: New value
     transaction: Transaction
     entity_per_entity: (entity per entity)
-    operations: "%count% operations"
+    operations: "%count% operation(s)"
   pager:
     first: First
     previous: Previous
     last: Last
     next: Next
     current: Current
-
+    info: 'Showing <span class="font-medium">%pageStart%</span> to <span class="font-medium">%pageEnd%</span> of <span class="font-medium">%numResults%</span> result(s)'

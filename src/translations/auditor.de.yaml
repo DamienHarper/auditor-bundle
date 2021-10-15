@@ -1,11 +1,7 @@
 audit:
   header:
-    home: Startseite
-    audited_entities: geprüfte Objekte
-  table_headers:
-    entity: Objekt
-    table: Tabelle
-    activity: Aktivität
+    home: Home
+    audited_entities: audited entities
   audit_details:
     view_audit: Audits anzeigen
     most_recent: (neueste zuerst)
@@ -15,10 +11,12 @@ audit:
     new_value: Neuer Wert
     transaction: Transaktion
     entity_per_entity: (Objekt pro Objekt)
+    operations: "%count% operationen"
   pager:
     first: Erste
     previous: Vorherige
     last: Letzte
     next: Weiter
     current: aktuell
+    info: 'Es werden <span class="font-medium">%pageStart%</span> bis <span class="font-medium">%pageEnd%</span> von <span class="font-medium">%numResults%</span> Ergebnissen angezeigt'
 
