@@ -75,6 +75,7 @@ class ViewerController extends AbstractController
     public function showEntityHistoryAction(Request $request, Reader $reader, string $entity, $id = null): Response
     {
         $page = (int) $request->query->get('page', '1');
+        $page = $page < 1 ? 1 : $page;
         $entity = UrlHelper::paramToNamespace($entity);
 
         if (!$reader->getProvider()->isAuditable($entity)) {
