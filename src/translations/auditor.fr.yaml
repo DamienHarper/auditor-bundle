@@ -2,10 +2,6 @@ audit:
   header:
     home: Home
     audited_entities: entités auditées
-  table_headers:
-    entity: Entité
-    table: Table
-    activity: Activité
   audit_details:
     view_audit: Afficher les audits
     most_recent: (le plus récent en premier)
@@ -15,9 +11,11 @@ audit:
     new_value: Nouvelle valeur
     transaction: Transaction
     entity_per_entity: (entité par entité)
+    operations: "%count% opération(s)"
   pager:
     first: Premier
     previous: Précédent
     last: Dernier
     next: Suivant
     current:  courant
+    info: 'Enregistrement(s) <span class="font-medium">%pageStart%</span> à <span class="font-medium">%pageEnd%</span> sur <span class="font-medium">%numResults%</span>'

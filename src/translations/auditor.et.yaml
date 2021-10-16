@@ -2,10 +2,6 @@ audit:
   header:
     home: Kodu
     audited_entities: auditeeritud kirjed
-  table_headers:
-    entity: Kirje
-    table: Tabel
-    activity: Toiming
   audit_details:
     view_audit: Vaata auditit
     most_recent: (hiljuti lisatud eespool)
@@ -15,10 +11,11 @@ audit:
     new_value: Uus väärtus
     transaction: Transaktsioon
     entity_per_entity: (kirje kaupa)
+    operations: "%count% operatsiooni"
   pager:
     first: Esimene
     previous: Eelmine
     last: Viimane
     next: Järgmine
     current: Praegune
-
+    info: 'Kuvatakse <span class="font-medium">%pageStart%</span> kuni <span class="font-medium">%pageEnd%</span> tulemust <span class="font-medium">%numResults%</span> -st'
