@@ -23,7 +23,9 @@
         "symfony/lock": "^4.0|^5.0",
         "symfony/security-bundle": "^4.0|^5.0",
         "symfony/translation": "^4.0|^5.0",
-        "symfony/twig-bundle": "^4.0|^5.0"
+        "symfony/twig-bundle": "^4.0|^5.0",
+        "twig/extra-bundle": "^3.3",
+        "twig/intl-extra": "^3.3"
     },
     "autoload": {
         "psr-4": {
