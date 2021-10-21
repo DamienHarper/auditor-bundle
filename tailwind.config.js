@@ -3,7 +3,8 @@ module.exports = {
   darkMode: false, // or 'media' or 'class'
   variants: {
     extend: {
-      'backgroundColor': ['even']
+      backgroundColor: ['even'],
+      divideColor: ['group-hover'],
     },
   }
 }

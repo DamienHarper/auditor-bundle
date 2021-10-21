@@ -23,7 +23,7 @@
 {% block dh_auditor_content %}
 <div class="auditor-audits mb-6 grid grid-cols-3 gap-4">
     {% for entity, table in audited %}
-    <div class="bg-white overflow-hidden rounded border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-all duration-300">
+    <div class="bg-white overflow-hidden rounded border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-all duration-300 group">
         <div class="px-4 py-3 sm:px-4">
             <h3 class="text-lg leading-6 text-gray-900">
                 <code class="text-pink-500">{{ entity|escape }}</code>
@@ -32,18 +32,15 @@
                 {{ table|escape }}
             </p>
         </div>
-        <div class="border-t border-gray-200 px-4 py-2 sm:p-0">
+        <div class="border-t border-gray-200 px-4 py-2 sm:p-0 bg-gray-50 group-hover:bg-blue-100 group-hover:border-blue-200 transition-all duration-300">
             <dl class="sm:divide-y sm:divide-gray-200">
                 <div class="py-4 sm:py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-4">
                     <dt class="text-sm font-medium text-gray-500">
-                        {% trans with { '%count%': reader.createQuery(entity).count() } from 'auditor' %}audit.audit_details.operations{% endtrans %}
+                        {% trans with { '%count%': reader.createQuery(entity).count() } from 'auditor' %}audit.audit_details.operations_count{% endtrans %}
                     </dt>
                     <dd class="mt-1 text-sm text-gray-900 text-right sm:mt-0 sm:col-span-2">
                         <a class="text-blue-500" href="{{ path('dh_auditor_show_entity_history', {'entity': helper.namespaceToParam(entity)}) }}">
                             {% trans from 'auditor' %}audit.audit_details.view_audit{% endtrans %}
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline align-text-top" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                            </svg>
                         </a>
                     </dd>
                 </div>

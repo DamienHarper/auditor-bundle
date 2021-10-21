@@ -10,14 +10,17 @@
                 {{ helper.icon_type(entry.getType()) }}
             </span>
         </div>
-        <div class="min-w-0 flex-1 bg-gray-100 rounded pb-2 px-3 border hover:border hover:border-blue-400 hover:bg-blue-50 transition-all duration-300">
+        <div class="min-w-0 flex-1 bg-gray-100 rounded pb-2 px-3 border hover:border hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 group">
             <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                 <div>
-                    <p class="text-sm text-gray-500">{{ helper.humanize(entity, entry) }}</p>
+                    <p class="text-sm text-gray-500">{{ helper.summarize(entity, entry) }}</p>
                 </div>
                 <div class="text-right text-sm whitespace-nowrap text-gray-500">
                     <time datetime="{{ entry.getCreatedAt()|date('Y-m-d H:i:s') }}">
-                        {{ entry.getCreatedAt()|date('l d F Y, H:i:s') }}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline align-text-top" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        {{ entry.getCreatedAt()|format_datetime('full', 'long') }}
                     </time>
                 </div>
             </div>
@@ -26,8 +29,8 @@
                 <div class="mt-2 flex flex-col">
                     <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                         <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                            <div class="overflow-hidden border border-gray-200 sm:rounded">
-                                <table class="min-w-full divide-y divide-gray-200">
+                            <div class="overflow-hidden border border-gray-200 sm:rounded group-hover:border-blue-200 transition-all duration-300">
+                                <table class="min-w-full divide-y divide-gray-200 group-hover:divide-blue-200 transition-all duration-300">
                                     <thead class="bg-gray-50">
                                     <tr>
                                         <th scope="col" class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -41,7 +44,7 @@
                                         </th>
                                     </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-gray-200">
+                                    <tbody class="divide-y divide-gray-200 group-hover:divide-blue-200 transition-all duration-300">
                                     {% set diffs = entry.getDiffs() %}
                                     {% for key, values in diffs %}
                                     <tr class="bg-white">

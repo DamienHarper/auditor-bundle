@@ -21,11 +21,10 @@
 {{- entity|replace({'\\': '-'}) -}}
 {% endmacro namespaceToParam %}
 
-{% macro humanize(entity, entry) %}
+{% macro summarize(entity, entry) %}
     {% import _self as helper %}
 
     {% set diffs = entry.getDiffs() %}
-    {% set subject = entity~'#'~entry.getObjectId() %}
 
     {% if entry.getType() == 'insert' %}
         {% set action = 'inserted' %}
@@ -38,33 +37,43 @@
         {% set action = 'associated' %}
         {% set source = diffs.source %}
         {% set target = diffs.target %}
-        {% set direction = 'to' %}
     {% elseif entry.getType() == 'dissociate' %}
         {% set action = 'dissociated' %}
         {% set source = diffs.source %}
         {% set target = diffs.target %}
-        {% set direction = 'from' %}
     {% else %}
-        {% set action = '???' %}
+        {% set action = 'unknown_action' %}
     {% endif %}
 
-    <code class="text-pink-500"><a href="{{ path('dh_auditor_show_entity_history', { 'entity': helper.namespaceToParam(entity), 'id': entry.getObjectId() }) }}" class="code">{{ subject }}</a></code>
-    {% if source is defined and source is not null and subject != source.label %}
-    <em>({{ source.label }})</em>
+    {% set source_subject = entity ~ '#' ~ entry.getObjectId() %}
+    {% set source_label = '' %}
+    {% if source is defined and source is not null and source_subject != source.label %}
+        {% set source_label = '(' ~ source.label|trim ~ ')' %}
     {% endif %}
-    has been <b>{{ action }}</b>
+
+    {% set target_link = '' %}
+    {% set target_subject = '' %}
+    {% set target_label = '' %}
     {% if target is defined and target is not null %}
-        {% set subject = target.class~'#'~target.id %}
-        {{ direction }} <code class="text-pink-500"><a href="{{ path('dh_auditor_show_entity_history', { 'entity': helper.namespaceToParam(target.class), 'id': target.id }) }}">{{ subject }}</a></code>
-        {% if subject != target.label %}
-            (<em>{{ helper.dump(target) }}</em>)
+        {% set target_subject = target.class ~ '#' ~ target.id %}
+        {% set target_link = path('dh_auditor_show_entity_history', { 'entity': helper.namespaceToParam(target.class), 'id': target.id }) %}
+        {% if target_subject != target.label %}
+            {% set target_label = '(' ~ helper.dump(target)|trim ~ ')' %}
         {% endif %}
     {% endif %}
-    by <b>{{ entry.getUsername() is null ? 'unknown user' : entry.getUsername() }}</b>
-    {% if entry.getIp() is not empty %}
-        , IP: {{ entry.getIp() }}
-    {% endif %}
+
+    {{ ('audit.audit_details.summary.' ~ action)|trans({
+        '%source_link%': path('dh_auditor_show_entity_history', { 'entity': helper.namespaceToParam(entity), 'id': entry.getObjectId() }),
+        '%source%': source_subject,
+        '%source_label%': source_label,
+        '%target_link%': target_link,
+        '%target%': target_subject,
+        '%target_label%': target_label,
+        '%user%': entry.getUsername() is null ? 'audit.audit_details.summary.unkown_user'|trans(domain='auditor') : entry.getUsername(),
+        '%ip%': entry.getIp() is not empty ? ', IP: ' ~ entry.getIp() : '',
+    }, domain='auditor')|raw }}
 {% endmacro %}
+
 
 {% macro icon_type(value) %}
     {% apply spaceless %}
