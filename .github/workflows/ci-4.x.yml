@@ -1,0 +1,73 @@
+name: auditor-bundle 4.x CI
+
+on:
+  schedule:
+    - cron: 0 2 * * *
+  pull_request:
+  push:
+    branches:
+      - 4.x
+
+jobs:
+  tests:
+    name: Tests PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}
+    runs-on: ubuntu-18.04
+
+    strategy:
+      matrix:
+        php:
+          - '7.2'
+          - '7.3'
+          - '7.4'
+        symfony:
+          - '3.4.*'
+          - '4.4.*'
+          - '5.*'
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: 4.x
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: composer:v2, flex, pcov
+          coverage: pcov
+
+      - name: Configure Symfony
+        run: |
+          composer global require --no-progress --no-scripts --no-plugins symfony/flex
+          composer config extra.symfony.require "${{ matrix.symfony }}"
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ matrix.php }}-composer-
+
+      - name: Update project dependencies (3.4.*)
+        if: matrix.symfony == '3.4.*'
+        run: SYMFONY_REQUIRE="^3.4" composer update --no-progress --ansi --prefer-stable
+
+      - name: Update project dependencies (4.4.*)
+        if: matrix.symfony == '4.4.*'
+        run: SYMFONY_REQUIRE="^4.4" composer update --no-progress --ansi --prefer-stable
+
+      - name: Update project dependencies (5.*)
+        if: matrix.symfony == '5.*'
+        run: composer update --no-progress --ansi --prefer-stable
+
+      - name: Validate composer
+        run: composer validate --strict --no-check-lock
+
+      - name: Run tests
+        run: vendor/bin/phpunit
