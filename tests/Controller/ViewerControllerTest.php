@@ -286,7 +286,7 @@ final class ViewerControllerTest extends WebTestCase
 
     private function login(array $roles = []): void
     {
-        $session = self::$container->get('session');
+        $session = self::getContainer()->get('session');
         $user = new User(
             'dark.vador',
             '$argon2id$v=19$m=65536,t=4,p=1$g1yZVCS0GJ32k2fFqBBtqw$359jLODXkhqVWtD/rf+CjiNz9r/kIvhJlenPBnW851Y',
@@ -299,7 +299,7 @@ final class ViewerControllerTest extends WebTestCase
         $session->set('_security_'.$firewallName, serialize($token));
         $session->save();
 
-        self::$container->get('security.token_storage')->setToken($token);
+        self::getContainer()->get('security.token_storage')->setToken($token);
 
         $cookie = new Cookie($session->getName(), $session->getId());
         $this->client->getCookieJar()->set($cookie);
