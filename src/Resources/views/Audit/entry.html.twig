@@ -1,71 +1,100 @@
-{% import '@DHAuditor/Audit/helpers/bootstrap.html.twig' as bootstrap %}
 {% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
 
-<article class="timeline-entry">
-    <div class="timeline-entry-inner">
-        <time class="timeline-time" datetime="{{ entry.getCreatedAt()|date('Y-m-d H:i:s') }}">
-            <span>{{ entry.getCreatedAt()|date('H:i:s') }}</span> <span>{{ entry.getCreatedAt()|date('l d F Y') }}</span>
-        </time>
-
-        <div class="timeline-icon bg-{{ bootstrap.label_type(entry.getType()) }}">
-            {{ bootstrap.icon_type(entry.getType()) }}
+<div class="relative pb-8">
+    {% if not is_last %}
+    <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+    {% endif %}
+    <div class="relative flex space-x-3">
+        <div>
+            <span class="h-8 w-8 rounded-full {{ helper.label_type(entry.getType()) }} flex items-center justify-center ring-8 ring-white text-white">
+                {{ helper.icon_type(entry.getType()) }}
+            </span>
         </div>
-
-        <div class="timeline-label">
-            <div class="row">
-                <div class="col-lg-8">
-                    <h2 class="mb-0">{{ helper.humanize(entity, entry) }}</h2>
+        <div class="min-w-0 flex-1 bg-gray-100 rounded pb-2 px-3 border hover:border hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 group">
+            <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                <div>
+                    <p class="text-sm text-gray-500">{{ helper.summarize(entity, entry) }}</p>
                 </div>
-                <div class="col-lg-3" align="right">
-                    {% if entry.getTransactionHash() is not empty %}
-                    <a href="{{ path('dh_auditor_show_transaction', {hash: entry.getTransactionHash()}) }}" class="badge badge-pill badge-light font-weight-light transaction-hash" title="{% trans from 'auditor' %}audit.audit_details.entry_title{% endtrans %}">
-                        <i class="fas fa-tag"></i>&nbsp;{{ entry.getTransactionHash() }}
-                    </a>
-                    {% endif %}
+                <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                    <time datetime="{{ entry.getCreatedAt()|date('Y-m-d H:i:s') }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline align-text-top" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        {{ entry.getCreatedAt()|format_datetime('full', 'long') }}
+                    </time>
                 </div>
-                <div class="col-lg-1" align="center">{{ bootstrap.badge(entry.getType(), bootstrap.label_type(entry.getType())) }}</div>
             </div>
-            {% if entry.getType() in ['insert', 'update'] %}
-                <table class="table table-hover layout-fixed table-sm mt-2 mb-0">
-                    <thead class="thead-light">
-                    <th width="30%">{% trans from 'auditor' %}audit.audit_details.property{% endtrans %}</th>
-                    <th width="35%">{% trans from 'auditor' %}audit.audit_details.old_value{% endtrans %}</th>
-                    <th width="35%">{% trans from 'auditor' %}audit.audit_details.new_value{% endtrans %}</th>
-                    </thead>
-                    <tbody>
-                    {% set diffs = entry.getDiffs() %}
-                    {% for key, values in diffs %}
-                        <tr>
-                            <td>
-                                <code>{{ key }}</code>
-                            </td>
-                            <td>
-                                {% if values.old is defined %}
-                                    {% if values.old is null %}
-                                        {{ bootstrap.badge('null', 'secondary') }}
-                                    {% else %}
-                                        {{ bootstrap.text(helper.dump(values.old), 'danger') }}
-                                    {% endif %}
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if values.new is defined %}
-                                    {% if values.new is null %}
-                                        {{ bootstrap.badge('null', 'secondary') }}
-                                    {% else %}
-                                        {% if values.old is null %}
-                                            {{ bootstrap.text(helper.dump(values.new), 'primary') }}
-                                        {% else %}
-                                            {{ bootstrap.text(helper.dump(values.new), 'success') }}
-                                        {% endif %}
-                                    {% endif %}
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            {% endif %}
+            <div class="min-w-0">
+                {% if entry.getType() in ['insert', 'update'] %}
+                <div class="mt-2 flex flex-col">
+                    <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                        <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                            <div class="overflow-hidden border border-gray-200 sm:rounded group-hover:border-blue-200 transition-all duration-300">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            {% trans from 'auditor' %}audit.audit_details.property{% endtrans %}
+                                        </th>
+                                        <th scope="col" class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3">
+                                            {% trans from 'auditor' %}audit.audit_details.old_value{% endtrans %}
+                                        </th>
+                                        <th scope="col" class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3">
+                                            {% trans from 'auditor' %}audit.audit_details.new_value{% endtrans %}
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                    {% set diffs = entry.getDiffs() %}
+                                    {% for key, values in diffs %}
+                                    <tr class="bg-white">
+                                        <td class="px-3 py-1 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            <code class="text-gray-700">{{ key }}</code>
+                                        </td>
+                                        <td class="px-3 py-1 whitespace-nowrap text-sm text-gray-500">
+                                            {% if values.old is defined %}
+                                                {% if values.old is null %}
+                                                    <span class="bg-gray-500 px-2 py-0.5 rounded text-white">null</span>
+                                                {% else %}
+                                                    <span class="text-red-500">{{ helper.dump(values.old) }}</span>
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                        <td class="px-3 py-1 whitespace-nowrap text-sm text-gray-500">
+                                            {% if values.new is defined %}
+                                                {% if values.new is null %}
+                                                    <span class="bg-gray-500 px-2 py-0.5 rounded text-white">null</span>
+                                                {% else %}
+                                                    {% if values.old is null %}
+                                                        <span class="text-blue-500">{{ helper.dump(values.new) }}</span>
+                                                    {% else %}
+                                                        <span class="text-green-500">{{ helper.dump(values.new) }}</span>
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if entry.getTransactionHash() is not empty %}
+                <div class="text-right">
+                    <a class="text-xs text-gray-500 hover:text-blue-500 transition-all duration-300" href="{{ path('dh_auditor_show_transaction', {hash: entry.getTransactionHash()}) }}" title="{% trans from 'auditor' %}audit.audit_details.entry_title{% endtrans %}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline align-text-top" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                        </svg>
+                        {{ entry.getTransactionHash() }}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
-</article>
+</div>
+

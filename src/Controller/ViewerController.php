@@ -15,6 +15,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ViewerController extends AbstractController
 {
+    private $environment;
+
+    public function __construct(\Twig\Environment $environment)
+    {
+        $this->environment = $environment;
+    }
+
     /**
      * @Route("/audit", name="dh_auditor_list_audits", methods={"GET"})
      */
@@ -68,6 +75,7 @@ class ViewerController extends AbstractController
     public function showEntityHistoryAction(Request $request, Reader $reader, string $entity, $id = null): Response
     {
         $page = (int) $request->query->get('page', '1');
+        $page = $page < 1 ? 1 : $page;
         $entity = UrlHelper::paramToNamespace($entity);
 
         if (!$reader->getProvider()->isAuditable($entity)) {
@@ -89,5 +97,10 @@ class ViewerController extends AbstractController
             'entity' => $entity,
             'paginator' => $pager,
         ]);
+    }
+
+    protected function renderView(string $view, array $parameters = []): string
+    {
+        return $this->environment->render($view, $parameters);
     }
 }

@@ -60,6 +60,7 @@ services:
 
   # Bundle related services
   DH\AuditorBundle\Controller\ViewerController:
+    arguments: ['@twig']
     calls:
       - { method: setContainer, arguments: ['@service_container'] }
     tags: ['controller.service_arguments']

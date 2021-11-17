@@ -15,6 +15,7 @@ use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Nyholm\BundleTest\BaseBundleTestCase;
 use Nyholm\BundleTest\CompilerPass\PublicServicePass;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
+use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\HttpKernel\Kernel;
 
 /**
@@ -44,6 +45,7 @@ final class DHAuditorBundleTest extends BaseBundleTestCase
 
         $kernel->addBundle(DoctrineBundle::class);
         $kernel->addBundle(SecurityBundle::class);
+        $kernel->addBundle(TwigBundle::class);
 
         $this->bootKernel();
 

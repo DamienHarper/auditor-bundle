@@ -9,3 +9,4 @@ composer.lock
 var/
 /tests/App/.preload.php
 /tests/App/cache/
+node_modules/

@@ -49,25 +49,31 @@ final class ViewerControllerTest extends WebTestCase
 
         self::assertPageTitleContains('auditor', 'Title is auditor');
 
-        $breadcrumbs = $crawler->filter('ol.breadcrumb > li');
+        $breadcrumbs = $crawler->filter('nav > ol > li');
         self::assertSame(1, $breadcrumbs->count(), 'Nav has 1 item.');
-        self::assertSame('Home', $breadcrumbs->text(), 'Nav has 1 item: Home');
+        self::assertSame('Home', trim($breadcrumbs->text()), 'Nav has 1 item: Home');
 
-        $rows = $crawler->filter('table.table-hover > tbody > tr');
-        self::assertSame(4, $rows->count(), 'There are 4 entity audits.');
+        $cards = $crawler->filter('div.auditor-audits > div');
+        self::assertSame(4, $cards->count(), 'There are 4 entity audits.');
 
         $expected = [
-            [Author::class, 'author', '5 operations', 'View audit'],
-            [Comment::class, 'comment', '3 operations', 'View audit'],
-            [Post::class, 'post', '15 operations', 'View audit'],
-            [Tag::class, 'tag', '15 operations', 'View audit'],
+            [Author::class, 'author', '5 operation(s)', 'View audit'],
+            [Comment::class, 'comment', '3 operation(s)', 'View audit'],
+            [Post::class, 'post', '15 operation(s)', 'View audit'],
+            [Tag::class, 'tag', '15 operation(s)', 'View audit'],
         ];
-        $rows->each(function ($row, $rowIndex) use ($expected): void {
-            $cells = $row->filter('td');
-            self::assertSame(4, $cells->count(), 'Each row is composed of 4 cells.');
-            $cells->each(function ($cell, $cellIndex) use ($expected, $rowIndex): void {
-                self::assertSame($expected[$rowIndex][$cellIndex], trim($cell->text()), sprintf('Cell #%s of row #%s is ok.', $cellIndex, $rowIndex));
-            });
+        $cards->each(function ($row, $rowIndex) use ($expected): void {
+            $cell = $row->filter('div > h3 > code');
+            self::assertSame($expected[$rowIndex][0], trim($cell->text()), 'Entity is OK');
+
+            $cell = $row->filter('div > p');
+            self::assertSame($expected[$rowIndex][1], trim($cell->text()), 'Tablename is OK');
+
+            $cell = $row->filter('div > dl > div > dt');
+            self::assertSame($expected[$rowIndex][2], trim($cell->text()), 'Operation count is OK');
+
+            $cell = $row->filter('div > dl > div > dd > a');
+            self::assertSame($expected[$rowIndex][3], trim($cell->text()), 'Link is OK');
         });
     }
 
@@ -84,24 +90,30 @@ final class ViewerControllerTest extends WebTestCase
 
         self::assertPageTitleContains('auditor', 'Title is auditor');
 
-        $breadcrumbs = $crawler->filter('ol.breadcrumb > li');
+        $breadcrumbs = $crawler->filter('nav > ol > li');
         self::assertSame(1, $breadcrumbs->count(), 'Nav has 1 item.');
-        self::assertSame('Home', $breadcrumbs->text(), 'Nav has 1 item: Home');
+        self::assertSame('Home', trim($breadcrumbs->text()), 'Nav has 1 item: Home');
 
-        $rows = $crawler->filter('table.table-hover > tbody > tr');
-        self::assertSame(3, $rows->count(), 'There are 3 entity audits.');
+        $cards = $crawler->filter('div.auditor-audits > div');
+        self::assertSame(3, $cards->count(), 'There are 3 entity audits.');
 
         $expected = [
-            [Comment::class, 'comment', '3 operations', 'View audit'],
-            [Post::class, 'post', '15 operations', 'View audit'],
-            [Tag::class, 'tag', '15 operations', 'View audit'],
+            [Comment::class, 'comment', '3 operation(s)', 'View audit'],
+            [Post::class, 'post', '15 operation(s)', 'View audit'],
+            [Tag::class, 'tag', '15 operation(s)', 'View audit'],
         ];
-        $rows->each(function ($row, $rowIndex) use ($expected): void {
-            $cells = $row->filter('td');
-            self::assertSame(4, $cells->count(), 'Each row is composed of 4 cells.');
-            $cells->each(function ($cell, $cellIndex) use ($expected, $rowIndex): void {
-                self::assertSame($expected[$rowIndex][$cellIndex], trim($cell->text()), sprintf('Cell #%s of row #%s is ok.', $cellIndex, $rowIndex));
-            });
+        $cards->each(function ($row, $rowIndex) use ($expected): void {
+            $cell = $row->filter('div > h3 > code');
+            self::assertSame($expected[$rowIndex][0], trim($cell->text()), 'Entity is OK');
+
+            $cell = $row->filter('div > p');
+            self::assertSame($expected[$rowIndex][1], trim($cell->text()), 'Tablename is OK');
+
+            $cell = $row->filter('div > dl > div > dt');
+            self::assertSame($expected[$rowIndex][2], trim($cell->text()), 'Operation count is OK');
+
+            $cell = $row->filter('div > dl > div > dd > a');
+            self::assertSame($expected[$rowIndex][3], trim($cell->text()), 'Link is OK');
         });
     }
 
@@ -118,25 +130,31 @@ final class ViewerControllerTest extends WebTestCase
 
         self::assertPageTitleContains('auditor', 'Title is auditor');
 
-        $breadcrumbs = $crawler->filter('ol.breadcrumb > li');
+        $breadcrumbs = $crawler->filter('nav > ol > li');
         self::assertSame(1, $breadcrumbs->count(), 'Nav has 1 item.');
-        self::assertSame('Home', $breadcrumbs->text(), 'Nav has 1 item: Home');
+        self::assertSame('Home', trim($breadcrumbs->text()), 'Nav has 1 item: Home');
 
-        $rows = $crawler->filter('table.table-hover > tbody > tr');
-        self::assertSame(4, $rows->count(), 'There are 4 entity audits.');
+        $cards = $crawler->filter('div.auditor-audits > div');
+        self::assertSame(4, $cards->count(), 'There are 4 entity audits.');
 
         $expected = [
-            [Author::class, 'author', '5 operations', 'View audit'],
-            [Comment::class, 'comment', '3 operations', 'View audit'],
-            [Post::class, 'post', '15 operations', 'View audit'],
-            [Tag::class, 'tag', '15 operations', 'View audit'],
+            [Author::class, 'author', '5 operation(s)', 'View audit'],
+            [Comment::class, 'comment', '3 operation(s)', 'View audit'],
+            [Post::class, 'post', '15 operation(s)', 'View audit'],
+            [Tag::class, 'tag', '15 operation(s)', 'View audit'],
         ];
-        $rows->each(function ($row, $rowIndex) use ($expected): void {
-            $cells = $row->filter('td');
-            self::assertSame(4, $cells->count(), 'Each row is composed of 4 cells.');
-            $cells->each(function ($cell, $cellIndex) use ($expected, $rowIndex): void {
-                self::assertSame($expected[$rowIndex][$cellIndex], trim($cell->text()), sprintf('Cell #%s of row #%s is ok.', $cellIndex, $rowIndex));
-            });
+        $cards->each(function ($row, $rowIndex) use ($expected): void {
+            $cell = $row->filter('div > h3 > code');
+            self::assertSame($expected[$rowIndex][0], trim($cell->text()), 'Entity is OK');
+
+            $cell = $row->filter('div > p');
+            self::assertSame($expected[$rowIndex][1], trim($cell->text()), 'Tablename is OK');
+
+            $cell = $row->filter('div > dl > div > dt');
+            self::assertSame($expected[$rowIndex][2], trim($cell->text()), 'Operation count is OK');
+
+            $cell = $row->filter('div > dl > div > dd > a');
+            self::assertSame($expected[$rowIndex][3], trim($cell->text()), 'Link is OK');
         });
     }
 
@@ -153,10 +171,10 @@ final class ViewerControllerTest extends WebTestCase
 
         self::assertPageTitleContains('auditor', 'Title is auditor');
 
-        $breadcrumbs = $crawler->filter('ol.breadcrumb > li');
-        self::assertSame(2, $breadcrumbs->count(), 'Nav has 2 items.');
-        self::assertSame('Home', $breadcrumbs->eq(0)->text(), 'Nav has 1 item: Home');
-        self::assertSame(Author::class, $breadcrumbs->eq(1)->text(), 'Nav has 1 item: '.Author::class);
+        $breadcrumbs = $crawler->filter('nav > ol > li');
+        self::assertSame(2, $breadcrumbs->count(), 'Nav has 2 item.');
+        self::assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
+        self::assertSame(Author::class, trim($breadcrumbs->eq(1)->children('div > a > code')->text()), 'Nav has 1 item: '.Author::class);
     }
 
     /**
@@ -185,10 +203,10 @@ final class ViewerControllerTest extends WebTestCase
 
         self::assertPageTitleContains('auditor', 'Title is auditor');
 
-        $breadcrumbs = $crawler->filter('ol.breadcrumb > li');
-        self::assertSame(2, $breadcrumbs->count(), 'Nav has 2 items.');
-        self::assertSame('Home', $breadcrumbs->eq(0)->text(), 'Nav has 1 item: Home');
-        self::assertSame(Author::class, $breadcrumbs->eq(1)->text(), 'Nav has 1 item: '.Author::class);
+        $breadcrumbs = $crawler->filter('nav > ol > li');
+        self::assertSame(2, $breadcrumbs->count(), 'Nav has 2 item.');
+        self::assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
+        self::assertSame(Author::class, trim($breadcrumbs->eq(1)->children('div > a > code')->text()), 'Nav has 1 item: '.Author::class);
     }
 
     /**
@@ -224,22 +242,16 @@ final class ViewerControllerTest extends WebTestCase
 
         self::assertPageTitleContains('auditor', 'Title is auditor');
 
-        $breadcrumbs = $crawler->filter('ol.breadcrumb > li');
-        self::assertSame(2, $breadcrumbs->count(), 'Nav has 2 items.');
-        self::assertSame('Home', $breadcrumbs->eq(0)->text(), 'Nav has 1 item: Home');
-        $expected = 'transaction #'.$first->getTransactionHash();
-        self::assertSame($expected, $breadcrumbs->eq(1)->text(), 'Nav has 1 item: '.$expected);
+        $breadcrumbs = $crawler->filter('nav > ol > li');
+        self::assertSame(2, $breadcrumbs->count(), 'Nav has 2 item.');
+        self::assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
+        self::assertSame($first->getTransactionHash(), trim($breadcrumbs->eq(1)->children('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
 
-        $sections = $crawler->filter('h4.card-title');
-        self::assertSame(4, $sections->count(), 'There are 4 sections.');
-        $expected = 'Transaction #'.$first->getTransactionHash().' (entity per entity)';
-        self::assertSame($expected, $sections->eq(0)->text(), $expected);
-        $expected = Author::class.' (most recent first)';
-        self::assertSame($expected, $sections->eq(1)->text(), $expected);
-        $expected = Post::class.' (most recent first)';
-        self::assertSame($expected, $sections->eq(2)->text(), $expected);
-        $expected = Comment::class.' (most recent first)';
-        self::assertSame($expected, $sections->eq(3)->text(), $expected);
+        $sections = $crawler->filter('.flow-root > div');
+        self::assertSame(3, $sections->count(), 'There are 3 sections.');
+        self::assertSame(Author::class, trim($sections->eq(0)->children('div > code')->text()), Author::class);
+        self::assertSame(Post::class, trim($sections->eq(1)->children('div > code')->text()), Post::class);
+        self::assertSame(Comment::class, trim($sections->eq(2)->children('div > code')->text()), Comment::class);
     }
 
     /**
@@ -261,20 +273,15 @@ final class ViewerControllerTest extends WebTestCase
 
         self::assertPageTitleContains('auditor', 'Title is auditor');
 
-        $breadcrumbs = $crawler->filter('ol.breadcrumb > li');
-        self::assertSame(2, $breadcrumbs->count(), 'Nav has 2 items.');
-        self::assertSame('Home', $breadcrumbs->eq(0)->text(), 'Nav has 1 item: Home');
-        $expected = 'transaction #'.$first->getTransactionHash();
-        self::assertSame($expected, $breadcrumbs->eq(1)->text(), 'Nav has 1 item: '.$expected);
+        $breadcrumbs = $crawler->filter('nav > ol > li');
+        self::assertSame(2, $breadcrumbs->count(), 'Nav has 2 item.');
+        self::assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
+        self::assertSame($first->getTransactionHash(), trim($breadcrumbs->eq(1)->children('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
 
-        $sections = $crawler->filter('h4.card-title');
-        self::assertSame(3, $sections->count(), 'There are 3 sections.');
-        $expected = 'Transaction #'.$first->getTransactionHash().' (entity per entity)';
-        self::assertSame($expected, $sections->eq(0)->text(), $expected);
-        $expected = Post::class.' (most recent first)';
-        self::assertSame($expected, $sections->eq(1)->text(), $expected);
-        $expected = Comment::class.' (most recent first)';
-        self::assertSame($expected, $sections->eq(2)->text(), $expected);
+        $sections = $crawler->filter('.flow-root > div');
+        self::assertSame(2, $sections->count(), 'There are 2 sections.');
+        self::assertSame(Post::class, trim($sections->eq(0)->children('div > code')->text()), Post::class);
+        self::assertSame(Comment::class, trim($sections->eq(1)->children('div > code')->text()), Comment::class);
     }
 
     private function login(array $roles = []): void

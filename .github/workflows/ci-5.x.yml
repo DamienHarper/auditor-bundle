@@ -1,4 +1,4 @@
-name: CI
+name: auditor-bundle 5.x CI
 
 on:
   schedule:
@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - master
-      - 3.x
 
 jobs:
   tests:
@@ -17,11 +16,10 @@ jobs:
     strategy:
       matrix:
         php:
-          - '7.2'
           - '7.3'
           - '7.4'
+          - '8.0'
         symfony:
-          - '3.4.*'
           - '4.4.*'
           - '5.*'
       fail-fast: false
@@ -52,10 +50,6 @@ jobs:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}
           restore-keys: ${{ matrix.php }}-composer-
-
-      - name: Update project dependencies (3.4.*)
-        if: matrix.symfony == '3.4.*'
-        run: SYMFONY_REQUIRE="^3.4" composer update --no-progress --ansi --prefer-stable
 
       - name: Update project dependencies (4.4.*)
         if: matrix.symfony == '4.4.*'

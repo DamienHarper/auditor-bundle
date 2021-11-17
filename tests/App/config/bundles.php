@@ -6,5 +6,6 @@ return [
     Symfony\Bundle\TwigBundle\TwigBundle::class => ['all' => true],
     Symfony\Bundle\SecurityBundle\SecurityBundle::class => ['all' => true],
     DH\AuditorBundle\DHAuditorBundle::class => ['all' => true],
-    //    Symfony\Bundle\MonologBundle\MonologBundle::class => ['all' => true],
+    Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
+//    Symfony\Bundle\MonologBundle\MonologBundle::class => ['all' => true],
 ];

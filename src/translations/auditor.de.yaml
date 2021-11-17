@@ -1,11 +1,7 @@
 audit:
   header:
-    home: Startseite
-    audited_entities: geprüfte Objekte
-  table_headers:
-    entity: Objekt
-    table: Tabelle
-    activity: Aktivität
+    home: Home
+    audited_entities: audited entities
   audit_details:
     view_audit: Audits anzeigen
     most_recent: (neueste zuerst)
@@ -15,10 +11,46 @@ audit:
     new_value: Neuer Wert
     transaction: Transaktion
     entity_per_entity: (Objekt pro Objekt)
+    operations_count: '%count% operation(s)'
+    summary:
+      inserted: >-
+        <code class="text-pink-500">
+          <a href="%source_link%" class="code">%source%</a>
+        </code>
+        <em>%source_label%</em> wurde von <b>%user%</b> %ip% <b>eingefügt</b>
+      updated: >-
+        <code class="text-pink-500">
+          <a href="%source_link%" class="code">%source%</a>
+        </code>
+        <em>%source_label%</em> wurde von <b>%user%</b> %ip% <b>aktualisiert</b>
+      deleted: >-
+        <code class="text-pink-500">
+          <a href="%source_link%" class="code">%source%</a>
+        </code>
+        <em>%source_label%</em> wurde von <b>%user%</b> %ip% <b>gelöscht</b>
+      associated: >-
+        <code class="text-pink-500">
+          <a href="%source_link%" class="code">%source%</a>
+        </code>
+        <em>%source_label%</em> wurde von <b>%user%</b> %ip% mit
+        <code class="text-pink-500">
+          <a href="%target_link%" class="code">%target%</a>
+        </code>
+        <em>%target_label%</em> <b>verknüpft</b>
+      dissociated: >-
+        <code class="text-pink-500">
+          <a href="%source_link%" class="code">%source%</a>
+        </code>
+        <em>%source_label%</em> wurde von <b>%user%</b> %ip% von
+        <code class="text-pink-500">
+          <a href="%target_link%" class="code">%target%</a>
+        </code>
+        <em>%target_label%</em> <b>getrennt</b>
+      unkown_user: 'einem anonymen Benutzer'
   pager:
     first: Erste
     previous: Vorherige
     last: Letzte
     next: Weiter
     current: aktuell
-
+    info: 'Es werden <span class="font-medium">%pageStart%</span> bis <span class="font-medium">%pageEnd%</span> von <span class="font-medium">%numResults%</span> Ergebnissen angezeigt'

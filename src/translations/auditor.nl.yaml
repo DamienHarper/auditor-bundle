@@ -2,10 +2,6 @@ audit:
   header:
     home: Hoofdpagina
     audited_entities: gecontroleerde entiteiten
-  table_headers:
-    entity: Entiteit
-    table: Tabel
-    activity: Activiteit
   audit_details:
     view_audit: Bekijk versie
     most_recent: (meest recente eerst)
@@ -15,9 +11,46 @@ audit:
     new_value: Nieuwe waarde
     transaction: Transactie
     entity_per_entity: (entiteit per entiteit)
+    operations_count: '%count% operation(s)'
+    summary:
+      inserted: >-
+        <code class="text-pink-500">
+          <a href="%source_link%" class="code">%source%</a>
+        </code>
+        <em>%source_label%</em> is <b>ingevoegd</b> door <b>%user%</b> %ip%
+      updated: >-
+        <code class="text-pink-500">
+          <a href="%source_link%" class="code">%source%</a>
+        </code>
+        <em>%source_label%</em> is <b>bijgewerkt</b> door <b>%user%</b> %ip%
+      deleted: >-
+        <code class="text-pink-500">
+          <a href="%source_link%" class="code">%source%</a>
+        </code>
+        <em>%source_label%</em> is <b>verwijderd</b> door <b>%user%</b> %ip%
+      associated: >-
+        <code class="text-pink-500">
+          <a href="%source_link%" class="code">%source%</a>
+        </code>
+        <em>%source_label%</em> is <b>gekoppeld</b> aan
+        <code class="text-pink-500">
+          <a href="%target_link%" class="code">%target%</a>
+        </code>
+        <em>%target_label%</em> door <b>%user%</b> %ip%
+      dissociated: >-
+        <code class="text-pink-500">
+          <a href="%source_link%" class="code">%source%</a>
+        </code>
+        <em>%source_label%</em> is <b>losgekoppeld</b> van
+        <code class="text-pink-500">
+          <a href="%target_link%" class="code">%target%</a>
+        </code>
+        <em>%target_label%</em> door <b>%user%</b> %ip%
+      unkown_user: 'een anonieme gebruiker'
   pager:
     first: Eerste
     previous: Vorige
     last: Laatste
     next: Volgende
     current: Huidige
+    info: 'Toont <span class="font-medium">%pageStart%</span> tot <span class="font-medium">%pageEnd%</span> van <span class="font-medium">%numResults%</span> resultaten'
