@@ -105,7 +105,7 @@ class Configuration implements ConfigurationInterface
                         $v['doctrine']['auditing_services'] = ['doctrine.orm.default_entity_manager'];
                     }
 
-                    // "viewer" is enabled by default
+                    // "viewer" is disabled by default
                     if (!\array_key_exists('viewer', $v['doctrine']) || !\is_bool($v['doctrine']['viewer'])) {
                         $v['doctrine']['viewer'] = false;
                     }
