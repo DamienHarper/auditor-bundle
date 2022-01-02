@@ -1,6 +1,6 @@
 includes:
-    - vendor/phpstan/phpstan-doctrine/extension.neon
-    - vendor/phpstan/phpstan-doctrine/rules.neon
+    - tools/phpstan/vendor/phpstan/phpstan-doctrine/extension.neon
+    - tools/phpstan/vendor/phpstan/phpstan-doctrine/rules.neon
 
 parameters:
     level: max
@@ -8,14 +8,14 @@ parameters:
     checkMissingIterableValueType: false
     checkGenericClassInNonGenericObjectType: false
 
-    excludes_analyse:
+    excludePaths:
         - '%currentWorkingDirectory%/src/DependencyInjection/Configuration.php'
 
     ignoreErrors:
         # false positives
         - '~Call to an undefined method Symfony\\Component\\Security\\Core\\Authentication\\Token\\TokenInterface\:\:getRoles\(\)\.~'
-        - '~Call to method getSource\(\) on an unknown class Symfony\\Component\\Security\\Core\\Role\\SwitchUserRole\.~'
-        - '~Class Symfony\\Component\\Security\\Core\\Role\\SwitchUserRole not found\.~'
+        - '~Call to an undefined method Symfony\\Component\\Security\\Core\\Role\\SwitchUserRole\:\:getSource\(\)\.~'
+        - '~Property DH\\AuditorBundle\\User\\UserProvider\:\:\$configuration is never read, only written\.~'
         # required for Symfony 4.4 compatibility
-        - '~Method DH\\AuditorBundle\\Routing\\RoutingAnnotationLoader\:\:load\(\) has parameter \$type with no typehint specified.~'
-        - '~Method DH\\AuditorBundle\\Routing\\RoutingAnnotationLoader\:\:supports\(\) has parameter \$type with no typehint specified.~'
+        - '~Method DH\\AuditorBundle\\Routing\\RoutingAnnotationLoader\:\:load\(\) has parameter \$type with no type specified.~'
+        - '~Method DH\\AuditorBundle\\Routing\\RoutingAnnotationLoader\:\:supports\(\) has parameter \$type with no type specified.~'
