@@ -10,20 +10,11 @@ use Symfony\Component\Routing\RouteCollection;
 
 class RoutingAnnotationLoader extends Loader
 {
-    /**
-     * @var AnnotatedRouteControllerLoader
-     */
-    private $annotatedRouteControllerLoader;
+    private AnnotatedRouteControllerLoader $annotatedRouteControllerLoader;
 
-    /**
-     * @var bool
-     */
-    private $isLoaded = false;
+    private bool $isLoaded = false;
 
-    /**
-     * @var array
-     */
-    private $configuration;
+    private array $configuration;
 
     public function __construct(AnnotatedRouteControllerLoader $annotatedRouteController, array $configuration)
     {

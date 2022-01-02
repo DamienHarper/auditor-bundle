@@ -8,6 +8,9 @@ use DH\AuditorBundle\DependencyInjection\Compiler\DoctrineProviderConfigurationC
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
+/**
+ * @see \DH\AuditorBundle\Tests\DHAuditorBundleTest
+ */
 class DHAuditorBundle extends Bundle
 {
     public function build(ContainerBuilder $container): void

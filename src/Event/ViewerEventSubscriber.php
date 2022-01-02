@@ -14,10 +14,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 class ViewerEventSubscriber implements EventSubscriberInterface
 {
-    /**
-     * @var Auditor
-     */
-    private $auditor;
+    private Auditor $auditor;
 
     public function __construct(Auditor $auditor)
     {

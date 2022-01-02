@@ -2,6 +2,9 @@
 
 namespace DH\AuditorBundle\Helper;
 
+/**
+ * @see \DH\AuditorBundle\Tests\Helper\UrlHelperTest
+ */
 abstract class UrlHelper
 {
     public static function paramToNamespace(string $entity): string
