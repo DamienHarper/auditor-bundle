@@ -11,7 +11,7 @@
         }
     ],
     "require": {
-        "php": ">=7.3",
+        "php": ">=7.4",
         "ext-json": "*",
         "damienharper/auditor": "^2.0-dev",
         "doctrine/annotations": "^1.8",
@@ -58,7 +58,8 @@
         "csfixer": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --using-cache=no --verbose --ansi",
         "phpstan": "tools/phpstan/vendor/bin/phpstan --ansi analyse src",
         "setup44": "SYMFONY_REQUIRE='^4.4' composer update --prefer-stable",
-        "setup54": "SYMFONY_REQUIRE='^5.4' composer update --prefer-stable"
+        "setup54": "SYMFONY_REQUIRE='^5.4' composer update --prefer-stable",
+        "rector": "tools/rector/vendor/bin/rector process src"
     },
     "config": {
         "sort-packages": true

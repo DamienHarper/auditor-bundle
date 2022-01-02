@@ -10,15 +10,9 @@ use Symfony\Component\Security\Core\Security;
 
 class RoleChecker implements RoleCheckerInterface
 {
-    /**
-     * @var Security
-     */
-    private $security;
+    private Security $security;
 
-    /**
-     * @var DoctrineProvider
-     */
-    private $provider;
+    private DoctrineProvider $provider;
 
     public function __construct(Security $security, DoctrineProvider $doctrineProvider)
     {

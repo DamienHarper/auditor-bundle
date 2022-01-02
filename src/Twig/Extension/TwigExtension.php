@@ -6,6 +6,9 @@ use Doctrine\Persistence\ManagerRegistry;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
+/**
+ * @see \DH\AuditorBundle\Tests\Twig\Extension\TwigExtensionTest
+ */
 class TwigExtension extends AbstractExtension
 {
     /**
