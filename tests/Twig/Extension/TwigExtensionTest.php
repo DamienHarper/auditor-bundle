@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DH\AuditorBundle\Tests\Twig\Extension;
 
 use DH\AuditorBundle\DHAuditorBundle;
@@ -13,6 +15,8 @@ use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * @internal
+ *
+ * @small
  */
 final class TwigExtensionTest extends BaseBundleTestCase
 {
@@ -52,7 +56,7 @@ final class TwigExtensionTest extends BaseBundleTestCase
         self::assertNotEmpty($filters, 'extension has at least 1 filter.');
 
         foreach ($filters as $filter) {
-            self::assertInstanceOf('Twig\TwigFilter', $filter, 'filter instanceof Twig\TwigFilter');
+            self::assertInstanceOf(\Twig\TwigFilter::class, $filter, 'filter instanceof Twig\TwigFilter');
         }
     }
 

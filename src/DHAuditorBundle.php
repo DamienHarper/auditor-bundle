@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DH\AuditorBundle;
 
 use DH\AuditorBundle\DependencyInjection\Compiler\AddProviderCompilerPass;

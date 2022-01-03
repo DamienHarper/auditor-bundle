@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 if (isset($_ENV['BOOTSTRAP_CLEAR_CACHE_ENV'])) {
     // executes the "php bin/console cache:clear" command
     passthru(sprintf(

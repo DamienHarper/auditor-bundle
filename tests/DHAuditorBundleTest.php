@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DH\AuditorBundle\Tests;
 
 use DH\Auditor\Auditor;
@@ -20,6 +22,8 @@ use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * @internal
+ *
+ * @small
  */
 final class DHAuditorBundleTest extends BaseBundleTestCase
 {
@@ -51,32 +55,32 @@ final class DHAuditorBundleTest extends BaseBundleTestCase
 
         $container = $this->getContainer();
 
-        self::assertTrue($container->has('DH\Auditor\Configuration'));
-        self::assertInstanceOf(AuditorConfiguration::class, $container->get('DH\Auditor\Configuration'));
+        self::assertTrue($container->has(\DH\Auditor\Configuration::class));
+        self::assertInstanceOf(AuditorConfiguration::class, $container->get(\DH\Auditor\Configuration::class));
 
-        self::assertTrue($container->has('DH\Auditor\Auditor'));
-        self::assertInstanceOf(Auditor::class, $container->get('DH\Auditor\Auditor'));
+        self::assertTrue($container->has(\DH\Auditor\Auditor::class));
+        self::assertInstanceOf(Auditor::class, $container->get(\DH\Auditor\Auditor::class));
 
-        self::assertTrue($container->has('DH\Auditor\Provider\Doctrine\Configuration'));
-        self::assertInstanceOf(DoctrineProviderConfiguration::class, $container->get('DH\Auditor\Provider\Doctrine\Configuration'));
+        self::assertTrue($container->has(\DH\Auditor\Provider\Doctrine\Configuration::class));
+        self::assertInstanceOf(DoctrineProviderConfiguration::class, $container->get(\DH\Auditor\Provider\Doctrine\Configuration::class));
 
-        self::assertTrue($container->has('DH\Auditor\Provider\Doctrine\DoctrineProvider'));
-        self::assertInstanceOf(DoctrineProvider::class, $container->get('DH\Auditor\Provider\Doctrine\DoctrineProvider'));
+        self::assertTrue($container->has(\DH\Auditor\Provider\Doctrine\DoctrineProvider::class));
+        self::assertInstanceOf(DoctrineProvider::class, $container->get(\DH\Auditor\Provider\Doctrine\DoctrineProvider::class));
 
         self::assertTrue($container->has('dh_auditor.provider.doctrine'));
         self::assertInstanceOf(DoctrineProvider::class, $container->get('dh_auditor.provider.doctrine'));
 
-        self::assertTrue($container->has('DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader'));
-        self::assertInstanceOf(Reader::class, $container->get('DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader'));
+        self::assertTrue($container->has(\DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader::class));
+        self::assertInstanceOf(Reader::class, $container->get(\DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader::class));
 
-        self::assertTrue($container->has('DH\Auditor\Provider\Doctrine\Persistence\Event\CreateSchemaListener'));
-        self::assertInstanceOf(CreateSchemaListener::class, $container->get('DH\Auditor\Provider\Doctrine\Persistence\Event\CreateSchemaListener'));
+        self::assertTrue($container->has(\DH\Auditor\Provider\Doctrine\Persistence\Event\CreateSchemaListener::class));
+        self::assertInstanceOf(CreateSchemaListener::class, $container->get(\DH\Auditor\Provider\Doctrine\Persistence\Event\CreateSchemaListener::class));
 
-        self::assertTrue($container->has('DH\AuditorBundle\Controller\ViewerController'));
-        self::assertInstanceOf(ViewerController::class, $container->get('DH\AuditorBundle\Controller\ViewerController'));
+        self::assertTrue($container->has(\DH\AuditorBundle\Controller\ViewerController::class));
+        self::assertInstanceOf(ViewerController::class, $container->get(\DH\AuditorBundle\Controller\ViewerController::class));
 
-        self::assertTrue($container->has('DH\AuditorBundle\Twig\Extension\TwigExtension'));
-        self::assertInstanceOf(TwigExtension::class, $container->get('DH\AuditorBundle\Twig\Extension\TwigExtension'));
+        self::assertTrue($container->has(\DH\AuditorBundle\Twig\Extension\TwigExtension::class));
+        self::assertInstanceOf(TwigExtension::class, $container->get(\DH\AuditorBundle\Twig\Extension\TwigExtension::class));
     }
 
     protected function getBundleClass()

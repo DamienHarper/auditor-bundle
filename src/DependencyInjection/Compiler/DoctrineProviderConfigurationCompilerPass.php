@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DH\AuditorBundle\DependencyInjection\Compiler;
 
 use DH\Auditor\Provider\Doctrine\Auditing\Annotation\AnnotationLoader;
