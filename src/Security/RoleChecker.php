@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DH\AuditorBundle\Security;
 
 use DH\Auditor\Provider\Doctrine\Configuration;

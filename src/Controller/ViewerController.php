@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DH\AuditorBundle\Controller;
 
 use DH\Auditor\Exception\AccessDeniedException;
@@ -13,6 +15,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * @see \DH\AuditorBundle\Tests\Controller\ViewerControllerTest
+ */
 class ViewerController extends AbstractController
 {
     private $environment;
@@ -38,7 +43,7 @@ class ViewerController extends AbstractController
                 $audited,
                 array_filter(
                     $schemaManager->getAuditableTableNames($auditingService->getEntityManager()),
-                    function ($entity) use ($reader, $scope) {
+                    static function ($entity) use ($reader, $scope) {
                         $roleChecker = $reader->getProvider()->getAuditor()->getConfiguration()->getRoleChecker();
 
                         return null === $roleChecker ? true : $roleChecker($entity, $scope);

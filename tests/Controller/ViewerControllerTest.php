@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DH\AuditorBundle\Tests\Controller;
 
 use DH\Auditor\Model\Entry;
@@ -24,16 +26,15 @@ use Symfony\Component\Security\Core\User\User;
 
 /**
  * @internal
+ *
+ * @small
  */
 final class ViewerControllerTest extends WebTestCase
 {
     use BlogSchemaSetupTrait;
     use ReaderTrait;
 
-    /**
-     * @var AbstractBrowser
-     */
-    private $client;
+    private AbstractBrowser $client;
 
     /**
      * @see https://symfony.com/doc/current/testing.html
@@ -62,7 +63,7 @@ final class ViewerControllerTest extends WebTestCase
             [Post::class, 'post', '15 operation(s)', 'View audit'],
             [Tag::class, 'tag', '15 operation(s)', 'View audit'],
         ];
-        $cards->each(function ($row, $rowIndex) use ($expected): void {
+        $cards->each(static function ($row, $rowIndex) use ($expected): void {
             $cell = $row->filter('div > h3 > code');
             self::assertSame($expected[$rowIndex][0], trim($cell->text()), 'Entity is OK');
 
@@ -102,7 +103,7 @@ final class ViewerControllerTest extends WebTestCase
             [Post::class, 'post', '15 operation(s)', 'View audit'],
             [Tag::class, 'tag', '15 operation(s)', 'View audit'],
         ];
-        $cards->each(function ($row, $rowIndex) use ($expected): void {
+        $cards->each(static function ($row, $rowIndex) use ($expected): void {
             $cell = $row->filter('div > h3 > code');
             self::assertSame($expected[$rowIndex][0], trim($cell->text()), 'Entity is OK');
 
@@ -143,7 +144,7 @@ final class ViewerControllerTest extends WebTestCase
             [Post::class, 'post', '15 operation(s)', 'View audit'],
             [Tag::class, 'tag', '15 operation(s)', 'View audit'],
         ];
-        $cards->each(function ($row, $rowIndex) use ($expected): void {
+        $cards->each(static function ($row, $rowIndex) use ($expected): void {
             $cell = $row->filter('div > h3 > code');
             self::assertSame($expected[$rowIndex][0], trim($cell->text()), 'Entity is OK');
 

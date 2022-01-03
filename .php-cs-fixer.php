@@ -1,36 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 $config = new PhpCsFixer\Config();
 $config
     ->setRiskyAllowed(true)
     ->setRules([
         '@PhpCsFixer' => true,
         '@PhpCsFixer:risky' => true,
-        '@PHP73Migration' => true,
-        '@PHP71Migration:risky' => true,
+        '@PHP74Migration:risky' => true,
+        '@PHP80Migration' => true,
+        '@PHP80Migration:risky' => true,
         '@DoctrineAnnotation' => true,
-        '@PHPUnit75Migration:risky' => true,
-        'blank_line_before_statement' => [
-            'statements' => [
-                'break',
-                // 'case', -> On ne souhaite pas ce cas
-                'continue',
-                'declare',
-                // 'default',  -> On ne souhaite pas ce cas
-                'exit',
-                'goto',
-                'include',
-                'include_once',
-                'require',
-                'require_once',
-                'return',
-                'switch',
-                'throw',
-                'try',
-            ],
-        ],
-        'date_time_immutable' => false,
-        'declare_strict_types' => false,
+        '@PHPUnit84Migration:risky' => true,
+        'date_time_immutable' => true,
+        'final_public_method_for_abstract_class' => false,
         'general_phpdoc_annotation_remove' => [
             'annotations' => [
                 'expectedException',
@@ -39,24 +23,32 @@ $config
             ],
         ],
         'global_namespace_import' => true,
+        'linebreak_after_opening_tag' => true,
         'list_syntax' => ['syntax' => 'short'],
         'mb_str_functions' => true,
+        'method_chaining_indentation' => true,
         'nullable_type_declaration_for_default_null_value' => true,
         'ordered_interfaces' => true,
-        'phpdoc_line_span' => true,
-        // 'phpdoc_to_param_type' => true,
-        // 'phpdoc_to_return_type' => true,
-        // 'regular_callable_call' => true,
-        'self_static_accessor' => true,
-        // 'simplified_if_return' => true, // Fait bugger le cs-fixer (local principalement) en version < 3
-        // 'simplified_null_return' => true,
+        'ordered_traits' => false,
+        'php_unit_size_class' => true,
         'php_unit_test_class_requires_covers' => false,
+        'phpdoc_types' => false,
+        'phpdoc_to_param_type' => false,
+        'phpdoc_to_property_type' => false,
+        'phpdoc_to_return_type' => true,
+        'regular_callable_call' => true,
+        'self_static_accessor' => true,
+        'simplified_if_return' => true,
+        'simplified_null_return' => false,
+        'static_lambda' => true,
     ])
     ->setFinder(PhpCsFixer\Finder::create()
         ->in(__DIR__)
-        ->notPath('tests/App/var/')
-        ->notPath('tests/App/cache/')
         ->notPath('src/DependencyInjection/Configuration.php')
+        ->exclude('vendor')
+        ->exclude('node_modules')
+        ->exclude('tools')
+        ->exclude('tests/App/var')
     )
 ;
 

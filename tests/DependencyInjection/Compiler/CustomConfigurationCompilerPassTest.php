@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DH\AuditorBundle\Tests\DependencyInjection\Compiler;
 
 use DH\Auditor\Configuration;
@@ -12,6 +14,8 @@ use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * @internal
+ *
+ * @small
  */
 final class CustomConfigurationCompilerPassTest extends AbstractCompilerPassTestCase
 {
@@ -32,16 +36,16 @@ final class CustomConfigurationCompilerPassTest extends AbstractCompilerPassTest
                         1 => 'updatedAt',
                     ],
                     'entities' => [
-                        'DH\\Auditor\\Tests\\Provider\\Doctrine\\Fixtures\\Entity\\Standard\\Blog\\Author' => [
+                        \DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author::class => [
                             'enabled' => true,
                         ],
-                        'DH\\Auditor\\Tests\\Provider\\Doctrine\\Fixtures\\Entity\\Standard\\Blog\\Post' => [
+                        \DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post::class => [
                             'enabled' => true,
                         ],
-                        'DH\\Auditor\\Tests\\Provider\\Doctrine\\Fixtures\\Entity\\Standard\\Blog\\Comment' => [
+                        \DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Comment::class => [
                             'enabled' => true,
                         ],
-                        'DH\\Auditor\\Tests\\Provider\\Doctrine\\Fixtures\\Entity\\Standard\\Blog\\Tag' => [
+                        \DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag::class => [
                             'enabled' => true,
                         ],
                     ],

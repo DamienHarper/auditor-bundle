@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DH\AuditorBundle\Tests\Helper;
 
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author;
@@ -8,6 +10,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
+ *
+ * @small
  */
 final class UrlHelperTest extends TestCase
 {

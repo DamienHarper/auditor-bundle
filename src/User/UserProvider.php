@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DH\AuditorBundle\User;
 
 use DH\Auditor\Provider\Doctrine\Configuration;
@@ -51,10 +53,7 @@ class UserProvider implements UserProviderInterface
         return new User($identifier, $username);
     }
 
-    /**
-     * @return null|UserInterface
-     */
-    private function getTokenUser()
+    private function getTokenUser(): ?UserInterface
     {
         try {
             $token = $this->security->getToken();

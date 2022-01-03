@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DH\AuditorBundle\Routing;
 
 use DH\AuditorBundle\Controller\ViewerController;

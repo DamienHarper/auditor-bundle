@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DH\AuditorBundle\DependencyInjection;
 
 use DH\Auditor\Provider\ProviderInterface;
