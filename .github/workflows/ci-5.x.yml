@@ -13,7 +13,7 @@ on:
 jobs:
   tests:
     name: Tests PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -60,8 +60,23 @@ jobs:
         if: matrix.symfony == '5.*'
         run: composer update --no-progress --ansi --prefer-stable
 
+      - name: Install PHPStan
+        run: composer install --no-progress --ansi --working-dir=tools/phpstan
+
+      - name: Install PHP-CS-Fixer
+        run: composer install --no-progress --ansi --working-dir=tools/php-cs-fixer
+
       - name: Validate composer
         run: composer validate --strict --no-check-lock
+
+      - name: Run PHP-CS-Fixer
+        run: |
+          sed -i "s/'phpdoc_to_return_type' => true/'phpdoc_to_return_type' => false/g" .php-cs-fixer.php
+          composer cs-check
+
+      - name: Run PHPStan
+        if: matrix.symfony == '5.*'
+        run: composer phpstan
 
       - name: Run tests
         run: vendor/bin/phpunit

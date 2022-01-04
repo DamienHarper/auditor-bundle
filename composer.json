@@ -56,13 +56,17 @@
     "scripts": {
         "test": "php -d pcov.enabled=1 ./vendor/bin/phpunit --colors=always",
         "csfixer": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --using-cache=no --verbose --ansi",
+        "cs-check": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --using-cache=no --verbose --ansi --dry-run",
         "phpstan": "tools/phpstan/vendor/bin/phpstan --ansi analyse src",
         "setup44": "SYMFONY_REQUIRE='^4.4' composer update --prefer-stable",
         "setup54": "SYMFONY_REQUIRE='^5.4' composer update --prefer-stable",
         "rector": "tools/rector/vendor/bin/rector process src"
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true
+        }
     },
     "extra": {
         "branch-alias": {
