@@ -75,6 +75,7 @@ jobs:
           composer cs-check
 
       - name: Run PHPStan
+        if: matrix.symfony == '5.*'
         run: composer phpstan
 
       - name: Run tests
