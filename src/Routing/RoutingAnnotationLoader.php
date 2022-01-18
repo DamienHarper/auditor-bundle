@@ -24,6 +24,10 @@ class RoutingAnnotationLoader extends Loader
         $this->configuration = $configuration;
     }
 
+    /**
+     * @param mixed       $resource
+     * @param null|string $type
+     */
     public function load($resource, $type = null): RouteCollection
     {
         if (true === $this->isLoaded) {
@@ -40,6 +44,10 @@ class RoutingAnnotationLoader extends Loader
         return $routeCollection;
     }
 
+    /**
+     * @param mixed   $resource
+     * @param ?string $type
+     */
     public function supports($resource, $type = null): bool
     {
         return 'auditor' === $type;

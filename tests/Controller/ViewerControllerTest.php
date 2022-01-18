@@ -330,11 +330,8 @@ final class ViewerControllerTest extends WebTestCase
 
     private function createAndInitDoctrineProvider(): void
     {
-        if (!self::$booted) {
-            $this->client = self::createClient(); // boots the Kernel and populates container
-        }
-        $this->login();
-        $this->fixRequestStack();
+        $this->client = self::createClient(); // boots the Kernel and populates container
+//        $this->fixRequestStack();
         $this->provider = self::$container->get(DoctrineProvider::class);
     }
 }

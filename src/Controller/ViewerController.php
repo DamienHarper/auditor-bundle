@@ -79,6 +79,7 @@ class ViewerController extends AbstractController
      */
     public function showEntityHistoryAction(Request $request, Reader $reader, string $entity, $id = null): Response
     {
+        \assert(\is_string($request->query->get('page', '1')) || \is_int($request->query->get('page', '1')));
         $page = (int) $request->query->get('page', '1');
         $page = $page < 1 ? 1 : $page;
         $entity = UrlHelper::paramToNamespace($entity);
