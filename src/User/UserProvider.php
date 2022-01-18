@@ -39,11 +39,11 @@ class UserProvider implements UserProviderInterface
                 $identifier = $tokenUser->getId();
             }
 
-            $username = $tokenUser->getUsername();
+            $username = method_exists($tokenUser, 'getUsername') ? $tokenUser->getUsername() : $tokenUser->getUserIdentifier();
         }
 
         if (null !== $impersonatorUser && $impersonatorUser instanceof UserInterface) {
-            $username .= sprintf('[impersonator %s]', $impersonatorUser->getUsername());
+            $username .= sprintf('[impersonator %s]', method_exists($impersonatorUser, 'getUsername') ? $impersonatorUser->getUsername() : $impersonatorUser->getUserIdentifier());
         }
 
         if (null === $identifier && null === $username) {
