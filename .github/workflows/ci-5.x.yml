@@ -11,15 +11,43 @@ on:
       - master
 
 jobs:
-  tests:
+
+  code_style_composer_checks:
+    name: Runs PHP-CS-Fixer to check for CS issues, and validates composer.json
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          extensions: composer:v2
+
+      - name: Install PHP-CS-Fixer
+        run: composer install --no-progress --ansi --working-dir=tools/php-cs-fixer
+
+      - name: Run PHP-CS-Fixer
+        run: |
+          sed -i "s/'phpdoc_to_return_type' => true/'phpdoc_to_return_type' => false/g" .php-cs-fixer.php
+          composer cs-check
+
+      - name: Validate composer
+        run: composer validate --strict --no-check-lock
+
+  tests_sf4_sf5:
     name: Tests PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}
     runs-on: ubuntu-latest
+    needs: [ code_style_composer_checks ]
 
     strategy:
       matrix:
         php:
           - '7.4'
           - '8.0'
+          - '8.1'
         symfony:
           - '4.4.*'
           - '5.*'
@@ -58,25 +86,109 @@ jobs:
 
       - name: Update project dependencies (5.*)
         if: matrix.symfony == '5.*'
-        run: composer update --no-progress --ansi --prefer-stable
+        run: SYMFONY_REQUIRE="^5.4" composer update --no-progress --ansi --prefer-stable
 
       - name: Install PHPStan
         run: composer install --no-progress --ansi --working-dir=tools/phpstan
 
-      - name: Install PHP-CS-Fixer
-        run: composer install --no-progress --ansi --working-dir=tools/php-cs-fixer
-
-      - name: Validate composer
-        run: composer validate --strict --no-check-lock
-
-      - name: Run PHP-CS-Fixer
-        run: |
-          sed -i "s/'phpdoc_to_return_type' => true/'phpdoc_to_return_type' => false/g" .php-cs-fixer.php
-          composer cs-check
-
       - name: Run PHPStan
-        if: matrix.symfony == '5.*'
         run: composer phpstan
 
       - name: Run tests
-        run: vendor/bin/phpunit
+        run: |
+          RAW_CODECOV_REPORT="php-${{ matrix.php }}-sf-${{ matrix.symfony }}-coverage"
+          echo "CODECOV_REPORT=$(echo $RAW_CODECOV_REPORT | sed 's/\.\*//')" >> $GITHUB_ENV
+          vendor/bin/phpunit --coverage-clover=coverage.xml
+
+      - name: Upload coverage file
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.CODECOV_REPORT }}
+          path: coverage.xml
+
+  tests_sf_6:
+    name: Tests PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}
+    runs-on: ubuntu-latest
+    needs: [ code_style_composer_checks ]
+
+    strategy:
+      matrix:
+        php:
+          - '8.0'
+          - '8.1'
+        symfony:
+          - '6.*'
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: composer:v2, flex, pcov
+          coverage: pcov
+
+      - name: Configure Symfony
+        run: |
+          composer global require --no-progress --no-scripts --no-plugins symfony/flex
+          composer config extra.symfony.require "${{ matrix.symfony }}"
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ matrix.php }}-composer-
+
+      - name: Update project dependencies (6.*)
+        if: matrix.symfony == '6.*'
+        run: SYMFONY_REQUIRE="^6.0" composer update --no-progress --ansi --prefer-stable
+
+      - name: Install PHPStan
+        run: composer install --no-progress --ansi --working-dir=tools/phpstan
+
+      - name: Run PHPStan
+        run: composer phpstan
+
+      - name: Run tests
+        run: |
+          RAW_CODECOV_REPORT="php-${{ matrix.php }}-sf-${{ matrix.symfony }}-coverage"
+          echo "CODECOV_REPORT=$(echo $RAW_CODECOV_REPORT | sed 's/\.\*//')" >> $GITHUB_ENV
+          vendor/bin/phpunit --coverage-clover=coverage.xml
+
+      - name: Upload coverage file
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.CODECOV_REPORT }}
+          path: coverage.xml
+
+  upload_coverage:
+    name: "Upload coverage to Codecov"
+    runs-on: "ubuntu-latest"
+    needs:
+      - tests_sf4_sf5
+      - tests_sf_6
+
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v2"
+        with:
+          fetch-depth: 2
+
+      - name: "Download coverage files"
+        uses: "actions/download-artifact@v2"
+        with:
+          path: "reports"
+
+      - name: "Upload to Codecov"
+        uses: "codecov/codecov-action@v2"
+        with:
+          directory: reports
+          token: ${{ env.CODECOV_TOKEN }}

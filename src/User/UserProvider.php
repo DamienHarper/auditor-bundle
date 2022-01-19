@@ -10,7 +10,6 @@ use DH\Auditor\User\UserInterface as AuditorUserInterface;
 use DH\Auditor\User\UserProviderInterface;
 use Exception;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
-use Symfony\Component\Security\Core\Role\SwitchUserRole;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -39,11 +38,22 @@ class UserProvider implements UserProviderInterface
                 $identifier = $tokenUser->getId();
             }
 
-            $username = $tokenUser->getUsername();
+            $username = '';
+            if (method_exists($tokenUser, 'getUserIdentifier')) {
+                $username = $tokenUser->getUserIdentifier();
+            } elseif (method_exists($tokenUser, 'getUsername')) {
+                $username = $tokenUser->getUsername();
+            }
         }
 
-        if (null !== $impersonatorUser && $impersonatorUser instanceof UserInterface) {
-            $username .= sprintf('[impersonator %s]', $impersonatorUser->getUsername());
+        if ($impersonatorUser instanceof UserInterface) {
+            $impersonatorUsername = '';
+            if (method_exists($impersonatorUser, 'getUserIdentifier')) {
+                $impersonatorUsername = $impersonatorUser->getUserIdentifier();
+            } elseif (method_exists($impersonatorUser, 'getUsername')) {
+                $impersonatorUsername = $impersonatorUser->getUsername();
+            }
+            $username .= '[impersonator '.$impersonatorUsername.']';
         }
 
         if (null === $identifier && null === $username) {
@@ -73,28 +83,16 @@ class UserProvider implements UserProviderInterface
         return null;
     }
 
-    /**
-     * @return null|string|UserInterface
-     */
     private function getImpersonatorUser()
     {
         $token = $this->security->getToken();
 
-        // Symfony >= 5
-        if (class_exists(SwitchUserToken::class) && $token instanceof SwitchUserToken) {
+        if (null !== $token && $token instanceof SwitchUserToken) {
             return $token->getOriginalToken()->getUser();
         }
 
-        // Symfony < 5
-        $roles = [];
         if (null !== $token) {
-            $roles = method_exists($token, 'getRoleNames') ? $token->getRoleNames() : $token->getRoles();
-        }
-
-        foreach ($roles as $role) {
-            if ($role instanceof SwitchUserRole) {
-                return $role->getSource()->getUser();
-            }
+            return $token->getUser();
         }
 
         return null;

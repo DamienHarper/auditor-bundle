@@ -37,15 +37,15 @@ final class DHAuditorBundleTest extends BaseBundleTestCase
 
     public function testInitBundle(): void
     {
-        if (3 === Kernel::MAJOR_VERSION) {
-            self::markTestSkipped('Test skipped for Symfony <= 3.4');
-        }
-
         $kernel = $this->createKernel();
 
         $kernel->addConfigFile(__DIR__.'/Fixtures/Resources/config/dh_auditor.yaml');
         $kernel->addConfigFile(__DIR__.'/Fixtures/Resources/config/doctrine.yaml');
-        $kernel->addConfigFile(__DIR__.'/Fixtures/Resources/config/security.yaml');
+        if (6 === Kernel::MAJOR_VERSION) {
+            $kernel->addConfigFile(__DIR__.'/Fixtures/Resources/config/sf6/security.yaml');
+        } else {
+            $kernel->addConfigFile(__DIR__.'/Fixtures/Resources/config/sf4_5/security.yaml');
+        }
 
         $kernel->addBundle(DoctrineBundle::class);
         $kernel->addBundle(SecurityBundle::class);

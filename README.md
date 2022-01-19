@@ -1,9 +1,10 @@
 # auditor-bundle [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Create%20audit%20logs%20for%20all%20Doctrine%20ORM%20database%20related%20changes%20with%20auditor-bundle.&url=https://github.com/DamienHarper/auditor-bundle&hashtags=auditor-bundle)
 [![Latest Stable Version](https://poser.pugx.org/damienharper/auditor-bundle/v/stable)](https://packagist.org/packages/damienharper/auditor-bundle)
 [![Latest Unstable Version](https://poser.pugx.org/damienharper/auditor-bundle/v/unstable)](https://packagist.org/packages/damienharper/auditor-bundle)
-![CI](https://github.com/DamienHarper/auditor-bundle/workflows/CI/badge.svg?branch=master)
+[![auditor-bundle 5.x CI](https://github.com/DamienHarper/auditor-bundle/actions/workflows/ci-5.x.yml/badge.svg)](https://github.com/DamienHarper/auditor-bundle/actions/workflows/ci-5.x.yml)
 [![License](https://poser.pugx.org/damienharper/auditor-bundle/license)](https://packagist.org/packages/damienharper/auditor-bundle)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/?branch=master)
+[![codecov](https://codecov.io/gh/DamienHarper/auditor-bundle/branch/master/graph/badge.svg)](https://app.codecov.io/gh/DamienHarper/auditor-bundle/branch/master)
 [![Total Downloads](https://poser.pugx.org/damienharper/auditor-bundle/downloads)](https://packagist.org/packages/damienharper/auditor-bundle)
 [![Monthly Downloads](https://poser.pugx.org/damienharper/auditor-bundle/d/monthly)](https://packagist.org/packages/damienharper/auditor-bundle)
 [![Daily Downloads](https://poser.pugx.org/damienharper/auditor-bundle/d/daily)](https://packagist.org/packages/damienharper/auditor-bundle)
@@ -23,9 +24,9 @@ Follow instructions at [auditor-bundle-demo](https://github.com/DamienHarper/aud
 ## Version Information
  Version   | Status                      | Requirements               | Badges
 :----------|:----------------------------|:---------------------------|:-----------
- 5.x       | Not yet released, active development :rocket: | PHP >= 7.3, Symfony >= 4.4 | ![CI](https://github.com/DamienHarper/auditor-bundle/workflows/CI/badge.svg?branch=master) <br/>[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/?branch=master)
- 4.x       | Active support              | PHP >= 7.2, Symfony >= 3.4 | ![CI](https://github.com/DamienHarper/auditor-bundle/workflows/CI/badge.svg?branch=master) <br/>[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/?branch=master)
- 3.x       | End of life                 | PHP >= 7.1, Symfony >= 3.4 | ![CI](https://github.com/DamienHarper/auditor-bundle/workflows/CI/badge.svg?branch=3.x) <br/>[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/badges/quality-score.png?b=3.x)](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/?branch=3.x)
+ 5.x       | Not yet released, active development :rocket: | PHP >= 7.3, Symfony >= 4.4 | [![auditor-bundle 5.x CI](https://github.com/DamienHarper/auditor-bundle/actions/workflows/ci-5.x.yml/badge.svg)](https://github.com/DamienHarper/auditor-bundle/actions/workflows/ci-5.x.yml) <br/>[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/?branch=master) <br/>[![codecov](https://codecov.io/gh/DamienHarper/auditor-bundle/branch/master/graph/badge.svg)](https://app.codecov.io/gh/DamienHarper/auditor-bundle/branch/master)
+ 4.x       | Active support              | PHP >= 7.2, Symfony >= 3.4 | [![auditor-bundle 4.x CI](https://github.com/DamienHarper/auditor-bundle/actions/workflows/ci-4.x.yml/badge.svg)](https://github.com/DamienHarper/auditor-bundle/actions/workflows/ci-4.x.yml) <br/>[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/badges/quality-score.png?b=4.x)](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/?branch=4.x)
+ 3.x       | End of life                 | PHP >= 7.1, Symfony >= 3.4 | 
  2.x       | End of life                 | PHP >= 7.1, Symfony >= 3.4 |
  1.x       | End of life                 | PHP >= 7.1, Symfony >= 3.4 |
 

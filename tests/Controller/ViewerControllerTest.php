@@ -12,16 +12,14 @@ use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
-use DH\AuditorBundle\Security\SecurityProvider;
-use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\AbstractBrowser;
 use Symfony\Component\BrowserKit\Cookie;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\User\InMemoryUser;
 use Symfony\Component\Security\Core\User\User;
 
 /**
@@ -35,6 +33,27 @@ final class ViewerControllerTest extends WebTestCase
     use ReaderTrait;
 
     private AbstractBrowser $client;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // boots the Kernel and populates container
+        $this->client = self::createClient();
+
+        // provider with 1 em for both storage and auditing
+        $this->createAndInitDoctrineProvider();
+
+        // declare audited entites
+        $this->configureEntities();
+
+        // setup entity and audit schemas
+        $this->setupEntitySchemas();
+        $this->setupAuditSchemas();
+
+        // setup (seed) entities
+        $this->setupEntities();
+    }
 
     /**
      * @see https://symfony.com/doc/current/testing.html
@@ -288,7 +307,8 @@ final class ViewerControllerTest extends WebTestCase
     private function login(array $roles = []): void
     {
         $session = self::$container->get('session');
-        $user = new User(
+        $class = class_exists(User::class) ? User::class : InMemoryUser::class;
+        $user = new $class(
             'dark.vador',
             '$argon2id$v=19$m=65536,t=4,p=1$g1yZVCS0GJ32k2fFqBBtqw$359jLODXkhqVWtD/rf+CjiNz9r/kIvhJlenPBnW851Y',
             $roles
@@ -296,7 +316,11 @@ final class ViewerControllerTest extends WebTestCase
 
         $firewallName = 'main';
 
-        $token = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
+        if (6 === Kernel::MAJOR_VERSION) {
+            $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
+        } else {
+            $token = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
+        }
         $session->set('_security_'.$firewallName, serialize($token));
         $session->save();
 
@@ -306,33 +330,8 @@ final class ViewerControllerTest extends WebTestCase
         $this->client->getCookieJar()->set($cookie);
     }
 
-    private function fixRequestStack(): void
-    {
-        $this->client->request('GET', '/audit');
-        $requestStack = $this->getMockBuilder(RequestStack::class)->getMock();
-        $requestStack
-            ->method('getCurrentRequest')
-            ->willReturn($this->client->getRequest())
-        ;
-
-        $reflectedClass = new ReflectionClass(SecurityProvider::class);
-        $reflectedProperty = $reflectedClass->getProperty('requestStack');
-        $reflectedProperty->setAccessible(true);
-
-        $reflectedProperty->setValue(self::$container->get(SecurityProvider::class), $requestStack);
-    }
-
     private function createAndInitDoctrineProvider(): void
     {
-        if (3 === Kernel::MAJOR_VERSION) {
-            self::markTestSkipped('Test skipped for Symfony <= 3.4');
-        }
-
-        if (!self::$booted) {
-            $this->client = self::createClient(); // boots the Kernel and populates container
-        }
-        $this->login();
-        $this->fixRequestStack();
         $this->provider = self::$container->get(DoctrineProvider::class);
     }
 }

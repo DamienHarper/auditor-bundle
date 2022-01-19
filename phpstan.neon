@@ -13,9 +13,6 @@ parameters:
 
     ignoreErrors:
         # false positives
-        - '~Call to an undefined method Symfony\\Component\\Security\\Core\\Authentication\\Token\\TokenInterface\:\:getRoles\(\)\.~'
-        - '~Call to an undefined method Symfony\\Component\\Security\\Core\\Role\\SwitchUserRole\:\:getSource\(\)\.~'
         - '~Property DH\\AuditorBundle\\User\\UserProvider\:\:\$configuration is never read, only written\.~'
         # required for Symfony 4.4 compatibility
-        - '~Method DH\\AuditorBundle\\Routing\\RoutingAnnotationLoader\:\:load\(\) has parameter \$type with no type specified.~'
-        - '~Method DH\\AuditorBundle\\Routing\\RoutingAnnotationLoader\:\:supports\(\) has parameter \$type with no type specified.~'
+        - '~Method DH\\AuditorBundle\\User\\UserProvider\:\:getImpersonatorUser\(\) has no return type specified\.~'
