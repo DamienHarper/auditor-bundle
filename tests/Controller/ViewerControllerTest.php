@@ -12,12 +12,9 @@ use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
-use DH\AuditorBundle\Security\SecurityProvider;
-use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\AbstractBrowser;
 use Symfony\Component\BrowserKit\Cookie;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -36,6 +33,27 @@ final class ViewerControllerTest extends WebTestCase
     use ReaderTrait;
 
     private AbstractBrowser $client;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // boots the Kernel and populates container
+        $this->client = self::createClient();
+
+        // provider with 1 em for both storage and auditing
+        $this->createAndInitDoctrineProvider();
+
+        // declare audited entites
+        $this->configureEntities();
+
+        // setup entity and audit schemas
+        $this->setupEntitySchemas();
+        $this->setupAuditSchemas();
+
+        // setup (seed) entities
+        $this->setupEntities();
+    }
 
     /**
      * @see https://symfony.com/doc/current/testing.html
@@ -312,26 +330,8 @@ final class ViewerControllerTest extends WebTestCase
         $this->client->getCookieJar()->set($cookie);
     }
 
-    private function fixRequestStack(): void
-    {
-        $this->client->request('GET', '/audit');
-        $requestStack = $this->getMockBuilder(RequestStack::class)->getMock();
-        $requestStack
-            ->method('getCurrentRequest')
-            ->willReturn($this->client->getRequest())
-        ;
-
-        $reflectedClass = new ReflectionClass(SecurityProvider::class);
-        $reflectedProperty = $reflectedClass->getProperty('requestStack');
-        $reflectedProperty->setAccessible(true);
-
-        $reflectedProperty->setValue(self::$container->get(SecurityProvider::class), $requestStack);
-    }
-
     private function createAndInitDoctrineProvider(): void
     {
-        $this->client = self::createClient(); // boots the Kernel and populates container
-//        $this->fixRequestStack();
         $this->provider = self::$container->get(DoctrineProvider::class);
     }
 }
