@@ -77,9 +77,9 @@ final class ViewerControllerTest extends WebTestCase
         self::assertSame(4, $cards->count(), 'There are 4 entity audits.');
 
         $expected = [
-            [Author::class, 'author', '5 operation(s)', 'View audit'],
+            [Author::class, 'author', '7 operation(s)', 'View audit'],
             [Comment::class, 'comment', '3 operation(s)', 'View audit'],
-            [Post::class, 'post', '15 operation(s)', 'View audit'],
+            [Post::class, 'post', '21 operation(s)', 'View audit'],
             [Tag::class, 'tag', '15 operation(s)', 'View audit'],
         ];
         $cards->each(static function ($row, $rowIndex) use ($expected): void {
@@ -119,7 +119,7 @@ final class ViewerControllerTest extends WebTestCase
 
         $expected = [
             [Comment::class, 'comment', '3 operation(s)', 'View audit'],
-            [Post::class, 'post', '15 operation(s)', 'View audit'],
+            [Post::class, 'post', '21 operation(s)', 'View audit'],
             [Tag::class, 'tag', '15 operation(s)', 'View audit'],
         ];
         $cards->each(static function ($row, $rowIndex) use ($expected): void {
@@ -158,9 +158,9 @@ final class ViewerControllerTest extends WebTestCase
         self::assertSame(4, $cards->count(), 'There are 4 entity audits.');
 
         $expected = [
-            [Author::class, 'author', '5 operation(s)', 'View audit'],
+            [Author::class, 'author', '7 operation(s)', 'View audit'],
             [Comment::class, 'comment', '3 operation(s)', 'View audit'],
-            [Post::class, 'post', '15 operation(s)', 'View audit'],
+            [Post::class, 'post', '21 operation(s)', 'View audit'],
             [Tag::class, 'tag', '15 operation(s)', 'View audit'],
         ];
         $cards->each(static function ($row, $rowIndex) use ($expected): void {
@@ -268,7 +268,7 @@ final class ViewerControllerTest extends WebTestCase
         self::assertSame($first->getTransactionHash(), trim($breadcrumbs->eq(1)->children('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
 
         $sections = $crawler->filter('.flow-root > div');
-        self::assertSame(3, $sections->count(), 'There are 3 sections.');
+        self::assertSame(4, $sections->count(), 'There are 3 sections.');
         self::assertSame(Author::class, trim($sections->eq(0)->children('div > code')->text()), Author::class);
         self::assertSame(Post::class, trim($sections->eq(1)->children('div > code')->text()), Post::class);
         self::assertSame(Comment::class, trim($sections->eq(2)->children('div > code')->text()), Comment::class);
@@ -299,7 +299,7 @@ final class ViewerControllerTest extends WebTestCase
         self::assertSame($first->getTransactionHash(), trim($breadcrumbs->eq(1)->children('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
 
         $sections = $crawler->filter('.flow-root > div');
-        self::assertSame(2, $sections->count(), 'There are 2 sections.');
+        self::assertSame(3, $sections->count(), 'There are 2 sections.');
         self::assertSame(Post::class, trim($sections->eq(0)->children('div > code')->text()), Post::class);
         self::assertSame(Comment::class, trim($sections->eq(1)->children('div > code')->text()), Comment::class);
     }
