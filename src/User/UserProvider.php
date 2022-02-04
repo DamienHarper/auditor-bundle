@@ -60,7 +60,7 @@ class UserProvider implements UserProviderInterface
             return null;
         }
 
-        return new User($identifier, $username);
+        return new User((string)$identifier, $username);
     }
 
     private function getTokenUser(): ?UserInterface
