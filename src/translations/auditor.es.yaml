@@ -1,6 +1,6 @@
 audit:
   header:
-    home: Home
+    home: Inicio
     audited_entities: entidades auditadas
   audit_details:
     view_audit: Ver audit
@@ -11,7 +11,7 @@ audit:
     new_value: Nuevo valor
     transaction: Transacción
     entity_per_entity: (entidad por entidad)
-    operations_count: '%count% operation(s)'
+    operations_count: '%count% operacion(es)'
     summary:
       inserted: >-
         <code class="text-pink-500">
@@ -22,12 +22,12 @@ audit:
         <code class="text-pink-500">
           <a href="%source_link%" class="code">%source%</a>
         </code>
-        <em>%source_label%</em> ha sido <b>updated</b> por <b>%user%</b> %ip%
+        <em>%source_label%</em> ha sido <b>actualizada</b> por <b>%user%</b> %ip%
       deleted: >-
         <code class="text-pink-500">
           <a href="%source_link%" class="code">%source%</a>
         </code>
-        <em>%source_label%</em> ha sido <b>deleted</b> por <b>%user%</b> %ip%
+        <em>%source_label%</em> ha sido <b>eliminada</b> por <b>%user%</b> %ip%
       associated: >-
         <code class="text-pink-500">
           <a href="%source_link%" class="code">%source%</a>
@@ -41,16 +41,16 @@ audit:
         <code class="text-pink-500">
           <a href="%source_link%" class="code">%source%</a>
         </code>
-        <em>%source_label%</em> ha sido <b>disociado</b> de
+        <em>%source_label%</em> ha sido <b>desasociada</b> de
         <code class="text-pink-500">
           <a href="%target_link%" class="code">%target%</a>
         </code>
         <em>%target_label%</em> por <b>%user%</b> %ip%
-      unkown_user: 'una usuario anónima'
+      unkown_user: 'un usuario anónimo'
   pager:
     first: Primero
     previous: Anterior
     last: Ultimo
     next: Siguente
     current:  Actual
-    info: 'Muestra <span class="font-medium">%pageStart%</span> a <span class="font-medium">%pageEnd%</span> de <span class="font-medium">%numResults%</span> resultados'
+    info: 'Mostrando de <span class="font-medium">%pageStart%</span> a <span class="font-medium">%pageEnd%</span> de <span class="font-medium">%numResults%</span> registro(s)'
