@@ -11,7 +11,7 @@ audit:
     new_value: Nuevo valor
     transaction: Transacción
     entity_per_entity: (entidad por entidad)
-    operations_count: '%count% operacion(es)'
+    operations_count: '%count% registro(s)'
     summary:
       inserted: >-
         <code class="text-pink-500">
