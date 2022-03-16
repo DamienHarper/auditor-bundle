@@ -91,10 +91,6 @@ class UserProvider implements UserProviderInterface
             return $token->getOriginalToken()->getUser();
         }
 
-        if (null !== $token) {
-            return $token->getUser();
-        }
-
         return null;
     }
 }
