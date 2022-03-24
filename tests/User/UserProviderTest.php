@@ -83,17 +83,17 @@ final class UserProviderTest extends WebTestCase
         ];
 
         $user = $this->createUser('dark.vador');
+        $secondUser = $this->createUser('second_user');
 
         $firewallName = 'main';
 
         if (6 === Kernel::MAJOR_VERSION) {
-            $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
+            $userToken = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
+            $token = new SwitchUserToken($secondUser, $firewallName, $secondUser->getRoles(), $userToken);
         } else {
-            $token = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
+            $userToken = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
+            $token = new SwitchUserToken($secondUser, null, $firewallName, $secondUser->getRoles(), $userToken);
         }
-
-        $secondUser = $this->createUser('second_user');
-        $token = new SwitchUserToken($secondUser, $firewallName, $secondUser->getRoles(), $token);
 
         self::$container->get('security.token_storage')->setToken($token);
         $post = new Post();
