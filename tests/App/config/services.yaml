@@ -1,0 +1,6 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  DH\AuditorBundle\Tests\App\Command\CreatePostCommand:
