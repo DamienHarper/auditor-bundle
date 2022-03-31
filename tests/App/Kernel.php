@@ -41,6 +41,7 @@ if (6 === BaseKernel::MAJOR_VERSION) {
             $container->setParameter('container.dumper.inline_factories', true);
 
             $confDir = $this->getProjectDir().'/config';
+            $loader->load($confDir.'/services'.self::CONFIG_EXTS, 'glob');
             $loader->load($confDir.'/{packages}/*'.self::CONFIG_EXTS, 'glob');
             $loader->load($confDir.'/{packages}/sf6/*'.self::CONFIG_EXTS, 'glob');
         }
@@ -81,6 +82,7 @@ if (6 === BaseKernel::MAJOR_VERSION) {
             $container->setParameter('container.dumper.inline_factories', true);
 
             $confDir = $this->getProjectDir().'/config';
+            $loader->load($confDir.'/services'.self::CONFIG_EXTS, 'glob');
             $loader->load($confDir.'/{packages}/*'.self::CONFIG_EXTS, 'glob');
             $loader->load($confDir.'/{packages}/sf4_5/*'.self::CONFIG_EXTS, 'glob');
         }

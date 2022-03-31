@@ -12,6 +12,7 @@ use DH\Auditor\Provider\Doctrine\Persistence\Event\CreateSchemaListener;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\AuditorBundle\Controller\ViewerController;
 use DH\AuditorBundle\DHAuditorBundle;
+use DH\AuditorBundle\Event\ConsoleEventSubscriber;
 use DH\AuditorBundle\Twig\Extension\TwigExtension;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Nyholm\BundleTest\BaseBundleTestCase;
@@ -81,6 +82,9 @@ final class DHAuditorBundleTest extends BaseBundleTestCase
 
         self::assertTrue($container->has(\DH\AuditorBundle\Twig\Extension\TwigExtension::class));
         self::assertInstanceOf(TwigExtension::class, $container->get(\DH\AuditorBundle\Twig\Extension\TwigExtension::class));
+
+        self::assertTrue($container->has(\DH\AuditorBundle\Event\ConsoleEventSubscriber::class));
+        self::assertInstanceOf(ConsoleEventSubscriber::class, $container->get(\DH\AuditorBundle\Event\ConsoleEventSubscriber::class));
     }
 
     protected function getBundleClass()

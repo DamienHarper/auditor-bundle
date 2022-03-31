@@ -77,6 +77,9 @@ services:
     arguments: ['@security.helper', '@DH\Auditor\Provider\Doctrine\Configuration']
   dh_auditor.user_provider: '@DH\AuditorBundle\User\UserProvider'
 
+  DH\AuditorBundle\User\ConsoleUserProvider:
+    class: DH\AuditorBundle\User\ConsoleUserProvider
+
   DH\AuditorBundle\Security\SecurityProvider:
     class: DH\AuditorBundle\Security\SecurityProvider
     arguments: ['@request_stack', '@security.firewall.map']
@@ -90,5 +93,10 @@ services:
   DH\AuditorBundle\Event\ViewerEventSubscriber:
     class: DH\AuditorBundle\Event\ViewerEventSubscriber
     arguments: ['@DH\Auditor\Auditor']
+    tags:
+      - { name: kernel.event_subscriber }
+
+  DH\AuditorBundle\Event\ConsoleEventSubscriber:
+    arguments: ['@DH\AuditorBundle\User\ConsoleUserProvider', '@DH\Auditor\Configuration', '@dh_auditor.user_provider']
     tags:
       - { name: kernel.event_subscriber }
