@@ -89,10 +89,10 @@ final class ViewerControllerTest extends WebTestCase
             $cell = $row->filter('div > p');
             self::assertSame($expected[$rowIndex][1], trim($cell->text()), 'Tablename is OK');
 
-            $cell = $row->filter('div > dl > div > dt');
+            $cell = $row->filter('div > dl > dt');
             self::assertSame($expected[$rowIndex][2], trim($cell->text()), 'Operation count is OK');
 
-            $cell = $row->filter('div > dl > div > dd > a');
+            $cell = $row->filter('div > dl > dd > a');
             self::assertSame($expected[$rowIndex][3], trim($cell->text()), 'Link is OK');
         });
     }
@@ -129,10 +129,10 @@ final class ViewerControllerTest extends WebTestCase
             $cell = $row->filter('div > p');
             self::assertSame($expected[$rowIndex][1], trim($cell->text()), 'Tablename is OK');
 
-            $cell = $row->filter('div > dl > div > dt');
+            $cell = $row->filter('div > dl > dt');
             self::assertSame($expected[$rowIndex][2], trim($cell->text()), 'Operation count is OK');
 
-            $cell = $row->filter('div > dl > div > dd > a');
+            $cell = $row->filter('div > dl > dd > a');
             self::assertSame($expected[$rowIndex][3], trim($cell->text()), 'Link is OK');
         });
     }
@@ -170,10 +170,10 @@ final class ViewerControllerTest extends WebTestCase
             $cell = $row->filter('div > p');
             self::assertSame($expected[$rowIndex][1], trim($cell->text()), 'Tablename is OK');
 
-            $cell = $row->filter('div > dl > div > dt');
+            $cell = $row->filter('div > dl > dt');
             self::assertSame($expected[$rowIndex][2], trim($cell->text()), 'Operation count is OK');
 
-            $cell = $row->filter('div > dl > div > dd > a');
+            $cell = $row->filter('div > dl > dd > a');
             self::assertSame($expected[$rowIndex][3], trim($cell->text()), 'Link is OK');
         });
     }
