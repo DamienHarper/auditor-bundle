@@ -53,11 +53,18 @@ class AuditTransaction
      */
     private $em;
 
-    public function __construct(AuditHelper $helper)
+
+    /**
+     * @var EntityManagerInterface
+     */
+    private $defaultEm;
+
+    public function __construct(AuditHelper $helper, EntityManagerInterface $defaultEm)
     {
         $this->helper = $helper;
         $this->configuration = $helper->getConfiguration();
         $this->em = $this->configuration->getEntityManager();
+        $this->defaultEm = $defaultEm;
     }
 
     /**
@@ -76,13 +83,13 @@ class AuditTransaction
 
     public function collect(): void
     {
-        $uow = $this->em->getUnitOfWork();
+        $uow = $this->defaultEm->getUnitOfWork();
 
         $this->collectScheduledInsertions($uow);
         $this->collectScheduledUpdates($uow);
-        $this->collectScheduledDeletions($uow, $this->em);
-        $this->collectScheduledCollectionUpdates($uow, $this->em);
-        $this->collectScheduledCollectionDeletions($uow, $this->em);
+        $this->collectScheduledDeletions($uow, $this->defaultEm);
+        $this->collectScheduledCollectionUpdates($uow, $this->defaultEm);
+        $this->collectScheduledCollectionDeletions($uow, $this->defaultEm);
     }
 
     /**
