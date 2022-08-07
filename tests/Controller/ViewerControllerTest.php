@@ -308,7 +308,7 @@ final class ViewerControllerTest extends WebTestCase
     {
         // TODO: remove following code when min Symfony version supported is >= 5
         if (Kernel::MAJOR_VERSION < 5) {
-            $session = self::getContainer()->get('session');
+            $session = self::$container->get('session');
             $class = class_exists(User::class) ? User::class : InMemoryUser::class;
             $user = new $class(
                 'dark.vador',
@@ -325,10 +325,12 @@ final class ViewerControllerTest extends WebTestCase
             $session->set('_security_'.$firewallName, serialize($token));
             $session->save();
 
-            self::getContainer()->get('security.token_storage')->setToken($token);
+            self::$container->get('security.token_storage')->setToken($token);
 
             $cookie = new Cookie($session->getName(), $session->getId());
             $this->client->getCookieJar()->set($cookie);
+
+            return;
         }
 
         // Symfony >= 5.x only
@@ -344,6 +346,14 @@ final class ViewerControllerTest extends WebTestCase
 
     private function createAndInitDoctrineProvider(): void
     {
+        // TODO: remove following code when min Symfony version supported is >= 5
+        if (Kernel::MAJOR_VERSION < 5) {
+            $this->provider = self::$container->get(DoctrineProvider::class);
+
+            return;
+        }
+
+        // Symfony >= 5.x only
         $this->provider = self::getContainer()->get(DoctrineProvider::class);
     }
 }

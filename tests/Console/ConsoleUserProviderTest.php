@@ -73,6 +73,14 @@ final class ConsoleUserProviderTest extends KernelTestCase
 
     private function createAndInitDoctrineProvider(): void
     {
+        // TODO: remove following code when min Symfony version supported is >= 5
+        if (Kernel::MAJOR_VERSION < 5) {
+            $this->provider = self::$container->get(DoctrineProvider::class);
+
+            return;
+        }
+
+        // Symfony >= 5.x only
         $this->provider = self::getContainer()->get(DoctrineProvider::class);
     }
 }
