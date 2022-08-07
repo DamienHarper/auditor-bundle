@@ -62,7 +62,7 @@ final class UserProviderTest extends WebTestCase
         } else {
             $token = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
         }
-        self::$container->get('security.token_storage')->setToken($token);
+        self::getContainer()->get('security.token_storage')->setToken($token);
         $post = new Post();
         $post
             ->setTitle('Blameable post')
@@ -95,7 +95,7 @@ final class UserProviderTest extends WebTestCase
             $token = new SwitchUserToken($secondUser, null, $firewallName, $secondUser->getRoles(), $userToken);
         }
 
-        self::$container->get('security.token_storage')->setToken($token);
+        self::getContainer()->get('security.token_storage')->setToken($token);
         $post = new Post();
         $post
             ->setTitle('Blameable post')
@@ -116,7 +116,7 @@ final class UserProviderTest extends WebTestCase
 
     private function createAndInitDoctrineProvider(): void
     {
-        $this->provider = self::$container->get(DoctrineProvider::class);
+        $this->provider = self::getContainer()->get(DoctrineProvider::class);
     }
 
     private function createUser(string $username): UserInterface

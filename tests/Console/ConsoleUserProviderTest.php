@@ -73,6 +73,6 @@ final class ConsoleUserProviderTest extends KernelTestCase
 
     private function createAndInitDoctrineProvider(): void
     {
-        $this->provider = self::$container->get(DoctrineProvider::class);
+        $this->provider = self::getContainer()->get(DoctrineProvider::class);
     }
 }
