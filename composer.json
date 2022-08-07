@@ -60,7 +60,8 @@
         "phpstan": "tools/phpstan/vendor/bin/phpstan --ansi analyse src",
         "setup44": "SYMFONY_REQUIRE='^4.4' composer update --prefer-stable",
         "setup54": "SYMFONY_REQUIRE='^5.4' composer update --prefer-stable",
-        "rector": "tools/rector/vendor/bin/rector process src"
+        "rector": "tools/rector/vendor/bin/rector process src",
+        "update-tools": "composer update --working-dir=tools/php-cs-fixer ; composer update --working-dir=tools/phpstan ; composer update --working-dir=tools/rector"
     },
     "config": {
         "sort-packages": true,
