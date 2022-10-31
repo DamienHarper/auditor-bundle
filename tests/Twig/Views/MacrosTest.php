@@ -57,7 +57,7 @@ class MacrosTest extends KernelTestCase
             'entry' => $entry,
             'entity' => get_class($entity)
         ]);
-        //TODO: Asserts
+        self::assertEquals($this->getExpected(), trim($response));
     }
 
     private function getTemplateAsString(): string
@@ -66,6 +66,17 @@ class MacrosTest extends KernelTestCase
 {% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
 {{ helper.summarize(entity, entry) }}
 TWIG;
+    }
+
+    private function getExpected(): string
+    {
+        return <<<EXPECTED
+<code class="text-pink-500">
+  <a href="/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Issue112-DummyEntity/2" class="code">DH\Auditor\Tests\Provider\Doctrine\Fixtures\Issue112\DummyEntity#2</a>
+</code> <em>(Example1)</em> has been <b>associated</b> to <code class="text-pink-500">
+  <a href="/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Issue112-DummyEntity/1" class="code">DH\Auditor\Tests\Provider\Doctrine\Fixtures\Issue112\DummyEntity#1</a>
+</code> <em></em> by <b>an anonymous user</b>
+EXPECTED;
 
     }
 }
