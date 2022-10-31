@@ -25,7 +25,7 @@ final class MacrosTest extends KernelTestCase
     public function testSummarizeOnTargetWithUnusualPK(): void
     {
         self::bootKernel();
-        $container = method_exists(self::class, 'getContainer') ? self::getContainer(): self::$container;
+        $container = method_exists(self::class, 'getContainer') ? self::getContainer() : self::$container;
         $twig = $container->get('twig');
         if (!$twig instanceof Environment) {
             self::markTestIncomplete('Twig missing');
