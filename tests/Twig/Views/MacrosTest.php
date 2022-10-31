@@ -7,7 +7,7 @@ namespace DH\AuditorBundle\Tests\Twig\Views;
 use DH\Auditor\Model\Entry;
 use DH\Auditor\Provider\Doctrine\Auditing\Transaction\AuditTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Issue112\DummyEntity;
-use Doctrine\ORM\EntityManagerInterface;
+use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\SchemaSetupTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Twig\Environment;
 use Twig\Extension\StringLoaderExtension;
@@ -20,29 +20,19 @@ use Twig\Extension\StringLoaderExtension;
 final class MacrosTest extends KernelTestCase
 {
     use AuditTrait;
+    use SchemaSetupTrait;
 
-    private Environment $twig;
-    private EntityManagerInterface $em;
-
-    protected function setUp(): void
+    public function testSummarizeOnTargetWithUnusualPK(): void
     {
-        parent::setUp();
         self::bootKernel();
         $twig = self::getContainer()->get('twig');
         if (!$twig instanceof Environment) {
             self::markTestIncomplete('Twig missing');
         }
-        $this->twig = $twig;
-        $this->twig->addExtension(new StringLoaderExtension());
-        $em = self::getContainer()->get('doctrine.orm.default_entity_manager');
-        if (!$em instanceof EntityManagerInterface) {
-            self::markTestIncomplete('EntityManager missing');
-        }
-        $this->em = $em;
-    }
-
-    public function testSummarizeOnTargetWithUnusualPK(): void
-    {
+        $twig->addExtension(new StringLoaderExtension());
+        $em = $this->createEntityManager([
+            __DIR__.'/../../../vendor/damienharper/auditor/tests/Provider/Doctrine/Fixtures/Issue112',
+        ]);
         $entity = new DummyEntity();
         $entity->setPrimaryKey(1);
         $entry = Entry::fromArray([
@@ -50,13 +40,13 @@ final class MacrosTest extends KernelTestCase
                 'source' => [
                     'label' => 'Example1',
                 ],
-                'target' => $this->summarize($this->em, $entity),
+                'target' => $this->summarize($em, $entity),
             ]),
             'type' => 'associate',
             'object_id' => '2',
         ]);
 
-        $template = twig_template_from_string($this->twig, $this->getTemplateAsString());
+        $template = twig_template_from_string($twig, $this->getTemplateAsString());
         $response = $template->render([
             'entry' => $entry,
             'entity' => \get_class($entity),
