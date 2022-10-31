@@ -41,6 +41,7 @@ $config
         'simplified_if_return' => true,
         'simplified_null_return' => false,
         'static_lambda' => true,
+        'get_class_to_class_keyword' => false,
     ])
     ->setFinder(PhpCsFixer\Finder::create()
         ->in(__DIR__)
