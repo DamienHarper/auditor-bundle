@@ -13,7 +13,6 @@ use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\AuditorBundle\Controller\ViewerController;
 use DH\AuditorBundle\DHAuditorBundle;
 use DH\AuditorBundle\Event\ConsoleEventSubscriber;
-use DH\AuditorBundle\Twig\Extension\TwigExtension;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Nyholm\BundleTest\BaseBundleTestCase;
 use Nyholm\BundleTest\CompilerPass\PublicServicePass;
