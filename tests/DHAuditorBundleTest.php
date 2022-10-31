@@ -80,9 +80,6 @@ final class DHAuditorBundleTest extends BaseBundleTestCase
         self::assertTrue($container->has(\DH\AuditorBundle\Controller\ViewerController::class));
         self::assertInstanceOf(ViewerController::class, $container->get(\DH\AuditorBundle\Controller\ViewerController::class));
 
-        self::assertTrue($container->has(\DH\AuditorBundle\Twig\Extension\TwigExtension::class));
-        self::assertInstanceOf(TwigExtension::class, $container->get(\DH\AuditorBundle\Twig\Extension\TwigExtension::class));
-
         self::assertTrue($container->has(\DH\AuditorBundle\Event\ConsoleEventSubscriber::class));
         self::assertInstanceOf(ConsoleEventSubscriber::class, $container->get(\DH\AuditorBundle\Event\ConsoleEventSubscriber::class));
     }
