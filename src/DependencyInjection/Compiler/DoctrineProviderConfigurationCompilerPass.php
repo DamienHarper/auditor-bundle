@@ -103,10 +103,10 @@ class DoctrineProviderConfigurationCompilerPass implements CompilerPassInterface
             return;
         }
         $configuration = $container->getDefinition($configurationName);
-        $loggingMiddlewareDef = $container->setDefinition(
+        $DHMiddlewareDef = $container->setDefinition(
             sprintf('doctrine.dbal.%s_connection.dh_middleware', $name),
             new ChildDefinition('doctrine.dbal.dh_middleware')
         );
-        $configuration->addMethodCall('setMiddlewares', [[$loggingMiddlewareDef]]);
+        $configuration->addMethodCall('setMiddlewares', [[$DHMiddlewareDef]]);
     }
 }
