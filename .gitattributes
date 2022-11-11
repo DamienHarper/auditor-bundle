@@ -1,5 +1,7 @@
 .*      export-ignore
 /doc    export-ignore
 /tests  export-ignore
+/tools  export-ignore
+rector.php  export-ignore
 phpstan.neon    export-ignore
 phpunit.xml.dist    export-ignore
