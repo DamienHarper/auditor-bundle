@@ -77,8 +77,8 @@ class DoctrineProviderConfigurationCompilerPass implements CompilerPassInterface
 
     private function registerDHMiddleware(ContainerBuilder $container): void
     {
-        $this->isDHMiddlewareSupported = interface_exists(Middleware::class) && class_exists(DHMiddleware::class);
-        if ($this->isDHMiddlewareSupported) {
+        if (interface_exists(Middleware::class) && class_exists(DHMiddleware::class)) {
+            $this->isDHMiddlewareSupported = true;
             $container->register('doctrine.dbal.dh_middleware', DHMiddleware::class);
         }
     }
