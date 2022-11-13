@@ -55,8 +55,9 @@
     {% set target_subject = '' %}
     {% set target_label = '' %}
     {% if target is defined and target is not null %}
-        {% set target_subject = target.class ~ '#' ~ target.id %}
-        {% set target_link = path('dh_auditor_show_entity_history', { 'entity': helper.namespaceToParam(target.class), 'id': target.id }) %}
+        {% set target_id = target.pkName is defined ? target[target.pkName] : target.id %}
+        {% set target_subject = target.class ~ '#' ~ target_id %}
+        {% set target_link = path('dh_auditor_show_entity_history', { 'entity': helper.namespaceToParam(target.class), 'id': target_id }) %}
         {% if target_subject != target.label %}
             {% set target_label = '(' ~ helper.dump(target)|trim ~ ')' %}
         {% endif %}

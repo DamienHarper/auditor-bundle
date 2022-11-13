@@ -65,13 +65,6 @@ services:
       - { method: setContainer, arguments: ['@service_container'] }
     tags: ['controller.service_arguments']
 
-  DH\AuditorBundle\Twig\Extension\TwigExtension:
-    class: DH\AuditorBundle\Twig\Extension\TwigExtension
-    arguments:
-      - '@doctrine'
-    tags:
-      - { name: twig.extension }
-
   DH\AuditorBundle\User\UserProvider:
     class: DH\AuditorBundle\User\UserProvider
     arguments: ['@security.helper', '@DH\Auditor\Provider\Doctrine\Configuration']
