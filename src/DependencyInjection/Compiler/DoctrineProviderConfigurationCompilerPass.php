@@ -94,17 +94,15 @@ class DoctrineProviderConfigurationCompilerPass implements CompilerPassInterface
             return;
         }
         $connectionName = (string) $argument;
-        if (1 !== preg_match('/^doctrine.dbal.(.+)_connection$/', $connectionName, $matches)) {
-            return;
-        }
-        $name = $matches[1];
-        $configurationName = sprintf('doctrine.dbal.%s_connection.configuration', $name);
+
+        /** @see vendor/doctrine/doctrine-bundle/DependencyInjection/DoctrineExtension.php */
+        $configurationName = $connectionName.'.configuration';
         if (!$container->hasDefinition($configurationName)) {
             return;
         }
         $configuration = $container->getDefinition($configurationName);
         $DHMiddlewareDef = $container->setDefinition(
-            sprintf('doctrine.dbal.%s_connection.dh_middleware', $name),
+            $connectionName.'.dh_middleware',
             new ChildDefinition('doctrine.dbal.dh_middleware')
         );
         $configuration->addMethodCall('setMiddlewares', [[$DHMiddlewareDef]]);

@@ -15,13 +15,18 @@ use Symfony\Component\HttpKernel\Kernel;
 
 class CreatePostCommand extends Command
 {
-    protected static $defaultName = 'app:post:create';
     private DoctrineProvider $doctrineProvider;
 
     public function __construct(DoctrineProvider $doctrineProvider)
     {
-        parent::__construct(self::$defaultName);
+        parent::__construct();
         $this->doctrineProvider = $doctrineProvider;
+    }
+
+    protected function configure(): void
+    {
+        $this->setName('app:post:create');
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
