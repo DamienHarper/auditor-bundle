@@ -38,14 +38,7 @@ final class DoctrineMiddlewareCompilerPassTest extends AbstractCompilerPassTestC
             'dbal' => [
                 'default_connection' => 'default',
                 'connections' => [
-                    'default' => [
-                        'driver' => 'pdo_pgsql',
-                        'host' => 'example_host',
-                        'port' => '9999',
-                        'dbname' => 'example_db',
-                        'user' => 'example_user',
-                        'password' => 'secret',
-                    ],
+                    'default' => [],
                 ],
             ],
             'orm' => [
