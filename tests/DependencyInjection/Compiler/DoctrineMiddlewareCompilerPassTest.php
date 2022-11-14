@@ -29,7 +29,7 @@ final class DoctrineMiddlewareCompilerPassTest extends AbstractCompilerPassTestC
     public function testCompilerPass(): void
     {
         if (!interface_exists(Middleware::class) || !class_exists(DHMiddleware::class)) {
-            self::markTestSkipped('DHMiddleware doesn\'t supported');
+            self::markTestSkipped('DHMiddleware isn\'t supported');
         }
         $this->container->setParameter('kernel.cache_dir', sys_get_temp_dir());
         $this->container->setParameter('kernel.debug', false);
