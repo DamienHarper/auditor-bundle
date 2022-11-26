@@ -44,6 +44,12 @@ services:
     tags:
       - { name: doctrine.event_subscriber }
 
+  DH\Auditor\Provider\Doctrine\Persistence\Event\TableSchemaSubscriber:
+    class: DH\Auditor\Provider\Doctrine\Persistence\Event\TableSchemaSubscriber
+    arguments: ['@DH\Auditor\Provider\Doctrine\DoctrineProvider']
+    tags:
+      - { name: doctrine.event_subscriber }
+
   DH\Auditor\Provider\Doctrine\Persistence\Command\CleanAuditLogsCommand:
     class: DH\Auditor\Provider\Doctrine\Persistence\Command\CleanAuditLogsCommand
     tags:
