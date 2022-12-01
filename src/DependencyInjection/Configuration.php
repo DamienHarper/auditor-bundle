@@ -91,6 +91,16 @@ class Configuration implements ConfigurationInterface
                         }
                     }
 
+                    // "extra_fields" is an empty array by default.
+                    if (!\array_key_exists('extra_fields', $v['doctrine']) || !\is_array($v['doctrine']['extra_fields'])) {
+                        $v['doctrine']['extra_fields'] = [];
+                    }
+
+                    // "extra_indices" is an empty array by default.
+                    if (!\array_key_exists('extra_indices', $v['doctrine']) || !\is_array($v['doctrine']['extra_indices'])) {
+                        $v['doctrine']['extra_indices'] = [];
+                    }
+
                     // "doctrine.orm.default_entity_manager" is the default "storage_services"
                     if (\array_key_exists('storage_services', $v['doctrine']) && \is_string($v['doctrine']['storage_services'])) {
                         $v['doctrine']['storage_services'] = [$v['doctrine']['storage_services']];
