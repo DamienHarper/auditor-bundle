@@ -2,7 +2,7 @@ name: auditor-bundle 4.x CI
 
 on:
   schedule:
-    - cron: 0 2 * * *
+    - cron: 30 0 * * *
   pull_request:
     branches:
       - 4.x
