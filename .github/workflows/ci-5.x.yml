@@ -5,10 +5,10 @@ on:
     - cron: 0 1 * * *
   pull_request:
     branches:
-      - master
+      - 5.x
   push:
     branches:
-      - master
+      - 5.x
 
 jobs:
 
@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          ref: 5.x
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -56,6 +58,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          ref: 5.x
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -127,6 +131,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          ref: 5.x
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
