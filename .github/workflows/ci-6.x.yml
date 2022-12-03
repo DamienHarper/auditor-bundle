@@ -1,4 +1,4 @@
-name: auditor-bundle 5.x CI
+name: auditor-bundle 6.x CI
 
 on:
   schedule:
