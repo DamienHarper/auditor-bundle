@@ -80,6 +80,7 @@ class ViewerController extends AbstractController
         \assert(\is_string($request->query->get('page', '1')) || \is_int($request->query->get('page', '1')));
         $page = (int) $request->query->get('page', '1');
         $page = $page < 1 ? 1 : $page;
+
         $entity = UrlHelper::paramToNamespace($entity);
 
         if (!$reader->getProvider()->isAuditable($entity)) {

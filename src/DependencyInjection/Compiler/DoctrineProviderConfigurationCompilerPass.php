@@ -93,6 +93,7 @@ class DoctrineProviderConfigurationCompilerPass implements CompilerPassInterface
         if (!$argument instanceof Reference) {
             return;
         }
+
         $connectionName = (string) $argument;
 
         /** @see vendor/doctrine/doctrine-bundle/DependencyInjection/DoctrineExtension.php */
@@ -100,6 +101,7 @@ class DoctrineProviderConfigurationCompilerPass implements CompilerPassInterface
         if (!$container->hasDefinition($configurationName)) {
             return;
         }
+
         $configuration = $container->getDefinition($configurationName);
         $DHMiddlewareDef = $container->setDefinition(
             $connectionName.'.dh_middleware',

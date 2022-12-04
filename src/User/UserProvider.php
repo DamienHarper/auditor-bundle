@@ -53,6 +53,7 @@ class UserProvider implements UserProviderInterface
             } elseif (method_exists($impersonatorUser, 'getUsername')) {
                 $impersonatorUsername = $impersonatorUser->getUsername();
             }
+
             $username .= '[impersonator '.$impersonatorUsername.']';
         }
 
@@ -74,6 +75,7 @@ class UserProvider implements UserProviderInterface
         if (!$token instanceof \Symfony\Component\Security\Core\Authentication\Token\TokenInterface) {
             return null;
         }
+
         return $token->getUser();
     }
 

@@ -37,7 +37,7 @@ class DHAuditorExtension extends Extension
 
             if (method_exists($container, 'registerAliasForArgument')) {
                 $serviceId = 'dh_auditor.provider.'.$providerName;
-                $container->registerAliasForArgument($serviceId, ProviderInterface::class, "{$providerName}Provider");
+                $container->registerAliasForArgument($serviceId, ProviderInterface::class, sprintf('%sProvider', $providerName));
             }
         }
     }
