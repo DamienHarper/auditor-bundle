@@ -13,7 +13,7 @@
     "require": {
         "php": ">=8.0",
         "ext-json": "*",
-        "damienharper/auditor": "^2.3",
+        "damienharper/auditor": "dev-master",
         "doctrine/annotations": "^1.8",
         "doctrine/doctrine-bundle": "^1.9|^2.0",
         "doctrine/orm": "^2.7",

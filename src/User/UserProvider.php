@@ -28,13 +28,18 @@ class UserProvider implements UserProviderInterface
 
     public function __invoke(): ?AuditorUserInterface
     {
-        $tokenUser = $this->getTokenUser();
-        $impersonatorUser = $this->getImpersonatorUser();
-
         $identifier = null;
         $username = null;
+        $tokenUser = null;
 
-        if (null !== $tokenUser && $tokenUser instanceof UserInterface) {
+        $token = $this->getToken();
+        if (null !== $token) {
+            $tokenUser = $token->getUser();
+        }
+
+        $impersonatorUser = $this->getImpersonatorUser();
+
+        if ($tokenUser instanceof UserInterface) {
             if (method_exists($tokenUser, 'getId')) {
                 $identifier = $tokenUser->getId();
             }
@@ -65,7 +70,7 @@ class UserProvider implements UserProviderInterface
         return new User((string) $identifier, $username);
     }
 
-    private function getTokenUser(): ?UserInterface
+    private function getToken(): ?TokenInterface
     {
         try {
             $token = $this->security->getToken();
@@ -77,14 +82,14 @@ class UserProvider implements UserProviderInterface
             return null;
         }
 
-        return $token->getUser();
+        return $token;
     }
 
     private function getImpersonatorUser(): ?UserInterface
     {
         $token = $this->security->getToken();
 
-        if (null !== $token && $token instanceof SwitchUserToken) {
+        if ($token instanceof SwitchUserToken) {
             return $token->getOriginalToken()->getUser();
         }
 
