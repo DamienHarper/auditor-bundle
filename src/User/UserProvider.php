@@ -10,6 +10,7 @@ use DH\Auditor\User\UserInterface as AuditorUserInterface;
 use DH\Auditor\User\UserProviderInterface;
 use Exception;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -72,14 +73,14 @@ class UserProvider implements UserProviderInterface
             $token = null;
         }
 
-        if (!$token instanceof \Symfony\Component\Security\Core\Authentication\Token\TokenInterface) {
+        if (!$token instanceof TokenInterface) {
             return null;
         }
 
         return $token->getUser();
     }
 
-    private function getImpersonatorUser()
+    private function getImpersonatorUser(): ?UserInterface
     {
         $token = $this->security->getToken();
 

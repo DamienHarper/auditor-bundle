@@ -11,9 +11,9 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class SecurityProvider implements SecurityProviderInterface
 {
-    private $requestStack;
+    private RequestStack $requestStack;
 
-    private $firewallMap;
+    private FirewallMap $firewallMap;
 
     public function __construct(RequestStack $requestStack, FirewallMap $firewallMap)
     {

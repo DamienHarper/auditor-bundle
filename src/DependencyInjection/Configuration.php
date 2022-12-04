@@ -71,14 +71,17 @@ class Configuration implements ConfigurationInterface
                     if (!\array_key_exists('doctrine', $v)) {
                         $v['doctrine'] = [];
                     }
+
                     // "table_prefix" is empty by default.
                     if (!\array_key_exists('table_prefix', $v['doctrine']) || !\is_string($v['doctrine']['table_prefix'])) {
                         $v['doctrine']['table_prefix'] = '';
                     }
+
                     // "table_suffix" is "_audit" by default.
                     if (!\array_key_exists('table_suffix', $v['doctrine']) || !\is_string($v['doctrine']['table_suffix'])) {
                         $v['doctrine']['table_suffix'] = '_audit';
                     }
+
                     // "entities" are "enabled" by default.
                     if (\array_key_exists('entities', $v['doctrine']) && \is_array($v['doctrine']['entities'])) {
                         foreach ($v['doctrine']['entities'] as $entity => $options) {
@@ -87,26 +90,31 @@ class Configuration implements ConfigurationInterface
                             }
                         }
                     }
+
                     // "doctrine.orm.default_entity_manager" is the default "storage_services"
                     if (\array_key_exists('storage_services', $v['doctrine']) && \is_string($v['doctrine']['storage_services'])) {
                         $v['doctrine']['storage_services'] = [$v['doctrine']['storage_services']];
                     } elseif (!\array_key_exists('storage_services', $v['doctrine']) || !\is_array($v['doctrine']['storage_services'])) {
                         $v['doctrine']['storage_services'] = ['doctrine.orm.default_entity_manager'];
                     }
+
                     // "doctrine.orm.default_entity_manager" is the default "auditing_services"
                     if (\array_key_exists('auditing_services', $v['doctrine']) && \is_string($v['doctrine']['auditing_services'])) {
                         $v['doctrine']['auditing_services'] = [$v['doctrine']['auditing_services']];
                     } elseif (!\array_key_exists('auditing_services', $v['doctrine']) || !\is_array($v['doctrine']['auditing_services'])) {
                         $v['doctrine']['auditing_services'] = ['doctrine.orm.default_entity_manager'];
                     }
+
                     // "viewer" is disabled by default
                     if (!\array_key_exists('viewer', $v['doctrine']) || !\is_bool($v['doctrine']['viewer'])) {
                         $v['doctrine']['viewer'] = false;
                     }
+
                     // "storage_mapper" is null by default
                     if (!\array_key_exists('storage_mapper', $v['doctrine']) || !\is_string($v['doctrine']['storage_mapper'])) {
                         $v['doctrine']['storage_mapper'] = null;
                     }
+
                     return $v;
                 })
             ->end()
