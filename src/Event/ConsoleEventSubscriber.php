@@ -14,7 +14,9 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class ConsoleEventSubscriber implements EventSubscriberInterface
 {
     private ConsoleUserProvider $consoleUserProvider;
+
     private Configuration $configuration;
+
     private UserProviderInterface $provider;
 
     public function __construct(ConsoleUserProvider $consoleUserProvider, Configuration $configuration, UserProviderInterface $provider)

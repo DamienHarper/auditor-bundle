@@ -23,7 +23,7 @@ class AddProviderCompilerPass implements CompilerPassInterface
         $auditorDefinition = $container->getDefinition(Auditor::class);
 
         $providers = [];
-        foreach ($container->findTaggedServiceIds('dh_auditor.provider') as $providerId => $attributes) {
+        foreach (array_keys($container->findTaggedServiceIds('dh_auditor.provider')) as $providerId) {
             $providers[] = new Reference($providerId);
         }
 

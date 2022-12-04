@@ -9,6 +9,7 @@ use DH\Auditor\Configuration as AuditorConfiguration;
 use DH\Auditor\Provider\Doctrine\Configuration as DoctrineProviderConfiguration;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Provider\Doctrine\Persistence\Event\CreateSchemaListener;
+use DH\Auditor\Provider\Doctrine\Persistence\Event\TableSchemaSubscriber;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\AuditorBundle\Controller\ViewerController;
 use DH\AuditorBundle\DHAuditorBundle;
@@ -72,6 +73,9 @@ final class DHAuditorBundleTest extends BaseBundleTestCase
 
         self::assertTrue($container->has(\DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader::class));
         self::assertInstanceOf(Reader::class, $container->get(\DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader::class));
+
+        self::assertTrue($container->has(\DH\Auditor\Provider\Doctrine\Persistence\Event\TableSchemaSubscriber::class));
+        self::assertInstanceOf(TableSchemaSubscriber::class, $container->get(\DH\Auditor\Provider\Doctrine\Persistence\Event\TableSchemaSubscriber::class));
 
         self::assertTrue($container->has(\DH\Auditor\Provider\Doctrine\Persistence\Event\CreateSchemaListener::class));
         self::assertInstanceOf(CreateSchemaListener::class, $container->get(\DH\Auditor\Provider\Doctrine\Persistence\Event\CreateSchemaListener::class));

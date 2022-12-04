@@ -10,6 +10,7 @@ use DH\Auditor\User\UserInterface as AuditorUserInterface;
 use DH\Auditor\User\UserProviderInterface;
 use Exception;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -53,6 +54,7 @@ class UserProvider implements UserProviderInterface
             } elseif (method_exists($impersonatorUser, 'getUsername')) {
                 $impersonatorUsername = $impersonatorUser->getUsername();
             }
+
             $username .= '[impersonator '.$impersonatorUsername.']';
         }
 
@@ -67,23 +69,18 @@ class UserProvider implements UserProviderInterface
     {
         try {
             $token = $this->security->getToken();
-        } catch (Exception $e) {
+        } catch (Exception) {
             $token = null;
         }
 
-        if (null === $token) {
+        if (!$token instanceof TokenInterface) {
             return null;
         }
 
-        $tokenUser = $token->getUser();
-        if ($tokenUser instanceof UserInterface) {
-            return $tokenUser;
-        }
-
-        return null;
+        return $token->getUser();
     }
 
-    private function getImpersonatorUser()
+    private function getImpersonatorUser(): ?UserInterface
     {
         $token = $this->security->getToken();
 

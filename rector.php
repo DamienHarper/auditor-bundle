@@ -2,40 +2,66 @@
 
 declare(strict_types=1);
 
-use Rector\Core\Configuration\Option;
-use Rector\Core\ValueObject\PhpVersion;
-use Rector\Php74\Rector\Property\TypedPropertyRector;
+use Rector\Config\RectorConfig;
+use Rector\DeadCode\Rector\Property\RemoveUnusedPrivatePropertyRector;
+use Rector\Doctrine\Set\DoctrineSetList;
+use Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector;
 use Rector\PHPUnit\Set\PHPUnitSetList;
 use Rector\Set\ValueObject\LevelSetList;
-use Rector\Symfony\Set\SymfonyLevelSetList;
+use Rector\Set\ValueObject\SetList;
+use Rector\Symfony\Rector\Class_\MakeCommandLazyRector;
 use Rector\Symfony\Set\SymfonySetList;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Rector\Transform\Rector\Attribute\AttributeKeyToClassConstFetchRector;
+use Rector\TypeDeclaration\Rector\ClassMethod\AddArrayParamDocTypeRector;
+use Rector\TypeDeclaration\Rector\ClassMethod\AddArrayReturnDocTypeRector;
 
-return static function (ContainerConfigurator $containerConfigurator): void {
-    $services = $containerConfigurator->services();
-    $services->set(TypedPropertyRector::class);
+return static function (RectorConfig $rectorConfig): void {
+    $rectorConfig->paths([__DIR__.'/src', __DIR__.'/tests']);
 
-    // get parameters
-    $parameters = $containerConfigurator->parameters();
-    $parameters->set(Option::PATHS, [__DIR__.'/src', __DIR__.'/tests']);
-    $parameters->set(Option::PHP_VERSION_FEATURES, PhpVersion::PHP_74);
-    $parameters->set(Option::BOOTSTRAP_FILES, [__DIR__.'/vendor/autoload.php']);
-    $parameters->set(Option::SKIP, [__DIR__.'/tests/App/var/*']);
+    // Do not try to change simple property init and assign to constructor promotion
+    // to make code easier to read (no more class with properties declared both
+    // at the start of the class and in the constructor)
+    $rectorConfig->skip([
+        ClassPropertyAssignToConstructorPromotionRector::class,
+        RemoveUnusedPrivatePropertyRector::class,
+        AttributeKeyToClassConstFetchRector::class,
+        MakeCommandLazyRector::class,
+        AddArrayReturnDocTypeRector::class,
+        AddArrayParamDocTypeRector::class,
+        __DIR__.'/tests/App/var/*',
+    ]);
 
-    // PHP Rules
-    $containerConfigurator->import(LevelSetList::UP_TO_PHP_74);
+    // PHP rules
+    $rectorConfig->sets([
+        LevelSetList::UP_TO_PHP_80,
+        SetList::CODE_QUALITY,
+        SetList::DEAD_CODE,
+        SetList::CODING_STYLE,
+        SetList::TYPE_DECLARATION,
+        SetList::TYPE_DECLARATION_STRICT,
+    ]);
 
-    // PHPUnit Rules
-    $containerConfigurator->import(PHPUnitSetList::PHPUNIT_91);
-    $containerConfigurator->import(PHPUnitSetList::PHPUNIT_CODE_QUALITY);
-    $containerConfigurator->import(PHPUnitSetList::PHPUNIT_YIELD_DATA_PROVIDER);
+    // Symfony rules
+//    $rectorConfig->sets([
+//        SymfonySetList::SYMFONY_54,
+//        SymfonySetList::SYMFONY_CODE_QUALITY,
+//        SymfonySetList::SYMFONY_CONSTRUCTOR_INJECTION,
+//        SymfonySetList::ANNOTATIONS_TO_ATTRIBUTES,
+//        SymfonySetList::SYMFONY_STRICT,
+//    ]);
 
-    // Symfony Rules
-    $parameters->set(
-        Option::SYMFONY_CONTAINER_XML_PATH_PARAMETER,
-        __DIR__.'/tests/App/var/cache/test/DH_AuditorBundle_Tests_App_KernelTestDebugContainer.xml'
-    );
-    $containerConfigurator->import(SymfonyLevelSetList::UP_TO_SYMFONY_44);
-    $containerConfigurator->import(SymfonySetList::SYMFONY_CODE_QUALITY);
-    $containerConfigurator->import(SymfonySetList::SYMFONY_CONSTRUCTOR_INJECTION);
+    // Doctrine rules
+//    $rectorConfig->sets([
+//        DoctrineSetList::DOCTRINE_CODE_QUALITY,
+//        DoctrineSetList::DOCTRINE_DBAL_30,
+//        DoctrineSetList::DOCTRINE_ORM_29,
+//        DoctrineSetList::ANNOTATIONS_TO_ATTRIBUTES,
+//    ]);
+
+    // PHPUnit rules
+//    $rectorConfig->sets([
+//        PHPUnitSetList::PHPUNIT_91,
+//        PHPUnitSetList::PHPUNIT_CODE_QUALITY,
+//        PHPUnitSetList::PHPUNIT_YIELD_DATA_PROVIDER,
+//    ]);
 };

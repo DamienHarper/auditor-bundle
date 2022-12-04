@@ -30,7 +30,7 @@ class RoutingAnnotationLoader extends Loader
      */
     public function load($resource, $type = null): RouteCollection
     {
-        if (true === $this->isLoaded) {
+        if ($this->isLoaded) {
             throw new RuntimeException('Do not add the "audit" loader twice');
         }
 
