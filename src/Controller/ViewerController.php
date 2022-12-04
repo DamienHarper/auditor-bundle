@@ -38,7 +38,7 @@ class ViewerController extends AbstractController
         $auditingServices = $reader->getProvider()->getAuditingServices();
         $audited = [];
         $scope = Security::VIEW_SCOPE;
-        foreach ($auditingServices as $name => $auditingService) {
+        foreach ($auditingServices as $auditingService) {
             $audited = array_merge(
                 $audited,
                 array_filter(
