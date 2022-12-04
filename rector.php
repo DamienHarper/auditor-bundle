@@ -53,7 +53,7 @@ return static function (RectorConfig $rectorConfig): void {
     // Doctrine rules
     $rectorConfig->sets([
         DoctrineSetList::DOCTRINE_CODE_QUALITY,
-//        DoctrineSetList::DOCTRINE_DBAL_30,
+        DoctrineSetList::DOCTRINE_DBAL_30,
 //        DoctrineSetList::DOCTRINE_ORM_29,
 //        DoctrineSetList::ANNOTATIONS_TO_ATTRIBUTES,
     ]);
