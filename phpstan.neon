@@ -14,5 +14,3 @@ parameters:
     ignoreErrors:
         # false positives
         - '~Property DH\\AuditorBundle\\User\\UserProvider\:\:\$configuration is never read, only written\.~'
-        # required for Symfony 4.4 compatibility
-        - '~Method DH\\AuditorBundle\\User\\UserProvider\:\:getImpersonatorUser\(\) has no return type specified\.~'
