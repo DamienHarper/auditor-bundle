@@ -67,7 +67,7 @@ class UserProvider implements UserProviderInterface
     {
         try {
             $token = $this->security->getToken();
-        } catch (Exception $e) {
+        } catch (Exception) {
             $token = null;
         }
 

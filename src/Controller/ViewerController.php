@@ -74,10 +74,8 @@ class ViewerController extends AbstractController
 
     /**
      * @Route(path="/audit/{entity}/{id}", name="dh_auditor_show_entity_history", methods={"GET"})
-     *
-     * @param int|string $id
      */
-    public function showEntityHistoryAction(Request $request, Reader $reader, string $entity, $id = null): Response
+    public function showEntityHistoryAction(Request $request, Reader $reader, string $entity, int|string $id = null): Response
     {
         \assert(\is_string($request->query->get('page', '1')) || \is_int($request->query->get('page', '1')));
         $page = (int) $request->query->get('page', '1');
@@ -94,7 +92,7 @@ class ViewerController extends AbstractController
                 'page' => $page,
                 'page_size' => Reader::PAGE_SIZE,
             ]), $page, Reader::PAGE_SIZE);
-        } catch (AccessDeniedException $e) {
+        } catch (AccessDeniedException) {
             throw $this->createAccessDeniedException();
         }
 
