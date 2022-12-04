@@ -71,16 +71,10 @@ class UserProvider implements UserProviderInterface
             $token = null;
         }
 
-        if (null === $token) {
+        if (!$token instanceof \Symfony\Component\Security\Core\Authentication\Token\TokenInterface) {
             return null;
         }
-
-        $tokenUser = $token->getUser();
-        if ($tokenUser instanceof UserInterface) {
-            return $tokenUser;
-        }
-
-        return null;
+        return $token->getUser();
     }
 
     private function getImpersonatorUser()

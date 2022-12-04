@@ -29,7 +29,7 @@ class SecurityProvider implements SecurityProviderInterface
             $firewallConfig = $this->firewallMap->getFirewallConfig($request);
 
             $clientIp = $request->getClientIp();
-            $firewallName = null === $firewallConfig ? null : $firewallConfig->getName();
+            $firewallName = $firewallConfig instanceof \Symfony\Bundle\SecurityBundle\Security\FirewallConfig ? $firewallConfig->getName() : null;
         }
 
         return [$clientIp, $firewallName];
