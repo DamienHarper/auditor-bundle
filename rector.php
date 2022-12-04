@@ -16,7 +16,7 @@ use Rector\TypeDeclaration\Rector\ClassMethod\AddArrayParamDocTypeRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\AddArrayReturnDocTypeRector;
 
 return static function (RectorConfig $rectorConfig): void {
-    $rectorConfig->paths([__DIR__ . '/src', __DIR__ . '/tests']);
+    $rectorConfig->paths([__DIR__.'/src', __DIR__.'/tests']);
 
     // Do not try to change simple property init and assign to constructor promotion
     // to make code easier to read (no more class with properties declared both
