@@ -38,17 +38,15 @@ return static function (RectorConfig $rectorConfig): void {
         SetList::DEAD_CODE,
         SetList::CODING_STYLE,
         SetList::TYPE_DECLARATION,
-        SetList::TYPE_DECLARATION_STRICT,
     ]);
 
     // Symfony rules
-//    $rectorConfig->sets([
-//        SymfonySetList::SYMFONY_54,
-//        SymfonySetList::SYMFONY_CODE_QUALITY,
-//        SymfonySetList::SYMFONY_CONSTRUCTOR_INJECTION,
-//        SymfonySetList::ANNOTATIONS_TO_ATTRIBUTES,
-//        SymfonySetList::SYMFONY_STRICT,
-//    ]);
+    $rectorConfig->sets([
+        SymfonySetList::SYMFONY_54,
+        SymfonySetList::SYMFONY_CODE_QUALITY,
+        SymfonySetList::SYMFONY_CONSTRUCTOR_INJECTION,
+        SymfonySetList::ANNOTATIONS_TO_ATTRIBUTES,
+    ]);
 
     // Doctrine rules
     $rectorConfig->sets([

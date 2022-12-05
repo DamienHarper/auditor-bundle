@@ -28,9 +28,7 @@ class ViewerController extends AbstractController
         $this->environment = $environment;
     }
 
-    /**
-     * @Route(path="/audit", name="dh_auditor_list_audits", methods={"GET"})
-     */
+    #[Route(path: '/audit', name: 'dh_auditor_list_audits', methods: ['GET'])]
     public function listAuditsAction(Reader $reader): Response
     {
         $schemaManager = new SchemaManager($reader->getProvider());
@@ -60,9 +58,7 @@ class ViewerController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route(path="/audit/transaction/{hash}", name="dh_auditor_show_transaction", methods={"GET"})
-     */
+    #[Route(path: '/audit/transaction/{hash}', name: 'dh_auditor_show_transaction', methods: ['GET'])]
     public function showTransactionAction(Reader $reader, string $hash): Response
     {
         $audits = $reader->getAuditsByTransactionHash($hash);
@@ -73,9 +69,7 @@ class ViewerController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route(path="/audit/{entity}/{id}", name="dh_auditor_show_entity_history", methods={"GET"})
-     */
+    #[Route(path: '/audit/{entity}/{id}', name: 'dh_auditor_show_entity_history', methods: ['GET'])]
     public function showEntityHistoryAction(Request $request, Reader $reader, string $entity, int|string $id = null): Response
     {
         \assert(\is_string($request->query->get('page', '1')) || \is_int($request->query->get('page', '1')));
