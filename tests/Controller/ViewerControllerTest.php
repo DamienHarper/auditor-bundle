@@ -14,10 +14,8 @@ use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\AbstractBrowser;
-use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\User\InMemoryUser;
 use Symfony\Component\Security\Core\User\User;
@@ -306,34 +304,6 @@ final class ViewerControllerTest extends WebTestCase
 
     private function login(array $roles = []): void
     {
-        // TODO: remove following code when min Symfony version supported is >= 5
-        if (Kernel::MAJOR_VERSION < 5) {
-            $session = self::$container->get('session');
-            $class = class_exists(User::class) ? User::class : InMemoryUser::class;
-            $user = new $class(
-                'dark.vador',
-                '$argon2id$v=19$m=65536,t=4,p=1$g1yZVCS0GJ32k2fFqBBtqw$359jLODXkhqVWtD/rf+CjiNz9r/kIvhJlenPBnW851Y',
-                $roles
-            );
-            $firewallName = 'main';
-
-            if (6 === Kernel::MAJOR_VERSION) {
-                $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
-            } else {
-                $token = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
-            }
-            $session->set('_security_'.$firewallName, serialize($token));
-            $session->save();
-
-            self::$container->get('security.token_storage')->setToken($token);
-
-            $cookie = new Cookie($session->getName(), $session->getId());
-            $this->client->getCookieJar()->set($cookie);
-
-            return;
-        }
-
-        // Symfony >= 5.x only
         $class = class_exists(User::class) ? User::class : InMemoryUser::class;
         $user = new $class(
             'dark.vador',
@@ -346,14 +316,6 @@ final class ViewerControllerTest extends WebTestCase
 
     private function createAndInitDoctrineProvider(): void
     {
-        // TODO: remove following code when min Symfony version supported is >= 5
-        if (Kernel::MAJOR_VERSION < 5) {
-            $this->provider = self::$container->get(DoctrineProvider::class);
-
-            return;
-        }
-
-        // Symfony >= 5.x only
         $this->provider = self::getContainer()->get(DoctrineProvider::class);
     }
 }

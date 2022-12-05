@@ -14,6 +14,9 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+/**
+ * @see \DH\AuditorBundle\Tests\User\UserProviderTest
+ */
 class UserProvider implements UserProviderInterface
 {
     private Security $security;

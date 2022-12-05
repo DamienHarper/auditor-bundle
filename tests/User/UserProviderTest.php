@@ -63,12 +63,7 @@ final class UserProviderTest extends WebTestCase
             $token = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
         }
 
-        // TODO: remove following code when min Symfony version supported is >= 5
-        if (Kernel::MAJOR_VERSION < 5) {
-            self::$container->get('security.token_storage')->setToken($token);
-        } else {
-            self::getContainer()->get('security.token_storage')->setToken($token);
-        }
+        self::getContainer()->get('security.token_storage')->setToken($token);
 
         $post = new Post();
         $post
@@ -102,12 +97,7 @@ final class UserProviderTest extends WebTestCase
             $token = new SwitchUserToken($secondUser, null, $firewallName, $secondUser->getRoles(), $userToken);
         }
 
-        // TODO: remove following code when min Symfony version supported is >= 5
-        if (Kernel::MAJOR_VERSION < 5) {
-            self::$container->get('security.token_storage')->setToken($token);
-        } else {
-            self::getContainer()->get('security.token_storage')->setToken($token);
-        }
+        self::getContainer()->get('security.token_storage')->setToken($token);
 
         $post = new Post();
         $post
@@ -129,14 +119,6 @@ final class UserProviderTest extends WebTestCase
 
     private function createAndInitDoctrineProvider(): void
     {
-        // TODO: remove following code when min Symfony version supported is >= 5
-        if (Kernel::MAJOR_VERSION < 5) {
-            $this->provider = self::$container->get(DoctrineProvider::class);
-
-            return;
-        }
-
-        // Symfony >= 5.x only
         $this->provider = self::getContainer()->get(DoctrineProvider::class);
     }
 
