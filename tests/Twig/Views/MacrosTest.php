@@ -50,7 +50,7 @@ final class MacrosTest extends KernelTestCase
         $template = twig_template_from_string($twig, $this->getTemplateAsString());
         $response = $template->render([
             'entry' => $entry,
-            'entity' => \get_class($entity),
+            'entity' => $entity::class,
         ]);
         self::assertSame($this->getExpected(), trim($response));
     }
