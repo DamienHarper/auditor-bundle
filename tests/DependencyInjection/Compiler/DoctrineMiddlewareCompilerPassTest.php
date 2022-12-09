@@ -15,7 +15,6 @@ use DH\AuditorBundle\DependencyInjection\DHAuditorExtension;
 use Doctrine\Bundle\DoctrineBundle\DependencyInjection\DoctrineExtension;
 use Doctrine\DBAL\Driver\Middleware;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractCompilerPassTestCase;
-use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 
@@ -94,10 +93,9 @@ final class DoctrineMiddlewareCompilerPassTest extends AbstractCompilerPassTestC
         $this->container->loadFromExtension('dh_auditor', $DHConfig);
         $this->compile();
 
-        $this->assertContainerBuilderHasServiceDefinitionWithMethodCall(
-            'doctrine.dbal.default_connection.configuration',
-            'setMiddlewares',
-            [[new ChildDefinition('doctrine.dbal.dh_middleware')]]
+        $this->assertContainerBuilderHasServiceDefinitionWithTag(
+            'doctrine.dbal.default_connection.dh_middleware',
+            'doctrine.middleware'
         );
     }
 
