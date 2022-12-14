@@ -57,10 +57,12 @@ final class ConsoleUserProviderTest extends KernelTestCase
         $tester->assertCommandIsSuccessful('Expect it to run');
 
         $this->flushAll($auditingServices);
+
         // get history
         $entries = $this->createReader()->createQuery(Post::class)->execute();
-        self::assertSame('app:post:create', $entries[0]->getUsername());
-        self::assertSame('command', $entries[0]->getUserId());
+        self::assertNotEmpty($entries, 'There are audit entries');
+        self::assertSame('app:post:create', $entries[0]->getUsername(), 'Username is OK');
+        self::assertSame('command', $entries[0]->getUserId(), 'User ID is OK');
     }
 
     protected function getBundleClass()
