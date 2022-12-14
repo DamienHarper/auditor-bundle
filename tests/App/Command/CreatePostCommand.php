@@ -11,7 +11,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\HttpKernel\Kernel;
 
 class CreatePostCommand extends Command
 {
@@ -32,7 +31,6 @@ class CreatePostCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-
         $io->write('Creating a new post');
 
         $post = new Post();
@@ -42,14 +40,10 @@ class CreatePostCommand extends Command
             ->setCreatedAt(new DateTimeImmutable('2020-01-17 22:17:34'))
         ;
 
-        $this->doctrineProvider->getAuditingServiceForEntity(Post::class)->getEntityManager()->persist($post);
-        $this->doctrineProvider->getAuditingServiceForEntity(Post::class)->getEntityManager()->flush();
+        $entityManager = $this->doctrineProvider->getAuditingServiceForEntity(Post::class)->getEntityManager();
+        $entityManager->persist($post);
+        $entityManager->flush();
 
-        // Symfony 4 compatibility
-        if (Kernel::MAJOR_VERSION >= 5) {
-            return self::SUCCESS;
-        }
-
-        return 0;
+        return self::SUCCESS;
     }
 }
