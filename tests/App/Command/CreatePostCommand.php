@@ -44,6 +44,6 @@ class CreatePostCommand extends Command
         $entityManager->persist($post);
         $entityManager->flush();
 
-        return self::SUCCESS;
+        return 0;
     }
 }
