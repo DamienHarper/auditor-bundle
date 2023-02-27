@@ -1,6 +1,3 @@
-parameters:
-  # empty by default
-  dh_auditor.provider.doctrine.configuration: []
 services:
   DH\Auditor\Configuration:
     class: DH\Auditor\Configuration
