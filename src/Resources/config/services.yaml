@@ -1,3 +1,6 @@
+parameters:
+  # empty by default
+  dh_auditor.provider.doctrine.configuration: []
 services:
   DH\Auditor\Configuration:
     class: DH\Auditor\Configuration
@@ -73,7 +76,7 @@ services:
 
   DH\AuditorBundle\User\UserProvider:
     class: DH\AuditorBundle\User\UserProvider
-    arguments: ['@security.helper', '@DH\Auditor\Provider\Doctrine\Configuration']
+    arguments: ['@security.token_storage']
   dh_auditor.user_provider: '@DH\AuditorBundle\User\UserProvider'
 
   DH\AuditorBundle\User\ConsoleUserProvider:
@@ -86,7 +89,7 @@ services:
 
   DH\AuditorBundle\Security\RoleChecker:
     class: DH\AuditorBundle\Security\RoleChecker
-    arguments: ['@security.helper', '@DH\Auditor\Provider\Doctrine\DoctrineProvider']
+    arguments: ['@security.authorization_checker', '@DH\Auditor\Provider\Doctrine\DoctrineProvider']
   dh_auditor.role_checker: '@DH\AuditorBundle\Security\RoleChecker'
 
   DH\AuditorBundle\Event\ViewerEventSubscriber:

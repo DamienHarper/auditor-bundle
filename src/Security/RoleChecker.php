@@ -8,27 +8,27 @@ use DH\Auditor\Provider\Doctrine\Configuration;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Security\RoleCheckerInterface;
 use DH\Auditor\User\UserInterface;
-use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class RoleChecker implements RoleCheckerInterface
 {
-    private Security $security;
+    private AuthorizationCheckerInterface $authorizationChecker;
 
     private DoctrineProvider $provider;
 
-    public function __construct(Security $security, DoctrineProvider $doctrineProvider)
+    public function __construct(AuthorizationCheckerInterface $authorizationChecker, DoctrineProvider $doctrineProvider)
     {
-        $this->security = $security;
+        $this->authorizationChecker = $authorizationChecker;
         $this->provider = $doctrineProvider;
     }
 
     public function __invoke(string $entity, string $scope): bool
     {
         $userProvider = $this->provider->getAuditor()->getConfiguration()->getUserProvider();
-        $user = null === $userProvider ? null : $userProvider();
-        $security = null === $userProvider ? null : $this->security;
+        $user = null !== $userProvider ? $userProvider() : null;
+        $authorizationChecker = null !== $userProvider ? $this->authorizationChecker : null;
 
-        if (!($user instanceof UserInterface) || !($security instanceof Security)) {
+        if (!($user instanceof UserInterface) || !($authorizationChecker instanceof AuthorizationCheckerInterface)) {
             // If no security defined or no user identified, consider access granted
             return true;
         }
@@ -49,7 +49,7 @@ class RoleChecker implements RoleCheckerInterface
 
         // roles are defined for the give scope
         foreach ($roles[$scope] as $role) {
-            if ($security->isGranted($role)) {
+            if ($authorizationChecker->isGranted($role)) {
                 // role granted => access granted
                 return true;
             }

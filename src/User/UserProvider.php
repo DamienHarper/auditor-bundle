@@ -4,25 +4,21 @@ declare(strict_types=1);
 
 namespace DH\AuditorBundle\User;
 
-use DH\Auditor\Provider\Doctrine\Configuration;
 use DH\Auditor\User\User;
 use DH\Auditor\User\UserInterface as AuditorUserInterface;
 use DH\Auditor\User\UserProviderInterface;
 use Exception;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class UserProvider implements UserProviderInterface
 {
-    private Security $security;
+    private TokenStorageInterface $tokenStorage;
 
-    private Configuration $configuration;
-
-    public function __construct(Security $security, Configuration $configuration)
+    public function __construct(TokenStorageInterface $tokenStorage)
     {
-        $this->security = $security;
-        $this->configuration = $configuration;
+        $this->tokenStorage = $tokenStorage;
     }
 
     public function __invoke(): ?AuditorUserInterface
@@ -33,26 +29,16 @@ class UserProvider implements UserProviderInterface
         $identifier = null;
         $username = null;
 
-        if (null !== $tokenUser && $tokenUser instanceof UserInterface) {
+        if ($tokenUser instanceof UserInterface) {
             if (method_exists($tokenUser, 'getId')) {
                 $identifier = $tokenUser->getId();
             }
 
-            $username = '';
-            if (method_exists($tokenUser, 'getUserIdentifier')) {
-                $username = $tokenUser->getUserIdentifier();
-            } elseif (method_exists($tokenUser, 'getUsername')) {
-                $username = $tokenUser->getUsername();
-            }
+            $username = $this->getUsername($tokenUser);
         }
 
         if ($impersonatorUser instanceof UserInterface) {
-            $impersonatorUsername = '';
-            if (method_exists($impersonatorUser, 'getUserIdentifier')) {
-                $impersonatorUsername = $impersonatorUser->getUserIdentifier();
-            } elseif (method_exists($impersonatorUser, 'getUsername')) {
-                $impersonatorUsername = $impersonatorUser->getUsername();
-            }
+            $impersonatorUsername = $this->getUsername($impersonatorUser);
             $username .= '[impersonator '.$impersonatorUsername.']';
         }
 
@@ -63,10 +49,22 @@ class UserProvider implements UserProviderInterface
         return new User((string) $identifier, $username);
     }
 
+    private function getUsername(UserInterface $user): string
+    {
+        if (method_exists($user, 'getUserIdentifier')) {
+            return $user->getUserIdentifier();
+        }
+        if (method_exists($user, 'getUsername')) {
+            return $user->getUsername();
+        }
+
+        return '';
+    }
+
     private function getTokenUser(): ?UserInterface
     {
         try {
-            $token = $this->security->getToken();
+            $token = $this->tokenStorage->getToken();
         } catch (Exception $e) {
             $token = null;
         }
@@ -85,9 +83,9 @@ class UserProvider implements UserProviderInterface
 
     private function getImpersonatorUser()
     {
-        $token = $this->security->getToken();
+        $token = $this->tokenStorage->getToken();
 
-        if (null !== $token && $token instanceof SwitchUserToken) {
+        if ($token instanceof SwitchUserToken) {
             return $token->getOriginalToken()->getUser();
         }
 
