@@ -81,7 +81,7 @@ class UserProvider implements UserProviderInterface
         return null;
     }
 
-    private function getImpersonatorUser()
+    private function getImpersonatorUser(): ?UserInterface
     {
         $token = $this->tokenStorage->getToken();
 
