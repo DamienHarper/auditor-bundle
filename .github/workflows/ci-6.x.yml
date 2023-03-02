@@ -106,7 +106,7 @@ jobs:
           vendor/bin/phpunit --coverage-clover=coverage.xml
 
       - name: Upload coverage file
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ env.CODECOV_REPORT }}
           path: coverage.xml
@@ -124,12 +124,12 @@ jobs:
           fetch-depth: 2
 
       - name: "Download coverage files"
-        uses: "actions/download-artifact@v2"
+        uses: "actions/download-artifact@v3"
         with:
           path: "reports"
 
       - name: "Upload to Codecov"
-        uses: "codecov/codecov-action@v2"
+        uses: "codecov/codecov-action@v3"
         with:
           directory: reports
           token: ${{ env.CODECOV_TOKEN }}
