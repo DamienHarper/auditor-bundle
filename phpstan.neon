@@ -12,5 +12,3 @@ parameters:
         - '%currentWorkingDirectory%/src/DependencyInjection/Configuration.php'
 
     ignoreErrors:
-        # false positives
-        - '~Property DH\\AuditorBundle\\User\\UserProvider\:\:\$configuration is never read, only written\.~'
