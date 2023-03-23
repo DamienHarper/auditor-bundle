@@ -54,7 +54,11 @@
 
 {% macro previous(entity, id, paginator) %}
     {% if paginator.hasPreviousPage %}
-        <a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: paginator.previousPage}) }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+        <a
+            href="#"
+            data-value="{{ paginator.currentPage -1 }}"
+            class="page-button relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+        >
             <span class="sr-only">{% trans from 'auditor' %}audit.pager.previous{% endtrans %}</span>
             <!-- Heroicon name: solid/chevron-left -->
             <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -93,7 +97,11 @@
 
 {% macro next(entity, id, paginator) %}
     {% if paginator.hasNextPage %}
-        <a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: paginator.nextPage}) }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+        <a
+            href="#"
+            data-value="{{ paginator.currentPage +1 }}"
+            class="page-button relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+        >
             <span class="sr-only">{% trans from 'auditor' %}audit.pager.next{% endtrans %}</span>
             <!-- Heroicon name: solid/chevron-right -->
             <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -120,11 +128,21 @@
 
 {% macro page(entity, id, paginator, page) %}
     {% if page == paginator.currentPage %}
-        <a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: page}) }}" aria-current="page" class="z-10 bg-indigo-50 border-indigo-500 text-indigo-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+        <a
+            href="#"
+            aria-current="page"
+            data-value={{ page }}
+            class="page-button z-10 bg-indigo-50 border-indigo-500 text-indigo-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium"
+        >
             {{ page }}
         </a>
     {% else %}
-        <a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: page}) }}" aria-current="page" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+        <a
+            href="#"
+            aria-current="page"
+            data-value={{ page }}
+            class="page-button bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium"
+        >
             {{ page }}
         </a>
     {% endif %}
