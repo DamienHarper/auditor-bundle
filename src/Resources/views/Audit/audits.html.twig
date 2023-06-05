@@ -35,7 +35,7 @@
                 <div class="border-t border-gray-200 px-4 py-2 bg-gray-50 group-hover:bg-blue-100 group-hover:border-blue-200 transition-all duration-300">
                     <dl class="flex justify-between items-center">
                         <dt class="text-sm font-medium text-gray-500">
-                            {% trans with { '%count%': reader.createQuery(entity).count() } from 'auditor' %}audit.audit_details.operations_count{% endtrans %}
+                            {% trans with { '%count%': reader.createQuery(entity).count()|number_format } from 'auditor' %}audit.audit_details.operations_count{% endtrans %}
                         </dt>
                         <dd class="text-sm text-gray-900 text-right">
                             <a class="text-blue-500" href="{{ path('dh_auditor_show_entity_history', {'entity': helper.namespaceToParam(entity)}) }}">
