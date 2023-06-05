@@ -1,7 +1,7 @@
 audit:
   header:
     home: Home
-    audited_entities: audited entities
+    audited_entities: auditierte Objekte
   audit_details:
     view_audit: Audits anzeigen
     most_recent: (neueste zuerst)
@@ -11,7 +11,7 @@ audit:
     new_value: Neuer Wert
     transaction: Transaktion
     entity_per_entity: (Objekt pro Objekt)
-    operations_count: '%count% operation(s)'
+    operations_count: '%count% Operation(en)'
     summary:
       inserted: >-
         <code class="text-pink-500">
