@@ -5,4 +5,5 @@ framework:
     router:
         utf8: true
     session:
+        handler_id: 'session.handler.native'
         storage_factory_id: session.storage.factory.mock_file
