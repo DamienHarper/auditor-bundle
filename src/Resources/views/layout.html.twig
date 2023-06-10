@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ app.request.locale }}">
 <head>
     <meta charset="UTF-8" />
-    <title>auditor</title>
+    <title>{% block title %}auditor{% endblock %}</title>
     {% block stylesheets %}
         <link rel="stylesheet" href="{{ asset('bundles/dhauditor/app.css') }}">
     {% endblock %}
 </head>
 <body>
 <div>
+    {% block navbar %}
     <nav class="bg-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
@@ -38,28 +39,20 @@
                             </svg>
                         </a>
                     </div>
-{#                    <div class="hidden md:block">#}
-{#                        <div class="ml-10 flex items-baseline space-x-4">#}
-{#                            <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->#}
-{#                            <a href="#" class="bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium" aria-current="page">Dashboard</a>#}
-{#                            <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Team</a>#}
-{#                            <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Projects</a>#}
-{#                            <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Calendar</a>#}
-{#                            <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Reports</a>#}
-{#                        </div>#}
-{#                    </div>#}
                 </div>
             </div>
         </div>
     </nav>
+    {% endblock %}
 
+    {% block breadcrumbs %}
     <header class="bg-white">
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-{#            <h1 class="text-lg leading-6 font-semibold text-gray-900">#}
             {% block dh_auditor_header %}{% endblock %}
-{#            </h1>#}
         </div>
     </header>
+    {% endblock %}
+
     <main>
         <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
             {% block dh_auditor_content %}{% endblock %}
