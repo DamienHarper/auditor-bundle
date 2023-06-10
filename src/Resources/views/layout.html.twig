@@ -2,7 +2,7 @@
 <html lang="{{ app.request.locale }}">
 <head>
     <meta charset="UTF-8" />
-    <title>auditor</title>
+    <title>{% block title %}auditor{% endblock %}</title>
     {% block stylesheets %}
         <link rel="stylesheet" href="{{ asset('bundles/dhauditor/app.css') }}">
     {% endblock %}
