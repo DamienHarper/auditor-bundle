@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <title>auditor</title>
@@ -9,6 +9,7 @@
 </head>
 <body>
 <div>
+    {% block navbar %}
     <nav class="bg-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
@@ -42,12 +43,16 @@
             </div>
         </div>
     </nav>
+    {% endblock %}
 
+    {% block breadcrums %}
     <header class="bg-white">
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
             {% block dh_auditor_header %}{% endblock %}
         </div>
     </header>
+    {% endblock %}
+
     <main>
         <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
             {% block dh_auditor_content %}{% endblock %}
