@@ -47,7 +47,7 @@ class RoutingAnnotationLoader extends Loader
      * @param mixed   $resource
      * @param ?string $type
      */
-    public function supports($resource, $type = null): bool
+    public function supports($resource, ?string $type = null): bool
     {
         return 'auditor' === $type;
     }

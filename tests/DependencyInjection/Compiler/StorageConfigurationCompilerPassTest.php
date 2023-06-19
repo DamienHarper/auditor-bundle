@@ -20,12 +20,12 @@ final class StorageConfigurationCompilerPassTest extends AbstractCompilerPassTes
         $container->addCompilerPass(new DoctrineProviderConfigurationCompilerPass());
     }
 
-//    public function testCompilerPass(): void
-//    {
-//        $this->compile();
-//
-//        $serviceId = 'dh_auditor.provider.doctrine.storage_services.doctrine.orm.default_entity_manager';
-//        $this->assertContainerBuilderHasAlias($serviceId, StorageService::class);
-//        $this->assertContainerBuilderHasService($serviceId, StorageService::class);
-//    }
+    //    public function testCompilerPass(): void
+    //    {
+    //        $this->compile();
+    //
+    //        $serviceId = 'dh_auditor.provider.doctrine.storage_services.doctrine.orm.default_entity_manager';
+    //        $this->assertContainerBuilderHasAlias($serviceId, StorageService::class);
+    //        $this->assertContainerBuilderHasService($serviceId, StorageService::class);
+    //    }
 }
