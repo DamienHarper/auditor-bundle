@@ -59,6 +59,24 @@
 </nav>
 {% endblock %}
 
+{% block dh_auditor_filters %}
+<nav class="bg-white border border-gray-200 rounded flex py-3" aria-label="Filters">
+    <div class="text-pink-500 text-lg leading-6 px-4">Filters</div>
+    <form id="entity-history-form" method="POST">
+        <ol role="list" class="max-w-screen-xl w-full mx-auto px-4 flex sm:px-6 lg:px-6 text-gray-500 flex-wrap">
+            {{ form(form) }}
+            <li class="form-group mr-4 mb-1 flex flex-col justify-end">
+                <input
+                    type="submit"
+                    value="Submit"
+                    class="bg-blue-400 text-white font-bold rounded cursor-pointer py-2 px-4"
+                />
+        </ol>
+
+    </form>
+</nav>
+{% endblock %}
+
 
 {% block dh_auditor_content %}
 <div class="flow-root">
@@ -76,3 +94,13 @@
 
 {{ pager.render(helper.namespaceToParam(entity), id, paginator) }}
 {% endblock dh_auditor_content %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('bundles/auditor/css/app.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('bundles/auditor/js/app.js') }}" type="text/javascript" charset="UTF-8"></script>
+{% endblock %}
