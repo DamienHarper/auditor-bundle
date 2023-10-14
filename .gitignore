@@ -11,3 +11,5 @@ tests/coverage/
 composer.lock
 *.sqlite
 .preload.php
+/tools/**/vendor/
+!/tools/**/composer.lock

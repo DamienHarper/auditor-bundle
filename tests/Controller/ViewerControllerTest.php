@@ -31,6 +31,7 @@ final class ViewerControllerTest extends WebTestCase
     use ReaderTrait;
 
     private AbstractBrowser $client;
+    private DoctrineProvider $provider;
 
     protected function setUp(): void
     {

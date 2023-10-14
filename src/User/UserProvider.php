@@ -10,8 +10,12 @@ use DH\Auditor\User\UserProviderInterface;
 use Exception;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+/**
+ * @see \DH\AuditorBundle\Tests\User\UserProviderTest
+ */
 class UserProvider implements UserProviderInterface
 {
     private TokenStorageInterface $tokenStorage;
@@ -54,6 +58,7 @@ class UserProvider implements UserProviderInterface
         if (method_exists($user, 'getUserIdentifier')) {
             return $user->getUserIdentifier();
         }
+
         if (method_exists($user, 'getUsername')) {
             return $user->getUsername();
         }
@@ -65,27 +70,22 @@ class UserProvider implements UserProviderInterface
     {
         try {
             $token = $this->tokenStorage->getToken();
-        } catch (Exception $e) {
+        } catch (Exception) {
             $token = null;
         }
 
-        if (null === $token) {
+        if (!$token instanceof TokenInterface) {
             return null;
         }
 
-        $tokenUser = $token->getUser();
-        if ($tokenUser instanceof UserInterface) {
-            return $tokenUser;
-        }
-
-        return null;
+        return $token->getUser();
     }
 
     private function getImpersonatorUser(): ?UserInterface
     {
         $token = $this->tokenStorage->getToken();
 
-        if (null !== $token && $token instanceof SwitchUserToken) {
+        if ($token instanceof TokenInterface && $token instanceof SwitchUserToken) {
             return $token->getOriginalToken()->getUser();
         }
 

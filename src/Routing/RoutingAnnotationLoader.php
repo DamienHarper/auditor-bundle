@@ -44,8 +44,7 @@ class RoutingAnnotationLoader extends Loader
     }
 
     /**
-     * @param mixed   $resource
-     * @param ?string $type
+     * @param mixed $resource
      */
     public function supports($resource, ?string $type = null): bool
     {

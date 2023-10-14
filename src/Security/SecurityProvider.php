@@ -7,6 +7,7 @@ namespace DH\AuditorBundle\Security;
 use DH\Auditor\Security\SecurityProviderInterface;
 use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class SecurityProvider implements SecurityProviderInterface
@@ -27,7 +28,7 @@ class SecurityProvider implements SecurityProviderInterface
         $firewallName = null;
 
         $request = $this->requestStack->getCurrentRequest();
-        if (null !== $request) {
+        if ($request instanceof Request) {
             $firewallConfig = $this->firewallMap->getFirewallConfig($request);
 
             $clientIp = $request->getClientIp();
