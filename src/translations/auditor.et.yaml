@@ -7,8 +7,10 @@ audit:
     most_recent: (hiljuti lisatud eespool)
     entry_title: Vaatle kõiki selle transaktsiooni toiminguid
     property: Rekvisiit
+    extra_field: Extra rekvisiit
     old_value: Vana väärtus
     new_value: Uus väärtus
+    value: Väärtus
     transaction: Transaktsioon
     entity_per_entity: (kirje kaupa)
     operations_count: '%count% operation(s)'

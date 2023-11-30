@@ -7,8 +7,10 @@ audit:
     most_recent: (meest recente eerst)
     entry_title: Bekijk alle operaties binnen deze transactie
     property: Veld
+    extra_field: Extra veld
     old_value: Oude waarde
     new_value: Nieuwe waarde
+    value: Waarde
     transaction: Transactie
     entity_per_entity: (entiteit per entiteit)
     operations_count: '%count% bewerking(en)'
