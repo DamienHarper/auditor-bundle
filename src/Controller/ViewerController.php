@@ -10,6 +10,7 @@ use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\Auditor\Provider\Doctrine\Persistence\Schema\SchemaManager;
 use DH\Auditor\Provider\Doctrine\Service\AuditingService;
 use DH\AuditorBundle\Helper\UrlHelper;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,7 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * @see \DH\AuditorBundle\Tests\Controller\ViewerControllerTest
  */
-class ViewerController
+class ViewerController extends AbstractController
 {
     private $environment;
 
