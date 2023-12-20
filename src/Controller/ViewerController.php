@@ -10,16 +10,17 @@ use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\Auditor\Provider\Doctrine\Persistence\Schema\SchemaManager;
 use DH\Auditor\Provider\Doctrine\Service\AuditingService;
 use DH\AuditorBundle\Helper\UrlHelper;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException as SymfonyAccessDeniedException;
 use Twig\Environment;
 
 /**
  * @see \DH\AuditorBundle\Tests\Controller\ViewerControllerTest
  */
-class ViewerController extends AbstractController
+class ViewerController
 {
     private Environment $environment;
 
@@ -52,7 +53,7 @@ class ViewerController extends AbstractController
             );
         }
 
-        return $this->render('@DHAuditor/Audit/audits.html.twig', [
+        return $this->renderView('@DHAuditor/Audit/audits.html.twig', [
             'audited' => $audited,
             'reader' => $reader,
         ]);
@@ -63,7 +64,7 @@ class ViewerController extends AbstractController
     {
         $audits = $reader->getAuditsByTransactionHash($hash);
 
-        return $this->render('@DHAuditor/Audit/transaction.html.twig', [
+        return $this->renderView('@DHAuditor/Audit/transaction.html.twig', [
             'hash' => $hash,
             'audits' => $audits,
         ]);
@@ -75,11 +76,10 @@ class ViewerController extends AbstractController
         \assert(\is_string($request->query->get('page', '1')) || \is_int($request->query->get('page', '1')));
         $page = (int) $request->query->get('page', '1');
         $page = $page < 1 ? 1 : $page;
-
         $entity = UrlHelper::paramToNamespace($entity);
 
         if (!$reader->getProvider()->isAuditable($entity)) {
-            throw $this->createNotFoundException();
+            throw new NotFoundHttpException('Not Found');
         }
 
         try {
@@ -88,19 +88,19 @@ class ViewerController extends AbstractController
                 'page' => $page,
                 'page_size' => Reader::PAGE_SIZE,
             ]), $page, Reader::PAGE_SIZE);
-        } catch (AccessDeniedException) {
-            throw $this->createAccessDeniedException();
+        } catch (AccessDeniedException $e) {
+            throw new SymfonyAccessDeniedException('Access Denied.');
         }
 
-        return $this->render('@DHAuditor/Audit/entity_history.html.twig', [
+        return $this->renderView('@DHAuditor/Audit/entity_history.html.twig', [
             'id' => $id,
             'entity' => $entity,
             'paginator' => $pager,
         ]);
     }
 
-    protected function renderView(string $view, array $parameters = []): string
+    protected function renderView(string $view, array $parameters = []): Response
     {
-        return $this->environment->render($view, $parameters);
+        return new Response($this->environment->render($view, $parameters));
     }
 }
