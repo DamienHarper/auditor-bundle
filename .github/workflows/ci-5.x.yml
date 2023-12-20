@@ -50,6 +50,8 @@ jobs:
           - '7.4'
           - '8.0'
           - '8.1'
+          - '8.2'
+          - '8.3'
         symfony:
           - '4.4.*'
           - '5.*'
@@ -124,15 +126,15 @@ jobs:
         php:
           - '8.0'
           - '8.1'
+          - '8.2'
+          - '8.3'
         symfony:
           - '6.*'
       fail-fast: false
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          ref: 5.x
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -183,16 +185,84 @@ jobs:
           name: ${{ env.CODECOV_REPORT }}
           path: coverage.xml
 
+  tests_sf_7:
+    name: Tests PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}
+    runs-on: ubuntu-latest
+    needs: [ code_style_composer_checks ]
+
+    strategy:
+      matrix:
+        php:
+          - '8.2'
+          - '8.3'
+        symfony:
+          - '7.*'
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: composer:v2, flex, pcov
+          coverage: pcov
+
+      - name: Configure Symfony
+        run: |
+          composer global config --no-plugins allow-plugins.symfony/flex true
+          composer global require --no-progress --no-scripts --no-plugins symfony/flex
+          composer config extra.symfony.require "${{ matrix.symfony }}"
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ matrix.php }}-composer-
+
+      - name: Update project dependencies (7.*)
+        if: matrix.symfony == '7.*'
+        run: SYMFONY_REQUIRE="^7.0" composer update --no-progress --ansi --prefer-stable
+
+      - name: Install auditor from source
+        run: composer reinstall damienharper/auditor --prefer-install=source
+
+      - name: Install PHPStan
+        run: composer install --no-progress --ansi --working-dir=tools/phpstan
+
+      - name: Run PHPStan
+        run: composer phpstan
+
+      - name: Run tests
+        run: |
+          RAW_CODECOV_REPORT="php-${{ matrix.php }}-sf-${{ matrix.symfony }}-coverage"
+          echo "CODECOV_REPORT=$(echo $RAW_CODECOV_REPORT | sed 's/\.\*//')" >> $GITHUB_ENV
+          vendor/bin/phpunit --coverage-clover=coverage.xml
+
+      - name: Upload coverage file
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.CODECOV_REPORT }}
+          path: coverage.xml
+
   upload_coverage:
     name: "Upload coverage to Codecov"
     runs-on: "ubuntu-latest"
     needs:
       - tests_sf4_sf5
       - tests_sf_6
+      - tests_sf_7
 
     steps:
       - name: "Checkout"
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v4"
         with:
           fetch-depth: 2
 
