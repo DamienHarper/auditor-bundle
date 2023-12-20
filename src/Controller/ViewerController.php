@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Environment;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException as SymfonyAccessDeniedException;
 
 /**
  * @see \DH\AuditorBundle\Tests\Controller\ViewerControllerTest
@@ -96,7 +97,7 @@ class ViewerController
                 'page_size' => Reader::PAGE_SIZE,
             ]), $page, Reader::PAGE_SIZE);
         } catch (AccessDeniedException $e) {
-            throw new \Symfony\Component\Security\Core\Exception\AccessDeniedException('Access Denied.');
+            throw new SymfonyAccessDeniedException('Access Denied.');
         }
 
         return $this->renderView('@DHAuditor/Audit/entity_history.html.twig', [
