@@ -12,6 +12,7 @@ use DH\Auditor\Provider\Doctrine\Service\AuditingService;
 use DH\AuditorBundle\Helper\UrlHelper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Twig\Environment;
 
@@ -85,7 +86,7 @@ class ViewerController
         $entity = UrlHelper::paramToNamespace($entity);
 
         if (!$reader->getProvider()->isAuditable($entity)) {
-            throw $this->createNotFoundException();
+            throw new NotFoundHttpException('Not Found');
         }
 
         try {
@@ -95,7 +96,7 @@ class ViewerController
                 'page_size' => Reader::PAGE_SIZE,
             ]), $page, Reader::PAGE_SIZE);
         } catch (AccessDeniedException $e) {
-            throw $this->createAccessDeniedException();
+            throw new \Symfony\Component\Security\Core\Exception\AccessDeniedException('Access Denied.');
         }
 
         return $this->renderView('@DHAuditor/Audit/entity_history.html.twig', [
@@ -107,6 +108,6 @@ class ViewerController
 
     protected function renderView(string $view, array $parameters = []): Response
     {
-        return new Response ($this->environment->render($view, $parameters));
+        return new Response($this->environment->render($view, $parameters));
     }
 }
