@@ -65,7 +65,7 @@ class ViewerController
      */
     public function showTransactionAction(Reader $reader, string $hash): Response
     {
-        $audits = $reader->getAuditsByTransactionHash($hash);
+        $audits = []; $reader->getAuditsByTransactionHash($hash);
 
         return $this->renderView('@DHAuditor/Audit/transaction.html.twig', [
             'hash' => $hash,
