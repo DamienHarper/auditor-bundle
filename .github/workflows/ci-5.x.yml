@@ -2,7 +2,7 @@ name: auditor-bundle 5.x CI
 
 on:
   schedule:
-    - cron: 0 1 * * *
+    - cron: 15 0 * * *
   pull_request:
     branches:
       - 5.x
@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -56,6 +58,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -72,10 +76,10 @@ jobs:
 
       - name: Get Composer Cache Directory
         id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}
@@ -105,7 +109,7 @@ jobs:
           vendor/bin/phpunit --coverage-clover=coverage.xml
 
       - name: Upload coverage file
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ env.CODECOV_REPORT }}
           path: coverage.xml
@@ -127,6 +131,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -143,10 +149,10 @@ jobs:
 
       - name: Get Composer Cache Directory
         id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}
@@ -172,7 +178,7 @@ jobs:
           vendor/bin/phpunit --coverage-clover=coverage.xml
 
       - name: Upload coverage file
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ env.CODECOV_REPORT }}
           path: coverage.xml
@@ -186,17 +192,17 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v3"
         with:
           fetch-depth: 2
 
       - name: "Download coverage files"
-        uses: "actions/download-artifact@v2"
+        uses: "actions/download-artifact@v3"
         with:
           path: "reports"
 
       - name: "Upload to Codecov"
-        uses: "codecov/codecov-action@v2"
+        uses: "codecov/codecov-action@v3"
         with:
           directory: reports
           token: ${{ env.CODECOV_TOKEN }}

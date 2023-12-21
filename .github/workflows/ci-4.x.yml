@@ -2,7 +2,7 @@ name: auditor-bundle 4.x CI
 
 on:
   schedule:
-    - cron: 0 2 * * *
+    - cron: 30 0 * * *
   pull_request:
     branches:
       - 4.x
@@ -13,7 +13,7 @@ on:
 jobs:
   tests:
     name: Tests PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -30,6 +30,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -46,10 +48,10 @@ jobs:
 
       - name: Get Composer Cache Directory
         id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}
