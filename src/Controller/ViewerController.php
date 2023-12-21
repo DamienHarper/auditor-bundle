@@ -71,7 +71,7 @@ class ViewerController
     }
 
     #[Route(path: '/audit/{entity}/{id}', name: 'dh_auditor_show_entity_history', methods: ['GET'])]
-    public function showEntityHistoryAction(Request $request, Reader $reader, string $entity, int|string|null $id = null): Response
+    public function showEntityHistoryAction(Request $request, Reader $reader, string $entity, null|int|string $id = null): Response
     {
         \assert(\is_string($request->query->get('page', '1')) || \is_int($request->query->get('page', '1')));
         $page = (int) $request->query->get('page', '1');

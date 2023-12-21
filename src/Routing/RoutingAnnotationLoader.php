@@ -24,10 +24,7 @@ class RoutingAnnotationLoader extends Loader
         $this->configuration = $configuration;
     }
 
-    /**
-     * @param mixed $resource
-     */
-    public function load($resource, ?string $type = null): RouteCollection
+    public function load(mixed $resource, ?string $type = null): RouteCollection
     {
         if ($this->isLoaded) {
             throw new RuntimeException('Do not add the "audit" loader twice');
@@ -44,10 +41,9 @@ class RoutingAnnotationLoader extends Loader
     }
 
     /**
-     * @param mixed   $resource
      * @param ?string $type
      */
-    public function supports($resource, ?string $type = null): bool
+    public function supports(mixed $resource, ?string $type = null): bool
     {
         return 'auditor' === $type;
     }
