@@ -19,6 +19,8 @@ use Twig\Environment;
 
 /**
  * @see \DH\AuditorBundle\Tests\Controller\ViewerControllerTest
+ *
+ * @final since 5.2.5
  */
 class ViewerController
 {
