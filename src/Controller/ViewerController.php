@@ -20,7 +20,7 @@ use Twig\Environment;
 /**
  * @see \DH\AuditorBundle\Tests\Controller\ViewerControllerTest
  */
-class ViewerController
+final class ViewerController
 {
     private Environment $environment;
 
