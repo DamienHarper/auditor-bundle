@@ -12,7 +12,6 @@ use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Routing\RouteCollectionBuilder;
 
-
 if (6 === BaseKernel::MAJOR_VERSION) {
     class Kernel extends BaseKernel
     {
@@ -44,7 +43,7 @@ if (6 === BaseKernel::MAJOR_VERSION) {
             $confDir = $this->getProjectDir().'/config';
             $loader->load($confDir.'/services'.self::CONFIG_EXTS, 'glob');
             $loader->load($confDir.'/{packages}/*'.self::CONFIG_EXTS, 'glob');
-            $loader->load($confDir.'/{packages}/sf6/*'.self::CONFIG_EXTS, 'glob');
+            $loader->load($confDir.'/{packages}/sf6_7/*'.self::CONFIG_EXTS, 'glob');
         }
 
         protected function configureRoutes(RoutingConfigurator $routes): void
@@ -52,6 +51,12 @@ if (6 === BaseKernel::MAJOR_VERSION) {
             $confDir = $this->getProjectDir().'/config';
 
             $routes->import($confDir.'/routes/*'.self::CONFIG_EXTS, 'glob');
+
+            if (6 > BaseKernel::MAJOR_VERSION) {
+                $routes->import($confDir.'/routes/sf4_5/*'.self::CONFIG_EXTS, 'glob');
+            } else {
+                $routes->import($confDir.'/routes/sf6_7/*'.self::CONFIG_EXTS, 'glob');
+            }
         }
     }
 } else {
@@ -88,7 +93,7 @@ if (6 === BaseKernel::MAJOR_VERSION) {
             if (6 > BaseKernel::MAJOR_VERSION) {
                 $loader->load($confDir.'/{packages}/sf4_5/*'.self::CONFIG_EXTS, 'glob');
             } else {
-                $loader->load($confDir.'/{packages}/sf6/*'.self::CONFIG_EXTS, 'glob');
+                $loader->load($confDir.'/{packages}/sf6_7/*'.self::CONFIG_EXTS, 'glob');
             }
         }
 
