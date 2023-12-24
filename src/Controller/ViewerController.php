@@ -99,7 +99,7 @@ final class ViewerController
         ]);
     }
 
-    protected function renderView(string $view, array $parameters = []): Response
+    private function renderView(string $view, array $parameters = []): Response
     {
         return new Response($this->environment->render($view, $parameters));
     }
