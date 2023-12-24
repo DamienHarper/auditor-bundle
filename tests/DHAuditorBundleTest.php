@@ -42,10 +42,12 @@ final class DHAuditorBundleTest extends BaseBundleTestCase
 
         $kernel->addConfigFile(__DIR__.'/Fixtures/Resources/config/dh_auditor.yaml');
         $kernel->addConfigFile(__DIR__.'/Fixtures/Resources/config/doctrine.yaml');
-        if (6 === Kernel::MAJOR_VERSION) {
-            $kernel->addConfigFile(__DIR__.'/Fixtures/Resources/config/sf6/security.yaml');
-        } else {
+        if (6 > Kernel::MAJOR_VERSION) {
             $kernel->addConfigFile(__DIR__.'/Fixtures/Resources/config/sf4_5/security.yaml');
+        //            $kernel->addConfigFile(__DIR__ . '/Fixtures/Resources/routes/sf4_5/annotations.yaml');
+        } else {
+            $kernel->addConfigFile(__DIR__.'/Fixtures/Resources/config/sf6_7/security.yaml');
+            //            $kernel->addConfigFile(__DIR__ . '/Fixtures/Resources/routes/sf6_7/attributes.yaml');
         }
 
         $kernel->addBundle(DoctrineBundle::class);
