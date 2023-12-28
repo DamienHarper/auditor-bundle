@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
- * @see \DH\AuditorBundle\Tests\DHAuditorBundleTest
+ * @see Tests\DHAuditorBundleTest
  */
 class DHAuditorBundle extends Bundle
 {
