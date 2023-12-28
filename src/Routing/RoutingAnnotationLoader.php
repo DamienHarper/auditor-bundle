@@ -6,21 +6,21 @@ namespace DH\AuditorBundle\Routing;
 
 use DH\AuditorBundle\Controller\ViewerController;
 use RuntimeException;
-use Symfony\Bundle\FrameworkBundle\Routing\AnnotatedRouteControllerLoader;
+use Symfony\Bundle\FrameworkBundle\Routing\AttributeRouteControllerLoader;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\Routing\RouteCollection;
 
 class RoutingAnnotationLoader extends Loader
 {
-    private AnnotatedRouteControllerLoader $annotatedRouteControllerLoader;
+    private AttributeRouteControllerLoader $attributeRouteControllerLoader;
 
     private bool $isLoaded = false;
 
     private array $configuration;
 
-    public function __construct(AnnotatedRouteControllerLoader $annotatedRouteController, array $configuration)
+    public function __construct(AttributeRouteControllerLoader $attributeRouteControllerLoader, array $configuration)
     {
-        $this->annotatedRouteControllerLoader = $annotatedRouteController;
+        $this->attributeRouteControllerLoader = $attributeRouteControllerLoader;
         $this->configuration = $configuration;
     }
 
@@ -32,7 +32,7 @@ class RoutingAnnotationLoader extends Loader
 
         $routeCollection = new RouteCollection();
         if (true === $this->configuration['viewer']) {
-            $routeCollection = $this->annotatedRouteControllerLoader->load(ViewerController::class);
+            $routeCollection = $this->attributeRouteControllerLoader->load(ViewerController::class);
         }
 
         $this->isLoaded = true;
