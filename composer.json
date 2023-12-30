@@ -45,7 +45,7 @@
         "symfony/css-selector": "^5.4|^6.0|^7.0",
         "symfony/framework-bundle": "^5.4|^6.0|^7.0",
         "symfony/var-dumper": "^5.4|^6.0|^7.0",
-        "symfony/webpack-encore-bundle": "^1.12",
+        "symfony/webpack-encore-bundle": "^1.12|^2.0",
         "doctrine/data-fixtures": "^1.4"
     },
     "scripts": {
