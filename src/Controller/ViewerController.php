@@ -10,6 +10,7 @@ use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\Auditor\Provider\Doctrine\Persistence\Schema\SchemaManager;
 use DH\Auditor\Provider\Doctrine\Service\AuditingService;
 use DH\AuditorBundle\Helper\UrlHelper;
+use DH\AuditorBundle\Tests\Controller\ViewerControllerTest;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -18,7 +19,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException as SymfonyAc
 use Twig\Environment;
 
 /**
- * @see \DH\AuditorBundle\Tests\Controller\ViewerControllerTest
+ * @see ViewerControllerTest
  *
  * @final since 5.2.5
  */

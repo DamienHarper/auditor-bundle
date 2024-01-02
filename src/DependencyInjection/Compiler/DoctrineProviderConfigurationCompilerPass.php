@@ -9,6 +9,7 @@ use DH\Auditor\Provider\Doctrine\Auditing\Logger\Middleware\DHMiddleware;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Provider\Doctrine\Service\AuditingService;
 use DH\Auditor\Provider\Doctrine\Service\StorageService;
+use DH\AuditorBundle\Tests\DependencyInjection\Compiler\DoctrineMiddlewareCompilerPassTest;
 use Doctrine\DBAL\Driver\Middleware;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -16,7 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
-/** @see \DH\AuditorBundle\Tests\DependencyInjection\Compiler\DoctrineMiddlewareCompilerPassTest */
+/** @see DoctrineMiddlewareCompilerPassTest */
 class DoctrineProviderConfigurationCompilerPass implements CompilerPassInterface
 {
     private bool $isDHMiddlewareSupported = false;

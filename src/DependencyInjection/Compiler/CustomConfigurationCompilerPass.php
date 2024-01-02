@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\DependencyInjection\Compiler;
 
 use DH\Auditor\Configuration;
+use DH\AuditorBundle\Tests\DependencyInjection\Compiler\CustomConfigurationCompilerPassTest;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
- * @see \DH\AuditorBundle\Tests\DependencyInjection\Compiler\CustomConfigurationCompilerPassTest
+ * @see CustomConfigurationCompilerPassTest
  */
 class CustomConfigurationCompilerPass implements CompilerPassInterface
 {
