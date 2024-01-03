@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace DH\AuditorBundle\Helper;
 
+use DH\AuditorBundle\Tests\Helper\UrlHelperTest;
+
 /**
- * @see \DH\AuditorBundle\Tests\Helper\UrlHelperTest
+ * @see UrlHelperTest
  */
 abstract class UrlHelper
 {
