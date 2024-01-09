@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\Tests\DependencyInjection\Compiler;
 
 use DH\Auditor\Configuration;
+use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author;
+use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Comment;
+use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
+use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag;
 use DH\AuditorBundle\DependencyInjection\Compiler\AddProviderCompilerPass;
 use DH\AuditorBundle\DependencyInjection\Compiler\CustomConfigurationCompilerPass;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractCompilerPassTestCase;
@@ -36,16 +40,16 @@ final class CustomConfigurationCompilerPassTest extends AbstractCompilerPassTest
                         1 => 'updatedAt',
                     ],
                     'entities' => [
-                        \DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author::class => [
+                        Author::class => [
                             'enabled' => true,
                         ],
-                        \DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post::class => [
+                        Post::class => [
                             'enabled' => true,
                         ],
-                        \DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Comment::class => [
+                        Comment::class => [
                             'enabled' => true,
                         ],
-                        \DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag::class => [
+                        Tag::class => [
                             'enabled' => true,
                         ],
                     ],
