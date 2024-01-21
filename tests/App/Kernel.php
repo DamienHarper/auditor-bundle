@@ -10,7 +10,6 @@ use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
-use Symfony\Component\Routing\RouteCollectionBuilder;
 
 if (BaseKernel::MAJOR_VERSION >= 6) {
     class Kernel extends BaseKernel
@@ -51,12 +50,7 @@ if (BaseKernel::MAJOR_VERSION >= 6) {
             $confDir = $this->getProjectDir().'/config';
 
             $routes->import($confDir.'/routes/*'.self::CONFIG_EXTS, 'glob');
-
-            if (BaseKernel::MAJOR_VERSION < 6) {
-                $routes->import($confDir.'/routes/sf4_5/*'.self::CONFIG_EXTS, 'glob');
-            } else {
-                $routes->import($confDir.'/routes/sf6_7/*'.self::CONFIG_EXTS, 'glob');
-            }
+            $routes->import($confDir.'/routes/sf6_7/*'.self::CONFIG_EXTS, 'glob');
         }
     }
 } else {
@@ -88,20 +82,17 @@ if (BaseKernel::MAJOR_VERSION >= 6) {
             $container->setParameter('container.dumper.inline_factories', true);
 
             $confDir = $this->getProjectDir().'/config';
-            $loader->load($confDir.'/services'.self::CONFIG_EXTS, 'glob');
+            $loader->load($confDir.'/services_legacy'.self::CONFIG_EXTS, 'glob');
             $loader->load($confDir.'/{packages}/*'.self::CONFIG_EXTS, 'glob');
-            if (BaseKernel::MAJOR_VERSION < 6) {
-                $loader->load($confDir.'/{packages}/sf4_5/*'.self::CONFIG_EXTS, 'glob');
-            } else {
-                $loader->load($confDir.'/{packages}/sf6_7/*'.self::CONFIG_EXTS, 'glob');
-            }
+            $loader->load($confDir.'/{packages}/sf4_5/*'.self::CONFIG_EXTS, 'glob');
         }
 
-        protected function configureRoutes(RouteCollectionBuilder $routes): void
+        protected function configureRoutes(RoutingConfigurator $routes): void
         {
             $confDir = $this->getProjectDir().'/config';
 
-            $routes->import($confDir.'/routes/*'.self::CONFIG_EXTS, '/', 'glob');
+            $routes->import($confDir.'/routes/*'.self::CONFIG_EXTS, 'glob');
+            $routes->import($confDir.'/routes/sf4_5/*'.self::CONFIG_EXTS, 'glob');
         }
     }
 }
