@@ -59,7 +59,7 @@ final class UserProviderTest extends WebTestCase
 
         $firewallName = 'main';
 
-        if (6 === Kernel::MAJOR_VERSION) {
+        if (Kernel::MAJOR_VERSION >= 6) {
             $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
         } else {
             $token = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
@@ -92,7 +92,7 @@ final class UserProviderTest extends WebTestCase
 
         $firewallName = 'main';
 
-        if (6 === Kernel::MAJOR_VERSION) {
+        if (Kernel::MAJOR_VERSION >= 6) {
             $userToken = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
             $token = new SwitchUserToken($secondUser, $firewallName, $secondUser->getRoles(), $userToken);
         } else {
