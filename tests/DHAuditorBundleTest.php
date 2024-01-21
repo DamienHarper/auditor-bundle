@@ -41,7 +41,7 @@ final class DHAuditorBundleTest extends KernelTestCase
             // Add some configuration
             $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/dh_auditor.yaml');
             $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/doctrine.yaml');
-            if (6 > Kernel::MAJOR_VERSION) {
+            if (Kernel::MAJOR_VERSION < 6) {
                 $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/sf4_5/security.yaml');
             } else {
                 $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/sf6_7/security.yaml');

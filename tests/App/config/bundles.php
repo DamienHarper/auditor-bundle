@@ -1,12 +1,18 @@
 <?php
 
 declare(strict_types=1);
+use DH\AuditorBundle\DHAuditorBundle;
+use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
+use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
+use Symfony\Bundle\SecurityBundle\SecurityBundle;
+use Symfony\Bundle\TwigBundle\TwigBundle;
+use Twig\Extra\TwigExtraBundle\TwigExtraBundle;
 
 return [
-    Symfony\Bundle\FrameworkBundle\FrameworkBundle::class => ['all' => true],
-    Doctrine\Bundle\DoctrineBundle\DoctrineBundle::class => ['all' => true],
-    Symfony\Bundle\TwigBundle\TwigBundle::class => ['all' => true],
-    Symfony\Bundle\SecurityBundle\SecurityBundle::class => ['all' => true],
-    DH\AuditorBundle\DHAuditorBundle::class => ['all' => true],
-    Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
+    FrameworkBundle::class => ['all' => true],
+    DoctrineBundle::class => ['all' => true],
+    TwigBundle::class => ['all' => true],
+    SecurityBundle::class => ['all' => true],
+    DHAuditorBundle::class => ['all' => true],
+    TwigExtraBundle::class => ['all' => true],
 ];

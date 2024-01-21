@@ -12,7 +12,7 @@ use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Routing\RouteCollectionBuilder;
 
-if (6 === BaseKernel::MAJOR_VERSION) {
+if (BaseKernel::MAJOR_VERSION >= 6) {
     class Kernel extends BaseKernel
     {
         use MicroKernelTrait;
@@ -52,7 +52,7 @@ if (6 === BaseKernel::MAJOR_VERSION) {
 
             $routes->import($confDir.'/routes/*'.self::CONFIG_EXTS, 'glob');
 
-            if (6 > BaseKernel::MAJOR_VERSION) {
+            if (BaseKernel::MAJOR_VERSION < 6) {
                 $routes->import($confDir.'/routes/sf4_5/*'.self::CONFIG_EXTS, 'glob');
             } else {
                 $routes->import($confDir.'/routes/sf6_7/*'.self::CONFIG_EXTS, 'glob');
@@ -90,7 +90,7 @@ if (6 === BaseKernel::MAJOR_VERSION) {
             $confDir = $this->getProjectDir().'/config';
             $loader->load($confDir.'/services'.self::CONFIG_EXTS, 'glob');
             $loader->load($confDir.'/{packages}/*'.self::CONFIG_EXTS, 'glob');
-            if (6 > BaseKernel::MAJOR_VERSION) {
+            if (BaseKernel::MAJOR_VERSION < 6) {
                 $loader->load($confDir.'/{packages}/sf4_5/*'.self::CONFIG_EXTS, 'glob');
             } else {
                 $loader->load($confDir.'/{packages}/sf6_7/*'.self::CONFIG_EXTS, 'glob');
