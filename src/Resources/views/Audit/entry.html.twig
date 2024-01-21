@@ -1,6 +1,6 @@
 {% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
 
-<div class="relative pb-8">
+<div class="auditor-audit-history-entry relative pb-8">
     {% if not is_last %}
     <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
     {% endif %}
@@ -10,7 +10,7 @@
                 {{ helper.icon_type(entry.getType()) }}
             </span>
         </div>
-        <div class="min-w-0 flex-1 bg-gray-100 rounded pb-2 px-3 border hover:border hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 group">
+        <div class="auditor-audit-history-entry-table min-w-0 flex-1 bg-gray-100 rounded pb-2 px-3 border hover:border hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 group">
             <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                 <div>
                     <p class="text-sm text-gray-500">{{ helper.summarize(entity, entry) }}</p>
@@ -51,7 +51,7 @@
                                         <td class="px-3 py-1 whitespace-nowrap text-sm font-medium text-gray-900">
                                             <code class="text-gray-700">{{ key }}</code>
                                         </td>
-                                        <td class="px-3 py-1 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-3 py-1 text-sm text-gray-500">
                                             {% if values.old is defined %}
                                                 {% if values.old is null %}
                                                     <span class="bg-gray-500 px-2 py-0.5 rounded text-white">null</span>
@@ -60,7 +60,7 @@
                                                 {% endif %}
                                             {% endif %}
                                         </td>
-                                        <td class="px-3 py-1 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-3 py-1 text-sm text-gray-500">
                                             {% if values.new is defined %}
                                                 {% if values.new is null %}
                                                     <span class="bg-gray-500 px-2 py-0.5 rounded text-white">null</span>
