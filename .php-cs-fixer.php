@@ -1,8 +1,10 @@
 <?php
 
 declare(strict_types=1);
+use PhpCsFixer\Config;
+use PhpCsFixer\Finder;
 
-$finder = (new PhpCsFixer\Finder())
+$finder = (new Finder())
     ->in(__DIR__.'/src')
     ->notPath('DependencyInjection/Configuration.php')
     ->in(__DIR__.'/tests')
@@ -10,7 +12,7 @@ $finder = (new PhpCsFixer\Finder())
     ->append([__FILE__])
 ;
 
-return (new PhpCsFixer\Config())
+return (new Config())
     ->setRiskyAllowed(true)
     ->setRules([
         '@PhpCsFixer' => true,
