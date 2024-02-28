@@ -1,79 +1,83 @@
 {
-    "name": "damienharper/auditor-bundle",
-    "type": "symfony-bundle",
-    "description": "Integrate auditor library in your Symfony projects.",
-    "keywords": ["doctrine", "audit", "auditor", "audit-log", "audit-trail"],
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Damien Harper",
-            "email": "damien.harper@gmail.com"
-        }
-    ],
-    "require": {
-        "php": ">=8.1",
-      "ext-json": "*",
-      "damienharper/auditor": "^2.3",
-      "doctrine/annotations": "^1.8|^2.0",
-        "doctrine/doctrine-bundle": "^2.0",
-        "doctrine/orm": "^2.13",
-        "symfony/asset": "^5.4|^6.0|^7.0",
-        "symfony/doctrine-bridge": "^5.4|^6.0|^7.0",
-        "symfony/event-dispatcher": "^5.4|^6.0|^7.0",
-        "symfony/lock": "^5.4|^6.0|^7.0",
-        "symfony/security-bundle": "^5.4|^6.0|^7.0",
-        "symfony/translation": "^5.4|^6.0|^7.0",
-        "symfony/twig-bundle": "^5.4|^6.0|^7.0",
-        "twig/extra-bundle": "^3.3",
-        "twig/intl-extra": "^3.3"
-    },
-    "autoload": {
-        "psr-4": {
-            "DH\\AuditorBundle\\": "src"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "DH\\AuditorBundle\\Tests\\": "tests",
-            "DH\\Auditor\\Tests\\": "vendor/damienharper/auditor/tests"
-        }
-    },
-    "require-dev": {
-        "gedmo/doctrine-extensions": "^2.4|^3.0",
-        "matthiasnoback/symfony-dependency-injection-test": "^3.1|^4.0|^5.0",
-        "nyholm/symfony-bundle-test": "^2.0|^3.0",
-        "phpunit/phpunit": "^9.0",
-        "symfony/browser-kit": "^5.4|^6.0|^7.0",
-        "symfony/css-selector": "^5.4|^6.0|^7.0",
-        "symfony/framework-bundle": "^5.4|^6.0|^7.0",
-        "symfony/var-dumper": "^5.4|^6.0|^7.0",
-        "symfony/webpack-encore-bundle": "^1.12|^2.0",
-        "doctrine/data-fixtures": "^1.4"
-    },
-    "scripts": {
-        "test": "php -d pcov.enabled=1 ./vendor/bin/phpunit --colors=always",
-        "csfixer": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --using-cache=no --verbose --ansi",
-        "cs-check": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --using-cache=no --verbose --ansi --dry-run",
-        "phpstan": "tools/phpstan/vendor/bin/phpstan --ansi analyse src",
-        "setup44": "SYMFONY_REQUIRE='^4.4' composer update --prefer-stable",
-        "setup54": "SYMFONY_REQUIRE='^5.4' composer update --prefer-stable",
-        "rector": "tools/rector/vendor/bin/rector process src",
-        "rector-check": "tools/rector/vendor/bin/rector --dry-run",
-        "update-tools": "composer update --working-dir=tools/php-cs-fixer ; composer update --working-dir=tools/phpstan ; composer update --working-dir=tools/rector"
-    },
-    "config": {
-        "sort-packages": true,
-        "allow-plugins": {
-            "composer/package-versions-deprecated": true,
-            "bamarni/composer-bin-plugin": true
-        }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "6.x-dev",
-            "dev-6.x": "6.x-dev",
-            "dev-5.x": "5.x-dev",
-            "dev-4.x": "4.x-dev"
-        }
+  "name": "damienharper/auditor-bundle",
+  "type": "symfony-bundle",
+  "description": "Integrate auditor library in your Symfony projects.",
+  "keywords": [
+    "doctrine",
+    "audit",
+    "auditor",
+    "audit-log",
+    "audit-trail"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Damien Harper",
+      "email": "damien.harper@gmail.com"
     }
+  ],
+  "require": {
+    "php": ">=8.1",
+    "ext-json": "*",
+    "damienharper/auditor": "^2.3",
+    "doctrine/annotations": "^1.8|^2.0",
+    "doctrine/doctrine-bundle": "^2.0",
+    "doctrine/orm": "^2.13",
+    "symfony/asset": "^5.4|^6.0|^7.0",
+    "symfony/doctrine-bridge": "^5.4|^6.0|^7.0",
+    "symfony/event-dispatcher": "^5.4|^6.0|^7.0",
+    "symfony/lock": "^5.4|^6.0|^7.0",
+    "symfony/security-bundle": "^5.4|^6.0|^7.0",
+    "symfony/translation": "^5.4|^6.0|^7.0",
+    "symfony/twig-bundle": "^5.4|^6.0|^7.0",
+    "twig/extra-bundle": "^3.3",
+    "twig/intl-extra": "^3.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "DH\\AuditorBundle\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "DH\\AuditorBundle\\Tests\\": "tests",
+      "DH\\Auditor\\Tests\\": "vendor/damienharper/auditor/tests"
+    }
+  },
+  "require-dev": {
+    "gedmo/doctrine-extensions": "^2.4|^3.0",
+    "matthiasnoback/symfony-dependency-injection-test": "^3.1|^4.0|^5.0",
+    "nyholm/symfony-bundle-test": "^2.0|^3.0",
+    "phpunit/phpunit": "^9.0",
+    "symfony/browser-kit": "^5.4|^6.0|^7.0",
+    "symfony/css-selector": "^5.4|^6.0|^7.0",
+    "symfony/framework-bundle": "^5.4|^6.0|^7.0",
+    "symfony/var-dumper": "^5.4|^6.0|^7.0",
+    "symfony/webpack-encore-bundle": "^1.12|^2.0",
+    "doctrine/data-fixtures": "^1.4"
+  },
+  "scripts": {
+    "test": "php -d pcov.enabled=1 ./vendor/bin/phpunit --colors=always",
+    "csfixer": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --using-cache=no --verbose --ansi",
+    "cs-check": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --using-cache=no --verbose --ansi --dry-run",
+    "phpstan": "tools/phpstan/vendor/bin/phpstan --ansi analyse src",
+    "setup44": "SYMFONY_REQUIRE='^4.4' composer update --prefer-stable",
+    "setup54": "SYMFONY_REQUIRE='^5.4' composer update --prefer-stable",
+    "rector": "tools/rector/vendor/bin/rector process src",
+    "rector-check": "tools/rector/vendor/bin/rector --dry-run",
+    "update-tools": "composer update --working-dir=tools/php-cs-fixer ; composer update --working-dir=tools/phpstan ; composer update --working-dir=tools/rector"
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "composer/package-versions-deprecated": true
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "6.x-dev",
+      "dev-5.x": "5.x-dev",
+      "dev-4.x": "4.x-dev"
+    }
+  }
 }
