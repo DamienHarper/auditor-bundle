@@ -20,7 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: 5.x
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -47,21 +47,19 @@ jobs:
     strategy:
       matrix:
         php:
+          - '7.4'
+          - '8.0'
           - '8.1'
-          - '8.2'
-          - '8.3'
         symfony:
           - '4.4.*'
-          - '5.4.*'
-          - '6.4.*'
-          - '7.*'
+          - '5.*'
       fail-fast: false
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: 5.x
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -124,9 +122,8 @@ jobs:
     strategy:
       matrix:
         php:
+          - '8.0'
           - '8.1'
-          - '8.2'
-          - '8.3'
         symfony:
           - '6.*'
       fail-fast: false
@@ -135,7 +132,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: 5.x
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -195,7 +192,7 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: "actions/checkout@v4"
+        uses: "actions/checkout@v3"
         with:
           fetch-depth: 2
 
