@@ -5,10 +5,10 @@ on:
     - cron: 15 0 * * *
   pull_request:
     branches:
-      - 6.x
+      - 5.x
   push:
     branches:
-      - 6.x
+      - 5.x
 
 jobs:
 
