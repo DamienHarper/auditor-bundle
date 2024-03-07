@@ -22,7 +22,7 @@
     "damienharper/auditor": "dev-master",
     "doctrine/annotations": "^1.8|^2.0",
     "doctrine/doctrine-bundle": "^2.0",
-    "doctrine/orm": "^2.13",
+    "doctrine/orm": "^2.13 || ^3.1" ,
     "symfony/asset": "^5.4|^6.0|^7.0",
     "symfony/doctrine-bridge": "^5.4|^6.0|^7.0",
     "symfony/event-dispatcher": "^5.4|^6.0|^7.0",
