@@ -85,7 +85,7 @@ class UserProvider implements UserProviderInterface
     {
         $token = $this->tokenStorage->getToken();
 
-        if (null !== $token && $token instanceof SwitchUserToken) {
+        if ($token instanceof SwitchUserToken) {
             return $token->getOriginalToken()->getUser();
         }
 
