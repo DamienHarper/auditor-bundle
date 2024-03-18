@@ -10,9 +10,15 @@
             "email": "damien.harper@gmail.com"
         }
     ],
+    "repositories": [
+        {
+            "type": "github",
+            "url": "https://github.com/Jlonom/auditor.git"
+        }
+    ],
     "require": {
         "php": ">=8.2",
-        "damienharper/auditor": "dev-master",
+        "damienharper/auditor": "dev-master|dev-orm_3",
         "doctrine/doctrine-bundle": "^2.0",
         "doctrine/orm": "^2.13|^3.0",
         "symfony/asset": "^5.4|^6.0|^7.0",
