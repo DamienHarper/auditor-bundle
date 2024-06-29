@@ -5,11 +5,10 @@ includes:
 parameters:
     level: max
     inferPrivatePropertyTypeFromConstructor: true
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
 
     excludePaths:
         - '%currentWorkingDirectory%/src/DependencyInjection/Configuration.php'
         - '%currentWorkingDirectory%/src/Routing/RoutingLoader.php'
 
     ignoreErrors:
+        - identifier: missingType.iterableValue
