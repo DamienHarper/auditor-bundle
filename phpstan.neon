@@ -5,8 +5,6 @@ includes:
 parameters:
     level: max
     inferPrivatePropertyTypeFromConstructor: true
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
     paths:
         - src
 
@@ -15,3 +13,4 @@ parameters:
         - '%currentWorkingDirectory%/src/Routing/RoutingLoader.php'
 
     ignoreErrors:
+        - identifier: missingType.iterableValue
