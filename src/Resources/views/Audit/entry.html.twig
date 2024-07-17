@@ -83,6 +83,42 @@
                 </div>
                 {% endif %}
 
+                <div class="mt-2 flex flex-col">
+                    <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                        <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                            <div class="overflow-hidden border border-gray-200 sm:rounded group-hover:border-blue-200 transition-all duration-300">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3">
+                                            {% trans from 'auditor' %}audit.audit_details.extra_field{% endtrans %}
+                                        </th>
+                                        <th scope="col" class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/3">
+                                            {% trans from 'auditor' %}audit.audit_details.value{% endtrans %}
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                    {% set extraFields = entry.getExtraField() %}
+                                    {% for key, value in extraFields %}
+                                        <tr class="bg-white">
+                                            <td class="px-3 py-1 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                <code class="text-gray-700">{{ key }}</code>
+                                            </td>
+                                            <td class="px-3 py-1 whitespace-nowrap text-sm text-gray-500">
+                                                {% if value is not null %}
+                                                    <span class="text-blue-500">{{ helper.dump(value) }}</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {% if entry.getTransactionHash() is not empty %}
                 <div class="text-right">
                     <a class="text-xs text-gray-500 hover:text-blue-500 transition-all duration-300" href="{{ path('dh_auditor_show_transaction', {hash: entry.getTransactionHash()}) }}" title="{% trans from 'auditor' %}audit.audit_details.entry_title{% endtrans %}">

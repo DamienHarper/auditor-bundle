@@ -7,8 +7,10 @@ audit:
     most_recent: (le plus récent en premier)
     entry_title: Afficher toutes les opérations de cette transaction
     property: Attribut
+    extra_field: Extra attribut
     old_value: Ancienne valeur
     new_value: Nouvelle valeur
+    value: Valeur
     transaction: Transaction
     entity_per_entity: (entité par entité)
     operations_count: '%count% opération(s)'
