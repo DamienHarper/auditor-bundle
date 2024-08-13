@@ -32,7 +32,7 @@ final class DHAuditorBundleTest extends BaseBundleTestCase
         parent::setUp();
 
         // Make services public
-        $this->addCompilerPass(new PublicServicePass('#^(DH\\\\Auditor(Bundle)?\\\\|dh_auditor\.).*$#'));
+        $this->addCompilerPass(new PublicServicePass('#^(DH\\\Auditor(Bundle)?\\\|dh_auditor\.).*$#'));
     }
 
     public function testInitBundle(): void
