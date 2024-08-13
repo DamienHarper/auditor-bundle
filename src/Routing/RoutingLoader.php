@@ -43,9 +43,6 @@ if (BaseKernel::MAJOR_VERSION >= 6) {
             return $routeCollection;
         }
 
-        /**
-         * @param ?string $type
-         */
         public function supports(mixed $resource, ?string $type = null): bool
         {
             return 'auditor' === $type;
@@ -82,9 +79,6 @@ if (BaseKernel::MAJOR_VERSION >= 6) {
             return $routeCollection;
         }
 
-        /**
-         * @param ?string $type
-         */
         public function supports(mixed $resource, ?string $type = null): bool
         {
             return 'auditor' === $type;
