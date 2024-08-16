@@ -47,11 +47,7 @@ class UserProvider implements UserProviderInterface
 
     private function getUsername(UserInterface $user): string
     {
-        if (method_exists($user, 'getUserIdentifier')) {
-            return $user->getUserIdentifier();
-        }
-
-        return '';
+        return $user->getUserIdentifier() ?: '';
     }
 
     private function getTokenUser(): ?UserInterface
