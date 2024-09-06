@@ -20,7 +20,7 @@ use Symfony\Component\DependencyInjection\Reference;
 /** @see DoctrineMiddlewareCompilerPassTest */
 class DoctrineProviderConfigurationCompilerPass implements CompilerPassInterface
 {
-    private bool $isDHMiddlewareSupported = false;
+    private bool $isAuditorMiddlewareSupported = false;
 
     public function process(ContainerBuilder $container): void
     {
@@ -54,7 +54,7 @@ class DoctrineProviderConfigurationCompilerPass implements CompilerPassInterface
 
         \assert(\is_array($config) && \array_key_exists('auditing_services', $config));
 
-        $this->registerDHMiddleware($container);
+        $this->registerAuditorMiddleware($container);
 
         foreach (array_unique($config['auditing_services']) as $entityManagerName) {
             $entityManagerName = str_replace('@', '', $entityManagerName);
@@ -72,21 +72,21 @@ class DoctrineProviderConfigurationCompilerPass implements CompilerPassInterface
             $container->setDefinition(AnnotationLoader::class, $annotationLoaderDefinition);
 
             $providerDefinition->addMethodCall('registerAuditingService', [$serviceReference]);
-            $this->configureDHMiddleware($container, $entityManagerName);
+            $this->configureAuditorMiddleware($container, $entityManagerName);
         }
     }
 
-    private function registerDHMiddleware(ContainerBuilder $container): void
+    private function registerAuditorMiddleware(ContainerBuilder $container): void
     {
         if (interface_exists(Middleware::class) && class_exists(AuditorMiddleware::class)) {
-            $this->isDHMiddlewareSupported = true;
+            $this->isAuditorMiddlewareSupported = true;
             $container->register('doctrine.dbal.auditor_middleware', AuditorMiddleware::class);
         }
     }
 
-    private function configureDHMiddleware(ContainerBuilder $container, string $entityManagerName): void
+    private function configureAuditorMiddleware(ContainerBuilder $container, string $entityManagerName): void
     {
-        if (!$this->isDHMiddlewareSupported) {
+        if (!$this->isAuditorMiddlewareSupported) {
             return;
         }
 

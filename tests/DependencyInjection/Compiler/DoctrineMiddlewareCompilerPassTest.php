@@ -15,26 +15,26 @@ use DH\AuditorBundle\DependencyInjection\DHAuditorExtension;
 use Doctrine\Bundle\DoctrineBundle\DependencyInjection\DoctrineExtension;
 use Doctrine\DBAL\Driver\Middleware;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractCompilerPassTestCase;
+use PHPUnit\Framework\Attributes\Small;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 
 /**
  * @internal
- *
- * @small
- *
- * @coversNothing
  */
+#[Small]
 final class DoctrineMiddlewareCompilerPassTest extends AbstractCompilerPassTestCase
 {
     public function testCompilerPass(): void
     {
         if (!interface_exists(Middleware::class) || !class_exists(AuditorMiddleware::class)) {
-            self::markTestSkipped('DHMiddleware isn\'t supported');
+            self::markTestSkipped("AuditorMiddleware isn't supported");
         }
+
         $this->container->setParameter('kernel.cache_dir', sys_get_temp_dir());
         $this->container->setParameter('kernel.debug', false);
         $this->container->setParameter('kernel.bundles', []);
+
         $doctrineConfig = [
             'dbal' => [
                 'default_connection' => 'default',
