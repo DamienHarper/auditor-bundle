@@ -56,15 +56,15 @@
     "doctrine/data-fixtures": "^1.4"
   },
   "scripts": {
-    "test": "php -d pcov.enabled=1 ./vendor/bin/phpunit --colors=always",
-    "csfixer": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --using-cache=no --verbose --ansi",
-    "cs-check": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --using-cache=no --verbose --ansi --dry-run",
-    "phpstan": "tools/phpstan/vendor/bin/phpstan --ansi analyse src",
-    "setup44": "SYMFONY_REQUIRE='^4.4' composer update --prefer-stable",
-    "setup54": "SYMFONY_REQUIRE='^5.4' composer update --prefer-stable",
-    "rector": "tools/rector/vendor/bin/rector process src",
+    "test": "XDEBUG_MODE=coverage ./vendor/bin/phpunit --colors=always",
+    "cs-fix": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --using-cache=no --verbose --ansi",
+    "cs-check": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --using-cache=no --verbose --ansi --dry-run",
+    "phpstan": "tools/phpstan/vendor/bin/phpstan --memory-limit=1G --ansi analyse src",
+    "rector": "tools/rector/vendor/bin/rector",
     "rector-check": "tools/rector/vendor/bin/rector --dry-run",
-    "update-tools": "composer update --working-dir=tools/php-cs-fixer ; composer update --working-dir=tools/phpstan ; composer update --working-dir=tools/rector"
+    "update-tools": "composer update --working-dir=tools/php-cs-fixer ; composer update --working-dir=tools/phpstan ; composer update --working-dir=tools/rector",
+    "setup44": "SYMFONY_REQUIRE='^4.4' composer update --prefer-stable",
+    "setup54": "SYMFONY_REQUIRE='^5.4' composer update --prefer-stable"
   },
   "config": {
     "sort-packages": true,
