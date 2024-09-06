@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace DH\AuditorBundle\Tests\User;
 
-use DateTimeImmutable;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
-use DH\AuditorBundle\DHAuditorBundle;
+use PHPUnit\Framework\Attributes\Small;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpKernel\HttpKernelBrowser;
 use Symfony\Component\HttpKernel\Kernel;
@@ -21,15 +20,15 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @internal
- *
- * @small
  */
+#[Small]
 final class UserProviderTest extends WebTestCase
 {
     use BlogSchemaSetupTrait;
     use ReaderTrait;
 
     private DoctrineProvider $provider;
+
     private HttpKernelBrowser $client;
 
     protected function setUp(): void
@@ -71,14 +70,14 @@ final class UserProviderTest extends WebTestCase
         $post
             ->setTitle('Blameable post')
             ->setBody('yet another post')
-            ->setCreatedAt(new DateTimeImmutable('2020-01-17 22:17:34'))
+            ->setCreatedAt(new \DateTimeImmutable('2020-01-17 22:17:34'))
         ;
         $auditingServices[Post::class]->getEntityManager()->persist($post);
         $this->flushAll($auditingServices);
 
         // get history
         $entries = $this->createReader()->createQuery(Post::class)->execute();
-        self::assertSame('dark.vador', $entries[0]->getUsername());
+        $this->assertSame('dark.vador', $entries[0]->getUsername());
     }
 
     public function testBlameImpersonator(): void
@@ -106,19 +105,14 @@ final class UserProviderTest extends WebTestCase
         $post
             ->setTitle('Blameable post')
             ->setBody('yet another post')
-            ->setCreatedAt(new DateTimeImmutable('2020-01-17 22:17:34'))
+            ->setCreatedAt(new \DateTimeImmutable('2020-01-17 22:17:34'))
         ;
         $auditingServices[Post::class]->getEntityManager()->persist($post);
         $this->flushAll($auditingServices);
 
         // get history
         $entries = $this->createReader()->createQuery(Post::class)->execute();
-        self::assertSame('second_user[impersonator dark.vador]', $entries[0]->getUsername());
-    }
-
-    protected function getBundleClass()
-    {
-        return DHAuditorBundle::class;
+        $this->assertSame('second_user[impersonator dark.vador]', $entries[0]->getUsername());
     }
 
     private function createAndInitDoctrineProvider(): void

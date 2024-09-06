@@ -67,7 +67,7 @@ class Configuration implements ConfigurationInterface
 
             ->validate()
                 ->always()
-                ->then(static function ($v) {
+                ->then(static function (array $v) {
                     if (!\array_key_exists('doctrine', $v)) {
                         $v['doctrine'] = [];
                     }

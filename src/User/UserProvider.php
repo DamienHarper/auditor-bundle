@@ -7,19 +7,15 @@ namespace DH\AuditorBundle\User;
 use DH\Auditor\User\User;
 use DH\Auditor\User\UserInterface as AuditorUserInterface;
 use DH\Auditor\User\UserProviderInterface;
-use Exception;
+use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class UserProvider implements UserProviderInterface
 {
-    private TokenStorageInterface $tokenStorage;
-
-    public function __construct(TokenStorageInterface $tokenStorage)
-    {
-        $this->tokenStorage = $tokenStorage;
-    }
+    public function __construct(private readonly TokenStorageInterface $tokenStorage) {}
 
     public function __invoke(): ?AuditorUserInterface
     {
@@ -54,9 +50,6 @@ class UserProvider implements UserProviderInterface
         if (method_exists($user, 'getUserIdentifier')) {
             return $user->getUserIdentifier();
         }
-        if (method_exists($user, 'getUsername')) {
-            return $user->getUsername();
-        }
 
         return '';
     }
@@ -65,20 +58,15 @@ class UserProvider implements UserProviderInterface
     {
         try {
             $token = $this->tokenStorage->getToken();
-        } catch (Exception $e) {
+        } catch (\Exception) {
             $token = null;
         }
 
-        if (null === $token) {
+        if (!$token instanceof TokenInterface || $token instanceof AnonymousToken) {
             return null;
         }
 
-        $tokenUser = $token->getUser();
-        if ($tokenUser instanceof UserInterface) {
-            return $tokenUser;
-        }
-
-        return null;
+        return $token->getUser();
     }
 
     private function getImpersonatorUser(): ?UserInterface

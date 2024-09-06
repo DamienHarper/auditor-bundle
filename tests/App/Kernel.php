@@ -36,7 +36,7 @@ if (BaseKernel::MAJOR_VERSION >= 6) {
         protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void
         {
             $container->addResource(new FileResource($this->getProjectDir().'/config/bundles.php'));
-            $container->setParameter('.container.dumper.inline_class_loader', \PHP_VERSION_ID < 70400 || $this->debug);
+            $container->setParameter('.container.dumper.inline_class_loader', \PHP_VERSION_ID < 70_400 || $this->debug);
             $container->setParameter('.container.dumper.inline_factories', true);
 
             $confDir = $this->getProjectDir().'/config';
@@ -78,7 +78,7 @@ if (BaseKernel::MAJOR_VERSION >= 6) {
         protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void
         {
             $container->addResource(new FileResource($this->getProjectDir().'/config/bundles.php'));
-            $container->setParameter('container.dumper.inline_class_loader', \PHP_VERSION_ID < 70400 || $this->debug);
+            $container->setParameter('container.dumper.inline_class_loader', \PHP_VERSION_ID < 70_400 || $this->debug);
             $container->setParameter('container.dumper.inline_factories', true);
 
             $confDir = $this->getProjectDir().'/config';
