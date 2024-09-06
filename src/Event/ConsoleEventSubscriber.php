@@ -13,18 +13,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class ConsoleEventSubscriber implements EventSubscriberInterface
 {
-    private ConsoleUserProvider $consoleUserProvider;
-
-    private Configuration $configuration;
-
-    private UserProviderInterface $provider;
-
-    public function __construct(ConsoleUserProvider $consoleUserProvider, Configuration $configuration, UserProviderInterface $provider)
-    {
-        $this->consoleUserProvider = $consoleUserProvider;
-        $this->configuration = $configuration;
-        $this->provider = $provider;
-    }
+    public function __construct(private readonly ConsoleUserProvider $consoleUserProvider, private readonly Configuration $configuration, private readonly UserProviderInterface $provider) {}
 
     public static function getSubscribedEvents(): array
     {

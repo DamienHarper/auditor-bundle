@@ -8,16 +8,15 @@ use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
-use DH\AuditorBundle\DHAuditorBundle;
+use PHPUnit\Framework\Attributes\Small;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\ApplicationTester;
 
 /**
  * @internal
- *
- * @small
  */
+#[Small]
 final class ConsoleUserProviderTest extends KernelTestCase
 {
     use BlogSchemaSetupTrait;
@@ -50,6 +49,7 @@ final class ConsoleUserProviderTest extends KernelTestCase
         $kernel = self::bootKernel();
         $application = new Application($kernel);
         $application->setAutoExit(false);
+
         $tester = new ApplicationTester($application);
 
         $tester->run(['app:post:create']);
@@ -60,14 +60,9 @@ final class ConsoleUserProviderTest extends KernelTestCase
 
         // get history
         $entries = $this->createReader()->createQuery(Post::class)->execute();
-        self::assertNotEmpty($entries, 'There are audit entries');
-        self::assertSame('app:post:create', $entries[0]->getUsername(), 'Username is OK');
-        self::assertSame('command', $entries[0]->getUserId(), 'User ID is OK');
-    }
-
-    protected function getBundleClass()
-    {
-        return DHAuditorBundle::class;
+        $this->assertNotEmpty($entries, 'There are audit entries');
+        $this->assertSame('app:post:create', $entries[0]->getUsername(), 'Username is OK');
+        $this->assertSame('command', $entries[0]->getUserId(), 'User ID is OK');
     }
 
     private function createAndInitDoctrineProvider(): void
