@@ -17,3 +17,5 @@ parameters:
 
     ignoreErrors:
         - identifier: missingType.iterableValue
+        - message: '~Class Symfony\\Component\\Security\\Core\\Authentication\\Token\\AnonymousToken not found.~'
+          reportUnmatched: false

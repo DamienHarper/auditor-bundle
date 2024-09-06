@@ -7,6 +7,7 @@ namespace DH\AuditorBundle\User;
 use DH\Auditor\User\User;
 use DH\Auditor\User\UserInterface as AuditorUserInterface;
 use DH\Auditor\User\UserProviderInterface;
+use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -50,10 +51,6 @@ class UserProvider implements UserProviderInterface
             return $user->getUserIdentifier();
         }
 
-        if (method_exists($user, 'getUsername')) {
-            return $user->getUsername();
-        }
-
         return '';
     }
 
@@ -65,7 +62,7 @@ class UserProvider implements UserProviderInterface
             $token = null;
         }
 
-        if (!$token instanceof TokenInterface) {
+        if (!$token instanceof TokenInterface || $token instanceof AnonymousToken) {
             return null;
         }
 
