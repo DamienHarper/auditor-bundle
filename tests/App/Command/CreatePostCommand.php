@@ -13,12 +13,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class CreatePostCommand extends Command
 {
-    private DoctrineProvider $doctrineProvider;
-
-    public function __construct(DoctrineProvider $doctrineProvider)
+    public function __construct(private readonly DoctrineProvider $doctrineProvider)
     {
         parent::__construct();
-        $this->doctrineProvider = $doctrineProvider;
     }
 
     protected function configure(): void

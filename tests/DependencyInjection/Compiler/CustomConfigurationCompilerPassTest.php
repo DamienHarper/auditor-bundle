@@ -12,17 +12,15 @@ use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag;
 use DH\AuditorBundle\DependencyInjection\Compiler\AddProviderCompilerPass;
 use DH\AuditorBundle\DependencyInjection\Compiler\CustomConfigurationCompilerPass;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractCompilerPassTestCase;
+use PHPUnit\Framework\Attributes\Small;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * @internal
- *
- * @small
- *
- * @coversNothing
  */
+#[Small]
 final class CustomConfigurationCompilerPassTest extends AbstractCompilerPassTestCase
 {
     public function testCompilerPass(): void

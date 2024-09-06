@@ -16,6 +16,7 @@ use DH\AuditorBundle\DHAuditorBundle;
 use DH\AuditorBundle\Event\ConsoleEventSubscriber;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Nyholm\BundleTest\TestKernel;
+use PHPUnit\Framework\Attributes\Small;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
@@ -24,17 +25,14 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
  * @internal
- *
- * @small
- *
- * @coversNothing
  */
+#[Small]
 final class DHAuditorBundleTest extends KernelTestCase
 {
     public function testInitBundle(): void
     {
         // Boot the kernel with a config closure, the handleOptions call in createKernel is important for that to work
-        $kernel = self::bootKernel(['config' => static function (TestKernel $kernel) {
+        self::bootKernel(['config' => static function (TestKernel $kernel): void {
             // Add some other bundles we depend on
             $kernel->addTestBundle(DoctrineBundle::class);
             $kernel->addTestBundle(SecurityBundle::class);
@@ -54,40 +52,35 @@ final class DHAuditorBundleTest extends KernelTestCase
         // Get the container
         $container = self::getContainer();
 
-        self::assertTrue($container->has(AuditorConfiguration::class));
-        self::assertInstanceOf(AuditorConfiguration::class, $container->get(AuditorConfiguration::class));
+        $this->assertTrue($container->has(AuditorConfiguration::class));
+        $this->assertInstanceOf(AuditorConfiguration::class, $container->get(AuditorConfiguration::class));
 
-        self::assertTrue($container->has(Auditor::class));
-        self::assertInstanceOf(Auditor::class, $container->get(Auditor::class));
+        $this->assertTrue($container->has(Auditor::class));
+        $this->assertInstanceOf(Auditor::class, $container->get(Auditor::class));
 
-        self::assertTrue($container->has(DoctrineProviderConfiguration::class));
-        self::assertInstanceOf(DoctrineProviderConfiguration::class, $container->get(DoctrineProviderConfiguration::class));
+        $this->assertTrue($container->has(DoctrineProviderConfiguration::class));
+        $this->assertInstanceOf(DoctrineProviderConfiguration::class, $container->get(DoctrineProviderConfiguration::class));
 
-        self::assertTrue($container->has(DoctrineProvider::class));
-        self::assertInstanceOf(DoctrineProvider::class, $container->get(DoctrineProvider::class));
+        $this->assertTrue($container->has(DoctrineProvider::class));
+        $this->assertInstanceOf(DoctrineProvider::class, $container->get(DoctrineProvider::class));
 
-        self::assertTrue($container->has('dh_auditor.provider.doctrine'));
-        self::assertInstanceOf(DoctrineProvider::class, $container->get('dh_auditor.provider.doctrine'));
+        $this->assertTrue($container->has('dh_auditor.provider.doctrine'));
+        $this->assertInstanceOf(DoctrineProvider::class, $container->get('dh_auditor.provider.doctrine'));
 
-        self::assertTrue($container->has(Reader::class));
-        self::assertInstanceOf(Reader::class, $container->get(Reader::class));
+        $this->assertTrue($container->has(Reader::class));
+        $this->assertInstanceOf(Reader::class, $container->get(Reader::class));
 
-        self::assertTrue($container->has(TableSchemaListener::class));
-        self::assertInstanceOf(TableSchemaListener::class, $container->get(TableSchemaListener::class));
+        $this->assertTrue($container->has(TableSchemaListener::class));
+        $this->assertInstanceOf(TableSchemaListener::class, $container->get(TableSchemaListener::class));
 
-        self::assertTrue($container->has(CreateSchemaListener::class));
-        self::assertInstanceOf(CreateSchemaListener::class, $container->get(CreateSchemaListener::class));
+        $this->assertTrue($container->has(CreateSchemaListener::class));
+        $this->assertInstanceOf(CreateSchemaListener::class, $container->get(CreateSchemaListener::class));
 
-        self::assertTrue($container->has(ViewerController::class));
-        self::assertInstanceOf(ViewerController::class, $container->get(ViewerController::class));
+        $this->assertTrue($container->has(ViewerController::class));
+        $this->assertInstanceOf(ViewerController::class, $container->get(ViewerController::class));
 
-        self::assertTrue($container->has(ConsoleEventSubscriber::class));
-        self::assertInstanceOf(ConsoleEventSubscriber::class, $container->get(ConsoleEventSubscriber::class));
-    }
-
-    protected function getBundleClass(): string
-    {
-        return DHAuditorBundle::class;
+        $this->assertTrue($container->has(ConsoleEventSubscriber::class));
+        $this->assertInstanceOf(ConsoleEventSubscriber::class, $container->get(ConsoleEventSubscriber::class));
     }
 
     protected static function getKernelClass(): string

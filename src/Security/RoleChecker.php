@@ -12,15 +12,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class RoleChecker implements RoleCheckerInterface
 {
-    private AuthorizationCheckerInterface $authorizationChecker;
-
-    private DoctrineProvider $provider;
-
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker, DoctrineProvider $doctrineProvider)
-    {
-        $this->authorizationChecker = $authorizationChecker;
-        $this->provider = $doctrineProvider;
-    }
+    public function __construct(private readonly AuthorizationCheckerInterface $authorizationChecker, private readonly DoctrineProvider $provider) {}
 
     public function __invoke(string $entity, string $scope): bool
     {

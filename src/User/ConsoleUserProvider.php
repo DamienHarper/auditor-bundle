@@ -27,6 +27,6 @@ class ConsoleUserProvider implements UserProviderInterface
 
     public function setCurrentCommand(?Command $command): void
     {
-        $this->currentCommand = null === $command ? null : $command->getName();
+        $this->currentCommand = $command instanceof Command ? $command->getName() : null;
     }
 }

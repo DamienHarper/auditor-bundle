@@ -23,12 +23,7 @@ use Twig\Environment;
  */
 final class ViewerController
 {
-    private Environment $environment;
-
-    public function __construct(Environment $environment)
-    {
-        $this->environment = $environment;
-    }
+    public function __construct(private readonly Environment $environment) {}
 
     #[Route(path: '/audit', name: 'dh_auditor_list_audits', methods: ['GET'])]
     public function listAuditsAction(Reader $reader): Response
@@ -76,7 +71,8 @@ final class ViewerController
     {
         \assert(\is_string($request->query->get('page', '1')) || \is_int($request->query->get('page', '1')));
         $page = (int) $request->query->get('page', '1');
-        $page = $page < 1 ? 1 : $page;
+        $page = max(1, $page);
+
         $entity = UrlHelper::paramToNamespace($entity);
 
         if (!$reader->getProvider()->isAuditable($entity)) {
@@ -89,7 +85,7 @@ final class ViewerController
                 'page' => $page,
                 'page_size' => Reader::PAGE_SIZE,
             ]), $page, Reader::PAGE_SIZE);
-        } catch (AccessDeniedException $e) {
+        } catch (AccessDeniedException) {
             throw new SymfonyAccessDeniedException('Access Denied.');
         }
 

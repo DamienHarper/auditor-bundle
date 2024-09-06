@@ -12,6 +12,8 @@ use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
+use PHPUnit\Framework\Attributes\Depends;
+use PHPUnit\Framework\Attributes\Small;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\AbstractBrowser;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -22,11 +24,8 @@ use Symfony\Component\Security\Core\User\User;
 
 /**
  * @internal
- *
- * @small
- *
- * @coversNothing
  */
+#[Small]
 final class ViewerControllerTest extends WebTestCase
 {
     use BlogSchemaSetupTrait;
@@ -65,16 +64,16 @@ final class ViewerControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', '/audit');
 
         // asserts that the response status code is 2xx
-        self::assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
+        $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
 
-        self::assertPageTitleContains('auditor', 'Title is auditor');
+        $this->assertPageTitleContains('auditor', 'Title is auditor');
 
         $breadcrumbs = $crawler->filter('nav > ol > li');
-        self::assertSame(1, $breadcrumbs->count(), 'Nav has 1 item.');
-        self::assertSame('Home', trim($breadcrumbs->text()), 'Nav has 1 item: Home');
+        $this->assertCount(1, $breadcrumbs, 'Nav has 1 item.');
+        $this->assertSame('Home', trim($breadcrumbs->text()), 'Nav has 1 item: Home');
 
         $cards = $crawler->filter('div.auditor-audits > div');
-        self::assertSame(4, $cards->count(), 'There are 4 entity audits.');
+        $this->assertCount(4, $cards, 'There are 4 entity audits.');
 
         $expected = [
             [Author::class, 'author', '7 operation(s)', 'View audit'],
@@ -84,38 +83,36 @@ final class ViewerControllerTest extends WebTestCase
         ];
         $cards->each(static function ($row, $rowIndex) use ($expected): void {
             $cell = $row->filter('div > h3 > code');
-            self::assertSame($expected[$rowIndex][0], trim($cell->text()), 'Entity is OK');
+            self::assertSame($expected[$rowIndex][0], trim((string) $cell->text()), 'Entity is OK');
 
             $cell = $row->filter('div > p');
-            self::assertSame($expected[$rowIndex][1], trim($cell->text()), 'Tablename is OK');
+            self::assertSame($expected[$rowIndex][1], trim((string) $cell->text()), 'Tablename is OK');
 
             $cell = $row->filter('div > dl > dt');
-            self::assertSame($expected[$rowIndex][2], trim($cell->text()), 'Operation count is OK');
+            self::assertSame($expected[$rowIndex][2], trim((string) $cell->text()), 'Operation count is OK');
 
             $cell = $row->filter('div > dl > dd > a');
-            self::assertSame($expected[$rowIndex][3], trim($cell->text()), 'Link is OK');
+            self::assertSame($expected[$rowIndex][3], trim((string) $cell->text()), 'Link is OK');
         });
     }
 
-    /**
-     * @depends testListAuditsAnonymously
-     */
+    #[Depends('testListAuditsAnonymously')]
     public function testListAuditsWithRoleNotGrantedForAuthorAuditViewing(): void
     {
         $this->login(['ROLE_USER']);
         $crawler = $this->client->request('GET', '/audit');
 
         // asserts that the response status code is 2xx
-        self::assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
+        $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
 
-        self::assertPageTitleContains('auditor', 'Title is auditor');
+        $this->assertPageTitleContains('auditor', 'Title is auditor');
 
         $breadcrumbs = $crawler->filter('nav > ol > li');
-        self::assertSame(1, $breadcrumbs->count(), 'Nav has 1 item.');
-        self::assertSame('Home', trim($breadcrumbs->text()), 'Nav has 1 item: Home');
+        $this->assertCount(1, $breadcrumbs, 'Nav has 1 item.');
+        $this->assertSame('Home', trim($breadcrumbs->text()), 'Nav has 1 item: Home');
 
         $cards = $crawler->filter('div.auditor-audits > div');
-        self::assertSame(3, $cards->count(), 'There are 3 entity audits.');
+        $this->assertCount(3, $cards, 'There are 3 entity audits.');
 
         $expected = [
             [Comment::class, 'comment', '3 operation(s)', 'View audit'],
@@ -124,38 +121,36 @@ final class ViewerControllerTest extends WebTestCase
         ];
         $cards->each(static function ($row, $rowIndex) use ($expected): void {
             $cell = $row->filter('div > h3 > code');
-            self::assertSame($expected[$rowIndex][0], trim($cell->text()), 'Entity is OK');
+            self::assertSame($expected[$rowIndex][0], trim((string) $cell->text()), 'Entity is OK');
 
             $cell = $row->filter('div > p');
-            self::assertSame($expected[$rowIndex][1], trim($cell->text()), 'Tablename is OK');
+            self::assertSame($expected[$rowIndex][1], trim((string) $cell->text()), 'Tablename is OK');
 
             $cell = $row->filter('div > dl > dt');
-            self::assertSame($expected[$rowIndex][2], trim($cell->text()), 'Operation count is OK');
+            self::assertSame($expected[$rowIndex][2], trim((string) $cell->text()), 'Operation count is OK');
 
             $cell = $row->filter('div > dl > dd > a');
-            self::assertSame($expected[$rowIndex][3], trim($cell->text()), 'Link is OK');
+            self::assertSame($expected[$rowIndex][3], trim((string) $cell->text()), 'Link is OK');
         });
     }
 
-    /**
-     * @depends testListAuditsWithRoleNotGrantedForAuthorAuditViewing
-     */
+    #[Depends('testListAuditsWithRoleNotGrantedForAuthorAuditViewing')]
     public function testListAuditsWithRoleGrantedForAuthorAuditViewing(): void
     {
         $this->login(['ROLE1']);
         $crawler = $this->client->request('GET', '/audit');
 
         // asserts that the response status code is 2xx
-        self::assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
+        $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
 
-        self::assertPageTitleContains('auditor', 'Title is auditor');
+        $this->assertPageTitleContains('auditor', 'Title is auditor');
 
         $breadcrumbs = $crawler->filter('nav > ol > li');
-        self::assertSame(1, $breadcrumbs->count(), 'Nav has 1 item.');
-        self::assertSame('Home', trim($breadcrumbs->text()), 'Nav has 1 item: Home');
+        $this->assertCount(1, $breadcrumbs, 'Nav has 1 item.');
+        $this->assertSame('Home', trim($breadcrumbs->text()), 'Nav has 1 item: Home');
 
         $cards = $crawler->filter('div.auditor-audits > div');
-        self::assertSame(4, $cards->count(), 'There are 4 entity audits.');
+        $this->assertCount(4, $cards, 'There are 4 entity audits.');
 
         $expected = [
             [Author::class, 'author', '7 operation(s)', 'View audit'],
@@ -165,87 +160,77 @@ final class ViewerControllerTest extends WebTestCase
         ];
         $cards->each(static function ($row, $rowIndex) use ($expected): void {
             $cell = $row->filter('div > h3 > code');
-            self::assertSame($expected[$rowIndex][0], trim($cell->text()), 'Entity is OK');
+            self::assertSame($expected[$rowIndex][0], trim((string) $cell->text()), 'Entity is OK');
 
             $cell = $row->filter('div > p');
-            self::assertSame($expected[$rowIndex][1], trim($cell->text()), 'Tablename is OK');
+            self::assertSame($expected[$rowIndex][1], trim((string) $cell->text()), 'Tablename is OK');
 
             $cell = $row->filter('div > dl > dt');
-            self::assertSame($expected[$rowIndex][2], trim($cell->text()), 'Operation count is OK');
+            self::assertSame($expected[$rowIndex][2], trim((string) $cell->text()), 'Operation count is OK');
 
             $cell = $row->filter('div > dl > dd > a');
-            self::assertSame($expected[$rowIndex][3], trim($cell->text()), 'Link is OK');
+            self::assertSame($expected[$rowIndex][3], trim((string) $cell->text()), 'Link is OK');
         });
     }
 
-    /**
-     * @depends testListAuditsAnonymously
-     */
+    #[Depends('testListAuditsAnonymously')]
     public function testShowEntityHistoryAnonymously(): void
     {
         $this->login();
         $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author');
 
         // asserts that the response status code is 2xx
-        self::assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
+        $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
 
-        self::assertPageTitleContains('auditor', 'Title is auditor');
+        $this->assertPageTitleContains('auditor', 'Title is auditor');
 
         $breadcrumbs = $crawler->filter('nav > ol > li');
-        self::assertSame(2, $breadcrumbs->count(), 'Nav has 2 item.');
-        self::assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
-        self::assertSame(Author::class, trim($breadcrumbs->eq(1)->children('div > a > code')->text()), 'Nav has 1 item: '.Author::class);
+        $this->assertCount(2, $breadcrumbs, 'Nav has 2 item.');
+        $this->assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
+        $this->assertSame(Author::class, trim($breadcrumbs->eq(1)->children('div > a > code')->text()), 'Nav has 1 item: '.Author::class);
     }
 
-    /**
-     * @depends testShowEntityHistoryAnonymously
-     */
+    #[Depends('testShowEntityHistoryAnonymously')]
     public function testShowEntityHistoryWithRoleNotGrantedForAuthorAuditViewing(): void
     {
         $this->login(['ROLE_USER']);
         $this->client->catchExceptions(false);
         $this->expectException(AccessDeniedException::class);
-        $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author');
+        $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author');
 
-        self::assertSame(403, $this->client->getResponse()->getStatusCode(), 'Response status is 403');
+        $this->assertSame(403, $this->client->getResponse()->getStatusCode(), 'Response status is 403');
     }
 
-    /**
-     * @depends testShowEntityHistoryWithRoleNotGrantedForAuthorAuditViewing
-     */
+    #[Depends('testShowEntityHistoryWithRoleNotGrantedForAuthorAuditViewing')]
     public function testShowEntityHistoryWithRoleGrantedForAuthorAuditViewing(): void
     {
         $this->login(['ROLE1']);
         $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author');
 
         // asserts that the response status code is 2xx
-        self::assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
+        $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
 
-        self::assertPageTitleContains('auditor', 'Title is auditor');
+        $this->assertPageTitleContains('auditor', 'Title is auditor');
 
         $breadcrumbs = $crawler->filter('nav > ol > li');
-        self::assertSame(2, $breadcrumbs->count(), 'Nav has 2 item.');
-        self::assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
-        self::assertSame(Author::class, trim($breadcrumbs->eq(1)->children('div > a > code')->text()), 'Nav has 1 item: '.Author::class);
+        $this->assertCount(2, $breadcrumbs, 'Nav has 2 item.');
+        $this->assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
+        $this->assertSame(Author::class, trim($breadcrumbs->eq(1)->children('div > a > code')->text()), 'Nav has 1 item: '.Author::class);
     }
 
-    /**
-     * @depends testShowEntityHistoryWithRoleGrantedForAuthorAuditViewing
-     */
+    #[Depends('testShowEntityHistoryWithRoleGrantedForAuthorAuditViewing')]
     public function testShowEntityHistoryOfUnauditedEntity(): void
     {
         $this->login();
 
         $this->client->catchExceptions(false);
         $this->expectException(NotFoundHttpException::class);
-        $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Damn');
+        $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Damn');
 
-        self::assertSame(404, $this->client->getResponse()->getStatusCode(), 'Response status is 404');
+        $this->assertSame(404, $this->client->getResponse()->getStatusCode(), 'Response status is 404');
     }
 
-    /**
-     * @depends testShowEntityHistoryWithRoleNotGrantedForAuthorAuditViewing
-     */
+    #[Depends('testShowEntityHistoryWithRoleNotGrantedForAuthorAuditViewing')]
     public function testShowTransactionHistoryAnonymously(): void
     {
         $reader = $this->createReader();
@@ -258,25 +243,23 @@ final class ViewerControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', '/audit/transaction/'.$first->getTransactionHash());
 
         // asserts that the response status code is 2xx
-        self::assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
+        $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
 
-        self::assertPageTitleContains('auditor', 'Title is auditor');
+        $this->assertPageTitleContains('auditor', 'Title is auditor');
 
         $breadcrumbs = $crawler->filter('nav > ol > li');
-        self::assertSame(2, $breadcrumbs->count(), 'Nav has 2 item.');
-        self::assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
-        self::assertSame($first->getTransactionHash(), trim($breadcrumbs->eq(1)->children('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
+        $this->assertCount(2, $breadcrumbs, 'Nav has 2 item.');
+        $this->assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
+        $this->assertSame($first->getTransactionHash(), trim($breadcrumbs->eq(1)->children('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
 
         $sections = $crawler->filter('.flow-root > div');
-        self::assertSame(4, $sections->count(), 'There are 3 sections.');
-        self::assertSame(Author::class, trim($sections->eq(0)->children('div > code')->text()), Author::class);
-        self::assertSame(Post::class, trim($sections->eq(1)->children('div > code')->text()), Post::class);
-        self::assertSame(Comment::class, trim($sections->eq(2)->children('div > code')->text()), Comment::class);
+        $this->assertCount(4, $sections, 'There are 3 sections.');
+        $this->assertSame(Author::class, trim($sections->eq(0)->children('div > code')->text()), Author::class);
+        $this->assertSame(Post::class, trim($sections->eq(1)->children('div > code')->text()), Post::class);
+        $this->assertSame(Comment::class, trim($sections->eq(2)->children('div > code')->text()), Comment::class);
     }
 
-    /**
-     * @depends testShowTransactionHistoryAnonymously
-     */
+    #[Depends('testShowTransactionHistoryAnonymously')]
     public function testShowTransactionHistoryWithRoleNotGrantedForAuthorAuditViewing(): void
     {
         $reader = $this->createReader();
@@ -289,19 +272,19 @@ final class ViewerControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', '/audit/transaction/'.$first->getTransactionHash());
 
         // asserts that the response status code is 2xx
-        self::assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
+        $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
 
-        self::assertPageTitleContains('auditor', 'Title is auditor');
+        $this->assertPageTitleContains('auditor', 'Title is auditor');
 
         $breadcrumbs = $crawler->filter('nav > ol > li');
-        self::assertSame(2, $breadcrumbs->count(), 'Nav has 2 item.');
-        self::assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
-        self::assertSame($first->getTransactionHash(), trim($breadcrumbs->eq(1)->children('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
+        $this->assertCount(2, $breadcrumbs, 'Nav has 2 item.');
+        $this->assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
+        $this->assertSame($first->getTransactionHash(), trim($breadcrumbs->eq(1)->children('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
 
         $sections = $crawler->filter('.flow-root > div');
-        self::assertSame(3, $sections->count(), 'There are 2 sections.');
-        self::assertSame(Post::class, trim($sections->eq(0)->children('div > code')->text()), Post::class);
-        self::assertSame(Comment::class, trim($sections->eq(1)->children('div > code')->text()), Comment::class);
+        $this->assertCount(3, $sections, 'There are 2 sections.');
+        $this->assertSame(Post::class, trim($sections->eq(0)->children('div > code')->text()), Post::class);
+        $this->assertSame(Comment::class, trim($sections->eq(1)->children('div > code')->text()), Comment::class);
     }
 
     private function login(array $roles = []): void

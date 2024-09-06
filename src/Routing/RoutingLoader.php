@@ -14,17 +14,9 @@ use Symfony\Component\Routing\RouteCollection;
 if (BaseKernel::MAJOR_VERSION >= 6) {
     class RoutingLoader extends Loader
     {
-        private AttributeRouteControllerLoader $annotatedRouteControllerLoader;
-
         private bool $isLoaded = false;
 
-        private array $configuration;
-
-        public function __construct(AttributeRouteControllerLoader $annotatedRouteController, array $configuration)
-        {
-            $this->annotatedRouteControllerLoader = $annotatedRouteController;
-            $this->configuration = $configuration;
-        }
+        public function __construct(private readonly AttributeRouteControllerLoader $annotatedRouteControllerLoader, private array $configuration) {}
 
         public function load(mixed $resource, ?string $type = null): RouteCollection
         {
@@ -50,16 +42,13 @@ if (BaseKernel::MAJOR_VERSION >= 6) {
 } else {
     class RoutingLoader extends Loader
     {
-        private AnnotatedRouteControllerLoader $annotatedRouteControllerLoader;
+        private readonly AnnotatedRouteControllerLoader $annotatedRouteControllerLoader;
 
         private bool $isLoaded = false;
 
-        private array $configuration;
-
-        public function __construct(AnnotatedRouteControllerLoader $annotatedRouteController, array $configuration)
+        public function __construct(AnnotatedRouteControllerLoader $annotatedRouteController, private array $configuration)
         {
             $this->annotatedRouteControllerLoader = $annotatedRouteController;
-            $this->configuration = $configuration;
         }
 
         public function load(mixed $resource, ?string $type = null): RouteCollection

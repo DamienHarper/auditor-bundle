@@ -27,4 +27,5 @@ $_SERVER['APP_DEBUG'] = $_ENV['APP_DEBUG'] = (int) $_SERVER['APP_DEBUG'] || filt
 // TODO: temporary fix for PHPUnit 11.x
 // cf. https://github.com/symfony/symfony/issues/53812
 use Symfony\Component\ErrorHandler\ErrorHandler;
+
 set_exception_handler([new ErrorHandler(), 'handleException']);

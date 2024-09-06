@@ -39,6 +39,7 @@ return (new Config())
         'numeric_literal_separator' => true,
         'string_implicit_backslashes' => true, // https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/pull/7786
         'php_unit_test_case_static_method_calls' => false,
+        'php_unit_test_class_requires_covers' => false,
     ])
     ->setFinder(
         (new Finder())
