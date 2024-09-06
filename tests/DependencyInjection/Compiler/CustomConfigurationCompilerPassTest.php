@@ -20,6 +20,8 @@ use Symfony\Component\DependencyInjection\Reference;
  * @internal
  *
  * @small
+ *
+ * @coversNothing
  */
 final class CustomConfigurationCompilerPassTest extends AbstractCompilerPassTestCase
 {

@@ -17,6 +17,8 @@ use Symfony\Component\Console\Tester\ApplicationTester;
  * @internal
  *
  * @small
+ *
+ * @coversNothing
  */
 final class ConsoleUserProviderTest extends KernelTestCase
 {

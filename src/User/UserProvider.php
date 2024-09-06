@@ -7,7 +7,6 @@ namespace DH\AuditorBundle\User;
 use DH\Auditor\User\User;
 use DH\Auditor\User\UserInterface as AuditorUserInterface;
 use DH\Auditor\User\UserProviderInterface;
-use Exception;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -65,7 +64,7 @@ class UserProvider implements UserProviderInterface
     {
         try {
             $token = $this->tokenStorage->getToken();
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $token = null;
         }
 

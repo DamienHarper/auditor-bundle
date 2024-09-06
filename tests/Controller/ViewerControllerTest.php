@@ -24,6 +24,8 @@ use Symfony\Component\Security\Core\User\User;
  * @internal
  *
  * @small
+ *
+ * @coversNothing
  */
 final class ViewerControllerTest extends WebTestCase
 {

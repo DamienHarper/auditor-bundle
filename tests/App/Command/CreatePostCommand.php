@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace DH\AuditorBundle\Tests\App\Command;
 
-use DateTimeImmutable;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use Symfony\Component\Console\Command\Command;
@@ -37,7 +36,7 @@ class CreatePostCommand extends Command
         $post
             ->setTitle('Blameable post')
             ->setBody('yet another post')
-            ->setCreatedAt(new DateTimeImmutable('2020-01-17 22:17:34'))
+            ->setCreatedAt(new \DateTimeImmutable('2020-01-17 22:17:34'))
         ;
 
         $entityManager = $this->doctrineProvider->getAuditingServiceForEntity(Post::class)->getEntityManager();

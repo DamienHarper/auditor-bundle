@@ -45,6 +45,8 @@ return (new Config())
             ->ignoreDotFiles(false)
             ->ignoreVCSIgnored(true)
             ->in(__DIR__.'/src')
+            ->notPath('DependencyInjection/Configuration.php')
             ->in(__DIR__.'/tests')
+            ->exclude('App/var')
     )
 ;

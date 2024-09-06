@@ -12,6 +12,8 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * @internal
  *
  * @small
+ *
+ * @coversNothing
  */
 final class StorageConfigurationCompilerPassTest extends AbstractCompilerPassTestCase
 {

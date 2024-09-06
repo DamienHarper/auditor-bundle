@@ -22,6 +22,8 @@ use Symfony\Component\DependencyInjection\Definition;
  * @internal
  *
  * @small
+ *
+ * @coversNothing
  */
 final class DoctrineMiddlewareCompilerPassTest extends AbstractCompilerPassTestCase
 {

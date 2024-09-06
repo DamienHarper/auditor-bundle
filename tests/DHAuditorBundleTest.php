@@ -26,6 +26,8 @@ use Symfony\Component\HttpKernel\KernelInterface;
  * @internal
  *
  * @small
+ *
+ * @coversNothing
  */
 final class DHAuditorBundleTest extends KernelTestCase
 {

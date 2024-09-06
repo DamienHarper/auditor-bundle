@@ -12,6 +12,8 @@ use PHPUnit\Framework\TestCase;
  * @internal
  *
  * @small
+ *
+ * @coversNothing
  */
 final class UrlHelperTest extends TestCase
 {

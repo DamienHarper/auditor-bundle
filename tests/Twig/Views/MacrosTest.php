@@ -16,6 +16,8 @@ use Twig\Extension\StringLoaderExtension;
  * @internal
  *
  * @small
+ *
+ * @coversNothing
  */
 final class MacrosTest extends KernelTestCase
 {
