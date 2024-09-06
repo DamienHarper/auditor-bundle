@@ -7,7 +7,7 @@ tests/coverage/
 .DS_Store
 .php_cs.cache
 .php-cs-fixer.cache
-.phpunit.result.cache
+.phpunit.cache/
 composer.lock
 *.sqlite
 .preload.php

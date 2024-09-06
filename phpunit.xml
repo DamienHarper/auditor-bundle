@@ -1,17 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
-         bootstrap="tests/bootstrap.php"
-         executionOrder="depends,defects"
-         forceCoversAnnotation="false"
-         beStrictAboutCoversAnnotation="false"
-         beStrictAboutOutputDuringTests="true"
-         beStrictAboutTodoAnnotatedTests="true"
-         verbose="true">
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.3/phpunit.xsd" bootstrap="tests/bootstrap.php"
+         executionOrder="depends,defects" beStrictAboutOutputDuringTests="true" cacheDirectory=".phpunit.cache"
+         requireCoverageMetadata="false" beStrictAboutCoverageMetadata="true">
   <coverage includeUncoveredFiles="true">
-    <include>
-      <directory suffix=".php">src</directory>
-    </include>
     <report>
       <html outputDirectory="tests/coverage"/>
     </report>
@@ -22,12 +14,17 @@
     <server name="KERNEL_CLASS" value="DH\AuditorBundle\Tests\App\Kernel"/>
     <server name="APP_ENV" value="test" force="true"/>
     <server name="SHELL_VERBOSITY" value="-1"/>
-    <server name="SYMFONY_DEPRECATIONS_HELPER" value="weak" />
+<!--    <server name="SYMFONY_DEPRECATIONS_HELPER" value="weak"/>-->
     <env name="BOOTSTRAP_CLEAR_CACHE_ENV" value="test"/>
   </php>
   <testsuites>
-    <testsuite name="AuditBundle test suite">
+    <testsuite name="Auditor Bundle test suite">
       <directory suffix="Test.php">tests</directory>
     </testsuite>
   </testsuites>
+  <source>
+    <include>
+      <directory suffix=".php">src</directory>
+    </include>
+  </source>
 </phpunit>

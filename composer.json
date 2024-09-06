@@ -47,7 +47,7 @@
     "gedmo/doctrine-extensions": "^2.4|^3.0",
     "matthiasnoback/symfony-dependency-injection-test": "^3.1|^4.0|^5.0",
     "nyholm/symfony-bundle-test": "^2.0|^3.0",
-    "phpunit/phpunit": "^9.0",
+    "phpunit/phpunit": "^11.0",
     "symfony/browser-kit": "^5.4|^6.0|^7.0",
     "symfony/css-selector": "^5.4|^6.0|^7.0",
     "symfony/framework-bundle": "^5.4|^6.0|^7.0",
