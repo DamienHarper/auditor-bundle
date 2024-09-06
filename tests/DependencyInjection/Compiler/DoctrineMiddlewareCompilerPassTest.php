@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\Tests\DependencyInjection\Compiler;
 
 use DH\Auditor\Configuration;
-use DH\Auditor\Provider\Doctrine\Auditing\Logger\Middleware\DHMiddleware;
+use DH\Auditor\Provider\Doctrine\Auditing\DBAL\Middleware\AuditorMiddleware;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Comment;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
@@ -29,7 +29,7 @@ final class DoctrineMiddlewareCompilerPassTest extends AbstractCompilerPassTestC
 {
     public function testCompilerPass(): void
     {
-        if (!interface_exists(Middleware::class) || !class_exists(DHMiddleware::class)) {
+        if (!interface_exists(Middleware::class) || !class_exists(AuditorMiddleware::class)) {
             self::markTestSkipped('DHMiddleware isn\'t supported');
         }
         $this->container->setParameter('kernel.cache_dir', sys_get_temp_dir());
@@ -96,7 +96,7 @@ final class DoctrineMiddlewareCompilerPassTest extends AbstractCompilerPassTestC
         $this->compile();
 
         $this->assertContainerBuilderHasServiceDefinitionWithTag(
-            'doctrine.dbal.default_connection.dh_middleware',
+            'doctrine.dbal.default_connection.auditor_middleware',
             'doctrine.middleware'
         );
     }

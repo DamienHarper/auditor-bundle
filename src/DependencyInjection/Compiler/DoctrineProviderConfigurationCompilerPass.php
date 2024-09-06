@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\DependencyInjection\Compiler;
 
 use DH\Auditor\Provider\Doctrine\Auditing\Annotation\AnnotationLoader;
-use DH\Auditor\Provider\Doctrine\Auditing\Logger\Middleware\DHMiddleware;
+use DH\Auditor\Provider\Doctrine\Auditing\DBAL\Middleware\AuditorMiddleware;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Provider\Doctrine\Service\AuditingService;
 use DH\Auditor\Provider\Doctrine\Service\StorageService;
@@ -78,9 +78,9 @@ class DoctrineProviderConfigurationCompilerPass implements CompilerPassInterface
 
     private function registerDHMiddleware(ContainerBuilder $container): void
     {
-        if (interface_exists(Middleware::class) && class_exists(DHMiddleware::class)) {
+        if (interface_exists(Middleware::class) && class_exists(AuditorMiddleware::class)) {
             $this->isDHMiddlewareSupported = true;
-            $container->register('doctrine.dbal.dh_middleware', DHMiddleware::class);
+            $container->register('doctrine.dbal.auditor_middleware', AuditorMiddleware::class);
         }
     }
 
@@ -105,8 +105,8 @@ class DoctrineProviderConfigurationCompilerPass implements CompilerPassInterface
 
         $container
             ->setDefinition(
-                $connectionName.'.dh_middleware',
-                new ChildDefinition('doctrine.dbal.dh_middleware')
+                $connectionName.'.auditor_middleware',
+                new ChildDefinition('doctrine.dbal.auditor_middleware')
             )
             ->addTag('doctrine.middleware')
         ;
