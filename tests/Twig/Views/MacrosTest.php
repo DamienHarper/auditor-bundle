@@ -8,15 +8,15 @@ use DH\Auditor\Model\Entry;
 use DH\Auditor\Provider\Doctrine\Auditing\Transaction\AuditTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Issue112\DummyEntity;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\SchemaSetupTrait;
+use PHPUnit\Framework\Attributes\Small;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Twig\Environment;
 use Twig\Extension\StringLoaderExtension;
 
 /**
  * @internal
- *
- * @small
  */
+#[Small]
 final class MacrosTest extends KernelTestCase
 {
     use AuditTrait;
@@ -30,12 +30,14 @@ final class MacrosTest extends KernelTestCase
         if (!$twig instanceof Environment) {
             self::markTestIncomplete('Twig missing');
         }
+
         $twig->addExtension(new StringLoaderExtension());
         $em = $this->createEntityManager([
             __DIR__.'/../../../vendor/damienharper/auditor/tests/Provider/Doctrine/Fixtures/Issue112',
         ]);
         $entity = new DummyEntity();
         $entity->setPrimaryKey(1);
+
         $entry = Entry::fromArray([
             'diffs' => json_encode([
                 'source' => [
@@ -52,7 +54,7 @@ final class MacrosTest extends KernelTestCase
             'entry' => $entry,
             'entity' => $entity::class,
         ]);
-        self::assertSame($this->getExpected(), trim($response));
+        $this->assertSame($this->getExpected(), trim($response));
     }
 
     private function getTemplateAsString(): string

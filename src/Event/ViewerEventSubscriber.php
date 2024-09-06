@@ -16,12 +16,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 class ViewerEventSubscriber implements EventSubscriberInterface
 {
-    private Auditor $auditor;
-
-    public function __construct(Auditor $auditor)
-    {
-        $this->auditor = $auditor;
-    }
+    public function __construct(private readonly Auditor $auditor) {}
 
     public function onKernelController(KernelEvent $event): void
     {

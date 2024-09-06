@@ -21,7 +21,7 @@
     "ext-json": "*",
     "damienharper/auditor": "dev-master",
     "doctrine/doctrine-bundle": "^2.0",
-    "doctrine/orm": "^2.13 || ^3.1",
+    "doctrine/orm": "^2.13|^3.2",
     "symfony/asset": "^5.4|^6.0|^7.0",
     "symfony/doctrine-bridge": "^5.4|^6.0|^7.0",
     "symfony/event-dispatcher": "^5.4|^6.0|^7.0",
@@ -45,9 +45,9 @@
   },
   "require-dev": {
     "gedmo/doctrine-extensions": "^2.4|^3.0",
-    "matthiasnoback/symfony-dependency-injection-test": "^3.1|^4.0|^5.0",
+    "matthiasnoback/symfony-dependency-injection-test": "^6.0",
     "nyholm/symfony-bundle-test": "^2.0|^3.0",
-    "phpunit/phpunit": "^9.0",
+    "phpunit/phpunit": "^11.0",
     "symfony/browser-kit": "^5.4|^6.0|^7.0",
     "symfony/css-selector": "^5.4|^6.0|^7.0",
     "symfony/framework-bundle": "^5.4|^6.0|^7.0",
@@ -56,15 +56,15 @@
     "doctrine/data-fixtures": "^1.4"
   },
   "scripts": {
-    "test": "php -d pcov.enabled=1 ./vendor/bin/phpunit --colors=always",
-    "csfixer": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --using-cache=no --verbose --ansi",
-    "cs-check": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --using-cache=no --verbose --ansi --dry-run",
-    "phpstan": "tools/phpstan/vendor/bin/phpstan --ansi analyse src",
-    "setup44": "SYMFONY_REQUIRE='^4.4' composer update --prefer-stable",
-    "setup54": "SYMFONY_REQUIRE='^5.4' composer update --prefer-stable",
-    "rector": "tools/rector/vendor/bin/rector process src",
+    "test": "XDEBUG_MODE=coverage ./vendor/bin/phpunit --colors=always",
+    "cs-fix": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --using-cache=no --verbose --ansi",
+    "cs-check": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --using-cache=no --verbose --ansi --dry-run",
+    "phpstan": "tools/phpstan/vendor/bin/phpstan --memory-limit=1G --ansi analyse src",
+    "rector": "tools/rector/vendor/bin/rector",
     "rector-check": "tools/rector/vendor/bin/rector --dry-run",
-    "update-tools": "composer update --working-dir=tools/php-cs-fixer ; composer update --working-dir=tools/phpstan ; composer update --working-dir=tools/rector"
+    "update-tools": "composer update --working-dir=tools/php-cs-fixer ; composer update --working-dir=tools/phpstan ; composer update --working-dir=tools/rector",
+    "setup54": "SYMFONY_REQUIRE='^5.4' composer update --prefer-stable && rm -rf tests/App/var/cache/*",
+    "setup64": "SYMFONY_REQUIRE='^6.4' composer update --prefer-stable && rm -rf tests/App/var/cache/*"
   },
   "config": {
     "sort-packages": true,
