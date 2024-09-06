@@ -44,7 +44,7 @@ final class ViewerController
                 $audited,
                 array_filter(
                     $schemaManager->getAuditableTableNames($auditingService->getEntityManager()),
-                    static function ($entity) use ($reader, $scope) {
+                    static function (string $entity) use ($reader, $scope) {
                         $roleChecker = $reader->getProvider()->getAuditor()->getConfiguration()->getRoleChecker();
 
                         return null === $roleChecker ? true : $roleChecker($entity, $scope);
