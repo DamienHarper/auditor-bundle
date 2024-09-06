@@ -15,7 +15,7 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder('dh_auditor');
 
-        $this->getRootNode($treeBuilder, 'dh_auditor')
+        $treeBuilder->getRootNode()
             ->children()
                 ->booleanNode('enabled')
                     ->defaultTrue()
@@ -39,23 +39,11 @@ class Configuration implements ConfigurationInterface
         return $treeBuilder;
     }
 
-    /**
-     * Proxy to get root node for Symfony < 4.2.
-     */
-    protected function getRootNode(TreeBuilder $treeBuilder, string $name): ArrayNodeDefinition
-    {
-        if (method_exists($treeBuilder, 'getRootNode')) {
-            return $treeBuilder->getRootNode();
-        }
-
-        return $treeBuilder->root($name);
-    }
-
     private function getProvidersNode(): ArrayNodeDefinition
     {
         $treeBuilder = new TreeBuilder('providers');
 
-        return $this->getRootNode($treeBuilder, 'providers')
+        return $treeBuilder->getRootNode()
             ->requiresAtLeastOneElement()
             ->useAttributeAsKey('name')
             ->variablePrototype()
