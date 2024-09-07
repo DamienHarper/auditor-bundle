@@ -14,7 +14,7 @@
         <server name="KERNEL_CLASS" value="DH\AuditorBundle\Tests\App\Kernel"/>
         <server name="APP_ENV" value="test" force="true"/>
         <server name="SHELL_VERBOSITY" value="-1"/>
-        <!--    <server name="SYMFONY_DEPRECATIONS_HELPER" value="weak"/>-->
+<!--        <server name="SYMFONY_DEPRECATIONS_HELPER" value="weak"/>-->
         <env name="BOOTSTRAP_CLEAR_CACHE_ENV" value="test"/>
     </php>
     <testsuites>
