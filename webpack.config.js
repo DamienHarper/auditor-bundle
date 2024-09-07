@@ -1,5 +1,5 @@
 const Encore = require('@symfony/webpack-encore');
-const PurgeCssPlugin = require('purgecss-webpack-plugin');
+const purgeCssWebpackPlugin = require("purgecss-webpack-plugin").PurgeCSSPlugin;
 const glob = require('glob-all');
 const path = require('path');
 
@@ -8,7 +8,7 @@ if (!Encore.isRuntimeEnvironmentConfigured()) {
 }
 
 if (Encore.isProduction()) {
-    Encore.addPlugin(new PurgeCssPlugin({
+    Encore.addPlugin(new purgeCssWebpackPlugin({
         paths: glob.sync([
             path.join(__dirname, 'src/Resources/views/**/**/*.html.twig'),
             path.join(__dirname, 'src/Resources/views/**/*.html.twig'),
