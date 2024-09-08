@@ -1,0 +1,36 @@
+name: auditor-bundle-tester
+services:
+  php-cli:
+    image: auditor:${PHP_VERSION}
+    build:
+      context: .
+      target: auditor
+      args:
+        PHP_VERSION: ${PHP_VERSION}
+    environment:
+      SYMFONY_REQUIRE: ^${SYMFONY_VERSION}
+      XDEBUG_MODE: ${XDEBUG_MODE:-coverage}
+    volumes:
+      - ../..:/app
+      - vendor_php${PHP_VERSION}_sf${SYMFONY_VERSION}:/app/vendor
+      - phpcsfixer_php${PHP_VERSION}:/app/tools/php-cs-fixer/vendor
+      - phpstan_php${PHP_VERSION}:/app/tools/phpstan/vendor
+      - rector_php${PHP_VERSION}:/app/tools/rector/vendor
+      - phpstan_cache:/tmp/phpstan
+      - composer_root:/root/.composer
+
+volumes:
+  composer_root:
+  vendor_php8.3_sf7.1:
+  vendor_php8.3_sf6.4:
+  vendor_php8.3_sf5.4:
+  vendor_php8.2_sf7.1:
+  vendor_php8.2_sf6.4:
+  vendor_php8.2_sf5.4:
+  phpcsfixer_php8.2:
+  phpcsfixer_php8.3:
+  phpstan_php8.3:
+  phpstan_php8.2:
+  rector_php8.3:
+  rector_php8.2:
+  phpstan_cache:

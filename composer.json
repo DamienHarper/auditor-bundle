@@ -19,9 +19,10 @@
   "require": {
     "php": ">=8.1",
     "ext-json": "*",
+    "ext-intl": "*",
     "damienharper/auditor": "dev-master",
     "doctrine/doctrine-bundle": "^2.0",
-    "doctrine/orm": "^2.13 || ^3.2",
+    "doctrine/orm": "^2.13|^3.2",
     "symfony/asset": "^5.4|^6.4|^7.0",
     "symfony/doctrine-bridge": "^5.4|^6.4|^7.0",
     "symfony/event-dispatcher": "^5.4|^6.4|^7.0",
@@ -64,7 +65,8 @@
     "rector-check": "tools/rector/vendor/bin/rector --dry-run",
     "update-tools": "composer update --working-dir=tools/php-cs-fixer ; composer update --working-dir=tools/phpstan ; composer update --working-dir=tools/rector",
     "setup54": "SYMFONY_REQUIRE='^5.4' composer update --prefer-stable && rm -rf tests/App/var/cache/*",
-    "setup64": "SYMFONY_REQUIRE='^6.4' composer update --prefer-stable && rm -rf tests/App/var/cache/*"
+    "setup64": "SYMFONY_REQUIRE='^6.4' composer update --prefer-stable && rm -rf tests/App/var/cache/*",
+    "setup71": "SYMFONY_REQUIRE='^7.1' composer update --prefer-stable && rm -rf tests/App/var/cache/*"
   },
   "config": {
     "sort-packages": true,
