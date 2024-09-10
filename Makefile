@@ -65,7 +65,7 @@ endef
 .PHONY: tests
 tests: validate_matrix
 	$(eval $(call set_args,tests))
-	#$(call common_setup)
+	$(call common_setup)
 	PHP_VERSION=$(php) SYMFONY_VERSION=$(sf) \
 	sh -c "docker compose $(compose_files) run --rm --remove-orphans php-cli vendor/bin/phpunit $(args)"
 
