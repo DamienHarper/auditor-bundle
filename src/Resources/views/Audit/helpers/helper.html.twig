@@ -65,12 +65,12 @@
 
     {{ ('audit.audit_details.summary.' ~ action)|trans({
         '%source_link%': path('dh_auditor_show_entity_history', { 'entity': helper.namespaceToParam(entity), 'id': entry.getObjectId() }),
-        '%source%': source_subject,
-        '%source_label%': source_label,
-        '%target_link%': target_link,
-        '%target%': target_subject,
-        '%target_label%': target_label,
-        '%user%': entry.getUsername() is null ? 'audit.audit_details.summary.unkown_user'|trans(domain='auditor') : entry.getUsername(),
+        '%source%': source_subject|escape,
+        '%source_label%': source_label|escape,
+        '%target_link%': target_link|escape,
+        '%target%': target_subject|escape,
+        '%target_label%': target_label|escape,
+        '%user%': entry.getUsername() is null ? 'audit.audit_details.summary.unkown_user'|trans(domain='auditor') : entry.getUsername()|escape,
         '%ip%': entry.getIp() is not empty ? ', IP: ' ~ entry.getIp() : '',
     }, domain='auditor')|raw }}
 {% endmacro %}
