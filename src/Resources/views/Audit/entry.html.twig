@@ -1,5 +1,18 @@
 {% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
 
+{% macro displayDiffs(field, changeset) %}
+{#    {{ dump(field, changeset) }}#}
+    {% if changeset.old is defined or changeset.new is defined %}
+        {# NON JSON field changeset #}
+        {{ include('@DHAuditor/Audit/entry_diff.html.twig', {'key': field, 'values': changeset}) }}
+    {% else %}
+        {#  JSON field changeset #}
+        {% for json_field, json_changeset in changeset %}
+            {{ _self.displayDiffs(field~'.'~json_field, json_changeset) }}
+        {% endfor %}
+    {% endif %}
+{% endmacro %}
+
 <div class="auditor-audit-history-entry relative pb-8">
     {% if not is_last %}
     <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
@@ -46,34 +59,8 @@
                                     </thead>
                                     <tbody class="divide-y divide-gray-200">
                                     {% set diffs = entry.getDiffs() %}
-                                    {% for key, values in diffs %}
-                                    <tr class="bg-white">
-                                        <td class="px-3 py-1 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            <code class="text-gray-700">{{ key }}</code>
-                                        </td>
-                                        <td class="px-3 py-1 text-sm text-gray-500">
-                                            {% if values.old is defined %}
-                                                {% if values.old is null %}
-                                                    <span class="bg-gray-500 px-2 py-0.5 rounded text-white">null</span>
-                                                {% else %}
-                                                    <span class="text-red-500">{{ helper.dump(values.old) }}</span>
-                                                {% endif %}
-                                            {% endif %}
-                                        </td>
-                                        <td class="px-3 py-1 text-sm text-gray-500">
-                                            {% if values.new is defined %}
-                                                {% if values.new is null %}
-                                                    <span class="bg-gray-500 px-2 py-0.5 rounded text-white">null</span>
-                                                {% else %}
-                                                    {% if values.old is null %}
-                                                        <span class="text-blue-500">{{ helper.dump(values.new) }}</span>
-                                                    {% else %}
-                                                        <span class="text-green-500">{{ helper.dump(values.new) }}</span>
-                                                    {% endif %}
-                                                {% endif %}
-                                            {% endif %}
-                                        </td>
-                                    </tr>
+                                    {% for field, changeset in diffs %}
+                                        {{ _self.displayDiffs(field, changeset) }}
                                     {% endfor %}
                                     </tbody>
                                 </table>
@@ -97,4 +84,3 @@
         </div>
     </div>
 </div>
-
