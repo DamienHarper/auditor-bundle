@@ -30,6 +30,9 @@ return (new Config())
         'phpdoc_to_param_type' => true,
         'phpdoc_to_property_type' => true,
         'phpdoc_to_return_type' => true,
+        'phpdoc_to_comment' => [
+            'ignored_tags' => ['todo', 'var']
+        ],
         'regular_callable_call' => true,
         'simplified_if_return' => true,
         'get_class_to_class_keyword' => true,
