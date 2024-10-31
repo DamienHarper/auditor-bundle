@@ -2,6 +2,7 @@
 
 namespace DH\AuditorBundle\DependencyInjection;
 
+use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -94,8 +95,32 @@ class Configuration implements ConfigurationInterface
                     }
 
                     // "viewer" is disabled by default
-                    if (!\array_key_exists('viewer', $v['doctrine']) || !\is_bool($v['doctrine']['viewer'])) {
-                        $v['doctrine']['viewer'] = false;
+                    $defaultViewerOptions = [
+                        'enabled' => false,
+                        'page_size' => Reader::PAGE_SIZE,
+                    ];
+                    if (\array_key_exists('viewer', $v['doctrine'])) {
+                        if (is_array($v['doctrine']['viewer'])) {
+                            if (
+                                !\array_key_exists('enabled', $v['doctrine']['viewer']) ||
+                                !\is_bool($v['doctrine']['viewer']['enabled'])
+                            ) {
+                                $v['doctrine']['viewer']['enabled'] = false;
+                            }
+
+                            if (
+                                !\array_key_exists('page_size', $v['doctrine']['viewer']) ||
+                                !\is_int($v['doctrine']['viewer']['page_size'])
+                            ) {
+                                $v['doctrine']['viewer']['page_size'] = Reader::PAGE_SIZE;
+                            }
+                        } elseif (!\is_bool($v['doctrine']['viewer'])) {
+                            // "viewer" is disabled by default
+                            $v['doctrine']['viewer'] = $defaultViewerOptions;
+                        }
+                    } else {
+                        // "viewer" is disabled by default
+                        $v['doctrine']['viewer'] = $defaultViewerOptions;
                     }
 
                     // "storage_mapper" is null by default

@@ -6,6 +6,7 @@ namespace DH\AuditorBundle\Controller;
 
 use DH\Auditor\Exception\AccessDeniedException;
 use DH\Auditor\Provider\Doctrine\Auditing\Annotation\Security;
+use DH\Auditor\Provider\Doctrine\Configuration;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\Auditor\Provider\Doctrine\Persistence\Schema\SchemaManager;
 use DH\Auditor\Provider\Doctrine\Service\AuditingService;
@@ -80,11 +81,14 @@ final class ViewerController
         }
 
         try {
+            /** @var Configuration $configuration */
+            $configuration = $reader->getProvider()->getConfiguration();
+            $pageSize = $configuration->getViewerPageSize();
             $pager = $reader->paginate($reader->createQuery($entity, [
                 'object_id' => $id,
                 'page' => $page,
-                'page_size' => Reader::PAGE_SIZE,
-            ]), $page, Reader::PAGE_SIZE);
+                'page_size' => $pageSize,
+            ]), $page, $pageSize);
         } catch (AccessDeniedException) {
             throw new SymfonyAccessDeniedException('Access Denied.');
         }
