@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DH\AuditorBundle\Routing;
 
+use DH\Auditor\Provider\Doctrine\Configuration;
 use DH\AuditorBundle\Controller\ViewerController;
 use Symfony\Bundle\FrameworkBundle\Routing\AnnotatedRouteControllerLoader;
 use Symfony\Bundle\FrameworkBundle\Routing\AttributeRouteControllerLoader;
@@ -25,7 +26,7 @@ if (BaseKernel::MAJOR_VERSION >= 6) {
             }
 
             $routeCollection = new RouteCollection();
-            if (true === $this->configuration['viewer']) {
+            if (Configuration::isViewerEnabledInConfig($this->configuration['viewer'])) {
                 $routeCollection = $this->annotatedRouteControllerLoader->load(ViewerController::class);
             }
 
@@ -58,7 +59,7 @@ if (BaseKernel::MAJOR_VERSION >= 6) {
             }
 
             $routeCollection = new RouteCollection();
-            if (true === $this->configuration['viewer']) {
+            if (Configuration::isViewerEnabledInConfig($this->configuration['viewer'])) {
                 $routeCollection = $this->annotatedRouteControllerLoader->load(ViewerController::class);
             }
 

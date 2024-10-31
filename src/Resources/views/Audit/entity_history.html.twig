@@ -74,5 +74,8 @@
     </ul>
 </div>
 
+{% block dh_auditor_pager %}
 {{ pager.render(helper.namespaceToParam(entity), id, paginator) }}
+{% endblock dh_auditor_pager %}
+
 {% endblock dh_auditor_content %}
