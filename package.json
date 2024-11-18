@@ -6,7 +6,7 @@
     "autoprefixer": "^10.4.20",
     "babel-loader": "^9.2.1",
     "glob-all": "^3.3.1",
-    "postcss": "^8.4.48",
+    "postcss": "^8.4.49",
     "postcss-loader": "^8.1.1",
     "tailwindcss": "^3.4.14",
     "webpack": "^5.96.1",
