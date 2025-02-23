@@ -52,7 +52,7 @@
     "symfony/framework-bundle": "^5.4|^6.4|^7.0",
     "symfony/var-dumper": "^5.4|^6.4|^7.0",
     "symfony/webpack-encore-bundle": "^1.12|^2.0",
-    "doctrine/data-fixtures": "^1.4"
+    "doctrine/data-fixtures": "^2.0"
   },
   "scripts": {
     "test": "XDEBUG_MODE=coverage ./vendor/bin/phpunit --colors=always",
