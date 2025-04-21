@@ -31,6 +31,7 @@ final class DoctrineMiddlewareCompilerPassTest extends AbstractCompilerPassTestC
             self::markTestSkipped('DHMiddleware isn\'t supported');
         }
         $this->container->setParameter('kernel.cache_dir', sys_get_temp_dir());
+        $this->container->setParameter('kernel.build_dir', $this->container->getParameter('kernel.cache_dir'));
         $this->container->setParameter('kernel.debug', false);
         $this->container->setParameter('kernel.bundles', []);
         $doctrineConfig = [
