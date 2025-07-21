@@ -9,7 +9,7 @@
     "postcss": "^8.5.3",
     "postcss-loader": "^8.1.1",
     "tailwindcss": "^3.4.17",
-    "webpack": "^5.98.0",
+    "webpack": "^5.100.2",
     "webpack-cli": "^5.1.4"
   }
 }
