@@ -4,7 +4,8 @@
 /tools  export-ignore
 rector.php  export-ignore
 phpstan.neon    export-ignore
-phpunit.xml.dist    export-ignore
+phpunit.xml    export-ignore
+Makefile    export-ignore
 yarn.lock    export-ignore
 webpack.config.js    export-ignore
 tailwind.config.js    export-ignore
