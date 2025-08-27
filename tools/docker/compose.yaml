@@ -8,6 +8,7 @@ services:
       args:
         PHP_VERSION: ${PHP_VERSION}
     environment:
+      PHP_CS_FIXER_IGNORE_ENV: 1
       SYMFONY_REQUIRE: ^${SYMFONY_VERSION}
       XDEBUG_MODE: ${XDEBUG_MODE:-coverage}
     volumes:
@@ -21,16 +22,28 @@ services:
 
 volumes:
   composer_root:
+  vendor_php8.4_sf7.3:
+  vendor_php8.4_sf7.2:
+  vendor_php8.4_sf7.1:
+  vendor_php8.4_sf6.4:
+  vendor_php8.4_sf5.4:
+  vendor_php8.3_sf7.3:
+  vendor_php8.3_sf7.2:
   vendor_php8.3_sf7.1:
   vendor_php8.3_sf6.4:
   vendor_php8.3_sf5.4:
+  vendor_php8.2_sf7.3:
+  vendor_php8.2_sf7.2:
   vendor_php8.2_sf7.1:
   vendor_php8.2_sf6.4:
   vendor_php8.2_sf5.4:
-  phpcsfixer_php8.2:
+  phpcsfixer_php8.4:
   phpcsfixer_php8.3:
+  phpcsfixer_php8.2:
+  phpstan_php8.4:
   phpstan_php8.3:
   phpstan_php8.2:
+  rector_php8.4:
   rector_php8.3:
   rector_php8.2:
   phpstan_cache:

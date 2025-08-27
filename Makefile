@@ -6,12 +6,21 @@ args ?=
 # Allowed PHP and Symfony version combinations
 # (PHP_VERSION;SYMFONY_VERSION)
 valid_combinations = \
-    8.3;7.1 \
-    8.3;6.4 \
-    8.3;5.4 \
-    8.2;7.1 \
+    8.2;5.4 \
     8.2;6.4 \
-    8.2;5.4
+    8.2;7.1 \
+    8.2;7.2 \
+    8.2;7.3 \
+    8.3;5.4 \
+    8.3;6.4 \
+    8.3;7.1 \
+    8.3;7.2 \
+    8.3;7.3 \
+    8.4;5.4 \
+    8.4;6.4 \
+    8.4;7.1 \
+    8.4;7.2 \
+    8.4;7.3
 
 current_combination = $(php);$(sf)
 
