@@ -1660,9 +1660,9 @@ csso@^5.0.5:
     css-tree "~2.2.0"
 
 debug@^4.1.0, debug@^4.3.1, debug@^4.4.1:
-  version "4.4.2"
-  resolved "https://registry.yarnpkg.com/debug/-/debug-4.4.2.tgz#96b480a7fe47cc04fe57f0bf56e058dba2a001fa"
-  integrity sha512-IQeXCZhGRpFiLI3MYlCGLjNssUBiE8G21RMyNH35KFsxIvhrMeh5jXuG82woDZrYX9pgqHs+GF5js2Ducn4y4A==
+  version "4.4.3"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-4.4.3.tgz#c6ae432d9bd9662582fce08709b038c58e9e3d6a"
+  integrity sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==
   dependencies:
     ms "^2.1.3"
 
