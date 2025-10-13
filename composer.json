@@ -20,7 +20,7 @@
     "php": ">=8.2",
     "ext-intl": "*",
     "damienharper/auditor": "^3.2",
-    "doctrine/doctrine-bundle": "^2.0",
+    "doctrine/doctrine-bundle": "^2.0|^3.0",
     "symfony/asset": "^5.4|^6.4|^7.0",
     "symfony/doctrine-bridge": "^5.4|^6.4|^7.0",
     "symfony/event-dispatcher": "^5.4|^6.4|^7.0",
