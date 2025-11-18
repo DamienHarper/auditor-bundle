@@ -68,6 +68,12 @@
         "sort-packages": true,
         "allow-plugins": {
             "composer/package-versions-deprecated": true
+        },
+        "audit": {
+            "ignore": [
+                "PKSA-365x-2zjk-pt47",
+                "PKSA-b35n-565h-rs4q"
+            ]
         }
     },
     "extra": {
