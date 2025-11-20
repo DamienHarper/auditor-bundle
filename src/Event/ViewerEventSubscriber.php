@@ -38,6 +38,10 @@ class ViewerEventSubscriber implements EventSubscriberInterface
             $controller = $controller[0];
         }
 
+        if (!$controller instanceof ViewerController) {
+            return;
+        }
+
         /** @var AuditorConfiguration $auditorConfiguration */
         $auditorConfiguration = $this->auditor->getConfiguration();
 
@@ -47,7 +51,7 @@ class ViewerEventSubscriber implements EventSubscriberInterface
         $isAuditorEnabled = $auditorConfiguration->isEnabled();
         $isViewerEnabled = $providerConfiguration->isViewerEnabled();
 
-        if ($controller instanceof ViewerController && (!$isAuditorEnabled || !$isViewerEnabled)) {
+        if (!$isAuditorEnabled || !$isViewerEnabled) {
             throw new NotFoundHttpException();
         }
     }
