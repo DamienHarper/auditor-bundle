@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\Event;
 
 use DH\Auditor\Auditor;
+use DH\Auditor\Configuration as AuditorConfiguration;
 use DH\Auditor\Provider\Doctrine\Configuration as DoctrineProviderConfiguration;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\AuditorBundle\Controller\ViewerController;
@@ -32,6 +33,11 @@ class ViewerEventSubscriber implements EventSubscriberInterface
             $controller = $controller[0];
         }
 
+        if (!$controller instanceof ViewerController) {
+            return;
+        }
+
+        /** @var AuditorConfiguration $auditorConfiguration */
         $auditorConfiguration = $this->auditor->getConfiguration();
 
         /** @var DoctrineProviderConfiguration $providerConfiguration */
@@ -40,7 +46,7 @@ class ViewerEventSubscriber implements EventSubscriberInterface
         $isAuditorEnabled = $auditorConfiguration->isEnabled();
         $isViewerEnabled = $providerConfiguration->isViewerEnabled();
 
-        if ($controller instanceof ViewerController && (!$isAuditorEnabled || !$isViewerEnabled)) {
+        if (!$isAuditorEnabled || !$isViewerEnabled) {
             throw new NotFoundHttpException();
         }
     }
