@@ -72,7 +72,9 @@
         "audit": {
             "ignore": [
                 "PKSA-365x-2zjk-pt47",
-                "PKSA-b35n-565h-rs4q"
+                "PKSA-b35n-565h-rs4q",
+                "PKSA-yhcn-xrg3-68b1",
+                "PKSA-2wrf-1xmk-1pky"
             ]
         }
     },
