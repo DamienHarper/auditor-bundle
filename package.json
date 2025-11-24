@@ -2,7 +2,7 @@
   "devDependencies": {
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.26.9",
-    "@symfony/webpack-encore": "^5.1.0",
+    "@symfony/webpack-encore": "^5.3.1",
     "autoprefixer": "^10.4.22",
     "babel-loader": "^10.0.0",
     "glob-all": "^3.3.1",
