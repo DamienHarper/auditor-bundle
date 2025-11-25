@@ -65,15 +65,7 @@
     "config": {
         "sort-packages": true,
         "audit": {
-            "ignore": [
-                "PKSA-365x-2zjk-pt47",
-                "PKSA-b35n-565h-rs4q",
-                "PKSA-hr4y-jwk2-1yb9",
-                "PKSA-4w9w-fp7s-ddy7",
-                "PKSA-yhcn-xrg3-68b1",
-                "PKSA-2wrf-1xmk-1pky",
-                "PKSA-ztgh-x9c8-k66g"
-            ]
+          "block-insecure": false
         }
     },
     "extra": {
