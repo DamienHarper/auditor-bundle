@@ -9,13 +9,13 @@ return (new Config())
     ->setParallelConfig(ParallelConfigFactory::detect()) // @TODO 4.0 no need to call this manually :poop:
     ->setRiskyAllowed(true)
     ->setRules([
-        '@PHP82Migration' => true,
+        '@PHP8x2Migration' => true,
         '@Symfony' => true,
         '@Symfony:risky' => true,
         '@DoctrineAnnotation' => true,
         '@PhpCsFixer' => true,
         '@PhpCsFixer:risky' => true,
-        '@PHPUnit100Migration:risky' => true,
+        '@PHPUnit10x0Migration:risky' => true,
 //        'date_time_immutable' => true,
         'general_phpdoc_annotation_remove' => [
             'annotations' => [
