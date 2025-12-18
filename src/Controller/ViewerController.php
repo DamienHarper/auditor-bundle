@@ -15,7 +15,7 @@ use DH\AuditorBundle\Tests\Controller\ViewerControllerTest;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException as SymfonyAccessDeniedException;
 use Twig\Environment;
 
@@ -70,7 +70,7 @@ final class ViewerController
     #[Route(path: '/audit/{entity}/{id}', name: 'dh_auditor_show_entity_history', methods: ['GET'])]
     public function showEntityHistoryAction(Request $request, Reader $reader, string $entity, int|string|null $id = null): Response
     {
-        \assert(\is_string($request->query->get('page', '1')) || \is_int($request->query->get('page', '1')));
+        \assert(\is_string($request->query->get('page', '1')));
         $page = (int) $request->query->get('page', '1');
         $page = max(1, $page);
 
