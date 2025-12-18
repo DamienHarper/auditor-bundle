@@ -45,10 +45,13 @@ jobs:
         php:
           - '8.2'
           - '8.3'
+          - '8.4'
+          - '8.5'
         symfony:
           - '5.*'
           - '6.*'
           - '7.*'
+          - '8.*'
       fail-fast: false
 
     steps:
@@ -85,11 +88,15 @@ jobs:
 
       - name: Update project dependencies (6.*)
         if: matrix.symfony == '6.*'
-        run: SYMFONY_REQUIRE="^6.0" composer update --no-progress --ansi --prefer-stable
+        run: SYMFONY_REQUIRE="^6.4" composer update --no-progress --ansi --prefer-stable
 
       - name: Update project dependencies (7.*)
         if: matrix.symfony == '7.*'
-        run: SYMFONY_REQUIRE="^7.0" composer update --no-progress --ansi --prefer-stable
+        run: SYMFONY_REQUIRE="^7.4" composer update --no-progress --ansi --prefer-stable
+
+      - name: Update project dependencies (8.*)
+        if: matrix.symfony == '8.*'
+        run: SYMFONY_REQUIRE="^8.0" composer update --no-progress --ansi --prefer-stable
 
       - name: Install auditor from source
         run: composer reinstall damienharper/auditor --prefer-install=source
