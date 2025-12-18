@@ -61,10 +61,10 @@
     "rector": "tools/rector/vendor/bin/rector",
     "rector-check": "tools/rector/vendor/bin/rector --dry-run",
     "update-tools": "composer update --working-dir=tools/php-cs-fixer ; composer update --working-dir=tools/phpstan ; composer update --working-dir=tools/rector",
-    "setup54": "SYMFONY_REQUIRE='^5.4' composer update --prefer-stable && rm -rf tests/App/var/cache/*",
-    "setup64": "SYMFONY_REQUIRE='^6.4' composer update --prefer-stable && rm -rf tests/App/var/cache/*",
-    "setup74": "SYMFONY_REQUIRE='^7.4' composer update --prefer-stable && rm -rf tests/App/var/cache/*",
-    "setup80": "SYMFONY_REQUIRE='^8.0' composer update --prefer-stable && rm -rf tests/App/var/cache/*"
+    "setup5": "SYMFONY_REQUIRE='~5.4' composer update --prefer-stable && rm -rf tests/App/var/cache/*",
+    "setup6": "SYMFONY_REQUIRE='~6.4' composer update --prefer-stable && rm -rf tests/App/var/cache/*",
+    "setup7": "SYMFONY_REQUIRE='~7.4' composer update --prefer-stable && rm -rf tests/App/var/cache/*",
+    "setup8": "SYMFONY_REQUIRE='~8.0' composer update --prefer-stable && rm -rf tests/App/var/cache/*"
   },
   "config": {
     "sort-packages": true,
