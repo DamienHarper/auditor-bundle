@@ -69,7 +69,7 @@ final class ViewerControllerTest extends WebTestCase
 
         $breadcrumbs = $crawler->filter('nav > ol > li');
         $this->assertCount(1, $breadcrumbs, 'Nav has 1 item.');
-        $this->assertSame('Home', trim($breadcrumbs->text()), 'Nav has 1 item: Home');
+        $this->assertSame('Home', mb_trim($breadcrumbs->text()), 'Nav has 1 item: Home');
 
         $cards = $crawler->filter('div.auditor-audits > div');
         $this->assertCount(4, $cards, 'There are 4 entity audits.');
@@ -82,16 +82,16 @@ final class ViewerControllerTest extends WebTestCase
         ];
         $cards->each(static function ($row, $rowIndex) use ($expected): void {
             $cell = $row->filter('div > h3 > code');
-            self::assertSame($expected[$rowIndex][0], trim((string) $cell->text()), 'Entity is OK');
+            self::assertSame($expected[$rowIndex][0], mb_trim((string) $cell->text()), 'Entity is OK');
 
             $cell = $row->filter('div > p');
-            self::assertSame($expected[$rowIndex][1], trim((string) $cell->text()), 'Tablename is OK');
+            self::assertSame($expected[$rowIndex][1], mb_trim((string) $cell->text()), 'Tablename is OK');
 
             $cell = $row->filter('div > dl > dt');
-            self::assertSame($expected[$rowIndex][2], trim((string) $cell->text()), 'Operation count is OK');
+            self::assertSame($expected[$rowIndex][2], mb_trim((string) $cell->text()), 'Operation count is OK');
 
             $cell = $row->filter('div > dl > dd > a');
-            self::assertSame($expected[$rowIndex][3], trim((string) $cell->text()), 'Link is OK');
+            self::assertSame($expected[$rowIndex][3], mb_trim((string) $cell->text()), 'Link is OK');
         });
     }
 
@@ -108,7 +108,7 @@ final class ViewerControllerTest extends WebTestCase
 
         $breadcrumbs = $crawler->filter('nav > ol > li');
         $this->assertCount(1, $breadcrumbs, 'Nav has 1 item.');
-        $this->assertSame('Home', trim($breadcrumbs->text()), 'Nav has 1 item: Home');
+        $this->assertSame('Home', mb_trim($breadcrumbs->text()), 'Nav has 1 item: Home');
 
         $cards = $crawler->filter('div.auditor-audits > div');
         $this->assertCount(3, $cards, 'There are 3 entity audits.');
@@ -120,16 +120,16 @@ final class ViewerControllerTest extends WebTestCase
         ];
         $cards->each(static function ($row, $rowIndex) use ($expected): void {
             $cell = $row->filter('div > h3 > code');
-            self::assertSame($expected[$rowIndex][0], trim((string) $cell->text()), 'Entity is OK');
+            self::assertSame($expected[$rowIndex][0], mb_trim((string) $cell->text()), 'Entity is OK');
 
             $cell = $row->filter('div > p');
-            self::assertSame($expected[$rowIndex][1], trim((string) $cell->text()), 'Tablename is OK');
+            self::assertSame($expected[$rowIndex][1], mb_trim((string) $cell->text()), 'Tablename is OK');
 
             $cell = $row->filter('div > dl > dt');
-            self::assertSame($expected[$rowIndex][2], trim((string) $cell->text()), 'Operation count is OK');
+            self::assertSame($expected[$rowIndex][2], mb_trim((string) $cell->text()), 'Operation count is OK');
 
             $cell = $row->filter('div > dl > dd > a');
-            self::assertSame($expected[$rowIndex][3], trim((string) $cell->text()), 'Link is OK');
+            self::assertSame($expected[$rowIndex][3], mb_trim((string) $cell->text()), 'Link is OK');
         });
     }
 
@@ -146,7 +146,7 @@ final class ViewerControllerTest extends WebTestCase
 
         $breadcrumbs = $crawler->filter('nav > ol > li');
         $this->assertCount(1, $breadcrumbs, 'Nav has 1 item.');
-        $this->assertSame('Home', trim($breadcrumbs->text()), 'Nav has 1 item: Home');
+        $this->assertSame('Home', mb_trim($breadcrumbs->text()), 'Nav has 1 item: Home');
 
         $cards = $crawler->filter('div.auditor-audits > div');
         $this->assertCount(4, $cards, 'There are 4 entity audits.');
@@ -159,16 +159,16 @@ final class ViewerControllerTest extends WebTestCase
         ];
         $cards->each(static function ($row, $rowIndex) use ($expected): void {
             $cell = $row->filter('div > h3 > code');
-            self::assertSame($expected[$rowIndex][0], trim((string) $cell->text()), 'Entity is OK');
+            self::assertSame($expected[$rowIndex][0], mb_trim((string) $cell->text()), 'Entity is OK');
 
             $cell = $row->filter('div > p');
-            self::assertSame($expected[$rowIndex][1], trim((string) $cell->text()), 'Tablename is OK');
+            self::assertSame($expected[$rowIndex][1], mb_trim((string) $cell->text()), 'Tablename is OK');
 
             $cell = $row->filter('div > dl > dt');
-            self::assertSame($expected[$rowIndex][2], trim((string) $cell->text()), 'Operation count is OK');
+            self::assertSame($expected[$rowIndex][2], mb_trim((string) $cell->text()), 'Operation count is OK');
 
             $cell = $row->filter('div > dl > dd > a');
-            self::assertSame($expected[$rowIndex][3], trim((string) $cell->text()), 'Link is OK');
+            self::assertSame($expected[$rowIndex][3], mb_trim((string) $cell->text()), 'Link is OK');
         });
     }
 
@@ -185,8 +185,8 @@ final class ViewerControllerTest extends WebTestCase
 
         $breadcrumbs = $crawler->filter('nav > ol > li');
         $this->assertCount(2, $breadcrumbs, 'Nav has 2 item.');
-        $this->assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
-        $this->assertSame(Author::class, trim($breadcrumbs->eq(1)->children('div > a > code')->text()), 'Nav has 1 item: '.Author::class);
+        $this->assertSame('Home', mb_trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
+        $this->assertSame(Author::class, mb_trim($breadcrumbs->eq(1)->children('div > a > code')->text()), 'Nav has 1 item: '.Author::class);
     }
 
     #[Depends('testShowEntityHistoryAnonymously')]
@@ -213,8 +213,8 @@ final class ViewerControllerTest extends WebTestCase
 
         $breadcrumbs = $crawler->filter('nav > ol > li');
         $this->assertCount(2, $breadcrumbs, 'Nav has 2 item.');
-        $this->assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
-        $this->assertSame(Author::class, trim($breadcrumbs->eq(1)->children('div > a > code')->text()), 'Nav has 1 item: '.Author::class);
+        $this->assertSame('Home', mb_trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
+        $this->assertSame(Author::class, mb_trim($breadcrumbs->eq(1)->children('div > a > code')->text()), 'Nav has 1 item: '.Author::class);
     }
 
     #[Depends('testShowEntityHistoryWithRoleGrantedForAuthorAuditViewing')]
@@ -248,14 +248,14 @@ final class ViewerControllerTest extends WebTestCase
 
         $breadcrumbs = $crawler->filter('nav > ol > li');
         $this->assertCount(2, $breadcrumbs, 'Nav has 2 item.');
-        $this->assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
-        $this->assertSame($first->getTransactionHash(), trim($breadcrumbs->eq(1)->children('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
+        $this->assertSame('Home', mb_trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
+        $this->assertSame($first->getTransactionHash(), mb_trim($breadcrumbs->eq(1)->children('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
 
         $sections = $crawler->filter('.flow-root > div');
         $this->assertCount(4, $sections, 'There are 3 sections.');
-        $this->assertSame(Author::class, trim($sections->eq(0)->children('div > code')->text()), Author::class);
-        $this->assertSame(Post::class, trim($sections->eq(1)->children('div > code')->text()), Post::class);
-        $this->assertSame(Comment::class, trim($sections->eq(2)->children('div > code')->text()), Comment::class);
+        $this->assertSame(Author::class, mb_trim($sections->eq(0)->children('div > code')->text()), Author::class);
+        $this->assertSame(Post::class, mb_trim($sections->eq(1)->children('div > code')->text()), Post::class);
+        $this->assertSame(Comment::class, mb_trim($sections->eq(2)->children('div > code')->text()), Comment::class);
     }
 
     #[Depends('testShowTransactionHistoryAnonymously')]
@@ -277,13 +277,13 @@ final class ViewerControllerTest extends WebTestCase
 
         $breadcrumbs = $crawler->filter('nav > ol > li');
         $this->assertCount(2, $breadcrumbs, 'Nav has 2 item.');
-        $this->assertSame('Home', trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
-        $this->assertSame($first->getTransactionHash(), trim($breadcrumbs->eq(1)->children('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
+        $this->assertSame('Home', mb_trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
+        $this->assertSame($first->getTransactionHash(), mb_trim($breadcrumbs->eq(1)->children('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
 
         $sections = $crawler->filter('.flow-root > div');
         $this->assertCount(3, $sections, 'There are 2 sections.');
-        $this->assertSame(Post::class, trim($sections->eq(0)->children('div > code')->text()), Post::class);
-        $this->assertSame(Comment::class, trim($sections->eq(1)->children('div > code')->text()), Comment::class);
+        $this->assertSame(Post::class, mb_trim($sections->eq(0)->children('div > code')->text()), Post::class);
+        $this->assertSame(Comment::class, mb_trim($sections->eq(1)->children('div > code')->text()), Comment::class);
     }
 
     private function login(array $roles = []): void
