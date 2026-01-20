@@ -19,7 +19,6 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException as SymfonyAc
 use Twig\Environment;
 
 if (class_exists('Symfony\Component\Routing\Annotation\Route') && !class_exists('Symfony\Component\Routing\Attribute\Route')) {
-    // @phpstan-ignore-next-line class.notFound
     class_alias(\Symfony\Component\Routing\Annotation\Route::class, 'Symfony\Component\Routing\Attribute\Route');
 }
 
