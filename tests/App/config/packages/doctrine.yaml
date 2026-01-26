@@ -20,7 +20,6 @@ doctrine:
                 url: 'sqlite:///%kernel.project_dir%/var/audits.db'
     orm:
         default_entity_manager: default
-        auto_generate_proxy_classes: true
         entity_managers:
             default:
                 connection: default

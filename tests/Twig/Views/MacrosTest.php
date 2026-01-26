@@ -54,7 +54,7 @@ final class MacrosTest extends KernelTestCase
             'entry' => $entry,
             'entity' => $entity::class,
         ]);
-        $this->assertSame($this->getExpected(), trim($response));
+        $this->assertSame($this->getExpected(), mb_trim($response));
     }
 
     private function getTemplateAsString(): string
