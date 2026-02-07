@@ -22,6 +22,13 @@ services:
 
 volumes:
   composer_root:
+  vendor_php8.5_sf8.0:
+  vendor_php8.5_sf7.3:
+  vendor_php8.5_sf7.2:
+  vendor_php8.5_sf7.1:
+  vendor_php8.5_sf6.4:
+  vendor_php8.5_sf5.4:
+  vendor_php8.4_sf8.0:
   vendor_php8.4_sf7.3:
   vendor_php8.4_sf7.2:
   vendor_php8.4_sf7.1:
@@ -37,12 +44,15 @@ volumes:
   vendor_php8.2_sf7.1:
   vendor_php8.2_sf6.4:
   vendor_php8.2_sf5.4:
+  phpcsfixer_php8.5:
   phpcsfixer_php8.4:
   phpcsfixer_php8.3:
   phpcsfixer_php8.2:
+  phpstan_php8.5:
   phpstan_php8.4:
   phpstan_php8.3:
   phpstan_php8.2:
+  rector_php8.5:
   rector_php8.4:
   rector_php8.3:
   rector_php8.2:

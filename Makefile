@@ -1,6 +1,6 @@
 # Default values
-php ?= 8.3
-sf ?= 7.1
+php ?= 8.5
+sf ?= 8.0
 args ?=
 
 # Allowed PHP and Symfony version combinations
@@ -20,7 +20,14 @@ valid_combinations = \
     8.4;6.4 \
     8.4;7.1 \
     8.4;7.2 \
-    8.4;7.3
+    8.4;7.3 \
+    8.4;8.0 \
+    8.5;5.4 \
+    8.5;6.4 \
+    8.5;7.1 \
+    8.5;7.2 \
+    8.5;7.3 \
+    8.5;8.0
 
 current_combination = $(php);$(sf)
 
