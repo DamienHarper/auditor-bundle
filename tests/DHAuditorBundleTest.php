@@ -33,6 +33,8 @@ final class DHAuditorBundleTest extends KernelTestCase
     {
         // Boot the kernel with a config closure, the handleOptions call in createKernel is important for that to work
         self::bootKernel(['config' => static function (TestKernel $kernel): void {
+            $kernel->setClearCacheAfterShutdown(false);
+
             // Add some other bundles we depend on
             $kernel->addTestBundle(DoctrineBundle::class);
             $kernel->addTestBundle(SecurityBundle::class);
