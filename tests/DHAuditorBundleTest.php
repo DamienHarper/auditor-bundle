@@ -79,11 +79,13 @@ final class DHAuditorBundleTest extends KernelTestCase
         $this->assertInstanceOf(ConsoleEventSubscriber::class, $container->get(ConsoleEventSubscriber::class));
     }
 
+    #[\Override]
     protected static function getKernelClass(): string
     {
         return TestKernel::class;
     }
 
+    #[\Override]
     protected static function createKernel(array $options = []): KernelInterface
     {
         /**

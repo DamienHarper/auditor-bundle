@@ -20,7 +20,6 @@ class ViewerEventSubscriber implements EventSubscriberInterface
 
     public function onKernelController(ControllerEvent $event): void
     {
-
         $controller = $event->getController();
 
         // when a controller class defines multiple action methods, the controller

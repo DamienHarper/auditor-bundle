@@ -19,13 +19,12 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException as SymfonyAccessDeniedException;
 use Twig\Environment;
 
-
 /**
  * @see ViewerControllerTest
  */
-final class ViewerController
+final readonly class ViewerController
 {
-    public function __construct(private readonly Environment $environment) {}
+    public function __construct(private Environment $environment) {}
 
     #[Route(path: '/audit', name: 'dh_auditor_list_audits', methods: ['GET'])]
     public function listAuditsAction(Reader $reader): Response
@@ -41,10 +40,10 @@ final class ViewerController
                 $audited,
                 array_filter(
                     $schemaManager->getAuditableTableNames($auditingService->getEntityManager()),
-                    static function (string $entity) use ($reader, $scope) {
+                    static function (string $entity) use ($reader, $scope): bool {
                         $roleChecker = $reader->getProvider()->getAuditor()->getConfiguration()->getRoleChecker();
 
-                        return null === $roleChecker ? true : $roleChecker($entity, $scope);
+                        return null === $roleChecker || (bool) $roleChecker($entity, $scope);
                     },
                     ARRAY_FILTER_USE_KEY
                 )
@@ -71,8 +70,7 @@ final class ViewerController
     #[Route(path: '/audit/{entity}/{id}', name: 'dh_auditor_show_entity_history', methods: ['GET'])]
     public function showEntityHistoryAction(Request $request, Reader $reader, string $entity, int|string|null $id = null): Response
     {
-        \assert(\is_string($request->query->get('page', '1')));
-        $page = (int) $request->query->get('page', '1');
+        $page = $request->query->getInt('page', 1);
         $page = max(1, $page);
 
         $entity = UrlHelper::paramToNamespace($entity);

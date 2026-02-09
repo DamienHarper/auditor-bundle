@@ -3,9 +3,6 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
-use Rector\Doctrine\Set\DoctrineSetList;
-use Rector\PHPUnit\Set\PHPUnitSetList;
-use Rector\Symfony\Set\SymfonySetList;
 
 return RectorConfig::configure()
     ->withPaths([__DIR__.'/src', __DIR__.'/tests'])
@@ -24,16 +21,8 @@ return RectorConfig::configure()
         phpunitCodeQuality: true,
         doctrineCodeQuality: true,
         symfonyCodeQuality: true,
-        phpunit: true,
     )
-    ->withSets([
-        SymfonySetList::SYMFONY_80,
-        PHPUnitSetList::PHPUNIT_120,
-        DoctrineSetList::DOCTRINE_CODE_QUALITY,
-        DoctrineSetList::DOCTRINE_ORM_32,
-        DoctrineSetList::DOCTRINE_DBAL_40,
-    ])
-    ->withAttributesSets(
+    ->withComposerBased(
         symfony: true,
         doctrine: true,
         phpunit: true,

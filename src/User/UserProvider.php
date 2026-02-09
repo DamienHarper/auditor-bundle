@@ -26,8 +26,11 @@ class UserProvider implements UserProviderInterface
 
         if ($tokenUser instanceof UserInterface) {
             if (method_exists($tokenUser, 'getId')) {
-                $identifier = $tokenUser->getId();
+                /** @var null|int|string $id */
+                $id = $tokenUser->getId();
+                $identifier = $id;
             }
+
             $username = $tokenUser->getUserIdentifier();
         }
 
@@ -40,7 +43,7 @@ class UserProvider implements UserProviderInterface
             return null;
         }
 
-        return new User((string) $identifier, $username);
+        return new User(null !== $identifier ? (string) $identifier : '', $username);
     }
 
     private function getTokenUser(): ?UserInterface

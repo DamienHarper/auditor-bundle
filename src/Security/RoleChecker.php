@@ -27,7 +27,12 @@ class RoleChecker implements RoleCheckerInterface
 
         \assert($this->provider->getConfiguration() instanceof Configuration);
         $entities = $this->provider->getConfiguration()->getEntities();
-        $roles = $entities[$entity]['roles'] ?? null;
+
+        /** @var null|array<string, mixed> $entityConfig */
+        $entityConfig = $entities[$entity] ?? null;
+
+        /** @var null|array<string, list<string>> $roles */
+        $roles = \is_array($entityConfig) ? ($entityConfig['roles'] ?? null) : null;
 
         if (null === $roles) {
             // If no roles are configured, consider access granted
@@ -39,15 +44,6 @@ class RoleChecker implements RoleCheckerInterface
             return true;
         }
 
-        // roles are defined for the give scope
-        foreach ($roles[$scope] as $role) {
-            if ($authorizationChecker->isGranted($role)) {
-                // role granted => access granted
-                return true;
-            }
-        }
-
-        // access denied
-        return false;
+        return array_any($roles[$scope], static fn ($role): bool => $authorizationChecker->isGranted($role));
     }
 }

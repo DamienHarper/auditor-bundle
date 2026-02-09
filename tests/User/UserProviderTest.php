@@ -10,7 +10,6 @@ use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
 use PHPUnit\Framework\Attributes\Small;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\HttpKernel\HttpKernelBrowser;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\InMemoryUser;
@@ -27,13 +26,11 @@ final class UserProviderTest extends WebTestCase
 
     private DoctrineProvider $provider;
 
-    private HttpKernelBrowser $client;
-
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->client = self::createClient();
+        self::createClient();
 
         // provider with 1 em for both storage and auditing
         $this->createAndInitDoctrineProvider();
