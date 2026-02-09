@@ -51,11 +51,12 @@
     "matthiasnoback/symfony-dependency-injection-test": "^6.0",
     "nyholm/symfony-bundle-test": "^3.0",
     "phpunit/phpunit": "^12.0",
+    "symfony/asset-mapper": "^8.0",
     "symfony/browser-kit": "^8.0",
     "symfony/css-selector": "^8.0",
     "symfony/framework-bundle": "^8.0",
     "symfony/var-dumper": "^8.0",
-    "symfony/webpack-encore-bundle": "^2.0"
+    "symfonycasts/tailwind-bundle": "^0.12"
   },
   "scripts": {
     "test": "./vendor/bin/phpunit --colors=always --no-coverage",

@@ -1,6 +1,5 @@
 .idea/
 cache/
-node_modules/
 var/
 vendor/
 tests/coverage/
@@ -11,3 +10,4 @@ tests/coverage/
 composer.lock
 *.sqlite
 .preload.php
+/var/tailwind/

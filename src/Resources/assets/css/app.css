@@ -1,28 +1,30 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import "tailwindcss";
+
+@source "../../views/**/*.html.twig";
 
 /** Cards **/
-div.card {
-     @apply rounded-md bg-white border;
-}
+@layer components {
+    div.card {
+        @apply rounded-md bg-white border;
+    }
 
-div.card > div.card-header {
-     @apply rounded-t-md p-3;
-}
+    div.card > div.card-header {
+        @apply rounded-t-md p-3;
+    }
 
-div.card > .card-header-sm {
-     @apply rounded-t-md px-3 py-2;
-}
+    div.card > .card-header-sm {
+        @apply rounded-t-md px-3 py-2;
+    }
 
-div.card > .card-body {
-     @apply px-3 py-2;
-}
+    div.card > .card-body {
+        @apply px-3 py-2;
+    }
 
-div.card > .card-footer {
-     @apply rounded-b-md border-t p-3;
-}
+    div.card > .card-footer {
+        @apply rounded-b-md border-t p-3;
+    }
 
-div.card > .card-footer-sm {
-    @apply rounded-b-md border-t px-3 py-2;
+    div.card > .card-footer-sm {
+        @apply rounded-b-md border-t px-3 py-2;
+    }
 }
