@@ -1,14 +1,14 @@
-name: auditor-bundle 6.x CI
+name: auditor-bundle 7.x CI
 
 on:
   schedule:
     - cron: 0 0 * * *
   pull_request:
     branches:
-      - 6.x
+      - master
   push:
     branches:
-      - 6.x
+      - master
 
 jobs:
 
@@ -23,7 +23,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.5
+          php-version: 8.4
           extensions: composer:v2
 
       - name: Install PHP-CS-Fixer
@@ -35,7 +35,7 @@ jobs:
       - name: Validate composer
         run: composer validate --strict --no-check-lock
 
-  tests_sf:
+  tests:
     name: Tests PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}
     runs-on: ubuntu-latest
     needs: [ code_style_composer_checks ]
@@ -43,19 +43,10 @@ jobs:
     strategy:
       matrix:
         php:
-          - '8.2'
-          - '8.3'
           - '8.4'
           - '8.5'
         symfony:
-          - '5.*'
-          - '6.*'
-          - '7.*'
-        exclude:
-          - php: '8.2'
-            symfony: '8.*'
-          - php: '8.3'
-            symfony: '8.*'
+          - '8.*'
       fail-fast: false
 
     steps:
@@ -86,20 +77,7 @@ jobs:
           key: ${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}
           restore-keys: ${{ matrix.php }}-composer-
 
-      - name: Update project dependencies (5.*)
-        if: matrix.symfony == '5.*'
-        run: SYMFONY_REQUIRE="^5.4" composer update --no-progress --ansi --prefer-stable
-
-      - name: Update project dependencies (6.*)
-        if: matrix.symfony == '6.*'
-        run: SYMFONY_REQUIRE="^6.4" composer update --no-progress --ansi --prefer-stable
-
-      - name: Update project dependencies (7.*)
-        if: matrix.symfony == '7.*'
-        run: SYMFONY_REQUIRE="^7.4" composer update --no-progress --ansi --prefer-stable
-
-      - name: Update project dependencies (8.*)
-        if: matrix.symfony == '8.*'
+      - name: Update project dependencies
         run: SYMFONY_REQUIRE="^8.0" composer update --no-progress --ansi --prefer-stable
 
       - name: Install auditor from source
@@ -127,7 +105,7 @@ jobs:
     name: "Upload coverage to Codecov"
     runs-on: "ubuntu-latest"
     needs:
-      - tests_sf
+      - tests
 
     steps:
       - name: "Checkout"

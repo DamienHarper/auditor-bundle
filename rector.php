@@ -12,7 +12,7 @@ return RectorConfig::configure()
     ->withSkip([
         __DIR__.'/tests/App/var/*',
     ])
-    ->withPhpSets(php82: true)
+    ->withPhpSets(php84: true)
     ->withPreparedSets(
         deadCode: true,
         codeQuality: true,
@@ -27,10 +27,10 @@ return RectorConfig::configure()
         phpunit: true,
     )
     ->withSets([
-        SymfonySetList::SYMFONY_54,
-        PHPUnitSetList::PHPUNIT_110,
+        SymfonySetList::SYMFONY_80,
+        PHPUnitSetList::PHPUNIT_120,
         DoctrineSetList::DOCTRINE_CODE_QUALITY,
-        DoctrineSetList::DOCTRINE_ORM_29,
+        DoctrineSetList::DOCTRINE_ORM_32,
         DoctrineSetList::DOCTRINE_DBAL_40,
     ])
     ->withAttributesSets(

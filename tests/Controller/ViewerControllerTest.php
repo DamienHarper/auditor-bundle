@@ -19,7 +19,6 @@ use Symfony\Component\BrowserKit\AbstractBrowser;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\User\InMemoryUser;
-use Symfony\Component\Security\Core\User\User;
 
 /**
  * @internal
@@ -288,8 +287,7 @@ final class ViewerControllerTest extends WebTestCase
 
     private function login(array $roles = []): void
     {
-        $class = class_exists(User::class) ? User::class : InMemoryUser::class;
-        $user = new $class(
+        $user = new InMemoryUser(
             'dark.vador',
             '$argon2id$v=19$m=65536,t=4,p=1$g1yZVCS0GJ32k2fFqBBtqw$359jLODXkhqVWtD/rf+CjiNz9r/kIvhJlenPBnW851Y',
             $roles

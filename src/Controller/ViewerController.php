@@ -15,14 +15,10 @@ use DH\AuditorBundle\Tests\Controller\ViewerControllerTest;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException as SymfonyAccessDeniedException;
 use Twig\Environment;
 
-if (class_exists('Symfony\Component\Routing\Annotation\Route') && !class_exists('Symfony\Component\Routing\Attribute\Route')) {
-    class_alias(\Symfony\Component\Routing\Annotation\Route::class, 'Symfony\Component\Routing\Attribute\Route');
-}
-
-use Symfony\Component\Routing\Attribute\Route;
 
 /**
  * @see ViewerControllerTest
