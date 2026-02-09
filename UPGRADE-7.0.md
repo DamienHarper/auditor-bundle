@@ -41,7 +41,7 @@ The following classes have been removed:
 | `DH\AuditorBundle\DependencyInjection\DHAuditorExtension` | Merged into `DHAuditorBundle::loadExtension()` |
 | `DH\AuditorBundle\DependencyInjection\Compiler\AddProviderCompilerPass` | No longer needed with autowiring |
 | `DH\AuditorBundle\DependencyInjection\Compiler\CustomConfigurationCompilerPass` | Merged into `DHAuditorBundle::loadExtension()` |
-| `DH\AuditorBundle\DependencyInjection\Compiler\DoctrineProviderConfigurationCompilerPass` | Merged into `DHAuditorBundle::loadExtension()` |
+| `DH\AuditorBundle\DependencyInjection\Compiler\DoctrineProviderConfigurationCompilerPass` | Replaced by `DoctrineMiddlewareCompilerPass` |
 
 ### Removed Files
 
