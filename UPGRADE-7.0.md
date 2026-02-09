@@ -21,7 +21,7 @@ This document describes the backward incompatible changes introduced in auditor-
 
 ### Auditor Library
 - **damienharper/auditor**: minimum version is now **4.0** (was 3.2 in 6.x)
-- See [auditor UPGRADE-4.0.md](https://github.com/DamienHarper/auditor/blob/feature/4.0/UPGRADE-4.0.md) for details about auditor library changes
+- See [auditor UPGRADE-4.0.md](https://github.com/DamienHarper/auditor/blob/master/UPGRADE-4.0.md) for details about auditor library changes
 
 ## Bundle Architecture Changes
 
