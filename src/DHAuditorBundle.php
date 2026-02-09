@@ -7,7 +7,6 @@ namespace DH\AuditorBundle;
 use DH\Auditor\Auditor;
 use DH\Auditor\Configuration;
 use DH\Auditor\Provider\Doctrine\Auditing\Annotation\AnnotationLoader;
-use DH\Auditor\Provider\Doctrine\Auditing\DBAL\Middleware\AuditorMiddleware;
 use DH\Auditor\Provider\Doctrine\Configuration as DoctrineProviderConfiguration;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Provider\Doctrine\Persistence\Command\CleanAuditLogsCommand;
@@ -19,6 +18,7 @@ use DH\Auditor\Provider\Doctrine\Service\AuditingService;
 use DH\Auditor\Provider\Doctrine\Service\StorageService;
 use DH\Auditor\Provider\ProviderInterface;
 use DH\AuditorBundle\Controller\ViewerController;
+use DH\AuditorBundle\DependencyInjection\Compiler\DoctrineMiddlewareCompilerPass;
 use DH\AuditorBundle\Event\ConsoleEventSubscriber;
 use DH\AuditorBundle\Event\ViewerEventSubscriber;
 use DH\AuditorBundle\Routing\RoutingLoader;
@@ -27,7 +27,7 @@ use DH\AuditorBundle\Security\SecurityProvider;
 use DH\AuditorBundle\User\ConsoleUserProvider;
 use DH\AuditorBundle\User\UserProvider;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
-use Symfony\Component\DependencyInjection\ChildDefinition;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
@@ -39,6 +39,20 @@ use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
  */
 class DHAuditorBundle extends AbstractBundle
 {
+    #[\Override]
+    public function getPath(): string
+    {
+        return __DIR__;
+    }
+
+    #[\Override]
+    public function build(ContainerBuilder $container): void
+    {
+        parent::build($container);
+
+        $container->addCompilerPass(new DoctrineMiddlewareCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);
+    }
+
     public function configure(DefinitionConfigurator $definition): void
     {
         $definition->rootNode()
@@ -136,6 +150,11 @@ class DHAuditorBundle extends AbstractBundle
             ->tag('dh_auditor.provider')
         ;
 
+        // Register the provider with Auditor
+        $builder->getDefinition(Auditor::class)
+            ->addMethodCall('registerProvider', [new Reference(DoctrineProvider::class)])
+        ;
+
         $services->alias('dh_auditor.provider.doctrine', DoctrineProvider::class);
 
         // Register storage services
@@ -153,9 +172,6 @@ class DHAuditorBundle extends AbstractBundle
                 ->addMethodCall('registerStorageService', [new Reference($serviceId)])
             ;
         }
-
-        // Register AuditorMiddleware
-        $builder->register('doctrine.dbal.auditor_middleware', AuditorMiddleware::class);
 
         // Register auditing services
         /** @var list<string> $auditingServices */
@@ -175,9 +191,6 @@ class DHAuditorBundle extends AbstractBundle
             $builder->getDefinition(DoctrineProvider::class)
                 ->addMethodCall('registerAuditingService', [new Reference($serviceId)])
             ;
-
-            // Configure Auditor Middleware for this entity manager
-            $this->configureAuditorMiddleware($builder, $entityManagerName);
         }
 
         // Reader
@@ -265,33 +278,6 @@ class DHAuditorBundle extends AbstractBundle
                 new Reference('dh_auditor.user_provider'),
             ])
             ->tag('kernel.event_subscriber')
-        ;
-    }
-
-    private function configureAuditorMiddleware(ContainerBuilder $builder, string $entityManagerName): void
-    {
-        if (!$builder->hasDefinition($entityManagerName)) {
-            return;
-        }
-
-        $argument = $builder->getDefinition($entityManagerName)->getArgument(0);
-        if (!$argument instanceof Reference) {
-            return;
-        }
-
-        $connectionName = (string) $argument;
-        $configurationName = $connectionName.'.configuration';
-
-        if (!$builder->hasDefinition($configurationName)) {
-            return;
-        }
-
-        $builder
-            ->setDefinition(
-                $connectionName.'.auditor_middleware',
-                new ChildDefinition('doctrine.dbal.auditor_middleware')
-            )
-            ->addTag('doctrine.middleware')
         ;
     }
 
