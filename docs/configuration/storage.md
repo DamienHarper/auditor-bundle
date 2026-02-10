@@ -19,7 +19,7 @@ This provides **transactional integrity**: audit entries are part of the same da
 Audit tables are named: `{prefix}{entity_table}{suffix}`
 
 | Option         | Default    | Example (entity: `users`) |
-|:---------------|:-----------|:--------------------------|
+|----------------|------------|---------------------------|
 | `table_prefix` | `''`       | → `users_audit`           |
 | `table_suffix` | `'_audit'` | → `users_audit`           |            
 

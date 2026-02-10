@@ -5,7 +5,7 @@ This section covers how to customize the bundle's providers.
 The bundle uses three providers that can be customized:
 
 | Provider          | Purpose                              | Default Service                  |
-|:------------------|:-------------------------------------|:---------------------------------|
+|-------------------|--------------------------------------|----------------------------------|
 | User Provider     | Returns current user information     | `dh_auditor.user_provider`       |
 | Security Provider | Returns IP address and firewall name | `dh_auditor.security_provider`   |
 | Role Checker      | Checks if user can view entity audits | `dh_auditor.role_checker`       |         

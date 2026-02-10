@@ -7,7 +7,7 @@ This section contains upgrade guides for major versions.
 ## Version Support
 
 | Version | Status                 | Support Until |
-|:--------|:-----------------------|:--------------|
+|---------|------------------------|---------------|
 | 7.x     | Active development 🚀  | Current       |
 | 6.x     | Active support         | TBD           |
 | 5.x     | End of Life            | -             |             

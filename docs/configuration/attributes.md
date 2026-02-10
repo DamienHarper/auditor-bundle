@@ -5,7 +5,7 @@ PHP attributes provide an alternative to YAML configuration for declaring audita
 ## Available Attributes
 
 | Attribute      | Target   | Description                           |
-|:---------------|:---------|:--------------------------------------|
+|----------------|----------|---------------------------------------|
 | `#[Auditable]` | Class    | Marks an entity as auditable          |
 | `#[Ignore]`    | Property | Excludes a property from auditing     |
 | `#[Security]`  | Class    | Defines roles required to view audits |    

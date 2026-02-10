@@ -5,7 +5,7 @@ This guide covers the installation of auditor-bundle in a Symfony application.
 ### Version 7.x (Current)
 
 | Requirement   | Version |
-|:--------------|:--------|
+|---------------|---------|
 | PHP           | >= 8.4  |
 | Symfony       | >= 8.0  |
 | Doctrine DBAL | >= 4.0  |
@@ -15,7 +15,7 @@ This guide covers the installation of auditor-bundle in a Symfony application.
 ### Previous Versions
 
 | Version | PHP    | Symfony | auditor |
-|:--------|:-------|:--------|:--------|
+|---------|--------|---------|---------|
 | 6.x     | >= 8.2 | >= 5.4  | >= 3.0  |
 | 5.x     | >= 7.4 | >= 4.4  | >= 2.0  |
 
@@ -130,7 +130,7 @@ bin/console assets:install
 The bundle registers these services automatically:
 
 | Service                                                  | Purpose                          |
-|:---------------------------------------------------------|:---------------------------------|
+|----------------------------------------------------------|----------------------------------|
 | `DH\Auditor\Auditor`                                     | Main auditor service             |
 | `DH\Auditor\Provider\Doctrine\DoctrineProvider`          | Doctrine provider                |
 | `DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader` | Audit reader                     |
