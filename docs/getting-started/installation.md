@@ -4,20 +4,20 @@ This guide covers the installation of auditor-bundle in a Symfony application.
 
 ### Version 7.x (Current)
 
- Requirement           Version  
---------------------------------
- PHP                   >= 8.4   
- Symfony               >= 8.0   
- Doctrine DBAL         >= 4.0   
- Doctrine ORM          >= 3.2   
- auditor               >= 4.0   
+| Requirement   | Version |
+|:--------------|:--------|
+| PHP           | >= 8.4  |
+| Symfony       | >= 8.0  |
+| Doctrine DBAL | >= 4.0  |
+| Doctrine ORM  | >= 3.2  |
+| auditor       | >= 4.0  |
 
 ### Previous Versions
 
- Version  PHP      Symfony    auditor 
---------------------------------------
- 6.x      >= 8.2   >= 5.4     >= 3.0  
- 5.x      >= 7.4   >= 4.4     >= 2.0  
+| Version | PHP    | Symfony | auditor |
+|:--------|:-------|:--------|:--------|
+| 6.x     | >= 8.2 | >= 5.4  | >= 3.0  |
+| 5.x     | >= 7.4 | >= 4.4  | >= 2.0  |
 
 ## Install via Composer
 
@@ -129,14 +129,14 @@ bin/console assets:install
 
 The bundle registers these services automatically:
 
- Service                                    Purpose                         
----------------------------------------------------------------------------
- `DH\Auditor\Auditor`                       Main auditor service            
- `DH\Auditor\Provider\Doctrine\DoctrineProvider`  Doctrine provider        
- `DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader`  Audit reader    
- `dh_auditor.user_provider`                 User info for audit entries     
- `dh_auditor.security_provider`             Security info for audit entries 
- `dh_auditor.role_checker`                  Access control for viewer       
+| Service                                                  | Purpose                          |
+|:---------------------------------------------------------|:---------------------------------|
+| `DH\Auditor\Auditor`                                     | Main auditor service             |
+| `DH\Auditor\Provider\Doctrine\DoctrineProvider`          | Doctrine provider                |
+| `DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader` | Audit reader                     |
+| `dh_auditor.user_provider`                               | User info for audit entries      |
+| `dh_auditor.security_provider`                           | Security info for audit entries  |
+| `dh_auditor.role_checker`                                | Access control for viewer        |
 
 ## Next Steps
 

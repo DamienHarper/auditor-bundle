@@ -25,11 +25,11 @@ dh_auditor:
 
 The viewer registers three routes:
 
- Route                              URL                              Description                
------------------------------------------------------------------------------------------------
- `dh_auditor_list_audits`           `/audit`                         List all audited entities  
- `dh_auditor_show_entity_history`   `/audit/{entity}/{id?}`          Entity audit history       
- `dh_auditor_show_transaction`      `/audit/transaction/{hash}`      Transaction details        
+| Route                            | URL                         | Description               |
+|:---------------------------------|:----------------------------|:--------------------------|
+| `dh_auditor_list_audits`         | `/audit`                    | List all audited entities |
+| `dh_auditor_show_entity_history` | `/audit/{entity}/{id?}`     | Entity audit history      |
+| `dh_auditor_show_transaction`    | `/audit/transaction/{hash}` | Transaction details       |        
 
 ### Route Configuration
 
@@ -184,16 +184,16 @@ templates/bundles/DHAuditorBundle/
 
 ### Template Blocks
 
- Block                   Description              
---------------------------------------------------
- `title`                 Page title               
- `stylesheets`           CSS includes             
- `navbar`                Navigation bar           
- `breadcrumbs`           Breadcrumb navigation    
- `dh_auditor_header`     Page header content      
- `dh_auditor_content`    Main content area        
- `dh_auditor_pager`      Pagination               
- `javascripts`           JavaScript includes      
+| Block                | Description           |
+|:---------------------|:----------------------|
+| `title`              | Page title            |
+| `stylesheets`        | CSS includes          |
+| `navbar`             | Navigation bar        |
+| `breadcrumbs`        | Breadcrumb navigation |
+| `dh_auditor_header`  | Page header content   |
+| `dh_auditor_content` | Main content area     |
+| `dh_auditor_pager`   | Pagination            |
+| `javascripts`        | JavaScript includes   |      
 
 ## Assets
 

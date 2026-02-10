@@ -25,11 +25,11 @@ The bundle bridges auditor with Symfony:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                        Symfony Application                               │
+│                          Symfony Application                            │
 └───────────────────────────────────┬─────────────────────────────────────┘
                                     │
 ┌───────────────────────────────────┴─────────────────────────────────────┐
-│                           auditor-bundle                                 │
+│                           auditor-bundle                                │
 │  ┌───────────────────────────────────────────────────────────────────┐  │
 │  │                     Symfony Integration                           │  │
 │  │  ┌─────────────┐  ┌─────────────────┐  ┌───────────────────────┐  │  │
@@ -49,29 +49,29 @@ The bundle bridges auditor with Symfony:
 └───────────────────────────────────┬─────────────────────────────────────┘
                                     │
 ┌───────────────────────────────────┴─────────────────────────────────────┐
-│                              auditor                                     │
-│                    (See auditor documentation)                           │
+│                                auditor                                  │
+│                      (See auditor documentation)                        │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### What the Bundle Provides
 
- Component                Service ID                              Description                          
--------------------------------------------------------------------------------------------------------
- UserProvider             `dh_auditor.user_provider`              Gets current user from TokenStorage  
- SecurityProvider         `dh_auditor.security_provider`          Gets IP and firewall from Request    
- RoleChecker              `dh_auditor.role_checker`               Checks access via Security component 
- ConsoleUserProvider      (internal)                              Tracks console command as user       
- ViewerController         (internal)                              Web UI for audit logs                
- RoutingLoader            (internal)                              Loads viewer routes                  
+| Component           | Service ID                     | Description                           |
+|:--------------------|:-------------------------------|:--------------------------------------|
+| UserProvider        | `dh_auditor.user_provider`     | Gets current user from TokenStorage   |
+| SecurityProvider    | `dh_auditor.security_provider` | Gets IP and firewall from Request     |
+| RoleChecker         | `dh_auditor.role_checker`      | Checks access via Security component  |
+| ConsoleUserProvider | (internal)                     | Tracks console command as user        |
+| ViewerController    | (internal)                     | Web UI for audit logs                 |
+| RoutingLoader       | (internal)                     | Loads viewer routes                   |                  
 
 ## Version Compatibility
 
- Version  Status                       Requirements                                                         
-:--------:----------------------------:---------------------------------------------------------------------
- 7.x      Active development 🚀        PHP >= 8.4, Symfony >= 8.0, Doctrine DBAL >= 4.0, Doctrine ORM >= 3.2
- 6.x      Active support               PHP >= 8.2, Symfony >= 5.4                                           
- 5.x      End of Life                  PHP >= 7.4, Symfony >= 4.4                                           
+| Version | Status                      | Requirements                                                         |
+|:--------|:----------------------------|:---------------------------------------------------------------------|
+| 7.x     | Active development 🚀       |PHP >= 8.4, Symfony >= 8.0, Doctrine DBAL >= 4.0, Doctrine ORM >= 3.2|
+| 6.x     | Active support              | PHP >= 8.2, Symfony >= 5.4                                           |
+| 5.x     | End of Life                 | PHP >= 7.4, Symfony >= 4.4                                           |
 
 ## Quick Links
 

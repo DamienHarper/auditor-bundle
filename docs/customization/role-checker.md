@@ -47,12 +47,12 @@ public function __invoke(string $entity, string $scope): bool
 
 ### Default Behavior
 
- Scenario                         Access   
--------------------------------------------
- No roles configured for entity   Granted  
- No user authenticated            Granted  
- User has required role           Granted  
- User lacks required role         Denied   
+| Scenario                        | Access  |
+|:--------------------------------|:--------|
+| No roles configured for entity  | Granted |
+| No user authenticated           | Granted |
+| User has required role          | Granted |
+| User lacks required role        | Denied  |   
 
 ## Configuring Roles
 

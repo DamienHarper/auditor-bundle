@@ -30,9 +30,9 @@ dh_auditor:
 
 ### enabled
 
- Type     Default  Description                    
---------------------------------------------------
- `bool`   `true`   Enable or disable all auditing 
+| Type   | Default | Description                   |
+|:-------|:--------|:------------------------------|
+| `bool` | `true`  | Enable or disable all auditing |
 
 ```yaml
 dh_auditor:
@@ -43,9 +43,9 @@ When `false`, no changes are audited until re-enabled at runtime.
 
 ### timezone
 
- Type       Default  Description                       
--------------------------------------------------------
- `string`   `'UTC'`  Timezone for audit timestamps     
+| Type     | Default | Description                   |
+|:---------|:--------|:------------------------------|
+| `string` | `'UTC'` | Timezone for audit timestamps |
 
 ```yaml
 dh_auditor:
@@ -54,9 +54,9 @@ dh_auditor:
 
 ### user_provider
 
- Type       Default                       Description                  
------------------------------------------------------------------------
- `string`   `'dh_auditor.user_provider'`  Service ID for user provider 
+| Type     | Default                      | Description                  |
+|:---------|:-----------------------------|:-----------------------------|
+| `string` | `'dh_auditor.user_provider'` | Service ID for user provider |
 
 ```yaml
 dh_auditor:
@@ -67,9 +67,9 @@ See [User Provider Customization](../customization/user-provider.md).
 
 ### security_provider
 
- Type       Default                           Description                      
--------------------------------------------------------------------------------
- `string`   `'dh_auditor.security_provider'`  Service ID for security provider 
+| Type     | Default                          | Description                      |
+|:---------|:---------------------------------|:---------------------------------|
+| `string` | `'dh_auditor.security_provider'` | Service ID for security provider |
 
 ```yaml
 dh_auditor:
@@ -80,9 +80,9 @@ See [Security Provider Customization](../customization/security-provider.md).
 
 ### role_checker
 
- Type       Default                       Description                    
--------------------------------------------------------------------------
- `string`   `'dh_auditor.role_checker'`   Service ID for role checker    
+| Type     | Default                     | Description                 |
+|:---------|:----------------------------|:----------------------------|
+| `string` | `'dh_auditor.role_checker'` | Service ID for role checker |
 
 ```yaml
 dh_auditor:
@@ -97,10 +97,10 @@ All options under `providers.doctrine`:
 
 ### table_prefix / table_suffix
 
- Option          Type       Default     Description                    
------------------------------------------------------------------------
- `table_prefix`  `string`   `''`        Prefix for audit table names   
- `table_suffix`  `string`   `'_audit'`  Suffix for audit table names   
+| Option         | Type     | Default    | Description                  |
+|:---------------|:---------|:-----------|:-----------------------------|
+| `table_prefix` | `string` | `''`       | Prefix for audit table names |
+| `table_suffix` | `string` | `'_audit'` | Suffix for audit table names |
 
 ```yaml
 dh_auditor:
@@ -114,9 +114,9 @@ Example: Entity table `users` → Audit table `audit_users`
 
 ### ignored_columns
 
- Type      Default  Description                                     
---------------------------------------------------------------------
- `array`   `[]`     Properties to ignore globally across all entities 
+| Type    | Default | Description                                    |
+|:--------|:--------|:-----------------------------------------------|
+| `array` | `[]`    | Properties to ignore globally across all entities |
 
 ```yaml
 dh_auditor:
@@ -130,9 +130,9 @@ dh_auditor:
 
 ### entities
 
- Type      Default  Description                  
--------------------------------------------------
- `array`   `[]`     Entities to audit and options 
+| Type    | Default | Description                   |
+|:--------|:--------|:------------------------------|
+| `array` | `[]`    | Entities to audit and options |
 
 ```yaml
 dh_auditor:
@@ -154,17 +154,17 @@ dh_auditor:
 
 Entity options:
 
- Option             Type      Default  Description                          
----------------------------------------------------------------------------
- `enabled`          `bool`    `true`   Enable/disable auditing for entity   
- `ignored_columns`  `array`   `[]`     Properties to ignore for this entity 
- `roles.view`       `array`   `[]`     Roles required to view audits        
+| Option            | Type    | Default | Description                          |
+|:------------------|:--------|:--------|:-------------------------------------|
+| `enabled`         | `bool`  | `true`  | Enable/disable auditing for entity   |
+| `ignored_columns` | `array` | `[]`    | Properties to ignore for this entity |
+| `roles.view`      | `array` | `[]`    | Roles required to view audits        |
 
 ### storage_services
 
- Type      Default                                    Description                   
------------------------------------------------------------------------------------
- `array`   `['@doctrine.orm.default_entity_manager']` Entity managers for storage   
+| Type    | Default                                   | Description                  |
+|:--------|:------------------------------------------|:-----------------------------|
+| `array` | `['@doctrine.orm.default_entity_manager']` | Entity managers for storage |
 
 ```yaml
 dh_auditor:
@@ -179,9 +179,9 @@ See [Multi-Database Setup](storage.md) for details.
 
 ### auditing_services
 
- Type      Default                                    Description                      
----------------------------------------------------------------------------------------
- `array`   `['@doctrine.orm.default_entity_manager']` Entity managers to monitor       
+| Type    | Default                                   | Description                 |
+|:--------|:------------------------------------------|:----------------------------|
+| `array` | `['@doctrine.orm.default_entity_manager']` | Entity managers to monitor |
 
 ```yaml
 dh_auditor:
@@ -194,9 +194,9 @@ dh_auditor:
 
 ### storage_mapper
 
- Type              Default  Description                                 
-------------------------------------------------------------------------
- `string\|null`    `null`   Service ID for routing audits to storage    
+| Type            | Default | Description                              |
+|:----------------|:--------|:-----------------------------------------|
+| `string\|null`  | `null`  | Service ID for routing audits to storage |
 
 Required when using multiple storage services.
 
@@ -211,9 +211,9 @@ See [Multi-Database Setup](storage.md) for details.
 
 ### viewer
 
- Type             Default  Description                    
-----------------------------------------------------------
- `bool\|array`    `false`  Enable/configure audit viewer  
+| Type           | Default | Description                   |
+|:---------------|:--------|:------------------------------|
+| `bool\|array`  | `false` | Enable/configure audit viewer |
 
 ```yaml
 # Simple enable
@@ -233,10 +233,10 @@ dh_auditor:
 
 Viewer options:
 
- Option       Type    Default  Description              
---------------------------------------------------------
- `enabled`    `bool`  `false`  Enable the viewer        
- `page_size`  `int`   `50`     Results per page         
+| Option      | Type   | Default | Description         |
+|:------------|:-------|:--------|:--------------------|
+| `enabled`   | `bool` | `false` | Enable the viewer   |
+| `page_size` | `int`  | `50`    | Results per page    |
 
 ## Complete Example
 
