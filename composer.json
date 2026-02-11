@@ -21,7 +21,7 @@
   "require": {
     "php": "^8.4",
     "ext-intl": "*",
-    "damienharper/auditor": "dev-feature/4.0",
+    "damienharper/auditor": "dev-master",
     "doctrine/doctrine-bundle": "^3.0",
     "doctrine/dbal": "^4.0",
     "doctrine/orm": "^3.2",
