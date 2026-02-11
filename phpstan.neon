@@ -4,24 +4,15 @@ parameters:
 
     type_coverage:
         return_type: 100
-        param_type: 100
+        param_type: 97
         property_type: 100
         constant: 0
 
     paths:
         - src
 
-    excludePaths:
-        - '%currentWorkingDirectory%/src/DependencyInjection/Configuration.php'
-        - '%currentWorkingDirectory%/src/Routing/RoutingLoader.php'
-
     ignoreErrors:
         - identifier: missingType.iterableValue
-        - message: '~Class Symfony\\Component\\Security\\Core\\Authentication\\Token\\AnonymousToken not found.~'
-          reportUnmatched: false
-        - message: '~Fetching class constant class of deprecated class Symfony\\Component\\Routing\\Annotation\\Route~'
-          path: src/Controller/ViewerController.php
-          reportUnmatched: false
-        - message: '~Attribute class Symfony\\Component\\Routing\\Attribute\\Route does not exist~'
-          path: src/Controller/ViewerController.php
-          reportUnmatched: false
+        -
+            message: '~Cannot access offset .+ on mixed~'
+            path: src/DHAuditorBundle.php

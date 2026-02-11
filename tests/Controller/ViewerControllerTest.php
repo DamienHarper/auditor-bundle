@@ -19,7 +19,6 @@ use Symfony\Component\BrowserKit\AbstractBrowser;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\User\InMemoryUser;
-use Symfony\Component\Security\Core\User\User;
 
 /**
  * @internal
@@ -82,16 +81,16 @@ final class ViewerControllerTest extends WebTestCase
         ];
         $cards->each(static function ($row, $rowIndex) use ($expected): void {
             $cell = $row->filter('div > h3 > code');
-            self::assertSame($expected[$rowIndex][0], mb_trim((string) $cell->text()), 'Entity is OK');
+            self::assertSame($expected[$rowIndex][0], mb_trim($cell->text()), 'Entity is OK');
 
             $cell = $row->filter('div > p');
-            self::assertSame($expected[$rowIndex][1], mb_trim((string) $cell->text()), 'Tablename is OK');
+            self::assertSame($expected[$rowIndex][1], mb_trim($cell->text()), 'Tablename is OK');
 
             $cell = $row->filter('div > dl > dt');
-            self::assertSame($expected[$rowIndex][2], mb_trim((string) $cell->text()), 'Operation count is OK');
+            self::assertSame($expected[$rowIndex][2], mb_trim($cell->text()), 'Operation count is OK');
 
             $cell = $row->filter('div > dl > dd > a');
-            self::assertSame($expected[$rowIndex][3], mb_trim((string) $cell->text()), 'Link is OK');
+            self::assertSame($expected[$rowIndex][3], mb_trim($cell->text()), 'Link is OK');
         });
     }
 
@@ -120,16 +119,16 @@ final class ViewerControllerTest extends WebTestCase
         ];
         $cards->each(static function ($row, $rowIndex) use ($expected): void {
             $cell = $row->filter('div > h3 > code');
-            self::assertSame($expected[$rowIndex][0], mb_trim((string) $cell->text()), 'Entity is OK');
+            self::assertSame($expected[$rowIndex][0], mb_trim($cell->text()), 'Entity is OK');
 
             $cell = $row->filter('div > p');
-            self::assertSame($expected[$rowIndex][1], mb_trim((string) $cell->text()), 'Tablename is OK');
+            self::assertSame($expected[$rowIndex][1], mb_trim($cell->text()), 'Tablename is OK');
 
             $cell = $row->filter('div > dl > dt');
-            self::assertSame($expected[$rowIndex][2], mb_trim((string) $cell->text()), 'Operation count is OK');
+            self::assertSame($expected[$rowIndex][2], mb_trim($cell->text()), 'Operation count is OK');
 
             $cell = $row->filter('div > dl > dd > a');
-            self::assertSame($expected[$rowIndex][3], mb_trim((string) $cell->text()), 'Link is OK');
+            self::assertSame($expected[$rowIndex][3], mb_trim($cell->text()), 'Link is OK');
         });
     }
 
@@ -159,16 +158,16 @@ final class ViewerControllerTest extends WebTestCase
         ];
         $cards->each(static function ($row, $rowIndex) use ($expected): void {
             $cell = $row->filter('div > h3 > code');
-            self::assertSame($expected[$rowIndex][0], mb_trim((string) $cell->text()), 'Entity is OK');
+            self::assertSame($expected[$rowIndex][0], mb_trim($cell->text()), 'Entity is OK');
 
             $cell = $row->filter('div > p');
-            self::assertSame($expected[$rowIndex][1], mb_trim((string) $cell->text()), 'Tablename is OK');
+            self::assertSame($expected[$rowIndex][1], mb_trim($cell->text()), 'Tablename is OK');
 
             $cell = $row->filter('div > dl > dt');
-            self::assertSame($expected[$rowIndex][2], mb_trim((string) $cell->text()), 'Operation count is OK');
+            self::assertSame($expected[$rowIndex][2], mb_trim($cell->text()), 'Operation count is OK');
 
             $cell = $row->filter('div > dl > dd > a');
-            self::assertSame($expected[$rowIndex][3], mb_trim((string) $cell->text()), 'Link is OK');
+            self::assertSame($expected[$rowIndex][3], mb_trim($cell->text()), 'Link is OK');
         });
     }
 
@@ -288,8 +287,7 @@ final class ViewerControllerTest extends WebTestCase
 
     private function login(array $roles = []): void
     {
-        $class = class_exists(User::class) ? User::class : InMemoryUser::class;
-        $user = new $class(
+        $user = new InMemoryUser(
             'dark.vador',
             '$argon2id$v=19$m=65536,t=4,p=1$g1yZVCS0GJ32k2fFqBBtqw$359jLODXkhqVWtD/rf+CjiNz9r/kIvhJlenPBnW851Y',
             $roles

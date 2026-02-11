@@ -10,12 +10,9 @@ use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
 use PHPUnit\Framework\Attributes\Small;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\HttpKernel\HttpKernelBrowser;
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\InMemoryUser;
-use Symfony\Component\Security\Core\User\User;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -29,13 +26,11 @@ final class UserProviderTest extends WebTestCase
 
     private DoctrineProvider $provider;
 
-    private HttpKernelBrowser $client;
-
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->client = self::createClient();
+        self::createClient();
 
         // provider with 1 em for both storage and auditing
         $this->createAndInitDoctrineProvider();
@@ -57,12 +52,7 @@ final class UserProviderTest extends WebTestCase
         $user = $this->createUser('dark.vador');
 
         $firewallName = 'main';
-
-        if (Kernel::MAJOR_VERSION >= 6) {
-            $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
-        } else {
-            $token = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
-        }
+        $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
 
         self::getContainer()->get('security.token_storage')->setToken($token);
 
@@ -90,14 +80,8 @@ final class UserProviderTest extends WebTestCase
         $secondUser = $this->createUser('second_user');
 
         $firewallName = 'main';
-
-        if (Kernel::MAJOR_VERSION >= 6) {
-            $userToken = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
-            $token = new SwitchUserToken($secondUser, $firewallName, $secondUser->getRoles(), $userToken);
-        } else {
-            $userToken = new UsernamePasswordToken($user, null, $firewallName, $user->getRoles());
-            $token = new SwitchUserToken($secondUser, null, $firewallName, $secondUser->getRoles(), $userToken);
-        }
+        $userToken = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
+        $token = new SwitchUserToken($secondUser, $firewallName, $secondUser->getRoles(), $userToken);
 
         self::getContainer()->get('security.token_storage')->setToken($token);
 
@@ -122,9 +106,7 @@ final class UserProviderTest extends WebTestCase
 
     private function createUser(string $username): UserInterface
     {
-        $class = class_exists(User::class) ? User::class : InMemoryUser::class;
-
-        return new $class(
+        return new InMemoryUser(
             $username,
             '$argon2id$v=19$m=65536,t=4,p=1$g1yZVCS0GJ32k2fFqBBtqw$359jLODXkhqVWtD/rf+CjiNz9r/kIvhJlenPBnW851Y',
             []

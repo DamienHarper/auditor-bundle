@@ -20,7 +20,6 @@ use PHPUnit\Framework\Attributes\Small;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
@@ -43,12 +42,7 @@ final class DHAuditorBundleTest extends KernelTestCase
             // Add some configuration
             $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/dh_auditor.yaml');
             $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/doctrine.yaml');
-            if (Kernel::MAJOR_VERSION < 6) {
-                $kernel->addTestConfig(__DIR__.'/App/config/services_legacy.yaml');
-                $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/sf4_5/security.yaml');
-            } else {
-                $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/sf6_7/security.yaml');
-            }
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/security.yaml');
         }]);
 
         // Get the container
@@ -85,11 +79,13 @@ final class DHAuditorBundleTest extends KernelTestCase
         $this->assertInstanceOf(ConsoleEventSubscriber::class, $container->get(ConsoleEventSubscriber::class));
     }
 
+    #[\Override]
     protected static function getKernelClass(): string
     {
         return TestKernel::class;
     }
 
+    #[\Override]
     protected static function createKernel(array $options = []): KernelInterface
     {
         /**
