@@ -40,9 +40,11 @@ help:
 	@echo "Usage: make <target> [php=<php_version>] [sf=<symfony_version>] [args=<phpunit_args>]"
 	@echo ""
 	@echo "Targets:"
-	@echo "  tests    - Run the test suite using PHPUnit."
-	@echo "  cs-fix   - Run PHP-CS-Fixer to fix coding standards issues."
-	@echo "  phpstan  - Run PHPStan for static code analysis."
+	@echo "  tests        - Run the test suite using PHPUnit."
+	@echo "  cs-fix       - Run PHP-CS-Fixer to fix coding standards issues."
+	@echo "  phpstan      - Run PHPStan for static code analysis."
+	@echo "  build-assets - Build CSS assets using Tailwind CSS (minified for production)."
+	@echo "  watch-assets - Watch and rebuild CSS assets on changes (development mode)."
 	@echo ""
 	@echo "Options:"
 	@echo "  php      - PHP version to use (default: $(php)). Supported: 8.2, 8.3"
@@ -59,6 +61,7 @@ help:
 	@echo "  make tests php=8.2 sf=6.4"
 	@echo "  make cs-fix"
 	@echo "  make phpstan"
+	@echo "  make build-assets"
 	@echo "  make tests args='--filter=TestClassName'"
 	@echo ""
 	@echo "Note: Ensure that the PHP and Symfony versions are valid combinations:"
@@ -125,3 +128,17 @@ define set_args
     args := fix --using-cache=no --verbose --ansi
   endif
 endef
+
+# Build CSS assets using Tailwind CSS (for production/release)
+.PHONY: build-assets
+build-assets:
+	@echo "Building CSS assets with Tailwind CSS..."
+	cd tests/App && php bin/console tailwind:build --minify
+	@cp tests/App/var/tailwind/app.built.css src/Resources/public/app.css
+	@echo "Assets built successfully: src/Resources/public/app.css"
+
+# Watch and rebuild CSS assets on changes (for development)
+.PHONY: watch-assets
+watch-assets:
+	@echo "Watching CSS assets with Tailwind CSS..."
+	cd tests/App && php bin/console tailwind:build --watch
