@@ -22,6 +22,11 @@ audit:
     by: kasutajalt
     source: Allikas
     target: Sihtmärk
+    action_insert: kirje loodud
+    action_update: kirje uuendatud
+    action_remove: kirje kustutatud
+    action_associate: seos lisatud
+    action_dissociate: seos eemaldatud
   filter:
     all_actions: Kõik toimingud
     all_users: Kõik kasutajad

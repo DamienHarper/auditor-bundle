@@ -22,6 +22,11 @@ audit:
     by: от
     source: Источник
     target: Цель
+    action_insert: запись создана
+    action_update: запись обновлена
+    action_remove: запись удалена
+    action_associate: связь добавлена
+    action_dissociate: связь удалена
   filter:
     all_actions: Все действия
     all_users: Все пользователи

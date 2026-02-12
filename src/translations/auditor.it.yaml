@@ -22,6 +22,11 @@ audit:
     by: da
     source: Origine
     target: Destinazione
+    action_insert: record creato
+    action_update: record aggiornato
+    action_remove: record eliminato
+    action_associate: relazione aggiunta
+    action_dissociate: relazione rimossa
   filter:
     all_actions: Tutte le azioni
     all_users: Tutti gli utenti

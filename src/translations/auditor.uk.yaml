@@ -22,6 +22,11 @@ audit:
     by: від
     source: Джерело
     target: Ціль
+    action_insert: запис створено
+    action_update: запис оновлено
+    action_remove: запис видалено
+    action_associate: зв'язок додано
+    action_dissociate: зв'язок видалено
   filter:
     all_actions: Усі дії
     all_users: Усі користувачі

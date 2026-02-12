@@ -22,6 +22,11 @@ audit:
     by: door
     source: Bron
     target: Doel
+    action_insert: record aangemaakt
+    action_update: record bijgewerkt
+    action_remove: record verwijderd
+    action_associate: relatie toegevoegd
+    action_dissociate: relatie verwijderd
   filter:
     all_actions: Alle acties
     all_users: Alle gebruikers
