@@ -28,8 +28,10 @@ audit:
   stream:
     no_entries: Auditikirjeid ei leitud.
   pager:
+    first: Esimene
     previous: Eelmine
     next: Järgmine
+    last: Viimane
     page_info: 'Leht %current% / %total%'
 
 time_ago:

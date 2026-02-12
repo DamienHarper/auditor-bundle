@@ -1,46 +1,54 @@
 {% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
 
 <details class="group">
-    <summary class="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition list-none">
-        <div class="flex items-center gap-3 min-w-0">
-            {# Type badge #}
-            {{ helper.type_badge(entry.type) }}
+    <summary class="flex flex-col px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition list-none">
+        {# First line: badge, entity link, hash, chevron #}
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3 min-w-0">
+                {# Type badge #}
+                {{ helper.type_badge(entry.type) }}
 
-            {# Entity label #}
-            <span class="font-medium text-slate-900 dark:text-slate-100 truncate">
-                {{ entity|split('\\')|last }} #{{ entry.objectId }}
-            </span>
+                {# Entity label with link and FQCN title #}
+                <a href="{{ path('dh_auditor_show_entity_stream', {'entity': helper.namespaceToParam(entity), 'id': entry.objectId}) }}"
+                   class="font-medium text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 truncate min-w-40"
+                   title="{{ entity }}"
+                   onclick="event.stopPropagation();">
+                    {{ entity|split('\\')|last }} #{{ entry.objectId }}
+                </a>
+            </div>
+
+            <div class="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 shrink-0">
+                {# Transaction hash - short version with full hash in title #}
+                {% if entry.transactionHash is not empty and hide_transaction is not defined %}
+                    <a href="{{ path('dh_auditor_show_transaction_stream', {hash: entry.transactionHash}) }}"
+                       class="font-mono text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition"
+                       title="{{ entry.transactionHash }}"
+                       onclick="event.stopPropagation();">
+                        {{ entry.transactionHash|slice(0, 10) }}…
+                    </a>
+                {% endif %}
+
+                {# Chevron #}
+                <svg class="w-4 h-4 text-slate-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </div>
         </div>
 
-        <div class="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 shrink-0">
-            {# Date and user #}
-            <span class="hidden sm:inline">
-                {{ entry.createdAt|format_datetime('full', 'short') }}
-                · {% trans from 'auditor' %}audit.entry.by{% endtrans %}
+        {# Second line: date and user/command #}
+        <div class="flex items-center gap-2 mt-1 ml-16 text-xs text-slate-500 dark:text-slate-400">
+            <span>{{ entry.createdAt|format_datetime('full', 'short') }}</span>
+            <span>·</span>
+            <span>{% trans from 'auditor' %}audit.entry.by{% endtrans %}
                 <span class="font-medium">{{ entry.username ?? 'audit.audit_details.anonymous'|trans(domain='auditor') }}</span>
             </span>
-
-            {# Transaction hash #}
-            {% if entry.transactionHash is not empty and hide_transaction is not defined %}
-                <a href="{{ path('dh_auditor_show_transaction_stream', {hash: entry.transactionHash}) }}"
-                   class="font-mono text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition"
-                   title="{% trans from 'auditor' %}audit.audit_details.view_transaction{% endtrans %}"
-                   onclick="event.stopPropagation();">
-                    {{ entry.transactionHash }}
-                </a>
-            {% endif %}
-
-            {# Chevron #}
-            <svg class="w-4 h-4 text-slate-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
         </div>
     </summary>
 
     {# Details content - diffs #}
     {% if entry.type in ['insert', 'update'] %}
         <div class="px-4 pb-4">
-            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 text-sm">
+            <div class="rounded-lg p-4 text-sm border border-slate-200 dark:border-slate-700">
                 {% set diffs = entry.diffs %}
                 {% for field, changeset in diffs %}
                     {{ _self.displayDiff(field, changeset) }}
@@ -49,7 +57,7 @@
         </div>
     {% elseif entry.type in ['associate', 'dissociate'] %}
         <div class="px-4 pb-4">
-            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 text-sm">
+            <div class="rounded-lg p-4 text-sm border border-slate-200 dark:border-slate-700">
                 {% set diffs = entry.diffs %}
                 {% if diffs.source is defined %}
                     <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
@@ -71,7 +79,7 @@
         </div>
     {% elseif entry.type == 'remove' %}
         <div class="px-4 pb-4">
-            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 text-sm">
+            <div class="rounded-lg p-4 text-sm border border-slate-200 dark:border-slate-700">
                 {% set diffs = entry.diffs %}
                 {% for field, value in diffs %}
                     <div class="flex gap-2 py-1">

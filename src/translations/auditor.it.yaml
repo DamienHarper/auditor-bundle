@@ -28,8 +28,10 @@ audit:
   stream:
     no_entries: Nessuna voce di audit trovata.
   pager:
+    first: Prima
     previous: Precedente
     next: Prossimo
+    last: Ultima
     page_info: 'Pagina %current% di %total%'
 
 time_ago:

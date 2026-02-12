@@ -13,10 +13,10 @@
         {% trans from 'auditor' %}audit.header.back_to_entities{% endtrans %}
     </a>
 
-    {# Sub-header #}
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+    {# Sub-header - sticky #}
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sticky top-16 z-40 -mx-6 px-6 py-4 bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur border-b border-slate-200 dark:border-slate-800">
         <div>
-            <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">
+            <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100" title="{{ entity }}">
                 {{ entity|split('\\')|last }}{% if id is not null %} #{{ id }}{% endif %}
             </h1>
             <p class="text-sm text-slate-500 dark:text-slate-400">

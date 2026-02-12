@@ -1,46 +1,114 @@
 {% macro render(entity, id = null, paginator) %}
     {% if paginator.haveToPaginate %}
-        <div class="flex items-center justify-between mt-6 pt-6 border-t border-slate-200 dark:border-slate-800">
-            {# Previous #}
-            {% if paginator.hasPreviousPage %}
-                <a href="{{ path('dh_auditor_show_entity_stream', {entity: entity, id: id, page: paginator.previousPage}) }}"
-                   class="inline-flex items-center text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        <div class="flex items-center justify-center gap-1 mt-6 pt-6 border-t border-slate-200 dark:border-slate-800">
+            {# First page #}
+            {% if paginator.currentPage > 1 %}
+                <a href="{{ path('dh_auditor_show_entity_stream', {entity: entity, id: id, page: 1}) }}"
+                   class="inline-flex items-center justify-center w-8 h-8 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800 rounded transition"
+                   title="{% trans from 'auditor' %}audit.pager.first{% endtrans %}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
                     </svg>
-                    {% trans from 'auditor' %}audit.pager.previous{% endtrans %}
                 </a>
             {% else %}
-                <span class="inline-flex items-center text-sm text-slate-300 dark:text-slate-600 cursor-not-allowed">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                <span class="inline-flex items-center justify-center w-8 h-8 text-slate-300 dark:text-slate-600 cursor-not-allowed">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
                     </svg>
-                    {% trans from 'auditor' %}audit.pager.previous{% endtrans %}
                 </span>
             {% endif %}
 
-            {# Page info #}
-            <span class="text-sm text-slate-500 dark:text-slate-400">
-                {% trans with { '%current%': paginator.currentPage, '%total%': paginator.numPages } from 'auditor' %}audit.pager.page_info{% endtrans %}
-            </span>
+            {# Previous #}
+            {% if paginator.hasPreviousPage %}
+                <a href="{{ path('dh_auditor_show_entity_stream', {entity: entity, id: id, page: paginator.previousPage}) }}"
+                   class="inline-flex items-center justify-center w-8 h-8 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800 rounded transition"
+                   title="{% trans from 'auditor' %}audit.pager.previous{% endtrans %}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+            {% else %}
+                <span class="inline-flex items-center justify-center w-8 h-8 text-slate-300 dark:text-slate-600 cursor-not-allowed">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </span>
+            {% endif %}
+
+            {# Page numbers #}
+            {% set startPage = max(1, paginator.currentPage - 2) %}
+            {% set endPage = min(paginator.numPages, paginator.currentPage + 2) %}
+
+            {# Adjust range to always show 5 pages when possible #}
+            {% if endPage - startPage < 4 %}
+                {% if startPage == 1 %}
+                    {% set endPage = min(paginator.numPages, startPage + 4) %}
+                {% elseif endPage == paginator.numPages %}
+                    {% set startPage = max(1, endPage - 4) %}
+                {% endif %}
+            {% endif %}
+
+            {# Show ellipsis before if needed #}
+            {% if startPage > 1 %}
+                <span class="inline-flex items-center justify-center w-8 h-8 text-sm text-slate-400 dark:text-slate-500">…</span>
+            {% endif %}
+
+            {% for page in startPage..endPage %}
+                {% if page == paginator.currentPage %}
+                    <span class="inline-flex items-center justify-center w-8 h-8 text-sm font-medium bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 rounded">
+                        {{ page }}
+                    </span>
+                {% else %}
+                    <a href="{{ path('dh_auditor_show_entity_stream', {entity: entity, id: id, page: page}) }}"
+                       class="inline-flex items-center justify-center w-8 h-8 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800 rounded transition">
+                        {{ page }}
+                    </a>
+                {% endif %}
+            {% endfor %}
+
+            {# Show ellipsis after if needed #}
+            {% if endPage < paginator.numPages %}
+                <span class="inline-flex items-center justify-center w-8 h-8 text-sm text-slate-400 dark:text-slate-500">…</span>
+            {% endif %}
 
             {# Next #}
             {% if paginator.hasNextPage %}
                 <a href="{{ path('dh_auditor_show_entity_stream', {entity: entity, id: id, page: paginator.nextPage}) }}"
-                   class="inline-flex items-center text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition">
-                    {% trans from 'auditor' %}audit.pager.next{% endtrans %}
-                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   class="inline-flex items-center justify-center w-8 h-8 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800 rounded transition"
+                   title="{% trans from 'auditor' %}audit.pager.next{% endtrans %}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </a>
             {% else %}
-                <span class="inline-flex items-center text-sm text-slate-300 dark:text-slate-600 cursor-not-allowed">
-                    {% trans from 'auditor' %}audit.pager.next{% endtrans %}
-                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span class="inline-flex items-center justify-center w-8 h-8 text-slate-300 dark:text-slate-600 cursor-not-allowed">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </span>
             {% endif %}
+
+            {# Last page #}
+            {% if paginator.currentPage < paginator.numPages %}
+                <a href="{{ path('dh_auditor_show_entity_stream', {entity: entity, id: id, page: paginator.numPages}) }}"
+                   class="inline-flex items-center justify-center w-8 h-8 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-100 dark:hover:bg-slate-800 rounded transition"
+                   title="{% trans from 'auditor' %}audit.pager.last{% endtrans %}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            {% else %}
+                <span class="inline-flex items-center justify-center w-8 h-8 text-slate-300 dark:text-slate-600 cursor-not-allowed">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
+                    </svg>
+                </span>
+            {% endif %}
+        </div>
+
+        {# Page info text #}
+        <div class="text-center mt-3 text-sm text-slate-500 dark:text-slate-400">
+            {% trans with { '%current%': paginator.currentPage, '%total%': paginator.numPages } from 'auditor' %}audit.pager.page_info{% endtrans %}
         </div>
     {% endif %}
 {% endmacro render %}

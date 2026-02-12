@@ -28,8 +28,10 @@ audit:
   stream:
     no_entries: Записи аудита не найдены.
   pager:
+    first: Первая
     previous: Предыдущий
     next: Следующий
+    last: Последняя
     page_info: 'Страница %current% из %total%'
 
 time_ago:

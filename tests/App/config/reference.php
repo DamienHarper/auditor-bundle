@@ -1282,7 +1282,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     dh_auditor?: DhAuditorConfig,
  *     twig_extra?: TwigExtraConfig,
  *     symfonycasts_tailwind?: SymfonycastsTailwindConfig,
- *     "when@test"?: array{
+ *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
  *         services?: ServicesConfig,
@@ -1373,7 +1373,7 @@ namespace Symfony\Component\Routing\Loader\Configurator;
  *     deprecated?: array{package:string, version:string, message?:string},
  * }
  * @psalm-type RoutesConfig = array{
- *     "when@test"?: array<string, RouteConfig|ImportConfig|AliasConfig>,
+ *     "when@dev"?: array<string, RouteConfig|ImportConfig|AliasConfig>,
  *     ...<string, RouteConfig|ImportConfig|AliasConfig>
  * }
  */
