@@ -24,6 +24,7 @@ use DH\AuditorBundle\Event\ViewerEventSubscriber;
 use DH\AuditorBundle\Routing\RoutingLoader;
 use DH\AuditorBundle\Security\RoleChecker;
 use DH\AuditorBundle\Security\SecurityProvider;
+use DH\AuditorBundle\Twig\TimeAgoExtension;
 use DH\AuditorBundle\User\ConsoleUserProvider;
 use DH\AuditorBundle\User\UserProvider;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
@@ -278,6 +279,12 @@ class DHAuditorBundle extends AbstractBundle
                 new Reference('dh_auditor.user_provider'),
             ])
             ->tag('kernel.event_subscriber')
+        ;
+
+        // Twig extension
+        $services->set(TimeAgoExtension::class)
+            ->args([new Reference('translator')])
+            ->tag('twig.extension')
         ;
     }
 

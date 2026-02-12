@@ -1,0 +1,53 @@
+{% extends "@DHAuditor/layout.html.twig" %}
+
+{% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
+{% import '@DHAuditor/Audit/helpers/pager.html.twig' as pager %}
+
+{% block dh_auditor_content %}
+    {# Back link #}
+    <a href="{{ path('dh_auditor_list_audits') }}"
+       class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 mb-6">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        {% trans from 'auditor' %}audit.header.back_to_entities{% endtrans %}
+    </a>
+
+    {# Sub-header #}
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+        <div>
+            <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">
+                {{ entity|split('\\')|last }}{% if id is not null %} #{{ id }}{% endif %}
+            </h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+                {% trans with { '%count%': paginator.numResults|number_format } from 'auditor' %}audit.audit_details.events_count{% endtrans %}
+                · {% trans from 'auditor' %}audit.audit_details.most_recent{% endtrans %}
+            </p>
+        </div>
+        <div class="flex gap-2 mt-4 sm:mt-0">
+            {# Placeholder filters - disabled for now #}
+            <select disabled class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed">
+                <option>{% trans from 'auditor' %}audit.filter.all_actions{% endtrans %}</option>
+            </select>
+            <select disabled class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed">
+                <option>{% trans from 'auditor' %}audit.filter.all_users{% endtrans %}</option>
+            </select>
+        </div>
+    </div>
+
+    {# Entries list #}
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 divide-y divide-slate-200 dark:divide-slate-800">
+        {% for entry in paginator.results %}
+            {{ include('@DHAuditor/Audit/entry.html.twig', {'entry': entry, 'entity': entity}) }}
+        {% else %}
+            <div class="p-8 text-center text-slate-500 dark:text-slate-400">
+                {% trans from 'auditor' %}audit.stream.no_entries{% endtrans %}
+            </div>
+        {% endfor %}
+    </div>
+
+    {# Pager #}
+    {% block dh_auditor_pager %}
+        {{ pager.render(helper.namespaceToParam(entity), id, paginator) }}
+    {% endblock dh_auditor_pager %}
+{% endblock dh_auditor_content %}

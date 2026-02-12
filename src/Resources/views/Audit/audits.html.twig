@@ -2,48 +2,35 @@
 
 {% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
 
-{% block dh_auditor_header %}
-    <nav class="bg-white border border-gray-200 rounded flex" aria-label="Breadcrumb">
-        <ol role="list" class="max-w-screen-xl w-full mx-auto px-4 flex space-x-4 sm:px-6 lg:px-6">
-            <li class="flex">
-                <div class="flex items-center h-11">
-                    <a href="{{ path('dh_auditor_list_audits') }}" class="text-gray-400 hover:text-gray-500 flex space-x-1">
-                        <!-- Heroicon name: solid/home -->
-                        <svg class="flex-shrink-0 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                        </svg>
-                        <span>{% trans from 'auditor' %}audit.header.home{% endtrans %}</span>
-                    </a>
-                </div>
-            </li>
-        </ol>
-    </nav>
-{% endblock %}
-
 {% block dh_auditor_content %}
-    <div class="auditor-audits grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-4">
-        {% for entity, table in audited %}
-            <div id="audit-entity-{{ entity|escape|split('\\')|last|lower }}" class="auditor-audit bg-white overflow-hidden rounded border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-all duration-300 group flex flex-col justify-between">
-                <div class="px-4 py-3 sm:px-4">
-                    <h3 class="text-lg leading-6 text-gray-900">
-                        <code class="text-pink-500">{{ entity|escape }}</code>
-                    </h3>
-                    <p class="mt-1 max-w-2xl text-sm text-gray-500">
-                        {{ table|escape }}
-                    </p>
+    <div class="mb-8">
+        <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">
+            {% trans from 'auditor' %}audit.home.title{% endtrans %}
+        </h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+            {% trans from 'auditor' %}audit.home.subtitle{% endtrans %}
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for entity, entityAuditData in audited %}
+            <a href="{{ path('dh_auditor_show_entity_stream', {'entity': helper.namespaceToParam(entity)}) }}"
+               class="rounded-xl border bg-white border-slate-200 p-4
+                      hover:bg-slate-50 hover:border-slate-300 transition
+                      dark:bg-slate-900 dark:border-slate-800 dark:hover:bg-slate-800">
+                <div class="flex justify-between">
+                    <span class="font-medium" title="{{ entity|e('html_attr') }}">{{ entity|split('\\')|last }}</span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 my-auto">
+                        {% trans with { '%count%': entityAuditData.count|number_format } from 'auditor' %}audit.audit_details.events_count{% endtrans %}
+                    </span>
                 </div>
-                <div class="border-t border-gray-200 px-4 py-2 bg-gray-50 group-hover:bg-blue-100 group-hover:border-blue-200 transition-all duration-300">
-                    <dl class="flex justify-between items-center">
-                        <dt class="text-sm font-medium text-gray-500">
-                            {% trans with { '%count%': reader.createQuery(entity).count()|number_format } from 'auditor' %}audit.audit_details.operations_count{% endtrans %}
-                        </dt>
-                        <dd class="text-sm text-gray-900 text-right">
-                            <a class="text-blue-500" href="{{ path('dh_auditor_show_entity_history', {'entity': helper.namespaceToParam(entity)}) }}">
-                                {% trans from 'auditor' %}audit.audit_details.view_audit{% endtrans %}
-                            </a>
-                        </dd>
-                    </dl>
+                <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    {% trans from 'auditor' %}audit.audit_details.last_activity{% endtrans %} · {{ entityAuditData.latest.type|upper }} · {{ entityAuditData.latest.createdAt|time_ago }}
                 </div>
+            </a>
+        {% else %}
+            <div class="col-span-full text-center text-slate-500 dark:text-slate-400 py-8">
+                {% trans from 'auditor' %}audit.home.no_audits{% endtrans %}
             </div>
         {% endfor %}
     </div>

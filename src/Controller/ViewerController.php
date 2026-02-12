@@ -36,18 +36,29 @@ final readonly class ViewerController
         $audited = [];
         $scope = Security::VIEW_SCOPE;
         foreach ($auditingServices as $auditingService) {
-            $audited = array_merge(
-                $audited,
-                array_filter(
-                    $schemaManager->getAuditableTableNames($auditingService->getEntityManager()),
-                    static function (string $entity) use ($reader, $scope): bool {
-                        $roleChecker = $reader->getProvider()->getAuditor()->getConfiguration()->getRoleChecker();
+            $entities = array_filter(
+                $schemaManager->getAuditableTableNames($auditingService->getEntityManager()),
+                static function (string $entity) use ($reader, $scope): bool {
+                    $roleChecker = $reader->getProvider()->getAuditor()->getConfiguration()->getRoleChecker();
 
-                        return null === $roleChecker || (bool) $roleChecker($entity, $scope);
-                    },
-                    ARRAY_FILTER_USE_KEY
-                )
+                    return null === $roleChecker || (bool) $roleChecker($entity, $scope);
+                },
+                ARRAY_FILTER_USE_KEY
             );
+
+            foreach ($entities as $entity => $table) {
+                $query = $reader->createQuery($entity, ['page_size' => 1]);
+                $count = $query->count();
+
+                if ($count > 0) {
+                    $latest = $query->execute()[0] ?? null;
+                    $audited[$entity] = [
+                        'table' => $table,
+                        'count' => $count,
+                        'latest' => $latest,
+                    ];
+                }
+            }
         }
 
         return $this->renderView('@DHAuditor/Audit/audits.html.twig', [
@@ -56,18 +67,18 @@ final readonly class ViewerController
         ]);
     }
 
-    #[Route(path: '/audit/transaction/{hash}', name: 'dh_auditor_show_transaction', methods: ['GET'])]
+    #[Route(path: '/audit/transaction/{hash}', name: 'dh_auditor_show_transaction_stream', methods: ['GET'])]
     public function showTransactionAction(Reader $reader, string $hash): Response
     {
         $audits = $reader->getAuditsByTransactionHash($hash);
 
-        return $this->renderView('@DHAuditor/Audit/transaction.html.twig', [
+        return $this->renderView('@DHAuditor/Audit/transaction_stream.html.twig', [
             'hash' => $hash,
             'audits' => $audits,
         ]);
     }
 
-    #[Route(path: '/audit/{entity}/{id}', name: 'dh_auditor_show_entity_history', methods: ['GET'])]
+    #[Route(path: '/audit/{entity}/{id}', name: 'dh_auditor_show_entity_stream', methods: ['GET'])]
     public function showEntityHistoryAction(Request $request, Reader $reader, string $entity, int|string|null $id = null): Response
     {
         $page = $request->query->getInt('page', 1);
@@ -92,7 +103,7 @@ final readonly class ViewerController
             throw new SymfonyAccessDeniedException('Access Denied.');
         }
 
-        return $this->renderView('@DHAuditor/Audit/entity_history.html.twig', [
+        return $this->renderView('@DHAuditor/Audit/entity_stream.html.twig', [
             'id' => $id,
             'entity' => $entity,
             'paginator' => $pager,

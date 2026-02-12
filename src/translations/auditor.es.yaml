@@ -1,56 +1,39 @@
 audit:
   header:
     home: Inicio
-    audited_entities: entidades auditadas
+    back_to_entities: Entidades
+  home:
+    title: Entidades auditadas
+    subtitle: Resumen de todas las entidades rastreadas
+    no_audits: No se encontraron entidades auditadas.
   audit_details:
     view_audit: Ver audit
     most_recent: (el más reciente primero)
-    entry_title: Ver todas las operaciones dentro de esta transacción
+    view_transaction: Ver todas las operaciones de esta transacción
     property: Propiedad
-    old_value: Viejo valor
-    new_value: Nuevo valor
-    transaction: Transacción
-    entity_per_entity: (entidad por entidad)
-    operations_count: '%count% registro(s)'
-    summary:
-      inserted: >-
-        <code class="text-pink-500">
-          <a href="%source_link%" class="code">%source%</a>
-        </code>
-        <em>%source_label%</em> ha sido <b>insertada</b> por <b>%user%</b> %ip%
-      updated: >-
-        <code class="text-pink-500">
-          <a href="%source_link%" class="code">%source%</a>
-        </code>
-        <em>%source_label%</em> ha sido <b>actualizada</b> por <b>%user%</b> %ip%
-      deleted: >-
-        <code class="text-pink-500">
-          <a href="%source_link%" class="code">%source%</a>
-        </code>
-        <em>%source_label%</em> ha sido <b>eliminada</b> por <b>%user%</b> %ip%
-      associated: >-
-        <code class="text-pink-500">
-          <a href="%source_link%" class="code">%source%</a>
-        </code>
-        <em>%source_label%</em> ha sido <b>asociado</b> a
-        <code class="text-pink-500">
-          <a href="%target_link%" class="code">%target%</a>
-        </code>
-        <em>%target_label%</em> por <b>%user%</b> %ip%
-      dissociated: >-
-        <code class="text-pink-500">
-          <a href="%source_link%" class="code">%source%</a>
-        </code>
-        <em>%source_label%</em> ha sido <b>desasociada</b> de
-        <code class="text-pink-500">
-          <a href="%target_link%" class="code">%target%</a>
-        </code>
-        <em>%target_label%</em> por <b>%user%</b> %ip%
-      unkown_user: 'un usuario anónimo'
+    old_value: Valor antiguo
+    new_value: Valor nuevo
+    events_count: '%count% evento(s)'
+    last_activity: Última actividad
+    anonymous: usuario anónimo
+  transaction:
+    title: Transacción
+  entry:
+    by: por
+    source: Origen
+    target: Destino
+  filter:
+    all_actions: Todas las acciones
+    all_users: Todos los usuarios
+  stream:
+    no_entries: No se encontraron entradas de auditoría.
   pager:
-    first: Primero
     previous: Anterior
-    last: Ultimo
-    next: Siguente
-    current:  Actual
-    info: 'Mostrando de <span class="font-medium">%pageStart%</span> a <span class="font-medium">%pageEnd%</span> de <span class="font-medium">%numResults%</span> registro(s)'
+    next: Siguiente
+    page_info: 'Página %current% de %total%'
+
+time_ago:
+  seconds_ago: '{0} ahora mismo|{1} hace 1 segundo|]1,Inf[ hace %count% segundos'
+  minutes_ago: '{1} hace 1 minuto|]1,Inf[ hace %count% minutos'
+  hours_ago: '{1} hace 1 hora|]1,Inf[ hace %count% horas'
+  days_ago: '{1} hace 1 día|]1,Inf[ hace %count% días'

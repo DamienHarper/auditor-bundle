@@ -1,86 +1,114 @@
 {% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
 
-{% macro displayDiffs(field, changeset) %}
-{#    {{ dump(field, changeset) }}#}
+<details class="group">
+    <summary class="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition list-none">
+        <div class="flex items-center gap-3 min-w-0">
+            {# Type badge #}
+            {{ helper.type_badge(entry.type) }}
+
+            {# Entity label #}
+            <span class="font-medium text-slate-900 dark:text-slate-100 truncate">
+                {{ entity|split('\\')|last }} #{{ entry.objectId }}
+            </span>
+        </div>
+
+        <div class="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 shrink-0">
+            {# Date and user #}
+            <span class="hidden sm:inline">
+                {{ entry.createdAt|format_datetime('full', 'short') }}
+                · {% trans from 'auditor' %}audit.entry.by{% endtrans %}
+                <span class="font-medium">{{ entry.username ?? 'audit.audit_details.anonymous'|trans(domain='auditor') }}</span>
+            </span>
+
+            {# Transaction hash #}
+            {% if entry.transactionHash is not empty and hide_transaction is not defined %}
+                <a href="{{ path('dh_auditor_show_transaction_stream', {hash: entry.transactionHash}) }}"
+                   class="font-mono text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition"
+                   title="{% trans from 'auditor' %}audit.audit_details.view_transaction{% endtrans %}"
+                   onclick="event.stopPropagation();">
+                    {{ entry.transactionHash }}
+                </a>
+            {% endif %}
+
+            {# Chevron #}
+            <svg class="w-4 h-4 text-slate-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </div>
+    </summary>
+
+    {# Details content - diffs #}
+    {% if entry.type in ['insert', 'update'] %}
+        <div class="px-4 pb-4">
+            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 text-sm">
+                {% set diffs = entry.diffs %}
+                {% for field, changeset in diffs %}
+                    {{ _self.displayDiff(field, changeset) }}
+                {% endfor %}
+            </div>
+        </div>
+    {% elseif entry.type in ['associate', 'dissociate'] %}
+        <div class="px-4 pb-4">
+            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 text-sm">
+                {% set diffs = entry.diffs %}
+                {% if diffs.source is defined %}
+                    <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                        <span class="text-slate-400">{% trans from 'auditor' %}audit.entry.source{% endtrans %}:</span>
+                        <span class="font-medium">{{ diffs.source.label|default(diffs.source.class ~ '#' ~ diffs.source.id) }}</span>
+                    </div>
+                {% endif %}
+                {% if diffs.target is defined %}
+                    {% set target_id = diffs.target.pkName is defined ? diffs.target[diffs.target.pkName] : diffs.target.id %}
+                    <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300 mt-1">
+                        <span class="text-slate-400">{% trans from 'auditor' %}audit.entry.target{% endtrans %}:</span>
+                        <a href="{{ path('dh_auditor_show_entity_stream', { 'entity': helper.namespaceToParam(diffs.target.class), 'id': target_id }) }}"
+                           class="font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                            {{ diffs.target.label|default(diffs.target.class|split('\\')|last ~ '#' ~ target_id) }}
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% elseif entry.type == 'remove' %}
+        <div class="px-4 pb-4">
+            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 text-sm">
+                {% set diffs = entry.diffs %}
+                {% for field, value in diffs %}
+                    <div class="flex gap-2 py-1">
+                        <span class="text-slate-500 dark:text-slate-400 min-w-32">{{ field }}</span>
+                        <span class="text-red-500 dark:text-red-400">{{ helper.dump(value) }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</details>
+
+{% macro displayDiff(field, changeset) %}
+    {% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
     {% if changeset.old is defined or changeset.new is defined %}
-        {# NON JSON field changeset #}
-        {{ include('@DHAuditor/Audit/entry_diff.html.twig', {'key': field, 'values': changeset}) }}
+        <div class="flex gap-2 py-1 items-start">
+            <span class="text-slate-500 dark:text-slate-400 min-w-32 shrink-0">{{ field }}</span>
+            <span class="text-slate-400 dark:text-slate-500">
+                {% if changeset.old is defined and changeset.old is not null %}
+                    <span class="text-red-400 dark:text-red-500 line-through">{{ helper.dump(changeset.old) }}</span>
+                {% else %}
+                    <span class="text-slate-300 dark:text-slate-600">⌀</span>
+                {% endif %}
+            </span>
+            <span class="text-slate-400 dark:text-slate-500">→</span>
+            <span>
+                {% if changeset.new is defined and changeset.new is not null %}
+                    <span class="text-blue-600 dark:text-blue-400">{{ helper.dump(changeset.new) }}</span>
+                {% else %}
+                    <span class="text-slate-300 dark:text-slate-600">⌀</span>
+                {% endif %}
+            </span>
+        </div>
     {% else %}
-        {#  JSON field changeset #}
+        {# JSON nested field #}
         {% for json_field, json_changeset in changeset %}
-            {{ _self.displayDiffs(field~'.'~json_field, json_changeset) }}
+            {{ _self.displayDiff(field ~ '.' ~ json_field, json_changeset) }}
         {% endfor %}
     {% endif %}
 {% endmacro %}
-
-<div class="auditor-audit-history-entry relative pb-8">
-    {% if not is_last %}
-    <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
-    {% endif %}
-    <div class="relative flex space-x-3">
-        <div>
-            <span class="h-8 w-8 rounded-full {{ helper.label_type(entry.getType()) }} flex items-center justify-center ring-8 ring-white text-white">
-                {{ helper.icon_type(entry.getType()) }}
-            </span>
-        </div>
-        <div class="auditor-audit-history-entry-table min-w-0 flex-1 bg-gray-100 rounded pb-2 px-3 border hover:border hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 group">
-            <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                <div>
-                    <p class="text-sm text-gray-500">{{ helper.summarize(entity, entry) }}</p>
-                </div>
-                <div class="text-right text-sm whitespace-nowrap text-gray-500">
-                    <time datetime="{{ entry.getCreatedAt()|date('Y-m-d H:i:s') }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline align-text-top" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        {{ entry.getCreatedAt()|format_datetime('full', 'long') }}
-                    </time>
-                </div>
-            </div>
-            <div class="min-w-0">
-                {% if entry.getType() in ['insert', 'update'] %}
-                <div class="mt-2 flex flex-col">
-                    <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                        <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                            <div class="overflow-hidden border border-gray-200 sm:rounded group-hover:border-blue-200 transition-all duration-300">
-                                <table class="min-w-full divide-y divide-gray-200">
-                                    <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            {% trans from 'auditor' %}audit.audit_details.property{% endtrans %}
-                                        </th>
-                                        <th scope="col" class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3">
-                                            {% trans from 'auditor' %}audit.audit_details.old_value{% endtrans %}
-                                        </th>
-                                        <th scope="col" class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3">
-                                            {% trans from 'auditor' %}audit.audit_details.new_value{% endtrans %}
-                                        </th>
-                                    </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-gray-200">
-                                    {% set diffs = entry.getDiffs() %}
-                                    {% for field, changeset in diffs %}
-                                        {{ _self.displayDiffs(field, changeset) }}
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if entry.getTransactionHash() is not empty %}
-                <div class="text-right">
-                    <a class="text-xs text-gray-500 hover:text-blue-500 transition-all duration-300" href="{{ path('dh_auditor_show_transaction', {hash: entry.getTransactionHash()}) }}" title="{% trans from 'auditor' %}audit.audit_details.entry_title{% endtrans %}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline align-text-top" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                        </svg>
-                        {{ entry.getTransactionHash() }}
-                    </a>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>

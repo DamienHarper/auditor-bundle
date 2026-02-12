@@ -1,137 +1,46 @@
-{% macro render(entity, id = null, paginator, proximity = 3, displayedPages = 10) %}
+{% macro render(entity, id = null, paginator) %}
     {% if paginator.haveToPaginate %}
-        {% set start = paginator.currentPage - proximity %}
-        {% set end = paginator.currentPage + proximity %}
-        {% if start < 1 %}
-            {% set end = min(end + (1 - start), paginator.numPages) %}
-            {% set start = 1 %}
-        {% endif %}
-        {% if end > paginator.numPages %}
-            {% set start = max(start - (end - paginator.numPages), 1) %}
-            {% set end = paginator.numPages %}
-        {% endif %}
+        <div class="flex items-center justify-between mt-6 pt-6 border-t border-slate-200 dark:border-slate-800">
+            {# Previous #}
+            {% if paginator.hasPreviousPage %}
+                <a href="{{ path('dh_auditor_show_entity_stream', {entity: entity, id: id, page: paginator.previousPage}) }}"
+                   class="inline-flex items-center text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                    {% trans from 'auditor' %}audit.pager.previous{% endtrans %}
+                </a>
+            {% else %}
+                <span class="inline-flex items-center text-sm text-slate-300 dark:text-slate-600 cursor-not-allowed">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                    {% trans from 'auditor' %}audit.pager.previous{% endtrans %}
+                </span>
+            {% endif %}
 
-        {% if paginator.currentPage > 1 %}
-            {% set pageStart = (paginator.currentPage - 1) * paginator.pageSize + 1 %}
-            {% set pageEnd = ((paginator.currentPage - 1) * paginator.pageSize) < paginator.numResults ? (paginator.currentPage * paginator.pageSize) : paginator.numResults %}
-        {% else %}
-            {% set pageStart = 1 %}
-            {% set pageEnd = (paginator.currentPage * paginator.pageSize) < paginator.numResults ? (paginator.currentPage * paginator.pageSize) : paginator.numResults %}
-        {% endif %}
+            {# Page info #}
+            <span class="text-sm text-slate-500 dark:text-slate-400">
+                {% trans with { '%current%': paginator.currentPage, '%total%': paginator.numPages } from 'auditor' %}audit.pager.page_info{% endtrans %}
+            </span>
 
-        <div class="bg-white px-0 pt-6 flex items-center justify-between">
-            <div class="flex-1 flex items-center justify-between">
-                <div class="flex sm:hidden">
-                    <p class="text-sm text-gray-700">
-                        {% trans with { '%pageStart%': pageStart, '%pageEnd%': pageEnd, '%numResults%': paginator.numResults } from 'auditor' %}audit.pager.info{% endtrans %}
-                    </p>
-                </div>
-                <div>
-                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                        {{ _self.first(entity, id, paginator) }}
-                        {{ _self.previous(entity, id, paginator) }}
-                        {{ _self.dotsIfStartIsOver3(entity, id, paginator, start) }}
-                        {{ _self.pages(entity, id, paginator, start, end) }}
-                        {{ _self.dotsIfEndIsUnder3ToLast(entity, id, paginator, end) }}
-                        {{ _self.next(entity, id, paginator) }}
-                        {{ _self.last(entity, id, paginator) }}
-                    </nav>
-                </div>
-            </div>
+            {# Next #}
+            {% if paginator.hasNextPage %}
+                <a href="{{ path('dh_auditor_show_entity_stream', {entity: entity, id: id, page: paginator.nextPage}) }}"
+                   class="inline-flex items-center text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition">
+                    {% trans from 'auditor' %}audit.pager.next{% endtrans %}
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            {% else %}
+                <span class="inline-flex items-center text-sm text-slate-300 dark:text-slate-600 cursor-not-allowed">
+                    {% trans from 'auditor' %}audit.pager.next{% endtrans %}
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </span>
+            {% endif %}
         </div>
     {% endif %}
 {% endmacro render %}
-
-{% macro first(entity, id, paginator) %}
-    {% if paginator.hasPreviousPage %}
-        <a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: 1}) }}" class="relative inline-flex items-center p-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" rel="previous">
-            <span class="sr-only">{% trans from 'auditor' %}audit.pager.first{% endtrans %}</span>
-            <!-- Heroicon name: solid/chevron-double-left -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m18.75 4.5l-7.5 7.5l7.5 7.5m-6-15L5.25 12l7.5 7.5"/></svg>
-        </a>
-    {% else %}
-        <span class="relative inline-flex items-center p-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-300">
-            <!-- Heroicon name: solid/chevron-double-left -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m18.75 4.5l-7.5 7.5l7.5 7.5m-6-15L5.25 12l7.5 7.5"/></svg>
-        </span>
-    {% endif %}
-{% endmacro first %}
-
-{% macro previous(entity, id, paginator) %}
-    {% if paginator.hasPreviousPage %}
-        <a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: paginator.previousPage}) }}" class="relative inline-flex items-center p-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-            <span class="sr-only">{% trans from 'auditor' %}audit.pager.previous{% endtrans %}</span>
-            <!-- Heroicon name: solid/chevron-left -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
-        </a>
-    {% else %}
-        <span class="relative inline-flex items-center p-2 border border-gray-300 bg-white text-sm font-medium text-gray-300">
-            <!-- Heroicon name: solid/chevron-left -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
-        </span>
-    {% endif %}
-{% endmacro previous %}
-
-{% macro dotsIfStartIsOver3(entity, id, paginator, start) %}
-    {% if start > 1 %}
-        <span class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-          ...
-        </span>
-    {% endif %}
-{% endmacro dotsIfStartIsOver3 %}
-
-{% macro pages(entity, id, paginator, start, end) %}
-    {% for i in start..end %}
-        {{ _self.page(entity, id, paginator, i) }}
-    {% endfor %}
-{% endmacro pages %}
-
-{% macro dotsIfEndIsUnder3ToLast(entity, id, paginator, end) %}
-    {% if end < paginator.numPages %}
-        <span class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-          ...
-        </span>
-    {% endif %}
-{% endmacro dotsIfEndIsUnder3ToLast %}
-
-{% macro next(entity, id, paginator) %}
-    {% if paginator.hasNextPage %}
-        <a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: paginator.nextPage}) }}" class="relative inline-flex items-center p-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-            <span class="sr-only">{% trans from 'auditor' %}audit.pager.next{% endtrans %}</span>
-            <!-- Heroicon name: solid/chevron-right -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m8.25 4.5l7.5 7.5l-7.5 7.5"/></svg>
-        </a>
-    {% else %}
-        <span class="relative inline-flex items-center p-2 border border-gray-300 bg-white text-sm font-medium text-gray-300">
-            <!-- Heroicon name: solid/chevron-right -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m8.25 4.5l7.5 7.5l-7.5 7.5"/></svg>
-        </span>
-    {% endif %}
-{% endmacro next %}
-
-{% macro last(entity, id, paginator) %}
-    {% if paginator.hasNextPage %}
-        <a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: paginator.numPages}) }}" class="relative inline-flex items-center p-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-            <span class="sr-only">{% trans from 'auditor' %}audit.pager.last{% endtrans %}</span>
-            <!-- Heroicon name: solid/chevron-double-right -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m5.25 4.5l7.5 7.5l-7.5 7.5m6-15l7.5 7.5l-7.5 7.5"/></svg>
-        </a>
-    {% else %}
-        <span class="relative inline-flex items-center p-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-300">
-            <!-- Heroicon name: solid/chevron-double-right -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="m5.25 4.5l7.5 7.5l-7.5 7.5m6-15l7.5 7.5l-7.5 7.5"/></svg>
-        <span>
-    {% endif %}
-{% endmacro last %}
-
-{% macro page(entity, id, paginator, page) %}
-    {% if page == paginator.currentPage %}
-        <a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: page}) }}" aria-current="page" class="z-10 bg-indigo-50 border-indigo-500 text-indigo-600 relative inline-flex items-center px-3 py-2 border text-sm font-medium">
-            {{ page }}
-        </a>
-    {% else %}
-        <a href="{{ path('dh_auditor_show_entity_history', {entity: entity, id: id, page: page}) }}" aria-current="page" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-3 py-2 border text-sm font-medium">
-            {{ page }}
-        </a>
-    {% endif %}
-{% endmacro page %}

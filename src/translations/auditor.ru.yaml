@@ -1,56 +1,39 @@
 audit:
   header:
     home: Главная
-    audited_entities: проверяемые сущности
+    back_to_entities: Сущности
+  home:
+    title: Проверяемые сущности
+    subtitle: Обзор всех отслеживаемых сущностей
+    no_audits: Проверяемые сущности не найдены.
   audit_details:
     view_audit: Просмотр проверки
-    most_recent: (самый последний первый)
-    entry_title: Просмотреть все операции в рамках данной транзакции
+    most_recent: (самые последние первыми)
+    view_transaction: Просмотреть все операции этой транзакции
     property: Атрибут
     old_value: Старое значение
     new_value: Новое значение
-    transaction: Транзакция
-    entity_per_entity: (сущность на сущность)
-    operations_count: '%count% действий'
-    summary:
-      inserted: >-
-        <code class="text-pink-500">
-          <a href="%source_link%" class="code">%source%</a>
-        </code>
-        <em>%source_label%</em> было <b>вставлено</b> <b>%user%</b> %ip%
-      updated: >-
-        <code class="text-pink-500">
-          <a href="%source_link%" class="code">%source%</a>
-        </code>
-        <em>%source_label%</em> было <b>обновлено</b> <b>%user%</b> %ip%
-      deleted: >-
-        <code class="text-pink-500">
-          <a href="%source_link%" class="code">%source%</a>
-        </code>
-        <em>%source_label%</em> было <b>удалено</b> <b>%user%</b> %ip%
-      associated: >-
-        <code class="text-pink-500">
-          <a href="%source_link%" class="code">%source%</a>
-        </code>
-        <em>%source_label%</em> было <b>связано</b> с
-        <code class="text-pink-500">
-          <a href="%target_link%" class="code">%target%</a>
-        </code>
-        <em>%target_label%</em> <b>%user%</b> %ip%
-      dissociated: >-
-        <code class="text-pink-500">
-          <a href="%source_link%" class="code">%source%</a>
-        </code>
-        <em>%source_label%</em> было <b>отсоединено</b> от
-        <code class="text-pink-500">
-          <a href="%target_link%" class="code">%target%</a>
-        </code>
-        <em>%target_label%</em> by <b>%user%</b> %ip%
-      unkown_user: 'анонимный пользователь'
+    events_count: '%count% событие(й)'
+    last_activity: Последняя активность
+    anonymous: анонимный пользователь
+  transaction:
+    title: Транзакция
+  entry:
+    by: от
+    source: Источник
+    target: Цель
+  filter:
+    all_actions: Все действия
+    all_users: Все пользователи
+  stream:
+    no_entries: Записи аудита не найдены.
   pager:
-    first: Первый
     previous: Предыдущий
-    last: Последний
     next: Следующий
-    current: Текущий
-    info: 'Показано <span class="font-medium">%pageStart%</span> - <span class="font-medium">%pageEnd%</span> из <span class="font-medium">%numResults%</span> результатов'
+    page_info: 'Страница %current% из %total%'
+
+time_ago:
+  seconds_ago: '{0} только что|{1} 1 секунду назад|]1,Inf[ %count% секунд назад'
+  minutes_ago: '{1} 1 минуту назад|]1,Inf[ %count% минут назад'
+  hours_ago: '{1} 1 час назад|]1,Inf[ %count% часов назад'
+  days_ago: '{1} 1 день назад|]1,Inf[ %count% дней назад'
