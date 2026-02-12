@@ -13,7 +13,7 @@ audit:
     property: Атрибут
     old_value: Старе значення
     new_value: Нове значення
-    events_count: '%count% подія(й)'
+    events_count: '{1} %count% подія|[2,4] %count% події|]4,Inf[ %count% подій'
     last_activity: Остання активність
     anonymous: анонімний користувач
   transaction:
