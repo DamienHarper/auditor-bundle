@@ -5,12 +5,14 @@
         {# First line: badge, entity link, hash, chevron #}
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3 min-w-0">
-                {# Type badge #}
-                {{ helper.type_badge(entry.type) }}
+                {# Type badge - fixed width for alignment #}
+                <span class="w-24 shrink-0">
+                    {{ helper.type_badge(entry.type) }}
+                </span>
 
                 {# Entity label with link and FQCN title #}
                 <a href="{{ path('dh_auditor_show_entity_stream', {'entity': helper.namespaceToParam(entity), 'id': entry.objectId}) }}"
-                   class="font-medium text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 truncate min-w-40"
+                   class="font-medium text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 truncate"
                    title="{{ entity }}"
                    onclick="event.stopPropagation();">
                     {{ entity|split('\\')|last }} #{{ entry.objectId }}
@@ -36,7 +38,7 @@
         </div>
 
         {# Second line: date and user/command #}
-        <div class="flex items-center gap-2 mt-1 ml-16 text-xs text-slate-500 dark:text-slate-400">
+        <div class="flex items-center gap-2 mt-1 ml-2 text-xs text-slate-500 dark:text-slate-400">
             <span>{{ entry.createdAt|format_datetime('full', 'short') }}</span>
             <span>·</span>
             <span>{% trans from 'auditor' %}audit.entry.by{% endtrans %}
@@ -48,7 +50,7 @@
     {# Details content - diffs #}
     {% if entry.type in ['insert', 'update'] %}
         <div class="px-4 pb-4">
-            <div class="rounded-lg p-4 text-sm border border-slate-200 dark:border-slate-700">
+            <div class="pl-4 text-sm">
                 {% set diffs = entry.diffs %}
                 {% for field, changeset in diffs %}
                     {{ _self.displayDiff(field, changeset) }}
@@ -57,7 +59,7 @@
         </div>
     {% elseif entry.type in ['associate', 'dissociate'] %}
         <div class="px-4 pb-4">
-            <div class="rounded-lg p-4 text-sm border border-slate-200 dark:border-slate-700">
+            <div class="pl-4 text-sm">
                 {% set diffs = entry.diffs %}
                 {% if diffs.source is defined %}
                     <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
@@ -79,12 +81,12 @@
         </div>
     {% elseif entry.type == 'remove' %}
         <div class="px-4 pb-4">
-            <div class="rounded-lg p-4 text-sm border border-slate-200 dark:border-slate-700">
+            <div class="pl-4 text-sm">
                 {% set diffs = entry.diffs %}
                 {% for field, value in diffs %}
                     <div class="flex gap-2 py-1">
                         <span class="text-slate-500 dark:text-slate-400 min-w-32">{{ field }}</span>
-                        <span class="text-red-500 dark:text-red-400">{{ helper.dump(value) }}</span>
+                        <span class="text-rose-500 dark:text-rose-400">{{ helper.dump(value) }}</span>
                     </div>
                 {% endfor %}
             </div>
@@ -99,7 +101,7 @@
             <span class="text-slate-500 dark:text-slate-400 min-w-32 shrink-0">{{ field }}</span>
             <span class="text-slate-400 dark:text-slate-500">
                 {% if changeset.old is defined and changeset.old is not null %}
-                    <span class="text-red-400 dark:text-red-500 line-through">{{ helper.dump(changeset.old) }}</span>
+                    <span class="text-rose-400 dark:text-rose-500 line-through">{{ helper.dump(changeset.old) }}</span>
                 {% else %}
                     <span class="text-slate-300 dark:text-slate-600">⌀</span>
                 {% endif %}

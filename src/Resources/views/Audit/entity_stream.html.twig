@@ -4,34 +4,36 @@
 {% import '@DHAuditor/Audit/helpers/pager.html.twig' as pager %}
 
 {% block dh_auditor_content %}
-    {# Back link #}
-    <a href="{{ path('dh_auditor_list_audits') }}"
-       class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 mb-6">
-        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-        </svg>
-        {% trans from 'auditor' %}audit.header.back_to_entities{% endtrans %}
-    </a>
+    {# Sub-header - sticky with back link #}
+    <div class="sticky top-16 z-40 -mx-6 px-6 py-3 mb-4 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur">
+        {# Back link #}
+        <a href="{{ path('dh_auditor_list_audits') }}"
+           class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 mb-2">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            {% trans from 'auditor' %}audit.header.back_to_entities{% endtrans %}
+        </a>
 
-    {# Sub-header - sticky #}
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sticky top-16 z-40 -mx-6 px-6 py-4 bg-slate-50/95 dark:bg-slate-950/95 backdrop-blur border-b border-slate-200 dark:border-slate-800">
-        <div>
-            <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100" title="{{ entity }}">
-                {{ entity|split('\\')|last }}{% if id is not null %} #{{ id }}{% endif %}
-            </h1>
-            <p class="text-sm text-slate-500 dark:text-slate-400">
-                {% trans with { '%count%': paginator.numResults|number_format } from 'auditor' %}audit.audit_details.events_count{% endtrans %}
-                · {% trans from 'auditor' %}audit.audit_details.most_recent{% endtrans %}
-            </p>
-        </div>
-        <div class="flex gap-2 mt-4 sm:mt-0">
-            {# Placeholder filters - disabled for now #}
-            <select disabled class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed">
-                <option>{% trans from 'auditor' %}audit.filter.all_actions{% endtrans %}</option>
-            </select>
-            <select disabled class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed">
-                <option>{% trans from 'auditor' %}audit.filter.all_users{% endtrans %}</option>
-            </select>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100" title="{{ entity }}">
+                    {{ entity|split('\\')|last }}{% if id is not null %} #{{ id }}{% endif %}
+                </h1>
+                <p class="text-sm text-slate-500 dark:text-slate-400">
+                    {% trans with { '%count%': paginator.numResults|number_format } from 'auditor' %}audit.audit_details.events_count{% endtrans %}
+                    · {% trans from 'auditor' %}audit.audit_details.most_recent{% endtrans %}
+                </p>
+            </div>
+            <div class="flex gap-2 mt-3 sm:mt-0">
+                {# Placeholder filters - disabled for now #}
+                <select disabled class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed">
+                    <option>{% trans from 'auditor' %}audit.filter.all_actions{% endtrans %}</option>
+                </select>
+                <select disabled class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed">
+                    <option>{% trans from 'auditor' %}audit.filter.all_users{% endtrans %}</option>
+                </select>
+            </div>
         </div>
     </div>
 
