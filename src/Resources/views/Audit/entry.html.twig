@@ -12,7 +12,7 @@
 
                 {# Entity label with link and FQCN title #}
                 <a href="{{ path('dh_auditor_show_entity_stream', {'entity': helper.namespaceToParam(entity), 'id': entry.objectId}) }}"
-                   class="font-medium text-slate-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 truncate"
+                   class="font-medium text-slate-900 dark:text-slate-100 hover:underline truncate"
                    title="{{ entity }}"
                    onclick="event.stopPropagation();">
                     {{ entity|split('\\')|last }} #{{ entry.objectId }}
@@ -23,7 +23,7 @@
                 {# Transaction hash - short version with full hash in title #}
                 {% if entry.transactionHash is not empty and hide_transaction is not defined %}
                     <a href="{{ path('dh_auditor_show_transaction_stream', {hash: entry.transactionHash}) }}"
-                       class="font-mono text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition"
+                       class="font-mono text-xs text-slate-400 hover:underline transition"
                        title="{{ entry.transactionHash }}"
                        onclick="event.stopPropagation();">
                         {{ entry.transactionHash|slice(0, 10) }}…
