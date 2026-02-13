@@ -6,8 +6,67 @@
     {% set entity_label = entry.diffs.label %}
 {% endif %}
 
-<details class="group">
-    <summary class="flex flex-col px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition list-none">
+{% if entry.type == 'remove' %}
+{# REMOVE entries are not expandable #}
+<div class="flex flex-col px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+    {# First line: badge, entity link, label, action description, hash #}
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3 min-w-0">
+            {# Type badge - fixed width for alignment #}
+            <span class="w-24 shrink-0">
+                {{ helper.type_badge(entry.type) }}
+            </span>
+
+            {# Entity info #}
+            <div class="flex items-center gap-2 min-w-0 text-sm">
+                {# Entity name + ID #}
+                <a href="{{ path('dh_auditor_show_entity_stream', {'entity': helper.namespaceToParam(entity), 'id': entry.objectId}) }}"
+                   class="font-medium text-slate-900 dark:text-slate-100 hover:underline shrink-0"
+                   title="{{ entity }}">
+                    {{ entity|split('\\')|last }} #{{ entry.objectId }}
+                </a>
+
+                {# Entity label if available - smaller and italic #}
+                {% if entity_label %}
+                    <span class="text-slate-500 dark:text-slate-400">·</span>
+                    <span class="text-xs italic text-slate-500 dark:text-slate-400 truncate">{{ entity_label }}</span>
+                {% endif %}
+
+                {# Action description #}
+                <span class="text-slate-500 dark:text-slate-400">·</span>
+                <span class="text-slate-400 dark:text-slate-500 italic shrink-0">
+                    {% trans from 'auditor' %}audit.entry.action_remove{% endtrans %}
+                </span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 shrink-0">
+            {# Transaction hash - short version with full hash in title #}
+            {% if entry.transactionHash is not empty and hide_transaction is not defined %}
+                <a href="{{ path('dh_auditor_show_transaction_stream', {hash: entry.transactionHash}) }}"
+                   class="font-mono text-xs text-slate-400 hover:underline transition"
+                   title="{{ entry.transactionHash }}">
+                    {{ entry.transactionHash|slice(0, 10) }}…
+                </a>
+            {% endif %}
+            {# Spacer to align with chevron in other rows #}
+            <span class="w-4"></span>
+        </div>
+    </div>
+
+    {# Second line: date and user/command #}
+    <div class="flex items-center gap-2 mt-1 ml-2 text-xs text-slate-500 dark:text-slate-400">
+        <span>{{ entry.createdAt|format_datetime('full', 'short') }}</span>
+        <span>·</span>
+        <span>{% trans from 'auditor' %}audit.entry.by{% endtrans %}
+            <span class="font-medium">{{ entry.username ?? 'audit.audit_details.anonymous'|trans(domain='auditor') }}</span>
+        </span>
+    </div>
+</div>
+{% else %}
+{# Other entry types are expandable #}
+<details class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+    <summary class="flex flex-col px-4 py-3 cursor-pointer list-none">
         {# First line: badge, entity link, label, action description, hash, chevron #}
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-3 min-w-0">
@@ -39,8 +98,6 @@
                             {% trans from 'auditor' %}audit.entry.action_insert{% endtrans %}
                         {% elseif entry.type == 'update' %}
                             {% trans from 'auditor' %}audit.entry.action_update{% endtrans %}
-                        {% elseif entry.type == 'remove' %}
-                            {% trans from 'auditor' %}audit.entry.action_remove{% endtrans %}
                         {% elseif entry.type == 'associate' %}
                             {% trans from 'auditor' %}audit.entry.action_associate{% endtrans %}
                         {% elseif entry.type == 'dissociate' %}
@@ -163,10 +220,9 @@
                 {% endif %}
             </table>
         </div>
-    {% elseif entry.type == 'remove' %}
-        {# No details for remove - the action description is enough #}
     {% endif %}
 </details>
+{% endif %}
 
 {# Macro for INSERT: table row with field and value #}
 {% macro displayInsertValue(field, changeset) %}
