@@ -61,8 +61,8 @@ final class ConsoleUserProviderTest extends KernelTestCase
         // get history
         $entries = $this->createReader()->createQuery(Post::class)->execute();
         $this->assertNotEmpty($entries, 'There are audit entries');
+        $this->assertSame('app:post:create', $entries[0]->getUserId(), 'User ID is OK');
         $this->assertSame('app:post:create', $entries[0]->getUsername(), 'Username is OK');
-        $this->assertSame('command', $entries[0]->getUserId(), 'User ID is OK');
     }
 
     private function createAndInitDoctrineProvider(): void

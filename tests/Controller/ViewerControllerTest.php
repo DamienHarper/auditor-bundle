@@ -192,7 +192,7 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertGreaterThanOrEqual(1, $backLink->count(), 'Back link to entities exists');
 
         // Check transaction hash is displayed
-        $hash = $crawler->filter('p.font-mono');
+        $hash = $crawler->filter('span.font-mono');
         $this->assertStringContainsString($first->getTransactionHash(), $hash->text(), 'Transaction hash is displayed');
 
         // Check entries grouped by entity
