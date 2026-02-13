@@ -87,7 +87,7 @@ final class ClearActivityCacheCommandTest extends TestCase
     #[Test]
     public function itShowsWarningWhenClearAllFailsWithoutTagSupport(): void
     {
-        $cache = $this->createMock(CacheItemPoolInterface::class);
+        $cache = $this->createStub(CacheItemPoolInterface::class);
 
         $provider = new ActivityGraphProvider(7, true, 300, $cache);
 
@@ -104,7 +104,7 @@ final class ClearActivityCacheCommandTest extends TestCase
     #[Test]
     public function itShowsWarningWhenClearEntityFails(): void
     {
-        $cache = $this->createMock(CacheItemPoolInterface::class);
+        $cache = $this->createStub(CacheItemPoolInterface::class);
         $cache->method('deleteItem')->willReturn(false);
 
         $provider = new ActivityGraphProvider(7, true, 300, $cache);

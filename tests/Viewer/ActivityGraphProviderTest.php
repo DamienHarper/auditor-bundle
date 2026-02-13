@@ -72,7 +72,7 @@ final class ActivityGraphProviderTest extends WebTestCase
     {
         $cachedData = [10, 20, 30, 40, 50, 60, 70];
 
-        $cacheItem = $this->createMock(CacheItemInterface::class);
+        $cacheItem = $this->createStub(CacheItemInterface::class);
         $cacheItem->method('isHit')->willReturn(true);
         $cacheItem->method('get')->willReturn($cachedData);
 
@@ -181,7 +181,7 @@ final class ActivityGraphProviderTest extends WebTestCase
     #[Test]
     public function clearCacheAllReturnsFalseWithoutTagSupport(): void
     {
-        $cache = $this->createMock(CacheItemPoolInterface::class);
+        $cache = $this->createStub(CacheItemPoolInterface::class);
 
         $provider = new ActivityGraphProvider(7, true, 300, $cache);
 
@@ -191,7 +191,7 @@ final class ActivityGraphProviderTest extends WebTestCase
     #[Test]
     public function isCacheAvailableReturnsCorrectValue(): void
     {
-        $cache = $this->createMock(CacheItemPoolInterface::class);
+        $cache = $this->createStub(CacheItemPoolInterface::class);
 
         $providerWithCache = new ActivityGraphProvider(7, true, 300, $cache);
         $providerWithoutCache = new ActivityGraphProvider(7, true, 300, null);
