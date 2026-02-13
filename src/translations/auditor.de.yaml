@@ -39,6 +39,9 @@ audit:
       dissociate: Trennen
   stream:
     no_entries: Keine Audit-Einträge gefunden.
+  activity_graph:
+    period: Letzte %days% Tage
+    no_activity: Keine kürzliche Aktivität
   pager:
     first: Erste
     previous: Vorherige

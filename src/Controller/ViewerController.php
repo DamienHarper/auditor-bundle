@@ -14,6 +14,7 @@ use DH\Auditor\Provider\Doctrine\Service\AuditingService;
 use DH\AuditorBundle\Filter\NullFilter;
 use DH\AuditorBundle\Helper\UrlHelper;
 use DH\AuditorBundle\Tests\Controller\ViewerControllerTest;
+use DH\AuditorBundle\Viewer\ActivityGraphProvider;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -26,7 +27,10 @@ use Twig\Environment;
  */
 final readonly class ViewerController
 {
-    public function __construct(private Environment $environment) {}
+    public function __construct(
+        private Environment $environment,
+        private ?ActivityGraphProvider $activityGraphProvider = null,
+    ) {}
 
     #[Route(path: '/audit', name: 'dh_auditor_list_audits', methods: ['GET'])]
     public function listAuditsAction(Reader $reader): Response
@@ -63,9 +67,22 @@ final readonly class ViewerController
             }
         }
 
+        // Activity Graph
+        $activityGraphEnabled = null !== $this->activityGraphProvider;
+        $activityGraphDays = 7;
+        if ($activityGraphEnabled) {
+            $activityGraphDays = $this->activityGraphProvider->getDays();
+            foreach ($audited as $entity => &$data) {
+                $data['activityGraph'] = $this->activityGraphProvider->getActivityData($entity, $reader);
+            }
+            unset($data);
+        }
+
         return $this->renderView('@DHAuditor/Audit/audits.html.twig', [
             'audited' => $audited,
             'reader' => $reader,
+            'activityGraphEnabled' => $activityGraphEnabled,
+            'activityGraphDays' => $activityGraphDays,
         ]);
     }
 

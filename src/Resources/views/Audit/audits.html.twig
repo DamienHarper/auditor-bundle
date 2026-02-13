@@ -29,6 +29,9 @@
                     <span class="w-24 shrink-0">{{ helper.type_badge(entityAuditData.latest.type) }}</span> ·
                     {{ entityAuditData.latest.createdAt|time_ago }}
                 </div>
+                {% if activityGraphEnabled and entityAuditData.activityGraph is defined %}
+                    {{ helper.activity_graph(entityAuditData.activityGraph, activityGraphDays) }}
+                {% endif %}
             </a>
         {% else %}
             <div class="col-span-full text-center text-slate-500 dark:text-slate-400 py-8">

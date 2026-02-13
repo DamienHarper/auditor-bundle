@@ -39,6 +39,9 @@ audit:
       dissociate: Lahutamine
   stream:
     no_entries: Auditikirjeid ei leitud.
+  activity_graph:
+    period: Viimased %days% päeva
+    no_activity: Hiljutine tegevus puudub
   pager:
     first: Esimene
     previous: Eelmine

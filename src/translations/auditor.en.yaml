@@ -39,6 +39,9 @@ audit:
       dissociate: Dissociate
   stream:
     no_entries: No audit entries found.
+  activity_graph:
+    period: Last %days% days
+    no_activity: No recent activity
   pager:
     first: First
     previous: Previous

@@ -39,6 +39,9 @@ audit:
       dissociate: Отвязывание
   stream:
     no_entries: Записи аудита не найдены.
+  activity_graph:
+    period: Последние %days% дней
+    no_activity: Нет недавней активности
   pager:
     first: Первая
     previous: Предыдущий

@@ -81,6 +81,9 @@
       "composer/package-versions-deprecated": true
     }
   },
+  "suggest": {
+    "symfony/cache": "Required for activity graph caching in the audit viewer"
+  },
   "extra": {
     "branch-alias": {
       "dev-master": "7.x-dev"

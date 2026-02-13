@@ -94,6 +94,63 @@ URL parameters:
 
 Groups all changes from a single database transaction across all entities.
 
+## Activity Graph
+
+Each entity card displays a visual activity graph showing audit activity over time.
+
+### Configuration
+
+```yaml
+dh_auditor:
+    providers:
+        doctrine:
+            viewer:
+                enabled: true
+                activity_graph:
+                    enabled: true       # Show/hide the graph (default: true)
+                    days: 7             # Number of days to display (default: 7, max: 30)
+                    cache:
+                        enabled: true   # Enable caching (default: true)
+                        pool: 'cache.app'  # Cache pool service ID
+                        ttl: 300        # Cache TTL in seconds (default: 300)
+```
+
+### Caching
+
+The activity graph uses caching to improve performance on large audit tables. Caching requires `symfony/cache`:
+
+```bash
+composer require symfony/cache
+```
+
+If `symfony/cache` is not installed, the graph will still work but without caching.
+
+#### Cache with Tags
+
+If your cache pool supports tags (`TagAwareCacheInterface`), the bundle uses the tag `dh_auditor.activity` for efficient cache invalidation.
+
+### Clear Cache Command
+
+Clear the activity graph cache manually:
+
+```bash
+# Clear all activity graph cache
+php bin/console audit:cache:clear
+
+# Clear cache for a specific entity
+php bin/console audit:cache:clear --entity="App\Entity\User"
+```
+
+> **Note:** Clearing all cache requires a cache pool that supports tags. If your cache pool doesn't support tags, you can only clear cache for specific entities.
+
+### Display Behavior
+
+| State | Behavior |
+|-------|----------|
+| Graph disabled (`enabled: false`) | Activity graph section is completely hidden |
+| Graph enabled, no data | Placeholder with "No recent activity" message |
+| Graph enabled, with data | Bars are normalized (tallest bar = 100%) |
+
 ## Access Control
 
 ### Via Configuration
