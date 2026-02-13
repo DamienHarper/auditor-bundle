@@ -159,6 +159,18 @@ php bin/console audit:cache:clear --entity="App\Entity\User"
 | Graph enabled, no data | Placeholder with "No recent activity" message |
 | Graph enabled, with data | Bars are normalized (tallest bar = 100%) |
 
+## Dark Mode
+
+The viewer includes a dark/light mode toggle button in the header.
+
+### Behavior
+
+- **Default**: Follows system preference (`prefers-color-scheme`)
+- **Manual toggle**: Click the sun/moon icon in the header
+- **Persistence**: User preference is saved in `localStorage`
+
+The toggle works without page reload and persists across sessions.
+
 ## Access Control
 
 ### Via Configuration
@@ -288,11 +300,7 @@ templates/bundles/DHAuditorBundle/
 |----------------------|-----------------------|
 | `title`              | Page title            |
 | `stylesheets`        | CSS includes          |
-| `navbar`             | Navigation bar        |
-| `breadcrumbs`        | Breadcrumb navigation |
-| `dh_auditor_header`  | Page header content   |
 | `dh_auditor_content` | Main content area     |
-| `dh_auditor_pager`   | Pagination            |
 | `javascripts`        | JavaScript includes   |      
 
 ## Assets
