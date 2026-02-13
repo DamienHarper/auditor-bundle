@@ -19,9 +19,10 @@ class ConsoleUserProvider implements UserProviderInterface
             return null;
         }
 
+        // Use command name as both ID and username for better traceability
         return new User(
-            'command',
-            $this->currentCommand ?? ''
+            $this->currentCommand,
+            $this->currentCommand
         );
     }
 

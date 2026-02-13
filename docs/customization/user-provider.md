@@ -55,6 +55,35 @@ public function __invoke(): ?UserInterface
 }
 ```
 
+## Console Commands
+
+For CLI commands, the bundle provides `DH\AuditorBundle\User\ConsoleUserProvider` which automatically tracks the command name:
+
+```php
+public function __invoke(): ?UserInterface
+{
+    if (null === $this->currentCommand) {
+        return null;
+    }
+
+    // Command name is used as both ID and username
+    return new User(
+        $this->currentCommand,  // e.g., 'app:import-users'
+        $this->currentCommand
+    );
+}
+```
+
+This allows you to:
+- Identify which command made specific changes
+- Filter audit entries by command in the viewer
+- Track automated processes separately from user actions
+
+Example audit entries:
+- `app:import-users` - Import command
+- `doctrine:fixtures:load` - Fixtures loading
+- `app:sync-products` - Sync command
+
 ## Creating a Custom Provider
 
 ### Basic Example

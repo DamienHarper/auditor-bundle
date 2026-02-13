@@ -17,6 +17,7 @@ use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\Auditor\Provider\Doctrine\Service\AuditingService;
 use DH\Auditor\Provider\Doctrine\Service\StorageService;
 use DH\Auditor\Provider\ProviderInterface;
+use DH\AuditorBundle\Command\ClearActivityCacheCommand;
 use DH\AuditorBundle\Controller\ViewerController;
 use DH\AuditorBundle\DependencyInjection\Compiler\DoctrineMiddlewareCompilerPass;
 use DH\AuditorBundle\Event\ConsoleEventSubscriber;
@@ -24,8 +25,10 @@ use DH\AuditorBundle\Event\ViewerEventSubscriber;
 use DH\AuditorBundle\Routing\RoutingLoader;
 use DH\AuditorBundle\Security\RoleChecker;
 use DH\AuditorBundle\Security\SecurityProvider;
+use DH\AuditorBundle\Twig\TimeAgoExtension;
 use DH\AuditorBundle\User\ConsoleUserProvider;
 use DH\AuditorBundle\User\UserProvider;
+use DH\AuditorBundle\Viewer\ActivityGraphProvider;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -228,13 +231,45 @@ class DHAuditorBundle extends AbstractBundle
             ->call('setAuditor', [new Reference(Auditor::class)])
             ->tag('console.command', ['command' => 'audit:schema:update'])
         ;
+
+        // Activity Graph Provider
+        $activityGraphProviderRef = null;
+        if (\is_array($config['viewer']) && ($config['viewer']['activity_graph']['enabled'] ?? false)) {
+            /** @var array{enabled: bool, days: int, layout: string, cache: array{enabled: bool, pool: string, ttl: int}} $activityGraphConfig */
+            $activityGraphConfig = $config['viewer']['activity_graph'];
+
+            $cachePoolRef = $activityGraphConfig['cache']['enabled']
+                ? new Reference($activityGraphConfig['cache']['pool'])
+                : null;
+
+            $services->set(ActivityGraphProvider::class)
+                ->args([
+                    $activityGraphConfig['days'],
+                    $activityGraphConfig['layout'],
+                    $activityGraphConfig['cache']['enabled'],
+                    $activityGraphConfig['cache']['ttl'],
+                    $cachePoolRef,
+                ])
+            ;
+
+            $activityGraphProviderRef = new Reference(ActivityGraphProvider::class);
+        }
+
+        // Clear Activity Cache Command
+        $services->set(ClearActivityCacheCommand::class)
+            ->args([$activityGraphProviderRef])
+            ->tag('console.command', ['command' => 'audit:cache:clear'])
+        ;
     }
 
     private function loadBundleServices(ServicesConfigurator $services): void
     {
         // ViewerController
         $services->set(ViewerController::class)
-            ->args([new Reference('twig')])
+            ->args([
+                new Reference('twig'),
+                new Reference(ActivityGraphProvider::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
+            ])
             ->tag('controller.service_arguments')
         ;
 
@@ -278,6 +313,12 @@ class DHAuditorBundle extends AbstractBundle
                 new Reference('dh_auditor.user_provider'),
             ])
             ->tag('kernel.event_subscriber')
+        ;
+
+        // Twig extension
+        $services->set(TimeAgoExtension::class)
+            ->args([new Reference('translator')])
+            ->tag('twig.extension')
         ;
     }
 
@@ -335,9 +376,20 @@ class DHAuditorBundle extends AbstractBundle
         }
 
         // "viewer" is disabled by default
+        $defaultActivityGraphOptions = [
+            'enabled' => true,
+            'days' => 30,
+            'layout' => 'bottom',  // 'bottom' (Option B) or 'inline' (Option A)
+            'cache' => [
+                'enabled' => true,
+                'pool' => 'cache.app',
+                'ttl' => 300,
+            ],
+        ];
         $defaultViewerOptions = [
             'enabled' => false,
             'page_size' => Reader::PAGE_SIZE,
+            'activity_graph' => $defaultActivityGraphOptions,
         ];
         if (\array_key_exists('viewer', $doctrine)) {
             if (\is_array($doctrine['viewer'])) {
@@ -354,8 +406,19 @@ class DHAuditorBundle extends AbstractBundle
                 ) {
                     $doctrine['viewer']['page_size'] = Reader::PAGE_SIZE;
                 }
+
+                // Normalize activity_graph options
+                /** @var array<string, mixed> $activityGraphInput */
+                $activityGraphInput = $doctrine['viewer']['activity_graph'] ?? [];
+                $doctrine['viewer']['activity_graph'] = $this->normalizeActivityGraphConfig(
+                    $activityGraphInput,
+                    $defaultActivityGraphOptions
+                );
             } elseif (!\is_bool($doctrine['viewer'])) {
                 $doctrine['viewer'] = $defaultViewerOptions;
+            } else {
+                // viewer is a boolean, convert to array with defaults
+                $doctrine['viewer'] = array_merge($defaultViewerOptions, ['enabled' => $doctrine['viewer']]);
             }
         } else {
             $doctrine['viewer'] = $defaultViewerOptions;
@@ -369,5 +432,39 @@ class DHAuditorBundle extends AbstractBundle
         $v['doctrine'] = $doctrine;
 
         return $v;
+    }
+
+    /**
+     * @param array<string, mixed>                                                                                 $config
+     * @param array{enabled: bool, days: int, layout: string, cache: array{enabled: bool, pool: string, ttl: int}} $defaults
+     *
+     * @return array{enabled: bool, days: int, layout: string, cache: array{enabled: bool, pool: string, ttl: int}}
+     */
+    private function normalizeActivityGraphConfig(array $config, array $defaults): array
+    {
+        /** @var array<string, mixed> $configCache */
+        $configCache = $config['cache'] ?? [];
+
+        $days = $config['days'] ?? $defaults['days'];
+        $ttl = $configCache['ttl'] ?? $defaults['cache']['ttl'];
+        $pool = $configCache['pool'] ?? $defaults['cache']['pool'];
+        $layout = $config['layout'] ?? $defaults['layout'];
+
+        // Validate layout value
+        $validLayouts = ['bottom', 'inline'];
+        if (!\is_string($layout) || !\in_array($layout, $validLayouts, true)) {
+            $layout = $defaults['layout'];
+        }
+
+        return [
+            'enabled' => (bool) ($config['enabled'] ?? $defaults['enabled']),
+            'days' => max(1, min(30, is_numeric($days) ? (int) $days : $defaults['days'])),
+            'layout' => $layout,
+            'cache' => [
+                'enabled' => (bool) ($configCache['enabled'] ?? $defaults['cache']['enabled']),
+                'pool' => \is_string($pool) ? $pool : $defaults['cache']['pool'],
+                'ttl' => max(0, is_numeric($ttl) ? (int) $ttl : $defaults['cache']['ttl']),
+            ],
+        ];
     }
 }

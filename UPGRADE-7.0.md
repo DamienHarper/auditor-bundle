@@ -1,111 +1,90 @@
 # UPGRADE FROM 6.x to 7.0
 
-This document describes the backward incompatible changes introduced in auditor-bundle 7.0 and how to adapt your code accordingly.
+This document summarizes the backward incompatible changes introduced in auditor-bundle 7.0.
+
+For a complete upgrade guide with step-by-step instructions, see the [full documentation](docs/upgrade/v7.md).
 
 ## Requirements Changes
 
-### PHP Version
-- **Minimum PHP version is now 8.4** (was 8.2 in 6.x, required by Symfony 8.0)
+| Requirement      | 6.x     | 7.0    |
+|------------------|---------|--------|
+| PHP              | >= 8.2  | >= 8.4 |
+| Symfony          | >= 5.4  | >= 8.0 |
+| Doctrine DBAL    | >= 3.2  | >= 4.0 |
+| Doctrine ORM     | >= 2.13 | >= 3.2 |
+| Doctrine Bundle  | >= 2.0  | >= 3.0 |
+| PHPUnit          | >= 11.0 | >= 12.0 |
+| damienharper/auditor | >= 3.2 | >= 4.0 |
 
-### Symfony Version
-- **Minimum Symfony version is now 8.0** (was 5.4 in 6.x)
-- Support for Symfony 5.4, 6.4, and 7.x has been dropped
+See [auditor UPGRADE-4.0.md](https://github.com/DamienHarper/auditor/blob/master/UPGRADE-4.0.md) for auditor library changes.
 
-### Doctrine Versions
-- **Doctrine DBAL**: minimum version is now **4.0** (was 3.2 in 6.x)
-- **Doctrine ORM**: minimum version is now **3.2** (was 2.13 in 6.x)
-- **Doctrine Bundle**: minimum version is now **3.0** (was 2.0 in 6.x)
+## Breaking Changes
 
-### PHPUnit Version
-- **PHPUnit**: minimum version is now **12.0** (was 11.0 in 6.x)
+### Route Names
 
-### Auditor Library
-- **damienharper/auditor**: minimum version is now **4.0** (was 3.2 in 6.x)
-- See [auditor UPGRADE-4.0.md](https://github.com/DamienHarper/auditor/blob/master/UPGRADE-4.0.md) for details about auditor library changes
+| Before (6.x)                       | After (7.0)                          |
+|------------------------------------|--------------------------------------|
+| `dh_auditor_show_entity_history`   | `dh_auditor_show_entity_stream`      |
+| `dh_auditor_show_transaction`      | `dh_auditor_show_transaction_stream` |
 
-## Bundle Architecture Changes
+### ConsoleUserProvider
 
-### AbstractBundle Migration
+CLI commands now use the command name as the user identifier:
 
-The bundle now extends `Symfony\Component\HttpKernel\Bundle\AbstractBundle` instead of `Symfony\Component\HttpKernel\Bundle\Bundle`.
+| Before (6.x)                     | After (7.0)                        |
+|----------------------------------|------------------------------------|
+| `blame_id: "command"`            | `blame_id: "app:import-users"`     |
+| `blame_user: "app:import-users"` | `blame_user: "app:import-users"`   |
 
-This is an internal change and should not affect your application configuration.
+**Note:** Existing audit entries with `blame_id = "command"` will not be automatically migrated.
 
 ### Removed Classes
 
-The following classes have been removed:
-
-| Removed Class | Reason |
-|---------------|--------|
-| `DH\AuditorBundle\DependencyInjection\Configuration` | Merged into `DHAuditorBundle::configure()` |
-| `DH\AuditorBundle\DependencyInjection\DHAuditorExtension` | Merged into `DHAuditorBundle::loadExtension()` |
-| `DH\AuditorBundle\DependencyInjection\Compiler\AddProviderCompilerPass` | No longer needed with autowiring |
-| `DH\AuditorBundle\DependencyInjection\Compiler\CustomConfigurationCompilerPass` | Merged into `DHAuditorBundle::loadExtension()` |
-| `DH\AuditorBundle\DependencyInjection\Compiler\DoctrineProviderConfigurationCompilerPass` | Replaced by `DoctrineMiddlewareCompilerPass` |
-
-### Removed Files
-
-- `src/Resources/config/services.yaml` - Services are now defined programmatically in `DHAuditorBundle::loadExtension()`
-
-## Code Changes
+| Removed Class | Replacement |
+|---------------|-------------|
+| `DH\AuditorBundle\DependencyInjection\Configuration` | `DHAuditorBundle::configure()` |
+| `DH\AuditorBundle\DependencyInjection\DHAuditorExtension` | `DHAuditorBundle::loadExtension()` |
+| `DH\AuditorBundle\DependencyInjection\Compiler\AddProviderCompilerPass` | Autowiring |
+| `DH\AuditorBundle\DependencyInjection\Compiler\CustomConfigurationCompilerPass` | `DHAuditorBundle::loadExtension()` |
+| `DH\AuditorBundle\DependencyInjection\Compiler\DoctrineProviderConfigurationCompilerPass` | `DoctrineMiddlewareCompilerPass` |
 
 ### UserProvider
 
-The `UserProvider` class no longer handles `AnonymousToken` (removed in Symfony 6.0).
+The `AnonymousToken` handling was removed (deprecated in Symfony 6.0, removed in Symfony 8.0).
 
-**Before (6.x):**
-```php
-if (!$token instanceof TokenInterface || $token instanceof AnonymousToken) {
-    return null;
-}
-```
+### Template Blocks
 
-**After (7.0):**
-```php
-if (!$token instanceof TokenInterface) {
-    return null;
-}
-```
+The following Twig blocks have been removed from the base layout:
 
-The `getId()` method check remains unchanged - if your user entity doesn't have a `getId()` method, consider implementing one or creating a custom `UserProvider`.
+| Removed Block        | Reason                           |
+|----------------------|----------------------------------|
+| `navbar`             | Replaced by built-in header      |
+| `breadcrumbs`        | No longer used                   |
 
-## Composer Scripts
+The `dh_auditor_header` and `dh_auditor_pager` blocks are still available in stream templates.
 
-The following composer scripts have been removed:
-- `setup5` (Symfony 5.4)
-- `setup6` (Symfony 6.4)
-- `setup7` (Symfony 7.x)
-- `setup8` (Symfony 8.0)
+If you override `layout.html.twig`, update your template to use the available blocks: `title`, `stylesheets`, `dh_auditor_content`, `javascripts`.
 
-Use the new unified `setup` script instead:
+### Composer Scripts
+
+The `setup5`, `setup6`, `setup7`, `setup8` scripts have been replaced by a unified `setup` script.
+
+## Quick Migration
+
 ```bash
-composer setup
+# 1. Update dependencies
+composer require php:^8.4 symfony/framework-bundle:^8.0 \
+    doctrine/dbal:^4.0 doctrine/orm:^3.2 doctrine/doctrine-bundle:^3.0 \
+    damienharper/auditor:^4.0 damienharper/auditor-bundle:^7.0
+
+# 2. Clear cache
+bin/console cache:clear
+
+# 3. Check schema
+bin/console audit:schema:update --dump-sql
 ```
-
-## Migration Steps
-
-1. **Update your PHP version** to 8.4 or higher
-2. **Update your Symfony dependencies** to 8.0 or higher
-3. **Update Doctrine dependencies**:
-   - `doctrine/dbal` to ^4.0
-   - `doctrine/orm` to ^3.2
-   - `doctrine/doctrine-bundle` to ^3.0
-4. **Update auditor library**:
-   - `damienharper/auditor` to ^4.0
-5. **Update auditor-bundle**:
-   - `damienharper/auditor-bundle` to ^7.0
-6. **Clear your cache**:
-   ```bash
-   php bin/console cache:clear
-   ```
-7. **Run your test suite** to ensure everything works correctly
-
-## Configuration
-
-The bundle configuration format remains unchanged. No modifications to your `config/packages/dh_auditor.yaml` are required.
 
 ## Need Help?
 
-If you encounter any issues during the upgrade, please:
-1. Check the [official documentation](https://damienharper.github.io/auditor-docs/)
-2. Open an issue on [GitHub](https://github.com/DamienHarper/auditor-bundle/issues)
+- [Full upgrade documentation](docs/upgrade/v7.md)
+- [GitHub Issues](https://github.com/DamienHarper/auditor-bundle/issues)
