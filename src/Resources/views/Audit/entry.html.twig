@@ -80,90 +80,102 @@
 
     {# Details content - diffs #}
     {% if entry.type == 'insert' %}
-        <div class="px-4 pb-4">
-            <div class="pl-4 text-sm font-mono">
+        <div class="px-4 pb-4 pl-8">
+            <table class="text-sm font-mono">
                 {% set diffs = entry.diffs %}
                 {% for field, changeset in diffs %}
                     {% if field != 'label' %}
                         {{ _self.displayInsertValue(field, changeset) }}
                     {% endif %}
                 {% endfor %}
-            </div>
+            </table>
         </div>
     {% elseif entry.type == 'update' %}
-        <div class="px-4 pb-4">
-            <div class="pl-4 text-sm font-mono">
+        <div class="px-4 pb-4 pl-8">
+            <table class="text-sm font-mono">
                 {% set diffs = entry.diffs %}
                 {% for field, changeset in diffs %}
                     {% if field != 'label' %}
                         {{ _self.displayUpdateDiff(field, changeset) }}
                     {% endif %}
                 {% endfor %}
-            </div>
+            </table>
         </div>
     {% elseif entry.type == 'associate' %}
-        <div class="px-4 pb-4">
-            <div class="pl-4 text-sm font-mono">
+        <div class="px-4 pb-4 pl-8">
+            <table class="text-sm font-mono">
                 {% set diffs = entry.diffs %}
                 {% if diffs.source is defined and diffs.target is defined %}
                     {% set target_id = diffs.target.pkName is defined ? diffs.target[diffs.target.pkName] : diffs.target.id %}
-
-                    <div class="flex items-center py-0.5">
-                        <span class="min-w-48 shrink-0 text-blue-600 dark:text-blue-400">{{ diffs.source.class|split('\\')|last }} #{{ diffs.source.id }}</span>
-                        <span class="w-8 text-center text-slate-400">→</span>
-                        <a href="{{ path('dh_auditor_show_entity_stream', { 'entity': helper.namespaceToParam(diffs.target.class), 'id': target_id }) }}"
-                           class="text-blue-600 dark:text-blue-400 hover:underline">
-                            {{ diffs.target.class|split('\\')|last }} #{{ target_id }}
-                        </a>
-                    </div>
+                    <tr>
+                        <td class="pr-3 text-blue-600 dark:text-blue-400 align-top break-words" style="max-width: 45%;">
+                            <a href="{{ path('dh_auditor_show_entity_stream', { 'entity': helper.namespaceToParam(diffs.source.class), 'id': diffs.source.id }) }}"
+                               class="hover:underline" title="{{ diffs.source.class }}">
+                                {{ diffs.source.class|split('\\')|last }} #{{ diffs.source.id }}
+                            </a>
+                        </td>
+                        <td class="px-2 text-slate-400 align-top whitespace-nowrap">↔</td>
+                        <td class="pl-3 text-blue-600 dark:text-blue-400 align-top break-words" style="max-width: 45%;">
+                            <a href="{{ path('dh_auditor_show_entity_stream', { 'entity': helper.namespaceToParam(diffs.target.class), 'id': target_id }) }}"
+                               class="hover:underline" title="{{ diffs.target.class }}">
+                                {{ diffs.target.class|split('\\')|last }} #{{ target_id }}
+                            </a>
+                        </td>
+                    </tr>
                     {% if diffs.source.label is defined or diffs.target.label is defined %}
-                        <div class="flex items-center py-0.5">
-                            <span class="min-w-48 shrink-0 text-xs italic text-slate-500 dark:text-slate-400">{{ diffs.source.label|default('') }}</span>
-                            <span class="w-8 text-center text-slate-300 dark:text-slate-600">→</span>
-                            <span class="text-xs italic text-slate-500 dark:text-slate-400">{{ diffs.target.label|default('') }}</span>
-                        </div>
+                        <tr class="text-xs italic text-slate-500 dark:text-slate-400">
+                            <td class="pr-3 align-top break-words" style="max-width: 45%;">{{ diffs.source.label|default('—') }}</td>
+                            <td></td>
+                            <td class="pl-3 align-top break-words" style="max-width: 45%;">{{ diffs.target.label|default('—') }}</td>
+                        </tr>
                     {% endif %}
                 {% endif %}
-            </div>
+            </table>
         </div>
     {% elseif entry.type == 'dissociate' %}
-        <div class="px-4 pb-4">
-            <div class="pl-4 text-sm font-mono">
+        <div class="px-4 pb-4 pl-8">
+            <table class="text-sm font-mono">
                 {% set diffs = entry.diffs %}
                 {% if diffs.source is defined and diffs.target is defined %}
                     {% set target_id = diffs.target.pkName is defined ? diffs.target[diffs.target.pkName] : diffs.target.id %}
-
-                    <div class="flex items-center py-0.5">
-                        <span class="min-w-48 shrink-0 text-rose-600 dark:text-rose-400">{{ diffs.source.class|split('\\')|last }} #{{ diffs.source.id }}</span>
-                        <span class="w-8 text-center text-slate-400">→</span>
-                        <a href="{{ path('dh_auditor_show_entity_stream', { 'entity': helper.namespaceToParam(diffs.target.class), 'id': target_id }) }}"
-                           class="text-rose-600 dark:text-rose-400 hover:underline">
-                            {{ diffs.target.class|split('\\')|last }} #{{ target_id }}
-                        </a>
-                    </div>
+                    <tr>
+                        <td class="pr-3 text-rose-600 dark:text-rose-400 align-top break-words" style="max-width: 45%;">
+                            <a href="{{ path('dh_auditor_show_entity_stream', { 'entity': helper.namespaceToParam(diffs.source.class), 'id': diffs.source.id }) }}"
+                               class="hover:underline" title="{{ diffs.source.class }}">
+                                {{ diffs.source.class|split('\\')|last }} #{{ diffs.source.id }}
+                            </a>
+                        </td>
+                        <td class="px-2 text-slate-400 align-top whitespace-nowrap">↔</td>
+                        <td class="pl-3 text-rose-600 dark:text-rose-400 align-top break-words" style="max-width: 45%;">
+                            <a href="{{ path('dh_auditor_show_entity_stream', { 'entity': helper.namespaceToParam(diffs.target.class), 'id': target_id }) }}"
+                               class="hover:underline" title="{{ diffs.target.class }}">
+                                {{ diffs.target.class|split('\\')|last }} #{{ target_id }}
+                            </a>
+                        </td>
+                    </tr>
                     {% if diffs.source.label is defined or diffs.target.label is defined %}
-                        <div class="flex items-center py-0.5">
-                            <span class="min-w-48 shrink-0 text-xs italic text-slate-500 dark:text-slate-400">{{ diffs.source.label|default('') }}</span>
-                            <span class="w-8 text-center text-slate-300 dark:text-slate-600">→</span>
-                            <span class="text-xs italic text-slate-500 dark:text-slate-400">{{ diffs.target.label|default('') }}</span>
-                        </div>
+                        <tr class="text-xs italic text-slate-500 dark:text-slate-400">
+                            <td class="pr-3 align-top break-words" style="max-width: 45%;">{{ diffs.source.label|default('—') }}</td>
+                            <td></td>
+                            <td class="pl-3 align-top break-words" style="max-width: 45%;">{{ diffs.target.label|default('—') }}</td>
+                        </tr>
                     {% endif %}
                 {% endif %}
-            </div>
+            </table>
         </div>
     {% elseif entry.type == 'remove' %}
         {# No details for remove - the action description is enough #}
     {% endif %}
 </details>
 
-{# Macro for INSERT: display only the new value in emerald #}
+{# Macro for INSERT: table row with field and value #}
 {% macro displayInsertValue(field, changeset) %}
     {% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
     {% if changeset.new is defined %}
-        <div class="flex items-start py-0.5">
-            <span class="text-slate-500 dark:text-slate-400 min-w-48 shrink-0">{{ field }}</span>
-            <span class="text-emerald-600 dark:text-emerald-400">{{ helper.dump(changeset.new) }}</span>
-        </div>
+        <tr>
+            <td class="pr-6 text-slate-500 dark:text-slate-400 align-top break-words" style="max-width: 25%;">{{ field }}</td>
+            <td class="text-emerald-600 dark:text-emerald-400 align-top break-words" style="max-width: 70%;">{{ helper.dump(changeset.new) }}</td>
+        </tr>
     {% elseif changeset is iterable and changeset.old is not defined and changeset.new is not defined %}
         {# JSON nested field #}
         {% for json_field, json_changeset in changeset %}
@@ -172,28 +184,28 @@
     {% endif %}
 {% endmacro %}
 
-{# Macro for UPDATE: display old (rose strikethrough) → new (indigo) #}
+{# Macro for UPDATE: table row with field, old value, arrow, new value #}
 {% macro displayUpdateDiff(field, changeset) %}
     {% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
     {% if changeset.old is defined or changeset.new is defined %}
-        <div class="flex items-start py-0.5">
-            <span class="text-slate-500 dark:text-slate-400 min-w-48 shrink-0">{{ field }}</span>
-            <span class="min-w-32 shrink-0">
+        <tr>
+            <td class="pr-6 text-slate-500 dark:text-slate-400 align-top break-words" style="max-width: 20%;">{{ field }}</td>
+            <td class="pr-3 text-slate-400 dark:text-slate-500 align-top break-words" style="max-width: 25%;">
                 {% if changeset.old is defined and changeset.old is not null %}
-                    <span class="text-rose-500 dark:text-rose-400 line-through">{{ helper.dump(changeset.old) }}</span>
+                    {{ helper.dump(changeset.old) }}
                 {% else %}
-                    <span class="text-slate-300 dark:text-slate-600">⌀</span>
+                    ⌀
                 {% endif %}
-            </span>
-            <span class="w-8 text-center text-slate-400 dark:text-slate-500 shrink-0">→</span>
-            <span>
+            </td>
+            <td class="px-2 text-slate-400 dark:text-slate-500 align-top whitespace-nowrap">→</td>
+            <td class="pl-3 text-indigo-600 dark:text-indigo-400 align-top break-words" style="max-width: 40%;">
                 {% if changeset.new is defined and changeset.new is not null %}
-                    <span class="text-indigo-600 dark:text-indigo-400">{{ helper.dump(changeset.new) }}</span>
+                    {{ helper.dump(changeset.new) }}
                 {% else %}
-                    <span class="text-slate-300 dark:text-slate-600">⌀</span>
+                    ⌀
                 {% endif %}
-            </span>
-        </div>
+            </td>
+        </tr>
     {% else %}
         {# JSON nested field #}
         {% for json_field, json_changeset in changeset %}
