@@ -40,8 +40,9 @@ audit:
   stream:
     no_entries: Записи аудита не найдены.
   activity_graph:
-    period: Последние %days% дней
-    no_activity: Нет недавней активности
+    title: Активность
+    period: последние %days% дней
+    no_activity: нет недавней активности
   pager:
     first: Первая
     previous: Предыдущий

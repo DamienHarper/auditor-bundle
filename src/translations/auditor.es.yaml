@@ -40,8 +40,9 @@ audit:
   stream:
     no_entries: No se encontraron entradas de auditoría.
   activity_graph:
-    period: Últimos %days% días
-    no_activity: Sin actividad reciente
+    title: Actividad
+    period: últimos %days% días
+    no_activity: sin actividad reciente
   pager:
     first: Primera
     previous: Anterior

@@ -68,11 +68,11 @@
                 {% endif %}
             {% endfor %}
         </div>
-        <div class="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5">
+        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">
             {% if hasActivity %}
-                {{ 'audit.activity_graph.period'|trans({'%days%': days}, 'auditor') }}
+                {{ 'audit.activity_graph.title'|trans(domain='auditor') }} · {{ 'audit.activity_graph.period'|trans({'%days%': days}, 'auditor') }}
             {% else %}
-                {{ 'audit.activity_graph.no_activity'|trans(domain='auditor') }}
+                {{ 'audit.activity_graph.title'|trans(domain='auditor') }} · {{ 'audit.activity_graph.no_activity'|trans(domain='auditor') }}
             {% endif %}
         </div>
     </div>

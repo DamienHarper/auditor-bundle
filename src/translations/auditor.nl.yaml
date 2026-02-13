@@ -40,8 +40,9 @@ audit:
   stream:
     no_entries: Geen audit-items gevonden.
   activity_graph:
-    period: Laatste %days% dagen
-    no_activity: Geen recente activiteit
+    title: Activiteit
+    period: laatste %days% dagen
+    no_activity: geen recente activiteit
   pager:
     first: Eerste
     previous: Vorige

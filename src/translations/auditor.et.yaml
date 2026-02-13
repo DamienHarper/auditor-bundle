@@ -40,8 +40,9 @@ audit:
   stream:
     no_entries: Auditikirjeid ei leitud.
   activity_graph:
-    period: Viimased %days% päeva
-    no_activity: Hiljutine tegevus puudub
+    title: Tegevus
+    period: viimased %days% päeva
+    no_activity: hiljutine tegevus puudub
   pager:
     first: Esimene
     previous: Eelmine
