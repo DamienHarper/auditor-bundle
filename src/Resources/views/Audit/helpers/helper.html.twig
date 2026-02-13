@@ -42,11 +42,11 @@
         {% for value in data %}
             {% set rawValue = rawData[loop.index0]|default(0) %}
             {% if hasActivity %}
-                <div class="flex-1 bg-indigo-400 dark:bg-indigo-500 rounded-sm transition-colors hover:bg-indigo-600 dark:hover:bg-indigo-400 cursor-default"
+                <div class="flex-1 bg-slate-300 dark:bg-indigo-500 rounded-sm transition-colors hover:bg-slate-400 dark:hover:bg-indigo-400 cursor-default"
                      style="height: {{ value > 0 ? (value < 15 ? 15 : value) : 4 }}%"
                      title="{{ rawValue }} {{ rawValue == 1 ? 'event' : 'events' }}"></div>
             {% else %}
-                <div class="flex-1 bg-slate-300 dark:bg-slate-600 rounded-sm" style="height: 20%"></div>
+                <div class="flex-1 bg-slate-200 dark:bg-slate-600 rounded-sm" style="height: 20%"></div>
             {% endif %}
         {% endfor %}
     </div>
@@ -60,11 +60,11 @@
             {% for value in data %}
                 {% set rawValue = rawData[loop.index0]|default(0) %}
                 {% if hasActivity %}
-                    <div class="flex-1 bg-indigo-400 dark:bg-indigo-500 rounded-sm transition-colors hover:bg-indigo-600 dark:hover:bg-indigo-400 cursor-default"
+                    <div class="flex-1 bg-slate-300 dark:bg-indigo-500 rounded-sm transition-colors hover:bg-slate-400 dark:hover:bg-indigo-400 cursor-default"
                          style="height: {{ value > 0 ? (value < 15 ? 15 : value) : 4 }}%"
                          title="{{ rawValue }} {{ rawValue == 1 ? 'event' : 'events' }}"></div>
                 {% else %}
-                    <div class="flex-1 bg-slate-300 dark:bg-slate-600 rounded-sm" style="height: 20%"></div>
+                    <div class="flex-1 bg-slate-200 dark:bg-slate-600 rounded-sm" style="height: 20%"></div>
                 {% endif %}
             {% endfor %}
         </div>
