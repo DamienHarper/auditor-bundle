@@ -12,7 +12,7 @@
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            {% trans from 'auditor' %}audit.header.back_to_entities{% endtrans %}
+            {{ 'audit.header.back_to_entities'|trans(domain='auditor') }}
         </a>
 
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -21,17 +21,17 @@
                     {{ entity|split('\\')|last }}{% if id is not null %} #{{ id }}{% endif %}
                 </h1>
                 <p class="text-sm text-slate-500 dark:text-slate-400">
-                    {% trans with { '%count%': paginator.numResults|number_format } from 'auditor' %}audit.audit_details.events_count{% endtrans %}
-                    · {% trans from 'auditor' %}audit.audit_details.most_recent{% endtrans %}
+                    {{ 'audit.audit_details.events_count'|trans({'%count%': paginator.numResults|number_format}, 'auditor') }}
+                    · {{ 'audit.audit_details.most_recent'|trans(domain='auditor') }}
                 </p>
             </div>
             <div class="flex gap-2 mt-3 sm:mt-0">
                 {# Placeholder filters - disabled for now #}
                 <select disabled class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed">
-                    <option>{% trans from 'auditor' %}audit.filter.all_actions{% endtrans %}</option>
+                    <option>{{ 'audit.filter.all_actions'|trans(domain='auditor') }}</option>
                 </select>
                 <select disabled class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed">
-                    <option>{% trans from 'auditor' %}audit.filter.all_users{% endtrans %}</option>
+                    <option>{{ 'audit.filter.all_users'|trans(domain='auditor') }}</option>
                 </select>
             </div>
         </div>
@@ -43,7 +43,7 @@
             {{ include('@DHAuditor/Audit/entry.html.twig', {'entry': entry, 'entity': entity}) }}
         {% else %}
             <div class="p-8 text-center text-slate-500 dark:text-slate-400">
-                {% trans from 'auditor' %}audit.stream.no_entries{% endtrans %}
+                {{ 'audit.stream.no_entries'|trans(domain='auditor') }}
             </div>
         {% endfor %}
     </div>

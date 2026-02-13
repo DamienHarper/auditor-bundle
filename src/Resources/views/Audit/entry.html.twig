@@ -35,7 +35,7 @@
                 {# Action description #}
                 <span class="text-slate-500 dark:text-slate-400">·</span>
                 <span class="text-xs text-slate-400 dark:text-slate-500 italic shrink-0">
-                    {% trans from 'auditor' %}audit.entry.action_remove{% endtrans %}
+                    {{ 'audit.entry.action_remove'|trans(domain='auditor') }}
                 </span>
             </div>
         </div>
@@ -58,7 +58,7 @@
     <div class="flex items-center gap-2 mt-1 ml-2 text-xs text-slate-500 dark:text-slate-400">
         <span>{{ entry.createdAt|format_datetime('full', 'short') }}</span>
         <span>·</span>
-        <span>{% trans from 'auditor' %}audit.entry.by{% endtrans %}
+        <span>{{ 'audit.entry.by'|trans(domain='auditor') }}
             <span class="font-medium">{{ entry.username ?? 'audit.audit_details.anonymous'|trans(domain='auditor') }}</span>
         </span>
     </div>
@@ -95,13 +95,13 @@
                     <span class="text-slate-500 dark:text-slate-400">·</span>
                     <span class="text-slate-400 dark:text-slate-500 text-xs italic shrink-0">
                         {% if entry.type == 'insert' %}
-                            {% trans from 'auditor' %}audit.entry.action_insert{% endtrans %}
+                            {{ 'audit.entry.action_insert'|trans(domain='auditor') }}
                         {% elseif entry.type == 'update' %}
-                            {% trans from 'auditor' %}audit.entry.action_update{% endtrans %}
+                            {{ 'audit.entry.action_update'|trans(domain='auditor') }}
                         {% elseif entry.type == 'associate' %}
-                            {% trans from 'auditor' %}audit.entry.action_associate{% endtrans %}
+                            {{ 'audit.entry.action_associate'|trans(domain='auditor') }}
                         {% elseif entry.type == 'dissociate' %}
-                            {% trans from 'auditor' %}audit.entry.action_dissociate{% endtrans %}
+                            {{ 'audit.entry.action_dissociate'|trans(domain='auditor') }}
                         {% endif %}
                     </span>
                 </div>
@@ -129,7 +129,7 @@
         <div class="flex items-center gap-2 mt-1 ml-2 text-xs text-slate-500 dark:text-slate-400">
             <span>{{ entry.createdAt|format_datetime('full', 'short') }}</span>
             <span>·</span>
-            <span>{% trans from 'auditor' %}audit.entry.by{% endtrans %}
+            <span>{{ 'audit.entry.by'|trans(domain='auditor') }}
                 <span class="font-medium">{{ entry.username ?? 'audit.audit_details.anonymous'|trans(domain='auditor') }}</span>
             </span>
         </div>

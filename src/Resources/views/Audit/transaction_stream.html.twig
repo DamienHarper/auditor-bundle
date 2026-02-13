@@ -11,7 +11,7 @@
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            {% trans from 'auditor' %}audit.header.back_to_entities{% endtrans %}
+            {{ 'audit.header.back_to_entities'|trans(domain='auditor') }}
         </a>
 
         <div>
@@ -19,7 +19,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                 </svg>
-                {% trans from 'auditor' %}audit.transaction.title{% endtrans %}
+                {{ 'audit.transaction.title'|trans(domain='auditor') }}
             </h1>
             {% set total = 0 %}
             {% for entity, entries in audits %}
@@ -27,7 +27,7 @@
             {% endfor %}
             <p class="text-sm text-slate-500 dark:text-slate-400">
                 <span class="font-mono">{{ hash }}</span>
-                · {% trans with { '%count%': total } from 'auditor' %}audit.audit_details.events_count{% endtrans %}
+                · {{ 'audit.audit_details.events_count'|trans({'%count%': total}, 'auditor') }}
             </p>
         </div>
     </div>
@@ -42,7 +42,7 @@
                     {{ entity|split('\\')|last }}
                 </a>
                 <span class="text-slate-400 dark:text-slate-500 font-normal">
-                    · {% trans with { '%count%': entries|length } from 'auditor' %}audit.audit_details.events_count{% endtrans %}
+                    · {{ 'audit.audit_details.events_count'|trans({'%count%': entries|length}, 'auditor') }}
                 </span>
             </h2>
             <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 divide-y divide-slate-200 dark:divide-slate-800">
@@ -53,7 +53,7 @@
         </div>
     {% else %}
         <div class="p-8 text-center text-slate-500 dark:text-slate-400 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-            {% trans from 'auditor' %}audit.stream.no_entries{% endtrans %}
+            {{ 'audit.stream.no_entries'|trans(domain='auditor') }}
         </div>
     {% endfor %}
 {% endblock dh_auditor_content %}

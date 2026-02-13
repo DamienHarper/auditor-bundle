@@ -5,10 +5,10 @@
 {% block dh_auditor_content %}
     <div class="mb-8">
         <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">
-            {% trans from 'auditor' %}audit.home.title{% endtrans %}
+            {{ 'audit.home.title'|trans(domain='auditor') }}
         </h1>
         <p class="text-sm text-slate-500 dark:text-slate-400">
-            {% trans from 'auditor' %}audit.home.subtitle{% endtrans %}
+            {{ 'audit.home.subtitle'|trans(domain='auditor') }}
         </p>
     </div>
 
@@ -21,16 +21,16 @@
                 <div class="flex justify-between">
                     <span class="font-medium" title="{{ entity|e('html_attr') }}">{{ entity|split('\\')|last }}</span>
                     <span class="text-xs text-slate-500 dark:text-slate-400 my-auto">
-                        {% trans with { '%count%': entityAuditData.count|number_format } from 'auditor' %}audit.audit_details.events_count{% endtrans %}
+                        {{ 'audit.audit_details.events_count'|trans({'%count%': entityAuditData.count|number_format}, 'auditor') }}
                     </span>
                 </div>
                 <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    {% trans from 'auditor' %}audit.audit_details.last_activity{% endtrans %} · {{ entityAuditData.latest.type|upper }} · {{ entityAuditData.latest.createdAt|time_ago }}
+                    {{ 'audit.audit_details.last_activity'|trans(domain='auditor') }} · {{ entityAuditData.latest.type|upper }} · {{ entityAuditData.latest.createdAt|time_ago }}
                 </div>
             </a>
         {% else %}
             <div class="col-span-full text-center text-slate-500 dark:text-slate-400 py-8">
-                {% trans from 'auditor' %}audit.home.no_audits{% endtrans %}
+                {{ 'audit.home.no_audits'|trans(domain='auditor') }}
             </div>
         {% endfor %}
     </div>
