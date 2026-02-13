@@ -22,12 +22,12 @@
                 <div class="flex justify-between items-center gap-2">
                     <span class="font-medium truncate" title="{{ entity|e('html_attr') }}">{{ entity|split('\\')|last }}</span>
                     <div class="flex items-center gap-2 shrink-0 min-w-0 flex-1 justify-end">
+                        {% if activityGraphEnabled and activityGraphLayout == 'inline' and entityAuditData.activityGraph is defined %}
+                            {{ helper.activity_sparkline(entityAuditData.activityGraph, entityAuditData.activityGraphRaw|default([]), activityGraphDays) }}
+                        {% endif %}
                         <span class="text-xs text-slate-500 dark:text-slate-400 shrink-0">
                             {{ 'audit.audit_details.events_count'|trans({'%count%': entityAuditData.count|number_format}, 'auditor') }}
                         </span>
-                        {% if activityGraphEnabled and activityGraphLayout == 'inline' and entityAuditData.activityGraph is defined %}
-                            {{ helper.activity_sparkline(entityAuditData.activityGraph, activityGraphDays) }}
-                        {% endif %}
                     </div>
                 </div>
                 <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -37,7 +37,7 @@
                 </div>
                 {# Bottom sparkline (Option B) #}
                 {% if activityGraphEnabled and activityGraphLayout == 'bottom' and entityAuditData.activityGraph is defined %}
-                    {{ helper.activity_sparkline_bottom(entityAuditData.activityGraph, activityGraphDays) }}
+                    {{ helper.activity_sparkline_bottom(entityAuditData.activityGraph, entityAuditData.activityGraphRaw|default([]), activityGraphDays) }}
                 {% endif %}
             </a>
         {% else %}

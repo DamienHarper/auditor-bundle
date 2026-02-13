@@ -31,13 +31,23 @@ class ActivityGraphProvider
      */
     public function getActivityData(string $entity, Reader $reader): array
     {
+        return $this->getActivityDataWithRaw($entity, $reader)['normalized'];
+    }
+
+    /**
+     * Get activity data for an entity with both normalized and raw values.
+     *
+     * @return array{normalized: array<int>, raw: array<int>} Normalized (0-100) and raw (event counts) arrays
+     */
+    public function getActivityDataWithRaw(string $entity, Reader $reader): array
+    {
         $cacheKey = $this->getCacheKey($entity);
 
         // Try to get from cache
         if ($this->cacheEnabled && null !== $this->cache) {
             $item = $this->cache->getItem($cacheKey);
             if ($item->isHit()) {
-                /** @var array<int> $cachedData */
+                /** @var array{normalized: array<int>, raw: array<int>} $cachedData */
                 $cachedData = $item->get();
 
                 return $cachedData;
@@ -127,6 +137,11 @@ class ActivityGraphProvider
      *
      * @return array<int> Array of N values (0-100) representing normalized activity
      */
+    /**
+     * Compute activity data from the database.
+     *
+     * @return array{normalized: array<int>, raw: array<int>} Normalized (0-100) and raw (event counts) arrays
+     */
     private function computeActivityData(string $entity, Reader $reader): array
     {
         $storageService = $reader->getProvider()->getStorageServiceForEntity($entity);
@@ -153,21 +168,25 @@ class ActivityGraphProvider
             $countsByDate[$day] = (int) $cnt;
         }
 
-        // Generate values for the last N days
-        $data = [];
+        // Generate raw values for the last N days
+        $raw = [];
         $max = 0;
         for ($i = $this->days - 1; $i >= 0; $i--) {
             $date = (new \DateTimeImmutable(\sprintf('-%d days', $i)))->format('Y-m-d');
             $count = $countsByDate[$date] ?? 0;
-            $data[] = $count;
+            $raw[] = $count;
             $max = max($max, $count);
         }
 
         // Normalize to 0-100
+        $normalized = $raw;
         if ($max > 0) {
-            $data = array_map(static fn (int $v): int => (int) round(($v / $max) * 100), $data);
+            $normalized = array_map(static fn (int $v): int => (int) round(($v / $max) * 100), $raw);
         }
 
-        return $data;
+        return [
+            'normalized' => $normalized,
+            'raw' => $raw,
+        ];
     }
 }

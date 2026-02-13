@@ -75,7 +75,9 @@ final readonly class ViewerController
             $activityGraphDays = $this->activityGraphProvider->getDays();
             $activityGraphLayout = $this->activityGraphProvider->getLayout();
             foreach ($audited as $entity => &$data) {
-                $data['activityGraph'] = $this->activityGraphProvider->getActivityData($entity, $reader);
+                $activityData = $this->activityGraphProvider->getActivityDataWithRaw($entity, $reader);
+                $data['activityGraph'] = $activityData['normalized'];
+                $data['activityGraphRaw'] = $activityData['raw'];
             }
             unset($data);
         }

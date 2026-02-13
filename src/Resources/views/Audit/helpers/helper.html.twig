@@ -36,13 +36,15 @@
 {% endmacro type_badge %}
 
 {# Option A: Sparkline compact (pour affichage inline dans le header, max 40% de largeur) #}
-{% macro activity_sparkline(data, days) %}
+{% macro activity_sparkline(data, rawData, days) %}
     {% set hasActivity = data|filter(v => v > 0)|length > 0 %}
     <div class="flex items-end gap-px h-4 w-full max-w-[40%] shrink-0" title="{{ 'audit.activity_graph.period'|trans({'%days%': days}, 'auditor') }}">
         {% for value in data %}
+            {% set rawValue = rawData[loop.index0]|default(0) %}
             {% if hasActivity %}
-                <div class="flex-1 bg-indigo-400 dark:bg-indigo-500 rounded-sm"
-                     style="height: {{ value > 0 ? (value < 15 ? 15 : value) : 4 }}%"></div>
+                <div class="flex-1 bg-indigo-400 dark:bg-indigo-500 rounded-sm transition-colors hover:bg-indigo-600 dark:hover:bg-indigo-400 cursor-default"
+                     style="height: {{ value > 0 ? (value < 15 ? 15 : value) : 4 }}%"
+                     title="{{ rawValue }} {{ rawValue == 1 ? 'event' : 'events' }}"></div>
             {% else %}
                 <div class="flex-1 bg-slate-300 dark:bg-slate-600 rounded-sm" style="height: 20%"></div>
             {% endif %}
@@ -51,14 +53,16 @@
 {% endmacro activity_sparkline %}
 
 {# Option B: Sparkline en bas, pleine largeur de la card #}
-{% macro activity_sparkline_bottom(data, days) %}
+{% macro activity_sparkline_bottom(data, rawData, days) %}
     {% set hasActivity = data|filter(v => v > 0)|length > 0 %}
     <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
         <div class="flex items-end gap-px h-5">
             {% for value in data %}
+                {% set rawValue = rawData[loop.index0]|default(0) %}
                 {% if hasActivity %}
-                    <div class="flex-1 bg-indigo-400 dark:bg-indigo-500 rounded-sm"
-                         style="height: {{ value > 0 ? (value < 15 ? 15 : value) : 4 }}%"></div>
+                    <div class="flex-1 bg-indigo-400 dark:bg-indigo-500 rounded-sm transition-colors hover:bg-indigo-600 dark:hover:bg-indigo-400 cursor-default"
+                         style="height: {{ value > 0 ? (value < 15 ? 15 : value) : 4 }}%"
+                         title="{{ rawValue }} {{ rawValue == 1 ? 'event' : 'events' }}"></div>
                 {% else %}
                     <div class="flex-1 bg-slate-300 dark:bg-slate-600 rounded-sm" style="height: 20%"></div>
                 {% endif %}
@@ -74,12 +78,12 @@
     </div>
 {% endmacro activity_sparkline_bottom %}
 
-{# Legacy: garde l'ancien macro pour compatibilité, redirige vers sparkline_bottom #}
-{% macro activity_graph(data, days, layout) %}
+{# Legacy: garde l'ancien macro pour compatibilité #}
+{% macro activity_graph(data, rawData, days, layout) %}
     {% import _self as helper %}
     {% if layout|default('bottom') == 'inline' %}
-        {{ helper.activity_sparkline(data, days) }}
+        {{ helper.activity_sparkline(data, rawData, days) }}
     {% else %}
-        {{ helper.activity_sparkline_bottom(data, days) }}
+        {{ helper.activity_sparkline_bottom(data, rawData, days) }}
     {% endif %}
 {% endmacro activity_graph %}
