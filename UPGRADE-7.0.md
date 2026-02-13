@@ -49,6 +49,40 @@ The following classes have been removed:
 
 ## Code Changes
 
+### Route Names
+
+The viewer route names have been updated for consistency:
+
+| Before (6.x)                       | After (7.0)                          |
+|------------------------------------|--------------------------------------|
+| `dh_auditor_show_entity_history`   | `dh_auditor_show_entity_stream`      |
+| `dh_auditor_show_transaction`      | `dh_auditor_show_transaction_stream` |
+
+Update any route references in your code:
+
+```php
+// Before
+$url = $urlGenerator->generate('dh_auditor_show_entity_history', ['entity' => 'App-Entity-User']);
+
+// After
+$url = $urlGenerator->generate('dh_auditor_show_entity_stream', ['entity' => 'App-Entity-User']);
+```
+
+### ConsoleUserProvider
+
+CLI commands now use the command name as the user identifier instead of a generic `"command"` string:
+
+| Before (6.x)                    | After (7.0)                        |
+|---------------------------------|------------------------------------|
+| `blame_id: "command"`           | `blame_id: "app:import-users"`     |
+| `blame_user: "app:import-users"` | `blame_user: "app:import-users"` |
+
+This allows:
+- Filtering audit entries by specific CLI command in the viewer
+- Better traceability of automated processes
+
+**Note:** Existing audit entries with `blame_id = "command"` will not be automatically migrated.
+
 ### UserProvider
 
 The `UserProvider` class no longer handles `AnonymousToken` (removed in Symfony 6.0).

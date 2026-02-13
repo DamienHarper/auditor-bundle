@@ -25,11 +25,11 @@ dh_auditor:
 
 The viewer registers three routes:
 
-| Route                            | URL                         | Description               |
-|----------------------------------|-----------------------------|---------------------------|
-| `dh_auditor_list_audits`         | `/audit`                    | List all audited entities |
-| `dh_auditor_show_entity_history` | `/audit/{entity}/{id?}`     | Entity audit history      |
-| `dh_auditor_show_transaction`    | `/audit/transaction/{hash}` | Transaction details       |        
+| Route                              | URL                         | Description               |
+|------------------------------------|-----------------------------|---------------------------|
+| `dh_auditor_list_audits`           | `/audit`                    | List all audited entities |
+| `dh_auditor_show_entity_stream`    | `/audit/{entity}/{id?}`     | Entity audit stream       |
+| `dh_auditor_show_transaction_stream` | `/audit/transaction/{hash}` | Transaction details     |        
 
 ### Route Configuration
 
@@ -51,17 +51,43 @@ Displays all audited entities with:
 - Number of audit entries
 - Link to view history
 
-### Entity History (`/audit/{entity}`)
+### Entity Stream (`/audit/{entity}`)
 
 Shows audit entries for an entity:
 - Chronological list (newest first)
-- Operation type (insert/update/remove)
+- Operation type (insert/update/remove/associate/dissociate)
 - User and timestamp
 - Changed properties (diff)
 
 Filter by specific entity ID:
 ```
 /audit/App-Entity-User/42
+```
+
+#### Filters
+
+The entity stream page includes filters to narrow down audit entries:
+
+**Action Type Filter**
+Filter by operation type:
+- Insert (record created)
+- Update (record updated)
+- Remove (record deleted)
+- Associate (relation added)
+- Dissociate (relation removed)
+
+**User Filter**
+Filter by the user who performed the action:
+- All registered users who have made changes
+- Anonymous (for actions without user attribution)
+- CLI commands (each command is tracked by its name, e.g., `app:import-users`)
+
+Filters can be combined and are preserved during pagination.
+
+URL parameters:
+```
+/audit/App-Entity-User?type=update&user=42
+/audit/App-Entity-User?type=insert&user=__anonymous__
 ```
 
 ### Transaction View (`/audit/transaction/{hash}`)
@@ -130,19 +156,26 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 // Entity list
 $url = $urlGenerator->generate('dh_auditor_list_audits');
 
-// Entity history
-$url = $urlGenerator->generate('dh_auditor_show_entity_history', [
+// Entity stream
+$url = $urlGenerator->generate('dh_auditor_show_entity_stream', [
     'entity' => 'App-Entity-User',
 ]);
 
 // Specific entity
-$url = $urlGenerator->generate('dh_auditor_show_entity_history', [
+$url = $urlGenerator->generate('dh_auditor_show_entity_stream', [
     'entity' => 'App-Entity-User',
     'id' => 42,
 ]);
 
+// With filters
+$url = $urlGenerator->generate('dh_auditor_show_entity_stream', [
+    'entity' => 'App-Entity-User',
+    'type' => 'update',
+    'user' => '42',
+]);
+
 // Transaction
-$url = $urlGenerator->generate('dh_auditor_show_transaction', [
+$url = $urlGenerator->generate('dh_auditor_show_transaction_stream', [
     'hash' => $transactionHash,
 ]);
 ```
@@ -156,12 +189,14 @@ Create files in `templates/bundles/DHAuditorBundle/`:
 ```
 templates/bundles/DHAuditorBundle/
 ├── Audit/
-│   ├── audits.html.twig           # Entity list
-│   ├── entity_history.html.twig   # Audit history
-│   ├── entry.html.twig            # Single entry
-│   ├── entry_diff.html.twig       # Property diff
-│   └── transaction.html.twig      # Transaction view
-└── layout.html.twig               # Base layout
+│   ├── audits.html.twig              # Entity list
+│   ├── entity_stream.html.twig       # Entity audit stream
+│   ├── transaction_stream.html.twig  # Transaction view
+│   ├── entry.html.twig               # Single entry
+│   └── helpers/
+│       ├── helper.html.twig          # Helper macros
+│       └── pager.html.twig           # Pagination
+└── layout.html.twig                  # Base layout
 ```
 
 ### Custom Layout
