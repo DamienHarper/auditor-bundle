@@ -14,6 +14,9 @@ use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 
+/**
+ * @internal
+ */
 #[Small]
 #[CoversClass(ClearActivityCacheCommand::class)]
 final class ClearActivityCacheCommandTest extends TestCase
@@ -21,37 +24,38 @@ final class ClearActivityCacheCommandTest extends TestCase
     #[Test]
     public function itShowsWarningWhenProviderIsNull(): void
     {
-        $command = new ClearActivityCacheCommand(null);
+        $command = new ClearActivityCacheCommand();
         $tester = new CommandTester($command);
 
         $tester->execute([]);
 
-        self::assertSame(0, $tester->getStatusCode());
-        self::assertStringContainsString('not configured', $tester->getDisplay());
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertStringContainsString('not configured', $tester->getDisplay());
     }
 
     #[Test]
     public function itShowsWarningWhenCacheNotAvailable(): void
     {
-        $provider = new ActivityGraphProvider(7, 'bottom', false, 300, null);
+        $provider = new ActivityGraphProvider(7, 'bottom', false, 300);
 
         $command = new ClearActivityCacheCommand($provider);
         $tester = new CommandTester($command);
 
         $tester->execute([]);
 
-        self::assertSame(0, $tester->getStatusCode());
-        self::assertStringContainsString('not available', $tester->getDisplay());
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertStringContainsString('not available', $tester->getDisplay());
     }
 
     #[Test]
     public function itClearsAllCacheSuccessfully(): void
     {
         $cache = $this->createMock(TagAwareAdapterInterface::class);
-        $cache->expects(self::once())
+        $cache->expects($this->once())
             ->method('invalidateTags')
             ->with([ActivityGraphProvider::CACHE_TAG])
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
 
         $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
 
@@ -60,28 +64,29 @@ final class ClearActivityCacheCommandTest extends TestCase
 
         $tester->execute([]);
 
-        self::assertSame(0, $tester->getStatusCode());
-        self::assertStringContainsString('All activity graph cache cleared', $tester->getDisplay());
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertStringContainsString('All activity graph cache cleared', $tester->getDisplay());
     }
 
     #[Test]
     public function itClearsEntityCacheSuccessfully(): void
     {
         $cache = $this->createMock(CacheItemPoolInterface::class);
-        $cache->expects(self::once())
+        $cache->expects($this->once())
             ->method('deleteItem')
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
 
         $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
 
         $command = new ClearActivityCacheCommand($provider);
         $tester = new CommandTester($command);
 
-        $tester->execute(['--entity' => 'App\\Entity\\User']);
+        $tester->execute(['--entity' => 'App\Entity\User']);
 
-        self::assertSame(0, $tester->getStatusCode());
-        self::assertStringContainsString('Cache cleared for entity', $tester->getDisplay());
-        self::assertStringContainsString('App\\Entity\\User', $tester->getDisplay());
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertStringContainsString('Cache cleared for entity', $tester->getDisplay());
+        $this->assertStringContainsString('App\Entity\User', $tester->getDisplay());
     }
 
     #[Test]
@@ -96,9 +101,9 @@ final class ClearActivityCacheCommandTest extends TestCase
 
         $tester->execute([]);
 
-        self::assertSame(0, $tester->getStatusCode());
-        self::assertStringContainsString('Could not clear all cache', $tester->getDisplay());
-        self::assertStringContainsString('TagAwareCacheInterface', $tester->getDisplay());
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertStringContainsString('Could not clear all cache', $tester->getDisplay());
+        $this->assertStringContainsString('TagAwareCacheInterface', $tester->getDisplay());
     }
 
     #[Test]
@@ -112,9 +117,9 @@ final class ClearActivityCacheCommandTest extends TestCase
         $command = new ClearActivityCacheCommand($provider);
         $tester = new CommandTester($command);
 
-        $tester->execute(['--entity' => 'App\\Entity\\User']);
+        $tester->execute(['--entity' => 'App\Entity\User']);
 
-        self::assertSame(0, $tester->getStatusCode());
-        self::assertStringContainsString('Could not clear cache for entity', $tester->getDisplay());
+        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertStringContainsString('Could not clear cache for entity', $tester->getDisplay());
     }
 }

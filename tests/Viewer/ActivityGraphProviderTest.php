@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\Tests\Viewer;
 
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
+use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
 use DH\AuditorBundle\Viewer\ActivityGraphProvider;
@@ -15,8 +16,10 @@ use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
-use Symfony\Contracts\Cache\ItemInterface;
 
+/**
+ * @internal
+ */
 #[Small]
 #[CoversClass(ActivityGraphProvider::class)]
 final class ActivityGraphProviderTest extends WebTestCase
@@ -26,19 +29,14 @@ final class ActivityGraphProviderTest extends WebTestCase
 
     private DoctrineProvider $provider;
 
-    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();
-
         self::createClient();
-
         // provider with 1 em for both storage and auditing
         $this->createAndInitDoctrineProvider();
-
         // declare audited entities
         $this->configureEntities();
-
         // setup entity and audit schemas
         $this->setupEntitySchemas();
         $this->setupAuditSchemas();
@@ -50,9 +48,9 @@ final class ActivityGraphProviderTest extends WebTestCase
         $provider = new ActivityGraphProvider(7, 'bottom', false, 300);
         $reader = $this->createReader();
 
-        $result = $provider->getActivityData('DH\\Auditor\\Tests\\Provider\\Doctrine\\Fixtures\\Entity\\Standard\\Blog\\Post', $reader);
+        $result = $provider->getActivityData(Post::class, $reader);
 
-        self::assertCount(7, $result);
+        $this->assertCount(7, $result);
     }
 
     #[Test]
@@ -61,32 +59,35 @@ final class ActivityGraphProviderTest extends WebTestCase
         $provider = new ActivityGraphProvider(7, 'bottom', false, 300);
         $reader = $this->createReader();
 
-        $result = $provider->getActivityData('DH\\Auditor\\Tests\\Provider\\Doctrine\\Fixtures\\Entity\\Standard\\Blog\\Post', $reader);
+        $result = $provider->getActivityData(Post::class, $reader);
 
         // Fresh database should have no activity
-        self::assertSame([0, 0, 0, 0, 0, 0, 0], $result);
+        $this->assertSame([0, 0, 0, 0, 0, 0, 0], $result);
     }
 
     #[Test]
     public function itUsesCacheWhenAvailableAndHit(): void
     {
-        $cachedData = [10, 20, 30, 40, 50, 60, 70];
+        $normalizedData = [10, 20, 30, 40, 50, 60, 70];
+        $rawData = [1, 2, 3, 4, 5, 6, 7];
+        $cachedData = ['normalized' => $normalizedData, 'raw' => $rawData];
 
         $cacheItem = $this->createStub(CacheItemInterface::class);
         $cacheItem->method('isHit')->willReturn(true);
         $cacheItem->method('get')->willReturn($cachedData);
 
         $cache = $this->createMock(CacheItemPoolInterface::class);
-        $cache->expects(self::once())
+        $cache->expects($this->once())
             ->method('getItem')
-            ->willReturn($cacheItem);
+            ->willReturn($cacheItem)
+        ;
 
         $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
         $reader = $this->createReader();
 
-        $result = $provider->getActivityData('DH\\Auditor\\Tests\\Provider\\Doctrine\\Fixtures\\Entity\\Standard\\Blog\\Post', $reader);
+        $result = $provider->getActivityData(Post::class, $reader);
 
-        self::assertSame($cachedData, $result);
+        $this->assertSame($normalizedData, $result);
     }
 
     #[Test]
@@ -94,17 +95,17 @@ final class ActivityGraphProviderTest extends WebTestCase
     {
         $cacheItem = $this->createMock(CacheItemInterface::class);
         $cacheItem->method('isHit')->willReturn(false);
-        $cacheItem->expects(self::once())->method('set');
-        $cacheItem->expects(self::once())->method('expiresAfter')->with(300);
+        $cacheItem->expects($this->once())->method('set');
+        $cacheItem->expects($this->once())->method('expiresAfter')->with(300);
 
         $cache = $this->createMock(CacheItemPoolInterface::class);
         $cache->method('getItem')->willReturn($cacheItem);
-        $cache->expects(self::once())->method('save')->with($cacheItem);
+        $cache->expects($this->once())->method('save')->with($cacheItem);
 
         $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
         $reader = $this->createReader();
 
-        $provider->getActivityData('DH\\Auditor\\Tests\\Provider\\Doctrine\\Fixtures\\Entity\\Standard\\Blog\\Post', $reader);
+        $provider->getActivityData(Post::class, $reader);
     }
 
     #[Test]
@@ -119,63 +120,66 @@ final class ActivityGraphProviderTest extends WebTestCase
         $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
 
         // Verify the cache is available
-        self::assertTrue($provider->isCacheAvailable());
+        $this->assertTrue($provider->isCacheAvailable());
 
         // Verify clearCache with tags works (this proves tag support detection)
-        $cache->expects(self::once())
+        $cache->expects($this->once())
             ->method('invalidateTags')
             ->with([ActivityGraphProvider::CACHE_TAG])
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
 
-        self::assertTrue($provider->clearCache());
+        $this->assertTrue($provider->clearCache());
     }
 
     #[Test]
     public function itDoesNotUseCacheWhenDisabled(): void
     {
         $cache = $this->createMock(CacheItemPoolInterface::class);
-        $cache->expects(self::never())->method('getItem');
+        $cache->expects($this->never())->method('getItem');
 
         $provider = new ActivityGraphProvider(7, 'bottom', false, 300, $cache);
         $reader = $this->createReader();
 
-        $provider->getActivityData('DH\\Auditor\\Tests\\Provider\\Doctrine\\Fixtures\\Entity\\Standard\\Blog\\Post', $reader);
+        $provider->getActivityData(Post::class, $reader);
     }
 
     #[Test]
     public function clearCacheReturnsFalseWithoutCache(): void
     {
-        $provider = new ActivityGraphProvider(7, 'bottom', true, 300, null);
+        $provider = new ActivityGraphProvider(7, 'bottom', true, 300);
 
-        self::assertFalse($provider->clearCache());
-        self::assertFalse($provider->clearCache('App\\Entity\\User'));
+        $this->assertFalse($provider->clearCache());
+        $this->assertFalse($provider->clearCache('App\Entity\User'));
     }
 
     #[Test]
     public function clearCacheForEntityDeletesItem(): void
     {
         $cache = $this->createMock(CacheItemPoolInterface::class);
-        $cache->expects(self::once())
+        $cache->expects($this->once())
             ->method('deleteItem')
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
 
         $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
 
-        self::assertTrue($provider->clearCache('App\\Entity\\User'));
+        $this->assertTrue($provider->clearCache('App\Entity\User'));
     }
 
     #[Test]
     public function clearCacheAllUsesTagsWhenAvailable(): void
     {
         $cache = $this->createMock(TagAwareAdapterInterface::class);
-        $cache->expects(self::once())
+        $cache->expects($this->once())
             ->method('invalidateTags')
             ->with([ActivityGraphProvider::CACHE_TAG])
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
 
         $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
 
-        self::assertTrue($provider->clearCache());
+        $this->assertTrue($provider->clearCache());
     }
 
     #[Test]
@@ -185,7 +189,7 @@ final class ActivityGraphProviderTest extends WebTestCase
 
         $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
 
-        self::assertFalse($provider->clearCache());
+        $this->assertFalse($provider->clearCache());
     }
 
     #[Test]
@@ -194,12 +198,12 @@ final class ActivityGraphProviderTest extends WebTestCase
         $cache = $this->createStub(CacheItemPoolInterface::class);
 
         $providerWithCache = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
-        $providerWithoutCache = new ActivityGraphProvider(7, 'bottom', true, 300, null);
+        $providerWithoutCache = new ActivityGraphProvider(7, 'bottom', true, 300);
         $providerDisabled = new ActivityGraphProvider(7, 'bottom', false, 300, $cache);
 
-        self::assertTrue($providerWithCache->isCacheAvailable());
-        self::assertFalse($providerWithoutCache->isCacheAvailable());
-        self::assertFalse($providerDisabled->isCacheAvailable());
+        $this->assertTrue($providerWithCache->isCacheAvailable());
+        $this->assertFalse($providerWithoutCache->isCacheAvailable());
+        $this->assertFalse($providerDisabled->isCacheAvailable());
     }
 
     #[Test]
@@ -207,6 +211,6 @@ final class ActivityGraphProviderTest extends WebTestCase
     {
         $provider = new ActivityGraphProvider(14, 'bottom', false, 300);
 
-        self::assertSame(14, $provider->getDays());
+        $this->assertSame(14, $provider->getDays());
     }
 }

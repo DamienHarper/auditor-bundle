@@ -435,8 +435,8 @@ class DHAuditorBundle extends AbstractBundle
     }
 
     /**
-     * @param array<string, mixed>  $config
-     * @param array{enabled: bool, days: int, layout: string, cache: array{enabled: bool, pool: string, ttl: int}}  $defaults
+     * @param array<string, mixed>                                                                                 $config
+     * @param array{enabled: bool, days: int, layout: string, cache: array{enabled: bool, pool: string, ttl: int}} $defaults
      *
      * @return array{enabled: bool, days: int, layout: string, cache: array{enabled: bool, pool: string, ttl: int}}
      */
@@ -456,17 +456,15 @@ class DHAuditorBundle extends AbstractBundle
             $layout = $defaults['layout'];
         }
 
-        $result = [
+        return [
             'enabled' => (bool) ($config['enabled'] ?? $defaults['enabled']),
-            'days' => max(1, min(30, \is_numeric($days) ? (int) $days : $defaults['days'])),
+            'days' => max(1, min(30, is_numeric($days) ? (int) $days : $defaults['days'])),
             'layout' => $layout,
             'cache' => [
                 'enabled' => (bool) ($configCache['enabled'] ?? $defaults['cache']['enabled']),
                 'pool' => \is_string($pool) ? $pool : $defaults['cache']['pool'],
-                'ttl' => max(0, \is_numeric($ttl) ? (int) $ttl : $defaults['cache']['ttl']),
+                'ttl' => max(0, is_numeric($ttl) ? (int) $ttl : $defaults['cache']['ttl']),
             ],
         ];
-
-        return $result;
     }
 }

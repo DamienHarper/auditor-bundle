@@ -49,7 +49,7 @@ final class ClearActivityCacheCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        if (null === $this->activityGraphProvider) {
+        if (!$this->activityGraphProvider instanceof ActivityGraphProvider) {
             $io->warning('Activity graph is not configured or disabled.');
 
             return Command::SUCCESS;
@@ -64,7 +64,7 @@ final class ClearActivityCacheCommand extends Command
             return Command::SUCCESS;
         }
 
-        /** @var string|null $entity */
+        /** @var null|string $entity */
         $entity = $input->getOption('entity');
 
         if ($this->activityGraphProvider->clearCache($entity)) {
@@ -72,16 +72,14 @@ final class ClearActivityCacheCommand extends Command
                 ? \sprintf('Cache cleared for entity: %s', $entity)
                 : 'All activity graph cache cleared.';
             $io->success($message);
+        } elseif (null === $entity) {
+            $io->warning([
+                'Could not clear all cache.',
+                'Your cache pool may not support tags (TagAwareCacheInterface).',
+                'Try clearing cache for a specific entity with --entity option.',
+            ]);
         } else {
-            if (null === $entity) {
-                $io->warning([
-                    'Could not clear all cache.',
-                    'Your cache pool may not support tags (TagAwareCacheInterface).',
-                    'Try clearing cache for a specific entity with --entity option.',
-                ]);
-            } else {
-                $io->warning(\sprintf('Could not clear cache for entity: %s', $entity));
-            }
+            $io->warning(\sprintf('Could not clear cache for entity: %s', $entity));
         }
 
         return Command::SUCCESS;

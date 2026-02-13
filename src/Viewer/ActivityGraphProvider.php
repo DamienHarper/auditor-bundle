@@ -7,6 +7,7 @@ namespace DH\AuditorBundle\Viewer;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 /**
  * Provides activity graph data for audited entities.
@@ -14,6 +15,7 @@ use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
 class ActivityGraphProvider
 {
     public const string CACHE_TAG = 'dh_auditor.activity';
+
     private const string CACHE_KEY_PREFIX = 'dh_auditor.activity.';
 
     public function __construct(
@@ -44,7 +46,7 @@ class ActivityGraphProvider
         $cacheKey = $this->getCacheKey($entity);
 
         // Try to get from cache
-        if ($this->cacheEnabled && null !== $this->cache) {
+        if ($this->cacheEnabled && $this->cache instanceof CacheItemPoolInterface) {
             $item = $this->cache->getItem($cacheKey);
             if ($item->isHit()) {
                 /** @var array{normalized: array<int>, raw: array<int>} $cachedData */
@@ -58,12 +60,12 @@ class ActivityGraphProvider
         $data = $this->computeActivityData($entity, $reader);
 
         // Store in cache
-        if ($this->cacheEnabled && null !== $this->cache) {
+        if ($this->cacheEnabled && $this->cache instanceof CacheItemPoolInterface) {
             $item = $this->cache->getItem($cacheKey);
             $item->set($data);
             $item->expiresAfter($this->cacheTtl);
 
-            if ($item instanceof \Symfony\Contracts\Cache\ItemInterface && $this->cache instanceof TagAwareAdapterInterface) {
+            if ($item instanceof ItemInterface && $this->cache instanceof TagAwareAdapterInterface) {
                 $item->tag([self::CACHE_TAG]);
             }
 
@@ -76,13 +78,13 @@ class ActivityGraphProvider
     /**
      * Clear the activity graph cache.
      *
-     * @param string|null $entity Clear cache for a specific entity, or all if null
+     * @param null|string $entity Clear cache for a specific entity, or all if null
      *
      * @return bool True if cache was cleared successfully
      */
     public function clearCache(?string $entity = null): bool
     {
-        if (null === $this->cache) {
+        if (!$this->cache instanceof CacheItemPoolInterface) {
             return false;
         }
 
@@ -103,7 +105,7 @@ class ActivityGraphProvider
      */
     public function isCacheAvailable(): bool
     {
-        return $this->cacheEnabled && null !== $this->cache;
+        return $this->cacheEnabled && $this->cache instanceof CacheItemPoolInterface;
     }
 
     /**
@@ -163,6 +165,7 @@ class ActivityGraphProvider
         foreach ($result as $row) {
             /** @var string $day */
             $day = $row['day'];
+
             /** @var int|string $cnt */
             $cnt = $row['cnt'];
             $countsByDate[$day] = (int) $cnt;
@@ -171,8 +174,8 @@ class ActivityGraphProvider
         // Generate raw values for the last N days
         $raw = [];
         $max = 0;
-        for ($i = $this->days - 1; $i >= 0; $i--) {
-            $date = (new \DateTimeImmutable(\sprintf('-%d days', $i)))->format('Y-m-d');
+        for ($i = $this->days - 1; $i >= 0; --$i) {
+            $date = new \DateTimeImmutable(\sprintf('-%d days', $i))->format('Y-m-d');
             $count = $countsByDate[$date] ?? 0;
             $raw[] = $count;
             $max = max($max, $count);

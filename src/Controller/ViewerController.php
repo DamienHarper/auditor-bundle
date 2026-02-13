@@ -71,14 +71,16 @@ final readonly class ViewerController
         $activityGraphEnabled = null !== $this->activityGraphProvider;
         $activityGraphDays = 30;
         $activityGraphLayout = 'bottom';
-        if ($activityGraphEnabled) {
-            $activityGraphDays = $this->activityGraphProvider->getDays();
-            $activityGraphLayout = $this->activityGraphProvider->getLayout();
+        if ($activityGraphEnabled && null !== $this->activityGraphProvider) {
+            $activityGraphProvider = $this->activityGraphProvider;
+            $activityGraphDays = $activityGraphProvider->getDays();
+            $activityGraphLayout = $activityGraphProvider->getLayout();
             foreach ($audited as $entity => &$data) {
-                $activityData = $this->activityGraphProvider->getActivityDataWithRaw($entity, $reader);
+                $activityData = $activityGraphProvider->getActivityDataWithRaw($entity, $reader);
                 $data['activityGraph'] = $activityData['normalized'];
                 $data['activityGraphRaw'] = $activityData['raw'];
             }
+
             unset($data);
         }
 
@@ -192,6 +194,7 @@ final readonly class ViewerController
             $auditTable,
             '' !== $objectIdCondition ? 'WHERE '.$objectIdCondition : ''
         );
+        /** @var list<string> $types */
         $types = $connection->executeQuery($typesSql, $params)->fetchFirstColumn();
 
         // Get distinct users (blame_id and blame_user) - excluding NULL
@@ -202,10 +205,15 @@ final readonly class ViewerController
         );
 
         $usersResult = $connection->executeQuery($usersSql, $params)->fetchAllAssociative();
-        $users = array_map(static fn (array $row): array => [
-            'id' => $row['blame_id'],
-            'name' => $row['blame_user'] ?? $row['blame_id'],
-        ], $usersResult);
+        $users = array_map(static function (array $row): array {
+            $blameId = $row['blame_id'];
+            $blameUser = $row['blame_user'] ?? $blameId;
+
+            return [
+                'id' => \is_scalar($blameId) ? (string) $blameId : '',
+                'name' => \is_scalar($blameUser) ? (string) $blameUser : '',
+            ];
+        }, $usersResult);
 
         // Check if there are anonymous entries (blame_id IS NULL)
         $anonymousSql = \sprintf(
@@ -213,7 +221,8 @@ final readonly class ViewerController
             $auditTable,
             '' !== $objectIdCondition ? 'AND '.$objectIdCondition : ''
         );
-        $hasAnonymous = (int) $connection->executeQuery($anonymousSql, $params)->fetchOne() > 0;
+        $anonymousCount = $connection->executeQuery($anonymousSql, $params)->fetchOne();
+        $hasAnonymous = \is_numeric($anonymousCount) && (int) $anonymousCount > 0;
 
         return [
             'types' => $types,

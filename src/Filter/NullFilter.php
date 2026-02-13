@@ -9,9 +9,9 @@ use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\FilterInterface;
 /**
  * Filter for NULL values (e.g., anonymous users where blame_id IS NULL).
  */
-final class NullFilter implements FilterInterface
+final readonly class NullFilter implements FilterInterface
 {
-    public function __construct(private readonly string $name) {}
+    public function __construct(private string $name) {}
 
     public function getName(): string
     {

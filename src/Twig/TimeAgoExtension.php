@@ -11,9 +11,12 @@ use Twig\TwigFilter;
 class TimeAgoExtension extends AbstractExtension
 {
     private const int SECONDS_PER_MINUTE = 60;
-    private const int SECONDS_PER_HOUR = 3600;
-    private const int SECONDS_PER_DAY = 86400;
-    private const int SECONDS_PER_WEEK = 604800;
+
+    private const int SECONDS_PER_HOUR = 3_600;
+
+    private const int SECONDS_PER_DAY = 86_400;
+
+    private const int SECONDS_PER_WEEK = 604_800;
 
     public function __construct(
         private readonly TranslatorInterface $translator,
