@@ -27,9 +27,9 @@
     {%- elseif type == 'remove' -%}
         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400">REMOVE</span>
     {%- elseif type == 'associate' -%}
-        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">ASSOCIATE</span>
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">LINK</span>
     {%- elseif type == 'dissociate' -%}
-        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-300">DISSOCIATE</span>
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-300">UNLINK</span>
     {%- else -%}
         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400">{{ type|upper }}</span>
     {%- endif -%}
