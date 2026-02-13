@@ -68,10 +68,10 @@ final readonly class ViewerController
         }
 
         // Activity Graph
-        $activityGraphEnabled = null !== $this->activityGraphProvider;
+        $activityGraphEnabled = $this->activityGraphProvider instanceof ActivityGraphProvider;
         $activityGraphDays = 30;
         $activityGraphLayout = 'bottom';
-        if ($activityGraphEnabled && null !== $this->activityGraphProvider) {
+        if ($activityGraphEnabled && $this->activityGraphProvider instanceof ActivityGraphProvider) {
             $activityGraphProvider = $this->activityGraphProvider;
             $activityGraphDays = $activityGraphProvider->getDays();
             $activityGraphLayout = $activityGraphProvider->getLayout();
@@ -194,6 +194,7 @@ final readonly class ViewerController
             $auditTable,
             '' !== $objectIdCondition ? 'WHERE '.$objectIdCondition : ''
         );
+
         /** @var list<string> $types */
         $types = $connection->executeQuery($typesSql, $params)->fetchFirstColumn();
 
@@ -222,7 +223,7 @@ final readonly class ViewerController
             '' !== $objectIdCondition ? 'AND '.$objectIdCondition : ''
         );
         $anonymousCount = $connection->executeQuery($anonymousSql, $params)->fetchOne();
-        $hasAnonymous = \is_numeric($anonymousCount) && (int) $anonymousCount > 0;
+        $hasAnonymous = is_numeric($anonymousCount) && (int) $anonymousCount > 0;
 
         return [
             'types' => $types,

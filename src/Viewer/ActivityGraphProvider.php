@@ -49,10 +49,7 @@ class ActivityGraphProvider
         if ($this->cacheEnabled && $this->cache instanceof CacheItemPoolInterface) {
             $item = $this->cache->getItem($cacheKey);
             if ($item->isHit()) {
-                /** @var array{normalized: array<int>, raw: array<int>} $cachedData */
-                $cachedData = $item->get();
-
-                return $cachedData;
+                return $item->get();    // @phpstan-ignore-line
             }
         }
 
