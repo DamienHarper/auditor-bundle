@@ -30,6 +30,12 @@ audit:
   filter:
     all_actions: Alle acties
     all_users: Alle gebruikers
+    type:
+      insert: Invoegen
+      update: Bijwerken
+      remove: Verwijderen
+      associate: Koppelen
+      dissociate: Ontkoppelen
   stream:
     no_entries: Geen audit-items gevonden.
   pager:

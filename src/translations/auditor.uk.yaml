@@ -30,6 +30,12 @@ audit:
   filter:
     all_actions: Усі дії
     all_users: Усі користувачі
+    type:
+      insert: Вставка
+      update: Оновлення
+      remove: Видалення
+      associate: Зв'язування
+      dissociate: Від'єднання
   stream:
     no_entries: Записи аудиту не знайдено.
   pager:

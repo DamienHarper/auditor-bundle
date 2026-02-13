@@ -26,12 +26,28 @@
                 </p>
             </div>
             <div class="flex gap-2 mt-3 sm:mt-0">
-                {# Placeholder filters - disabled for now #}
-                <select disabled class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed">
-                    <option>{{ 'audit.filter.all_actions'|trans(domain='auditor') }}</option>
+                {# Type filter #}
+                <select id="filter-type"
+                        class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                        onchange="applyFilters()">
+                    <option value="">{{ 'audit.filter.all_actions'|trans(domain='auditor') }}</option>
+                    {% for type in filterOptions.types %}
+                        <option value="{{ type }}" {% if filters.type == type %}selected{% endif %}>
+                            {{ ('audit.filter.type.' ~ type)|trans(domain='auditor') }}
+                        </option>
+                    {% endfor %}
                 </select>
-                <select disabled class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed">
-                    <option>{{ 'audit.filter.all_users'|trans(domain='auditor') }}</option>
+
+                {# User filter #}
+                <select id="filter-user"
+                        class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                        onchange="applyFilters()">
+                    <option value="">{{ 'audit.filter.all_users'|trans(domain='auditor') }}</option>
+                    {% for user in filterOptions.users %}
+                        <option value="{{ user.id }}" {% if filters.user == user.id %}selected{% endif %}>
+                            {{ user.name }}
+                        </option>
+                    {% endfor %}
                 </select>
             </div>
         </div>
@@ -50,6 +66,31 @@
 
     {# Pager #}
     {% block dh_auditor_pager %}
-        {{ pager.render(helper.namespaceToParam(entity), id, paginator) }}
+        {{ pager.render(helper.namespaceToParam(entity), id, paginator, filters) }}
     {% endblock dh_auditor_pager %}
+
+    <script>
+        function applyFilters() {
+            const type = document.getElementById('filter-type').value;
+            const user = document.getElementById('filter-user').value;
+            const url = new URL(window.location.href);
+
+            // Reset to page 1 when filters change
+            url.searchParams.delete('page');
+
+            if (type) {
+                url.searchParams.set('type', type);
+            } else {
+                url.searchParams.delete('type');
+            }
+
+            if (user) {
+                url.searchParams.set('user', user);
+            } else {
+                url.searchParams.delete('user');
+            }
+
+            window.location.href = url.toString();
+        }
+    </script>
 {% endblock dh_auditor_content %}

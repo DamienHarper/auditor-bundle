@@ -30,6 +30,12 @@ audit:
   filter:
     all_actions: Alle Aktionen
     all_users: Alle Benutzer
+    type:
+      insert: Einfügen
+      update: Aktualisieren
+      remove: Löschen
+      associate: Verknüpfen
+      dissociate: Trennen
   stream:
     no_entries: Keine Audit-Einträge gefunden.
   pager:

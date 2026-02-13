@@ -30,6 +30,12 @@ audit:
   filter:
     all_actions: Kõik toimingud
     all_users: Kõik kasutajad
+    type:
+      insert: Lisamine
+      update: Uuendamine
+      remove: Kustutamine
+      associate: Seostamine
+      dissociate: Lahutamine
   stream:
     no_entries: Auditikirjeid ei leitud.
   pager:
