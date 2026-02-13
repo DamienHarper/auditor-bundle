@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}Auditor{% endblock %}</title>
+    <title>{% block title %}auditor{% endblock %}</title>
     {% block stylesheets %}
         <link rel="stylesheet" href="{{ asset('bundles/dhauditor/app.css') }}">
     {% endblock %}
@@ -25,22 +25,18 @@
             <a href="{{ path('dh_auditor_list_audits') }}"
                class="flex items-center gap-3 group">
                 {# Icon #}
-                <div class="w-8 h-8 rounded-lg
+                <div class="w-10 h-10 rounded-lg
                             bg-slate-900 dark:bg-slate-100
                             text-white dark:text-slate-900
                             flex items-center justify-center
-                            text-sm font-bold">
+                            text-xl font-bold">
                     A
                 </div>
                 <div class="leading-tight">
                     {# Bundle name #}
-                    <div class="text-lg font-semibold tracking-tight">
-                        Auditor
-                    </div>
+                    <div class="text-lg font-semibold tracking-tight">auditor</div>
                     {# Punchline #}
-                    <div class="text-[11px] text-slate-500 dark:text-slate-400">
-                        Doctrine audit inspection
-                    </div>
+                    <div class="text-[11px] text-slate-500 dark:text-slate-400">The missing audit log library.</div>
                 </div>
             </a>
 
