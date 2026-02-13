@@ -35,21 +35,36 @@
     {%- endif -%}
 {% endmacro type_badge %}
 
-{% macro activity_graph(data, days) %}
-    <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-        <div class="flex items-end gap-0.5 h-8">
-            {% set hasActivity = data|filter(v => v > 0)|length > 0 %}
+{# Option A: Sparkline compact (pour affichage à droite dans le header) #}
+{% macro activity_sparkline(data, days) %}
+    {% set hasActivity = data|filter(v => v > 0)|length > 0 %}
+    <div class="flex items-end gap-px h-5 w-20 shrink-0" title="{{ 'audit.activity_graph.period'|trans({'%days%': days}, 'auditor') }}">
+        {% for value in data %}
+            {% if hasActivity %}
+                <div class="w-0.5 bg-indigo-400 dark:bg-indigo-500 rounded-sm"
+                     style="height: {{ value > 0 ? (value < 15 ? 15 : value) : 4 }}%"></div>
+            {% else %}
+                <div class="w-0.5 bg-slate-300 dark:bg-slate-600 rounded-sm" style="height: 20%"></div>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endmacro activity_sparkline %}
+
+{# Option B: Sparkline en bas, compact mais pleine largeur #}
+{% macro activity_sparkline_bottom(data, days) %}
+    {% set hasActivity = data|filter(v => v > 0)|length > 0 %}
+    <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+        <div class="flex items-end gap-px h-4">
             {% for value in data %}
                 {% if hasActivity %}
-                    <div class="flex-1 bg-indigo-400 dark:bg-indigo-500 rounded-sm transition-all hover:bg-indigo-500 dark:hover:bg-indigo-400"
-                         style="height: {{ value > 0 ? (value < 10 ? 10 : value) : 2 }}%"
-                         title="{{ value }}%"></div>
+                    <div class="flex-1 min-w-0.5 max-w-1 bg-indigo-400 dark:bg-indigo-500 rounded-sm"
+                         style="height: {{ value > 0 ? (value < 15 ? 15 : value) : 4 }}%"></div>
                 {% else %}
-                    <div class="flex-1 bg-slate-200 dark:bg-slate-700 rounded-sm" style="height: 15%"></div>
+                    <div class="flex-1 min-w-0.5 max-w-1 bg-slate-300 dark:bg-slate-600 rounded-sm" style="height: 20%"></div>
                 {% endif %}
             {% endfor %}
         </div>
-        <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
+        <div class="text-[9px] text-slate-400 dark:text-slate-500 mt-0.5">
             {% if hasActivity %}
                 {{ 'audit.activity_graph.period'|trans({'%days%': days}, 'auditor') }}
             {% else %}
@@ -57,4 +72,14 @@
             {% endif %}
         </div>
     </div>
+{% endmacro activity_sparkline_bottom %}
+
+{# Legacy: garde l'ancien macro pour compatibilité, redirige vers sparkline_bottom #}
+{% macro activity_graph(data, days, layout) %}
+    {% import _self as helper %}
+    {% if layout|default('bottom') == 'inline' %}
+        {{ helper.activity_sparkline(data, days) }}
+    {% else %}
+        {{ helper.activity_sparkline_bottom(data, days) }}
+    {% endif %}
 {% endmacro activity_graph %}

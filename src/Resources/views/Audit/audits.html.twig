@@ -18,19 +18,26 @@
                class="rounded-xl border bg-white border-slate-200 p-4
                       hover:bg-slate-50 hover:border-slate-300 transition
                       dark:bg-slate-900 dark:border-slate-800 dark:hover:bg-slate-800">
-                <div class="flex justify-between">
-                    <span class="font-medium" title="{{ entity|e('html_attr') }}">{{ entity|split('\\')|last }}</span>
-                    <span class="text-xs text-slate-500 dark:text-slate-400 my-auto">
-                        {{ 'audit.audit_details.events_count'|trans({'%count%': entityAuditData.count|number_format}, 'auditor') }}
-                    </span>
+                {# Header row with entity name, event count, and optional inline sparkline #}
+                <div class="flex justify-between items-center gap-2">
+                    <span class="font-medium truncate" title="{{ entity|e('html_attr') }}">{{ entity|split('\\')|last }}</span>
+                    <div class="flex items-center gap-3 shrink-0">
+                        {% if activityGraphEnabled and activityGraphLayout == 'inline' and entityAuditData.activityGraph is defined %}
+                            {{ helper.activity_sparkline(entityAuditData.activityGraph, activityGraphDays) }}
+                        {% endif %}
+                        <span class="text-xs text-slate-500 dark:text-slate-400">
+                            {{ 'audit.audit_details.events_count'|trans({'%count%': entityAuditData.count|number_format}, 'auditor') }}
+                        </span>
+                    </div>
                 </div>
                 <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">
                     {{ 'audit.audit_details.last_activity'|trans(domain='auditor') }} ·
                     <span class="w-24 shrink-0">{{ helper.type_badge(entityAuditData.latest.type) }}</span> ·
                     {{ entityAuditData.latest.createdAt|time_ago }}
                 </div>
-                {% if activityGraphEnabled and entityAuditData.activityGraph is defined %}
-                    {{ helper.activity_graph(entityAuditData.activityGraph, activityGraphDays) }}
+                {# Bottom sparkline (Option B) #}
+                {% if activityGraphEnabled and activityGraphLayout == 'bottom' and entityAuditData.activityGraph is defined %}
+                    {{ helper.activity_sparkline_bottom(entityAuditData.activityGraph, activityGraphDays) }}
                 {% endif %}
             </a>
         {% else %}

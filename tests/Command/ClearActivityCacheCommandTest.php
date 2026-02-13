@@ -33,7 +33,7 @@ final class ClearActivityCacheCommandTest extends TestCase
     #[Test]
     public function itShowsWarningWhenCacheNotAvailable(): void
     {
-        $provider = new ActivityGraphProvider(7, false, 300, null);
+        $provider = new ActivityGraphProvider(7, 'bottom', false, 300, null);
 
         $command = new ClearActivityCacheCommand($provider);
         $tester = new CommandTester($command);
@@ -53,7 +53,7 @@ final class ClearActivityCacheCommandTest extends TestCase
             ->with([ActivityGraphProvider::CACHE_TAG])
             ->willReturn(true);
 
-        $provider = new ActivityGraphProvider(7, true, 300, $cache);
+        $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
 
         $command = new ClearActivityCacheCommand($provider);
         $tester = new CommandTester($command);
@@ -72,7 +72,7 @@ final class ClearActivityCacheCommandTest extends TestCase
             ->method('deleteItem')
             ->willReturn(true);
 
-        $provider = new ActivityGraphProvider(7, true, 300, $cache);
+        $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
 
         $command = new ClearActivityCacheCommand($provider);
         $tester = new CommandTester($command);
@@ -89,7 +89,7 @@ final class ClearActivityCacheCommandTest extends TestCase
     {
         $cache = $this->createStub(CacheItemPoolInterface::class);
 
-        $provider = new ActivityGraphProvider(7, true, 300, $cache);
+        $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
 
         $command = new ClearActivityCacheCommand($provider);
         $tester = new CommandTester($command);
@@ -107,7 +107,7 @@ final class ClearActivityCacheCommandTest extends TestCase
         $cache = $this->createStub(CacheItemPoolInterface::class);
         $cache->method('deleteItem')->willReturn(false);
 
-        $provider = new ActivityGraphProvider(7, true, 300, $cache);
+        $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
 
         $command = new ClearActivityCacheCommand($provider);
         $tester = new CommandTester($command);

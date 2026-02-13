@@ -69,9 +69,11 @@ final readonly class ViewerController
 
         // Activity Graph
         $activityGraphEnabled = null !== $this->activityGraphProvider;
-        $activityGraphDays = 7;
+        $activityGraphDays = 30;
+        $activityGraphLayout = 'bottom';
         if ($activityGraphEnabled) {
             $activityGraphDays = $this->activityGraphProvider->getDays();
+            $activityGraphLayout = $this->activityGraphProvider->getLayout();
             foreach ($audited as $entity => &$data) {
                 $data['activityGraph'] = $this->activityGraphProvider->getActivityData($entity, $reader);
             }
@@ -83,6 +85,7 @@ final readonly class ViewerController
             'reader' => $reader,
             'activityGraphEnabled' => $activityGraphEnabled,
             'activityGraphDays' => $activityGraphDays,
+            'activityGraphLayout' => $activityGraphLayout,
         ]);
     }
 

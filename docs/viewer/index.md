@@ -96,7 +96,7 @@ Groups all changes from a single database transaction across all entities.
 
 ## Activity Graph
 
-Each entity card displays a visual activity graph showing audit activity over time.
+Each entity card displays a visual sparkline graph showing audit activity over time.
 
 ### Configuration
 
@@ -108,12 +108,20 @@ dh_auditor:
                 enabled: true
                 activity_graph:
                     enabled: true       # Show/hide the graph (default: true)
-                    days: 7             # Number of days to display (default: 7, max: 30)
+                    days: 30            # Number of days to display (default: 30, max: 30)
+                    layout: 'bottom'    # Graph layout: 'bottom' or 'inline' (default: 'bottom')
                     cache:
                         enabled: true   # Enable caching (default: true)
                         pool: 'cache.app'  # Cache pool service ID
                         ttl: 300        # Cache TTL in seconds (default: 300)
 ```
+
+### Layout Options
+
+| Layout | Description |
+|--------|-------------|
+| `bottom` | Sparkline displayed below the entity info, full width (default) |
+| `inline` | Compact sparkline displayed in the header row, next to event count |
 
 ### Caching
 

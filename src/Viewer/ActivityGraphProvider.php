@@ -18,6 +18,7 @@ class ActivityGraphProvider
 
     public function __construct(
         private readonly int $days,
+        private readonly string $layout,
         private readonly bool $cacheEnabled,
         private readonly int $cacheTtl,
         private readonly ?CacheItemPoolInterface $cache = null,
@@ -101,6 +102,16 @@ class ActivityGraphProvider
     public function getDays(): int
     {
         return $this->days;
+    }
+
+    /**
+     * Get the layout configured for the activity graph.
+     *
+     * @return string 'bottom' or 'inline'
+     */
+    public function getLayout(): string
+    {
+        return $this->layout;
     }
 
     /**

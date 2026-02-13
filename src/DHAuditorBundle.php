@@ -235,7 +235,7 @@ class DHAuditorBundle extends AbstractBundle
         // Activity Graph Provider
         $activityGraphProviderRef = null;
         if (\is_array($config['viewer']) && ($config['viewer']['activity_graph']['enabled'] ?? false)) {
-            /** @var array{enabled: bool, days: int, cache: array{enabled: bool, pool: string, ttl: int}} $activityGraphConfig */
+            /** @var array{enabled: bool, days: int, layout: string, cache: array{enabled: bool, pool: string, ttl: int}} $activityGraphConfig */
             $activityGraphConfig = $config['viewer']['activity_graph'];
 
             $cachePoolRef = $activityGraphConfig['cache']['enabled']
@@ -245,6 +245,7 @@ class DHAuditorBundle extends AbstractBundle
             $services->set(ActivityGraphProvider::class)
                 ->args([
                     $activityGraphConfig['days'],
+                    $activityGraphConfig['layout'],
                     $activityGraphConfig['cache']['enabled'],
                     $activityGraphConfig['cache']['ttl'],
                     $cachePoolRef,
@@ -377,7 +378,8 @@ class DHAuditorBundle extends AbstractBundle
         // "viewer" is disabled by default
         $defaultActivityGraphOptions = [
             'enabled' => true,
-            'days' => 7,
+            'days' => 30,
+            'layout' => 'bottom',  // 'bottom' (Option B) or 'inline' (Option A)
             'cache' => [
                 'enabled' => true,
                 'pool' => 'cache.app',
@@ -434,9 +436,9 @@ class DHAuditorBundle extends AbstractBundle
 
     /**
      * @param array<string, mixed>  $config
-     * @param array{enabled: bool, days: int, cache: array{enabled: bool, pool: string, ttl: int}}  $defaults
+     * @param array{enabled: bool, days: int, layout: string, cache: array{enabled: bool, pool: string, ttl: int}}  $defaults
      *
-     * @return array{enabled: bool, days: int, cache: array{enabled: bool, pool: string, ttl: int}}
+     * @return array{enabled: bool, days: int, layout: string, cache: array{enabled: bool, pool: string, ttl: int}}
      */
     private function normalizeActivityGraphConfig(array $config, array $defaults): array
     {
@@ -446,10 +448,18 @@ class DHAuditorBundle extends AbstractBundle
         $days = $config['days'] ?? $defaults['days'];
         $ttl = $configCache['ttl'] ?? $defaults['cache']['ttl'];
         $pool = $configCache['pool'] ?? $defaults['cache']['pool'];
+        $layout = $config['layout'] ?? $defaults['layout'];
+
+        // Validate layout value
+        $validLayouts = ['bottom', 'inline'];
+        if (!\is_string($layout) || !\in_array($layout, $validLayouts, true)) {
+            $layout = $defaults['layout'];
+        }
 
         $result = [
             'enabled' => (bool) ($config['enabled'] ?? $defaults['enabled']),
             'days' => max(1, min(30, \is_numeric($days) ? (int) $days : $defaults['days'])),
+            'layout' => $layout,
             'cache' => [
                 'enabled' => (bool) ($configCache['enabled'] ?? $defaults['cache']['enabled']),
                 'pool' => \is_string($pool) ? $pool : $defaults['cache']['pool'],
