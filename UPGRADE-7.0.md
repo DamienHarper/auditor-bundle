@@ -52,6 +52,19 @@ CLI commands now use the command name as the user identifier:
 
 The `AnonymousToken` handling was removed (deprecated in Symfony 6.0, removed in Symfony 8.0).
 
+### Template Blocks
+
+The following Twig blocks have been removed from the base layout:
+
+| Removed Block        | Reason                           |
+|----------------------|----------------------------------|
+| `navbar`             | Replaced by built-in header      |
+| `breadcrumbs`        | No longer used                   |
+
+The `dh_auditor_header` and `dh_auditor_pager` blocks are still available in stream templates.
+
+If you override `layout.html.twig`, update your template to use the available blocks: `title`, `stylesheets`, `dh_auditor_content`, `javascripts`.
+
 ### Composer Scripts
 
 The `setup5`, `setup6`, `setup7`, `setup8` scripts have been replaced by a unified `setup` script.

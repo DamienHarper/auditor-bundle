@@ -296,12 +296,14 @@ templates/bundles/DHAuditorBundle/
 
 ### Template Blocks
 
-| Block                | Description           |
-|----------------------|-----------------------|
-| `title`              | Page title            |
-| `stylesheets`        | CSS includes          |
-| `dh_auditor_content` | Main content area     |
-| `javascripts`        | JavaScript includes   |      
+| Block                | Description                          | Available in                     |
+|----------------------|--------------------------------------|----------------------------------|
+| `title`              | Page title                           | All pages                        |
+| `stylesheets`        | CSS includes                         | All pages                        |
+| `dh_auditor_content` | Main content area                    | All pages                        |
+| `dh_auditor_header`  | Sub-header with back link & filters  | Entity stream, Transaction view  |
+| `dh_auditor_pager`   | Pagination                           | Entity stream                    |
+| `javascripts`        | JavaScript includes                  | All pages                        |      
 
 ## Assets
 

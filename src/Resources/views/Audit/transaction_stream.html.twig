@@ -4,6 +4,7 @@
 
 {% block dh_auditor_content %}
     {# Sub-header - sticky with back link #}
+    {% block dh_auditor_header %}
     <div class="sticky top-16 z-40 -mx-6 px-6 py-3 mb-4 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur">
         {# Back link #}
         <a href="{{ path('dh_auditor_list_audits') }}"
@@ -31,6 +32,7 @@
             </p>
         </div>
     </div>
+    {% endblock dh_auditor_header %}
 
     {# Entries grouped by entity #}
     {% for entity, entries in audits %}
