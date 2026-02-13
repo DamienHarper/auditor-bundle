@@ -43,7 +43,7 @@ final class ActivityGraphProviderTest extends WebTestCase
     }
 
     #[Test]
-    public function itReturnsArrayWithCorrectLength(): void
+    public function testReturnsArrayWithCorrectLength(): void
     {
         $provider = new ActivityGraphProvider(7, 'bottom', false, 300);
         $reader = $this->createReader();
@@ -54,7 +54,7 @@ final class ActivityGraphProviderTest extends WebTestCase
     }
 
     #[Test]
-    public function itReturnsZerosWhenNoActivity(): void
+    public function testReturnsZerosWhenNoActivity(): void
     {
         $provider = new ActivityGraphProvider(7, 'bottom', false, 300);
         $reader = $this->createReader();
@@ -66,7 +66,7 @@ final class ActivityGraphProviderTest extends WebTestCase
     }
 
     #[Test]
-    public function itUsesCacheWhenAvailableAndHit(): void
+    public function testUsesCacheWhenAvailableAndHit(): void
     {
         $normalizedData = [10, 20, 30, 40, 50, 60, 70];
         $rawData = [1, 2, 3, 4, 5, 6, 7];
@@ -91,7 +91,7 @@ final class ActivityGraphProviderTest extends WebTestCase
     }
 
     #[Test]
-    public function itStoresInCacheOnMiss(): void
+    public function testStoresInCacheOnMiss(): void
     {
         $cacheItem = $this->createMock(CacheItemInterface::class);
         $cacheItem->method('isHit')->willReturn(false);
@@ -109,7 +109,7 @@ final class ActivityGraphProviderTest extends WebTestCase
     }
 
     #[Test]
-    public function itAppliesTagsWithTagAwareCache(): void
+    public function testAppliesTagsWithTagAwareCache(): void
     {
         // This test verifies that when a TagAwareAdapterInterface is used,
         // the provider correctly identifies it for tag support.
@@ -133,7 +133,7 @@ final class ActivityGraphProviderTest extends WebTestCase
     }
 
     #[Test]
-    public function itDoesNotUseCacheWhenDisabled(): void
+    public function testDoesNotUseCacheWhenDisabled(): void
     {
         $cache = $this->createMock(CacheItemPoolInterface::class);
         $cache->expects($this->never())->method('getItem');
@@ -145,7 +145,7 @@ final class ActivityGraphProviderTest extends WebTestCase
     }
 
     #[Test]
-    public function clearCacheReturnsFalseWithoutCache(): void
+    public function testClearCacheReturnsFalseWithoutCache(): void
     {
         $provider = new ActivityGraphProvider(7, 'bottom', true, 300);
 
@@ -154,7 +154,7 @@ final class ActivityGraphProviderTest extends WebTestCase
     }
 
     #[Test]
-    public function clearCacheForEntityDeletesItem(): void
+    public function testClearCacheForEntityDeletesItem(): void
     {
         $cache = $this->createMock(CacheItemPoolInterface::class);
         $cache->expects($this->once())
@@ -168,7 +168,7 @@ final class ActivityGraphProviderTest extends WebTestCase
     }
 
     #[Test]
-    public function clearCacheAllUsesTagsWhenAvailable(): void
+    public function testClearCacheAllUsesTagsWhenAvailable(): void
     {
         $cache = $this->createMock(TagAwareAdapterInterface::class);
         $cache->expects($this->once())
@@ -183,7 +183,7 @@ final class ActivityGraphProviderTest extends WebTestCase
     }
 
     #[Test]
-    public function clearCacheAllReturnsFalseWithoutTagSupport(): void
+    public function testClearCacheAllReturnsFalseWithoutTagSupport(): void
     {
         $cache = $this->createStub(CacheItemPoolInterface::class);
 
@@ -193,7 +193,7 @@ final class ActivityGraphProviderTest extends WebTestCase
     }
 
     #[Test]
-    public function isCacheAvailableReturnsCorrectValue(): void
+    public function testIsCacheAvailableReturnsCorrectValue(): void
     {
         $cache = $this->createStub(CacheItemPoolInterface::class);
 
@@ -207,7 +207,7 @@ final class ActivityGraphProviderTest extends WebTestCase
     }
 
     #[Test]
-    public function getDaysReturnsConfiguredValue(): void
+    public function testGetDaysReturnsConfiguredValue(): void
     {
         $provider = new ActivityGraphProvider(14, 'bottom', false, 300);
 

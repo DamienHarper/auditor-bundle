@@ -22,7 +22,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 final class ClearActivityCacheCommandTest extends TestCase
 {
     #[Test]
-    public function itShowsWarningWhenProviderIsNull(): void
+    public function testShowsWarningWhenProviderIsNull(): void
     {
         $command = new ClearActivityCacheCommand();
         $tester = new CommandTester($command);
@@ -34,7 +34,7 @@ final class ClearActivityCacheCommandTest extends TestCase
     }
 
     #[Test]
-    public function itShowsWarningWhenCacheNotAvailable(): void
+    public function testShowsWarningWhenCacheNotAvailable(): void
     {
         $provider = new ActivityGraphProvider(7, 'bottom', false, 300);
 
@@ -48,7 +48,7 @@ final class ClearActivityCacheCommandTest extends TestCase
     }
 
     #[Test]
-    public function itClearsAllCacheSuccessfully(): void
+    public function testClearsAllCacheSuccessfully(): void
     {
         $cache = $this->createMock(TagAwareAdapterInterface::class);
         $cache->expects($this->once())
@@ -69,7 +69,7 @@ final class ClearActivityCacheCommandTest extends TestCase
     }
 
     #[Test]
-    public function itClearsEntityCacheSuccessfully(): void
+    public function testClearsEntityCacheSuccessfully(): void
     {
         $cache = $this->createMock(CacheItemPoolInterface::class);
         $cache->expects($this->once())
@@ -90,7 +90,7 @@ final class ClearActivityCacheCommandTest extends TestCase
     }
 
     #[Test]
-    public function itShowsWarningWhenClearAllFailsWithoutTagSupport(): void
+    public function testShowsWarningWhenClearAllFailsWithoutTagSupport(): void
     {
         $cache = $this->createStub(CacheItemPoolInterface::class);
 
@@ -107,7 +107,7 @@ final class ClearActivityCacheCommandTest extends TestCase
     }
 
     #[Test]
-    public function itShowsWarningWhenClearEntityFails(): void
+    public function testShowsWarningWhenClearEntityFails(): void
     {
         $cache = $this->createStub(CacheItemPoolInterface::class);
         $cache->method('deleteItem')->willReturn(false);
