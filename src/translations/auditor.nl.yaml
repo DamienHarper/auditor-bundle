@@ -30,6 +30,7 @@ audit:
   filter:
     all_actions: Alle acties
     all_users: Alle gebruikers
+    anonymous: Anoniem
     type:
       insert: Invoegen
       update: Bijwerken

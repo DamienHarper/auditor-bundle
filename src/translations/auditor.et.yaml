@@ -30,6 +30,7 @@ audit:
   filter:
     all_actions: Kõik toimingud
     all_users: Kõik kasutajad
+    anonymous: Anonüümne
     type:
       insert: Lisamine
       update: Uuendamine

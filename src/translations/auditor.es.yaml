@@ -30,6 +30,7 @@ audit:
   filter:
     all_actions: Todas las acciones
     all_users: Todos los usuarios
+    anonymous: Anónimo
     type:
       insert: Inserción
       update: Actualización

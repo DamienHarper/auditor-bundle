@@ -43,6 +43,11 @@
                         class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
                         onchange="applyFilters()">
                     <option value="">{{ 'audit.filter.all_users'|trans(domain='auditor') }}</option>
+                    {% if filterOptions.hasAnonymous %}
+                        <option value="__anonymous__" {% if filters.user == '__anonymous__' %}selected{% endif %}>
+                            {{ 'audit.filter.anonymous'|trans(domain='auditor') }}
+                        </option>
+                    {% endif %}
                     {% for user in filterOptions.users %}
                         <option value="{{ user.id }}" {% if filters.user == user.id %}selected{% endif %}>
                             {{ user.name }}

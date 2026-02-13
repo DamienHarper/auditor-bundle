@@ -30,6 +30,7 @@ audit:
   filter:
     all_actions: Все действия
     all_users: Все пользователи
+    anonymous: Аноним
     type:
       insert: Вставка
       update: Обновление

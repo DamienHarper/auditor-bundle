@@ -7,9 +7,11 @@ namespace DH\AuditorBundle\Controller;
 use DH\Auditor\Exception\AccessDeniedException;
 use DH\Auditor\Provider\Doctrine\Auditing\Annotation\Security;
 use DH\Auditor\Provider\Doctrine\Configuration;
+use DH\Auditor\Provider\Doctrine\Persistence\Reader\Query;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\Auditor\Provider\Doctrine\Persistence\Schema\SchemaManager;
 use DH\Auditor\Provider\Doctrine\Service\AuditingService;
+use DH\AuditorBundle\Filter\NullFilter;
 use DH\AuditorBundle\Helper\UrlHelper;
 use DH\AuditorBundle\Tests\Controller\ViewerControllerTest;
 use Symfony\Component\HttpFoundation\Request;
@@ -79,7 +81,7 @@ final readonly class ViewerController
     }
 
     #[Route(path: '/audit/{entity}/{id}', name: 'dh_auditor_show_entity_stream', methods: ['GET'])]
-    public function showEntityHistoryAction(Request $request, Reader $reader, string $entity, int|string|null $id = null): Response
+    public function showEntityStreamAction(Request $request, Reader $reader, string $entity, int|string|null $id = null): Response
     {
         $page = $request->query->getInt('page', 1);
         $page = max(1, $page);
@@ -110,11 +112,20 @@ final readonly class ViewerController
                 $queryOptions['type'] = $typeFilter;
             }
 
-            if (null !== $userFilter && '' !== $userFilter) {
+            // Handle user filter - special case for anonymous
+            $isAnonymousFilter = '__anonymous__' === $userFilter;
+            if (null !== $userFilter && '' !== $userFilter && !$isAnonymousFilter) {
                 $queryOptions['blame_id'] = $userFilter;
             }
 
-            $pager = $reader->paginate($reader->createQuery($entity, $queryOptions), $page, $pageSize);
+            $query = $reader->createQuery($entity, $queryOptions);
+
+            // Add NullFilter for anonymous users
+            if ($isAnonymousFilter) {
+                $query->addFilter(new NullFilter(Query::USER_ID));
+            }
+
+            $pager = $reader->paginate($query, $page, $pageSize);
 
             // Get available filter options (types and users)
             $filterOptions = $this->getFilterOptions($reader, $entity, $id);
@@ -137,7 +148,7 @@ final readonly class ViewerController
     /**
      * Get available filter options (distinct types and users) for an entity.
      *
-     * @return array{types: array<string>, users: array<array{id: string, name: string}>}
+     * @return array{types: array<string>, users: array<array{id: string, name: string}>, hasAnonymous: bool}
      */
     private function getFilterOptions(Reader $reader, string $entity, int|string|null $id): array
     {
@@ -146,35 +157,27 @@ final readonly class ViewerController
         $auditTable = $reader->getEntityAuditTableName($entity);
 
         // Build base condition for object_id if provided
-        $whereClause = '';
         $params = [];
+        $objectIdCondition = '';
         if (null !== $id) {
-            $whereClause = 'WHERE object_id = :object_id';
+            $objectIdCondition = 'object_id = :object_id';
             $params['object_id'] = $id;
         }
 
         // Get distinct types
-        $typesSql = \sprintf('SELECT DISTINCT type FROM %s %s ORDER BY type', $auditTable, $whereClause);
+        $typesSql = \sprintf(
+            'SELECT DISTINCT type FROM %s %s ORDER BY type',
+            $auditTable,
+            '' !== $objectIdCondition ? 'WHERE '.$objectIdCondition : ''
+        );
         $types = $connection->executeQuery($typesSql, $params)->fetchFirstColumn();
 
-        // Get distinct users (blame_id and blame_user)
+        // Get distinct users (blame_id and blame_user) - excluding NULL
         $usersSql = \sprintf(
-            'SELECT DISTINCT blame_id, blame_user FROM %s %s WHERE blame_id IS NOT NULL ORDER BY blame_user',
+            'SELECT DISTINCT blame_id, blame_user FROM %s WHERE blame_id IS NOT NULL %s ORDER BY blame_user',
             $auditTable,
-            '' !== $whereClause ? $whereClause.' AND' : 'WHERE'
+            '' !== $objectIdCondition ? 'AND '.$objectIdCondition : ''
         );
-        // Fix the SQL - we need to handle the WHERE properly
-        if (null !== $id) {
-            $usersSql = \sprintf(
-                'SELECT DISTINCT blame_id, blame_user FROM %s WHERE object_id = :object_id AND blame_id IS NOT NULL ORDER BY blame_user',
-                $auditTable
-            );
-        } else {
-            $usersSql = \sprintf(
-                'SELECT DISTINCT blame_id, blame_user FROM %s WHERE blame_id IS NOT NULL ORDER BY blame_user',
-                $auditTable
-            );
-        }
 
         $usersResult = $connection->executeQuery($usersSql, $params)->fetchAllAssociative();
         $users = array_map(static fn (array $row): array => [
@@ -182,9 +185,18 @@ final readonly class ViewerController
             'name' => $row['blame_user'] ?? $row['blame_id'],
         ], $usersResult);
 
+        // Check if there are anonymous entries (blame_id IS NULL)
+        $anonymousSql = \sprintf(
+            'SELECT COUNT(*) FROM %s WHERE blame_id IS NULL %s',
+            $auditTable,
+            '' !== $objectIdCondition ? 'AND '.$objectIdCondition : ''
+        );
+        $hasAnonymous = (int) $connection->executeQuery($anonymousSql, $params)->fetchOne() > 0;
+
         return [
             'types' => $types,
             'users' => $users,
+            'hasAnonymous' => $hasAnonymous,
         ];
     }
 
