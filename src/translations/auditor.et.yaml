@@ -2,6 +2,8 @@ audit:
   header:
     home: Kodu
     back_to_entities: Olemid
+  theme:
+    toggle: Lülita hele/tume režiim
   home:
     title: Auditeeritud olemid
     subtitle: Ülevaade kõikidest jälgitavatest olemitest

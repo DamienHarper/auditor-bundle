@@ -2,6 +2,8 @@ audit:
   header:
     home: Home
     back_to_entities: Entities
+  theme:
+    toggle: Toggle dark/light mode
   home:
     title: Audited Entities
     subtitle: Overview of all tracked entities

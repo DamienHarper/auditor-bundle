@@ -2,6 +2,8 @@ audit:
   header:
     home: Accueil
     back_to_entities: Entités
+  theme:
+    toggle: Basculer mode clair/sombre
   home:
     title: Entités auditées
     subtitle: Aperçu de toutes les entités suivies

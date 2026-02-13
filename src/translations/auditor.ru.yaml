@@ -2,6 +2,8 @@ audit:
   header:
     home: Главная
     back_to_entities: Сущности
+  theme:
+    toggle: Переключить светлую/тёмную тему
   home:
     title: Проверяемые сущности
     subtitle: Обзор всех отслеживаемых сущностей

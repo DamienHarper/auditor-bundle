@@ -2,6 +2,8 @@ audit:
   header:
     home: Home
     back_to_entities: Entità
+  theme:
+    toggle: Attiva/disattiva modalità chiara/scura
   home:
     title: Entità auditate
     subtitle: Panoramica di tutte le entità tracciate

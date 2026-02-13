@@ -1,7 +1,9 @@
 audit:
   header:
-    home: Home
+    home: Startseite
     back_to_entities: Entitäten
+  theme:
+    toggle: Hell/Dunkel-Modus umschalten
   home:
     title: Auditierte Entitäten
     subtitle: Übersicht aller überwachten Entitäten

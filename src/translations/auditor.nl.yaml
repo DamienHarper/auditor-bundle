@@ -1,7 +1,9 @@
 audit:
   header:
-    home: Hoofdpagina
+    home: Home
     back_to_entities: Entiteiten
+  theme:
+    toggle: Wissel licht/donker modus
   home:
     title: Gecontroleerde entiteiten
     subtitle: Overzicht van alle gevolgde entiteiten

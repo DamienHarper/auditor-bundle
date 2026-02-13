@@ -2,6 +2,8 @@ audit:
   header:
     home: Inicio
     back_to_entities: Entidades
+  theme:
+    toggle: Alternar modo claro/oscuro
   home:
     title: Entidades auditadas
     subtitle: Resumen de todas las entidades rastreadas

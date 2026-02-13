@@ -2,6 +2,9 @@
 
 @source "../../views/**/*.html.twig";
 
+/* Dark mode: use class strategy instead of media query */
+@variant dark (&:where(.dark, .dark *));
+
 /** Cards **/
 @layer components {
     div.card {

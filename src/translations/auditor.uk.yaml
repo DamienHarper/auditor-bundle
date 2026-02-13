@@ -2,6 +2,8 @@ audit:
   header:
     home: Головна
     back_to_entities: Сутності
+  theme:
+    toggle: Перемкнути світлу/темну тему
   home:
     title: Сутності, що перевіряються
     subtitle: Огляд усіх відстежуваних сутностей
