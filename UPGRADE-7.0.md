@@ -69,6 +69,47 @@ If you override `layout.html.twig`, update your template to use the available bl
 
 The `setup5`, `setup6`, `setup7`, `setup8` scripts have been replaced by a unified `setup` script.
 
+### PHP Attributes Migration
+
+The following classes now use PHP 8.4+ attributes for auto-configuration:
+
+| Class | Attributes Used |
+|-------|-----------------|
+| `ConsoleEventSubscriber` | `#[AsEventListener]` |
+| `ViewerEventSubscriber` | `#[AsEventListener]` |
+| `ViewerController` | `#[AsController]` |
+| `TimeAgoExtension` | `#[AsTwigFilter]` |
+| `RoutingLoader` | `#[AutoconfigureTag]` |
+
+### Final Classes
+
+The following classes are now `final` and cannot be extended:
+
+- `DH\AuditorBundle\Event\ConsoleEventSubscriber`
+- `DH\AuditorBundle\Event\ViewerEventSubscriber`
+- `DH\AuditorBundle\Twig\TimeAgoExtension`
+- `DH\AuditorBundle\Routing\RoutingLoader`
+- `DH\AuditorBundle\User\UserProvider`
+- `DH\AuditorBundle\User\ConsoleUserProvider`
+- `DH\AuditorBundle\Security\SecurityProvider`
+- `DH\AuditorBundle\Security\RoleChecker`
+- `DH\AuditorBundle\Viewer\ActivityGraphProvider`
+
+### ActivityGraphProvider API Changes
+
+| Before | After |
+|--------|-------|
+| `$provider->getDays()` | `$provider->days` |
+| `$provider->getLayout()` | `$provider->layout` |
+
+### TimeAgoExtension
+
+`TimeAgoExtension` no longer extends `Twig\Extension\AbstractExtension`. If you extended this class, update your code accordingly.
+
+### SecurityProvider
+
+`SecurityProvider` now uses `FirewallMapInterface` instead of `FirewallMap` for better autowiring compatibility.
+
 ## Quick Migration
 
 ```bash
