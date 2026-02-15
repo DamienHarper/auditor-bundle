@@ -316,10 +316,10 @@ class DHAuditorBundle extends AbstractBundle
             ->autoconfigure()
         ;
 
-        // Twig extension
+        // Twig extension (uses #[AsTwigFilter] attribute)
         $services->set(TimeAgoExtension::class)
             ->args([new Reference('translator')])
-            ->tag('twig.extension')
+            ->autoconfigure()
         ;
     }
 
