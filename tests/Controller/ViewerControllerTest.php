@@ -61,7 +61,7 @@ final class ViewerControllerTest extends WebTestCase
         // asserts that the response status code is 2xx
         $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
 
-        $this->assertPageTitleContains('Auditor', 'Title contains Auditor');
+        $this->assertPageTitleContains('auditor', 'Title contains auditor');
 
         // Check page title
         $title = $crawler->filter('h1');
@@ -81,7 +81,7 @@ final class ViewerControllerTest extends WebTestCase
         // asserts that the response status code is 2xx
         $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
 
-        $this->assertPageTitleContains('Auditor', 'Title contains Auditor');
+        $this->assertPageTitleContains('auditor', 'Title contains auditor');
 
         // Check cards - Author should not be visible
         $cards = $crawler->filter('a[href*="/audit/"]');
@@ -97,7 +97,7 @@ final class ViewerControllerTest extends WebTestCase
         // asserts that the response status code is 2xx
         $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
 
-        $this->assertPageTitleContains('Auditor', 'Title contains Auditor');
+        $this->assertPageTitleContains('auditor', 'Title contains auditor');
 
         // Check cards
         $cards = $crawler->filter('a[href*="/audit/"]');
@@ -113,7 +113,7 @@ final class ViewerControllerTest extends WebTestCase
         // asserts that the response status code is 2xx
         $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
 
-        $this->assertPageTitleContains('Auditor', 'Title contains Auditor');
+        $this->assertPageTitleContains('auditor', 'Title contains auditor');
 
         // Check back link
         $backLink = $crawler->filter('a[href="/audit"]');
@@ -148,7 +148,7 @@ final class ViewerControllerTest extends WebTestCase
         // asserts that the response status code is 2xx
         $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
 
-        $this->assertPageTitleContains('Auditor', 'Title contains Auditor');
+        $this->assertPageTitleContains('auditor', 'Title contains auditor');
 
         // Check page title contains entity name
         $title = $crawler->filter('h1');
@@ -182,7 +182,7 @@ final class ViewerControllerTest extends WebTestCase
         // asserts that the response status code is 2xx
         $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
 
-        $this->assertPageTitleContains('Auditor', 'Title contains Auditor');
+        $this->assertPageTitleContains('auditor', 'Title contains auditor');
 
         // Check back link
         $backLink = $crawler->filter('a[href="/audit"]');
@@ -212,7 +212,7 @@ final class ViewerControllerTest extends WebTestCase
         // asserts that the response status code is 2xx
         $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
 
-        $this->assertPageTitleContains('Auditor', 'Title contains Auditor');
+        $this->assertPageTitleContains('auditor', 'Title contains auditor');
 
         // Check back link
         $backLink = $crawler->filter('a[href="/audit"]');
