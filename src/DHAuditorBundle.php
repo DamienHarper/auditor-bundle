@@ -265,12 +265,13 @@ class DHAuditorBundle extends AbstractBundle
     private function loadBundleServices(ServicesConfigurator $services): void
     {
         // ViewerController
+        // ViewerController (uses #[AsController] attribute)
         $services->set(ViewerController::class)
             ->args([
                 new Reference('twig'),
                 new Reference(ActivityGraphProvider::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
             ])
-            ->tag('controller.service_arguments')
+            ->autoconfigure()
         ;
 
         // UserProvider
