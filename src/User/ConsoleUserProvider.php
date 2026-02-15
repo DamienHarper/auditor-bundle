@@ -9,7 +9,7 @@ use DH\Auditor\User\UserInterface;
 use DH\Auditor\User\UserProviderInterface;
 use Symfony\Component\Console\Command\Command;
 
-class ConsoleUserProvider implements UserProviderInterface
+final class ConsoleUserProvider implements UserProviderInterface
 {
     private ?string $currentCommand = null;
 
