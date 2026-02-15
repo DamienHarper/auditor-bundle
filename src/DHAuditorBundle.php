@@ -201,13 +201,13 @@ class DHAuditorBundle extends AbstractBundle
             ->args([new Reference(DoctrineProvider::class)])
         ;
 
-        // Routing loader
+        // Routing loader (uses #[AutoconfigureTag('routing.loader')] attribute)
         $services->set(RoutingLoader::class)
             ->args([
                 new Reference('routing.loader.attribute'),
                 '%dh_auditor.provider.doctrine.configuration%',
             ])
-            ->tag('routing.loader')
+            ->autoconfigure()
         ;
 
         // Doctrine event listeners
@@ -264,7 +264,6 @@ class DHAuditorBundle extends AbstractBundle
 
     private function loadBundleServices(ServicesConfigurator $services): void
     {
-        // ViewerController
         // ViewerController (uses #[AsController] attribute)
         $services->set(ViewerController::class)
             ->args([

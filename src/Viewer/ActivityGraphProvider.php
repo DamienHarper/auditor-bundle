@@ -12,15 +12,15 @@ use Symfony\Contracts\Cache\ItemInterface;
 /**
  * Provides activity graph data for audited entities.
  */
-class ActivityGraphProvider
+final class ActivityGraphProvider
 {
     public const string CACHE_TAG = 'dh_auditor.activity';
 
     private const string CACHE_KEY_PREFIX = 'dh_auditor.activity.';
 
     public function __construct(
-        private readonly int $days,
-        private readonly string $layout,
+        public private(set) readonly int $days,
+        public private(set) readonly string $layout,
         private readonly bool $cacheEnabled,
         private readonly int $cacheTtl,
         private readonly ?CacheItemPoolInterface $cache = null,
@@ -105,23 +105,6 @@ class ActivityGraphProvider
         return $this->cacheEnabled && $this->cache instanceof CacheItemPoolInterface;
     }
 
-    /**
-     * Get the number of days configured for the activity graph.
-     */
-    public function getDays(): int
-    {
-        return $this->days;
-    }
-
-    /**
-     * Get the layout configured for the activity graph.
-     *
-     * @return string 'bottom' or 'inline'
-     */
-    public function getLayout(): string
-    {
-        return $this->layout;
-    }
 
     /**
      * Get the cache key for an entity.

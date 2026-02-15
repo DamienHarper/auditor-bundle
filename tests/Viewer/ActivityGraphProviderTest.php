@@ -207,10 +207,10 @@ final class ActivityGraphProviderTest extends WebTestCase
     }
 
     #[Test]
-    public function testGetDaysReturnsConfiguredValue(): void
+    public function testDaysPropertyReturnsConfiguredValue(): void
     {
         $provider = new ActivityGraphProvider(14, 'bottom', false, 300);
 
-        $this->assertSame(14, $provider->getDays());
+        $this->assertSame(14, $provider->days);
     }
 }

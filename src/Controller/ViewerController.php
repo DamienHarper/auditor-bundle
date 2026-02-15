@@ -75,8 +75,8 @@ final readonly class ViewerController
         $activityGraphLayout = 'bottom';
         if ($activityGraphEnabled && $this->activityGraphProvider instanceof ActivityGraphProvider) {
             $activityGraphProvider = $this->activityGraphProvider;
-            $activityGraphDays = $activityGraphProvider->getDays();
-            $activityGraphLayout = $activityGraphProvider->getLayout();
+            $activityGraphDays = $activityGraphProvider->days;
+            $activityGraphLayout = $activityGraphProvider->layout;
             foreach ($audited as $entity => &$data) {
                 $activityData = $activityGraphProvider->getActivityDataWithRaw($entity, $reader);
                 $data['activityGraph'] = $activityData['normalized'];
