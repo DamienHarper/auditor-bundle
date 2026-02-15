@@ -300,13 +300,12 @@ class DHAuditorBundle extends AbstractBundle
         ;
         $services->alias('dh_auditor.role_checker', RoleChecker::class);
 
-        // Event subscribers
+        // Event listeners (using #[AsEventListener] attributes)
         $services->set(ViewerEventSubscriber::class)
             ->args([new Reference(Auditor::class)])
-            ->tag('kernel.event_subscriber')
+            ->autoconfigure()
         ;
 
-        // ConsoleEventSubscriber uses #[AsEventListener] attributes
         $services->set(ConsoleEventSubscriber::class)
             ->args([
                 new Reference(ConsoleUserProvider::class),
