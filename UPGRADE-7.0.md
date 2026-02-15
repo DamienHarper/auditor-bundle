@@ -108,7 +108,7 @@ The following classes are now `final` and cannot be extended:
 
 ### SecurityProvider
 
-`SecurityProvider` now uses `FirewallMapInterface` instead of `FirewallMap` for better autowiring compatibility.
+`SecurityProvider` now uses `#[Autowire]` attribute for dependency injection. This is an internal change but may affect you if you were manually constructing this service.
 
 ## Quick Migration
 
