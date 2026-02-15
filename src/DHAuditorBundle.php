@@ -274,31 +274,19 @@ class DHAuditorBundle extends AbstractBundle
             ->autoconfigure()
         ;
 
-        // UserProvider
-        $services->set(UserProvider::class)
-            ->args([new Reference('security.token_storage')])
-        ;
+        // UserProvider (autowired)
+        $services->set(UserProvider::class)->autowire();
         $services->alias('dh_auditor.user_provider', UserProvider::class);
 
         // ConsoleUserProvider
         $services->set(ConsoleUserProvider::class);
 
-        // SecurityProvider
-        $services->set(SecurityProvider::class)
-            ->args([
-                new Reference('request_stack'),
-                new Reference('security.firewall.map'),
-            ])
-        ;
+        // SecurityProvider (autowired)
+        $services->set(SecurityProvider::class)->autowire();
         $services->alias('dh_auditor.security_provider', SecurityProvider::class);
 
-        // RoleChecker
-        $services->set(RoleChecker::class)
-            ->args([
-                new Reference('security.authorization_checker'),
-                new Reference(DoctrineProvider::class),
-            ])
-        ;
+        // RoleChecker (autowired)
+        $services->set(RoleChecker::class)->autowire();
         $services->alias('dh_auditor.role_checker', RoleChecker::class);
 
         // Event listeners (using #[AsEventListener] attributes)

@@ -10,9 +10,9 @@ use DH\Auditor\Security\RoleCheckerInterface;
 use DH\Auditor\User\UserInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
-class RoleChecker implements RoleCheckerInterface
+final readonly class RoleChecker implements RoleCheckerInterface
 {
-    public function __construct(private readonly AuthorizationCheckerInterface $authorizationChecker, private readonly DoctrineProvider $provider) {}
+    public function __construct(private AuthorizationCheckerInterface $authorizationChecker, private DoctrineProvider $provider) {}
 
     public function __invoke(string $entity, string $scope): bool
     {
