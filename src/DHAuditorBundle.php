@@ -306,13 +306,14 @@ class DHAuditorBundle extends AbstractBundle
             ->tag('kernel.event_subscriber')
         ;
 
+        // ConsoleEventSubscriber uses #[AsEventListener] attributes
         $services->set(ConsoleEventSubscriber::class)
             ->args([
                 new Reference(ConsoleUserProvider::class),
                 new Reference(Configuration::class),
                 new Reference('dh_auditor.user_provider'),
             ])
-            ->tag('kernel.event_subscriber')
+            ->autoconfigure()
         ;
 
         // Twig extension

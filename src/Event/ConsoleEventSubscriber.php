@@ -9,19 +9,17 @@ use DH\Auditor\User\UserProviderInterface;
 use DH\AuditorBundle\User\ConsoleUserProvider;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
-class ConsoleEventSubscriber implements EventSubscriberInterface
+#[AsEventListener(event: ConsoleEvents::COMMAND, method: 'registerConsoleUserProvider')]
+#[AsEventListener(event: ConsoleEvents::TERMINATE, method: 'restoreDefaultUserProvider')]
+final readonly class ConsoleEventSubscriber
 {
-    public function __construct(private readonly ConsoleUserProvider $consoleUserProvider, private readonly Configuration $configuration, private readonly UserProviderInterface $provider) {}
-
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            ConsoleEvents::COMMAND => 'registerConsoleUserProvider',
-            ConsoleEvents::TERMINATE => 'restoreDefaultUserProvider',
-        ];
-    }
+    public function __construct(
+        private ConsoleUserProvider $consoleUserProvider,
+        private Configuration $configuration,
+        private UserProviderInterface $provider,
+    ) {}
 
     public function registerConsoleUserProvider(ConsoleCommandEvent $commandEvent): void
     {
