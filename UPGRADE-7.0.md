@@ -20,6 +20,32 @@ See [auditor UPGRADE-4.0.md](https://github.com/DamienHarper/auditor/blob/master
 
 ## Breaking Changes
 
+### auditor Library Changes
+
+This bundle requires `damienharper/auditor` >= 4.0 which introduces several breaking changes:
+
+#### Namespace Rename: Annotation → Attribute
+
+| Before (3.x) | After (4.0) |
+|--------------|-------------|
+| `DH\Auditor\...\Auditing\Annotation\Auditable` | `DH\Auditor\...\Auditing\Attribute\Auditable` |
+| `DH\Auditor\...\Auditing\Annotation\Ignore` | `DH\Auditor\...\Auditing\Attribute\Ignore` |
+| `DH\Auditor\...\Auditing\Annotation\Security` | `DH\Auditor\...\Auditing\Attribute\Security` |
+| `DH\Auditor\...\Auditing\Annotation\AnnotationLoader` | `DH\Auditor\...\Auditing\Attribute\AttributeLoader` |
+
+#### Entry Model - Property Hooks (PHP 8.4)
+
+| Before | After |
+|--------|-------|
+| `$entry->getId()` | `$entry->id` |
+| `$entry->getType()` | `$entry->type` |
+| `$entry->getObjectId()` | `$entry->objectId` |
+| `$entry->getUserId()` | `$entry->userId` |
+| `$entry->getUsername()` | `$entry->username` |
+| `$entry->getCreatedAt()` | `$entry->createdAt` |
+
+See [auditor UPGRADE-4.0.md](https://github.com/DamienHarper/auditor/blob/master/UPGRADE-4.0.md) for the complete list of changes.
+
 ### Route Names
 
 | Before (6.x)                       | After (7.0)                          |
@@ -68,6 +94,47 @@ If you override `layout.html.twig`, update your template to use the available bl
 ### Composer Scripts
 
 The `setup5`, `setup6`, `setup7`, `setup8` scripts have been replaced by a unified `setup` script.
+
+### PHP Attributes Migration
+
+The following classes now use PHP 8.4+ attributes for auto-configuration:
+
+| Class | Attributes Used |
+|-------|-----------------|
+| `ConsoleEventSubscriber` | `#[AsEventListener]` |
+| `ViewerEventSubscriber` | `#[AsEventListener]` |
+| `ViewerController` | `#[AsController]` |
+| `TimeAgoExtension` | `#[AsTwigFilter]` |
+| `RoutingLoader` | `#[AutoconfigureTag]` |
+
+### Final Classes
+
+The following classes are now `final` and cannot be extended:
+
+- `DH\AuditorBundle\Event\ConsoleEventSubscriber`
+- `DH\AuditorBundle\Event\ViewerEventSubscriber`
+- `DH\AuditorBundle\Twig\TimeAgoExtension`
+- `DH\AuditorBundle\Routing\RoutingLoader`
+- `DH\AuditorBundle\User\UserProvider`
+- `DH\AuditorBundle\User\ConsoleUserProvider`
+- `DH\AuditorBundle\Security\SecurityProvider`
+- `DH\AuditorBundle\Security\RoleChecker`
+- `DH\AuditorBundle\Viewer\ActivityGraphProvider`
+
+### ActivityGraphProvider API Changes
+
+| Before | After |
+|--------|-------|
+| `$provider->getDays()` | `$provider->days` |
+| `$provider->getLayout()` | `$provider->layout` |
+
+### TimeAgoExtension
+
+`TimeAgoExtension` no longer extends `Twig\Extension\AbstractExtension`. If you extended this class, update your code accordingly.
+
+### SecurityProvider
+
+`SecurityProvider` now uses `#[Autowire]` attribute for dependency injection. This is an internal change but may affect you if you were manually constructing this service.
 
 ## Quick Migration
 

@@ -9,16 +9,17 @@ use DH\Auditor\Configuration as AuditorConfiguration;
 use DH\Auditor\Provider\Doctrine\Configuration as DoctrineProviderConfiguration;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\AuditorBundle\Controller\ViewerController;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-class ViewerEventSubscriber implements EventSubscriberInterface
+#[AsEventListener(event: KernelEvents::CONTROLLER)]
+final readonly class ViewerEventSubscriber
 {
-    public function __construct(private readonly Auditor $auditor) {}
+    public function __construct(private Auditor $auditor) {}
 
-    public function onKernelController(ControllerEvent $event): void
+    public function __invoke(ControllerEvent $event): void
     {
         $controller = $event->getController();
 
@@ -38,18 +39,11 @@ class ViewerEventSubscriber implements EventSubscriberInterface
         /** @var DoctrineProviderConfiguration $providerConfiguration */
         $providerConfiguration = $this->auditor->getProvider(DoctrineProvider::class)->getConfiguration();
 
-        $isAuditorEnabled = $auditorConfiguration->isEnabled();
+        $isAuditorEnabled = $auditorConfiguration->enabled;
         $isViewerEnabled = $providerConfiguration->isViewerEnabled();
 
         if (!$isAuditorEnabled || !$isViewerEnabled) {
             throw new NotFoundHttpException();
         }
-    }
-
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            KernelEvents::CONTROLLER => 'onKernelController',
-        ];
     }
 }

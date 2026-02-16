@@ -8,9 +8,11 @@ use DH\Auditor\Provider\Doctrine\Configuration;
 use DH\AuditorBundle\Controller\ViewerController;
 use Symfony\Bundle\FrameworkBundle\Routing\AttributeRouteControllerLoader;
 use Symfony\Component\Config\Loader\Loader;
+use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\Component\Routing\RouteCollection;
 
-class RoutingLoader extends Loader
+#[AutoconfigureTag('routing.loader')]
+final class RoutingLoader extends Loader
 {
     private bool $isLoaded = false;
 

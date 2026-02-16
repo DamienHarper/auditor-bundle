@@ -177,7 +177,7 @@ final class ViewerControllerTest extends WebTestCase
         $first = $audits[\count($audits) - 1];
 
         $this->login();
-        $crawler = $this->client->request('GET', '/audit/transaction/'.$first->getTransactionHash());
+        $crawler = $this->client->request('GET', '/audit/transaction/'.$first->transactionHash);
 
         // asserts that the response status code is 2xx
         $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
@@ -190,7 +190,7 @@ final class ViewerControllerTest extends WebTestCase
 
         // Check transaction hash is displayed
         $hash = $crawler->filter('span.font-mono');
-        $this->assertStringContainsString($first->getTransactionHash(), $hash->text(), 'Transaction hash is displayed');
+        $this->assertStringContainsString($first->transactionHash, $hash->text(), 'Transaction hash is displayed');
 
         // Check entries grouped by entity
         $entitySections = $crawler->filter('h2');
@@ -207,7 +207,7 @@ final class ViewerControllerTest extends WebTestCase
         $first = $audits[\count($audits) - 1];
 
         $this->login(['ROLE_USER']);
-        $crawler = $this->client->request('GET', '/audit/transaction/'.$first->getTransactionHash());
+        $crawler = $this->client->request('GET', '/audit/transaction/'.$first->transactionHash);
 
         // asserts that the response status code is 2xx
         $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');

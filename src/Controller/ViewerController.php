@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\Controller;
 
 use DH\Auditor\Exception\AccessDeniedException;
-use DH\Auditor\Provider\Doctrine\Auditing\Annotation\Security;
+use DH\Auditor\Provider\Doctrine\Auditing\Attribute\Security;
 use DH\Auditor\Provider\Doctrine\Configuration;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\NullFilter;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Query;
@@ -17,6 +17,7 @@ use DH\AuditorBundle\Tests\Controller\ViewerControllerTest;
 use DH\AuditorBundle\Viewer\ActivityGraphProvider;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException as SymfonyAccessDeniedException;
@@ -25,6 +26,7 @@ use Twig\Environment;
 /**
  * @see ViewerControllerTest
  */
+#[AsController]
 final readonly class ViewerController
 {
     public function __construct(
@@ -73,8 +75,8 @@ final readonly class ViewerController
         $activityGraphLayout = 'bottom';
         if ($activityGraphEnabled && $this->activityGraphProvider instanceof ActivityGraphProvider) {
             $activityGraphProvider = $this->activityGraphProvider;
-            $activityGraphDays = $activityGraphProvider->getDays();
-            $activityGraphLayout = $activityGraphProvider->getLayout();
+            $activityGraphDays = $activityGraphProvider->days;
+            $activityGraphLayout = $activityGraphProvider->layout;
             foreach ($audited as $entity => &$data) {
                 $activityData = $activityGraphProvider->getActivityDataWithRaw($entity, $reader);
                 $data['activityGraph'] = $activityData['normalized'];

@@ -88,11 +88,5 @@
     "branch-alias": {
       "dev-master": "7.x-dev"
     }
-  },
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/DamienHarper/auditor.git"
-    }
-  ]
+  }
 }

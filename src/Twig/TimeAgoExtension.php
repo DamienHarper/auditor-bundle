@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\Twig;
 
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Twig\Extension\AbstractExtension;
-use Twig\TwigFilter;
+use Twig\Attribute\AsTwigFilter;
 
-class TimeAgoExtension extends AbstractExtension
+final readonly class TimeAgoExtension
 {
     private const int SECONDS_PER_MINUTE = 60;
 
@@ -19,17 +18,10 @@ class TimeAgoExtension extends AbstractExtension
     private const int SECONDS_PER_WEEK = 604_800;
 
     public function __construct(
-        private readonly TranslatorInterface $translator,
+        private TranslatorInterface $translator,
     ) {}
 
-    #[\Override]
-    public function getFilters(): array
-    {
-        return [
-            new TwigFilter('time_ago', $this->timeAgo(...)),
-        ];
-    }
-
+    #[AsTwigFilter('time_ago')]
     public function timeAgo(\DateTimeInterface $date): string
     {
         $now = new \DateTimeImmutable();

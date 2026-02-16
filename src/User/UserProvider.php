@@ -12,9 +12,9 @@ use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class UserProvider implements UserProviderInterface
+final readonly class UserProvider implements UserProviderInterface
 {
-    public function __construct(private readonly TokenStorageInterface $tokenStorage) {}
+    public function __construct(private TokenStorageInterface $tokenStorage) {}
 
     public function __invoke(): ?AuditorUserInterface
     {

@@ -6,7 +6,7 @@ namespace DH\AuditorBundle;
 
 use DH\Auditor\Auditor;
 use DH\Auditor\Configuration;
-use DH\Auditor\Provider\Doctrine\Auditing\Annotation\AnnotationLoader;
+use DH\Auditor\Provider\Doctrine\Auditing\Attribute\AttributeLoader;
 use DH\Auditor\Provider\Doctrine\Configuration as DoctrineProviderConfiguration;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Provider\Doctrine\Persistence\Command\CleanAuditLogsCommand;
@@ -187,7 +187,7 @@ class DHAuditorBundle extends AbstractBundle
                 ->args([$serviceId, new Reference($entityManagerName)])
             ;
 
-            $services->set(AnnotationLoader::class)
+            $services->set(AttributeLoader::class)
                 ->args([new Reference($entityManagerName)])
             ;
 
@@ -201,13 +201,13 @@ class DHAuditorBundle extends AbstractBundle
             ->args([new Reference(DoctrineProvider::class)])
         ;
 
-        // Routing loader
+        // Routing loader (uses #[AutoconfigureTag('routing.loader')] attribute)
         $services->set(RoutingLoader::class)
             ->args([
                 new Reference('routing.loader.attribute'),
                 '%dh_auditor.provider.doctrine.configuration%',
             ])
-            ->tag('routing.loader')
+            ->autoconfigure()
         ;
 
         // Doctrine event listeners
@@ -264,46 +264,34 @@ class DHAuditorBundle extends AbstractBundle
 
     private function loadBundleServices(ServicesConfigurator $services): void
     {
-        // ViewerController
+        // ViewerController (uses #[AsController] attribute)
         $services->set(ViewerController::class)
             ->args([
                 new Reference('twig'),
                 new Reference(ActivityGraphProvider::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
             ])
-            ->tag('controller.service_arguments')
+            ->autoconfigure()
         ;
 
-        // UserProvider
-        $services->set(UserProvider::class)
-            ->args([new Reference('security.token_storage')])
-        ;
+        // UserProvider (autowired)
+        $services->set(UserProvider::class)->autowire();
         $services->alias('dh_auditor.user_provider', UserProvider::class);
 
         // ConsoleUserProvider
         $services->set(ConsoleUserProvider::class);
 
-        // SecurityProvider
-        $services->set(SecurityProvider::class)
-            ->args([
-                new Reference('request_stack'),
-                new Reference('security.firewall.map'),
-            ])
-        ;
+        // SecurityProvider (autowired)
+        $services->set(SecurityProvider::class)->autowire();
         $services->alias('dh_auditor.security_provider', SecurityProvider::class);
 
-        // RoleChecker
-        $services->set(RoleChecker::class)
-            ->args([
-                new Reference('security.authorization_checker'),
-                new Reference(DoctrineProvider::class),
-            ])
-        ;
+        // RoleChecker (autowired)
+        $services->set(RoleChecker::class)->autowire();
         $services->alias('dh_auditor.role_checker', RoleChecker::class);
 
-        // Event subscribers
+        // Event listeners (using #[AsEventListener] attributes)
         $services->set(ViewerEventSubscriber::class)
             ->args([new Reference(Auditor::class)])
-            ->tag('kernel.event_subscriber')
+            ->autoconfigure()
         ;
 
         $services->set(ConsoleEventSubscriber::class)
@@ -312,13 +300,13 @@ class DHAuditorBundle extends AbstractBundle
                 new Reference(Configuration::class),
                 new Reference('dh_auditor.user_provider'),
             ])
-            ->tag('kernel.event_subscriber')
+            ->autoconfigure()
         ;
 
-        // Twig extension
+        // Twig extension (uses #[AsTwigFilter] attribute)
         $services->set(TimeAgoExtension::class)
             ->args([new Reference('translator')])
-            ->tag('twig.extension')
+            ->autoconfigure()
         ;
     }
 

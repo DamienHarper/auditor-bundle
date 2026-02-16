@@ -67,7 +67,7 @@ final class UserProviderTest extends WebTestCase
 
         // get history
         $entries = $this->createReader()->createQuery(Post::class)->execute();
-        $this->assertSame('dark.vador', $entries[0]->getUsername());
+        $this->assertSame('dark.vador', $entries[0]->username);
     }
 
     public function testBlameImpersonator(): void
@@ -96,7 +96,7 @@ final class UserProviderTest extends WebTestCase
 
         // get history
         $entries = $this->createReader()->createQuery(Post::class)->execute();
-        $this->assertSame('second_user[impersonator dark.vador]', $entries[0]->getUsername());
+        $this->assertSame('second_user[impersonator dark.vador]', $entries[0]->username);
     }
 
     private function createAndInitDoctrineProvider(): void
