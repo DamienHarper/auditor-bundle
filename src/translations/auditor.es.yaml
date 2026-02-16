@@ -24,6 +24,7 @@ audit:
     by: por
     source: Origen
     target: Destino
+    extra_data: Datos adicionales
     action_insert: registro creado
     action_update: registro actualizado
     action_remove: registro eliminado

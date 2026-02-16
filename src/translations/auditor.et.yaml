@@ -24,6 +24,7 @@ audit:
     by: kasutajalt
     source: Allikas
     target: Sihtmärk
+    extra_data: Lisaandmed
     action_insert: kirje loodud
     action_update: kirje uuendatud
     action_remove: kirje kustutatud

@@ -24,6 +24,7 @@ audit:
     by: by
     source: Source
     target: Target
+    extra_data: Extra Data
     action_insert: record created
     action_update: record updated
     action_remove: record deleted
