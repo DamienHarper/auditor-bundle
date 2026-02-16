@@ -18,6 +18,7 @@
 - 🖥️ **Console support** - Tracks changes made via console commands
 - 🌍 **Internationalization** - Translations for 9 languages
 - ⚙️ **YAML configuration** - Simple configuration via `dh_auditor.yaml`
+- 📦 **Extra Data** - Attach custom contextual data to audit entries via event listeners
 
 ## 🏗️ Architecture Overview
 
