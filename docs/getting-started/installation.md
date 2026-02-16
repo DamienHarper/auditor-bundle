@@ -1,6 +1,10 @@
+# Installation
+
+> **Install auditor-bundle in your Symfony application**
+
 This guide covers the installation of auditor-bundle in a Symfony application.
 
-## Requirements
+## 📋 Requirements
 
 ### Version 7.x (Current)
 
@@ -19,7 +23,7 @@ This guide covers the installation of auditor-bundle in a Symfony application.
 | 6.x     | >= 8.2 | >= 5.4  | >= 3.0  |
 | 5.x     | >= 7.4 | >= 4.4  | >= 2.0  |
 
-## Install via Composer
+## 📦 Install via Composer
 
 ```bash
 composer require damienharper/auditor-bundle
@@ -27,7 +31,7 @@ composer require damienharper/auditor-bundle
 
 This installs both the bundle and the auditor library.
 
-## Bundle Registration
+## 🔌 Bundle Registration
 
 ### Symfony Flex (Automatic)
 
@@ -46,7 +50,7 @@ return [
 ];
 ```
 
-## Basic Configuration
+## ⚙️ Basic Configuration
 
 Create `config/packages/dh_auditor.yaml`:
 
@@ -60,10 +64,10 @@ dh_auditor:
 ```
 
 This minimal configuration:
-- Enables auditing for `User` and `Post` entities
-- Uses default settings for everything else
+- ✅ Enables auditing for `User` and `Post` entities
+- ✅ Uses default settings for everything else
 
-## Route Configuration
+## 🛤️ Route Configuration
 
 ### Symfony Flex (Automatic)
 
@@ -79,7 +83,7 @@ dh_auditor:
     type: auditor
 ```
 
-## Database Schema
+## 🗄️ Database Schema
 
 Create audit tables by updating your database schema:
 
@@ -96,7 +100,7 @@ bin/console doctrine:migrations:migrate
 bin/console doctrine:schema:update --force
 ```
 
-## Asset Installation
+## 🎨 Asset Installation
 
 Install assets for the audit viewer:
 
@@ -104,7 +108,7 @@ Install assets for the audit viewer:
 bin/console assets:install
 ```
 
-## Verification
+## ✅ Verification
 
 1. **Enable the viewer** in your configuration:
    ```yaml
@@ -125,7 +129,10 @@ bin/console assets:install
 
 4. **Make a change** to a User entity and verify it appears in the viewer
 
-## What Gets Installed
+> [!TIP]
+> If you don't see the viewer at `/audit`, make sure routes are properly configured and the cache has been cleared.
+
+## 📦 What Gets Installed
 
 The bundle registers these services automatically:
 
@@ -138,8 +145,10 @@ The bundle registers these services automatically:
 | `dh_auditor.security_provider`                           | Security info for audit entries  |
 | `dh_auditor.role_checker`                                | Access control for viewer        |
 
-## Next Steps
+---
 
-- [Configuration Reference](../configuration/index.md) - All configuration options
-- [Audit Viewer](../viewer/index.md) - Using the web interface
-- [Customization](../customization/index.md) - Custom providers
+## 🚀 Next Steps
+
+- ⚙️ [Configuration Reference](../configuration/index.md) - All configuration options
+- 👁️ [Audit Viewer](../viewer/index.md) - Using the web interface
+- 🔧 [Customization](../customization/index.md) - Custom providers

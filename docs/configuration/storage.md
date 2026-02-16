@@ -1,6 +1,10 @@
+# Storage Configuration
+
+> **Configure audit storage, including multi-database setups**
+
 This guide covers audit storage configuration, including multi-database setups.
 
-## Default Setup
+## 🗄️ Default Setup
 
 By default, audits are stored in the same database as your entities using the default entity manager:
 
@@ -14,7 +18,7 @@ dh_auditor:
 
 This provides **transactional integrity**: audit entries are part of the same database transaction as entity changes.
 
-## Table Naming
+## 📝 Table Naming
 
 Audit tables are named: `{prefix}{entity_table}{suffix}`
 
@@ -33,23 +37,23 @@ dh_auditor:
 
 Result: `users` → `audit_users`
 
-## Multi-Database Setup
+## 🗃️ Multi-Database Setup
 
 Store audits in a separate database from your entities.
 
-### ⚠️ Warning: Atomicity
-
-Using separate databases **breaks transactional integrity**:
-
-- Entity changes and audits are in **different transactions**
-- If entity operation succeeds but audit fails → missing audit
-- If entity operation fails but audit succeeds → orphan audit
-
-Only use this when the trade-offs are acceptable.
+> [!CAUTION]
+> **Warning: Atomicity**
+> 
+> Using separate databases **breaks transactional integrity**:
+> - Entity changes and audits are in **different transactions**
+> - If entity operation succeeds but audit fails → missing audit
+> - If entity operation fails but audit succeeds → orphan audit
+> 
+> Only use this when the trade-offs are acceptable.
 
 ### Configuration
 
-#### 1. Configure Multiple Entity Managers
+#### 1️⃣ Configure Multiple Entity Managers
 
 ```yaml
 # config/packages/doctrine.yaml
@@ -77,7 +81,7 @@ doctrine:
                 # No mappings needed - audit tables are created dynamically
 ```
 
-#### 2. Configure Storage Services
+#### 2️⃣ Configure Storage Services
 
 ```yaml
 # config/packages/dh_auditor.yaml
@@ -94,7 +98,7 @@ dh_auditor:
                 App\Entity\User: ~
 ```
 
-### Storage Mapper
+### 🗺️ Storage Mapper
 
 When using multiple storage services, a storage mapper routes audits to the correct database.
 
@@ -164,7 +168,7 @@ dh_auditor:
             storage_mapper: 'App\Audit\StorageMapper'
 ```
 
-## Schema Management
+## 🔧 Schema Management
 
 ### Single Database
 
@@ -193,41 +197,61 @@ bin/console audit:schema:update --force
 
 This command handles all configured storage services.
 
-## Architecture Comparison
+## 🏗️ Architecture Comparison
 
 ### Single Database (Recommended)
 
+```mermaid
+flowchart TB
+    subgraph DB["Main Database"]
+        direction TB
+        subgraph ENTITIES["Entity Tables"]
+            users
+            posts
+            comments
+        end
+        subgraph AUDITS["Audit Tables"]
+            users_audit
+            posts_audit
+            comments_audit
+        end
+    end
+    
+    ENTITIES -.->|Same transaction| AUDITS
+    
+    style DB fill:#e8f5e9
 ```
-┌─────────────────────────────────────────────┐
-│              Main Database                   │
-├─────────────────────────────────────────────┤
-│  ┌─────────┐  ┌─────────┐  ┌─────────────┐ │
-│  │ users   │  │ posts   │  │ comments    │ │
-│  └─────────┘  └─────────┘  └─────────────┘ │
-│  ┌─────────────┐  ┌─────────────┐          │
-│  │users_audit  │  │posts_audit  │  ...     │
-│  └─────────────┘  └─────────────┘          │
-└─────────────────────────────────────────────┘
-        Same transaction = Data integrity ✅
-```
+
+✅ **Same transaction = Data integrity**
 
 ### Separate Database
 
-```
-┌────────────────────────┐    ┌─────────────────────────┐
-│    Main Database        │    │    Audit Database        │
-├────────────────────────┤    ├─────────────────────────┤
-│  ┌──────┐  ┌──────┐    │    │  ┌─────────────┐        │
-│  │users │  │posts │    │    │  │users_audit  │        │
-│  └──────┘  └──────┘    │    │  ├─────────────┤        │
-└────────────────────────┘    │  │posts_audit  │        │
-                              │  └─────────────┘        │
-                              └─────────────────────────┘
-    Different transactions = Possible inconsistency ⚠️
+```mermaid
+flowchart LR
+    subgraph MAIN["Main Database"]
+        direction TB
+        users
+        posts
+    end
+    
+    subgraph AUDIT["Audit Database"]
+        direction TB
+        users_audit
+        posts_audit
+    end
+    
+    MAIN -.->|Different transactions| AUDIT
+    
+    style MAIN fill:#e3f2fd
+    style AUDIT fill:#fff3e0
 ```
 
-## Next Steps
+⚠️ **Different transactions = Possible inconsistency**
 
-- [Configuration Reference](index.md) - All options
-- [Schema Management](../upgrade/schema.md) - Managing audit tables
-- [Customization](../customization/index.md) - Custom providers
+---
+
+## 🚀 Next Steps
+
+- ⚙️ [Configuration Reference](index.md) - All options
+- ⬆️ [Upgrade Guide](../upgrade/index.md) - Managing audit tables
+- 🔧 [Customization](../customization/index.md) - Custom providers

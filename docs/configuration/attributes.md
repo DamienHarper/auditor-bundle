@@ -1,8 +1,13 @@
+# Entity Attributes
+
+> **Configure auditing with PHP 8 attributes**
+
 PHP attributes provide an alternative to YAML configuration for declaring auditable entities.
 
-> **Note:** Attributes take precedence over YAML configuration.
+> [!NOTE]
+> Attributes take precedence over YAML configuration.
 
-## Available Attributes
+## 📋 Available Attributes
 
 | Attribute      | Target   | Description                           |
 |----------------|----------|---------------------------------------|
@@ -10,9 +15,9 @@ PHP attributes provide an alternative to YAML configuration for declaring audita
 | `#[Ignore]`    | Property | Excludes a property from auditing     |
 | `#[Security]`  | Class    | Defines roles required to view audits |    
 
-All attributes are in the `DH\Auditor\Provider\Doctrine\Auditing\Annotation` namespace.
+All attributes are in the `DH\Auditor\Provider\Doctrine\Auditing\Attribute` namespace.
 
-## #[Auditable]
+## 🏷️ #[Auditable]
 
 Marks an entity class for auditing.
 
@@ -23,7 +28,7 @@ Marks an entity class for auditing.
 
 namespace App\Entity;
 
-use DH\Auditor\Provider\Doctrine\Auditing\Annotation as Audit;
+use DH\Auditor\Provider\Doctrine\Auditing\Attribute as Audit;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -56,7 +61,7 @@ class User
 }
 ```
 
-## #[Ignore]
+## 🚫 #[Ignore]
 
 Excludes a property from being audited.
 
@@ -65,7 +70,7 @@ Excludes a property from being audited.
 
 namespace App\Entity;
 
-use DH\Auditor\Provider\Doctrine\Auditing\Annotation as Audit;
+use DH\Auditor\Provider\Doctrine\Auditing\Attribute as Audit;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -85,9 +90,10 @@ class User
 }
 ```
 
-> **Note:** Properties in the global `ignored_columns` configuration don't need `#[Ignore]`.
+> [!TIP]
+> Properties in the global `ignored_columns` configuration don't need `#[Ignore]`.
 
-## #[Security]
+## 🔒 #[Security]
 
 Restricts access to view audit logs based on user roles.
 
@@ -96,7 +102,7 @@ Restricts access to view audit logs based on user roles.
 
 namespace App\Entity;
 
-use DH\Auditor\Provider\Doctrine\Auditing\Annotation as Audit;
+use DH\Auditor\Provider\Doctrine\Auditing\Attribute as Audit;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -118,14 +124,14 @@ class User
 }
 ```
 
-## Complete Example
+## 📝 Complete Example
 
 ```php
 <?php
 
 namespace App\Entity;
 
-use DH\Auditor\Provider\Doctrine\Auditing\Annotation as Audit;
+use DH\Auditor\Provider\Doctrine\Auditing\Attribute as Audit;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -159,7 +165,7 @@ class User
 }
 ```
 
-## Combining with YAML
+## 🔀 Combining with YAML
 
 You can use both attributes and YAML configuration:
 
@@ -190,15 +196,25 @@ class User
 }
 ```
 
-### Precedence Rules
+### 📊 Precedence Rules
 
-1. `#[Auditable]` → overrides `entities.*.enabled` from YAML
-2. `#[Ignore]` → adds to `ignored_columns` (YAML + attribute)
-3. `#[Security]` → overrides `entities.*.roles` from YAML
+```mermaid
+flowchart TD
+    A["Attribute #[Auditable]"] -->|overrides| B["YAML entities.*.enabled"]
+    C["Attribute #[Ignore]"] -->|adds to| D["YAML ignored_columns"]
+    E["Attribute #[Security]"] -->|overrides| F["YAML entities.*.roles"]
+```
 
-## Entity Not in YAML
+| Attribute       | Behavior                                    |
+|-----------------|---------------------------------------------|
+| `#[Auditable]`  | Overrides `entities.*.enabled` from YAML    |
+| `#[Ignore]`     | Adds to `ignored_columns` (YAML + attribute)|
+| `#[Security]`   | Overrides `entities.*.roles` from YAML      |
 
-If an entity has `#[Auditable]` but isn't in YAML `entities`, it will **not** be audited.
+## ⚠️ Entity Not in YAML
+
+> [!CAUTION]
+> If an entity has `#[Auditable]` but isn't in YAML `entities`, it will **not** be audited.
 
 ```yaml
 # User is NOT listed here
@@ -216,11 +232,13 @@ class User {}
 ```
 
 Either:
-- Add to YAML: `App\Entity\User: ~`
-- Or use YAML-only configuration
+- ✅ Add to YAML: `App\Entity\User: ~`
+- ✅ Or use YAML-only configuration
 
-## Next Steps
+---
 
-- [Configuration Reference](index.md) - All YAML options
-- [Storage Configuration](storage.md) - Multi-database setup
-- [Role Checker](../customization/role-checker.md) - Custom access control
+## 🚀 Next Steps
+
+- ⚙️ [Configuration Reference](index.md) - All YAML options
+- 🗄️ [Storage Configuration](storage.md) - Multi-database setup
+- 🛡️ [Role Checker](../customization/role-checker.md) - Custom access control
