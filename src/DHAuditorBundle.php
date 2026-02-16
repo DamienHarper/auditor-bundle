@@ -6,7 +6,7 @@ namespace DH\AuditorBundle;
 
 use DH\Auditor\Auditor;
 use DH\Auditor\Configuration;
-use DH\Auditor\Provider\Doctrine\Auditing\Annotation\AnnotationLoader;
+use DH\Auditor\Provider\Doctrine\Auditing\Attribute\AttributeLoader;
 use DH\Auditor\Provider\Doctrine\Configuration as DoctrineProviderConfiguration;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Provider\Doctrine\Persistence\Command\CleanAuditLogsCommand;
@@ -187,7 +187,7 @@ class DHAuditorBundle extends AbstractBundle
                 ->args([$serviceId, new Reference($entityManagerName)])
             ;
 
-            $services->set(AnnotationLoader::class)
+            $services->set(AttributeLoader::class)
                 ->args([new Reference($entityManagerName)])
             ;
 

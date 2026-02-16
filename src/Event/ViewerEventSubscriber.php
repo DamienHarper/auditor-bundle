@@ -39,7 +39,7 @@ final readonly class ViewerEventSubscriber
         /** @var DoctrineProviderConfiguration $providerConfiguration */
         $providerConfiguration = $this->auditor->getProvider(DoctrineProvider::class)->getConfiguration();
 
-        $isAuditorEnabled = $auditorConfiguration->isEnabled();
+        $isAuditorEnabled = $auditorConfiguration->enabled;
         $isViewerEnabled = $providerConfiguration->isViewerEnabled();
 
         if (!$isAuditorEnabled || !$isViewerEnabled) {

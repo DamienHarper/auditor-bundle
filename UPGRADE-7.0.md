@@ -20,6 +20,32 @@ See [auditor UPGRADE-4.0.md](https://github.com/DamienHarper/auditor/blob/master
 
 ## Breaking Changes
 
+### auditor Library Changes
+
+This bundle requires `damienharper/auditor` >= 4.0 which introduces several breaking changes:
+
+#### Namespace Rename: Annotation → Attribute
+
+| Before (3.x) | After (4.0) |
+|--------------|-------------|
+| `DH\Auditor\...\Auditing\Annotation\Auditable` | `DH\Auditor\...\Auditing\Attribute\Auditable` |
+| `DH\Auditor\...\Auditing\Annotation\Ignore` | `DH\Auditor\...\Auditing\Attribute\Ignore` |
+| `DH\Auditor\...\Auditing\Annotation\Security` | `DH\Auditor\...\Auditing\Attribute\Security` |
+| `DH\Auditor\...\Auditing\Annotation\AnnotationLoader` | `DH\Auditor\...\Auditing\Attribute\AttributeLoader` |
+
+#### Entry Model - Property Hooks (PHP 8.4)
+
+| Before | After |
+|--------|-------|
+| `$entry->getId()` | `$entry->id` |
+| `$entry->getType()` | `$entry->type` |
+| `$entry->getObjectId()` | `$entry->objectId` |
+| `$entry->getUserId()` | `$entry->userId` |
+| `$entry->getUsername()` | `$entry->username` |
+| `$entry->getCreatedAt()` | `$entry->createdAt` |
+
+See [auditor UPGRADE-4.0.md](https://github.com/DamienHarper/auditor/blob/master/UPGRADE-4.0.md) for the complete list of changes.
+
 ### Route Names
 
 | Before (6.x)                       | After (7.0)                          |

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\Controller;
 
 use DH\Auditor\Exception\AccessDeniedException;
-use DH\Auditor\Provider\Doctrine\Auditing\Annotation\Security;
+use DH\Auditor\Provider\Doctrine\Auditing\Attribute\Security;
 use DH\Auditor\Provider\Doctrine\Configuration;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\NullFilter;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Query;
