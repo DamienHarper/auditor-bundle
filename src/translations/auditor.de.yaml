@@ -24,6 +24,7 @@ audit:
     by: von
     source: Quelle
     target: Ziel
+    extra_data: Zusätzliche Daten
     action_insert: Datensatz erstellt
     action_update: Datensatz aktualisiert
     action_remove: Datensatz gelöscht

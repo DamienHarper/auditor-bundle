@@ -24,6 +24,7 @@ audit:
     by: par
     source: Source
     target: Cible
+    extra_data: Données complémentaires
     action_insert: enregistrement ajouté
     action_update: enregistrement mis à jour
     action_remove: enregistrement supprimé

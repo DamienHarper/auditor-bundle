@@ -24,6 +24,7 @@ audit:
     by: da
     source: Origine
     target: Destinazione
+    extra_data: Dati aggiuntivi
     action_insert: record creato
     action_update: record aggiornato
     action_remove: record eliminato

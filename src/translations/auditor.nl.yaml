@@ -24,6 +24,7 @@ audit:
     by: door
     source: Bron
     target: Doel
+    extra_data: Extra gegevens
     action_insert: record aangemaakt
     action_update: record bijgewerkt
     action_remove: record verwijderd

@@ -24,6 +24,7 @@ audit:
     by: від
     source: Джерело
     target: Ціль
+    extra_data: Додаткові дані
     action_insert: запис створено
     action_update: запис оновлено
     action_remove: запис видалено
