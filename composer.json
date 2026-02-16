@@ -88,11 +88,5 @@
     "branch-alias": {
       "dev-master": "7.x-dev"
     }
-  },
-  "repositories": [
-    {
-      "type": "path",
-      "url": "/Users/DHA/PhpstormProjects/auditor"
-    }
-  ]
+  }
 }
