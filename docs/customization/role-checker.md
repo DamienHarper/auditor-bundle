@@ -1,6 +1,10 @@
+# Role Checker
+
+> **Customize access control for the audit viewer**
+
 A role checker determines if the current user can access audit logs for a specific entity.
 
-## Interface
+## 📝 Interface
 
 ```php
 namespace DH\Auditor\Security;
@@ -11,13 +15,13 @@ interface RoleCheckerInterface
 }
 ```
 
-Parameters:
+**Parameters:**
 - `$entity`: Entity FQCN (e.g., `App\Entity\User`)
 - `$scope`: Access type (currently only `'view'`)
 
-Returns `true` to grant access, `false` to deny.
+**Returns:** `true` to grant access, `false` to deny.
 
-## Built-in Checker
+## 📦 Built-in Checker
 
 The default `DH\AuditorBundle\Security\RoleChecker`:
 
@@ -49,12 +53,12 @@ public function __invoke(string $entity, string $scope): bool
 
 | Scenario                        | Access  |
 |---------------------------------|---------|
-| No roles configured for entity  | Granted |
-| No user authenticated           | Granted |
-| User has required role          | Granted |
-| User lacks required role        | Denied  |   
+| No roles configured for entity  | ✅ Granted |
+| No user authenticated           | ✅ Granted |
+| User has required role          | ✅ Granted |
+| User lacks required role        | ❌ Denied  |   
 
-## Configuring Roles
+## ⚙️ Configuring Roles
 
 ### Via YAML
 
@@ -78,7 +82,7 @@ dh_auditor:
 ### Via Attributes
 
 ```php
-use DH\Auditor\Provider\Doctrine\Auditing\Annotation as Audit;
+use DH\Auditor\Provider\Doctrine\Auditing\Attribute as Audit;
 
 #[Audit\Auditable]
 #[Audit\Security(view: ['ROLE_ADMIN', 'ROLE_AUDITOR'])]
@@ -88,7 +92,7 @@ class User
 }
 ```
 
-## Creating a Custom Checker
+## 🔧 Creating a Custom Checker
 
 ### Basic Example
 
@@ -131,9 +135,9 @@ dh_auditor:
     role_checker: 'App\Audit\CustomRoleChecker'
 ```
 
-## Examples
+## 📚 Examples
 
-### Entity-Specific Rules
+### 🎯 Entity-Specific Rules
 
 ```php
 <?php
@@ -183,7 +187,7 @@ class EntityRoleChecker implements RoleCheckerInterface
 }
 ```
 
-### Using Symfony Voters
+### 🗳️ Using Symfony Voters
 
 ```php
 <?php
@@ -240,7 +244,7 @@ class AuditVoter extends Voter
 }
 ```
 
-### External Authorization Service
+### 🔗 External Authorization Service
 
 ```php
 <?php
@@ -276,7 +280,7 @@ class ExternalRoleChecker implements RoleCheckerInterface
 }
 ```
 
-### Time-Based Access
+### ⏰ Time-Based Access
 
 ```php
 <?php
@@ -311,8 +315,10 @@ class TimeBasedRoleChecker implements RoleCheckerInterface
 }
 ```
 
-## Next Steps
+---
 
-- [Audit Viewer](../viewer/index.md)
-- [User Provider](user-provider.md)
-- [Security Provider](security-provider.md)
+## 🚀 Next Steps
+
+- 👁️ [Audit Viewer](../viewer/index.md) - Web interface for browsing audits
+- 👤 [User Provider](user-provider.md) - Customize user identification
+- 🔒 [Security Provider](security-provider.md) - Customize IP/context detection

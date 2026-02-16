@@ -10,7 +10,7 @@
 
 **auditor-bundle** integrates the [auditor](https://github.com/DamienHarper/auditor) library into Symfony applications. It provides automatic service configuration, a web interface for browsing audits, and seamless integration with Symfony's security system.
 
-### Key Features
+### ✨ Key Features
 
 - 🔌 **Automatic wiring** - Services are automatically configured via Symfony's DI
 - 🔒 **Security integration** - Uses Symfony's security for user tracking and access control
@@ -19,42 +19,44 @@
 - 🌍 **Internationalization** - Translations for 9 languages
 - ⚙️ **YAML configuration** - Simple configuration via `dh_auditor.yaml`
 
-## Architecture Overview
+## 🏗️ Architecture Overview
 
 The bundle bridges auditor with Symfony:
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                          Symfony Application                            │
-└───────────────────────────────────┬─────────────────────────────────────┘
-                                    │
-┌───────────────────────────────────┴─────────────────────────────────────┐
-│                           auditor-bundle                                │
-│  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │                     Symfony Integration                           │  │
-│  │  ┌─────────────┐  ┌─────────────────┐  ┌───────────────────────┐  │  │
-│  │  │UserProvider │  │SecurityProvider │  │    RoleChecker        │  │  │
-│  │  │(TokenStorage│  │(RequestStack +  │  │(AuthorizationChecker) │  │  │
-│  │  │)            │  │ FirewallMap)    │  │                       │  │  │
-│  │  └─────────────┘  └─────────────────┘  └───────────────────────┘  │  │
-│  └───────────────────────────────────────────────────────────────────┘  │
-│  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │                        ViewerController                           │  │
-│  │           Web interface for browsing audit logs                   │  │
-│  └───────────────────────────────────────────────────────────────────┘  │
-│  ┌───────────────────────────────────────────────────────────────────┐  │
-│  │                    ConsoleEventSubscriber                         │  │
-│  │         Tracks changes made via console commands                  │  │
-│  └───────────────────────────────────────────────────────────────────┘  │
-└───────────────────────────────────┬─────────────────────────────────────┘
-                                    │
-┌───────────────────────────────────┴─────────────────────────────────────┐
-│                                auditor                                  │
-│                      (See auditor documentation)                        │
-└─────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    subgraph SYMFONY["Symfony Application"]
+        direction TB
+    end
+
+    subgraph BUNDLE["auditor-bundle"]
+        direction TB
+
+        subgraph INTEGRATION["Symfony Integration"]
+            direction LR
+            UP["UserProvider<br>(TokenStorage)"]
+            SP["SecurityProvider<br>(RequestStack + FirewallMap)"]
+            RC["RoleChecker<br>(AuthorizationChecker)"]
+        end
+
+        subgraph VIEWER["ViewerController"]
+            VC["Web interface for<br>browsing audit logs"]
+        end
+
+        subgraph CONSOLE["ConsoleEventSubscriber"]
+            CES["Tracks changes made<br>via console commands"]
+        end
+    end
+
+    subgraph AUDITOR["auditor"]
+        AUD["Core audit library<br>(See auditor documentation)"]
+    end
+
+    SYMFONY --> BUNDLE
+    BUNDLE --> AUDITOR
 ```
 
-### What the Bundle Provides
+### 📦 What the Bundle Provides
 
 | Component           | Service ID                     | Description                           |
 |---------------------|--------------------------------|---------------------------------------|
@@ -65,26 +67,26 @@ The bundle bridges auditor with Symfony:
 | ViewerController    | (internal)                     | Web UI for audit logs                 |
 | RoutingLoader       | (internal)                     | Loads viewer routes                   |                  
 
-## Version Compatibility
+## 📋 Version Compatibility
 
 | Version | Status                      | Requirements                                                         |
-|---------|-----------------------------|----------------------------------------------------------------------|
-| 7.x     | Active development 🚀       |PHP >= 8.4, Symfony >= 8.0, Doctrine DBAL >= 4.0, Doctrine ORM >= 3.2|
+|:--------|:----------------------------|:---------------------------------------------------------------------|
+| 7.x     | Active development 🚀       | PHP >= 8.4, Symfony >= 8.0, Doctrine DBAL >= 4.0, Doctrine ORM >= 3.2|
 | 6.x     | Active support              | PHP >= 8.2, Symfony >= 5.4                                           |
 | 5.x     | End of Life                 | PHP >= 7.4, Symfony >= 4.4                                           |
 
-## Quick Links
+## 🚀 Quick Links
 
-- [Installation Guide](getting-started/installation.md)
-- [Configuration Reference](configuration/index.md)
-- [Customization](customization/index.md)
-- [Audit Viewer](viewer/index.md)
-- [Upgrade Guides](upgrade/index.md)
+- 📥 [Installation Guide](getting-started/installation.md)
+- ⚙️ [Configuration Reference](configuration/index.md)
+- 🔧 [Customization](customization/index.md)
+- 👁️ [Audit Viewer](viewer/index.md)
+- ⬆️ [Upgrade Guides](upgrade/index.md)
 
-## Related Projects
+## 🔗 Related Projects
 
 - **[auditor](https://github.com/DamienHarper/auditor)** - The core audit library (required)
 
-## License
+## 📜 License
 
 This bundle is released under the [MIT License](https://opensource.org/licenses/MIT).

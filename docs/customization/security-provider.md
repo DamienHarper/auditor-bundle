@@ -1,6 +1,10 @@
+# Security Provider
+
+> **Customize IP address and context detection for audit entries**
+
 A security provider returns contextual security information for audit entries.
 
-## Interface
+## 📝 Interface
 
 ```php
 namespace DH\Auditor\Security;
@@ -20,7 +24,7 @@ return [
 ];
 ```
 
-## Built-in Provider
+## 📦 Built-in Provider
 
 The default `DH\AuditorBundle\Security\SecurityProvider`:
 
@@ -42,7 +46,7 @@ public function __invoke(): array
 }
 ```
 
-## Creating a Custom Provider
+## 🔧 Creating a Custom Provider
 
 ### Basic Example
 
@@ -84,9 +88,12 @@ dh_auditor:
     security_provider: 'App\Audit\CustomSecurityProvider'
 ```
 
-## Examples
+## 📚 Examples
 
-### Behind a Proxy/Load Balancer
+### 🔄 Behind a Proxy/Load Balancer
+
+> [!IMPORTANT]
+> When behind a proxy, the client IP may be in forwarded headers rather than the direct connection IP.
 
 ```php
 <?php
@@ -130,7 +137,7 @@ class ProxyAwareSecurityProvider implements SecurityProviderInterface
 }
 ```
 
-### Cloudflare
+### ☁️ Cloudflare
 
 ```php
 <?php
@@ -168,7 +175,7 @@ class CloudflareSecurityProvider implements SecurityProviderInterface
 }
 ```
 
-### AWS ALB / API Gateway
+### 🌩️ AWS ALB / API Gateway
 
 ```php
 <?php
@@ -207,7 +214,7 @@ class AwsSecurityProvider implements SecurityProviderInterface
 }
 ```
 
-### Console Context Aware
+### 🖥️ Console Context Aware
 
 ```php
 <?php
@@ -245,7 +252,9 @@ class ConsoleAwareSecurityProvider implements SecurityProviderInterface
 }
 ```
 
-## Next Steps
+---
 
-- [Role Checker](role-checker.md)
-- [User Provider](user-provider.md)
+## 🚀 Next Steps
+
+- 🛡️ [Role Checker](role-checker.md) - Customize access control
+- 👤 [User Provider](user-provider.md) - Customize user identification

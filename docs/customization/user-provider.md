@@ -1,6 +1,10 @@
+# User Provider
+
+> **Customize how the current user is identified in audit entries**
+
 A user provider returns information about the current user for audit entries.
 
-## Interface
+## 📝 Interface
 
 ```php
 namespace DH\Auditor\User;
@@ -23,7 +27,7 @@ interface UserInterface
 }
 ```
 
-## Built-in Provider
+## 📦 Built-in Provider
 
 The default `DH\AuditorBundle\User\UserProvider`:
 
@@ -55,7 +59,7 @@ public function __invoke(): ?UserInterface
 }
 ```
 
-## Console Commands
+## 🖥️ Console Commands
 
 For CLI commands, the bundle provides `DH\AuditorBundle\User\ConsoleUserProvider` which automatically tracks the command name:
 
@@ -74,17 +78,18 @@ public function __invoke(): ?UserInterface
 }
 ```
 
-This allows you to:
-- Identify which command made specific changes
-- Filter audit entries by command in the viewer
-- Track automated processes separately from user actions
+> [!TIP]
+> This allows you to:
+> - 🔍 Identify which command made specific changes
+> - 🔎 Filter audit entries by command in the viewer
+> - 📊 Track automated processes separately from user actions
 
-Example audit entries:
+**Example audit entries:**
 - `app:import-users` - Import command
 - `doctrine:fixtures:load` - Fixtures loading
 - `app:sync-products` - Sync command
 
-## Creating a Custom Provider
+## 🔧 Creating a Custom Provider
 
 ### Basic Example
 
@@ -137,9 +142,9 @@ services:
             - '@App\Security\MyAuthService'
 ```
 
-## Examples
+## 📚 Examples
 
-### API Token Authentication
+### 🔑 API Token Authentication
 
 ```php
 <?php
@@ -173,7 +178,7 @@ class ApiUserProvider implements UserProviderInterface
 }
 ```
 
-### External OAuth/SSO
+### 🌐 External OAuth/SSO
 
 ```php
 <?php
@@ -212,7 +217,7 @@ class OAuthUserProvider implements UserProviderInterface
 }
 ```
 
-### Combining Multiple Sources
+### 🔀 Combining Multiple Sources
 
 ```php
 <?php
@@ -258,7 +263,9 @@ class CompositeUserProvider implements UserProviderInterface
 }
 ```
 
-## Next Steps
+---
 
-- [Security Provider](security-provider.md)
-- [Role Checker](role-checker.md)
+## 🚀 Next Steps
+
+- 🔒 [Security Provider](security-provider.md) - Customize IP/context detection
+- 🛡️ [Role Checker](role-checker.md) - Customize access control

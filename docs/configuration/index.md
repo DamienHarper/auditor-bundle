@@ -1,10 +1,14 @@
+# Configuration Reference
+
+> **All configuration options available in auditor-bundle**
+
 This section covers all configuration options for auditor-bundle.
 
-## Configuration File
+## 📁 Configuration File
 
 All configuration is done in `config/packages/dh_auditor.yaml`.
 
-## Quick Reference
+## 🔍 Quick Reference
 
 ```yaml
 dh_auditor:
@@ -26,7 +30,7 @@ dh_auditor:
             viewer: false
 ```
 
-## Global Options
+## ⚙️ Global Options
 
 ### enabled
 
@@ -63,7 +67,8 @@ dh_auditor:
     user_provider: 'App\Audit\CustomUserProvider'
 ```
 
-See [User Provider Customization](../customization/user-provider.md).
+> [!TIP]
+> See [User Provider Customization](../customization/user-provider.md) for creating custom providers.
 
 ### security_provider
 
@@ -76,7 +81,8 @@ dh_auditor:
     security_provider: 'App\Audit\CustomSecurityProvider'
 ```
 
-See [Security Provider Customization](../customization/security-provider.md).
+> [!TIP]
+> See [Security Provider Customization](../customization/security-provider.md) for creating custom providers.
 
 ### role_checker
 
@@ -89,9 +95,10 @@ dh_auditor:
     role_checker: 'App\Audit\CustomRoleChecker'
 ```
 
-See [Role Checker Customization](../customization/role-checker.md).
+> [!TIP]
+> See [Role Checker Customization](../customization/role-checker.md) for creating custom checkers.
 
-## Doctrine Provider Options
+## 🗄️ Doctrine Provider Options
 
 All options under `providers.doctrine`:
 
@@ -152,7 +159,7 @@ dh_auditor:
                             - ROLE_ADMIN
 ```
 
-Entity options:
+**Entity options:**
 
 | Option            | Type    | Default | Description                          |
 |-------------------|---------|---------|--------------------------------------|
@@ -175,7 +182,8 @@ dh_auditor:
                 - '@doctrine.orm.audit_entity_manager'
 ```
 
-See [Multi-Database Setup](storage.md) for details.
+> [!NOTE]
+> See [Multi-Database Setup](storage.md) for details on using multiple storage services.
 
 ### auditing_services
 
@@ -207,7 +215,8 @@ dh_auditor:
             storage_mapper: 'App\Audit\StorageMapper'
 ```
 
-See [Multi-Database Setup](storage.md) for details.
+> [!NOTE]
+> See [Multi-Database Setup](storage.md) for details.
 
 ### viewer
 
@@ -231,14 +240,14 @@ dh_auditor:
                 page_size: 50
 ```
 
-Viewer options:
+**Viewer options:**
 
 | Option      | Type   | Default | Description         |
 |-------------|--------|---------|---------------------|
 | `enabled`   | `bool` | `false` | Enable the viewer   |
 | `page_size` | `int`  | `50`    | Results per page    |
 
-## Complete Example
+## 📝 Complete Example
 
 ```yaml
 # config/packages/dh_auditor.yaml
@@ -270,7 +279,7 @@ dh_auditor:
                 page_size: 100
 ```
 
-## Environment-Specific Configuration
+## 🌍 Environment-Specific Configuration
 
 ```yaml
 # config/packages/dev/dh_auditor.yaml
@@ -288,7 +297,7 @@ dh_auditor:
                 page_size: 50
 ```
 
-## Using Environment Variables
+## 🔐 Using Environment Variables
 
 ```yaml
 dh_auditor:
@@ -296,8 +305,10 @@ dh_auditor:
     timezone: '%env(AUDITOR_TIMEZONE)%'
 ```
 
-## Next Steps
+---
 
-- [Entity Attributes](attributes.md) - Configure entities with PHP attributes
-- [Storage Configuration](storage.md) - Multi-database setup
-- [Customization](../customization/index.md) - Custom providers
+## 🚀 Next Steps
+
+- 🏷️ [Entity Attributes](attributes.md) - Configure entities with PHP attributes
+- 🗄️ [Storage Configuration](storage.md) - Multi-database setup
+- 🔧 [Customization](../customization/index.md) - Custom providers

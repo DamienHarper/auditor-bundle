@@ -1,6 +1,10 @@
+# Audit Viewer
+
+> **Web interface for browsing audit logs**
+
 The bundle includes a web interface for browsing audit logs.
 
-## Enabling the Viewer
+## ✨ Enabling the Viewer
 
 ```yaml
 # config/packages/dh_auditor.yaml
@@ -21,7 +25,7 @@ dh_auditor:
                 page_size: 50
 ```
 
-## Routes
+## 🛤️ Routes
 
 The viewer registers three routes:
 
@@ -41,40 +45,40 @@ dh_auditor:
     type: auditor
 ```
 
-## Pages
+## 📄 Pages
 
 ### Entity List (`/audit`)
 
 Displays all audited entities with:
-- Entity class name
-- Audit table name
-- Number of audit entries
-- Link to view history
+- 📋 Entity class name
+- 🗄️ Audit table name
+- 🔢 Number of audit entries
+- 🔗 Link to view history
 
 ### Entity Stream (`/audit/{entity}`)
 
 Shows audit entries for an entity:
-- Chronological list (newest first)
-- Operation type (insert/update/remove/associate/dissociate)
-- User and timestamp
-- Changed properties (diff)
+- 📅 Chronological list (newest first)
+- 🏷️ Operation type (insert/update/remove/associate/dissociate)
+- 👤 User and timestamp
+- 📝 Changed properties (diff)
 
 Filter by specific entity ID:
 ```
 /audit/App-Entity-User/42
 ```
 
-#### Filters
+#### 🔍 Filters
 
 The entity stream page includes filters to narrow down audit entries:
 
 **Action Type Filter**
 Filter by operation type:
-- Insert (record created)
-- Update (record updated)
-- Remove (record deleted)
-- Associate (relation added)
-- Dissociate (relation removed)
+- `insert` - Record created
+- `update` - Record updated
+- `remove` - Record deleted
+- `associate` - Relation added
+- `dissociate` - Relation removed
 
 **User Filter**
 Filter by the user who performed the action:
@@ -82,9 +86,10 @@ Filter by the user who performed the action:
 - Anonymous (for actions without user attribution)
 - CLI commands (each command is tracked by its name, e.g., `app:import-users`)
 
-Filters can be combined and are preserved during pagination.
+> [!TIP]
+> Filters can be combined and are preserved during pagination.
 
-URL parameters:
+**URL parameters:**
 ```
 /audit/App-Entity-User?type=update&user=42
 /audit/App-Entity-User?type=insert&user=__anonymous__
@@ -94,7 +99,7 @@ URL parameters:
 
 Groups all changes from a single database transaction across all entities.
 
-## Activity Graph
+## 📊 Activity Graph
 
 Each entity card displays a visual sparkline graph showing audit activity over time.
 
@@ -118,26 +123,27 @@ dh_auditor:
 
 ### Layout Options
 
-| Layout | Description |
-|--------|-------------|
-| `bottom` | Sparkline displayed below the entity info, full width (default) |
+| Layout   | Description                                                       |
+|----------|-------------------------------------------------------------------|
+| `bottom` | Sparkline displayed below the entity info, full width (default)  |
 | `inline` | Compact sparkline displayed in the header row, next to event count |
 
 ### Caching
 
-The activity graph uses caching to improve performance on large audit tables. Caching requires `symfony/cache`:
+The activity graph uses caching to improve performance on large audit tables.
 
-```bash
-composer require symfony/cache
-```
-
-If `symfony/cache` is not installed, the graph will still work but without caching.
+> [!NOTE]
+> Caching requires `symfony/cache`:
+> ```bash
+> composer require symfony/cache
+> ```
+> If `symfony/cache` is not installed, the graph will still work but without caching.
 
 #### Cache with Tags
 
 If your cache pool supports tags (`TagAwareCacheInterface`), the bundle uses the tag `dh_auditor.activity` for efficient cache invalidation.
 
-### Clear Cache Command
+### 🗑️ Clear Cache Command
 
 Clear the activity graph cache manually:
 
@@ -149,17 +155,18 @@ php bin/console audit:cache:clear
 php bin/console audit:cache:clear --entity="App\Entity\User"
 ```
 
-> **Note:** Clearing all cache requires a cache pool that supports tags. If your cache pool doesn't support tags, you can only clear cache for specific entities.
+> [!IMPORTANT]
+> Clearing all cache requires a cache pool that supports tags. If your cache pool doesn't support tags, you can only clear cache for specific entities.
 
 ### Display Behavior
 
-| State | Behavior |
-|-------|----------|
-| Graph disabled (`enabled: false`) | Activity graph section is completely hidden |
-| Graph enabled, no data | Placeholder with "No recent activity" message |
-| Graph enabled, with data | Bars are normalized (tallest bar = 100%) |
+| State                            | Behavior                                         |
+|----------------------------------|--------------------------------------------------|
+| Graph disabled (`enabled: false`)| Activity graph section is completely hidden      |
+| Graph enabled, no data           | Placeholder with "No recent activity" message    |
+| Graph enabled, with data         | Bars are normalized (tallest bar = 100%)         |
 
-## Dark Mode
+## 🌙 Dark Mode
 
 The viewer includes a dark/light mode toggle button in the header.
 
@@ -171,7 +178,7 @@ The viewer includes a dark/light mode toggle button in the header.
 
 The toggle works without page reload and persists across sessions.
 
-## Access Control
+## 🔒 Access Control
 
 ### Via Configuration
 
@@ -203,7 +210,7 @@ security:
         - { path: ^/audit, roles: ROLE_ADMIN }
 ```
 
-## URL Format
+## 🔗 URL Format
 
 Entity namespaces use dashes instead of backslashes:
 
@@ -225,7 +232,7 @@ $namespace = UrlHelper::paramToNamespace('App-Entity-User');
 // Returns: 'App\Entity\User'
 ```
 
-## Generating URLs
+## 🔧 Generating URLs
 
 ```php
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -257,7 +264,7 @@ $url = $urlGenerator->generate('dh_auditor_show_transaction_stream', [
 ]);
 ```
 
-## Customization
+## 🎨 Customization
 
 ### Override Templates
 
@@ -305,7 +312,7 @@ templates/bundles/DHAuditorBundle/
 | `dh_auditor_pager`   | Pagination                           | Entity stream                    |
 | `javascripts`        | JavaScript includes                  | All pages                        |      
 
-## Assets
+## 📦 Assets
 
 Install assets:
 
@@ -315,23 +322,25 @@ bin/console assets:install
 
 Assets are installed to `public/bundles/dhauditor/`.
 
-## Translations
+## 🌍 Translations
 
 Available translations:
 
-- English (en)
-- French (fr)
-- German (de)
-- Spanish (es)
-- Italian (it)
-- Dutch (nl)
-- Russian (ru)
-- Ukrainian (uk)
-- Estonian (et)
+| Language   | Code |
+|------------|------|
+| English    | `en` |
+| French     | `fr` |
+| German     | `de` |
+| Spanish    | `es` |
+| Italian    | `it` |
+| Dutch      | `nl` |
+| Russian    | `ru` |
+| Ukrainian  | `uk` |
+| Estonian   | `et` |
 
 The viewer uses your application's locale automatically.
 
-## Disabling the Viewer
+## 🚫 Disabling the Viewer
 
 ```yaml
 dh_auditor:
@@ -342,7 +351,9 @@ dh_auditor:
 
 Routes are not registered, `/audit` returns 404.
 
-## Next Steps
+---
 
-- [Role Checker](../customization/role-checker.md) - Access control
-- [Querying](../querying.md) - Programmatic access
+## 🚀 Next Steps
+
+- 🛡️ [Role Checker](../customization/role-checker.md) - Access control
+- ⚙️ [Configuration](../configuration/index.md) - All options

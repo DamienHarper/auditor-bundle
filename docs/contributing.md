@@ -1,4 +1,10 @@
-## Ways to Contribute
+# Contributing
+
+> **Help improve auditor-bundle**
+
+Thank you for considering contributing to auditor-bundle!
+
+## 🤝 Ways to Contribute
 
 - 🐛 **Report bugs** - Submit issues on GitHub
 - 💡 **Suggest features** - Open a discussion or issue
@@ -6,11 +12,11 @@
 - 🔧 **Submit code** - Fix bugs or implement new features
 - ⭐ **Star the project** - Show your support
 
-## Code Contributions
+## 💻 Code Contributions
 
 All code contributions are made via **Pull Requests (PR)**. Direct commits to the `master` branch are not allowed.
 
-### Development Setup
+### 🚀 Development Setup
 
 1. Fork the repository on GitHub
 2. Clone your fork locally:
@@ -32,7 +38,7 @@ composer install
 git checkout -b feature/my-new-feature
 ```
 
-### Running Tests
+### ✅ Running Tests
 
 #### Quick Tests (Local PHP)
 
@@ -47,7 +53,7 @@ composer test:coverage
 composer testdox
 ```
 
-#### Testing with Docker (Recommended)
+#### 🐳 Testing with Docker (Recommended)
 
 The project includes a `Makefile` that allows you to test against different combinations of PHP versions and Symfony versions using Docker containers. This ensures your code works across all supported environments.
 
@@ -101,7 +107,8 @@ make tests args='--coverage-html=coverage'
 
 **Testing Multiple Versions:**
 
-Before submitting a pull request, it's recommended to test against multiple PHP versions:
+> [!TIP]
+> Before submitting a pull request, it's recommended to test against multiple PHP versions:
 
 ```bash
 # Test different PHP versions
@@ -109,7 +116,7 @@ make tests php=8.4
 make tests php=8.5
 ```
 
-### Code Quality
+### 🔍 Code Quality
 
 Before submitting, ensure your code passes all quality checks.
 
@@ -142,29 +149,29 @@ make phpstan php=8.4
 make cs-fix args='fix --dry-run'
 ```
 
-### Commit Messages
+### 📝 Commit Messages
 
 Write clear, concise commit messages:
 
-- Use the present tense ("Add feature" not "Added feature")
-- Use the imperative mood ("Move cursor to..." not "Moves cursor to...")
-- Limit the first line to 72 characters
-- Reference issues and pull requests when relevant
+- ✅ Use the present tense ("Add feature" not "Added feature")
+- ✅ Use the imperative mood ("Move cursor to..." not "Moves cursor to...")
+- ✅ Limit the first line to 72 characters
+- ✅ Reference issues and pull requests when relevant
 
-Good examples:
+**Good examples:**
 - `Add support for custom viewer templates`
 - `Fix RoleChecker when no user is authenticated`
 - `Update documentation for v7 migration`
 
-### Pull Request Process
+### 📤 Pull Request Process
 
-1. Ensure all tests pass (ideally on multiple PHP/Symfony combinations)
-2. Run code quality tools (`make cs-fix`, `make phpstan`)
-3. Update documentation if needed
-4. Submit the pull request
-5. Respond to review feedback
+1. ✅ Ensure all tests pass (ideally on multiple PHP/Symfony combinations)
+2. ✅ Run code quality tools (`make cs-fix`, `make phpstan`)
+3. 📖 Update documentation if needed
+4. 📤 Submit the pull request
+5. 💬 Respond to review feedback
 
-### Continuous Integration (CI)
+### 🤖 Continuous Integration (CI)
 
 When you submit a Pull Request, GitHub Actions will automatically run:
 
@@ -175,18 +182,20 @@ When you submit a Pull Request, GitHub Actions will automatically run:
 - **PHPStan** for static analysis
 - **Code coverage** report
 
-Your PR must pass all CI checks before it can be merged. If a check fails, review the logs to identify and fix the issue.
+> [!IMPORTANT]
+> Your PR must pass all CI checks before it can be merged. If a check fails, review the logs to identify and fix the issue.
 
-> **Tip:** Run `make tests php=8.4` and `make tests php=8.5` locally before pushing to catch compatibility issues early.
+> [!TIP]
+> Run `make tests php=8.4` and `make tests php=8.5` locally before pushing to catch compatibility issues early.
 
-### Writing Tests
+### ✍️ Writing Tests
 
 Tests are **highly encouraged** and often required for new features or bug fixes:
 
-- Place tests in the `tests/` directory, mirroring the `src/` structure
-- Use meaningful test method names that describe the behavior being tested
-- Include both positive and negative test cases
-- Test edge cases and error conditions
+- 📁 Place tests in the `tests/` directory, mirroring the `src/` structure
+- 📝 Use meaningful test method names that describe the behavior being tested
+- ✅ Include both positive and negative test cases
+- 🔍 Test edge cases and error conditions
 
 **Test Structure Example:**
 
@@ -222,46 +231,46 @@ make tests args='--filter=ViewerControllerTest'
 composer test:coverage
 ```
 
-## Reporting Bugs
+## 🐛 Reporting Bugs
 
 When reporting bugs, please include:
 
-1. **auditor-bundle version** - `composer show damienharper/auditor-bundle`
-2. **auditor version** - `composer show damienharper/auditor`
-3. **PHP version** - `php -v`
-4. **Symfony version** - `composer show symfony/framework-bundle`
-5. **Steps to reproduce** - Minimal code example
-6. **Expected behavior** - What should happen
-7. **Actual behavior** - What actually happens
-8. **Error messages** - Full stack trace if available
+1. 📦 **auditor-bundle version** - `composer show damienharper/auditor-bundle`
+2. 📦 **auditor version** - `composer show damienharper/auditor`
+3. 🐘 **PHP version** - `php -v`
+4. 🎵 **Symfony version** - `composer show symfony/framework-bundle`
+5. 📋 **Steps to reproduce** - Minimal code example
+6. ✅ **Expected behavior** - What should happen
+7. ❌ **Actual behavior** - What actually happens
+8. 📝 **Error messages** - Full stack trace if available
 
-## Feature Requests
+## 💡 Feature Requests
 
 For feature requests:
 
-1. Check existing issues to avoid duplicates
-2. Describe the use case
-3. Explain why existing features don't meet your needs
-4. Suggest a possible implementation if you have ideas
+1. 🔍 Check existing issues to avoid duplicates
+2. 📝 Describe the use case
+3. 💭 Explain why existing features don't meet your needs
+4. 🔧 Suggest a possible implementation if you have ideas
 
-## Documentation Contributions
+## 📖 Documentation Contributions
 
 Documentation lives in the `docs/` directory and uses Markdown.
 
 ### Style Guide
 
-- Use clear, simple language
-- Include code examples
-- Add internal links to related content
-- Use standard Markdown tables with pipes
-- Test all code examples
+- ✅ Use clear, simple language
+- ✅ Include code examples
+- ✅ Add internal links to related content
+- ✅ Use standard Markdown tables with pipes
+- ✅ Test all code examples
 
-## Questions?
+## ❓ Questions?
 
 - Open a [GitHub Issue](https://github.com/DamienHarper/auditor-bundle/issues)
 - Check existing issues first
 - Be patient - maintainers are volunteers
 
-## License
+## 📜 License
 
 By contributing, you agree that your contributions will be licensed under the MIT License.
