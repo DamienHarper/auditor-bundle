@@ -15,17 +15,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[Small]
 final class TimeAgoExtensionTest extends TestCase
 {
-    private function makeExtension(string $locale = 'en'): TimeAgoExtension
-    {
-        $translator = $this->createStub(TranslatorInterface::class);
-        $translator->method('getLocale')->willReturn($locale);
-        $translator->method('trans')->willReturnCallback(
-            static fn (string $id, array $params): string => $id.'|'.implode(',', $params)
-        );
-
-        return new TimeAgoExtension($translator);
-    }
-
     public function testSecondsAgo(): void
     {
         $ext = $this->makeExtension();
@@ -100,5 +89,16 @@ final class TimeAgoExtensionTest extends TestCase
         $this->assertNotSame($enResult, $frResult, 'Future date fallback must be locale-aware.');
         $this->assertDoesNotMatchRegularExpression('/\d{4}\/\d{2}\/\d{2}/', $enResult);
         $this->assertDoesNotMatchRegularExpression('/\d{4}\/\d{2}\/\d{2}/', $frResult);
+    }
+
+    private function makeExtension(string $locale = 'en'): TimeAgoExtension
+    {
+        $translator = $this->createStub(TranslatorInterface::class);
+        $translator->method('getLocale')->willReturn($locale);
+        $translator->method('trans')->willReturnCallback(
+            static fn (string $id, array $params): string => $id.'|'.implode(',', $params)
+        );
+
+        return new TimeAgoExtension($translator);
     }
 }
