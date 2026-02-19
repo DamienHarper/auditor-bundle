@@ -1213,6 +1213,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     user_provider?: scalar|Param|null, // Default: "dh_auditor.user_provider"
  *     security_provider?: scalar|Param|null, // Default: "dh_auditor.security_provider"
  *     role_checker?: scalar|Param|null, // Default: "dh_auditor.role_checker"
+ *     extra_data_provider?: scalar|Param|null, // Default: null
  *     providers?: array<string, mixed>,
  * }
  * @psalm-type TwigExtraConfig = array{

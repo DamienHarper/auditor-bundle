@@ -22,6 +22,7 @@ use DH\AuditorBundle\Controller\ViewerController;
 use DH\AuditorBundle\DependencyInjection\Compiler\DoctrineMiddlewareCompilerPass;
 use DH\AuditorBundle\Event\ConsoleEventSubscriber;
 use DH\AuditorBundle\Event\ViewerEventSubscriber;
+use DH\AuditorBundle\ExtraData\ExtraDataProvider;
 use DH\AuditorBundle\Routing\RoutingLoader;
 use DH\AuditorBundle\Security\RoleChecker;
 use DH\AuditorBundle\Security\SecurityProvider;
@@ -75,6 +76,9 @@ class DHAuditorBundle extends AbstractBundle
             ->scalarNode('role_checker')
             ->defaultValue('dh_auditor.role_checker')
             ->end()
+            ->scalarNode('extra_data_provider')
+            ->defaultNull()
+            ->end()
             ->arrayNode('providers')
             ->requiresAtLeastOneElement()
             ->useAttributeAsKey('name')
@@ -94,7 +98,7 @@ class DHAuditorBundle extends AbstractBundle
     }
 
     /**
-     * @param array{enabled: bool, timezone: string, user_provider: string, security_provider: string, role_checker: string, providers: array<string, array<string, mixed>>} $config
+     * @param array{enabled: bool, timezone: string, user_provider: string, security_provider: string, role_checker: string, extra_data_provider: ?string, providers: array<string, array<string, mixed>>} $config
      */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
@@ -106,12 +110,16 @@ class DHAuditorBundle extends AbstractBundle
         $builder->setParameter('dh_auditor.configuration', $auditorConfig);
 
         // Auditor Configuration service
-        $services->set(Configuration::class)
+        $configDefinition = $services->set(Configuration::class)
             ->args(['%dh_auditor.configuration%'])
             ->call('setUserProvider', [new Reference($config['user_provider'])])
             ->call('setSecurityProvider', [new Reference($config['security_provider'])])
             ->call('setRoleChecker', [new Reference($config['role_checker'])])
         ;
+
+        if (null !== $config['extra_data_provider']) {
+            $configDefinition->call('setExtraDataProvider', [new Reference($config['extra_data_provider'])]);
+        }
 
         // Auditor service
         $services->set(Auditor::class)
@@ -287,6 +295,11 @@ class DHAuditorBundle extends AbstractBundle
         // RoleChecker (autowired)
         $services->set(RoleChecker::class)->autowire();
         $services->alias('dh_auditor.role_checker', RoleChecker::class);
+
+        // ExtraDataProvider (autowired) — available but NOT wired by default;
+        // users opt in by setting extra_data_provider: dh_auditor.extra_data_provider
+        $services->set(ExtraDataProvider::class)->autowire();
+        $services->alias('dh_auditor.extra_data_provider', ExtraDataProvider::class);
 
         // Event listeners (using #[AsEventListener] attributes)
         $services->set(ViewerEventSubscriber::class)
