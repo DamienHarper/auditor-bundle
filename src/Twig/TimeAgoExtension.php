@@ -29,7 +29,7 @@ final readonly class TimeAgoExtension
 
         if ($diff < 0) {
             // Future date, display as absolute date
-            return $date->format('Y/m/d g:i:sa');
+            return $this->formatAbsolute($date);
         }
 
         if ($diff < self::SECONDS_PER_MINUTE) {
@@ -55,6 +55,24 @@ final readonly class TimeAgoExtension
         }
 
         // More than a week ago, display as absolute date
-        return $date->format('Y/m/d g:i:sa');
+        return $this->formatAbsolute($date);
+    }
+
+    /**
+     * Formats a date as a locale-aware absolute string using ICU.
+     * Consistent with the `format_datetime('medium', 'short')` Twig filter.
+     *
+     * @see https://github.com/DamienHarper/auditor-bundle/issues/359
+     */
+    private function formatAbsolute(\DateTimeInterface $date): string
+    {
+        $formatter = new \IntlDateFormatter(
+            $this->translator->getLocale(),
+            \IntlDateFormatter::MEDIUM,
+            \IntlDateFormatter::SHORT,
+            $date->getTimezone(),
+        );
+
+        return $formatter->format($date) ?: $date->format('Y-m-d H:i');
     }
 }
