@@ -17,7 +17,7 @@ dh_auditor:
     user_provider: 'dh_auditor.user_provider'
     security_provider: 'dh_auditor.security_provider'
     role_checker: 'dh_auditor.role_checker'
-    
+
     providers:
         doctrine:
             table_prefix: ''
@@ -27,6 +27,7 @@ dh_auditor:
             storage_services: ['@doctrine.orm.default_entity_manager']
             auditing_services: ['@doctrine.orm.default_entity_manager']
             storage_mapper: ~
+            utf8_convert: false             # Re-enable legacy UTF-8 conversion (opt-in)
             viewer: false
 ```
 
@@ -217,6 +218,33 @@ dh_auditor:
 
 > [!NOTE]
 > See [Multi-Database Setup](storage.md) for details.
+
+### utf8_convert
+
+| Type   | Default | Description                                   |
+|--------|---------|-----------------------------------------------|
+| `bool` | `false` | Re-enable the legacy UTF-8 conversion pass    |
+
+```yaml
+dh_auditor:
+    providers:
+        doctrine:
+            utf8_convert: false
+```
+
+In auditor 3.x, every audit entry value was passed through `mb_convert_encoding()` automatically. In auditor 4.0+ this implicit conversion is **disabled by default** because DBAL 4 enforces UTF-8 connections on PHP 8.4+, making the conversion a no-op for virtually all modern applications.
+
+If your application reads data from legacy non-UTF-8 sources, you can re-enable the conversion explicitly:
+
+```yaml
+dh_auditor:
+    providers:
+        doctrine:
+            utf8_convert: true
+```
+
+> [!NOTE]
+> Enabling this option has a small performance cost as every stored value is passed through `mb_convert_encoding()`. Leave it disabled unless you know your data sources may produce non-UTF-8 strings.
 
 ### viewer
 

@@ -33,6 +33,17 @@ This bundle requires `damienharper/auditor` >= 4.0 which introduces several brea
 | `DH\Auditor\...\Auditing\Annotation\Security` | `DH\Auditor\...\Auditing\Attribute\Security` |
 | `DH\Auditor\...\Auditing\Annotation\AnnotationLoader` | `DH\Auditor\...\Auditing\Attribute\AttributeLoader` |
 
+#### `utf8_convert` is now opt-in
+
+The implicit `mb_convert_encoding()` pass on every audit entry is disabled by default (DBAL 4 enforces UTF-8). Re-enable it explicitly if needed:
+
+```yaml
+dh_auditor:
+    providers:
+        doctrine:
+            utf8_convert: true
+```
+
 #### Entry Model - Property Hooks (PHP 8.4)
 
 | Before | After |
