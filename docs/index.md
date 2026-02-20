@@ -72,7 +72,7 @@ flowchart TB
 | RoleChecker         | `dh_auditor.role_checker`      | Checks access via Security component  |
 | ConsoleUserProvider | (internal)                     | Tracks console command as user        |
 | ViewerController    | (internal)                     | Web UI for audit logs                 |
-| RoutingLoader       | (internal)                     | Loads viewer routes                   |                  
+| RoutingLoader       | (internal)                     | Loads viewer routes                   |
 
 ## 📋 Version Compatibility
 
