@@ -26,7 +26,7 @@
                             {{ helper.activity_sparkline(entityAuditData.activityGraph, entityAuditData.activityGraphRaw|default([]), activityGraphDays) }}
                         {% endif %}
                         <span class="text-xs text-slate-500 dark:text-slate-400 shrink-0">
-                            {{ 'audit.audit_details.events_count'|trans({'%count%': entityAuditData.count|number_format}, 'auditor') }}
+                            {{ 'audit.audit_details.events_count'|trans({'%count%': entityAuditData.count, '%formatted_count%': entityAuditData.count|number_format}, 'auditor') }}
                         </span>
                     </div>
                 </div>

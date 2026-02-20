@@ -22,7 +22,7 @@
                     {{ entity|split('\\')|last }}{% if id is not null %} #{{ id }}{% endif %}
                 </h1>
                 <p class="text-sm text-slate-500 dark:text-slate-400">
-                    {{ 'audit.audit_details.events_count'|trans({'%count%': paginator.numResults|number_format}, 'auditor') }}
+                    {{ 'audit.audit_details.events_count'|trans({'%count%': paginator.numResults, '%formatted_count%': paginator.numResults|number_format}, 'auditor') }}
                     · {{ 'audit.audit_details.most_recent'|trans(domain='auditor') }}
                 </p>
             </div>

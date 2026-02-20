@@ -15,7 +15,7 @@ audit:
     property: Rekvisiit
     old_value: Vana väärtus
     new_value: Uus väärtus
-    events_count: '{1} %count% sündmus|]1,Inf[ %count% sündmust'
+    events_count: '{1} %formatted_count% sündmus|]1,Inf[ %formatted_count% sündmust'
     last_activity: Viimane tegevus
     anonymous: anonüümne kasutaja
   transaction:
