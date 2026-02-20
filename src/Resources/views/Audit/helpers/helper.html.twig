@@ -1,7 +1,13 @@
 {% macro dump(value, separator) %}
     {%- import _self as helper -%}
     {%- if value.label is defined -%}
-        {{- value.label -}}
+        {%- if value.label is iterable -%}
+            {%- for k, v in value.label -%}
+                {{- k }}: {{ helper.dump(v) }}{{ separator|default('<br/>')|raw -}}
+            {%- endfor -%}
+        {%- else -%}
+            {{- value.label -}}
+        {%- endif -%}
     {%- elseif value is iterable -%}
         {%- for k, v in value -%}
             {{- k }}: {{ helper.dump(v) }}{{ separator|default('<br/>')|raw -}}
@@ -10,7 +16,7 @@
         true
     {%- elseif value is same as(false) -%}
         false
-    {%- else -%}
+    {%- elseif value is not null -%}
         {{- value -}}
     {%- endif -%}
 {% endmacro dump %}

@@ -3,7 +3,11 @@
 {# Get entity label from diffs if available #}
 {% set entity_label = null %}
 {% if entry.diffs.label is defined %}
-    {% set entity_label = entry.diffs.label %}
+    {% if entry.diffs.label is iterable %}
+        {% set entity_label = entry.diffs.label|join(', ') %}
+    {% else %}
+        {% set entity_label = entry.diffs.label %}
+    {% endif %}
 {% endif %}
 
 {% if entry.type == 'remove' %}
@@ -201,9 +205,9 @@
                     </tr>
                     {% if diffs.source.label is defined or diffs.target.label is defined %}
                         <tr class="text-xs italic text-slate-500 dark:text-slate-400">
-                            <td class="pr-3 break-words" style="max-width: 45%;">{{ diffs.source.label|default('—') }}</td>
+                            <td class="pr-3 break-words" style="max-width: 45%;">{{ diffs.source.label is iterable ? diffs.source.label|join(', ') : diffs.source.label|default('—') }}</td>
                             <td></td>
-                            <td class="pl-3 break-words" style="max-width: 45%;">{{ diffs.target.label|default('—') }}</td>
+                            <td class="pl-3 break-words" style="max-width: 45%;">{{ diffs.target.label is iterable ? diffs.target.label|join(', ') : diffs.target.label|default('—') }}</td>
                         </tr>
                     {% endif %}
                 {% endif %}
@@ -235,9 +239,9 @@
                     </tr>
                     {% if diffs.source.label is defined or diffs.target.label is defined %}
                         <tr class="text-xs italic text-slate-500 dark:text-slate-400">
-                            <td class="pr-3 break-words" style="max-width: 45%;">{{ diffs.source.label|default('—') }}</td>
+                            <td class="pr-3 break-words" style="max-width: 45%;">{{ diffs.source.label is iterable ? diffs.source.label|join(', ') : diffs.source.label|default('—') }}</td>
                             <td></td>
-                            <td class="pl-3 break-words" style="max-width: 45%;">{{ diffs.target.label|default('—') }}</td>
+                            <td class="pl-3 break-words" style="max-width: 45%;">{{ diffs.target.label is iterable ? diffs.target.label|join(', ') : diffs.target.label|default('—') }}</td>
                         </tr>
                     {% endif %}
                 {% endif %}
