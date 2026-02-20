@@ -15,7 +15,7 @@ audit:
     property: Veld
     old_value: Oude waarde
     new_value: Nieuwe waarde
-    events_count: '{1} %count% gebeurtenis|]1,Inf[ %count% gebeurtenissen'
+    events_count: '{1} %formatted_count% gebeurtenis|]1,Inf[ %formatted_count% gebeurtenissen'
     last_activity: Laatste activiteit
     anonymous: anonieme gebruiker
   transaction:

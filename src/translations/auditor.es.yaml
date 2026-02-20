@@ -15,7 +15,7 @@ audit:
     property: Propiedad
     old_value: Valor antiguo
     new_value: Valor nuevo
-    events_count: '{1} %count% evento|]1,Inf[ %count% eventos'
+    events_count: '{1} %formatted_count% evento|]1,Inf[ %formatted_count% eventos'
     last_activity: Última actividad
     anonymous: usuario anónimo
   transaction:
