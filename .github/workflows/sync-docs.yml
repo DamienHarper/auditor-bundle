@@ -1,0 +1,75 @@
+name: Sync docs to auditor-docs
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout auditor-bundle
+        uses: actions/checkout@v4
+
+      - name: Checkout auditor-docs
+        uses: actions/checkout@v4
+        with:
+          repository: DamienHarper/auditor-docs
+          path: auditor-docs
+          token: ${{ secrets.AUDITOR_DOCS_PAT }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: auditor-docs/package-lock.json
+
+      - name: Install auditor-docs dependencies
+        run: npm ci
+        working-directory: auditor-docs
+
+      - name: Compute versions
+        id: versions
+        run: |
+          TAG="${{ github.ref_name }}"
+          MAJOR=$(echo "$TAG" | cut -d. -f1)
+          MINOR=$(echo "$TAG" | cut -d. -f2)
+          PATCH=$(echo "$TAG" | cut -d. -f3)
+          NEW_LABEL="${MAJOR}.x"
+          LATEST_FROZEN=$(node -e "const v=require('./auditor-docs/auditor-bundle_versions.json'); console.log(v[0] || '')")
+          LATEST_FROZEN_MAJOR=$(echo "$LATEST_FROZEN" | cut -d. -f1)
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "new_label=$NEW_LABEL" >> $GITHUB_OUTPUT
+          echo "latest_frozen=$LATEST_FROZEN" >> $GITHUB_OUTPUT
+          echo "latest_frozen_major=$LATEST_FROZEN_MAJOR" >> $GITHUB_OUTPUT
+          if [ -n "$LATEST_FROZEN" ] && [ "$MAJOR" -gt "$LATEST_FROZEN_MAJOR" ] && [ "$MINOR" -eq "0" ] && [ "$PATCH" -eq "0" ]; then
+            echo "freeze=true" >> $GITHUB_OUTPUT
+          else
+            echo "freeze=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Freeze current version (on major bump x.0.0 only)
+        if: steps.versions.outputs.freeze == 'true'
+        run: |
+          cd auditor-docs
+          PREV_MAJOR=$(( ${{ steps.versions.outputs.latest_frozen_major }} + 0 ))
+          FREEZE_LABEL="${PREV_MAJOR}.x"
+          if ! node -e "process.exit(require('./auditor-bundle_versions.json').includes('${FREEZE_LABEL}') ? 0 : 1)"; then
+            npm run docusaurus -- docs:version:auditor-bundle "${FREEZE_LABEL}"
+          fi
+
+      - name: Sync docs
+        run: |
+          rm -rf auditor-docs/docs/auditor-bundle
+          cp -r docs/ auditor-docs/docs/auditor-bundle
+
+      - name: Commit and push
+        run: |
+          cd auditor-docs
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --staged --quiet || git commit -m "chore: sync auditor-bundle docs from tag ${{ github.ref_name }}"
+          git push
