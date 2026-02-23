@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout auditor-bundle
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Checkout auditor-docs
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: DamienHarper/auditor-docs
           path: auditor-docs
