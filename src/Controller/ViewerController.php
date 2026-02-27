@@ -73,7 +73,7 @@ final readonly class ViewerController
         $activityGraphEnabled = $this->activityGraphProvider instanceof ActivityGraphProvider;
         $activityGraphDays = 30;
         $activityGraphLayout = 'bottom';
-        if ($activityGraphEnabled && $this->activityGraphProvider instanceof ActivityGraphProvider) {
+        if ($activityGraphEnabled) {
             $activityGraphProvider = $this->activityGraphProvider;
             $activityGraphDays = $activityGraphProvider->days;
             $activityGraphLayout = $activityGraphProvider->layout;

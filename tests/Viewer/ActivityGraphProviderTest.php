@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace DH\AuditorBundle\Tests\Viewer;
 
-use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
@@ -26,8 +25,6 @@ final class ActivityGraphProviderTest extends WebTestCase
 {
     use BlogSchemaSetupTrait;
     use ReaderTrait;
-
-    private DoctrineProvider $provider;
 
     protected function setUp(): void
     {
