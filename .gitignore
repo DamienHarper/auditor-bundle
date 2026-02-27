@@ -12,3 +12,4 @@ composer.lock
 *.sqlite
 .preload.php
 /var/tailwind/
+reference.php
