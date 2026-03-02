@@ -96,7 +96,7 @@ jobs:
           vendor/bin/phpunit --coverage-clover=coverage.xml
 
       - name: Upload coverage file
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.CODECOV_REPORT }}
           path: coverage.xml
