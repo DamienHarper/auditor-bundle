@@ -44,7 +44,7 @@
   "autoload-dev": {
     "psr-4": {
       "DH\\AuditorBundle\\Tests\\": "tests",
-      "DH\\Auditor\\Tests\\": "vendor/damienharper/auditor/tests"
+      "DH\\Auditor\\Tests\\": "vendor/damienharper/auditor-doctrine-provider/tests"
     }
   },
   "require-dev": {
