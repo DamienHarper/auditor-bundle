@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to sync (e.g. 7.1.0)'
+        required: true
+        type: string
 
 jobs:
   sync:
@@ -11,6 +17,8 @@ jobs:
     steps:
       - name: Checkout auditor-bundle
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Checkout auditor-docs
         uses: actions/checkout@v6
@@ -32,8 +40,9 @@ jobs:
 
       - name: Compute versions
         id: versions
+        env:
+          TAG: ${{ inputs.tag || github.ref_name }}
         run: |
-          TAG="${{ github.ref_name }}"
           MAJOR=$(echo "$TAG" | cut -d. -f1)
           MINOR=$(echo "$TAG" | cut -d. -f2)
           PATCH=$(echo "$TAG" | cut -d. -f3)
@@ -68,17 +77,18 @@ jobs:
       - name: Inject Docusaurus front matter into index.md
         run: |
           INDEX="auditor-docs/docs/auditor-bundle/index.md"
-          # Ajouter le front matter seulement s'il n'est pas déjà présent
           if ! head -1 "$INDEX" | grep -q '^---'; then
             CONTENT=$(cat "$INDEX")
             printf -- '---\nid: index\ntitle: Introduction\nslug: /\n---\n\n%s' "$CONTENT" > "$INDEX"
           fi
 
       - name: Commit and push
+        env:
+          TAG: ${{ steps.versions.outputs.tag }}
         run: |
           cd auditor-docs
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          git diff --staged --quiet || git commit -m "chore: sync auditor-bundle docs from tag ${{ github.ref_name }}"
+          git diff --staged --quiet || git commit -m "chore: sync auditor-bundle docs from tag $TAG"
           git push
