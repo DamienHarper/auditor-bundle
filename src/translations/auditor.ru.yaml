@@ -15,7 +15,7 @@ audit:
     property: Атрибут
     old_value: Старое значение
     new_value: Новое значение
-    events_count: '{1} %formatted_count% событие|[2,4] %formatted_count% события|]4,Inf[ %formatted_count% событий'
+    events_count: '{0} %formatted_count% событий|{1} %formatted_count% событие|[2,4] %formatted_count% события|]4,Inf[ %formatted_count% событий'
     last_activity: Последняя активность
     anonymous: анонимный пользователь
   transaction:

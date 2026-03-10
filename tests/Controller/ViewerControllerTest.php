@@ -143,7 +143,8 @@ final class ViewerControllerTest extends WebTestCase
     public function testShowEntityHistoryWithRoleGrantedForAuthorAuditViewing(): void
     {
         $this->login(['ROLE1']);
-        $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author');
+        $uri = '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author';
+        $crawler = $this->client->request('GET', $uri);
 
         // asserts that the response status code is 2xx
         $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
@@ -153,6 +154,11 @@ final class ViewerControllerTest extends WebTestCase
         // Check page title contains entity name
         $title = $crawler->filter('h1');
         $this->assertStringContainsString('Author', $title->text(), 'Page title contains Author');
+
+        // Check filtered events not found
+        $crawler = $this->client->request('GET', $uri.'?type=associate&user=1111111');
+        $subtitle = $crawler->filter('h1+p');
+        $this->assertStringContainsString('0 events', $subtitle->text(), 'Subtitle contains 0 events');
     }
 
     #[Depends('testShowEntityHistoryWithRoleGrantedForAuthorAuditViewing')]
