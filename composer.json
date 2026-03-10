@@ -22,6 +22,7 @@
     "php": "^8.4",
     "ext-intl": "*",
     "damienharper/auditor": "^4.0",
+    "damienharper/auditor-doctrine-provider": "^1.0",
     "doctrine/doctrine-bundle": "^3.0",
     "doctrine/dbal": "^4.0",
     "doctrine/orm": "^3.2",
@@ -43,7 +44,7 @@
   "autoload-dev": {
     "psr-4": {
       "DH\\AuditorBundle\\Tests\\": "tests",
-      "DH\\Auditor\\Tests\\": "vendor/damienharper/auditor/tests"
+      "DH\\Auditor\\Tests\\": "vendor/damienharper/auditor-doctrine-provider/tests"
     }
   },
   "require-dev": {
