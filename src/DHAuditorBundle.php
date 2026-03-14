@@ -159,6 +159,7 @@ class DHAuditorBundle extends AbstractBundle
             ->args([new Reference(DoctrineProviderConfiguration::class)])
             ->call('setAuditor', [new Reference(Auditor::class)])
             ->tag('dh_auditor.provider')
+            ->tag('kernel.reset', ['method' => 'reset'])
         ;
 
         // Register the provider with Auditor
