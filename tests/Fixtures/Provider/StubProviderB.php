@@ -6,7 +6,11 @@ namespace DH\AuditorBundle\Tests\Fixtures\Provider;
 
 use DH\Auditor\Auditor;
 use DH\Auditor\Configuration;
+use DH\Auditor\Event\LifecycleEvent;
+use DH\Auditor\Provider\ConfigurationInterface;
 use DH\Auditor\Provider\ProviderInterface;
+use DH\Auditor\Provider\Service\AuditingServiceInterface;
+use DH\Auditor\Provider\Service\StorageServiceInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
@@ -16,9 +20,11 @@ final class StubProviderB implements ProviderInterface
 {
     private ?Auditor $auditor = null;
 
-    public function setAuditor(Auditor $auditor): void
+    public function setAuditor(Auditor $auditor): static
     {
         $this->auditor = $auditor;
+
+        return $this;
     }
 
     public function getAuditor(): Auditor
@@ -26,9 +32,9 @@ final class StubProviderB implements ProviderInterface
         return $this->auditor ?? new Auditor(new Configuration([]), new EventDispatcher());
     }
 
-    public function getConfiguration(): mixed
+    public function getConfiguration(): ConfigurationInterface
     {
-        return null;
+        return new class implements ConfigurationInterface {};
     }
 
     public function isRegistered(): bool
@@ -36,20 +42,20 @@ final class StubProviderB implements ProviderInterface
         return null !== $this->auditor;
     }
 
-    public function registerStorageService(mixed $service): static
+    public function registerStorageService(StorageServiceInterface $service): static
     {
         return $this;
     }
 
-    public function registerAuditingService(mixed $service): static
+    public function registerAuditingService(AuditingServiceInterface $service): static
     {
         return $this;
     }
 
-    public function persist(mixed $payload): void {}
+    public function persist(LifecycleEvent $event): void {}
 
     /**
-     * @return array<string, mixed>
+     * @return StorageServiceInterface[]
      */
     public function getStorageServices(): array
     {
@@ -57,7 +63,7 @@ final class StubProviderB implements ProviderInterface
     }
 
     /**
-     * @return array<string, mixed>
+     * @return AuditingServiceInterface[]
      */
     public function getAuditingServices(): array
     {
@@ -73,11 +79,4 @@ final class StubProviderB implements ProviderInterface
     {
         return true;
     }
-
-    public function isAuditable(string $entity): bool
-    {
-        return false;
-    }
-
-    public function reset(): void {}
 }

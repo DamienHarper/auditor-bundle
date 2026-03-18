@@ -14,6 +14,7 @@ use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\AuditorBundle\Controller\ViewerController;
 use DH\AuditorBundle\DHAuditorBundle;
 use DH\AuditorBundle\Event\ConsoleEventSubscriber;
+use DH\AuditorBundle\Tests\Fixtures\Provider\StubProviderA;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Nyholm\BundleTest\TestKernel;
 use PHPUnit\Framework\Attributes\Small;
@@ -77,6 +78,67 @@ final class DHAuditorBundleTest extends KernelTestCase
 
         $this->assertTrue($container->has(ConsoleEventSubscriber::class));
         $this->assertInstanceOf(ConsoleEventSubscriber::class, $container->get(ConsoleEventSubscriber::class));
+    }
+
+    public function testDoctrineProviderRegisteredWithAuditor(): void
+    {
+        self::bootKernel(['config' => static function (TestKernel $kernel): void {
+            $kernel->setClearCacheAfterShutdown(false);
+            $kernel->addTestBundle(DoctrineBundle::class);
+            $kernel->addTestBundle(SecurityBundle::class);
+            $kernel->addTestBundle(TwigBundle::class);
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/dh_auditor.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/doctrine.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/security.yaml');
+        }]);
+
+        $auditor = self::getContainer()->get(Auditor::class);
+        \assert($auditor instanceof Auditor);
+
+        self::assertTrue($auditor->hasProvider(DoctrineProvider::class), 'DoctrineProvider must be registered with Auditor via the compiler pass');
+    }
+
+    public function testCustomProviderRegisteredViaTag(): void
+    {
+        self::bootKernel(['config' => static function (TestKernel $kernel): void {
+            $kernel->setClearCacheAfterShutdown(false);
+            $kernel->addTestBundle(DoctrineBundle::class);
+            $kernel->addTestBundle(SecurityBundle::class);
+            $kernel->addTestBundle(TwigBundle::class);
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/dh_auditor.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/doctrine.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/security.yaml');
+            // Load the custom provider service definition (tagged dh_auditor.provider)
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/custom_provider.yaml');
+        }]);
+
+        $auditor = self::getContainer()->get(Auditor::class);
+        \assert($auditor instanceof Auditor);
+
+        self::assertTrue(
+            $auditor->hasProvider(StubProviderA::class),
+            'Custom provider tagged with dh_auditor.provider must be auto-registered with Auditor'
+        );
+    }
+
+    public function testViewerEnabledParameterIsFalseByDefault(): void
+    {
+        self::bootKernel(['config' => static function (TestKernel $kernel): void {
+            $kernel->setClearCacheAfterShutdown(false);
+            $kernel->addTestBundle(DoctrineBundle::class);
+            $kernel->addTestBundle(SecurityBundle::class);
+            $kernel->addTestBundle(TwigBundle::class);
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/dh_auditor.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/doctrine.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/security.yaml');
+        }]);
+
+        $container = self::getContainer();
+
+        self::assertFalse(
+            $container->getParameter('dh_auditor.viewer_enabled'),
+            'dh_auditor.viewer_enabled must be false when viewer is not enabled in config'
+        );
     }
 
     #[\Override]
