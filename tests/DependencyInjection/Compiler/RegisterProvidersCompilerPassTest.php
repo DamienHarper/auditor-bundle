@@ -38,7 +38,7 @@ final class RegisterProvidersCompilerPassTest extends AbstractCompilerPassTestCa
         $calls = $this->container->getDefinition(Auditor::class)->getMethodCalls();
         $registerCalls = array_filter($calls, static fn (array $c): bool => 'registerProvider' === $c[0]);
 
-        self::assertEmpty($registerCalls, 'No registerProvider call expected when no tagged providers exist');
+        $this->assertEmpty($registerCalls, 'No registerProvider call expected when no tagged providers exist');
     }
 
     public function testCompilerPassRegistersOneTaggedProvider(): void
@@ -54,14 +54,14 @@ final class RegisterProvidersCompilerPassTest extends AbstractCompilerPassTestCa
         $auditorCalls = $this->container->getDefinition(Auditor::class)->getMethodCalls();
         $registerCalls = array_values(array_filter($auditorCalls, static fn (array $c): bool => 'registerProvider' === $c[0]));
 
-        self::assertCount(1, $registerCalls);
-        self::assertSame('my_custom_provider', (string) $registerCalls[0][1][0]);
+        $this->assertCount(1, $registerCalls);
+        $this->assertSame('my_custom_provider', (string) $registerCalls[0][1][0]);
 
         // The compiler pass must also inject Auditor into the provider definition
         $providerCalls = $this->container->getDefinition('my_custom_provider')->getMethodCalls();
         $setAuditorCalls = array_values(array_filter($providerCalls, static fn (array $c): bool => 'setAuditor' === $c[0]));
 
-        self::assertCount(1, $setAuditorCalls, 'setAuditor must be added to the provider definition by the compiler pass');
+        $this->assertCount(1, $setAuditorCalls, 'setAuditor must be added to the provider definition by the compiler pass');
     }
 
     public function testCompilerPassRegistersMultipleTaggedProviders(): void
@@ -81,7 +81,7 @@ final class RegisterProvidersCompilerPassTest extends AbstractCompilerPassTestCa
         $calls = $this->container->getDefinition(Auditor::class)->getMethodCalls();
         $registerCalls = array_filter($calls, static fn (array $c): bool => 'registerProvider' === $c[0]);
 
-        self::assertCount(2, $registerCalls, 'Two registerProvider calls expected for two tagged providers');
+        $this->assertCount(2, $registerCalls, 'Two registerProvider calls expected for two tagged providers');
     }
 
     public function testCompilerPassIgnoresNonTaggedServices(): void
@@ -97,7 +97,7 @@ final class RegisterProvidersCompilerPassTest extends AbstractCompilerPassTestCa
         $calls = $this->container->getDefinition(Auditor::class)->getMethodCalls();
         $registerCalls = array_filter($calls, static fn (array $c): bool => 'registerProvider' === $c[0]);
 
-        self::assertEmpty($registerCalls, 'Non-tagged services must not be registered as providers');
+        $this->assertEmpty($registerCalls, 'Non-tagged services must not be registered as providers');
     }
 
     #[\Override]

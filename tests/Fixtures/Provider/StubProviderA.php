@@ -39,7 +39,7 @@ final class StubProviderA implements ProviderInterface
 
     public function isRegistered(): bool
     {
-        return null !== $this->auditor;
+        return $this->auditor instanceof Auditor;
     }
 
     public function registerStorageService(StorageServiceInterface $service): static

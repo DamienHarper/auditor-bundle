@@ -17,6 +17,7 @@ use DH\AuditorBundle\Event\ConsoleEventSubscriber;
 use DH\AuditorBundle\Tests\Fixtures\Provider\StubProviderA;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Nyholm\BundleTest\TestKernel;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Attributes\Small;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
@@ -93,9 +94,9 @@ final class DHAuditorBundleTest extends KernelTestCase
         }]);
 
         $auditor = self::getContainer()->get(Auditor::class);
-        \assert($auditor instanceof Auditor);
+        Assert::assertInstanceOf(Auditor::class, $auditor);
 
-        self::assertTrue($auditor->hasProvider(DoctrineProvider::class), 'DoctrineProvider must be registered with Auditor via the compiler pass');
+        $this->assertTrue($auditor->hasProvider(DoctrineProvider::class), 'DoctrineProvider must be registered with Auditor via the compiler pass');
     }
 
     public function testCustomProviderRegisteredViaTag(): void
@@ -113,12 +114,9 @@ final class DHAuditorBundleTest extends KernelTestCase
         }]);
 
         $auditor = self::getContainer()->get(Auditor::class);
-        \assert($auditor instanceof Auditor);
+        Assert::assertInstanceOf(Auditor::class, $auditor);
 
-        self::assertTrue(
-            $auditor->hasProvider(StubProviderA::class),
-            'Custom provider tagged with dh_auditor.provider must be auto-registered with Auditor'
-        );
+        $this->assertTrue($auditor->hasProvider(StubProviderA::class), 'Custom provider tagged with dh_auditor.provider must be auto-registered with Auditor');
     }
 
     public function testBundleBootsWithNoProviders(): void
@@ -135,11 +133,8 @@ final class DHAuditorBundleTest extends KernelTestCase
 
         $container = self::getContainer();
 
-        self::assertTrue($container->has(Auditor::class), 'Auditor service must be registered even with no providers configured');
-        self::assertFalse(
-            $container->getParameter('dh_auditor.viewer_enabled'),
-            'dh_auditor.viewer_enabled must be false when no providers are configured'
-        );
+        $this->assertTrue($container->has(Auditor::class), 'Auditor service must be registered even with no providers configured');
+        $this->assertFalse($container->getParameter('dh_auditor.viewer_enabled'), 'dh_auditor.viewer_enabled must be false when no providers are configured');
     }
 
     public function testViewerEnabledParameterIsFalseByDefault(): void
@@ -156,10 +151,7 @@ final class DHAuditorBundleTest extends KernelTestCase
 
         $container = self::getContainer();
 
-        self::assertFalse(
-            $container->getParameter('dh_auditor.viewer_enabled'),
-            'dh_auditor.viewer_enabled must be false when viewer is not enabled in config'
-        );
+        $this->assertFalse($container->getParameter('dh_auditor.viewer_enabled'), 'dh_auditor.viewer_enabled must be false when viewer is not enabled in config');
     }
 
     #[\Override]

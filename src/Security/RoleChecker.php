@@ -19,7 +19,7 @@ final readonly class RoleChecker implements RoleCheckerInterface
 
     public function __invoke(string $entity, string $scope): bool
     {
-        if (null === $this->provider) {
+        if (!$this->provider instanceof DoctrineProvider) {
             // No Doctrine provider configured — access is unconditionally granted.
             return true;
         }
