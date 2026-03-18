@@ -1,0 +1,3 @@
+services:
+    DH\AuditorBundle\Tests\Fixtures\Provider\StubProviderA:
+        tags: [dh_auditor.provider]

@@ -12,10 +12,18 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 final readonly class RoleChecker implements RoleCheckerInterface
 {
-    public function __construct(private AuthorizationCheckerInterface $authorizationChecker, private DoctrineProvider $provider) {}
+    public function __construct(
+        private AuthorizationCheckerInterface $authorizationChecker,
+        private ?DoctrineProvider $provider = null,
+    ) {}
 
     public function __invoke(string $entity, string $scope): bool
     {
+        if (!$this->provider instanceof DoctrineProvider) {
+            // No Doctrine provider configured — access is unconditionally granted.
+            return true;
+        }
+
         $userProvider = $this->provider->getAuditor()->getConfiguration()->getUserProvider();
         $user = null !== $userProvider ? $userProvider() : null;
         $authorizationChecker = null !== $userProvider ? $this->authorizationChecker : null;
