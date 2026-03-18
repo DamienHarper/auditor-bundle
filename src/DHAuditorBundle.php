@@ -137,11 +137,13 @@ class DHAuditorBundle extends AbstractBundle
         // Load providers
         foreach ($config['providers'] as $providerName => $providerConfig) {
             $builder->setParameter('dh_auditor.provider.'.$providerName.'.configuration', $providerConfig);
-            $builder->registerAliasForArgument('dh_auditor.provider.'.$providerName, ProviderInterface::class, \sprintf('%sProvider', $providerName));
 
             if ('doctrine' === $providerName) {
                 /** @var array{storage_services: list<string>, auditing_services: list<string>, viewer: array<string, mixed>|bool} $providerConfig */
                 $this->loadDoctrineProvider($services, $builder, $providerConfig);
+                // The alias dh_auditor.provider.doctrine is defined by loadDoctrineProvider(),
+                // so we can register a named argument alias here.
+                $builder->registerAliasForArgument('dh_auditor.provider.doctrine', ProviderInterface::class, 'doctrineProvider');
             }
         }
 
