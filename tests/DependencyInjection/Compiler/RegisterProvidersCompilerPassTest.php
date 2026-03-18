@@ -51,11 +51,17 @@ final class RegisterProvidersCompilerPassTest extends AbstractCompilerPassTestCa
 
         $this->compile();
 
-        $calls = $this->container->getDefinition(Auditor::class)->getMethodCalls();
-        $registerCalls = array_values(array_filter($calls, static fn (array $c): bool => 'registerProvider' === $c[0]));
+        $auditorCalls = $this->container->getDefinition(Auditor::class)->getMethodCalls();
+        $registerCalls = array_values(array_filter($auditorCalls, static fn (array $c): bool => 'registerProvider' === $c[0]));
 
         self::assertCount(1, $registerCalls);
         self::assertSame('my_custom_provider', (string) $registerCalls[0][1][0]);
+
+        // The compiler pass must also inject Auditor into the provider definition
+        $providerCalls = $this->container->getDefinition('my_custom_provider')->getMethodCalls();
+        $setAuditorCalls = array_values(array_filter($providerCalls, static fn (array $c): bool => 'setAuditor' === $c[0]));
+
+        self::assertCount(1, $setAuditorCalls, 'setAuditor must be added to the provider definition by the compiler pass');
     }
 
     public function testCompilerPassRegistersMultipleTaggedProviders(): void

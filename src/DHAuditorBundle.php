@@ -82,13 +82,9 @@ class DHAuditorBundle extends AbstractBundle
             ->defaultNull()
             ->end()
             ->arrayNode('providers')
-            ->requiresAtLeastOneElement()
+            ->defaultValue([])
             ->useAttributeAsKey('name')
             ->variablePrototype()
-            ->validate()
-            ->ifEmpty()
-            ->thenInvalid('Invalid provider configuration %s')
-            ->end()
             ->end()
             ->validate()
             ->always()
@@ -162,13 +158,11 @@ class DHAuditorBundle extends AbstractBundle
         ;
 
         // DoctrineProvider — tagged so RegisterProvidersCompilerPass picks it up automatically.
-        // setAuditor() is called explicitly here to guarantee that the Auditor is injected
-        // as soon as DoctrineProvider is instantiated, regardless of the order in which
-        // other services are resolved. This matters because DoctrineSubscriber can fire
-        // Doctrine events (e.g. onFlush) before the Auditor service is first requested.
+        // The compiler pass also injects Auditor via setAuditor() on this definition, ensuring
+        // the Auditor reference is set as soon as DoctrineProvider is instantiated regardless
+        // of service resolution order.
         $services->set(DoctrineProvider::class)
             ->args([new Reference(DoctrineProviderConfiguration::class)])
-            ->call('setAuditor', [new Reference(Auditor::class)])
             ->tag('dh_auditor.provider')
             ->tag('kernel.reset', ['method' => 'reset'])
         ;

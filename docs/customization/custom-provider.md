@@ -66,7 +66,7 @@ final class ElasticsearchProvider extends AbstractProvider implements ResetInter
             'index' => 'audit',
             'body'  => [
                 'type'       => $payload['type'],
-                'entity'     => $payload['entity'] ?? null,
+                'entity'     => $payload['entity'],   // FQCN — always present when DoctrineProvider is the auditing source
                 'object_id'  => $payload['object_id'],
                 'diffs'      => json_decode($payload['diffs'], true),
                 'blame_user' => $payload['blame_user'],

@@ -121,6 +121,27 @@ final class DHAuditorBundleTest extends KernelTestCase
         );
     }
 
+    public function testBundleBootsWithNoProviders(): void
+    {
+        self::bootKernel(['config' => static function (TestKernel $kernel): void {
+            $kernel->setClearCacheAfterShutdown(false);
+            $kernel->addTestBundle(DoctrineBundle::class);
+            $kernel->addTestBundle(SecurityBundle::class);
+            $kernel->addTestBundle(TwigBundle::class);
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/no_providers.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/doctrine.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/security.yaml');
+        }]);
+
+        $container = self::getContainer();
+
+        self::assertTrue($container->has(Auditor::class), 'Auditor service must be registered even with no providers configured');
+        self::assertFalse(
+            $container->getParameter('dh_auditor.viewer_enabled'),
+            'dh_auditor.viewer_enabled must be false when no providers are configured'
+        );
+    }
+
     public function testViewerEnabledParameterIsFalseByDefault(): void
     {
         self::bootKernel(['config' => static function (TestKernel $kernel): void {

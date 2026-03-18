@@ -32,6 +32,18 @@ final class RegisterProvidersCompilerPass implements CompilerPassInterface
 
         foreach (array_keys($container->findTaggedServiceIds('dh_auditor.provider')) as $serviceId) {
             $auditorDefinition->addMethodCall('registerProvider', [new Reference($serviceId)]);
+
+            // Inject Auditor directly into the provider at instantiation time.
+            // This guarantees that the provider's Auditor reference is set as soon as the
+            // provider is constructed — which may happen *before* the Auditor service is first
+            // requested (e.g. when DoctrineSubscriber fires a Doctrine event at startup).
+            //
+            // Note: Auditor::registerProvider() also calls setAuditor() internally, so this
+            // results in setAuditor() being called twice. This is intentional and idempotent —
+            // it ensures correctness regardless of which service is instantiated first.
+            if ($container->hasDefinition($serviceId)) {
+                $container->getDefinition($serviceId)->addMethodCall('setAuditor', [new Reference(Auditor::class)]);
+            }
         }
     }
 }
