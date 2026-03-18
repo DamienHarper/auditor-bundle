@@ -95,3 +95,4 @@ This is handled by `ConsoleEventSubscriber` and requires no configuration.
 - 🔒 [Security Provider](security-provider.md) - Custom IP/context detection
 - 🛡️ [Role Checker](role-checker.md) - Custom access control
 - 📦 [Extra Data](extra-data.md) - Attach additional data to audit entries
+- 🔌 [Custom Provider](custom-provider.md) - Register a custom audit backend via tag
