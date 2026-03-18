@@ -20,6 +20,7 @@ use DH\Auditor\Provider\ProviderInterface;
 use DH\AuditorBundle\Command\ClearActivityCacheCommand;
 use DH\AuditorBundle\Controller\ViewerController;
 use DH\AuditorBundle\DependencyInjection\Compiler\DoctrineMiddlewareCompilerPass;
+use DH\AuditorBundle\DependencyInjection\Compiler\RegisterProvidersCompilerPass;
 use DH\AuditorBundle\Event\ConsoleEventSubscriber;
 use DH\AuditorBundle\Event\ViewerEventSubscriber;
 use DH\AuditorBundle\ExtraData\ExtraDataProvider;
@@ -55,6 +56,7 @@ class DHAuditorBundle extends AbstractBundle
         parent::build($container);
 
         $container->addCompilerPass(new DoctrineMiddlewareCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);
+        $container->addCompilerPass(new RegisterProvidersCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 0);
     }
 
     public function configure(DefinitionConfigurator $definition): void
@@ -129,6 +131,9 @@ class DHAuditorBundle extends AbstractBundle
             ])
         ;
 
+        // Default viewer state (overridden by providers that support the viewer)
+        $builder->setParameter('dh_auditor.viewer_enabled', false);
+
         // Load providers
         foreach ($config['providers'] as $providerName => $providerConfig) {
             $builder->setParameter('dh_auditor.provider.'.$providerName.'.configuration', $providerConfig);
@@ -154,17 +159,15 @@ class DHAuditorBundle extends AbstractBundle
             ->args(['%dh_auditor.provider.doctrine.configuration%'])
         ;
 
-        // DoctrineProvider
+        // DoctrineProvider — tagged so RegisterProvidersCompilerPass picks it up automatically.
+        // setAuditor() is called explicitly here to guarantee that the Auditor is injected
+        // as soon as DoctrineProvider is instantiated, regardless of the order in which
+        // other services are resolved. This matters because DoctrineSubscriber can fire
+        // Doctrine events (e.g. onFlush) before the Auditor service is first requested.
         $services->set(DoctrineProvider::class)
             ->args([new Reference(DoctrineProviderConfiguration::class)])
             ->call('setAuditor', [new Reference(Auditor::class)])
             ->tag('dh_auditor.provider')
-            ->tag('kernel.reset', ['method' => 'reset'])
-        ;
-
-        // Register the provider with Auditor
-        $builder->getDefinition(Auditor::class)
-            ->addMethodCall('registerProvider', [new Reference(DoctrineProvider::class)])
         ;
 
         $services->alias('dh_auditor.provider.doctrine', DoctrineProvider::class);
@@ -241,6 +244,11 @@ class DHAuditorBundle extends AbstractBundle
             ->tag('console.command', ['command' => 'audit:schema:update'])
         ;
 
+        // Expose viewer-enabled state as a container parameter so other services
+        // (e.g. ViewerEventSubscriber) can react without coupling to DoctrineProvider.
+        $isViewerEnabled = \is_array($config['viewer']) && ($config['viewer']['enabled'] ?? false);
+        $builder->setParameter('dh_auditor.viewer_enabled', $isViewerEnabled);
+
         // Activity Graph Provider
         $activityGraphProviderRef = null;
         if (\is_array($config['viewer']) && ($config['viewer']['activity_graph']['enabled'] ?? false)) {
@@ -304,7 +312,7 @@ class DHAuditorBundle extends AbstractBundle
 
         // Event listeners (using #[AsEventListener] attributes)
         $services->set(ViewerEventSubscriber::class)
-            ->args([new Reference(Auditor::class)])
+            ->args([new Reference(Auditor::class), '%dh_auditor.viewer_enabled%'])
             ->autoconfigure()
         ;
 
@@ -331,8 +339,10 @@ class DHAuditorBundle extends AbstractBundle
      */
     private function normalizeProvidersConfig(array $v): array
     {
+        // Only normalize doctrine config when explicitly declared; do not inject a default
+        // doctrine provider — other provider types are fully supported without it.
         if (!\array_key_exists('doctrine', $v)) {
-            $v['doctrine'] = [];
+            return $v;
         }
 
         /** @var array<string, mixed> $doctrine */

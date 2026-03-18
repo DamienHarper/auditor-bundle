@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\Event;
 
 use DH\Auditor\Auditor;
-use DH\Auditor\Configuration as AuditorConfiguration;
-use DH\Auditor\Provider\Doctrine\Configuration as DoctrineProviderConfiguration;
-use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\AuditorBundle\Controller\ViewerController;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
@@ -17,7 +14,10 @@ use Symfony\Component\HttpKernel\KernelEvents;
 #[AsEventListener(event: KernelEvents::CONTROLLER)]
 final readonly class ViewerEventSubscriber
 {
-    public function __construct(private Auditor $auditor) {}
+    public function __construct(
+        private Auditor $auditor,
+        private bool $viewerEnabled,
+    ) {}
 
     public function __invoke(ControllerEvent $event): void
     {
@@ -33,16 +33,9 @@ final readonly class ViewerEventSubscriber
             return;
         }
 
-        /** @var AuditorConfiguration $auditorConfiguration */
-        $auditorConfiguration = $this->auditor->getConfiguration();
+        $isAuditorEnabled = $this->auditor->getConfiguration()->enabled;
 
-        /** @var DoctrineProviderConfiguration $providerConfiguration */
-        $providerConfiguration = $this->auditor->getProvider(DoctrineProvider::class)->getConfiguration();
-
-        $isAuditorEnabled = $auditorConfiguration->enabled;
-        $isViewerEnabled = $providerConfiguration->isViewerEnabled();
-
-        if (!$isAuditorEnabled || !$isViewerEnabled) {
+        if (!$isAuditorEnabled || !$this->viewerEnabled) {
             throw new NotFoundHttpException();
         }
     }
