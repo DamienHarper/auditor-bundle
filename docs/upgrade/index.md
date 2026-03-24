@@ -6,15 +6,16 @@ This section contains upgrade guides for major versions.
 
 ## 📚 Upgrade Guides
 
+- ⬆️ [Upgrading to 8.0](v8.md) - From 7.x to 8.0
 - ⬆️ [Upgrading to 7.0](v7.md) - From 6.x to 7.0
 
 ## 📋 Version Support
 
 | Version | Status                 | Support Until |
 |:--------|:-----------------------|:--------------|
-| 7.x     | Active development 🚀  | Current       |
-| 6.x     | Active support         | TBD           |
-| 5.x     | End of Life            | -             |             
+| 8.x     | Active development 🚀  | Current       |
+| 7.x     | Active support         | TBD           |
+| 6.x     | End of Life            | -             |
 
 ## ✅ General Upgrade Process
 
