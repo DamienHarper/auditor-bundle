@@ -9,11 +9,12 @@ PHP attributes provide an alternative to YAML configuration for declaring audita
 
 ## 📋 Available Attributes
 
-| Attribute      | Target   | Description                           |
-|----------------|----------|---------------------------------------|
-| `#[Auditable]` | Class    | Marks an entity as auditable          |
-| `#[Ignore]`    | Property | Excludes a property from auditing     |
-| `#[Security]`  | Class    | Defines roles required to view audits |    
+| Attribute        | Target   | Description                                      |
+|------------------|----------|--------------------------------------------------|
+| `#[Auditable]`   | Class    | Marks an entity as auditable                     |
+| `#[Ignore]`      | Property | Excludes a property from auditing                |
+| `#[Security]`    | Class    | Defines roles required to view audits            |
+| `#[DiffLabel]`   | Property | Attaches a human-readable label resolver to a field |
 
 All attributes are in the `DH\Auditor\Provider\Doctrine\Auditing\Attribute` namespace.
 
@@ -237,8 +238,57 @@ Either:
 
 ---
 
+## 🏷️ #[DiffLabel]
+
+Attaches a **human-readable label resolver** to a scalar property so that audit diffs store `{"value": 1, "label": "Electronics"}` instead of just `1`.
+
+```php
+<?php
+
+namespace App\Entity;
+
+use App\Audit\Resolver\CategoryResolver;
+use DH\Auditor\Provider\Doctrine\Auditing\Attribute as Audit;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity]
+#[Audit\Auditable]
+class Product
+{
+    #[ORM\Column(type: Types::INTEGER)]
+    #[Audit\DiffLabel(resolver: CategoryResolver::class)]
+    private int $categoryId;
+}
+```
+
+The `resolver` argument must be the fully-qualified class name of a class implementing `DiffLabelResolverInterface`:
+
+```php
+use DH\Auditor\Contract\DiffLabelResolverInterface;
+
+final class CategoryResolver implements DiffLabelResolverInterface
+{
+    public function __invoke(mixed $value): ?string
+    {
+        // return a label string, or null to store the plain value
+        return match($value) {
+            1 => 'Books',
+            2 => 'Electronics',
+            default => null,
+        };
+    }
+}
+```
+
+> [!TIP]
+> See the [Diff Label Resolvers guide](../customization/diff-label-resolvers.md) for the full reference, including constraints on resolver behaviour and viewer integration.
+
+---
+
 ## 🚀 Next Steps
 
 - ⚙️ [Configuration Reference](index.md) - All YAML options
 - 🗄️ [Storage Configuration](storage.md) - Multi-database setup
 - 🛡️ [Role Checker](../customization/role-checker.md) - Custom access control
+- 🏷️ [Diff Label Resolvers](../customization/diff-label-resolvers.md) - Human-readable labels in diffs
