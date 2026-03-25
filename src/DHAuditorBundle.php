@@ -6,6 +6,7 @@ namespace DH\AuditorBundle;
 
 use DH\Auditor\Auditor;
 use DH\Auditor\Configuration;
+use DH\Auditor\Contract\DiffLabelResolverInterface;
 use DH\Auditor\Provider\Doctrine\Auditing\Attribute\AttributeLoader;
 use DH\Auditor\Provider\Doctrine\Configuration as DoctrineProviderConfiguration;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
@@ -20,6 +21,7 @@ use DH\Auditor\Provider\ProviderInterface;
 use DH\AuditorBundle\Command\ClearActivityCacheCommand;
 use DH\AuditorBundle\Controller\ViewerController;
 use DH\AuditorBundle\DependencyInjection\Compiler\DoctrineMiddlewareCompilerPass;
+use DH\AuditorBundle\DependencyInjection\Compiler\RegisterDiffLabelResolversCompilerPass;
 use DH\AuditorBundle\DependencyInjection\Compiler\RegisterProvidersCompilerPass;
 use DH\AuditorBundle\Event\ConsoleEventSubscriber;
 use DH\AuditorBundle\Event\ViewerEventSubscriber;
@@ -55,8 +57,13 @@ class DHAuditorBundle extends AbstractBundle
     {
         parent::build($container);
 
+        $container->registerForAutoconfiguration(DiffLabelResolverInterface::class)
+            ->addTag('dh_auditor.diff_label_resolver')
+        ;
+
         $container->addCompilerPass(new DoctrineMiddlewareCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);
         $container->addCompilerPass(new RegisterProvidersCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 0);
+        $container->addCompilerPass(new RegisterDiffLabelResolversCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 0);
     }
 
     public function configure(DefinitionConfigurator $definition): void
