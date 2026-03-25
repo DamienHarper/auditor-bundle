@@ -16,5 +16,3 @@ parameters:
         -
             message: '~Cannot access offset .+ on mixed~'
             path: src/DHAuditorBundle.php
-        -
-            message: '~deprecated class DH\\Auditor\\Provider\\Doctrine\\~'
