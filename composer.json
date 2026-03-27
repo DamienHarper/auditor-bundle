@@ -68,6 +68,15 @@
     "phpstan": "tools/phpstan/vendor/bin/phpstan --memory-limit=1G --ansi analyse",
     "rector": "tools/rector/vendor/bin/rector",
     "rector-check": "tools/rector/vendor/bin/rector --dry-run",
+    "agent-cs-fix": "tools/php-cs-fixer/vendor/bin/php-cs-fixer fix --using-cache=no --quiet --allow-unsupported-php-version=yes",
+    "agent-phpstan": "tools/phpstan/vendor/bin/phpstan --memory-limit=1G --no-progress analyse",
+    "agent-rector": "tools/rector/vendor/bin/rector --no-progress-bar",
+    "agent-test": "./vendor/bin/phpunit --no-coverage --no-progress",
+    "agent-qa": [
+      "@agent-rector",
+      "@agent-cs-fix",
+      "@agent-phpstan"
+    ],
     "qa": [
       "@rector",
       "@cs-fix",
