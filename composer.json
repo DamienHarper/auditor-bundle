@@ -16,6 +16,10 @@
       "email": "damien.harper@gmail.com"
     }
   ],
+  "repositories": [
+    {"type": "path", "url": "../auditor"},
+    {"type": "path", "url": "../auditor-doctrine-provider"}
+  ],
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
