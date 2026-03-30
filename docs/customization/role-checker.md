@@ -82,10 +82,11 @@ dh_auditor:
 ### Via Attributes
 
 ```php
-use DH\Auditor\Provider\Doctrine\Auditing\Attribute as Audit;
+use DH\Auditor\Attribute\Auditable;
+use DH\Auditor\Attribute\Security;
 
-#[Audit\Auditable]
-#[Audit\Security(view: ['ROLE_ADMIN', 'ROLE_AUDITOR'])]
+#[Auditable]
+#[Security(view: ['ROLE_ADMIN', 'ROLE_AUDITOR'])]
 class User
 {
     // ...

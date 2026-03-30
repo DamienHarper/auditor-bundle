@@ -69,16 +69,17 @@ Symfony's **autoconfiguration** automatically detects classes that implement `Di
 namespace App\Entity;
 
 use App\Audit\Resolver\CategoryResolver;
-use DH\Auditor\Provider\Doctrine\Auditing\Attribute as Audit;
+use DH\Auditor\Attribute\Auditable;
+use DH\Auditor\Attribute\DiffLabel;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[Audit\Auditable]
+#[Auditable]
 class Product
 {
     #[ORM\Column(type: Types::INTEGER)]
-    #[Audit\DiffLabel(resolver: CategoryResolver::class)]
+    #[DiffLabel(resolver: CategoryResolver::class)]
     private int $categoryId;
 
     // ...
@@ -213,20 +214,21 @@ final class ProductCategoryResolver implements DiffLabelResolverInterface
 namespace App\Entity;
 
 use App\Audit\Resolver\ProductCategoryResolver;
-use DH\Auditor\Provider\Doctrine\Auditing\Attribute as Audit;
+use DH\Auditor\Attribute\Auditable;
+use DH\Auditor\Attribute\DiffLabel;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[Audit\Auditable]
+#[Auditable]
 class Product
 {
     #[ORM\Column(type: Types::INTEGER)]
-    #[Audit\DiffLabel(resolver: ProductCategoryResolver::class)]
+    #[DiffLabel(resolver: ProductCategoryResolver::class)]
     private int $categoryId;
 
     #[ORM\Column(type: Types::INTEGER)]
-    #[Audit\DiffLabel(resolver: SupplierResolver::class)]
+    #[DiffLabel(resolver: SupplierResolver::class)]
     private int $supplierId;
 
     // ...

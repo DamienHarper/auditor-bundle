@@ -16,7 +16,7 @@ PHP attributes provide an alternative to YAML configuration for declaring audita
 | `#[Security]`    | Class    | Defines roles required to view audits            |
 | `#[DiffLabel]`   | Property | Attaches a human-readable label resolver to a field |
 
-All attributes are in the `DH\Auditor\Provider\Doctrine\Auditing\Attribute` namespace.
+All attributes are in the `DH\Auditor\Attribute` namespace (auditor core).
 
 ## 🏷️ #[Auditable]
 
@@ -29,11 +29,11 @@ Marks an entity class for auditing.
 
 namespace App\Entity;
 
-use DH\Auditor\Provider\Doctrine\Auditing\Attribute as Audit;
+use DH\Auditor\Attribute\Auditable;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[Audit\Auditable]
+#[Auditable]
 class User
 {
     #[ORM\Id]
@@ -54,7 +54,7 @@ Create an audit table but don't log until enabled at runtime:
 
 ```php
 #[ORM\Entity]
-#[Audit\Auditable(enabled: false)]
+#[Auditable(enabled: false)]
 class User
 {
     // Auditing is OFF by default
@@ -71,22 +71,23 @@ Excludes a property from being audited.
 
 namespace App\Entity;
 
-use DH\Auditor\Provider\Doctrine\Auditing\Attribute as Audit;
+use DH\Auditor\Attribute\Auditable;
+use DH\Auditor\Attribute\Ignore;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[Audit\Auditable]
+#[Auditable]
 class User
 {
     #[ORM\Column]
     private ?string $email = null;
 
     #[ORM\Column]
-    #[Audit\Ignore]
+    #[Ignore]
     private ?string $password = null;  // Not audited
 
     #[ORM\Column]
-    #[Audit\Ignore]
+    #[Ignore]
     private ?\DateTimeImmutable $lastLoginAt = null;  // Not audited
 }
 ```
@@ -103,12 +104,13 @@ Restricts access to view audit logs based on user roles.
 
 namespace App\Entity;
 
-use DH\Auditor\Provider\Doctrine\Auditing\Attribute as Audit;
+use DH\Auditor\Attribute\Auditable;
+use DH\Auditor\Attribute\Security;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[Audit\Auditable]
-#[Audit\Security(view: ['ROLE_ADMIN'])]
+#[Auditable]
+#[Security(view: ['ROLE_ADMIN'])]
 class User
 {
     // Only users with ROLE_ADMIN can view User audits
@@ -118,7 +120,7 @@ class User
 ### Multiple Roles (OR Logic)
 
 ```php
-#[Audit\Security(view: ['ROLE_ADMIN', 'ROLE_AUDITOR'])]
+#[Security(view: ['ROLE_ADMIN', 'ROLE_AUDITOR'])]
 class User
 {
     // Users with ROLE_ADMIN OR ROLE_AUDITOR can view
@@ -132,12 +134,14 @@ class User
 
 namespace App\Entity;
 
-use DH\Auditor\Provider\Doctrine\Auditing\Attribute as Audit;
+use DH\Auditor\Attribute\Auditable;
+use DH\Auditor\Attribute\Ignore;
+use DH\Auditor\Attribute\Security;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[Audit\Auditable]
-#[Audit\Security(view: ['ROLE_ADMIN', 'ROLE_AUDITOR'])]
+#[Auditable]
+#[Security(view: ['ROLE_ADMIN', 'ROLE_AUDITOR'])]
 class User
 {
     #[ORM\Id]
@@ -149,7 +153,7 @@ class User
     private ?string $email = null;
 
     #[ORM\Column]
-    #[Audit\Ignore]
+    #[Ignore]
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
@@ -159,7 +163,7 @@ class User
     private ?string $lastName = null;
 
     #[ORM\Column]
-    #[Audit\Ignore]
+    #[Ignore]
     private ?\DateTimeImmutable $lastLoginAt = null;
 
     // Getters and setters...
@@ -186,11 +190,11 @@ dh_auditor:
 ```php
 // Entity uses attributes for fine-grained control
 #[ORM\Entity]
-#[Audit\Auditable]
-#[Audit\Security(view: ['ROLE_ADMIN'])]
+#[Auditable]
+#[Security(view: ['ROLE_ADMIN'])]
 class User
 {
-    #[Audit\Ignore]
+    #[Ignore]
     private ?string $password = null;
     
     // createdAt and updatedAt are automatically ignored via YAML
@@ -228,7 +232,7 @@ dh_auditor:
 
 ```php
 // This entity will NOT be audited (not in YAML)
-#[Audit\Auditable]
+#[Auditable]
 class User {}
 ```
 
@@ -248,16 +252,17 @@ Attaches a **human-readable label resolver** to a scalar property so that audit 
 namespace App\Entity;
 
 use App\Audit\Resolver\CategoryResolver;
-use DH\Auditor\Provider\Doctrine\Auditing\Attribute as Audit;
+use DH\Auditor\Attribute\Auditable;
+use DH\Auditor\Attribute\DiffLabel;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
-#[Audit\Auditable]
+#[Auditable]
 class Product
 {
     #[ORM\Column(type: Types::INTEGER)]
-    #[Audit\DiffLabel(resolver: CategoryResolver::class)]
+    #[DiffLabel(resolver: CategoryResolver::class)]
     private int $categoryId;
 }
 ```
