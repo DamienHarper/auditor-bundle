@@ -98,7 +98,7 @@ final readonly class ViewerController
     #[Route(path: '/audit/transaction/{hash}', name: 'dh_auditor_show_transaction_stream', methods: ['GET'])]
     public function showTransactionAction(Reader $reader, string $hash): Response
     {
-        $audits = $reader->getAuditsByTransactionHash($hash);
+        $audits = $reader->getAuditsByTransactionId($hash);
 
         return $this->renderView('@DHAuditor/Audit/transaction_stream.html.twig', [
             'hash' => $hash,
@@ -200,9 +200,9 @@ final readonly class ViewerController
         /** @var list<string> $types */
         $types = $connection->executeQuery($typesSql, $params)->fetchFirstColumn();
 
-        // Get distinct users (blame_id and blame_user) - excluding NULL
+        // Get distinct users (blame_id + username from blame JSON) - excluding NULL
         $usersSql = \sprintf(
-            'SELECT DISTINCT blame_id, blame_user FROM %s WHERE blame_id IS NOT NULL %s ORDER BY blame_user',
+            'SELECT DISTINCT blame_id, blame FROM %s WHERE blame_id IS NOT NULL %s ORDER BY blame_id',
             $auditTable,
             '' !== $objectIdCondition ? 'AND '.$objectIdCondition : ''
         );
@@ -210,11 +210,16 @@ final readonly class ViewerController
         $usersResult = $connection->executeQuery($usersSql, $params)->fetchAllAssociative();
         $users = array_map(static function (array $row): array {
             $blameId = $row['blame_id'];
-            $blameUser = $row['blame_user'] ?? $blameId;
+            $blameUser = null;
+
+            if (\is_string($row['blame'] ?? null)) {
+                $decoded = json_decode($row['blame'], true);
+                $blameUser = \is_array($decoded) ? ($decoded['username'] ?? null) : null;
+            }
 
             return [
                 'id' => \is_scalar($blameId) ? (string) $blameId : '',
-                'name' => \is_scalar($blameUser) ? (string) $blameUser : '',
+                'name' => \is_string($blameUser) ? $blameUser : (\is_scalar($blameId) ? (string) $blameId : ''),
             ];
         }, $usersResult);
 
