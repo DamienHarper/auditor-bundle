@@ -9,10 +9,20 @@
     {% set entity_label = entry.diffs.label is iterable ? entry.diffs.label|join(', ') : entry.diffs.label %}
 {% endif %}
 
+{#
+  Transaction ID display:
+  - ULID (schema v2, 26 chars): show in full — it is short and human-readable.
+  - SHA1 (schema v1, 40 hex chars): truncate to 10 chars like a short git hash.
+  Any ID longer than 26 chars is treated as a SHA1.
+#}
+{% set tx_id = entry.transactionId %}
+{% set tx_label = tx_id is not empty ? (tx_id|length > 26 ? (tx_id|slice(0, 10) ~ '…') : tx_id) : null %}
+
 {% if entry.type == 'remove' %}
-{# REMOVE entries: expandable when v2 snapshot is available, plain otherwise #}
+{# REMOVE entries: expandable only for schema v2 when a field snapshot was captured. #}
 {% set remove_diffs = entry.diffs %}
-{% if remove_diffs|length > 0 %}
+{% set remove_has_snapshot = entry.schemaVersion >= 2 and remove_diffs|length > 0 %}
+{% if remove_has_snapshot %}
 <details class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
     <summary class="flex flex-col px-4 py-3 cursor-pointer list-none">
 {% else %}
@@ -51,15 +61,15 @@
             </div>
 
             <div class="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 shrink-0">
-                {# Transaction ID - short version with full ID in title #}
-                {% if entry.transactionId is not empty and hide_transaction is not defined %}
-                    <a href="{{ path('dh_auditor_show_transaction_stream', {hash: entry.transactionId}) }}"
+                {# Transaction ID #}
+                {% if tx_label is not empty and hide_transaction is not defined %}
+                    <a href="{{ path('dh_auditor_show_transaction_stream', {hash: tx_id}) }}"
                        class="font-mono text-xs text-slate-400 hover:underline transition"
-                       title="{{ entry.transactionId }}">
-                        {{ entry.transactionId|slice(0, 10) }}…
+                       title="{{ tx_id }}">
+                        {{ tx_label }}
                     </a>
                 {% endif %}
-                {% if remove_diffs|length > 0 %}
+                {% if remove_has_snapshot %}
                     <svg class="w-4 h-4 text-slate-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                     </svg>
@@ -85,7 +95,7 @@
                 <span class="italic">{{ entry.userFirewall }}</span>
             {% endif %}
         </div>
-{% if remove_diffs|length > 0 %}
+{% if remove_has_snapshot %}
     </summary>
     {# Deleted entity snapshot: show old values #}
     <div class="px-4 pb-4 pl-8">
@@ -146,13 +156,13 @@
             </div>
 
             <div class="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 shrink-0">
-                {# Transaction ID - short version with full ID in title #}
-                {% if entry.transactionId is not empty and hide_transaction is not defined %}
-                    <a href="{{ path('dh_auditor_show_transaction_stream', {hash: entry.transactionId}) }}"
+                {# Transaction ID #}
+                {% if tx_label is not empty and hide_transaction is not defined %}
+                    <a href="{{ path('dh_auditor_show_transaction_stream', {hash: tx_id}) }}"
                        class="font-mono text-xs text-slate-400 hover:underline transition"
-                       title="{{ entry.transactionId }}"
+                       title="{{ tx_id }}"
                        onclick="event.stopPropagation();">
-                        {{ entry.transactionId|slice(0, 10) }}…
+                        {{ tx_label }}
                     </a>
                 {% endif %}
 
