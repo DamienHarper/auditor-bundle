@@ -16,17 +16,13 @@
       "email": "damien.harper@gmail.com"
     }
   ],
-  "repositories": [
-    {"type": "path", "url": "../auditor"},
-    {"type": "path", "url": "../auditor-doctrine-provider"}
-  ],
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
     "php": "^8.4",
     "ext-intl": "*",
-    "damienharper/auditor": "^5.0@dev",
-    "damienharper/auditor-doctrine-provider": "^2.0@dev",
+    "damienharper/auditor": "5.x-dev",
+    "damienharper/auditor-doctrine-provider": "2.x-dev",
     "doctrine/doctrine-bundle": "^3.0",
     "doctrine/dbal": "^4.0",
     "doctrine/orm": "^3.2",
