@@ -174,6 +174,8 @@ final readonly class ViewerController
     /**
      * Get available filter options (distinct types and users) for an entity.
      *
+     * Supports both schema v1 (legacy: blame_user column) and schema v2 (blame JSON column).
+     *
      * @return array{types: array<string>, users: array<array{id: string, name: string}>, hasAnonymous: bool}
      */
     private function getFilterOptions(Reader $reader, string $entity, int|string|null $id): array
@@ -181,6 +183,12 @@ final readonly class ViewerController
         $storageService = $reader->getProvider()->getStorageServiceForEntity($entity);
         $connection = $storageService->getEntityManager()->getConnection();
         $auditTable = $reader->getEntityAuditTableName($entity);
+
+        // Introspect the actual table structure to detect the schema version.
+        // v2 tables have a 'blame' JSON column; v1 (legacy) tables use separate 'blame_user' columns.
+        $tableSchema = $connection->createSchemaManager()->introspectSchema()->getTable($auditTable);
+        $hasBlameColumn = $tableSchema->hasColumn('blame');      // schema v2
+        $hasLegacyBlame = $tableSchema->hasColumn('blame_user'); // schema v1 (legacy)
 
         // Build base condition for object_id if provided
         $params = [];
@@ -200,28 +208,52 @@ final readonly class ViewerController
         /** @var list<string> $types */
         $types = $connection->executeQuery($typesSql, $params)->fetchFirstColumn();
 
-        // Get distinct users (blame_id + username from blame JSON) - excluding NULL
-        $usersSql = \sprintf(
-            'SELECT DISTINCT blame_id, blame FROM %s WHERE blame_id IS NOT NULL %s ORDER BY blame_id',
-            $auditTable,
-            '' !== $objectIdCondition ? 'AND '.$objectIdCondition : ''
-        );
+        $users = [];
 
-        $usersResult = $connection->executeQuery($usersSql, $params)->fetchAllAssociative();
-        $users = array_map(static function (array $row): array {
-            $blameId = $row['blame_id'];
-            $blameUser = null;
+        if ($hasBlameColumn) {
+            // Schema v2: username is encoded as JSON in the 'blame' column.
+            $usersSql = \sprintf(
+                'SELECT DISTINCT blame_id, blame FROM %s WHERE blame_id IS NOT NULL %s ORDER BY blame_id',
+                $auditTable,
+                '' !== $objectIdCondition ? 'AND '.$objectIdCondition : ''
+            );
 
-            if (\is_string($row['blame'] ?? null)) {
-                $decoded = json_decode($row['blame'], true);
-                $blameUser = \is_array($decoded) ? ($decoded['username'] ?? null) : null;
-            }
+            $usersResult = $connection->executeQuery($usersSql, $params)->fetchAllAssociative();
+            $users = array_map(static function (array $row): array {
+                $blameId = $row['blame_id'];
+                $blameUser = null;
 
-            return [
-                'id' => \is_scalar($blameId) ? (string) $blameId : '',
-                'name' => \is_string($blameUser) ? $blameUser : (\is_scalar($blameId) ? (string) $blameId : ''),
-            ];
-        }, $usersResult);
+                if (\is_string($row['blame'] ?? null)) {
+                    $decoded = json_decode($row['blame'], true);
+                    $blameUser = \is_array($decoded) ? ($decoded['username'] ?? null) : null;
+                }
+
+                return [
+                    'id' => \is_scalar($blameId) ? (string) $blameId : '',
+                    'name' => \is_string($blameUser) ? $blameUser : (\is_scalar($blameId) ? (string) $blameId : ''),
+                ];
+            }, $usersResult);
+        } elseif ($hasLegacyBlame) {
+            // Schema v1 (legacy): username is stored in the dedicated 'blame_user' column.
+            $usersSql = \sprintf(
+                'SELECT DISTINCT blame_id, blame_user FROM %s WHERE blame_id IS NOT NULL %s ORDER BY blame_id',
+                $auditTable,
+                '' !== $objectIdCondition ? 'AND '.$objectIdCondition : ''
+            );
+
+            $usersResult = $connection->executeQuery($usersSql, $params)->fetchAllAssociative();
+            $users = array_map(static function (array $row): array {
+                $blameId = $row['blame_id'];
+                $blameUser = isset($row['blame_user']) && '' !== $row['blame_user'] ? $row['blame_user'] : null;
+
+                return [
+                    'id' => \is_scalar($blameId) ? (string) $blameId : '',
+                    'name' => \is_string($blameUser) ? $blameUser : (\is_scalar($blameId) ? (string) $blameId : ''),
+                ];
+            }, $usersResult);
+        }
+
+        // If neither column exists, $users remains [] (no blame info available).
 
         // Check if there are anonymous entries (blame_id IS NULL)
         $anonymousSql = \sprintf(
