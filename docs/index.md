@@ -74,26 +74,13 @@ flowchart TB
 | ViewerController    | (internal)                     | Web UI for audit logs                 |
 | RoutingLoader       | (internal)                     | Loads viewer routes                   |
 
-## ⚠️ Deprecation Notice (auditor v4.x)
-
-Starting with this release, `auditor-bundle` requires [`damienharper/auditor-doctrine-provider`](https://github.com/DamienHarper/auditor-doctrine-provider) as a direct dependency.
-
-The `DoctrineProvider` and all related classes previously bundled within `damienharper/auditor` (under `DH\Auditor\Provider\Doctrine\`) are now **deprecated** and will be removed in `damienharper/auditor` v5.0.
-
-**For auditor-bundle users: no action required.** The bundle automatically pulls in `auditor-doctrine-provider` and everything works transparently.
-
-**For users using `DoctrineProvider` directly** (without the bundle), install the standalone package:
-```bash
-composer require damienharper/auditor-doctrine-provider
-```
-
 ## 📋 Version Compatibility
 
 | Version | Status                      | Requirements                                                         |
 |:--------|:----------------------------|:---------------------------------------------------------------------|
-| 7.x     | Active development 🚀       | PHP >= 8.4, Symfony >= 8.0, Doctrine DBAL >= 4.0, Doctrine ORM >= 3.2|
-| 6.x     | Active support              | PHP >= 8.2, Symfony >= 5.4                                           |
-| 5.x     | End of Life                 | PHP >= 7.4, Symfony >= 4.4                                           |
+| 8.x     | Active development 🚀       | PHP >= 8.4, Symfony >= 8.0, Doctrine DBAL >= 4.0, Doctrine ORM >= 3.2|
+| 7.x     | Active support              | PHP >= 8.2, Symfony >= 5.4                                           |
+| 6.x     | End of Life                 | PHP >= 7.4, Symfony >= 4.4                                           |
 
 ## 🚀 Quick Links
 
