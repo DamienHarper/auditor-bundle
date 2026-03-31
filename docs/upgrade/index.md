@@ -42,12 +42,27 @@ bin/phpunit
 
 ## 🗄️ Schema Updates
 
-After upgrading, check if audit tables need updates:
+After upgrading, always check if audit tables need updating.
+
+**For fresh installations or existing v2 tables:**
 
 ```bash
 # Preview changes
 bin/console audit:schema:update --dump-sql
 
 # Apply changes
+bin/console audit:schema:update --force
+```
+
+**When upgrading from auditor-bundle 7.x or earlier (existing audit data):**
+
+> [!CAUTION]
+> `audit:schema:update` refuses to run if any audit table still has the legacy v1 schema. Run `audit:schema:migrate` first to preserve your data, then run `audit:schema:update`.
+
+```bash
+# Migrate legacy audit tables to v2 (preserves all data)
+bin/console audit:schema:migrate --force --convert-all
+
+# Then apply any remaining schema changes
 bin/console audit:schema:update --force
 ```
