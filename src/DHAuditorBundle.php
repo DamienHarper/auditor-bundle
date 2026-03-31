@@ -11,6 +11,7 @@ use DH\Auditor\Provider\Doctrine\Auditing\Attribute\AttributeLoader;
 use DH\Auditor\Provider\Doctrine\Configuration as DoctrineProviderConfiguration;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Provider\Doctrine\Persistence\Command\CleanAuditLogsCommand;
+use DH\Auditor\Provider\Doctrine\Persistence\Command\MigrateSchemaCommand;
 use DH\Auditor\Provider\Doctrine\Persistence\Command\UpdateSchemaCommand;
 use DH\Auditor\Provider\Doctrine\Persistence\Event\CreateSchemaListener;
 use DH\Auditor\Provider\Doctrine\Persistence\Event\TableSchemaListener;
@@ -246,6 +247,11 @@ class DHAuditorBundle extends AbstractBundle
         $services->set(UpdateSchemaCommand::class)
             ->call('setAuditor', [new Reference(Auditor::class)])
             ->tag('console.command', ['command' => 'audit:schema:update'])
+        ;
+
+        $services->set(MigrateSchemaCommand::class)
+            ->call('setAuditor', [new Reference(Auditor::class)])
+            ->tag('console.command', ['command' => 'audit:schema:migrate'])
         ;
 
         // Expose viewer-enabled state as a container parameter so other services

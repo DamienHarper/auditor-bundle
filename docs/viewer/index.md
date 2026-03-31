@@ -260,7 +260,7 @@ $url = $urlGenerator->generate('dh_auditor_show_entity_stream', [
 
 // Transaction
 $url = $urlGenerator->generate('dh_auditor_show_transaction_stream', [
-    'hash' => $transactionHash,
+    'hash' => $entry->transactionId,
 ]);
 ```
 

@@ -1,80 +1,116 @@
 {% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
 
-{# Get entity label from diffs if available #}
+{# Get entity label — schema v2: from diffSource; schema v1 legacy: from diffs.label #}
 {% set entity_label = null %}
-{% if entry.diffs.label is defined %}
-    {% if entry.diffs.label is iterable %}
-        {% set entity_label = entry.diffs.label|join(', ') %}
-    {% else %}
-        {% set entity_label = entry.diffs.label %}
-    {% endif %}
+{% set diff_source = entry.diffSource %}
+{% if diff_source is not null and diff_source.label is defined %}
+    {% set entity_label = diff_source.label is iterable ? diff_source.label|join(', ') : diff_source.label %}
+{% elseif entry.diffs.label is defined %}
+    {% set entity_label = entry.diffs.label is iterable ? entry.diffs.label|join(', ') : entry.diffs.label %}
 {% endif %}
 
+{#
+  Transaction ID display:
+  - ULID (schema v2, 26 chars): show in full — it is short and human-readable.
+  - SHA1 (schema v1, 40 hex chars): truncate to 10 chars like a short git hash.
+  Any ID longer than 26 chars is treated as a SHA1.
+#}
+{% set tx_id = entry.transactionId %}
+{% set tx_label = tx_id is not empty ? (tx_id|length > 26 ? (tx_id|slice(0, 10) ~ '…') : tx_id) : null %}
+
 {% if entry.type == 'remove' %}
-{# REMOVE entries are not expandable #}
+{# REMOVE entries: expandable only for schema v2 when a field snapshot was captured. #}
+{% set remove_diffs = entry.diffs %}
+{% set remove_has_snapshot = entry.schemaVersion >= 2 and remove_diffs|length > 0 %}
+{% if remove_has_snapshot %}
+<details class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+    <summary class="flex flex-col px-4 py-3 cursor-pointer list-none">
+{% else %}
 <div class="flex flex-col px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
-    {# First line: badge, entity link, label, action description, hash #}
-    <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3 min-w-0">
-            {# Type badge - fixed width for alignment #}
-            <span class="w-24 shrink-0">
-                {{ helper.type_badge(entry.type) }}
-            </span>
-
-            {# Entity info #}
-            <div class="flex items-center gap-2 min-w-0 text-sm">
-                {# Entity name + ID #}
-                <a href="{{ path('dh_auditor_show_entity_stream', {'entity': helper.namespaceToParam(entity), 'id': entry.objectId}) }}"
-                   class="font-medium text-slate-900 dark:text-slate-100 hover:underline shrink-0"
-                   title="{{ entity }}">
-                    {{ entity|split('\\')|last }} #{{ entry.objectId }}
-                </a>
-
-                {# Entity label if available - smaller and italic #}
-                {% if entity_label %}
-                    <span class="text-slate-500 dark:text-slate-400">·</span>
-                    <span class="text-xs italic text-slate-500 dark:text-slate-400 truncate">{{ entity_label }}</span>
-                {% endif %}
-
-                {# Action description #}
-                <span class="text-slate-500 dark:text-slate-400">·</span>
-                <span class="text-xs text-slate-400 dark:text-slate-500 italic shrink-0">
-                    {{ 'audit.entry.action_remove'|trans(domain='auditor') }}
+    <div class="flex flex-col">
+{% endif %}
+        {# First line: badge, entity link, label, action description, hash #}
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3 min-w-0">
+                {# Type badge - fixed width for alignment #}
+                <span class="w-24 shrink-0">
+                    {{ helper.type_badge(entry.type) }}
                 </span>
+
+                {# Entity info #}
+                <div class="flex items-center gap-2 min-w-0 text-sm">
+                    {# Entity name + ID #}
+                    <a href="{{ path('dh_auditor_show_entity_stream', {'entity': helper.namespaceToParam(entity), 'id': entry.objectId}) }}"
+                       class="font-medium text-slate-900 dark:text-slate-100 hover:underline shrink-0"
+                       title="{{ entity }}">
+                        {{ entity|split('\\')|last }} #{{ entry.objectId }}
+                    </a>
+
+                    {# Entity label if available - smaller and italic #}
+                    {% if entity_label %}
+                        <span class="text-slate-500 dark:text-slate-400">·</span>
+                        <span class="text-xs italic text-slate-500 dark:text-slate-400 truncate">{{ entity_label }}</span>
+                    {% endif %}
+
+                    {# Action description #}
+                    <span class="text-slate-500 dark:text-slate-400">·</span>
+                    <span class="text-xs text-slate-400 dark:text-slate-500 italic shrink-0">
+                        {{ 'audit.entry.action_remove'|trans(domain='auditor') }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 shrink-0">
+                {# Transaction ID #}
+                {% if tx_label is not empty and hide_transaction is not defined %}
+                    <a href="{{ path('dh_auditor_show_transaction_stream', {hash: tx_id}) }}"
+                       class="font-mono text-xs text-slate-400 hover:underline transition"
+                       title="{{ tx_id }}">
+                        {{ tx_label }}
+                    </a>
+                {% endif %}
+                {% if remove_has_snapshot %}
+                    <svg class="w-4 h-4 text-slate-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                {% else %}
+                    <span class="w-4"></span>
+                {% endif %}
             </div>
         </div>
 
-        <div class="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 shrink-0">
-            {# Transaction hash - short version with full hash in title #}
-            {% if entry.transactionHash is not empty and hide_transaction is not defined %}
-                <a href="{{ path('dh_auditor_show_transaction_stream', {hash: entry.transactionHash}) }}"
-                   class="font-mono text-xs text-slate-400 hover:underline transition"
-                   title="{{ entry.transactionHash }}">
-                    {{ entry.transactionHash|slice(0, 10) }}…
-                </a>
+        {# Second line: date, user/command, IP, firewall #}
+        <div class="flex items-center gap-2 mt-1 ml-2 text-xs text-slate-500 dark:text-slate-400">
+            <span>{{ entry.createdAt|format_datetime('full', 'short') }}</span>
+            <span>·</span>
+            <span>{{ 'audit.entry.by'|trans(domain='auditor') }}
+                <span class="font-medium">{{ entry.username ?? 'audit.audit_details.anonymous'|trans(domain='auditor') }}</span>
+            </span>
+            {% if entry.ip is not empty %}
+                <span>·</span>
+                <span class="font-mono">{{ entry.ip }}</span>
             {% endif %}
-            {# Spacer to align with chevron in other rows #}
-            <span class="w-4"></span>
+            {% if entry.userFirewall is not empty %}
+                <span>·</span>
+                <span class="italic">{{ entry.userFirewall }}</span>
+            {% endif %}
         </div>
+{% if remove_has_snapshot %}
+    </summary>
+    {# Deleted entity snapshot: show old values #}
+    <div class="px-4 pb-4 pl-8">
+        <table class="text-xs font-mono">
+            {% for field, changeset in remove_diffs %}
+                {{ _self.displayRemoveValue(field, changeset) }}
+            {% endfor %}
+        </table>
+        {{ _self.displayExtraData(entry.extraData) }}
     </div>
-
-    {# Second line: date, user/command, IP, firewall #}
-    <div class="flex items-center gap-2 mt-1 ml-2 text-xs text-slate-500 dark:text-slate-400">
-        <span>{{ entry.createdAt|format_datetime('full', 'short') }}</span>
-        <span>·</span>
-        <span>{{ 'audit.entry.by'|trans(domain='auditor') }}
-            <span class="font-medium">{{ entry.username ?? 'audit.audit_details.anonymous'|trans(domain='auditor') }}</span>
-        </span>
-        {% if entry.ip is not empty %}
-            <span>·</span>
-            <span class="font-mono">{{ entry.ip }}</span>
-        {% endif %}
-        {% if entry.userFirewall is not empty %}
-            <span>·</span>
-            <span class="italic">{{ entry.userFirewall }}</span>
-        {% endif %}
+</details>
+{% else %}
     </div>
 </div>
+{% endif %}
 {% else %}
 {# Other entry types are expandable #}
 <details class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
@@ -120,13 +156,13 @@
             </div>
 
             <div class="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 shrink-0">
-                {# Transaction hash - short version with full hash in title #}
-                {% if entry.transactionHash is not empty and hide_transaction is not defined %}
-                    <a href="{{ path('dh_auditor_show_transaction_stream', {hash: entry.transactionHash}) }}"
+                {# Transaction ID #}
+                {% if tx_label is not empty and hide_transaction is not defined %}
+                    <a href="{{ path('dh_auditor_show_transaction_stream', {hash: tx_id}) }}"
                        class="font-mono text-xs text-slate-400 hover:underline transition"
-                       title="{{ entry.transactionHash }}"
+                       title="{{ tx_id }}"
                        onclick="event.stopPropagation();">
-                        {{ entry.transactionHash|slice(0, 10) }}…
+                        {{ tx_label }}
                     </a>
                 {% endif %}
 
@@ -294,6 +330,28 @@
         {# JSON nested field #}
         {% for json_field, json_changeset in changeset %}
             {{ _self.displayUpdateDiff(field ~ '.' ~ json_field, json_changeset) }}
+        {% endfor %}
+    {% endif %}
+{% endmacro %}
+
+{# Macro for REMOVE snapshot: shows the old value (deleted entity state) #}
+{% macro displayRemoveValue(field, changeset) %}
+    {% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
+    {% if changeset is iterable and changeset.old is defined %}
+        <tr>
+            <td class="pr-6 text-slate-500 dark:text-slate-400 break-words" style="max-width: 25%;">{{ field }}</td>
+            <td class="text-rose-600 dark:text-rose-400 break-words" style="max-width: 70%;">
+                {% if changeset.old is not null %}
+                    {{ helper.dump(changeset.old) }}
+                {% else %}
+                    ⌀
+                {% endif %}
+            </td>
+        </tr>
+    {% elseif changeset is iterable and changeset.old is not defined and changeset.new is not defined %}
+        {# JSON nested field #}
+        {% for json_field, json_changeset in changeset %}
+            {{ _self.displayRemoveValue(field ~ '.' ~ json_field, json_changeset) }}
         {% endfor %}
     {% endif %}
 {% endmacro %}
