@@ -6,7 +6,7 @@ namespace DH\AuditorBundle\Event;
 
 use DH\Auditor\Configuration;
 use DH\Auditor\User\UserProviderInterface;
-use DH\AuditorBundle\User\ConsoleUserProvider;
+use DH\AuditorBundle\User\ConsoleUserProviderInterface;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -16,7 +16,7 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 final readonly class ConsoleEventSubscriber
 {
     public function __construct(
-        private ConsoleUserProvider $consoleUserProvider,
+        private ConsoleUserProviderInterface $consoleUserProvider,
         private Configuration $configuration,
         private UserProviderInterface $provider,
     ) {}

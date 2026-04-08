@@ -6,10 +6,9 @@ namespace DH\AuditorBundle\User;
 
 use DH\Auditor\User\User;
 use DH\Auditor\User\UserInterface;
-use DH\Auditor\User\UserProviderInterface;
 use Symfony\Component\Console\Command\Command;
 
-final class ConsoleUserProvider implements UserProviderInterface
+final class ConsoleUserProvider implements ConsoleUserProviderInterface
 {
     private ?string $currentCommand = null;
 
