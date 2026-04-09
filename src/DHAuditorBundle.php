@@ -11,6 +11,7 @@ use DH\Auditor\Provider\Doctrine\Auditing\Attribute\AttributeLoader;
 use DH\Auditor\Provider\Doctrine\Configuration as DoctrineProviderConfiguration;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Provider\Doctrine\Persistence\Command\CleanAuditLogsCommand;
+use DH\Auditor\Provider\Doctrine\Persistence\Command\ExportAuditLogsCommand;
 use DH\Auditor\Provider\Doctrine\Persistence\Command\MigrateSchemaCommand;
 use DH\Auditor\Provider\Doctrine\Persistence\Command\UpdateSchemaCommand;
 use DH\Auditor\Provider\Doctrine\Persistence\Event\CreateSchemaListener;
@@ -20,6 +21,7 @@ use DH\Auditor\Provider\Doctrine\Service\AuditingService;
 use DH\Auditor\Provider\Doctrine\Service\StorageService;
 use DH\Auditor\Provider\ProviderInterface;
 use DH\AuditorBundle\Command\ClearActivityCacheCommand;
+use DH\AuditorBundle\Controller\ExportController;
 use DH\AuditorBundle\Controller\ViewerController;
 use DH\AuditorBundle\DependencyInjection\Compiler\DoctrineMiddlewareCompilerPass;
 use DH\AuditorBundle\DependencyInjection\Compiler\RegisterDiffLabelResolversCompilerPass;
@@ -244,6 +246,11 @@ class DHAuditorBundle extends AbstractBundle
             ->tag('console.command', ['command' => 'audit:clean'])
         ;
 
+        $services->set(ExportAuditLogsCommand::class)
+            ->call('setAuditor', [new Reference(Auditor::class)])
+            ->tag('console.command', ['command' => 'audit:export'])
+        ;
+
         $services->set(UpdateSchemaCommand::class)
             ->call('setAuditor', [new Reference(Auditor::class)])
             ->tag('console.command', ['command' => 'audit:schema:update'])
@@ -291,6 +298,11 @@ class DHAuditorBundle extends AbstractBundle
 
     private function loadBundleServices(ServicesConfigurator $services): void
     {
+        // ExportController (uses #[AsController] attribute — always registered)
+        $services->set(ExportController::class)
+            ->autoconfigure()
+        ;
+
         // ViewerController (uses #[AsController] attribute)
         $services->set(ViewerController::class)
             ->args([

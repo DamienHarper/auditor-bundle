@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\Routing;
 
 use DH\Auditor\Provider\Doctrine\Configuration;
+use DH\AuditorBundle\Controller\ExportController;
 use DH\AuditorBundle\Controller\ViewerController;
 use Symfony\Bundle\FrameworkBundle\Routing\AttributeRouteControllerLoader;
 use Symfony\Component\Config\Loader\Loader;
@@ -33,6 +34,10 @@ final class RoutingLoader extends Loader
         if (Configuration::isViewerEnabledInConfig($this->configuration['viewer'])) {
             $routeCollection = $this->attributeRouteControllerLoader->load(ViewerController::class);
         }
+
+        // Export routes are always registered regardless of viewer.enabled
+        $exportRoutes = $this->attributeRouteControllerLoader->load(ExportController::class);
+        $routeCollection->addCollection($exportRoutes);
 
         $this->isLoaded = true;
 
