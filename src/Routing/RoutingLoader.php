@@ -30,14 +30,13 @@ final class RoutingLoader extends Loader
             throw new \RuntimeException('Do not add the "audit" loader twice');
         }
 
-        $routeCollection = new RouteCollection();
-        if (Configuration::isViewerEnabledInConfig($this->configuration['viewer'])) {
-            $routeCollection = $this->attributeRouteControllerLoader->load(ViewerController::class);
-        }
+        // Export routes must be added first so /audit/export takes priority over /audit/{entity}.
+        $routeCollection = $this->attributeRouteControllerLoader->load(ExportController::class);
 
-        // Export routes are always registered regardless of viewer.enabled
-        $exportRoutes = $this->attributeRouteControllerLoader->load(ExportController::class);
-        $routeCollection->addCollection($exportRoutes);
+        if (Configuration::isViewerEnabledInConfig($this->configuration['viewer'])) {
+            $viewerRoutes = $this->attributeRouteControllerLoader->load(ViewerController::class);
+            $routeCollection->addCollection($viewerRoutes);
+        }
 
         $this->isLoaded = true;
 

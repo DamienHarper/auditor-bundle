@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DH\AuditorBundle\Controller;
 
+use DH\Auditor\Attribute\Security;
 use DH\Auditor\Exception\InvalidArgumentException;
 use DH\Auditor\Model\Entry;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\DateRangeFilter;
@@ -14,8 +15,10 @@ use DH\Auditor\Provider\Doctrine\Persistence\Schema\SchemaManager;
 use DH\AuditorBundle\Helper\UrlHelper;
 use DH\AuditorBundle\Tests\Controller\ExportControllerTest;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Attribute\AsController;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
@@ -31,7 +34,6 @@ final readonly class ExportController
     #[Route(path: '/audit/export', name: 'dh_auditor_export', methods: ['GET'])]
     public function exportAction(Request $request, Reader $reader): StreamedResponse
     {
-        /** @var string $format */
         $format = $request->query->getString('format', 'ndjson');
 
         if (!\in_array($format, self::VALID_FORMATS, true)) {
@@ -63,8 +65,8 @@ final readonly class ExportController
             ? str_replace('\\', '_', $entity)
             : 'all';
 
-        $extension = 'ndjson' === $format ? 'ndjson' : $format;
-        $filename = \sprintf('audit-export-%s-%s.%s', $filenameBase, (new \DateTimeImmutable())->format('Ymd-His'), $extension);
+        $extension = $format;
+        $filename = \sprintf('audit-export-%s-%s.%s', $filenameBase, new \DateTimeImmutable()->format('Ymd-His'), $extension);
 
         $timezone = new \DateTimeZone($reader->getProvider()->getAuditor()->getConfiguration()->timezone);
 
@@ -116,17 +118,20 @@ final readonly class ExportController
                             'json' => $this->echoJson($data, $first),
                             'csv' => $this->echoCsv($data, $headerWritten),
                         };
-                    }
 
-                    ob_flush();
-                    flush();
+                        if (ob_get_level() > 0) {
+                            ob_flush();
+                        }
+
+                        flush();
+                    }
                 }
 
                 if ('json' === $format) {
                     echo ']';
                 }
             },
-            200,
+            Response::HTTP_OK,
             [
                 'Content-Type' => $contentType,
                 'Content-Disposition' => \sprintf('attachment; filename="%s"', $filename),
@@ -140,7 +145,14 @@ final readonly class ExportController
      */
     private function resolveEntities(?string $entity, Reader $reader): array
     {
+        $roleChecker = $reader->getProvider()->getAuditor()->getConfiguration()->getRoleChecker();
+
         if (null !== $entity) {
+            // Check access before validating existence to avoid leaking entity names to unauthorized callers.
+            if (null !== $roleChecker && !(bool) $roleChecker($entity, Security::VIEW_SCOPE)) {
+                throw new AccessDeniedHttpException(\sprintf("Access denied to audit log for '%s'.", $entity));
+            }
+
             // Validate the entity is known and auditable by attempting createQuery().
             try {
                 $reader->createQuery($entity, ['page_size' => 1]);
@@ -160,7 +172,9 @@ final readonly class ExportController
 
         foreach ($repository as $classes) {
             foreach ($classes as $fqcn => $table) {
-                $entities[] = $fqcn;
+                if (null === $roleChecker || (bool) $roleChecker($fqcn, Security::VIEW_SCOPE)) {
+                    $entities[] = $fqcn;
+                }
             }
         }
 
@@ -216,13 +230,21 @@ final readonly class ExportController
     private function toCsvLine(array $fields): string
     {
         $stream = fopen('php://temp', 'r+');
-        \assert(\is_resource($stream));
-        fputcsv($stream, $fields);
+
+        if (!\is_resource($stream)) {
+            throw new \RuntimeException('Failed to open temporary stream for CSV generation.');
+        }
+
+        fputcsv($stream, $fields, escape: '\\');
         rewind($stream);
         $line = stream_get_contents($stream);
         fclose($stream);
 
-        return \is_string($line) ? $line : '';
+        if (false === $line) {
+            throw new \RuntimeException('Failed to read from temporary stream.');
+        }
+
+        return $line;
     }
 
     /**
