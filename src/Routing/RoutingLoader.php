@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\Routing;
 
 use DH\Auditor\Provider\Doctrine\Configuration;
+use DH\AuditorBundle\Controller\ExportController;
 use DH\AuditorBundle\Controller\ViewerController;
 use Symfony\Bundle\FrameworkBundle\Routing\AttributeRouteControllerLoader;
 use Symfony\Component\Config\Loader\Loader;
@@ -29,9 +30,12 @@ final class RoutingLoader extends Loader
             throw new \RuntimeException('Do not add the "audit" loader twice');
         }
 
-        $routeCollection = new RouteCollection();
+        // Export routes must be added first so /audit/export takes priority over /audit/{entity}.
+        $routeCollection = $this->attributeRouteControllerLoader->load(ExportController::class);
+
         if (Configuration::isViewerEnabledInConfig($this->configuration['viewer'])) {
-            $routeCollection = $this->attributeRouteControllerLoader->load(ViewerController::class);
+            $viewerRoutes = $this->attributeRouteControllerLoader->load(ViewerController::class);
+            $routeCollection->addCollection($viewerRoutes);
         }
 
         $this->isLoaded = true;
