@@ -46,6 +46,7 @@ jobs:
           - '8.4'
           - '8.5'
         symfony:
+          - '7.4.*'
           - '8.*'
       fail-fast: false
 
@@ -78,6 +79,11 @@ jobs:
           restore-keys: ${{ matrix.php }}-composer-
 
       - name: Update project dependencies
+        if: matrix.symfony == '7.4.*'
+        run: SYMFONY_REQUIRE="^7.4" composer update --no-progress --ansi --prefer-stable
+
+      - name: Update project dependencies
+        if: matrix.symfony == '8.*'
         run: SYMFONY_REQUIRE="^8.0" composer update --no-progress --ansi --prefer-stable
 
       - name: Install auditor from source
