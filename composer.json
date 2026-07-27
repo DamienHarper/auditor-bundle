@@ -57,7 +57,7 @@
     "symfony/css-selector": "^8.0",
     "symfony/framework-bundle": "^8.0",
     "symfony/var-dumper": "^8.0",
-    "symfonycasts/tailwind-bundle": "^0.12"
+    "symfonycasts/tailwind-bundle": "^1.0"
   },
   "scripts": {
     "test": "./vendor/bin/phpunit --colors=always --no-coverage",
