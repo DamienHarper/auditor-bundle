@@ -3,13 +3,26 @@
 {% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
 
 {% block dh_auditor_content %}
-    <div class="mb-8 mt-4">
-        <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">
-            {{ 'audit.home.title'|trans(domain='auditor') }}
-        </h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400">
-            {{ 'audit.home.subtitle'|trans(domain='auditor') }}
-        </p>
+    <div class="mb-8 mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+            <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">
+                {{ 'audit.home.title'|trans(domain='auditor') }}
+            </h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+                {{ 'audit.home.subtitle'|trans(domain='auditor') }}
+            </p>
+        </div>
+
+        {# Sort selector #}
+        <select id="sort-entities"
+                class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                onchange="applySort()">
+            {% for option in ['name_asc', 'name_desc', 'count_desc', 'count_asc', 'activity_desc', 'activity_asc'] %}
+                <option value="{{ option }}" {% if sort == option %}selected{% endif %}>
+                    {{ ('audit.sort.' ~ option)|trans(domain='auditor') }}
+                </option>
+            {% endfor %}
+        </select>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -46,4 +59,19 @@
             </div>
         {% endfor %}
     </div>
+
+    <script>
+        function applySort() {
+            const sort = document.getElementById('sort-entities').value;
+            const url = new URL(window.location.href);
+
+            if (sort) {
+                url.searchParams.set('sort', sort);
+            } else {
+                url.searchParams.delete('sort');
+            }
+
+            window.location.href = url.toString();
+        }
+    </script>
 {% endblock dh_auditor_content %}
