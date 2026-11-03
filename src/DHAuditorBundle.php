@@ -32,6 +32,7 @@ use DH\AuditorBundle\ExtraData\ExtraDataProvider;
 use DH\AuditorBundle\Routing\RoutingLoader;
 use DH\AuditorBundle\Security\RoleChecker;
 use DH\AuditorBundle\Security\SecurityProvider;
+use DH\AuditorBundle\Twig\AuditableExtension;
 use DH\AuditorBundle\Twig\TimeAgoExtension;
 use DH\AuditorBundle\User\ConsoleUserProvider;
 use DH\AuditorBundle\User\UserProvider;
@@ -218,6 +219,12 @@ class DHAuditorBundle extends AbstractBundle
         // Reader
         $services->set(Reader::class)
             ->args([new Reference(DoctrineProvider::class)])
+        ;
+
+        // Twig extension (uses #[AsTwigFunction] attribute)
+        $services->set(AuditableExtension::class)
+            ->args([new Reference(Reader::class)])
+            ->autoconfigure()
         ;
 
         // Routing loader (uses #[AutoconfigureTag('routing.loader')] attribute)
