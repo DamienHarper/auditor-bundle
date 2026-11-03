@@ -8,6 +8,13 @@ audit:
     title: Audited Entities
     subtitle: Overview of all tracked entities
     no_audits: No audited entities found.
+  sort:
+    name_asc: 'Name (A-Z)'
+    name_desc: 'Name (Z-A)'
+    count_desc: Most events
+    count_asc: Fewest events
+    activity_desc: Most recently active
+    activity_asc: Least recently active
   audit_details:
     view_audit: View audit
     most_recent: (most recent first)

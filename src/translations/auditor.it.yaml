@@ -8,6 +8,13 @@ audit:
     title: Entità auditate
     subtitle: Panoramica di tutte le entità tracciate
     no_audits: Nessuna entità auditata trovata.
+  sort:
+    name_asc: 'Nome (A-Z)'
+    name_desc: 'Nome (Z-A)'
+    count_desc: Più eventi
+    count_asc: Meno eventi
+    activity_desc: Attività più recente
+    activity_asc: Attività meno recente
   audit_details:
     view_audit: Visualizza audit
     most_recent: (la più recente per prima)

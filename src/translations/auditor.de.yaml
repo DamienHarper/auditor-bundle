@@ -8,6 +8,13 @@ audit:
     title: Auditierte Entitäten
     subtitle: Übersicht aller überwachten Entitäten
     no_audits: Keine auditierten Entitäten gefunden.
+  sort:
+    name_asc: 'Name (A-Z)'
+    name_desc: 'Name (Z-A)'
+    count_desc: Meiste Ereignisse
+    count_asc: Wenigste Ereignisse
+    activity_desc: Zuletzt aktiv
+    activity_asc: Am längsten inaktiv
   audit_details:
     view_audit: Audits anzeigen
     most_recent: (neueste zuerst)

@@ -8,6 +8,13 @@ audit:
     title: Auditeeritud olemid
     subtitle: Ülevaade kõikidest jälgitavatest olemitest
     no_audits: Auditeeritud olemeid ei leitud.
+  sort:
+    name_asc: 'Nimi (A-Z)'
+    name_desc: 'Nimi (Z-A)'
+    count_desc: Enim sündmusi
+    count_asc: Vähim sündmusi
+    activity_desc: Viimati aktiivne
+    activity_asc: Kõige kauem passiivne
   audit_details:
     view_audit: Vaata auditit
     most_recent: (hiljuti lisatud eespool)

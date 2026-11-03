@@ -8,6 +8,13 @@ audit:
     title: Gecontroleerde entiteiten
     subtitle: Overzicht van alle gevolgde entiteiten
     no_audits: Geen gecontroleerde entiteiten gevonden.
+  sort:
+    name_asc: 'Naam (A-Z)'
+    name_desc: 'Naam (Z-A)'
+    count_desc: Meeste events
+    count_asc: Minste events
+    activity_desc: Meest recent actief
+    activity_asc: Langst inactief
   audit_details:
     view_audit: Bekijk versie
     most_recent: (meest recente eerst)
