@@ -63,7 +63,16 @@
     {# Entries list #}
     <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 divide-y divide-slate-200 dark:divide-slate-800">
         {% for entry in paginator.results %}
-            {{ include('@DHAuditor/Audit/entry.html.twig', {'entry': entry, 'entity': entity}) }}
+            {% if id is not null %}
+                <div class="flex items-start gap-1">
+                    <input type="checkbox" class="compare-checkbox mt-4 ml-3" value="{{ entry.id }}" onchange="onCompareCheckboxChange()">
+                    <div class="flex-1 min-w-0">
+                        {{ include('@DHAuditor/Audit/entry.html.twig', {'entry': entry, 'entity': entity}) }}
+                    </div>
+                </div>
+            {% else %}
+                {{ include('@DHAuditor/Audit/entry.html.twig', {'entry': entry, 'entity': entity}) }}
+            {% endif %}
         {% else %}
             <div class="p-8 text-center text-slate-500 dark:text-slate-400">
                 {{ 'audit.stream.no_entries'|trans(domain='auditor') }}
@@ -75,6 +84,18 @@
     {% block dh_auditor_pager %}
         {{ pager.render(helper.namespaceToParam(entity), id, paginator, filters) }}
     {% endblock dh_auditor_pager %}
+
+    {% if id is not null %}
+        {# Floating "compare" button, shown once exactly two revisions are checked #}
+        <a id="compare-button"
+           href="#"
+           class="hidden fixed bottom-6 right-6 inline-flex items-center gap-2 px-4 py-2.5 rounded-full shadow-lg text-sm font-medium bg-slate-900 text-white hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-300 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4"/>
+            </svg>
+            {{ 'audit.compare.button'|trans(domain='auditor') }}
+        </a>
+    {% endif %}
 
     <script>
         function applyFilters() {
@@ -98,6 +119,29 @@
             }
 
             window.location.href = url.toString();
+        }
+
+        function onCompareCheckboxChange() {
+            const checkboxes = document.querySelectorAll('.compare-checkbox');
+            const checked = Array.from(checkboxes).filter((checkbox) => checkbox.checked);
+
+            // At most two revisions can be compared at once.
+            if (checked.length > 2) {
+                checked[0].checked = false;
+                return onCompareCheckboxChange();
+            }
+
+            const button = document.getElementById('compare-button');
+
+            if (checked.length === 2) {
+                const url = new URL(window.location.pathname + '/compare', window.location.origin);
+                url.searchParams.set('from', checked[0].value);
+                url.searchParams.set('to', checked[1].value);
+                button.href = url.toString();
+                button.classList.remove('hidden');
+            } else {
+                button.classList.add('hidden');
+            }
         }
     </script>
 {% endblock dh_auditor_content %}

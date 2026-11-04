@@ -20,6 +20,12 @@ audit:
     anonymous: anonieme gebruiker
   transaction:
     title: Transactie
+  compare:
+    title: Revisievergelijking
+    from: Van
+    to: tot
+    no_changes: Geen verschillen tussen deze twee revisies.
+    button: Selectie vergelijken
   entry:
     by: door
     source: Bron

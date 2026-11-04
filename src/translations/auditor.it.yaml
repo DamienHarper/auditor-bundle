@@ -20,6 +20,12 @@ audit:
     anonymous: utente anonimo
   transaction:
     title: Transazione
+  compare:
+    title: Confronto tra revisioni
+    from: Da
+    to: a
+    no_changes: Nessuna differenza tra queste due revisioni.
+    button: Confronta selezione
   entry:
     by: da
     source: Origine
