@@ -31,6 +31,10 @@ audit:
     action_associate: relazione aggiunta
     action_dissociate: relazione rimossa
   filter:
+    from: Dal
+    to: Al
+    apply: Applica
+    clear_period: Cancella periodo
     all_actions: Tutte le azioni
     all_users: Tutti gli utenti
     anonymous: Anonimo
