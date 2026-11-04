@@ -73,7 +73,14 @@
 
     {# Pager #}
     {% block dh_auditor_pager %}
-        {{ pager.render(helper.namespaceToParam(entity), id, paginator, filters) }}
+        {% set routeParams = {entity: helper.namespaceToParam(entity), id: id} %}
+        {% if filters.type is defined and filters.type %}
+            {% set routeParams = routeParams|merge({type: filters.type}) %}
+        {% endif %}
+        {% if filters.user is defined and filters.user %}
+            {% set routeParams = routeParams|merge({user: filters.user}) %}
+        {% endif %}
+        {{ pager.render('dh_auditor_show_entity_stream', routeParams, paginator) }}
     {% endblock dh_auditor_pager %}
 
     <script>
