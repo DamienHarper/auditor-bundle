@@ -34,6 +34,7 @@ final class ViewerControllerTest extends WebTestCase
 
         // boots the Kernel and populates container
         $this->client = self::createClient();
+        $this->client->disableReboot();
 
         // provider with 1 em for both storage and auditing
         $this->createAndInitDoctrineProvider();
@@ -47,6 +48,10 @@ final class ViewerControllerTest extends WebTestCase
 
         // setup (seed) entities
         $this->setupEntities();
+
+        $entities = $this->provider->getConfiguration()->getEntities();
+        $entities[Author::class]['roles']['view'] = ['ROLE_1', 'ROLE_2'];
+        $this->provider->getConfiguration()->setEntities($entities);
     }
 
     /**
@@ -69,7 +74,7 @@ final class ViewerControllerTest extends WebTestCase
 
         // Check cards
         $cards = $crawler->filter('a[href*="/audit/"]');
-        $this->assertGreaterThanOrEqual(4, $cards->count(), 'There are at least 4 entity audit cards.');
+        $this->assertGreaterThanOrEqual(3, $cards->count(), 'There are at least 3 entity audit cards (Author excluded).');
     }
 
     #[Depends('testListAuditsAnonymously')]
@@ -91,7 +96,7 @@ final class ViewerControllerTest extends WebTestCase
     #[Depends('testListAuditsWithRoleNotGrantedForAuthorAuditViewing')]
     public function testListAuditsWithRoleGrantedForAuthorAuditViewing(): void
     {
-        $this->login(['ROLE1']);
+        $this->login(['ROLE_1']);
         $crawler = $this->client->request('GET', '/audit');
 
         // asserts that the response status code is 2xx
@@ -108,7 +113,7 @@ final class ViewerControllerTest extends WebTestCase
     public function testShowEntityHistoryAnonymously(): void
     {
         $this->login();
-        $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author');
+        $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Post');
 
         // asserts that the response status code is 2xx
         $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
@@ -121,7 +126,7 @@ final class ViewerControllerTest extends WebTestCase
 
         // Check page title contains entity name
         $title = $crawler->filter('h1');
-        $this->assertStringContainsString('Author', $title->text(), 'Page title contains Author');
+        $this->assertStringContainsString('Post', $title->text(), 'Page title contains Post');
 
         // Check entries are displayed
         $entries = $crawler->filter('details');
@@ -142,7 +147,7 @@ final class ViewerControllerTest extends WebTestCase
     #[Depends('testShowEntityHistoryWithRoleNotGrantedForAuthorAuditViewing')]
     public function testShowEntityHistoryWithRoleGrantedForAuthorAuditViewing(): void
     {
-        $this->login(['ROLE1']);
+        $this->login(['ROLE_1']);
         $uri = '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author';
         $crawler = $this->client->request('GET', $uri);
 
@@ -176,6 +181,7 @@ final class ViewerControllerTest extends WebTestCase
     #[Depends('testShowEntityHistoryWithRoleNotGrantedForAuthorAuditViewing')]
     public function testShowTransactionHistoryAnonymously(): void
     {
+        $this->login(['ROLE_1']);
         $reader = $this->createReader();
 
         /** @var Entry[] $audits */
@@ -206,6 +212,7 @@ final class ViewerControllerTest extends WebTestCase
     #[Depends('testShowTransactionHistoryAnonymously')]
     public function testShowTransactionHistoryWithRoleNotGrantedForAuthorAuditViewing(): void
     {
+        $this->login(['ROLE_1']);
         $reader = $this->createReader();
 
         /** @var Entry[] $audits */
@@ -227,10 +234,14 @@ final class ViewerControllerTest extends WebTestCase
 
     private function login(array $roles = []): void
     {
+        [$username, $configuredRoles] = \in_array('ROLE_1', $roles, true)
+            ? ['role1.user', ['ROLE_1']]
+            : ['dark.vador', ['ROLE_USER']];
+
         $user = new InMemoryUser(
-            'dark.vador',
+            $username,
             '$argon2id$v=19$m=65536,t=4,p=1$g1yZVCS0GJ32k2fFqBBtqw$359jLODXkhqVWtD/rf+CjiNz9r/kIvhJlenPBnW851Y',
-            $roles
+            $configuredRoles
         );
 
         $this->client->loginUser($user);
