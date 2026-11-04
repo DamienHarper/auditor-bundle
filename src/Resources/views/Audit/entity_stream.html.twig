@@ -55,6 +55,20 @@
                         </option>
                     {% endfor %}
                 </select>
+
+                {# Changed field filter #}
+                {% if filterOptions.fields|length > 0 %}
+                    <select id="filter-field"
+                            class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                            onchange="applyFilters()">
+                        <option value="">{{ 'audit.filter.all_fields'|trans(domain='auditor') }}</option>
+                        {% for field in filterOptions.fields %}
+                            <option value="{{ field }}" {% if filters.field == field %}selected{% endif %}>
+                                {{ field }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -80,6 +94,8 @@
         function applyFilters() {
             const type = document.getElementById('filter-type').value;
             const user = document.getElementById('filter-user').value;
+            const fieldSelect = document.getElementById('filter-field');
+            const field = fieldSelect ? fieldSelect.value : '';
             const url = new URL(window.location.href);
 
             // Reset to page 1 when filters change
@@ -95,6 +111,12 @@
                 url.searchParams.set('user', user);
             } else {
                 url.searchParams.delete('user');
+            }
+
+            if (field) {
+                url.searchParams.set('field', field);
+            } else {
+                url.searchParams.delete('field');
             }
 
             window.location.href = url.toString();

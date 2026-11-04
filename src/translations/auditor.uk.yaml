@@ -33,6 +33,7 @@ audit:
   filter:
     all_actions: Усі дії
     all_users: Усі користувачі
+    all_fields: Усі поля
     anonymous: Анонім
     type:
       insert: Вставка
