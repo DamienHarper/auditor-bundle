@@ -31,6 +31,10 @@ audit:
     action_associate: Beziehung hinzugefügt
     action_dissociate: Beziehung entfernt
   filter:
+    from: Von
+    to: Bis
+    apply: Anwenden
+    clear_period: Zeitraum zurücksetzen
     all_actions: Alle Aktionen
     all_users: Alle Benutzer
     anonymous: Anonym

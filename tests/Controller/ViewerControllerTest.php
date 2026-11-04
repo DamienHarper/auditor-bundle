@@ -9,10 +9,12 @@ use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\Attributes\Small;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\AbstractBrowser;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\User\InMemoryUser;
@@ -223,6 +225,114 @@ final class ViewerControllerTest extends WebTestCase
         // Check back link
         $backLink = $crawler->filter('a[href="/audit"]');
         $this->assertGreaterThanOrEqual(1, $backLink->count(), 'Back link to entities exists');
+    }
+
+    #[DataProvider('provideFilterByPeriodCases')]
+    public function testFilterByPeriod(array $filters, int $expectedCount): void
+    {
+        $this->seedPeriodEntries();
+        $this->login(['ROLE1']);
+        $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author/101', $filters);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString($expectedCount.' events', $crawler->filter('h1+p')->text());
+        $this->assertSame($filters['date_from'] ?? '', $crawler->filter('[name="date_from"]')->attr('value'));
+        $this->assertSame($filters['date_to'] ?? '', $crawler->filter('[name="date_to"]')->attr('value'));
+    }
+
+    public static function provideFilterByPeriodCases(): iterable
+    {
+        yield 'whole day including midnight and last second' => [['date_from' => '2026-02-10', 'date_to' => '2026-02-10'], 2];
+
+        yield 'start only' => [['date_from' => '2026-02-10'], 3];
+
+        yield 'end only' => [['date_to' => '2026-02-10'], 3];
+
+        yield 'empty bounds' => [['date_from' => '', 'date_to' => ''], 4];
+
+        yield 'no matches' => [['date_from' => '2026-02-12'], 0];
+
+        yield 'combined filters' => [['date_from' => '2026-02-10', 'date_to' => '2026-02-10', 'type' => 'insert', 'user' => 'period-user'], 2];
+
+        yield 'different action' => [['date_from' => '2026-02-10', 'type' => 'update'], 0];
+
+        yield 'different user' => [['date_from' => '2026-02-10', 'user' => '__anonymous__'], 0];
+    }
+
+    #[DataProvider('provideRejectsInvalidPeriodCases')]
+    public function testRejectsInvalidPeriod(array $filters): void
+    {
+        $this->login(['ROLE1']);
+        $this->client->catchExceptions(false);
+        $this->expectException(BadRequestHttpException::class);
+        $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author', $filters);
+    }
+
+    public static function provideRejectsInvalidPeriodCases(): iterable
+    {
+        yield 'invalid calendar date' => [['date_from' => '2026-02-30']];
+
+        yield 'invalid end date' => [['date_to' => '2026-13-01']];
+
+        yield 'relative date' => [['date_from' => 'yesterday']];
+
+        yield 'non padded date' => [['date_from' => '2026-2-01']];
+
+        yield 'null byte' => [['date_from' => "2026-02-10\0"]];
+
+        yield 'array parameter' => [['date_from' => ['2026-02-10']]];
+
+        yield 'reversed bounds' => [['date_from' => '2026-02-11', 'date_to' => '2026-02-10']];
+    }
+
+    public function testPeriodIsPreservedInPaginationAndForm(): void
+    {
+        $this->seedPeriodEntries();
+        $this->provider->getConfiguration()->setViewerPageSize(1);
+        $this->login(['ROLE1']);
+        $uri = '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author/101';
+        $filters = ['date_from' => '2026-02-10', 'date_to' => '2026-02-10', 'type' => 'insert', 'user' => 'period-user'];
+        $crawler = $this->client->request('GET', $uri, $filters);
+
+        $this->assertResponseIsSuccessful();
+        $links = $crawler->filter('a[href*="page=2"]');
+        $this->assertGreaterThan(0, $links->count());
+        $url = $links->first()->attr('href');
+        parse_str(parse_url($url, PHP_URL_QUERY), $query);
+        foreach ($filters as $name => $value) {
+            $this->assertSame($value, $query[$name]);
+        }
+
+        $this->assertStringStartsWith($uri.'?', $url);
+        $form = $crawler->selectButton('Apply')->form();
+        foreach ($filters as $name => $value) {
+            $this->assertSame($value, $form->getValues()[$name]);
+        }
+        $this->assertArrayNotHasKey('page', $form->getValues());
+        $this->assertSame($uri, parse_url($form->getUri(), PHP_URL_PATH));
+
+        $clearUrl = $crawler->selectLink('Clear period')->link()->getUri();
+        parse_str(parse_url($clearUrl, PHP_URL_QUERY), $clearQuery);
+        $this->assertSame(['type' => 'insert', 'user' => 'period-user'], $clearQuery);
+    }
+
+    private function seedPeriodEntries(): void
+    {
+        $reader = $this->createReader();
+        $connection = $this->provider->getStorageServiceForEntity(Author::class)->getEntityManager()->getConnection();
+        $table = $reader->getEntityAuditTableName(Author::class);
+        $row = $connection->fetchAssociative('SELECT * FROM '.$table.' LIMIT 1');
+        $this->assertIsArray($row);
+        unset($row['id']);
+        $connection->executeStatement('DELETE FROM '.$table);
+        $row['object_id'] = '101';
+        $row['blame_id'] = 'period-user';
+        $row['type'] = 'insert';
+
+        foreach (['2026-02-09 23:59:59', '2026-02-10 00:00:00', '2026-02-10 23:59:59', '2026-02-11 00:00:00'] as $date) {
+            $row['created_at'] = $date;
+            $connection->insert($table, $row);
+        }
     }
 
     private function login(array $roles = []): void

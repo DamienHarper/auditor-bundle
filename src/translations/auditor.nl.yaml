@@ -31,6 +31,10 @@ audit:
     action_associate: relatie toegevoegd
     action_dissociate: relatie verwijderd
   filter:
+    from: Van
+    to: Tot
+    apply: Toepassen
+    clear_period: Periode wissen
     all_actions: Alle acties
     all_users: Alle gebruikers
     anonymous: Anoniem

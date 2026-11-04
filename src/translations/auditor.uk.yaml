@@ -31,6 +31,10 @@ audit:
     action_associate: зв'язок додано
     action_dissociate: зв'язок видалено
   filter:
+    from: Від
+    to: До
+    apply: Застосувати
+    clear_period: Скинути період
     all_actions: Усі дії
     all_users: Усі користувачі
     anonymous: Анонім
