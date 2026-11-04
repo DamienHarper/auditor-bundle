@@ -33,6 +33,7 @@ audit:
   filter:
     all_actions: Kõik toimingud
     all_users: Kõik kasutajad
+    all_fields: Kõik väljad
     anonymous: Anonüümne
     type:
       insert: Lisamine
