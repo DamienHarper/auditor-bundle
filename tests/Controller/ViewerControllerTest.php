@@ -7,6 +7,8 @@ namespace DH\AuditorBundle\Tests\Controller;
 use DH\Auditor\Model\Entry;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author;
+use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Comment;
+use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
 use PHPUnit\Framework\Attributes\Depends;
@@ -223,6 +225,64 @@ final class ViewerControllerTest extends WebTestCase
         // Check back link
         $backLink = $crawler->filter('a[href="/audit"]');
         $this->assertGreaterThanOrEqual(1, $backLink->count(), 'Back link to entities exists');
+    }
+
+    #[Depends('testListAuditsAnonymously')]
+    public function testShowUserGlobalHistory(): void
+    {
+        $userId = '424242';
+        $username = 'global.history.tester';
+
+        $this->stampBlame(Post::class, $userId, $username, 'MIN');
+        $this->stampBlame(Comment::class, $userId, $username, 'MAX');
+
+        $this->login();
+        $crawler = $this->client->request('GET', '/audit/user/'.$userId);
+
+        // asserts that the response status code is 2xx
+        $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
+
+        $this->assertPageTitleContains('auditor', 'Title contains auditor');
+
+        // Check page title contains the username
+        $title = $crawler->filter('h1');
+        $this->assertStringContainsString($username, $title->text(), 'Page title contains the username');
+
+        // Check events count across both entities
+        $subtitle = $crawler->filter('h1+p');
+        $this->assertStringContainsString('2 events', $subtitle->text(), 'Subtitle contains 2 events');
+
+        // Check entries from both entities are shown in a single timeline
+        $postLinks = $crawler->filter('a[href*="Post"]');
+        $commentLinks = $crawler->filter('a[href*="Comment"]');
+        $this->assertGreaterThanOrEqual(1, $postLinks->count(), 'A Post entry is shown');
+        $this->assertGreaterThanOrEqual(1, $commentLinks->count(), 'A Comment entry is shown');
+    }
+
+    #[Depends('testShowUserGlobalHistory')]
+    public function testShowUserGlobalHistoryWithoutMatches(): void
+    {
+        $this->login();
+        $crawler = $this->client->request('GET', '/audit/user/does-not-exist');
+
+        $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
+        $this->assertStringContainsString('No audit entries found', $crawler->filter('body')->text());
+    }
+
+    /**
+     * Stamps the first or last audit row of $entity's audit table with a given blame_id/username,
+     * simulating an action performed by a specific user (test fixtures don't log in before seeding).
+     */
+    private function stampBlame(string $entity, string $userId, string $username, string $aggregate): void
+    {
+        $reader = $this->createReader();
+        $table = $reader->getEntityAuditTableName($entity);
+        $connection = $this->provider->getStorageServiceForEntity($entity)->getEntityManager()->getConnection();
+
+        $connection->executeStatement(
+            \sprintf('UPDATE %s SET blame_id = :id, blame = :blame WHERE id = (SELECT %s(id) FROM %s)', $table, $aggregate, $table),
+            ['id' => $userId, 'blame' => json_encode(['username' => $username], \JSON_THROW_ON_ERROR)]
+        );
     }
 
     private function login(array $roles = []): void
