@@ -1,0 +1,48 @@
+{% extends "@DHAuditor/layout.html.twig" %}
+
+{% import '@DHAuditor/Audit/helpers/pager.html.twig' as pager %}
+
+{% block dh_auditor_content %}
+    {# Sub-header - sticky with back link #}
+    {% block dh_auditor_header %}
+    <div class="sticky top-16 z-40 -mx-6 px-6 py-3 mb-4 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur">
+        {# Back link #}
+        <a href="{{ path('dh_auditor_list_audits') }}"
+           class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 mb-3">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            {{ 'audit.header.back_to_entities'|trans(domain='auditor') }}
+        </a>
+
+        <div>
+            <h1 class="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                {{ username ?? id }}
+            </h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+                {{ 'audit.audit_details.events_count'|trans({'%count%': paginator.numResults, '%formatted_count%': paginator.numResults|number_format}, 'auditor') }}
+                · {{ 'audit.audit_details.most_recent'|trans(domain='auditor') }}
+            </p>
+        </div>
+    </div>
+    {% endblock dh_auditor_header %}
+
+    {# Entries list - single chronological timeline across all authorized entities #}
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 divide-y divide-slate-200 dark:divide-slate-800">
+        {% for item in entries %}
+            {{ include('@DHAuditor/Audit/entry.html.twig', {'entry': item.entry, 'entity': item.entity}) }}
+        {% else %}
+            <div class="p-8 text-center text-slate-500 dark:text-slate-400">
+                {{ 'audit.stream.no_entries'|trans(domain='auditor') }}
+            </div>
+        {% endfor %}
+    </div>
+
+    {# Pager #}
+    {% block dh_auditor_pager %}
+        {{ pager.render('dh_auditor_show_user_stream', {id: id}, paginator) }}
+    {% endblock dh_auditor_pager %}
+{% endblock dh_auditor_content %}

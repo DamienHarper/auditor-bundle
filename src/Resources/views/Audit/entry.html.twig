@@ -84,7 +84,15 @@
             <span>{{ entry.createdAt|format_datetime('full', 'short') }}</span>
             <span>·</span>
             <span>{{ 'audit.entry.by'|trans(domain='auditor') }}
-                <span class="font-medium">{{ entry.username ?? 'audit.audit_details.anonymous'|trans(domain='auditor') }}</span>
+                {% if entry.userId is not null %}
+                    <a href="{{ path('dh_auditor_show_user_stream', {id: entry.userId}) }}"
+                       class="font-medium hover:underline"
+                       onclick="event.stopPropagation();">
+                        {{ entry.username ?? entry.userId }}
+                    </a>
+                {% else %}
+                    <span class="font-medium">{{ 'audit.audit_details.anonymous'|trans(domain='auditor') }}</span>
+                {% endif %}
             </span>
             {% if entry.ip is not empty %}
                 <span>·</span>
@@ -178,7 +186,15 @@
             <span>{{ entry.createdAt|format_datetime('full', 'short') }}</span>
             <span>·</span>
             <span>{{ 'audit.entry.by'|trans(domain='auditor') }}
-                <span class="font-medium">{{ entry.username ?? 'audit.audit_details.anonymous'|trans(domain='auditor') }}</span>
+                {% if entry.userId is not null %}
+                    <a href="{{ path('dh_auditor_show_user_stream', {id: entry.userId}) }}"
+                       class="font-medium hover:underline"
+                       onclick="event.stopPropagation();">
+                        {{ entry.username ?? entry.userId }}
+                    </a>
+                {% else %}
+                    <span class="font-medium">{{ 'audit.audit_details.anonymous'|trans(domain='auditor') }}</span>
+                {% endif %}
             </span>
             {% if entry.ip is not empty %}
                 <span>·</span>
