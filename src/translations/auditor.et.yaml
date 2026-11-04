@@ -31,6 +31,10 @@ audit:
     action_associate: seos lisatud
     action_dissociate: seos eemaldatud
   filter:
+    from: Alates
+    to: Kuni
+    apply: Rakenda
+    clear_period: Tühjenda periood
     all_actions: Kõik toimingud
     all_users: Kõik kasutajad
     anonymous: Anonüümne
