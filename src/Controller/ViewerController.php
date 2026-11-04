@@ -83,6 +83,7 @@ final readonly class ViewerController
                 $activityData = $activityGraphProvider->getActivityDataWithRaw($entity, $reader);
                 $data['activityGraph'] = $activityData['normalized'];
                 $data['activityGraphRaw'] = $activityData['raw'];
+                $data['activityGraphDates'] = $activityData['dates'];
             }
 
             unset($data);

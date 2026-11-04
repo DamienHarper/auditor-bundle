@@ -9,6 +9,8 @@ use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
+use DH\AuditorBundle\Controller\ViewerController;
+use DH\AuditorBundle\Viewer\ActivityGraphProvider;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\Attributes\Small;
@@ -18,6 +20,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\User\InMemoryUser;
+use Twig\Environment;
 
 /**
  * @internal
@@ -314,6 +317,51 @@ final class ViewerControllerTest extends WebTestCase
         $clearUrl = $crawler->selectLink('Clear period')->link()->getUri();
         parse_str(parse_url($clearUrl, PHP_URL_QUERY), $clearQuery);
         $this->assertSame(['type' => 'insert', 'user' => 'period-user'], $clearQuery);
+    }
+
+    #[DataProvider('provideActivityBarsLinkToTheirDayCases')]
+    public function testActivityBarsLinkToTheirDay(string $layout): void
+    {
+        self::getContainer()->set(ViewerController::class, new ViewerController(
+            self::getContainer()->get(Environment::class),
+            new ActivityGraphProvider(7, $layout, false, 300),
+        ));
+        $this->login(['ROLE1']);
+        $crawler = $this->client->request('GET', '/audit');
+        $this->assertResponseIsSuccessful();
+
+        $uri = '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author';
+        $bars = $crawler->filter('a[data-audit-date][href^="'.$uri.'?"]');
+        $this->assertCount(7, $bars);
+        $this->assertCount(1, $crawler->filter('a[href="'.$uri.'"]'));
+        $today = new \DateTimeImmutable('today', new \DateTimeZone('UTC'));
+        foreach ($bars as $index => $bar) {
+            $date = $today->modify('-'.(6 - $index).' days')->format('Y-m-d');
+            $this->assertSame($date, $bar->getAttribute('data-audit-date'));
+            parse_str(parse_url($bar->getAttribute('href'), PHP_URL_QUERY), $query);
+            $this->assertSame(['date_from' => $date, 'date_to' => $date], $query);
+            $this->assertStringContainsString($date, $bar->getAttribute('aria-label'));
+        }
+
+        $lastBar = $bars->last();
+        $expectedCount = $lastBar->attr('data-audit-count');
+        $this->assertGreaterThan(0, (int) $expectedCount);
+        $filtered = $this->client->click($lastBar->link());
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString($expectedCount.' events', $filtered->filter('h1+p')->text());
+        $this->assertSame($today->format('Y-m-d'), $filtered->filter('[name="date_from"]')->attr('value'));
+        $this->assertSame($today->format('Y-m-d'), $filtered->filter('[name="date_to"]')->attr('value'));
+
+        $emptyDay = $this->client->click($bars->first()->link());
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString('0 events', $emptyDay->filter('h1+p')->text());
+    }
+
+    public static function provideActivityBarsLinkToTheirDayCases(): iterable
+    {
+        yield 'bottom' => ['bottom'];
+
+        yield 'inline' => ['inline'];
     }
 
     private function seedPeriodEntries(): void
