@@ -317,6 +317,10 @@ final readonly class ViewerController
         // schema v1 and v2 transparently). Association entries contribute no business field.
         $fields = [];
         foreach ($reader->createQuery($entity, ['object_id' => $id, 'page_size' => null])->execute() as $entry) {
+            if (\in_array($entry->type, ['associate', 'dissociate'], true)) {
+                continue;
+            }
+
             foreach (array_keys($entry->getDiffs()) as $field) {
                 if ('label' !== $field) {
                     $fields[$field] = true;
