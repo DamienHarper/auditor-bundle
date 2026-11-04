@@ -8,6 +8,13 @@ audit:
     title: Сутності, що перевіряються
     subtitle: Огляд усіх відстежуваних сутностей
     no_audits: Сутності, що перевіряються, не знайдено.
+  sort:
+    name_asc: "Ім'я (А-Я)"
+    name_desc: "Ім'я (Я-А)"
+    count_desc: Більше подій
+    count_asc: Менше подій
+    activity_desc: Остання активність
+    activity_asc: Найдавніша активність
   audit_details:
     view_audit: Переглянути перевірку
     most_recent: (найновіші перші)

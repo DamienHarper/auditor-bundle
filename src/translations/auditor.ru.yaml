@@ -8,6 +8,13 @@ audit:
     title: Проверяемые сущности
     subtitle: Обзор всех отслеживаемых сущностей
     no_audits: Проверяемые сущности не найдены.
+  sort:
+    name_asc: 'Имя (А-Я)'
+    name_desc: 'Имя (Я-А)'
+    count_desc: Больше событий
+    count_asc: Меньше событий
+    activity_desc: Недавняя активность
+    activity_asc: Давняя активность
   audit_details:
     view_audit: Просмотр проверки
     most_recent: (самые последние первыми)
