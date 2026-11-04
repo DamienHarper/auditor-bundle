@@ -106,6 +106,55 @@ final readonly class ViewerController
         ]);
     }
 
+    #[Route(path: '/audit/user/{id}', name: 'dh_auditor_show_user_stream', methods: ['GET'])]
+    public function showUserStreamAction(Request $request, Reader $reader, string $id): Response
+    {
+        $page = max(1, $request->query->getInt('page', 1));
+
+        /** @var Configuration $configuration */
+        $configuration = $reader->getProvider()->getConfiguration();
+
+        $username = null;
+        $entries = [];
+
+        foreach (array_keys($configuration->getEntities()) as $entity) {
+            try {
+                $audits = $reader->createQuery($entity, ['blame_id' => $id, 'page_size' => null])->execute();
+            } catch (AccessDeniedException) {
+                continue;
+            }
+
+            foreach ($audits as $audit) {
+                $entries[] = ['entity' => $entity, 'entry' => $audit];
+                $username ??= $audit->username;
+            }
+        }
+
+        usort($entries, static fn (array $a, array $b): int => $b['entry']->createdAt <=> $a['entry']->createdAt);
+
+        $pageSize = $configuration->getViewerPageSize();
+        $numResults = \count($entries);
+        $numPages = (int) ceil($numResults / $pageSize);
+        $page = min($page, max(1, $numPages));
+
+        return $this->renderView('@DHAuditor/Audit/user_stream.html.twig', [
+            'id' => $id,
+            'username' => $username,
+            'entries' => \array_slice($entries, ($page - 1) * $pageSize, $pageSize),
+            'paginator' => [
+                'currentPage' => $page,
+                'hasPreviousPage' => $page > 1,
+                'hasNextPage' => ($page * $pageSize) < $numResults,
+                'previousPage' => $page > 1 ? $page - 1 : null,
+                'nextPage' => ($page * $pageSize) < $numResults ? $page + 1 : null,
+                'numPages' => $numPages,
+                'haveToPaginate' => $numResults > $pageSize,
+                'numResults' => $numResults,
+                'pageSize' => $pageSize,
+            ],
+        ]);
+    }
+
     #[Route(path: '/audit/{entity}/{id}', name: 'dh_auditor_show_entity_stream', methods: ['GET'])]
     public function showEntityStreamAction(Request $request, Reader $reader, string $entity, int|string|null $id = null): Response
     {
