@@ -14,16 +14,18 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for entity, entityAuditData in audited %}
-            <a href="{{ path('dh_auditor_show_entity_stream', {'entity': helper.namespaceToParam(entity)}) }}"
-               class="rounded-xl border bg-white border-slate-200 p-4
+            <div class="relative rounded-xl border bg-white border-slate-200 p-4
                       hover:bg-slate-50 hover:border-slate-300 transition
                       dark:bg-slate-900 dark:border-slate-800 dark:hover:bg-slate-800">
+                <a href="{{ path('dh_auditor_show_entity_stream', {'entity': helper.namespaceToParam(entity)}) }}"
+                   class="absolute inset-0 rounded-xl"
+                   aria-label="{{ 'audit.audit_details.view_audit'|trans(domain='auditor') }} · {{ entity|split('\\')|last }}"></a>
                 {# Header row with entity name, event count, and optional inline sparkline #}
                 <div class="flex justify-between items-center gap-2">
                     <span class="font-medium truncate" title="{{ entity|e('html_attr') }}">{{ entity|split('\\')|last }}</span>
                     <div class="flex items-center gap-2 shrink-0 min-w-0 flex-1 justify-end">
                         {% if activityGraphEnabled and activityGraphLayout == 'inline' and entityAuditData.activityGraph is defined %}
-                            {{ helper.activity_sparkline(entityAuditData.activityGraph, entityAuditData.activityGraphRaw|default([]), activityGraphDays) }}
+                            {{ helper.activity_sparkline(entityAuditData.activityGraph, entityAuditData.activityGraphRaw|default([]), activityGraphDays, entityAuditData.activityGraphDates, entity) }}
                         {% endif %}
                         <span class="text-xs text-slate-500 dark:text-slate-400 shrink-0">
                             {{ 'audit.audit_details.events_count'|trans({'%count%': entityAuditData.count, '%formatted_count%': entityAuditData.count|number_format}, 'auditor') }}
@@ -37,9 +39,9 @@
                 </div>
                 {# Bottom sparkline (Option B) #}
                 {% if activityGraphEnabled and activityGraphLayout == 'bottom' and entityAuditData.activityGraph is defined %}
-                    {{ helper.activity_sparkline_bottom(entityAuditData.activityGraph, entityAuditData.activityGraphRaw|default([]), activityGraphDays) }}
+                    {{ helper.activity_sparkline_bottom(entityAuditData.activityGraph, entityAuditData.activityGraphRaw|default([]), activityGraphDays, entityAuditData.activityGraphDates, entity) }}
                 {% endif %}
-            </a>
+            </div>
         {% else %}
             <div class="col-span-full text-center text-slate-500 dark:text-slate-400 py-8">
                 {{ 'audit.home.no_audits'|trans(domain='auditor') }}
