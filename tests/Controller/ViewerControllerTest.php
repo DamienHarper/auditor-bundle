@@ -134,6 +134,16 @@ final class ViewerControllerTest extends WebTestCase
     }
 
     #[Depends('testShowEntityHistoryAnonymously')]
+    public function testShowEntityHistoryWithoutLoginForAuthorAuditViewing(): void
+    {
+        $this->client->catchExceptions(false);
+        $this->expectException(AccessDeniedException::class);
+        $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author');
+
+        $this->assertSame(403, $this->client->getResponse()->getStatusCode(), 'Response status is 403');
+    }
+
+    #[Depends('testShowEntityHistoryAnonymously')]
     public function testShowEntityHistoryWithRoleNotGrantedForAuthorAuditViewing(): void
     {
         $this->login(['ROLE_USER']);
