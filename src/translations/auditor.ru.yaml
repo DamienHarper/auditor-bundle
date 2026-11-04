@@ -20,6 +20,12 @@ audit:
     anonymous: анонимный пользователь
   transaction:
     title: Транзакция
+  compare:
+    title: Сравнение версий
+    from: От
+    to: до
+    no_changes: Между этими двумя версиями нет изменений.
+    button: Сравнить выбранное
   entry:
     by: от
     source: Источник

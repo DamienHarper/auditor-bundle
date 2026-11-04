@@ -20,6 +20,12 @@ audit:
     anonymous: anonüümne kasutaja
   transaction:
     title: Transaktsioon
+  compare:
+    title: Versioonide võrdlus
+    from: Alates
+    to: kuni
+    no_changes: Nende kahe versiooni vahel pole erinevusi.
+    button: Võrdle valitud
   entry:
     by: kasutajalt
     source: Allikas

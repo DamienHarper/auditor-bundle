@@ -6,6 +6,7 @@ namespace DH\AuditorBundle\Controller;
 
 use DH\Auditor\Attribute\Security;
 use DH\Auditor\Exception\AccessDeniedException;
+use DH\Auditor\Model\Entry;
 use DH\Auditor\Provider\Doctrine\Configuration;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\NullFilter;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Query;
@@ -169,6 +170,115 @@ final readonly class ViewerController
             ],
             'filterOptions' => $filterOptions,
         ]);
+    }
+
+    #[Route(path: '/audit/{entity}/{id}/compare', name: 'dh_auditor_compare_revisions', methods: ['GET'])]
+    public function compareRevisionsAction(Request $request, Reader $reader, string $entity, int|string $id): Response
+    {
+        $entity = UrlHelper::paramToNamespace($entity);
+
+        if (!$reader->getProvider()->isAuditable($entity)) {
+            throw new NotFoundHttpException('Not Found');
+        }
+
+        $fromId = $request->query->get('from');
+        $toId = $request->query->get('to');
+
+        if (null === $fromId || null === $toId) {
+            throw new NotFoundHttpException('Both "from" and "to" revisions are required.');
+        }
+
+        try {
+            // Reader returns newest first; reconstructing state needs chronological
+            // (oldest first) order, so the whole history is fetched and reversed.
+            $entries = array_values(array_reverse($reader->createQuery($entity, ['object_id' => $id, 'page_size' => null])->execute()));
+        } catch (AccessDeniedException) {
+            throw new SymfonyAccessDeniedException('Access Denied.');
+        }
+
+        $fromIndex = $this->findRevisionIndex($entries, $fromId);
+        $toIndex = $this->findRevisionIndex($entries, $toId);
+
+        if (null === $fromIndex || null === $toIndex) {
+            throw new NotFoundHttpException('Revision not found.');
+        }
+
+        // Always diff in chronological order, regardless of which one was picked first.
+        if ($fromIndex > $toIndex) {
+            [$fromIndex, $toIndex] = [$toIndex, $fromIndex];
+        }
+
+        $stateFrom = $this->reconstructState($entries, $fromIndex);
+        $stateTo = $this->reconstructState($entries, $toIndex);
+
+        $diff = [];
+        foreach (array_unique([...array_keys($stateFrom), ...array_keys($stateTo)]) as $field) {
+            $old = $stateFrom[$field] ?? null;
+            $new = $stateTo[$field] ?? null;
+
+            if ($old !== $new) {
+                $diff[$field] = ['old' => $old, 'new' => $new];
+            }
+        }
+        ksort($diff);
+
+        return $this->renderView('@DHAuditor/Audit/compare.html.twig', [
+            'entity' => $entity,
+            'id' => $id,
+            'from' => $entries[$fromIndex],
+            'to' => $entries[$toIndex],
+            'diff' => $diff,
+        ]);
+    }
+
+    /**
+     * Finds the position of the audit entry whose ID matches $revisionId, within entries sorted chronologically.
+     *
+     * @param list<Entry> $entries
+     */
+    private function findRevisionIndex(array $entries, string $revisionId): ?int
+    {
+        foreach ($entries as $index => $entry) {
+            if ((string) $entry->id === $revisionId) {
+                return $index;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Reconstructs the object's field values by replaying every entry up to and including $uptoIndex.
+     *
+     * Association entries (no business field) and nested JSON sub-diffs are not replayed:
+     * only top-level scalar/array field changes are tracked.
+     *
+     * @param list<Entry> $entriesAscending
+     *
+     * @return array<string, mixed>
+     */
+    private function reconstructState(array $entriesAscending, int $uptoIndex): array
+    {
+        $state = [];
+
+        for ($i = 0; $i <= $uptoIndex; ++$i) {
+            foreach ($entriesAscending[$i]->getDiffs() as $field => $changeset) {
+                $field = (string) $field;
+
+                if ('label' === $field || !\is_array($changeset)) {
+                    continue;
+                }
+
+                if (\array_key_exists('new', $changeset)) {
+                    $state[$field] = $changeset['new'];
+                } elseif (\array_key_exists('old', $changeset)) {
+                    // REMOVE snapshot: 'old' is the last known value before deletion.
+                    $state[$field] = $changeset['old'];
+                }
+            }
+        }
+
+        return $state;
     }
 
     /**

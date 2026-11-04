@@ -20,6 +20,12 @@ audit:
     anonymous: анонімний користувач
   transaction:
     title: Транзакція
+  compare:
+    title: Порівняння версій
+    from: Від
+    to: до
+    no_changes: Немає відмінностей між цими двома версіями.
+    button: Порівняти вибране
   entry:
     by: від
     source: Джерело
