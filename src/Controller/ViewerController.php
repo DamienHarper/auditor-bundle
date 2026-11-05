@@ -172,6 +172,28 @@ final readonly class ViewerController
         ]);
     }
 
+    #[Route(path: '/audit/{entity}/{id}/revisions', name: 'dh_auditor_select_revisions', methods: ['GET'])]
+    public function selectRevisionsAction(Reader $reader, string $entity, int|string $id): Response
+    {
+        $entity = UrlHelper::paramToNamespace($entity);
+
+        if (!$reader->getProvider()->isAuditable($entity)) {
+            throw new NotFoundHttpException('Not Found');
+        }
+
+        try {
+            $entries = $reader->createQuery($entity, ['object_id' => $id, 'page_size' => null])->execute();
+        } catch (AccessDeniedException) {
+            throw new SymfonyAccessDeniedException('Access Denied.');
+        }
+
+        return $this->renderView('@DHAuditor/Audit/revisions.html.twig', [
+            'entity' => $entity,
+            'id' => $id,
+            'entries' => $entries,
+        ]);
+    }
+
     #[Route(path: '/audit/{entity}/{id}/compare', name: 'dh_auditor_compare_revisions', methods: ['GET'])]
     public function compareRevisionsAction(Request $request, Reader $reader, string $entity, int|string $id): Response
     {
