@@ -9,7 +9,7 @@ doctrine:
                 default_table_options:
                     charset: utf8mb4
                     collate: utf8mb4_unicode_ci
-                url: 'sqlite:///%kernel.project_dir%/var/data.db'
+                url: 'sqlite:///%kernel.project_dir%/var/data_%kernel.environment%.db'
             audits:
                 # configure these for your database server
                 driver: 'pdo_sqlite'
@@ -17,7 +17,7 @@ doctrine:
                 default_table_options:
                     charset: utf8mb4
                     collate: utf8mb4_unicode_ci
-                url: 'sqlite:///%kernel.project_dir%/var/audits.db'
+                url: 'sqlite:///%kernel.project_dir%/var/audits_%kernel.environment%.db'
     orm:
         default_entity_manager: default
         entity_managers:
