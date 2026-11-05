@@ -20,6 +20,15 @@ audit:
     anonymous: utilisateur anonyme
   transaction:
     title: Transaction
+  compare:
+    title: Comparaison de révisions
+    no_changes: Aucune différence entre ces deux révisions.
+    previous: Modification précédente
+    next: Modification suivante
+  revisions:
+    title: Sélectionner des révisions
+    hint: Clique sur deux révisions pour les comparer.
+    icon_title: Comparer les révisions
   entry:
     by: par
     source: Source

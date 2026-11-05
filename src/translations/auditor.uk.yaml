@@ -20,6 +20,15 @@ audit:
     anonymous: анонімний користувач
   transaction:
     title: Транзакція
+  compare:
+    title: Порівняння версій
+    no_changes: Немає відмінностей між цими двома версіями.
+    previous: Попередня зміна
+    next: Наступна зміна
+  revisions:
+    title: Вибрати версії
+    hint: Натисніть на дві версії, щоб порівняти їх.
+    icon_title: Порівняти версії
   entry:
     by: від
     source: Джерело
