@@ -193,7 +193,7 @@ final readonly class ViewerController
             'entries' => $entries,
             // Preselects the revision whose diff icon was clicked, so the user only
             // has to pick the second side of the comparison.
-            'preselect' => $request->query->get('preselect'),
+            'selected' => $request->query->get('selected'),
         ]);
     }
 
