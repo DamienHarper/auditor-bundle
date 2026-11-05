@@ -244,12 +244,23 @@ final readonly class ViewerController
         }
         ksort($diff);
 
+        // "Previous"/"next" shift the whole compared pair by one revision, so users
+        // can step through history without going back to the revisions picker.
+        $previous = $fromIndex > 0 && $toIndex > 0
+            ? ['from' => $entries[$fromIndex - 1]->id, 'to' => $entries[$toIndex - 1]->id]
+            : null;
+        $next = $fromIndex < \count($entries) - 1 && $toIndex < \count($entries) - 1
+            ? ['from' => $entries[$fromIndex + 1]->id, 'to' => $entries[$toIndex + 1]->id]
+            : null;
+
         return $this->renderView('@DHAuditor/Audit/compare.html.twig', [
             'entity' => $entity,
             'id' => $id,
             'from' => $entries[$fromIndex],
             'to' => $entries[$toIndex],
             'diff' => $diff,
+            'previous' => $previous,
+            'next' => $next,
         ]);
     }
 
