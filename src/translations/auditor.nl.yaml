@@ -22,9 +22,9 @@ audit:
     title: Transactie
   compare:
     title: Revisievergelijking
-    from: Van
-    to: tot
     no_changes: Geen verschillen tussen deze twee revisies.
+    previous: Vorige wijziging
+    next: Volgende wijziging
   revisions:
     title: Revisies selecteren
     hint: Klik op twee revisies om ze te vergelijken.

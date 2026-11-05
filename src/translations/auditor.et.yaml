@@ -22,9 +22,9 @@ audit:
     title: Transaktsioon
   compare:
     title: Versioonide võrdlus
-    from: Alates
-    to: kuni
     no_changes: Nende kahe versiooni vahel pole erinevusi.
+    previous: Eelmine muudatus
+    next: Järgmine muudatus
   revisions:
     title: Vali versioonid
     hint: Klõpsa kahel versioonil, et neid võrrelda.

@@ -22,9 +22,9 @@ audit:
     title: Transaction
   compare:
     title: Revision comparison
-    from: From
-    to: to
     no_changes: No changes between these two revisions.
+    previous: Previous change
+    next: Next change
   revisions:
     title: Select revisions
     hint: Click two revisions to compare them.
