@@ -27,9 +27,9 @@
 
     <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 divide-y divide-slate-200 dark:divide-slate-800">
         {% for entry in entries %}
-            <div class="revision-row flex items-center justify-between gap-4 px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition{% if selected is not null and selected == entry.id %} bg-indigo-50 dark:bg-indigo-900/20{% endif %}"
-                 data-id="{{ entry.id }}"
-                 onclick="onRevisionClick(this)">
+            {% set isSelected = selected is not null and selected == entry.id %}
+            <div class="flex items-center justify-between gap-4 px-4 py-3 transition{% if isSelected %} bg-indigo-50 dark:bg-indigo-900/20{% else %} cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50{% endif %}"
+                 {% if not isSelected %}onclick="compareWith('{{ entry.id }}')"{% endif %}>
                 <div class="flex items-center gap-3 min-w-0">
                     <span class="w-24 shrink-0">
                         {{ helper.type_badge(entry.type) }}
@@ -52,27 +52,13 @@
 
     <script>
         const compareBaseUrl = {{ path('dh_auditor_compare_revisions', {entity: helper.namespaceToParam(entity), id: id})|json_encode|raw }};
-        let selectedRevisions = {{ selected is not null ? [selected]|json_encode|raw : '[]' }};
+        const selectedRevision = {{ selected is not null ? selected|json_encode|raw : 'null' }};
 
-        function onRevisionClick(row) {
-            const id = row.dataset.id;
-            const index = selectedRevisions.indexOf(id);
-
-            if (index !== -1) {
-                selectedRevisions.splice(index, 1);
-                row.classList.remove('bg-indigo-50', 'dark:bg-indigo-900/20');
-                return;
-            }
-
-            selectedRevisions.push(id);
-            row.classList.add('bg-indigo-50', 'dark:bg-indigo-900/20');
-
-            if (selectedRevisions.length === 2) {
-                const url = new URL(compareBaseUrl, window.location.origin);
-                url.searchParams.set('from', selectedRevisions[0]);
-                url.searchParams.set('to', selectedRevisions[1]);
-                window.location.href = url.toString();
-            }
+        function compareWith(id) {
+            const url = new URL(compareBaseUrl, window.location.origin);
+            url.searchParams.set('from', selectedRevision);
+            url.searchParams.set('to', id);
+            window.location.href = url.toString();
         }
     </script>
 {% endblock dh_auditor_content %}
