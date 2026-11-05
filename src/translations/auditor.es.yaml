@@ -25,7 +25,10 @@ audit:
     from: Desde
     to: hasta
     no_changes: Sin cambios entre estas dos revisiones.
-    button: Comparar selección
+  revisions:
+    title: Seleccionar revisiones
+    hint: Haz clic en dos revisiones para compararlas.
+    icon_title: Comparar revisiones
   entry:
     by: por
     source: Origen
