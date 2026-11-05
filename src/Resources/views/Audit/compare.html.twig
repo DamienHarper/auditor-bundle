@@ -33,11 +33,11 @@
         {% if diff|length > 0 %}
             <table class="w-full text-xs font-mono">
                 <thead>
-                    <tr class="text-left text-slate-400 dark:text-slate-500 uppercase tracking-wide">
-                        <th class="pb-2 pr-6" style="max-width: 20%;">{{ 'audit.audit_details.property'|trans(domain='auditor') }}</th>
-                        <th class="pb-2 pr-3" style="max-width: 35%;">{{ 'audit.audit_details.old_value'|trans(domain='auditor') }}</th>
+                    <tr class="text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+                        <th class="pb-2 pr-6 text-left" style="max-width: 20%;">{{ 'audit.audit_details.property'|trans(domain='auditor') }}</th>
+                        <th class="pb-2 pr-3 text-left" style="max-width: 35%;">{{ 'audit.audit_details.old_value'|trans(domain='auditor') }}</th>
                         <th class="pb-2" style="max-width: 5%;"></th>
-                        <th class="pb-2 pl-3" style="max-width: 35%;">{{ 'audit.audit_details.new_value'|trans(domain='auditor') }}</th>
+                        <th class="pb-2 pl-3 text-left" style="max-width: 35%;">{{ 'audit.audit_details.new_value'|trans(domain='auditor') }}</th>
                     </tr>
                 </thead>
                 <tbody>
