@@ -173,7 +173,7 @@ final readonly class ViewerController
     }
 
     #[Route(path: '/audit/{entity}/{id}/revisions', name: 'dh_auditor_select_revisions', methods: ['GET'])]
-    public function selectRevisionsAction(Reader $reader, string $entity, int|string $id): Response
+    public function selectRevisionsAction(Request $request, Reader $reader, string $entity, int|string $id): Response
     {
         $entity = UrlHelper::paramToNamespace($entity);
 
@@ -191,6 +191,9 @@ final readonly class ViewerController
             'entity' => $entity,
             'id' => $id,
             'entries' => $entries,
+            // Preselects the revision whose diff icon was clicked, so the user only
+            // has to pick the second side of the comparison.
+            'preselect' => $request->query->get('preselect'),
         ]);
     }
 
