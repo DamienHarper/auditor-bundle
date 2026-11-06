@@ -26,12 +26,13 @@ final readonly class RoleChecker implements RoleCheckerInterface
 
         $userProvider = $this->provider->getAuditor()->getConfiguration()->getUserProvider();
         $user = null !== $userProvider ? $userProvider() : null;
-        $authorizationChecker = null !== $userProvider ? $this->authorizationChecker : null;
 
-        if (!($user instanceof UserInterface) || !($authorizationChecker instanceof AuthorizationCheckerInterface)) {
-            // If no security defined or no user identified, consider access granted
+        if (!$user instanceof UserInterface) {
+            // If no user provider is configured or no user is identified, consider access granted
             return true;
         }
+
+        $authorizationChecker = $this->authorizationChecker;
 
         \assert($this->provider->getConfiguration() instanceof Configuration);
         $entities = $this->provider->getConfiguration()->getEntities();
