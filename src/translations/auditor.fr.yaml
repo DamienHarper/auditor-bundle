@@ -33,6 +33,7 @@ audit:
   filter:
     all_actions: Toutes les actions
     all_users: Tous les utilisateurs
+    all_fields: Tous les champs
     anonymous: Anonyme
     type:
       insert: Insertion

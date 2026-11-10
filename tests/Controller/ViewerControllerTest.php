@@ -173,6 +173,30 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertSame(404, $this->client->getResponse()->getStatusCode(), 'Response status is 404');
     }
 
+    #[Depends('testShowEntityHistoryAnonymously')]
+    public function testShowEntityHistoryFilteredByChangedField(): void
+    {
+        $this->login();
+        $uri = '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Post';
+
+        // The "changed field" dropdown lists fields seen across Post's audit history.
+        $crawler = $this->client->request('GET', $uri);
+        $fieldOptions = $crawler->filter('#filter-field option')->each(static fn ($node) => $node->attr('value'));
+        $this->assertContains('title', $fieldOptions, 'title is offered as a changed-field filter');
+        $this->assertContains('coauthor', $fieldOptions, 'coauthor is offered as a changed-field filter');
+
+        // Filtering by "coauthor" only returns entries where that field changed.
+        $crawler = $this->client->request('GET', $uri.'?field=coauthor');
+        $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
+        $subtitle = $crawler->filter('h1+p');
+        $this->assertStringContainsString('3 events', $subtitle->text(), 'Exactly 3 coauthor changes');
+
+        // A field that is never changed yields no results.
+        $crawler = $this->client->request('GET', $uri.'?field=does-not-exist');
+        $subtitle = $crawler->filter('h1+p');
+        $this->assertStringContainsString('0 events', $subtitle->text(), 'Unknown field matches nothing');
+    }
+
     #[Depends('testShowEntityHistoryWithRoleNotGrantedForAuthorAuditViewing')]
     public function testShowTransactionHistoryAnonymously(): void
     {

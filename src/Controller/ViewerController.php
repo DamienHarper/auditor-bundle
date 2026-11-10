@@ -6,6 +6,7 @@ namespace DH\AuditorBundle\Controller;
 
 use DH\Auditor\Attribute\Security;
 use DH\Auditor\Exception\AccessDeniedException;
+use DH\Auditor\Model\Entry;
 use DH\Auditor\Provider\Doctrine\Configuration;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\NullFilter;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Query;
@@ -115,6 +116,7 @@ final readonly class ViewerController
         // Get filter parameters
         $typeFilter = $request->query->get('type');
         $userFilter = $request->query->get('user');
+        $fieldFilter = $request->query->get('field');
 
         $entity = UrlHelper::paramToNamespace($entity);
 
@@ -144,6 +146,15 @@ final readonly class ViewerController
                 $queryOptions['blame_id'] = $userFilter;
             }
 
+            $hasFieldFilter = null !== $fieldFilter && '' !== $fieldFilter;
+
+            if ($hasFieldFilter) {
+                // The changed field lives inside the JSON diffs, which the Reader can't
+                // filter on at the SQL level: fetch every matching row and paginate in PHP.
+                $queryOptions['page'] = null;
+                $queryOptions['page_size'] = null;
+            }
+
             $query = $reader->createQuery($entity, $queryOptions);
 
             // Add NullFilter for anonymous users
@@ -151,9 +162,17 @@ final readonly class ViewerController
                 $query->addFilter(new NullFilter(Query::USER_ID));
             }
 
-            $pager = $reader->paginate($query, $page, $pageSize);
+            if ($hasFieldFilter) {
+                $matches = array_values(array_filter(
+                    $query->execute(),
+                    static fn (Entry $entry): bool => \array_key_exists($fieldFilter, $entry->getDiffs())
+                ));
+                $pager = $this->paginateArray($matches, $page, $pageSize);
+            } else {
+                $pager = $reader->paginate($query, $page, $pageSize);
+            }
 
-            // Get available filter options (types and users)
+            // Get available filter options (types, users and changed fields)
             $filterOptions = $this->getFilterOptions($reader, $entity, $id);
         } catch (AccessDeniedException) {
             throw new SymfonyAccessDeniedException('Access Denied.');
@@ -166,17 +185,47 @@ final readonly class ViewerController
             'filters' => [
                 'type' => $typeFilter,
                 'user' => $userFilter,
+                'field' => $fieldFilter,
             ],
             'filterOptions' => $filterOptions,
         ]);
     }
 
     /**
-     * Get available filter options (distinct types and users) for an entity.
+     * Paginates an already-fetched list of entries, mirroring the shape returned by Reader::paginate().
+     *
+     * @param list<Entry> $items
+     *
+     * @return array{results: \ArrayIterator<int, Entry>, currentPage: int, hasPreviousPage: bool, hasNextPage: bool, previousPage: null|int, nextPage: null|int, numPages: int, haveToPaginate: bool, numResults: int, pageSize: int}
+     */
+    private function paginateArray(array $items, int $page, int $pageSize): array
+    {
+        $numResults = \count($items);
+        $numPages = (int) ceil($numResults / $pageSize);
+        $currentPage = min(max(1, $page), max(1, $numPages));
+        $hasPreviousPage = $currentPage > 1;
+        $hasNextPage = ($currentPage * $pageSize) < $numResults;
+
+        return [
+            'results' => new \ArrayIterator(\array_slice($items, ($currentPage - 1) * $pageSize, $pageSize)),
+            'currentPage' => $currentPage,
+            'hasPreviousPage' => $hasPreviousPage,
+            'hasNextPage' => $hasNextPage,
+            'previousPage' => $hasPreviousPage ? $currentPage - 1 : null,
+            'nextPage' => $hasNextPage ? $currentPage + 1 : null,
+            'numPages' => $numPages,
+            'haveToPaginate' => $numResults > $pageSize,
+            'numResults' => $numResults,
+            'pageSize' => $pageSize,
+        ];
+    }
+
+    /**
+     * Get available filter options (distinct types, users and changed fields) for an entity.
      *
      * Supports both schema v1 (legacy: blame_user column) and schema v2 (blame JSON column).
      *
-     * @return array{types: array<string>, users: array<array{id: string, name: string}>, hasAnonymous: bool}
+     * @return array{types: array<string>, users: array<array{id: string, name: string}>, hasAnonymous: bool, fields: array<string>}
      */
     private function getFilterOptions(Reader $reader, string $entity, int|string|null $id): array
     {
@@ -264,10 +313,28 @@ final readonly class ViewerController
         $anonymousCount = $connection->executeQuery($anonymousSql, $params)->fetchOne();
         $hasAnonymous = is_numeric($anonymousCount) && (int) $anonymousCount > 0;
 
+        // Distinct changed fields, gathered from each entry's decoded diffs (handles both
+        // schema v1 and v2 transparently). Association entries contribute no business field.
+        $fields = [];
+        foreach ($reader->createQuery($entity, ['object_id' => $id, 'page_size' => null])->execute() as $entry) {
+            if (\in_array($entry->type, ['associate', 'dissociate'], true)) {
+                continue;
+            }
+
+            foreach (array_keys($entry->getDiffs()) as $field) {
+                if ('label' !== $field) {
+                    $fields[$field] = true;
+                }
+            }
+        }
+        $fields = array_keys($fields);
+        sort($fields);
+
         return [
             'types' => $types,
             'users' => $users,
             'hasAnonymous' => $hasAnonymous,
+            'fields' => $fields,
         ];
     }
 
