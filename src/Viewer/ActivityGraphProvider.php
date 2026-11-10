@@ -16,7 +16,7 @@ final readonly class ActivityGraphProvider
 {
     public const string CACHE_TAG = 'dh_auditor.activity';
 
-    private const string CACHE_KEY_PREFIX = 'dh_auditor.activity.';
+    private const string CACHE_KEY_PREFIX = 'dh_auditor.activity.v2.';
 
     public function __construct(
         public private(set) int $days,
@@ -39,7 +39,7 @@ final readonly class ActivityGraphProvider
     /**
      * Get activity data for an entity with both normalized and raw values.
      *
-     * @return array{normalized: array<int>, raw: array<int>} Normalized (0-100) and raw (event counts) arrays
+     * @return array{normalized: array<int>, raw: array<int>, dates: list<string>} Values and their calendar dates
      */
     public function getActivityDataWithRaw(string $entity, Reader $reader): array
     {
@@ -116,12 +116,7 @@ final readonly class ActivityGraphProvider
     /**
      * Compute activity data from the database.
      *
-     * @return array<int> Array of N values (0-100) representing normalized activity
-     */
-    /**
-     * Compute activity data from the database.
-     *
-     * @return array{normalized: array<int>, raw: array<int>} Normalized (0-100) and raw (event counts) arrays
+     * @return array{normalized: array<int>, raw: array<int>, dates: list<string>} Values and their calendar dates
      */
     private function computeActivityData(string $entity, Reader $reader): array
     {
@@ -129,7 +124,9 @@ final readonly class ActivityGraphProvider
         $connection = $storageService->getEntityManager()->getConnection();
         $auditTable = $reader->getEntityAuditTableName($entity);
 
-        $minDate = new \DateTimeImmutable(\sprintf('-%d days', $this->days));
+        $timezone = new \DateTimeZone($reader->getProvider()->getAuditor()->getConfiguration()->timezone);
+        $today = new \DateTimeImmutable('today', $timezone);
+        $minDate = $today->modify(\sprintf('-%d days', $this->days - 1));
 
         $sql = \sprintf(
             'SELECT DATE(created_at) as day, COUNT(*) as cnt FROM %s WHERE created_at >= :minDate GROUP BY DATE(created_at) ORDER BY day ASC',
@@ -152,9 +149,11 @@ final readonly class ActivityGraphProvider
 
         // Generate raw values for the last N days
         $raw = [];
+        $dates = [];
         $max = 0;
         for ($i = $this->days - 1; $i >= 0; --$i) {
-            $date = new \DateTimeImmutable(\sprintf('-%d days', $i))->format('Y-m-d');
+            $date = $today->modify(\sprintf('-%d days', $i))->format('Y-m-d');
+            $dates[] = $date;
             $count = $countsByDate[$date] ?? 0;
             $raw[] = $count;
             $max = max($max, $count);
@@ -169,6 +168,7 @@ final readonly class ActivityGraphProvider
         return [
             'normalized' => $normalized,
             'raw' => $raw,
+            'dates' => $dates,
         ];
     }
 }
