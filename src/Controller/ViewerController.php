@@ -8,6 +8,7 @@ use DH\Auditor\Attribute\Security;
 use DH\Auditor\Exception\AccessDeniedException;
 use DH\Auditor\Model\Entry;
 use DH\Auditor\Provider\Doctrine\Configuration;
+use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\DateRangeFilter;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\NullFilter;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Query;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
@@ -20,6 +21,7 @@ use DH\AuditorBundle\Viewer\ActivityGraphProvider;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException as SymfonyAccessDeniedException;
@@ -85,6 +87,7 @@ final readonly class ViewerController
                 $activityData = $activityGraphProvider->getActivityDataWithRaw($entity, $reader);
                 $data['activityGraph'] = $activityData['normalized'];
                 $data['activityGraphRaw'] = $activityData['raw'];
+                $data['activityGraphDates'] = $activityData['dates'];
             }
 
             unset($data);
@@ -123,6 +126,8 @@ final readonly class ViewerController
         // Get filter parameters
         $typeFilter = $request->query->get('type');
         $userFilter = $request->query->get('user');
+        $dateFromFilter = $request->query->getString('date_from');
+        $dateToFilter = $request->query->getString('date_to');
 
         $entity = UrlHelper::paramToNamespace($entity);
 
@@ -154,6 +159,17 @@ final readonly class ViewerController
 
             $query = $reader->createQuery($entity, $queryOptions);
 
+            $timezone = new \DateTimeZone($reader->getProvider()->getAuditor()->getConfiguration()->timezone);
+            $dateFrom = $this->parseDateFilter($dateFromFilter, $timezone);
+            $dateTo = $this->parseDateFilter($dateToFilter, $timezone)?->setTime(23, 59, 59);
+            if ($dateFrom instanceof \DateTimeImmutable && $dateTo instanceof \DateTimeImmutable && $dateFrom > $dateTo) {
+                throw new BadRequestHttpException('The start date must not be later than the end date.');
+            }
+
+            if ($dateFrom instanceof \DateTimeImmutable || $dateTo instanceof \DateTimeImmutable) {
+                $query->addFilter(new DateRangeFilter(Query::CREATED_AT, $dateFrom, $dateTo));
+            }
+
             // Add NullFilter for anonymous users
             if ($isAnonymousFilter) {
                 $query->addFilter(new NullFilter(Query::USER_ID));
@@ -174,9 +190,29 @@ final readonly class ViewerController
             'filters' => [
                 'type' => $typeFilter,
                 'user' => $userFilter,
+                'date_from' => $dateFromFilter,
+                'date_to' => $dateToFilter,
             ],
             'filterOptions' => $filterOptions,
         ]);
+    }
+
+    private function parseDateFilter(string $value, \DateTimeZone $timezone): ?\DateTimeImmutable
+    {
+        if ('' === $value) {
+            return null;
+        }
+
+        if (1 !== preg_match('/^\d{4}-\d{2}-\d{2}$/D', $value)) {
+            throw new BadRequestHttpException('Dates must use the YYYY-MM-DD format.');
+        }
+
+        $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $value, $timezone);
+        if (false === $date || $date->format('Y-m-d') !== $value) {
+            throw new BadRequestHttpException('Dates must be valid calendar dates in YYYY-MM-DD format.');
+        }
+
+        return $date;
     }
 
     /**

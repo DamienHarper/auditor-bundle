@@ -6,6 +6,11 @@
     {% if filters.user is defined and filters.user %}
         {% set queryParams = queryParams|merge({user: filters.user}) %}
     {% endif %}
+    {% for name in ['date_from', 'date_to'] %}
+        {% if filters[name] is defined and filters[name] %}
+            {% set queryParams = queryParams|merge({(name): filters[name]}) %}
+        {% endif %}
+    {% endfor %}
 
     {% if paginator.haveToPaginate %}
         <div class="flex items-center justify-center gap-0.5 mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">

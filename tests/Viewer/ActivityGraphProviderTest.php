@@ -67,7 +67,8 @@ final class ActivityGraphProviderTest extends WebTestCase
     {
         $normalizedData = [10, 20, 30, 40, 50, 60, 70];
         $rawData = [1, 2, 3, 4, 5, 6, 7];
-        $cachedData = ['normalized' => $normalizedData, 'raw' => $rawData];
+        $dates = ['2026-01-01', '2026-01-02', '2026-01-03', '2026-01-04', '2026-01-05', '2026-01-06', '2026-01-07'];
+        $cachedData = ['normalized' => $normalizedData, 'raw' => $rawData, 'dates' => $dates];
 
         $cacheItem = $this->createStub(CacheItemInterface::class);
         $cacheItem->method('isHit')->willReturn(true);
@@ -82,9 +83,9 @@ final class ActivityGraphProviderTest extends WebTestCase
         $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
         $reader = $this->createReader();
 
-        $result = $provider->getActivityData(Post::class, $reader);
+        $result = $provider->getActivityDataWithRaw(Post::class, $reader);
 
-        $this->assertSame($normalizedData, $result);
+        $this->assertSame($cachedData, $result);
     }
 
     #[Test]
@@ -209,5 +210,38 @@ final class ActivityGraphProviderTest extends WebTestCase
         $provider = new ActivityGraphProvider(14, 'bottom', false, 300);
 
         $this->assertSame(14, $provider->days);
+    }
+
+    public function testDatesMatchDailyCountsInTheAuditTimezone(): void
+    {
+        $this->setupEntities();
+        $reader = $this->createReader();
+        $connection = $this->provider->getStorageServiceForEntity(Post::class)->getEntityManager()->getConnection();
+        $table = $reader->getEntityAuditTableName(Post::class);
+        $ids = $connection->fetchFirstColumn('SELECT id FROM '.$table.' ORDER BY id');
+        $connection->executeStatement('UPDATE '.$table.' SET created_at = :date', ['date' => '2000-01-01 00:00:00']);
+        $today = new \DateTimeImmutable('today', new \DateTimeZone('UTC'));
+        $firstDay = $today->modify('-6 days')->format('Y-m-d');
+        $lastDay = $today->format('Y-m-d');
+        $connection->update($table, ['created_at' => $firstDay.' 00:00:00'], ['id' => $ids[0]]);
+        $connection->update($table, ['created_at' => $lastDay.' 23:59:59'], ['id' => $ids[1]]);
+
+        $originalTimezone = date_default_timezone_get();
+        $utcHour = (int) new \DateTimeImmutable('now', new \DateTimeZone('UTC'))->format('H');
+        date_default_timezone_set($utcHour < 12 ? 'Etc/GMT+12' : 'Pacific/Kiritimati');
+
+        try {
+            $provider = new ActivityGraphProvider(7, 'bottom', false, 300);
+            $data = $provider->getActivityDataWithRaw(Post::class, $reader);
+        } finally {
+            date_default_timezone_set($originalTimezone);
+        }
+
+        $this->assertSame([1, 0, 0, 0, 0, 0, 1], $data['raw']);
+        $this->assertSame([100, 0, 0, 0, 0, 0, 100], $data['normalized']);
+        $this->assertCount(7, $data['dates']);
+        foreach ($data['dates'] as $index => $date) {
+            $this->assertSame($today->modify('-'.(6 - $index).' days')->format('Y-m-d'), $date);
+        }
     }
 }
