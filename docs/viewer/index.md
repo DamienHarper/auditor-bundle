@@ -210,6 +210,12 @@ security:
         - { path: ^/audit, roles: ROLE_ADMIN }
 ```
 
+> [!NOTE]
+> In association diffs (`associate` / `dissociate`), the related entity links to its audit stream
+> only when the current user can open it: the entity must be audited and its `view` roles granted.
+> Otherwise it is displayed as plain text. Templates can apply the same rule with the
+> `dh_auditor_is_viewable(entityClass)` Twig function.
+
 ## 🔗 URL Format
 
 Entity namespaces use dashes instead of backslashes:

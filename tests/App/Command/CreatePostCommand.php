@@ -6,22 +6,18 @@ namespace DH\AuditorBundle\Tests\App\Command;
 
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+#[AsCommand(name: 'app:post:create')]
 class CreatePostCommand extends Command
 {
     public function __construct(private readonly DoctrineProvider $doctrineProvider)
     {
         parent::__construct();
-    }
-
-    protected function configure(): void
-    {
-        $this->setName('app:post:create');
-        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

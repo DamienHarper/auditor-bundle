@@ -15,6 +15,18 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(
     name: 'audit:cache:clear',
     description: 'Clear the activity graph cache',
+    help: <<<'HELP'
+        The <info>%command.name%</info> command clears the activity graph cache.
+
+        Clear all activity graph cache:
+            <info>php %command.full_name%</info>
+
+        Clear cache for a specific entity:
+            <info>php %command.full_name% --entity="App\Entity\User"</info>
+
+        Note: Clearing all cache requires a cache pool that supports tags (TagAwareAdapterInterface).
+        If your cache pool doesn't support tags, you can only clear cache for specific entities.
+        HELP,
 )]
 final class ClearActivityCacheCommand extends Command
 {
@@ -29,18 +41,6 @@ final class ClearActivityCacheCommand extends Command
     {
         $this
             ->addOption('entity', null, InputOption::VALUE_REQUIRED, 'Clear cache for a specific entity (FQCN)')
-            ->setHelp(<<<'HELP'
-                The <info>%command.name%</info> command clears the activity graph cache.
-
-                Clear all activity graph cache:
-                    <info>php %command.full_name%</info>
-
-                Clear cache for a specific entity:
-                    <info>php %command.full_name% --entity="App\Entity\User"</info>
-
-                Note: Clearing all cache requires a cache pool that supports tags (TagAwareAdapterInterface).
-                If your cache pool doesn't support tags, you can only clear cache for specific entities.
-                HELP)
         ;
     }
 
