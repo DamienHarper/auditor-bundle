@@ -85,6 +85,39 @@ final class ViewableEntityExtensionTest extends KernelTestCase
         }
     }
 
+    /**
+     * The provider stores a related entity under its primary key name and adds a "pkName" key
+     * when that name is not "id": both sides must then be identified and linked by that key.
+     */
+    #[DataProvider('provideAssociationDiffIdentifiesRelatedEntityByItsPrimaryKeyNameCases')]
+    public function testAssociationDiffIdentifiesRelatedEntityByItsPrimaryKeyName(string $format): void
+    {
+        $this->bootWithConfiguration(['ROLE_USER']);
+
+        $relatedStream = '/audit/'.UrlHelper::namespaceToParam(Tag::class).'/2';
+
+        foreach (['associate', 'dissociate'] as $type) {
+            foreach (['target', 'source'] as $relatedSide) {
+                $crawler = $this->renderEntry($format, $type, Tag::class, $relatedSide, 'uuid');
+                $context = \sprintf('%s %s with a non-"id" primary key as %s', $format, $type, $relatedSide);
+
+                $link = $crawler->filter(\sprintf('table a[href="%s"]', $relatedStream));
+                $this->assertCount(1, $link, $context.': link to the related entity');
+                $this->assertSame('Tag #2', mb_trim($link->text()), $context.': the related entity is identified');
+            }
+        }
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function provideAssociationDiffIdentifiesRelatedEntityByItsPrimaryKeyNameCases(): iterable
+    {
+        foreach ([self::FORMAT_V1_LEGACY, self::FORMAT_V2_MIGRATED, self::FORMAT_V2_NATIVE] as $format) {
+            yield $format => [$format];
+        }
+    }
+
     public function testIsViewable(): void
     {
         $this->bootWithConfiguration(['ROLE_USER']);
@@ -123,11 +156,15 @@ final class ViewableEntityExtensionTest extends KernelTestCase
 
     /**
      * @param class-string $related
+     * @param string       $relatedPkName primary key name of the related entity, as stored by the provider
      */
-    private function renderEntry(string $format, string $type, string $related, string $relatedSide): Crawler
+    private function renderEntry(string $format, string $type, string $related, string $relatedSide, string $relatedPkName = 'id'): Crawler
     {
         $post = ['id' => 1, 'class' => Post::class, 'label' => 'Post#1', 'table' => 'post'];
-        $other = ['id' => 2, 'class' => $related, 'label' => 'Related#2', 'table' => 'related'];
+        $other = [$relatedPkName => 2, 'class' => $related, 'label' => 'Related#2', 'table' => 'related'];
+        if ('id' !== $relatedPkName) {
+            $other['pkName'] = $relatedPkName;
+        }
 
         if (self::FORMAT_V2_NATIVE === $format) {
             $post['field'] = 'related';
@@ -143,7 +180,7 @@ final class ViewableEntityExtensionTest extends KernelTestCase
             'id' => 1,
             'schema_version' => self::FORMAT_V1_LEGACY === $format ? 1 : 2,
             'type' => $type,
-            'object_id' => (string) $diffs['source']['id'],
+            'object_id' => (string) ('target' === $relatedSide ? $post['id'] : $other[$relatedPkName]),
             'diffs' => json_encode($diffs, JSON_THROW_ON_ERROR),
             'created_at' => new \DateTimeImmutable(),
         ];

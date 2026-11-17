@@ -221,34 +221,15 @@
             <table class="text-xs font-mono">
                 {% set diffs = entry.diffs %}
                 {% if diffs.source is defined and diffs.target is defined %}
-                    {% set target_id = diffs.target.pkName is defined ? diffs.target[diffs.target.pkName] : diffs.target.id %}
                     <tr>
                         <td class="pr-3 text-blue-600 dark:text-blue-400 break-words" style="max-width: 45%;">
-                            {% if dh_auditor_is_viewable(diffs.source.class) %}
-                                <a href="{{ path('dh_auditor_show_entity_stream', { 'entity': helper.namespaceToParam(diffs.source.class), 'id': diffs.source.id }) }}"
-                                   class="hover:underline" title="{{ diffs.source.class }}">
-                                    {{ diffs.source.class|split('\\')|last }} #{{ diffs.source.id }}
-                                </a>
-                            {% else %}
-                                <span title="{{ diffs.source.class }}">
-                                    {{ diffs.source.class|split('\\')|last }} #{{ diffs.source.id }}
-                                </span>
-                            {% endif %}
+                            {{ _self.displayRelatedEntity(diffs.source) }}
                         </td>
                         <td class="px-2 text-slate-400">
                             <svg class="w-5 h-5" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path opacity=".4" d=""/><path d="M497 441L601 337C610.4 327.6 610.4 312.4 601 303.1L497 199C487.6 189.6 472.4 189.6 463.1 199C453.8 208.4 453.7 223.6 463.1 232.9L526.1 295.9L114 295.9L177 232.9C186.4 223.5 186.4 208.3 177 199C167.6 189.7 152.4 189.6 143.1 199L39 303C29.6 312.4 29.6 327.6 39 336.9L143 441C152.4 450.4 167.6 450.4 176.9 441C186.2 431.6 186.3 416.4 176.9 407.1L113.9 344.1L526 344.1L463 407.1C453.6 416.5 453.6 431.7 463 441C472.4 450.3 487.6 450.4 496.9 441z"/></svg>
                         </td>
                         <td class="pl-3 text-blue-600 dark:text-blue-400 break-words" style="max-width: 45%;">
-                            {% if dh_auditor_is_viewable(diffs.target.class) %}
-                                <a href="{{ path('dh_auditor_show_entity_stream', { 'entity': helper.namespaceToParam(diffs.target.class), 'id': target_id }) }}"
-                                   class="hover:underline" title="{{ diffs.target.class }}">
-                                    {{ diffs.target.class|split('\\')|last }} #{{ target_id }}
-                                </a>
-                            {% else %}
-                                <span title="{{ diffs.target.class }}">
-                                    {{ diffs.target.class|split('\\')|last }} #{{ target_id }}
-                                </span>
-                            {% endif %}
+                            {{ _self.displayRelatedEntity(diffs.target) }}
                         </td>
                     </tr>
                     {% if diffs.source.label is defined or diffs.target.label is defined %}
@@ -267,34 +248,15 @@
             <table class="text-xs font-mono">
                 {% set diffs = entry.diffs %}
                 {% if diffs.source is defined and diffs.target is defined %}
-                    {% set target_id = diffs.target.pkName is defined ? diffs.target[diffs.target.pkName] : diffs.target.id %}
                     <tr>
                         <td class="pr-3 text-rose-600 dark:text-rose-400 break-words" style="max-width: 45%;">
-                            {% if dh_auditor_is_viewable(diffs.source.class) %}
-                                <a href="{{ path('dh_auditor_show_entity_stream', { 'entity': helper.namespaceToParam(diffs.source.class), 'id': diffs.source.id }) }}"
-                                   class="hover:underline" title="{{ diffs.source.class }}">
-                                    {{ diffs.source.class|split('\\')|last }} #{{ diffs.source.id }}
-                                </a>
-                            {% else %}
-                                <span title="{{ diffs.source.class }}">
-                                    {{ diffs.source.class|split('\\')|last }} #{{ diffs.source.id }}
-                                </span>
-                            {% endif %}
+                            {{ _self.displayRelatedEntity(diffs.source) }}
                         </td>
                         <td class="px-2 text-slate-400">
                             <svg class="w-5 h-5" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path opacity=".4" d=""/><path d="M497 441L601 337C610.4 327.6 610.4 312.4 601 303.1L497 199C487.6 189.6 472.4 189.6 463.1 199C453.8 208.4 453.7 223.6 463.1 232.9L526.1 295.9L114 295.9L177 232.9C186.4 223.5 186.4 208.3 177 199C167.6 189.7 152.4 189.6 143.1 199L39 303C29.6 312.4 29.6 327.6 39 336.9L143 441C152.4 450.4 167.6 450.4 176.9 441C186.2 431.6 186.3 416.4 176.9 407.1L113.9 344.1L526 344.1L463 407.1C453.6 416.5 453.6 431.7 463 441C472.4 450.3 487.6 450.4 496.9 441z"/></svg>
                         </td>
                         <td class="pl-3 text-rose-600 dark:text-rose-400 break-words" style="max-width: 45%;">
-                            {% if dh_auditor_is_viewable(diffs.target.class) %}
-                                <a href="{{ path('dh_auditor_show_entity_stream', { 'entity': helper.namespaceToParam(diffs.target.class), 'id': target_id }) }}"
-                                   class="hover:underline" title="{{ diffs.target.class }}">
-                                    {{ diffs.target.class|split('\\')|last }} #{{ target_id }}
-                                </a>
-                            {% else %}
-                                <span title="{{ diffs.target.class }}">
-                                    {{ diffs.target.class|split('\\')|last }} #{{ target_id }}
-                                </span>
-                            {% endif %}
+                            {{ _self.displayRelatedEntity(diffs.target) }}
                         </td>
                     </tr>
                     {% if diffs.source.label is defined or diffs.target.label is defined %}
@@ -377,6 +339,23 @@
         {% for json_field, json_changeset in changeset %}
             {{ _self.displayRemoveValue(field ~ '.' ~ json_field, json_changeset) }}
         {% endfor %}
+    {% endif %}
+{% endmacro %}
+
+{# Macro for ASSOCIATE/DISSOCIATE: one side of the relation, linked to its audit stream when viewable #}
+{# The provider stores the identifier under the primary key name, and adds "pkName" when that name is not "id" #}
+{% macro displayRelatedEntity(summary) %}
+    {% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
+    {% set id = summary.pkName is defined ? summary[summary.pkName] : summary.id %}
+    {% if dh_auditor_is_viewable(summary.class) %}
+        <a href="{{ path('dh_auditor_show_entity_stream', { 'entity': helper.namespaceToParam(summary.class), 'id': id }) }}"
+           class="hover:underline" title="{{ summary.class }}">
+            {{ summary.class|split('\\')|last }} #{{ id }}
+        </a>
+    {% else %}
+        <span title="{{ summary.class }}">
+            {{ summary.class|split('\\')|last }} #{{ id }}
+        </span>
     {% endif %}
 {% endmacro %}
 
