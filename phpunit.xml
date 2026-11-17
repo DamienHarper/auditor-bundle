@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.5/phpunit.xsd" bootstrap="tests/bootstrap.php"
-         executionOrder="depends,defects" beStrictAboutOutputDuringTests="true" cacheDirectory=".phpunit.cache"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/13.4/phpunit.xsd" bootstrap="tests/bootstrap.php"
+         executionOrder="defects" resolveDependencies="true" beStrictAboutOutputDuringTests="true" cacheDirectory=".phpunit.cache"
          requireCoverageMetadata="false" beStrictAboutCoverageMetadata="true">
   <coverage>
     <report>
