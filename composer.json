@@ -48,6 +48,7 @@
     }
   },
   "require-dev": {
+    "dragonmantank/cron-expression": "^3.4",
     "gedmo/doctrine-extensions": "^3.0",
     "matthiasnoback/symfony-dependency-injection-test": "^6.0",
     "nyholm/symfony-bundle-test": "^3.0",
@@ -56,6 +57,8 @@
     "symfony/browser-kit": "^8.0",
     "symfony/css-selector": "^8.0",
     "symfony/framework-bundle": "^8.0",
+    "symfony/messenger": "^8.0",
+    "symfony/scheduler": "^8.0",
     "symfony/var-dumper": "^8.0",
     "symfonycasts/tailwind-bundle": "^1.0"
   },
@@ -92,7 +95,9 @@
     }
   },
   "suggest": {
-    "symfony/cache": "Required for activity graph caching in the audit viewer"
+    "symfony/cache": "Required for activity graph caching in the audit viewer",
+    "symfony/scheduler": "Required for scheduled audit logs pruning (providers.doctrine.retention.schedule)",
+    "dragonmantank/cron-expression": "Required for scheduled audit logs pruning (cron expressions)"
   },
   "extra": {
     "branch-alias": {
