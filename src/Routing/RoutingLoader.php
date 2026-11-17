@@ -30,12 +30,14 @@ final class RoutingLoader extends Loader
             throw new \RuntimeException('Do not add the "audit" loader twice');
         }
 
-        // Export routes must be added first so /audit/export takes priority over /audit/{entity}.
-        $routeCollection = $this->attributeRouteControllerLoader->load(ExportController::class);
+        $routeCollection = new RouteCollection();
 
+        // The export endpoint exposes the same data as the viewer, so it shares its on/off switch:
+        // applications that disabled the viewer never get an /audit/export route they did not secure.
         if (Configuration::isViewerEnabledInConfig($this->configuration['viewer'])) {
-            $viewerRoutes = $this->attributeRouteControllerLoader->load(ViewerController::class);
-            $routeCollection->addCollection($viewerRoutes);
+            // Export routes must be added first so /audit/export takes priority over /audit/{entity}.
+            $routeCollection->addCollection($this->attributeRouteControllerLoader->load(ExportController::class));
+            $routeCollection->addCollection($this->attributeRouteControllerLoader->load(ViewerController::class));
         }
 
         $this->isLoaded = true;

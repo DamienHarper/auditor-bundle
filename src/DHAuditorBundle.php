@@ -298,7 +298,7 @@ class DHAuditorBundle extends AbstractBundle
 
     private function loadBundleServices(ServicesConfigurator $services): void
     {
-        // ExportController (uses #[AsController] attribute — always registered)
+        // ExportController (uses #[AsController] attribute; its route is only loaded when the viewer is enabled)
         $services->set(ExportController::class)
             ->autoconfigure()
         ;
