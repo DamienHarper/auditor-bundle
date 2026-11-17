@@ -6,12 +6,14 @@ namespace DH\AuditorBundle\Controller;
 
 use DH\Auditor\Attribute\Security;
 use DH\Auditor\Exception\AccessDeniedException;
+use DH\Auditor\Model\Entry;
 use DH\Auditor\Provider\Doctrine\Configuration;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\NullFilter;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Query;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\Auditor\Provider\Doctrine\Persistence\Schema\SchemaManager;
 use DH\Auditor\Provider\Doctrine\Service\AuditingService;
+use DH\AuditorBundle\Enum\EntitySort;
 use DH\AuditorBundle\Helper\UrlHelper;
 use DH\AuditorBundle\Tests\Controller\ViewerControllerTest;
 use DH\AuditorBundle\Viewer\ActivityGraphProvider;
@@ -35,8 +37,10 @@ final readonly class ViewerController
     ) {}
 
     #[Route(path: '/audit', name: 'dh_auditor_list_audits', methods: ['GET'])]
-    public function listAuditsAction(Reader $reader): Response
+    public function listAuditsAction(Request $request, Reader $reader): Response
     {
+        $sort = EntitySort::fromQueryParam($request->query->get('sort'));
+
         $schemaManager = new SchemaManager($reader->getProvider());
 
         /** @var AuditingService[] $auditingServices */
@@ -86,9 +90,13 @@ final readonly class ViewerController
             unset($data);
         }
 
+        $audited = $this->sortAudited($audited, $sort);
+
         return $this->renderView('@DHAuditor/Audit/audits.html.twig', [
             'audited' => $audited,
             'reader' => $reader,
+            'sort' => $sort->value,
+            'sortOptions' => EntitySort::cases(),
             'activityGraphEnabled' => $activityGraphEnabled,
             'activityGraphDays' => $activityGraphDays,
             'activityGraphLayout' => $activityGraphLayout,
@@ -169,6 +177,45 @@ final readonly class ViewerController
             ],
             'filterOptions' => $filterOptions,
         ]);
+    }
+
+    /**
+     * Sorts the audited entities; ties on event count or latest activity are broken by name (A-Z).
+     *
+     * @template T of array{count: int, latest: ?Entry}
+     *
+     * @param array<array-key, T> $audited audit summaries indexed by entity FQCN
+     *
+     * @return array<array-key, T>
+     */
+    private function sortAudited(array $audited, EntitySort $sort): array
+    {
+        uksort($audited, function (int|string $a, int|string $b) use ($audited, $sort): int {
+            $byName = strcasecmp($this->shortEntityName((string) $a), $this->shortEntityName((string) $b)) ?: strcmp((string) $a, (string) $b);
+
+            return match ($sort) {
+                EntitySort::NameAsc => $byName,
+                EntitySort::NameDesc => -$byName,
+                EntitySort::CountAsc => ($audited[$a]['count'] <=> $audited[$b]['count']) ?: $byName,
+                EntitySort::CountDesc => ($audited[$b]['count'] <=> $audited[$a]['count']) ?: $byName,
+                EntitySort::ActivityAsc => ($this->latestActivityTimestamp($audited[$a]['latest']) <=> $this->latestActivityTimestamp($audited[$b]['latest'])) ?: $byName,
+                EntitySort::ActivityDesc => ($this->latestActivityTimestamp($audited[$b]['latest']) <=> $this->latestActivityTimestamp($audited[$a]['latest'])) ?: $byName,
+            };
+        });
+
+        return $audited;
+    }
+
+    private function shortEntityName(string $entity): string
+    {
+        $position = mb_strrpos($entity, '\\');
+
+        return false === $position ? $entity : mb_substr($entity, $position + 1);
+    }
+
+    private function latestActivityTimestamp(?Entry $latest): int
+    {
+        return $latest?->createdAt?->getTimestamp() ?? 0;
     }
 
     /**

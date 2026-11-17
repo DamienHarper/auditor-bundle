@@ -7,12 +7,16 @@ namespace DH\AuditorBundle\Tests\Controller;
 use DH\Auditor\Model\Entry;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author;
+use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Comment;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
+use DH\AuditorBundle\Enum\EntitySort;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\Attributes\Small;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\AbstractBrowser;
+use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\User\InMemoryUser;
@@ -107,6 +111,85 @@ final class ViewerControllerTest extends WebTestCase
         // Check cards
         $cards = $crawler->filter('a[href*="/audit/"]');
         $this->assertGreaterThanOrEqual(4, $cards->count(), 'There are at least 4 entity audit cards.');
+    }
+
+    #[DataProvider('provideListAuditsSortsEntitiesCases')]
+    public function testListAuditsSortsEntities(EntitySort $sort): void
+    {
+        $reader = $this->createReader();
+
+        // Fixtures are audited within the same second: age one entity's audits so that the activity
+        // sorts are decided by the latest activity rather than by the name tie-breaker.
+        $this->provider->getStorageServiceForEntity(Comment::class)->getEntityManager()->getConnection()->executeStatement(
+            \sprintf('UPDATE %s SET created_at = ?', $reader->getEntityAuditTableName(Comment::class)),
+            ['2020-01-01 00:00:00']
+        );
+
+        $this->login(['ROLE_1']);
+        $crawler = $this->client->request('GET', '/audit?sort='.$sort->value);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists(\sprintf('#sort-entities[aria-label] option[value="%s"][selected]', $sort->value));
+        $this->assertCount(\count(EntitySort::cases()), $crawler->filter('#sort-entities option'));
+
+        $entities = $this->renderedEntities($crawler);
+        $this->assertGreaterThanOrEqual(4, \count($entities), 'There are at least 4 entity audit cards.');
+        $this->assertContains(Comment::class, $entities);
+
+        $keys = [];
+        foreach ($entities as $entity) {
+            $query = $reader->createQuery($entity, ['page_size' => 1]);
+            $latest = $query->execute()[0] ?? null;
+            $keys[$entity] = [
+                'name' => mb_strtolower(mb_substr((string) mb_strrchr('\\'.$entity, '\\'), 1)),
+                'count' => $query->count(),
+                'activity' => $latest instanceof Entry ? (int) $latest->createdAt?->getTimestamp() : 0,
+            ];
+        }
+
+        for ($i = 1, $n = \count($entities); $i < $n; ++$i) {
+            $previous = $keys[$entities[$i - 1]];
+            $current = $keys[$entities[$i]];
+            $byName = $previous['name'] <=> $current['name'];
+
+            $comparison = match ($sort) {
+                EntitySort::NameAsc => $byName,
+                EntitySort::NameDesc => -$byName,
+                EntitySort::CountAsc => ($previous['count'] <=> $current['count']) ?: $byName,
+                EntitySort::CountDesc => ($current['count'] <=> $previous['count']) ?: $byName,
+                EntitySort::ActivityAsc => ($previous['activity'] <=> $current['activity']) ?: $byName,
+                EntitySort::ActivityDesc => ($current['activity'] <=> $previous['activity']) ?: $byName,
+            };
+
+            $this->assertLessThanOrEqual(0, $comparison, \sprintf('"%s" is listed before "%s" with sort "%s".', $entities[$i - 1], $entities[$i], $sort->value));
+        }
+    }
+
+    /**
+     * @return iterable<string, array{EntitySort}>
+     */
+    public static function provideListAuditsSortsEntitiesCases(): iterable
+    {
+        foreach (EntitySort::cases() as $sort) {
+            yield $sort->value => [$sort];
+        }
+    }
+
+    public function testListAuditsFallsBackToNameAscendingOnInvalidSort(): void
+    {
+        $this->login(['ROLE_1']);
+        $expected = $this->renderedEntities($this->client->request('GET', '/audit?sort=name_asc'));
+        $reversed = $this->renderedEntities($this->client->request('GET', '/audit?sort=name_desc'));
+
+        $this->assertSame(array_reverse($expected), $reversed, 'Descending name order is the reverse of ascending name order.');
+
+        foreach (['', '?sort=', '?sort=NAME_ASC', '?sort=name;DROP%20TABLE%20author'] as $queryString) {
+            $crawler = $this->client->request('GET', '/audit'.$queryString);
+
+            $this->assertResponseIsSuccessful();
+            $this->assertSame($expected, $this->renderedEntities($crawler), \sprintf('"%s" falls back to name ascending.', $queryString));
+            $this->assertSelectorExists('#sort-entities option[value="name_asc"][selected]');
+        }
     }
 
     #[Depends('testListAuditsAnonymously')]
@@ -240,6 +323,14 @@ final class ViewerControllerTest extends WebTestCase
         // Check back link
         $backLink = $crawler->filter('a[href="/audit"]');
         $this->assertGreaterThanOrEqual(1, $backLink->count(), 'Back link to entities exists');
+    }
+
+    /**
+     * @return list<string> the audited entities FQCN, in the order their cards are rendered
+     */
+    private function renderedEntities(Crawler $crawler): array
+    {
+        return $crawler->filter('a[href*="/audit/"] span[title]')->each(static fn (Crawler $node): string => (string) $node->attr('title'));
     }
 
     private function login(array $roles = []): void
