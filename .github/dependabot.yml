@@ -23,3 +23,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      # PHPUnit major upgrades are coordinated across auditor, auditor-doctrine-provider
+      # and auditor-bundle (the bundle reuses the provider's test traits), so they are done by hand.
+      - dependency-name: "phpunit/phpunit"
+        update-types: ["version-update:semver-major"]
