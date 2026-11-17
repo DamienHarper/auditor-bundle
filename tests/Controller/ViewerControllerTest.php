@@ -521,9 +521,10 @@ final class ViewerControllerTest extends WebTestCase
     #[DataProvider('provideShowUserTimelinePaginatesAcrossEntitiesCases')]
     public function testShowUserTimelinePaginatesAcrossEntities(int $page, array $expectedEntities, bool $hasNextPage): void
     {
-        $this->seedUserEntry(Post::class, 'timeline-user', 'timeline.user', '2026-01-01 10:00:00');
-        $this->seedUserEntry(Comment::class, 'timeline-user', 'timeline.user', '2026-01-02 10:00:00');
+        $this->seedUserEntry(Comment::class, 'timeline-user', 'timeline.user', '2026-01-01 10:00:00');
+        $this->seedUserEntry(Post::class, 'timeline-user', 'timeline.user', '2026-01-02 10:00:00');
         $this->seedUserEntry(Post::class, 'timeline-user', 'timeline.user', '2026-01-03 10:00:00');
+        $this->seedUserEntry(Post::class, 'timeline-user', 'timeline.user', '2026-01-04 10:00:00');
         $this->provider->getConfiguration()->setViewerPageSize(2);
 
         $this->login(['ROLE_1']);
@@ -531,7 +532,7 @@ final class ViewerControllerTest extends WebTestCase
 
         $this->assertResponseIsSuccessful();
         $this->assertSame($expectedEntities, $this->timelineEntities($crawler));
-        $this->assertStringContainsString('3 events', $crawler->filter('h1+p')->text());
+        $this->assertStringContainsString('4 events', $crawler->filter('h1+p')->text());
         $this->assertSame($hasNextPage, $crawler->filter('a[href="/audit/user/timeline-user?page=2"]')->count() > 0);
     }
 
@@ -540,11 +541,12 @@ final class ViewerControllerTest extends WebTestCase
      */
     public static function provideShowUserTimelinePaginatesAcrossEntitiesCases(): iterable
     {
-        yield 'first page' => [1, [Post::class, Comment::class], true];
+        yield 'first page' => [1, [Post::class, Post::class], true];
 
-        yield 'last page' => [2, [Post::class], false];
+        // the oldest Post row is beyond the first page of its own entity
+        yield 'last page' => [2, [Post::class, Comment::class], false];
 
-        yield 'out of range page falls back to the last one' => [99, [Post::class], false];
+        yield 'out of range page falls back to the last one' => [99, [Post::class, Comment::class], false];
     }
 
     public function testShowUserTimelineWithoutMatches(): void
