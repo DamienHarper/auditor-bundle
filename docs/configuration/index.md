@@ -29,6 +29,9 @@ dh_auditor:
             storage_mapper: ~
             utf8_convert: false             # Re-enable legacy UTF-8 conversion (opt-in)
             viewer: false
+            retention:
+                schedule: ~                 # Cron expression for scheduled pruning (opt-in)
+                default_max_age: ~          # Max age for entities without a policy (scheduled pruning only)
 ```
 
 ## ⚙️ Global Options
@@ -292,6 +295,53 @@ dh_auditor:
 |-------------|--------|---------|---------------------|
 | `enabled`   | `bool` | `false` | Enable the viewer   |
 | `page_size` | `int`  | `50`    | Results per page    |
+
+### retention
+
+Scheduled pruning of audit entries with [Symfony Scheduler](https://symfony.com/doc/current/scheduler.html).
+**Disabled by default**: nothing is ever deleted automatically unless `schedule` is set.
+
+| Option            | Type      | Default | Description                                                             |
+|-------------------|-----------|---------|-------------------------------------------------------------------------|
+| `schedule`        | `?string` | `~`     | Cron expression (e.g. `'0 3 * * *'`, `'@daily'`) enabling scheduled pruning |
+| `default_max_age` | `?string` | `~`     | ISO 8601 duration applied to entities without a `max_age` policy        |
+
+```yaml
+dh_auditor:
+    providers:
+        doctrine:
+            entities:
+                App\Entity\Payment:
+                    retention:
+                        max_age: 'P7Y'
+                App\Entity\Session:
+                    retention:
+                        max_entries: 10000
+            retention:
+                schedule: '0 3 * * *'   # every day at 3 AM
+```
+
+A scheduled run applies the same rules as `audit:clean`, with one difference: **there is no implicit global
+retention period**. Only explicit policies are applied (entity `retention` options or `#[Auditable]` values); an entity
+without a policy is left untouched, unless `default_max_age` is set.
+
+Requirements:
+
+```bash
+composer require symfony/scheduler symfony/messenger dragonmantank/cron-expression
+```
+
+Then run the schedule's worker (e.g. with a process manager):
+
+```bash
+php bin/console messenger:consume scheduler_dh_auditor_retention
+```
+
+Notes:
+
+- Every policy is validated before anything is deleted; an invalid one makes the run fail without deleting anything.
+- A scheduled run shares the `audit:clean` lock: if the command is running on the same host, the run is skipped.
+- The configuration is validated when the container is built (cron expression, durations, allowed keys).
 
 ## 📝 Complete Example
 
