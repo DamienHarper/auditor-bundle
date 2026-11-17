@@ -30,12 +30,23 @@ audit:
     title: Transaction
   compare:
     title: Revision comparison
-    no_changes: No changes between these two revisions.
+    no_changes: No field or relation changed between these two revisions.
     previous: Previous change
     next: Next change
+    before: Before
+    after: After
+    change_revisions: Choose other revisions
+    associations: Relations
+    removed: The object was deleted between these two revisions.
+    recreated: The object was deleted, then created again with the same identifier, between these two revisions.
+    inconsistent: 'Some audit entries are missing between these two revisions: the values shown for %fields% may be incomplete.'
+    unreadable: 'These fields changed but cannot be compared value by value: %fields%. See the individual revisions.'
   revisions:
-    title: Select revisions
-    hint: Click two revisions to compare them.
+    title: Compare revisions
+    pick_first: Choose the first revision to compare.
+    pick_second: Choose the revision to compare with the selected one.
+    selected: Selected
+    change_selection: Change selection
     icon_title: Compare revisions
   entry:
     by: by

@@ -29,13 +29,24 @@ audit:
   transaction:
     title: Transactie
   compare:
-    title: Revisievergelijking
-    no_changes: Geen verschillen tussen deze twee revisies.
+    title: Vergelijking van revisies
+    no_changes: Tussen deze twee revisies is geen enkel veld of relatie gewijzigd.
     previous: Vorige wijziging
     next: Volgende wijziging
+    before: Voor
+    after: Na
+    change_revisions: Andere revisies kiezen
+    associations: Relaties
+    removed: Het object is tussen deze twee revisies verwijderd.
+    recreated: Het object is tussen deze twee revisies verwijderd en opnieuw aangemaakt met dezelfde identificatie.
+    inconsistent: 'Er ontbreken auditregels tussen deze twee revisies: de getoonde waarden voor %fields% kunnen onvolledig zijn.'
+    unreadable: 'Deze velden zijn gewijzigd maar kunnen niet waarde voor waarde worden vergeleken: %fields%. Bekijk de afzonderlijke revisies.'
   revisions:
-    title: Revisies selecteren
-    hint: Klik op twee revisies om ze te vergelijken.
+    title: Revisies vergelijken
+    pick_first: Kies de eerste revisie om te vergelijken.
+    pick_second: Kies de revisie om met de geselecteerde te vergelijken.
+    selected: Geselecteerd
+    change_selection: Selectie wijzigen
     icon_title: Revisies vergelijken
   entry:
     by: door

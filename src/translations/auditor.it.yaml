@@ -30,12 +30,23 @@ audit:
     title: Transazione
   compare:
     title: Confronto tra revisioni
-    no_changes: Nessuna differenza tra queste due revisioni.
+    no_changes: Nessun campo né relazione è cambiato tra queste due revisioni.
     previous: Modifica precedente
     next: Modifica successiva
+    before: Prima
+    after: Dopo
+    change_revisions: Scegli altre revisioni
+    associations: Relazioni
+    removed: L'oggetto è stato eliminato tra queste due revisioni.
+    recreated: L'oggetto è stato eliminato e poi ricreato con lo stesso identificativo tra queste due revisioni.
+    inconsistent: 'Mancano voci di audit tra queste due revisioni: i valori mostrati per %fields% potrebbero essere incompleti.'
+    unreadable: 'Questi campi sono cambiati ma non possono essere confrontati valore per valore: %fields%. Consulta le singole revisioni.'
   revisions:
-    title: Seleziona revisioni
-    hint: Clicca su due revisioni per confrontarle.
+    title: Confronta revisioni
+    pick_first: Scegli la prima revisione da confrontare.
+    pick_second: Scegli la revisione da confrontare con quella selezionata.
+    selected: Selezionata
+    change_selection: Cambia selezione
     icon_title: Confronta revisioni
   entry:
     by: da
