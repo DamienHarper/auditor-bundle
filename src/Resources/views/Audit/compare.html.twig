@@ -1,0 +1,111 @@
+{% extends "@DHAuditor/layout.html.twig" %}
+
+{% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
+
+{% block dh_auditor_content %}
+    {% block dh_auditor_header %}
+    <div class="sticky top-16 z-40 -mx-6 px-6 py-3 mb-4 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur">
+        {# Back link #}
+        <a href="{{ path('dh_auditor_show_entity_stream', {entity: helper.namespaceToParam(entity), id: id}) }}"
+           class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 mb-3">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            {{ entity|split('\\')|last }} #{{ id }}
+        </a>
+
+        <div>
+            <h1 class="text-lg font-semibold text-slate-900 dark:text-slate-100" title="{{ entity }}">
+                {{ 'audit.compare.title'|trans(domain='auditor') }}
+            </h1>
+        </div>
+    </div>
+    {% endblock dh_auditor_header %}
+
+    {# Revision headers, Wikipedia diff-style: the old revision's date/relative-time
+       are struck through on the left (superseded by the new one), the new revision's
+       are not. #}
+    <div class="grid grid-cols-2 gap-6 mb-4 text-sm">
+        <div>
+            <div class="line-through text-slate-900 dark:text-slate-100 font-medium">
+                {{ from.createdAt|format_datetime('full', 'short') }}
+            </div>
+            <div class="line-through text-slate-500 dark:text-slate-400">
+                {{ from.createdAt|time_ago }}
+            </div>
+            <div class="text-slate-700 dark:text-slate-300">
+                {{ from.username ?? 'audit.audit_details.anonymous'|trans(domain='auditor') }}
+            </div>
+            {% if previous %}
+                <a href="{{ path('dh_auditor_compare_revisions', {entity: helper.namespaceToParam(entity), id: id, from: previous.from, to: previous.to}) }}"
+                   class="inline-flex items-center gap-1 mt-2 text-xs text-indigo-600 dark:text-indigo-400 hover:underline">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                    {{ 'audit.compare.previous'|trans(domain='auditor') }}
+                </a>
+            {% endif %}
+        </div>
+        <div>
+            <div class="text-slate-900 dark:text-slate-100 font-medium">
+                {{ to.createdAt|format_datetime('full', 'short') }}
+            </div>
+            <div class="text-slate-500 dark:text-slate-400">
+                {{ to.createdAt|time_ago }}
+            </div>
+            <div class="text-slate-700 dark:text-slate-300">
+                {{ to.username ?? 'audit.audit_details.anonymous'|trans(domain='auditor') }}
+            </div>
+            {% if next %}
+                <a href="{{ path('dh_auditor_compare_revisions', {entity: helper.namespaceToParam(entity), id: id, from: next.from, to: next.to}) }}"
+                   class="inline-flex items-center gap-1 mt-2 text-xs text-indigo-600 dark:text-indigo-400 hover:underline">
+                    {{ 'audit.compare.next'|trans(domain='auditor') }}
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
+        {% if diff|length > 0 %}
+            <table class="w-full text-xs font-mono">
+                <thead>
+                    <tr class="text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+                        <th class="pb-2 pr-6 text-left" style="max-width: 20%;">{{ 'audit.audit_details.property'|trans(domain='auditor') }}</th>
+                        <th class="pb-2 pr-3 text-left" style="max-width: 35%;">{{ 'audit.audit_details.old_value'|trans(domain='auditor') }}</th>
+                        <th class="pb-2" style="max-width: 5%;"></th>
+                        <th class="pb-2 pl-3 text-left" style="max-width: 35%;">{{ 'audit.audit_details.new_value'|trans(domain='auditor') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for field, changeset in diff %}
+                        <tr class="border-t border-slate-100 dark:border-slate-800">
+                            <td class="py-2 pr-6 text-slate-500 dark:text-slate-400 break-words" style="max-width: 20%;">{{ field }}</td>
+                            <td class="py-2 pr-3 text-slate-400 dark:text-slate-500 break-words" style="max-width: 35%;">
+                                {% if changeset.old is not null %}
+                                    {{ helper.dump(changeset.old) }}
+                                {% else %}
+                                    &empty;
+                                {% endif %}
+                            </td>
+                            <td class="py-2 text-slate-400 dark:text-slate-500 whitespace-nowrap">&rarr;</td>
+                            <td class="py-2 pl-3 text-indigo-600 dark:text-indigo-400 break-words" style="max-width: 35%;">
+                                {% if changeset.new is not null %}
+                                    {{ helper.dump(changeset.new) }}
+                                {% else %}
+                                    &empty;
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="p-8 text-center text-slate-500 dark:text-slate-400">
+                {{ 'audit.compare.no_changes'|trans(domain='auditor') }}
+            </div>
+        {% endif %}
+    </div>
+{% endblock dh_auditor_content %}

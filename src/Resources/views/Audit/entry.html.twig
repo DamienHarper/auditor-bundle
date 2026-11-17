@@ -69,6 +69,16 @@
                         {{ tx_label }}
                     </a>
                 {% endif %}
+
+                {# Compare this object's revisions #}
+                <a href="{{ path('dh_auditor_select_revisions', {entity: helper.namespaceToParam(entity), id: entry.objectId, selected: entry.id}) }}"
+                   class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition"
+                   title="{{ 'audit.revisions.icon_title'|trans(domain='auditor') }}"
+                   onclick="event.stopPropagation();">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10M7 7l3-3M7 7l3 3M17 17H7m10 0l-3-3m3 3l-3 3"/>
+                    </svg>
+                </a>
                 {% if remove_has_snapshot %}
                     <svg class="w-4 h-4 text-slate-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -165,6 +175,16 @@
                         {{ tx_label }}
                     </a>
                 {% endif %}
+
+                {# Compare this object's revisions #}
+                <a href="{{ path('dh_auditor_select_revisions', {entity: helper.namespaceToParam(entity), id: entry.objectId, selected: entry.id}) }}"
+                   class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition"
+                   title="{{ 'audit.revisions.icon_title'|trans(domain='auditor') }}"
+                   onclick="event.stopPropagation();">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10M7 7l3-3M7 7l3 3M17 17H7m10 0l-3-3m3 3l-3 3"/>
+                    </svg>
+                </a>
 
                 {# Chevron #}
                 <svg class="w-4 h-4 text-slate-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
