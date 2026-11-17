@@ -43,6 +43,6 @@
 
     {# Pager #}
     {% block dh_auditor_pager %}
-        {{ pager.render('dh_auditor_show_user_stream', {id: id}, paginator) }}
+        {{ pager.render_route('dh_auditor_show_user_stream', {id: id}, paginator) }}
     {% endblock dh_auditor_pager %}
 {% endblock dh_auditor_content %}
