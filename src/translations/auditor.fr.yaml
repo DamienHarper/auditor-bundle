@@ -28,6 +28,26 @@ audit:
     anonymous: utilisateur anonyme
   transaction:
     title: Transaction
+  compare:
+    title: Comparaison de révisions
+    no_changes: Aucun champ ni aucune relation n'a changé entre ces deux révisions.
+    previous: Modification précédente
+    next: Modification suivante
+    before: Avant
+    after: Après
+    change_revisions: Choisir d'autres révisions
+    associations: Relations
+    removed: L'objet a été supprimé entre ces deux révisions.
+    recreated: L'objet a été supprimé puis recréé avec le même identifiant entre ces deux révisions.
+    inconsistent: 'Des entrées d''audit manquent entre ces deux révisions : les valeurs affichées pour %fields% peuvent être incomplètes.'
+    unreadable: 'Ces champs ont changé mais ne peuvent pas être comparés valeur par valeur : %fields%. Consultez les révisions une à une.'
+  revisions:
+    title: Comparer des révisions
+    pick_first: Choisissez la première révision à comparer.
+    pick_second: Choisissez la révision à comparer avec celle sélectionnée.
+    selected: Sélectionnée
+    change_selection: Changer la sélection
+    icon_title: Comparer les révisions
   entry:
     by: par
     source: Source

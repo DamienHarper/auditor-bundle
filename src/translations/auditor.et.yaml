@@ -28,6 +28,26 @@ audit:
     anonymous: anonüümne kasutaja
   transaction:
     title: Transaktsioon
+  compare:
+    title: Redaktsioonide võrdlus
+    no_changes: Nende kahe redaktsiooni vahel ei muutunud ükski väli ega seos.
+    previous: Eelmine muudatus
+    next: Järgmine muudatus
+    before: Enne
+    after: Pärast
+    change_revisions: Vali teised redaktsioonid
+    associations: Seosed
+    removed: Objekt kustutati nende kahe redaktsiooni vahel.
+    recreated: Objekt kustutati ja loodi sama identifikaatoriga uuesti nende kahe redaktsiooni vahel.
+    inconsistent: 'Nende kahe redaktsiooni vahel puuduvad auditikirjed: väljade %fields% kuvatud väärtused võivad olla puudulikud.'
+    unreadable: 'Need väljad muutusid, kuid neid ei saa väärtuse kaupa võrrelda: %fields%. Vaata üksikuid redaktsioone.'
+  revisions:
+    title: Võrdle redaktsioone
+    pick_first: Vali esimene võrreldav redaktsioon.
+    pick_second: Vali redaktsioon, mida valituga võrrelda.
+    selected: Valitud
+    change_selection: Muuda valikut
+    icon_title: Võrdle redaktsioone
   entry:
     by: kasutajalt
     source: Allikas

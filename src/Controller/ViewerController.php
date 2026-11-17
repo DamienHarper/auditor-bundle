@@ -12,6 +12,8 @@ use DH\Auditor\Provider\Doctrine\Configuration;
 use DH\Auditor\Provider\Doctrine\Persistence\Helper\JsonPlatformHelper;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\DateRangeFilter;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\NullFilter;
+use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\RangeFilter;
+use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\SimpleFilter;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Query;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\Auditor\Provider\Doctrine\Persistence\Schema\SchemaManager;
@@ -20,6 +22,7 @@ use DH\AuditorBundle\Enum\EntitySort;
 use DH\AuditorBundle\Helper\UrlHelper;
 use DH\AuditorBundle\Tests\Controller\ViewerControllerTest;
 use DH\AuditorBundle\Viewer\ActivityGraphProvider;
+use DH\AuditorBundle\Viewer\RevisionComparator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -288,6 +291,129 @@ final readonly class ViewerController
         ]);
     }
 
+    /**
+     * Lists the revisions of an audited object so that two of them can be compared: the first
+     * one picked becomes the baseline (?selected=), picking a second one opens the comparison.
+     */
+    #[Route(path: '/audit/{entity}/{id}/revisions', name: 'dh_auditor_select_revisions', methods: ['GET'])]
+    public function selectRevisionsAction(Request $request, Reader $reader, string $entity, int|string $id): Response
+    {
+        $entity = UrlHelper::paramToNamespace($entity);
+
+        if (!$reader->getProvider()->isAuditable($entity)) {
+            throw new NotFoundHttpException('Not Found');
+        }
+
+        $page = max(1, $request->query->getInt('page', 1));
+        $selectedId = $this->parseRevisionId($request, 'selected');
+
+        try {
+            /** @var Configuration $configuration */
+            $configuration = $reader->getProvider()->getConfiguration();
+            $pageSize = $configuration->getViewerPageSize();
+
+            $query = $reader->createQuery($entity, ['object_id' => $id, 'page' => $page, 'page_size' => $pageSize]);
+            $pager = $reader->paginate($query, $page, $pageSize);
+
+            $selected = null;
+            if (null !== $selectedId) {
+                $selected = $this->createRevisionQuery($reader, $entity, $id)
+                    ->addFilter(new SimpleFilter(Query::ID, $selectedId))
+                    ->execute()[0] ?? null
+                ;
+
+                // The baseline must be a revision of this very object.
+                if (null === $selected) {
+                    throw new NotFoundHttpException('Revision not found.');
+                }
+            }
+        } catch (AccessDeniedException) {
+            throw new SymfonyAccessDeniedException('Access Denied.');
+        }
+
+        return $this->renderView('@DHAuditor/Audit/revisions.html.twig', [
+            'entity' => $entity,
+            'id' => $id,
+            'paginator' => $pager,
+            'selected' => $selected,
+        ]);
+    }
+
+    /**
+     * Shows what changed on an audited object between two of its revisions.
+     *
+     * Only the entries recorded between the two revisions are loaded and composed (see
+     * RevisionComparator): the result stays exact when older entries have been purged.
+     */
+    #[Route(path: '/audit/{entity}/{id}/compare', name: 'dh_auditor_compare_revisions', methods: ['GET'])]
+    public function compareRevisionsAction(Request $request, Reader $reader, string $entity, int|string $id): Response
+    {
+        $entity = UrlHelper::paramToNamespace($entity);
+
+        if (!$reader->getProvider()->isAuditable($entity)) {
+            throw new NotFoundHttpException('Not Found');
+        }
+
+        $fromId = $this->parseRevisionId($request, 'from');
+        $toId = $this->parseRevisionId($request, 'to');
+
+        if (null === $fromId || null === $toId) {
+            throw new BadRequestHttpException('Both "from" and "to" revisions are required.');
+        }
+
+        // Always compare in chronological order, whichever revision was picked first.
+        [$fromId, $toId] = [min($fromId, $toId), max($fromId, $toId)];
+
+        try {
+            // Audit entry IDs grow with time within an audit table: they give the chronological order.
+            $range = array_values($this->createRevisionQuery($reader, $entity, $id)
+                ->addFilter(new RangeFilter(Query::ID, $fromId, $toId))
+                ->execute());
+            $before = $this->createRevisionQuery($reader, $entity, $id, 'DESC')
+                ->addFilter(new RangeFilter(Query::ID, null, $fromId - 1))
+                ->limit(1)
+                ->execute()[0] ?? null
+            ;
+            $after = $this->createRevisionQuery($reader, $entity, $id)
+                ->addFilter(new RangeFilter(Query::ID, $toId + 1))
+                ->limit(1)
+                ->execute()[0] ?? null
+            ;
+        } catch (AccessDeniedException) {
+            throw new SymfonyAccessDeniedException('Access Denied.');
+        }
+
+        $from = $range[0] ?? null;
+        $to = [] === $range ? null : $range[\count($range) - 1];
+
+        // Both revisions must exist and belong to this very object.
+        if (null === $from || null === $to || $from->id !== $fromId || $to->id !== $toId) {
+            throw new NotFoundHttpException('Revision not found.');
+        }
+
+        $count = \count($range);
+
+        // "Previous" and "next" shift both revisions by one, so users can step through history.
+        $previous = null === $before ? null : [
+            'from' => $before->id,
+            'to' => $count > 1 ? $range[$count - 2]->id : $before->id,
+        ];
+        $next = null === $after ? null : [
+            'from' => $count > 1 ? $range[1]->id : $after->id,
+            'to' => $after->id,
+        ];
+
+        return $this->renderView('@DHAuditor/Audit/compare.html.twig', [
+            'entity' => $entity,
+            'id' => $id,
+            'from' => $from,
+            'to' => $to,
+            'comparison' => new RevisionComparator()->compare(\array_slice($range, 1)),
+            'previous' => $previous,
+            'next' => $next,
+        ]);
+    }
+
     private function parseDateFilter(string $value, \DateTimeZone $timezone): ?\DateTimeImmutable
     {
         if ('' === $value) {
@@ -304,6 +430,35 @@ final readonly class ViewerController
         }
 
         return $date;
+    }
+
+    /**
+     * Returns the audit entry ID passed in the query string, or null when it is absent.
+     */
+    private function parseRevisionId(Request $request, string $name): ?int
+    {
+        $value = $request->query->getString($name);
+
+        if ('' === $value) {
+            return null;
+        }
+
+        if (1 !== preg_match('/^[1-9]\d{0,17}$/D', $value)) {
+            throw new BadRequestHttpException(\sprintf('The "%s" revision must be a positive integer.', $name));
+        }
+
+        return (int) $value;
+    }
+
+    /**
+     * Query on the revisions of a single object, ordered by audit entry ID.
+     */
+    private function createRevisionQuery(Reader $reader, string $entity, int|string $id, string $direction = 'ASC'): Query
+    {
+        return $reader->createQuery($entity, ['object_id' => $id, 'page_size' => null])
+            ->resetOrderBy()
+            ->addOrderBy(Query::ID, $direction)
+        ;
     }
 
     /**

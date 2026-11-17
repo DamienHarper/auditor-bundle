@@ -28,6 +28,26 @@ audit:
     anonymous: anonymer Benutzer
   transaction:
     title: Transaktion
+  compare:
+    title: Revisionsvergleich
+    no_changes: Zwischen diesen beiden Revisionen hat sich weder ein Feld noch eine Beziehung geändert.
+    previous: Vorherige Änderung
+    next: Nächste Änderung
+    before: Vorher
+    after: Nachher
+    change_revisions: Andere Revisionen wählen
+    associations: Beziehungen
+    removed: Das Objekt wurde zwischen diesen beiden Revisionen gelöscht.
+    recreated: Das Objekt wurde zwischen diesen beiden Revisionen gelöscht und mit derselben Kennung neu angelegt.
+    inconsistent: 'Zwischen diesen beiden Revisionen fehlen Audit-Einträge: Die angezeigten Werte für %fields% können unvollständig sein.'
+    unreadable: 'Diese Felder wurden geändert, können aber nicht Wert für Wert verglichen werden: %fields%. Siehe die einzelnen Revisionen.'
+  revisions:
+    title: Revisionen vergleichen
+    pick_first: Wählen Sie die erste zu vergleichende Revision.
+    pick_second: Wählen Sie die Revision, die mit der ausgewählten verglichen werden soll.
+    selected: Ausgewählt
+    change_selection: Auswahl ändern
+    icon_title: Revisionen vergleichen
   entry:
     by: von
     source: Quelle

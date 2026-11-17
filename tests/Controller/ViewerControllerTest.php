@@ -9,6 +9,7 @@ use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Comment;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
+use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
 use DH\AuditorBundle\Controller\ViewerController;
@@ -34,6 +35,8 @@ final class ViewerControllerTest extends WebTestCase
 {
     use BlogSchemaSetupTrait;
     use ReaderTrait;
+
+    private const string POST_URL = '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Post';
 
     private AbstractBrowser $client;
 
@@ -652,6 +655,252 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertResponseIsSuccessful();
         $this->assertStringContainsString('slashed.user', $crawler->filter('h1')->text());
         $this->assertSame([Post::class], $this->timelineEntities($crawler));
+    }
+
+    public function testCompareRevisionsComposesTheChangesBetweenThem(): void
+    {
+        [$postId, $revisions] = $this->createPostHistory();
+        $this->login();
+
+        foreach ([[$revisions[0], $revisions[2]], [$revisions[2], $revisions[0]]] as [$from, $to]) {
+            $crawler = $this->client->request('GET', \sprintf('%s/%d/compare?from=%d&to=%d', self::POST_URL, $postId, $from, $to));
+
+            $this->assertResponseIsSuccessful();
+            $this->assertSame([
+                'body Body X → Body Y',
+                'title Title A → Title C',
+            ], $this->comparedFields($crawler), 'Revisions are compared in chronological order, whichever is picked first.');
+        }
+    }
+
+    public function testCompareRevisionsStaysExactWhenOlderEntriesWerePurged(): void
+    {
+        [$postId, $revisions] = $this->createPostHistory();
+        $connection = $this->provider->getStorageServiceForEntity(Post::class)->getEntityManager()->getConnection();
+        $connection->executeStatement('DELETE FROM '.$this->createReader()->getEntityAuditTableName(Post::class).' WHERE id = ?', [$revisions[0]]);
+        $this->login();
+
+        $crawler = $this->client->request('GET', \sprintf('%s/%d/compare?from=%d&to=%d', self::POST_URL, $postId, $revisions[1], $revisions[2]));
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSame(['title Title A → Title C'], $this->comparedFields($crawler));
+        $this->assertCount(0, $crawler->selectLink('Previous change'), 'There is no revision left before the purged ones.');
+    }
+
+    public function testCompareRevisionsStepsThroughHistory(): void
+    {
+        [$postId, $revisions] = $this->createPostHistory();
+        $this->login();
+
+        $crawler = $this->client->request('GET', \sprintf('%s/%d/compare?from=%d&to=%d', self::POST_URL, $postId, $revisions[1], $revisions[2]));
+
+        $this->assertResponseIsSuccessful();
+        $this->assertCount(0, $crawler->selectLink('Next change'));
+        $crawler = $this->client->click($crawler->selectLink('Previous change')->link());
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSame(['body Body X → Body Y'], $this->comparedFields($crawler));
+        $this->assertCount(0, $crawler->selectLink('Previous change'));
+        $crawler = $this->client->click($crawler->selectLink('Next change')->link());
+
+        $this->assertSame(['title Title A → Title C'], $this->comparedFields($crawler));
+    }
+
+    public function testCompareRevisionsShowsRelationsAndRemoval(): void
+    {
+        $entityManager = $this->provider->getAuditingServiceForEntity(Post::class)->getEntityManager();
+        $post = new Post()->setTitle('Title')->setBody('Body')->setCreatedAt(new \DateTimeImmutable('2026-01-01'));
+        $tag = new Tag()->setTitle('compared tag');
+        $entityManager->persist($post);
+        $entityManager->persist($tag);
+        $entityManager->flush();
+
+        $post->addTag($tag);
+        $entityManager->flush();
+        $postId = (int) $post->getId();
+        $entityManager->remove($post);
+        $entityManager->flush();
+
+        $revisions = $this->revisionIds(Post::class, $postId);
+        $this->login();
+
+        $crawler = $this->client->request('GET', \sprintf('%s/%d/compare?from=%d&to=%d', self::POST_URL, $postId, $revisions[0], $revisions[\count($revisions) - 1]));
+
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString('The object was deleted between these two revisions.', $crawler->filter('body')->text());
+        $relations = $crawler->filter('caption + tbody tr')->each(
+            static fn (Crawler $row): string => (string) preg_replace('/\s+/', ' ', mb_trim($row->text()))
+        );
+        $this->assertCount(1, $relations);
+        $this->assertMatchesRegularExpression('/^tags LINK Tag #\d+ · compared tag$/', $relations[0]);
+        $this->assertStringNotContainsString('No field or relation changed', $crawler->filter('body')->text());
+    }
+
+    public function testCompareRevisionsOfAnotherObjectIsNotFound(): void
+    {
+        [$postId, $revisions] = $this->createPostHistory();
+        [, $otherRevisions] = $this->createPostHistory();
+        $this->login();
+
+        $this->client->catchExceptions(false);
+        $this->expectException(NotFoundHttpException::class);
+        $this->client->request('GET', \sprintf('%s/%d/compare?from=%d&to=%d', self::POST_URL, $postId, $revisions[0], $otherRevisions[1]));
+    }
+
+    /**
+     * @param array<string, mixed> $parameters
+     */
+    #[DataProvider('provideRevisionRoutesRejectInvalidRevisionsCases')]
+    public function testRevisionRoutesRejectInvalidRevisions(string $route, array $parameters): void
+    {
+        $this->login();
+
+        $this->client->catchExceptions(false);
+        $this->expectException(BadRequestHttpException::class);
+        $this->client->request('GET', self::POST_URL.'/1/'.$route, $parameters);
+    }
+
+    /**
+     * @return iterable<string, array{string, array<string, mixed>}>
+     */
+    public static function provideRevisionRoutesRejectInvalidRevisionsCases(): iterable
+    {
+        yield 'compare without "to"' => ['compare', ['from' => '1']];
+
+        yield 'compare without "from"' => ['compare', ['to' => '1']];
+
+        yield 'compare with a non-integer' => ['compare', ['from' => '1', 'to' => 'abc']];
+
+        yield 'compare with zero' => ['compare', ['from' => '0', 'to' => '1']];
+
+        yield 'compare with a negative integer' => ['compare', ['from' => '-1', 'to' => '1']];
+
+        yield 'compare with an array' => ['compare', ['from' => ['1'], 'to' => '1']];
+
+        yield 'revisions with markup' => ['revisions', ['selected' => '<!--<script>']];
+    }
+
+    public function testCompareRevisionsOfUnauditedEntityIsNotFound(): void
+    {
+        $this->login();
+
+        $this->client->catchExceptions(false);
+        $this->expectException(NotFoundHttpException::class);
+        $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Damn/1/compare?from=1&to=2');
+    }
+
+    #[DataProvider('provideRevisionRoutesCases')]
+    public function testRevisionRoutesWithRoleNotGrantedForAuthorAuditViewing(string $route): void
+    {
+        $this->login(['ROLE_USER']);
+
+        $this->client->catchExceptions(false);
+        $this->expectException(AccessDeniedException::class);
+        $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author/1/'.str_replace(['{first}', '{last}'], ['1', '2'], $route));
+    }
+
+    #[DataProvider('provideRevisionRoutesCases')]
+    public function testRevisionRoutesWithRoleGrantedForAuthorAuditViewing(string $route): void
+    {
+        $revisions = $this->revisionIds(Author::class, 1);
+        $this->login(['ROLE_1']);
+
+        $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author/1/'.str_replace(['{first}', '{last}'], [(string) $revisions[0], (string) $revisions[\count($revisions) - 1]], $route));
+
+        $this->assertResponseIsSuccessful();
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function provideRevisionRoutesCases(): iterable
+    {
+        yield 'revisions' => ['revisions'];
+
+        yield 'revisions with a selection' => ['revisions?selected={first}'];
+
+        yield 'compare' => ['compare?from={first}&to={last}'];
+    }
+
+    public function testSelectRevisionsPicksTheFirstThenTheSecondRevision(): void
+    {
+        [$postId, $revisions] = $this->createPostHistory();
+        $this->login();
+
+        $crawler = $this->client->request('GET', \sprintf('%s/%d', self::POST_URL, $postId));
+        $crawler = $this->client->click($crawler->filter('a[aria-label="Compare revisions"]')->last()->link());
+
+        // The revision whose icon was clicked is already selected
+        $this->assertResponseIsSuccessful();
+        $this->assertCount(1, $crawler->filter('[aria-current="true"]'));
+        $this->assertCount(2, $crawler->filter('ul a[href*="/compare?"]'));
+
+        $crawler = $this->client->request('GET', \sprintf('%s/%d/revisions', self::POST_URL, $postId));
+
+        $this->assertResponseIsSuccessful();
+        $this->assertCount(0, $crawler->filter('[aria-current="true"]'));
+        $this->assertCount(3, $crawler->filter('ul a[href*="/revisions?selected="]'));
+
+        $crawler = $this->client->click($crawler->filter(\sprintf('ul a[href*="selected=%d"]', $revisions[0]))->link());
+
+        $this->assertResponseIsSuccessful();
+        $this->assertCount(1, $crawler->filter('[aria-current="true"]'));
+        $crawler = $this->client->click($crawler->filter(\sprintf('ul a[href*="to=%d"]', $revisions[2]))->link());
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSame(['body Body X → Body Y', 'title Title A → Title C'], $this->comparedFields($crawler));
+    }
+
+    public function testSelectRevisionsRejectsASelectionOfAnotherObject(): void
+    {
+        [$postId] = $this->createPostHistory();
+        [, $otherRevisions] = $this->createPostHistory();
+        $this->login();
+
+        $this->client->catchExceptions(false);
+        $this->expectException(NotFoundHttpException::class);
+        $this->client->request('GET', \sprintf('%s/%d/revisions?selected=%d', self::POST_URL, $postId, $otherRevisions[0]));
+    }
+
+    /**
+     * Creates a post, then changes its body and its title in two separate flushes.
+     *
+     * @return array{int, list<int>} the post ID and its audit entry IDs, oldest first
+     */
+    private function createPostHistory(): array
+    {
+        $entityManager = $this->provider->getAuditingServiceForEntity(Post::class)->getEntityManager();
+        $post = new Post()->setTitle('Title A')->setBody('Body X')->setCreatedAt(new \DateTimeImmutable('2026-01-01'));
+        $entityManager->persist($post);
+        $entityManager->flush();
+
+        $post->setBody('Body Y');
+        $entityManager->flush();
+        $post->setTitle('Title C');
+        $entityManager->flush();
+
+        return [(int) $post->getId(), $this->revisionIds(Post::class, (int) $post->getId())];
+    }
+
+    /**
+     * @return list<int> audit entry IDs of the object, oldest first
+     */
+    private function revisionIds(string $entity, int $id): array
+    {
+        $connection = $this->provider->getStorageServiceForEntity($entity)->getEntityManager()->getConnection();
+        $table = $this->createReader()->getEntityAuditTableName($entity);
+
+        return array_map(intval(...), $connection->fetchFirstColumn('SELECT id FROM '.$table.' WHERE object_id = ? ORDER BY id', [(string) $id]));
+    }
+
+    /**
+     * @return list<string> one "field old → new" line per compared field
+     */
+    private function comparedFields(Crawler $crawler): array
+    {
+        return $crawler->filter('thead + tbody tr')->each(
+            static fn (Crawler $row): string => (string) preg_replace('/\s+/', ' ', mb_trim($row->text()))
+        );
     }
 
     /**
