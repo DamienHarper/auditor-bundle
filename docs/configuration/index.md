@@ -28,6 +28,7 @@ dh_auditor:
             auditing_services: ['@doctrine.orm.default_entity_manager']
             storage_mapper: ~
             utf8_convert: false             # Re-enable legacy UTF-8 conversion (opt-in)
+            compression: false              # Compress diffs/extra_data columns (MariaDB only)
             viewer: false
 ```
 
@@ -245,6 +246,49 @@ dh_auditor:
 
 > [!NOTE]
 > Enabling this option has a small performance cost as every stored value is passed through `mb_convert_encoding()`. Leave it disabled unless you know your data sources may produce non-UTF-8 strings.
+
+### compression
+
+| Type   | Default | Description                                                         |
+|--------|---------|---------------------------------------------------------------------|
+| `bool` | `false` | Store the `diffs` and `extra_data` columns compressed (MariaDB only) |
+
+```yaml
+dh_auditor:
+    providers:
+        doctrine:
+            compression: true
+```
+
+On MySQL and MariaDB, audit tables can become the largest tables of a database, almost entirely because of the
+`diffs` column. On **MariaDB**, this option declares `diffs` and `extra_data` as compressed columns
+(`JSON COMPRESSED`): MariaDB compresses and decompresses them transparently, so the viewer, the `Reader`, `JsonFilter`
+and JSON functions in SQL keep working unchanged.
+
+The option has no effect on other platforms:
+
+- **PostgreSQL** already compresses large `JSONB` values automatically (TOAST);
+- **MySQL** has no column compression. If disk space matters more than speed, InnoDB page compression can be enabled
+  manually on audit tables (`ALTER TABLE ... COMPRESSION='zlib'` followed by `OPTIMIZE TABLE`);
+- **SQLite** has no compression.
+
+New audit tables are created compressed. **Existing audit tables must be converted** by running:
+
+```bash
+# Preview, then apply
+bin/console audit:schema:update --dump-sql
+bin/console audit:schema:update --force
+```
+
+If you manage your schema with Doctrine Migrations, copy the SQL shown by `audit:schema:update --dump-sql` into a
+migration: `doctrine:migrations:diff` does not detect the compression of existing columns (and never reports a
+difference for compressed columns either). Converting rewrites the audit tables and compresses existing entries, which
+can take a while on large tables. Setting the option back to `false` and running `audit:schema:update` again restores
+uncompressed columns without losing data.
+
+> [!NOTE]
+> See the [DoctrineProvider configuration](https://github.com/DamienHarper/auditor-doctrine-provider/blob/main/docs/providers/doctrine/configuration.md)
+> for details.
 
 ### viewer
 
