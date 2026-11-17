@@ -87,6 +87,15 @@ Filter by the user who performed the action:
 - Anonymous (for actions without user attribution)
 - CLI commands (each command is tracked by its name, e.g., `app:import-users`)
 
+**Changed Field Filter**
+Filter by the field touched by the change:
+- Lists the audited fields and associations of the entity, from its Doctrine mapping
+- Inserts and updates that changed the field, and removes recorded with a full snapshot
+- For a collection, the items added to (`associate`) or removed from (`dissociate`) it
+
+> [!NOTE]
+> The changed field filter requires native JSON support (MySQL 5.7+, MariaDB 10.2.3+, PostgreSQL 9.4+, SQLite 3.38+) and an audit table migrated to the schema v2 structure (`audit:schema:migrate`). It is hidden otherwise. On large audit tables, combine it with a single entity (`/audit/{entity}/{id}`) or a period: the database has to read the diffs of every entry left by the other filters.
+
 > [!TIP]
 > Filters can be combined and are preserved during pagination.
 
@@ -94,6 +103,7 @@ Filter by the user who performed the action:
 ```
 /audit/App-Entity-User?type=update&user=42
 /audit/App-Entity-User?type=insert&user=__anonymous__
+/audit/App-Entity-User?field=email
 ```
 
 ### Transaction View (`/audit/transaction/{hash}`)

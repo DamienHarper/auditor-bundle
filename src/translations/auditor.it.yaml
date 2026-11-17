@@ -45,6 +45,7 @@ audit:
     clear_period: Cancella periodo
     all_actions: Tutte le azioni
     all_users: Tutti gli utenti
+    all_fields: Tutti i campi
     anonymous: Anonimo
     type:
       insert: Inserimento

@@ -6,8 +6,10 @@ namespace DH\AuditorBundle\Controller;
 
 use DH\Auditor\Attribute\Security;
 use DH\Auditor\Exception\AccessDeniedException;
+use DH\Auditor\Exception\InvalidArgumentException;
 use DH\Auditor\Model\Entry;
 use DH\Auditor\Provider\Doctrine\Configuration;
+use DH\Auditor\Provider\Doctrine\Persistence\Helper\JsonPlatformHelper;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\DateRangeFilter;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\NullFilter;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Query;
@@ -195,6 +197,7 @@ final readonly class ViewerController
         $userFilter = $request->query->get('user');
         $dateFromFilter = $request->query->getString('date_from');
         $dateToFilter = $request->query->getString('date_to');
+        $fieldFilter = $request->query->get('field');
 
         $entity = UrlHelper::paramToNamespace($entity);
 
@@ -224,7 +227,15 @@ final readonly class ViewerController
                 $queryOptions['blame_id'] = $userFilter;
             }
 
-            $query = $reader->createQuery($entity, $queryOptions);
+            if (null !== $fieldFilter && '' !== $fieldFilter) {
+                $queryOptions['changed_field'] = $fieldFilter;
+            }
+
+            try {
+                $query = $reader->createQuery($entity, $queryOptions);
+            } catch (InvalidArgumentException $e) {
+                throw new BadRequestHttpException($e->getMessage(), $e);
+            }
 
             $timezone = new \DateTimeZone($reader->getProvider()->getAuditor()->getConfiguration()->timezone);
             $dateFrom = $this->parseDateFilter($dateFromFilter, $timezone);
@@ -242,10 +253,22 @@ final readonly class ViewerController
                 $query->addFilter(new NullFilter(Query::USER_ID));
             }
 
-            $pager = $reader->paginate($query, $page, $pageSize);
-
-            // Get available filter options (types and users)
+            // Get available filter options (types, users and changed fields)
             $filterOptions = $this->getFilterOptions($reader, $entity, $id);
+
+            if (isset($queryOptions['changed_field'])) {
+                if ([] === $filterOptions['fields']) {
+                    throw new BadRequestHttpException('Filtering on a changed field is not available for this audit table.');
+                }
+
+                // Keep a field that is no longer mapped (renamed, removed) selectable.
+                if (!\in_array($queryOptions['changed_field'], $filterOptions['fields'], true)) {
+                    $filterOptions['fields'][] = $queryOptions['changed_field'];
+                    sort($filterOptions['fields']);
+                }
+            }
+
+            $pager = $reader->paginate($query, $page, $pageSize);
         } catch (AccessDeniedException) {
             throw new SymfonyAccessDeniedException('Access Denied.');
         }
@@ -259,6 +282,7 @@ final readonly class ViewerController
                 'user' => $userFilter,
                 'date_from' => $dateFromFilter,
                 'date_to' => $dateToFilter,
+                'field' => $fieldFilter,
             ],
             'filterOptions' => $filterOptions,
         ]);
@@ -322,11 +346,11 @@ final readonly class ViewerController
     }
 
     /**
-     * Get available filter options (distinct types and users) for an entity.
+     * Get available filter options (distinct types, users and changed fields) for an entity.
      *
      * Supports both schema v1 (legacy: blame_user column) and schema v2 (blame JSON column).
      *
-     * @return array{types: array<string>, users: array<array{id: string, name: string}>, hasAnonymous: bool}
+     * @return array{types: array<string>, users: array<array{id: string, name: string}>, hasAnonymous: bool, fields: array<string>}
      */
     private function getFilterOptions(Reader $reader, string $entity, int|string|null $id): array
     {
@@ -414,11 +438,52 @@ final readonly class ViewerController
         $anonymousCount = $connection->executeQuery($anonymousSql, $params)->fetchOne();
         $hasAnonymous = is_numeric($anonymousCount) && (int) $anonymousCount > 0;
 
+        // The changed field filter needs native JSON support and the schema v2 structure
+        // (schema_version column); legacy tables must be migrated first.
+        $fields = $tableSchema->hasColumn('schema_version') && JsonPlatformHelper::isJsonSearchSupported($connection)
+            ? $this->getAuditedFields($reader, $entity)
+            : [];
+
         return [
             'types' => $types,
             'users' => $users,
             'hasAnonymous' => $hasAnonymous,
+            'fields' => $fields,
         ];
+    }
+
+    /**
+     * Lists the fields of an entity that may appear in its audit entries, read from the Doctrine
+     * mapping rather than from the audit table: fields and associations, minus the ignored
+     * columns and the generated identifiers.
+     *
+     * @return list<string>
+     */
+    private function getAuditedFields(Reader $reader, string $entity): array
+    {
+        if (!class_exists($entity)) {
+            return [];
+        }
+
+        /** @var Configuration $configuration */
+        $configuration = $reader->getProvider()->getConfiguration();
+        $ignoredColumns = $configuration->getIgnoredColumns();
+        $entityConfiguration = $configuration->getEntities()[$entity] ?? null;
+        if (\is_array($entityConfiguration) && \is_array($entityConfiguration['ignored_columns'] ?? null)) {
+            $ignoredColumns = [...$ignoredColumns, ...array_filter($entityConfiguration['ignored_columns'], \is_string(...))];
+        }
+
+        $metadata = $reader->getProvider()->getAuditingServiceForEntity($entity)->getEntityManager()->getClassMetadata($entity);
+        $generatedIdentifiers = $metadata->isIdentifierNatural() ? [] : $metadata->getIdentifierFieldNames();
+
+        $fields = array_values(array_diff(
+            [...array_keys($metadata->fieldMappings), ...array_keys($metadata->associationMappings)],
+            $ignoredColumns,
+            $generatedIdentifiers,
+        ));
+        sort($fields);
+
+        return $fields;
     }
 
     private function renderView(string $view, array $parameters = []): Response

@@ -45,6 +45,7 @@ audit:
     clear_period: Periode wissen
     all_actions: Alle acties
     all_users: Alle gebruikers
+    all_fields: Alle velden
     anonymous: Anoniem
     type:
       insert: Invoegen

@@ -45,6 +45,7 @@ audit:
     clear_period: Сбросить период
     all_actions: Все действия
     all_users: Все пользователи
+    all_fields: Все поля
     anonymous: Аноним
     type:
       insert: Вставка

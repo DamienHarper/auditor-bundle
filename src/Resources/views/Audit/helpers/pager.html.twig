@@ -6,7 +6,7 @@
     {% if filters.user is defined and filters.user %}
         {% set queryParams = queryParams|merge({user: filters.user}) %}
     {% endif %}
-    {% for name in ['date_from', 'date_to'] %}
+    {% for name in ['field', 'date_from', 'date_to'] %}
         {% if filters[name] is defined and filters[name] %}
             {% set queryParams = queryParams|merge({(name): filters[name]}) %}
         {% endif %}
