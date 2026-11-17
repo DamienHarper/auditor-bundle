@@ -117,6 +117,73 @@ final readonly class ViewerController
         ]);
     }
 
+    /**
+     * Single chronological timeline of everything a user did, across every audited entity the
+     * current viewer is allowed to see (entities denied by the role checker are silently skipped).
+     *
+     * The user is identified by the `blame_id` column. Each entity is queried for at most
+     * `page * pageSize` rows (newest first), so only the rows needed to build the requested page
+     * are loaded, whatever the size of the audit tables.
+     */
+    #[Route(path: '/audit/user/{id}', name: 'dh_auditor_show_user_stream', requirements: ['id' => '.{1,255}'], methods: ['GET'])]
+    public function showUserStreamAction(Request $request, Reader $reader, string $id): Response
+    {
+        $page = max(1, $request->query->getInt('page', 1));
+
+        /** @var Configuration $configuration */
+        $configuration = $reader->getProvider()->getConfiguration();
+        $pageSize = $configuration->getViewerPageSize();
+
+        /** @var array<string, Query> $queries */
+        $queries = [];
+        $numResults = 0;
+        foreach (array_keys($configuration->getEntities()) as $entity) {
+            try {
+                $query = $reader->createQuery($entity, ['blame_id' => $id, 'page_size' => null]);
+            } catch (AccessDeniedException) {
+                continue;
+            }
+
+            $count = $query->count();
+            if ($count > 0) {
+                $queries[$entity] = $query;
+                $numResults += $count;
+            }
+        }
+
+        $numPages = (int) ceil($numResults / $pageSize);
+        $page = min($page, max(1, $numPages));
+
+        // The newest `page * pageSize` rows of each entity are enough to build the requested page.
+        $entries = [];
+        foreach ($queries as $entity => $query) {
+            foreach ($query->limit($page * $pageSize)->execute() as $entry) {
+                $entries[] = ['entity' => $entity, 'entry' => $entry];
+            }
+        }
+
+        // usort() is stable: rows of a same entity keep the (created_at, id) order of their query.
+        usort($entries, static fn (array $a, array $b): int => $b['entry']->createdAt <=> $a['entry']->createdAt);
+
+        return $this->renderView('@DHAuditor/Audit/user_stream.html.twig', [
+            'id' => $id,
+            // the username recorded with the most recent entry (it may have changed over time)
+            'username' => [] !== $entries ? $entries[0]['entry']->username : null,
+            'entries' => \array_slice($entries, ($page - 1) * $pageSize, $pageSize),
+            'paginator' => [
+                'currentPage' => $page,
+                'hasPreviousPage' => $page > 1,
+                'hasNextPage' => ($page * $pageSize) < $numResults,
+                'previousPage' => $page > 1 ? $page - 1 : null,
+                'nextPage' => ($page * $pageSize) < $numResults ? $page + 1 : null,
+                'numPages' => $numPages,
+                'haveToPaginate' => $numResults > $pageSize,
+                'numResults' => $numResults,
+                'pageSize' => $pageSize,
+            ],
+        ]);
+    }
+
     #[Route(path: '/audit/{entity}/{id}', name: 'dh_auditor_show_entity_stream', methods: ['GET'])]
     public function showEntityStreamAction(Request $request, Reader $reader, string $entity, int|string|null $id = null): Response
     {

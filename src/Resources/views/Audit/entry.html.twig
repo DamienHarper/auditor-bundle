@@ -84,7 +84,7 @@
             <span>{{ entry.createdAt|format_datetime('full', 'short') }}</span>
             <span>·</span>
             <span>{{ 'audit.entry.by'|trans(domain='auditor') }}
-                <span class="font-medium">{{ entry.username ?? 'audit.audit_details.anonymous'|trans(domain='auditor') }}</span>
+                {{ helper.blame(entry) }}
             </span>
             {% if entry.ip is not empty %}
                 <span>·</span>
@@ -178,7 +178,7 @@
             <span>{{ entry.createdAt|format_datetime('full', 'short') }}</span>
             <span>·</span>
             <span>{{ 'audit.entry.by'|trans(domain='auditor') }}
-                <span class="font-medium">{{ entry.username ?? 'audit.audit_details.anonymous'|trans(domain='auditor') }}</span>
+                {{ helper.blame(entry) }}
             </span>
             {% if entry.ip is not empty %}
                 <span>·</span>

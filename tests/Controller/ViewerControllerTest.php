@@ -8,6 +8,7 @@ use DH\Auditor\Model\Entry;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Comment;
+use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
 use DH\AuditorBundle\Controller\ViewerController;
@@ -462,6 +463,163 @@ final class ViewerControllerTest extends WebTestCase
         yield 'bottom' => ['bottom'];
 
         yield 'inline' => ['inline'];
+    }
+
+    public function testShowUserTimelineMergesEntitiesChronologically(): void
+    {
+        $this->seedUserEntry(Post::class, 'timeline-user', 'old.name', '2026-01-01 10:00:00');
+        $this->seedUserEntry(Comment::class, 'timeline-user', 'old.name', '2026-01-02 10:00:00');
+        $this->seedUserEntry(Post::class, 'timeline-user', 'new.name', '2026-01-03 10:00:00');
+        $this->seedUserEntry(Post::class, 'someone-else', 'someone.else', '2026-01-04 10:00:00');
+
+        $this->login(['ROLE_1']);
+        $crawler = $this->client->request('GET', '/audit/user/timeline-user');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertPageTitleContains('auditor');
+        $this->assertStringContainsString('new.name', $crawler->filter('h1')->text(), 'The most recent username is shown');
+        $this->assertStringContainsString('3 events', $crawler->filter('h1+p')->text());
+        $this->assertSame([Post::class, Comment::class, Post::class], $this->timelineEntities($crawler), 'Newest first, across entities');
+    }
+
+    /**
+     * @param null|list<string> $roles            null means not logged in
+     * @param list<string>      $expectedEntities
+     */
+    #[DataProvider('provideShowUserTimelineOnlyListsViewableEntitiesCases')]
+    public function testShowUserTimelineOnlyListsViewableEntities(?array $roles, array $expectedEntities): void
+    {
+        $this->seedUserEntry(Author::class, 'timeline-user', 'timeline.user', '2026-01-02 10:00:00');
+        $this->seedUserEntry(Post::class, 'timeline-user', 'timeline.user', '2026-01-01 10:00:00');
+
+        if (null !== $roles) {
+            $this->login($roles);
+        }
+
+        $crawler = $this->client->request('GET', '/audit/user/timeline-user');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSame($expectedEntities, $this->timelineEntities($crawler));
+        $this->assertStringContainsString(\count($expectedEntities).' event', $crawler->filter('h1+p')->text(), 'Denied entities are not counted');
+    }
+
+    /**
+     * @return iterable<string, array{null|list<string>, list<string>}>
+     */
+    public static function provideShowUserTimelineOnlyListsViewableEntitiesCases(): iterable
+    {
+        yield 'anonymous' => [null, [Post::class]];
+
+        yield 'role not granted for Author' => [['ROLE_USER'], [Post::class]];
+
+        yield 'role granted for Author' => [['ROLE_1'], [Author::class, Post::class]];
+    }
+
+    /**
+     * @param list<string> $expectedEntities
+     */
+    #[DataProvider('provideShowUserTimelinePaginatesAcrossEntitiesCases')]
+    public function testShowUserTimelinePaginatesAcrossEntities(int $page, array $expectedEntities, bool $hasNextPage): void
+    {
+        $this->seedUserEntry(Comment::class, 'timeline-user', 'timeline.user', '2026-01-01 10:00:00');
+        $this->seedUserEntry(Post::class, 'timeline-user', 'timeline.user', '2026-01-02 10:00:00');
+        $this->seedUserEntry(Post::class, 'timeline-user', 'timeline.user', '2026-01-03 10:00:00');
+        $this->seedUserEntry(Post::class, 'timeline-user', 'timeline.user', '2026-01-04 10:00:00');
+        $this->provider->getConfiguration()->setViewerPageSize(2);
+
+        $this->login(['ROLE_1']);
+        $crawler = $this->client->request('GET', '/audit/user/timeline-user', ['page' => $page]);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSame($expectedEntities, $this->timelineEntities($crawler));
+        $this->assertStringContainsString('4 events', $crawler->filter('h1+p')->text());
+        $this->assertSame($hasNextPage, $crawler->filter('a[href="/audit/user/timeline-user?page=2"]')->count() > 0);
+    }
+
+    /**
+     * @return iterable<string, array{int, list<string>, bool}>
+     */
+    public static function provideShowUserTimelinePaginatesAcrossEntitiesCases(): iterable
+    {
+        yield 'first page' => [1, [Post::class, Post::class], true];
+
+        // the oldest Post row is beyond the first page of its own entity
+        yield 'last page' => [2, [Post::class, Comment::class], false];
+
+        yield 'out of range page falls back to the last one' => [99, [Post::class, Comment::class], false];
+    }
+
+    public function testShowUserTimelineWithoutMatches(): void
+    {
+        $this->login(['ROLE_1']);
+        $crawler = $this->client->request('GET', '/audit/user/does-not-exist');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString('does-not-exist', $crawler->filter('h1')->text());
+        $this->assertStringContainsString('No audit entries found', $crawler->filter('body')->text());
+    }
+
+    public function testShowUserTimelineRejectsTooLongIdentifier(): void
+    {
+        $this->login(['ROLE_1']);
+        $this->client->catchExceptions(false);
+        $this->expectException(NotFoundHttpException::class);
+        $this->client->request('GET', '/audit/user/'.str_repeat('a', 256));
+    }
+
+    /**
+     * Entries link their author to the user timeline only when they carry a usable blame_id:
+     * users without a getId() method are recorded with an empty blame_id, and entries may hold a
+     * username without any blame_id.
+     */
+    public function testEntriesLinkTheirAuthorToTheUserTimeline(): void
+    {
+        $this->seedUserEntry(Post::class, 'team/42', 'slashed.user', '2026-01-01 10:00:00');
+        $this->seedUserEntry(Post::class, '', 'in.memory.user', '2026-01-02 10:00:00');
+        $this->seedUserEntry(Post::class, null, 'unidentified.user', '2026-01-03 10:00:00');
+
+        $this->login(['ROLE_1']);
+        $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Post');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSame('slashed.user', $crawler->filter('a[href="/audit/user/team/42"]')->first()->text());
+        $this->assertCount(0, $crawler->filter('a[href="/audit/user/"]'), 'No link for an empty blame_id');
+        $this->assertCount(0, $crawler->selectLink('in.memory.user'));
+        $this->assertCount(0, $crawler->selectLink('unidentified.user'));
+        $this->assertStringContainsString('in.memory.user', $crawler->filter('body')->text());
+        $this->assertStringContainsString('unidentified.user', $crawler->filter('body')->text());
+
+        $crawler = $this->client->click($crawler->selectLink('slashed.user')->link());
+
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString('slashed.user', $crawler->filter('h1')->text());
+        $this->assertSame([Post::class], $this->timelineEntities($crawler));
+    }
+
+    /**
+     * Copies an insert audit row of $entity, attributed to the given user at the given date.
+     */
+    private function seedUserEntry(string $entity, ?string $blameId, string $username, string $createdAt): void
+    {
+        $table = $this->createReader()->getEntityAuditTableName($entity);
+        $connection = $this->provider->getStorageServiceForEntity($entity)->getEntityManager()->getConnection();
+        $row = $connection->fetchAssociative('SELECT * FROM '.$table." WHERE type = 'insert' ORDER BY id LIMIT 1");
+        $this->assertIsArray($row);
+        unset($row['id']);
+        $row['blame_id'] = $blameId;
+        $row['blame'] = json_encode(['username' => $username], JSON_THROW_ON_ERROR);
+        $row['created_at'] = $createdAt;
+        $connection->insert($table, $row);
+    }
+
+    /**
+     * @return list<string> FQCN of the entity of each rendered entry, in display order
+     */
+    private function timelineEntities(Crawler $crawler): array
+    {
+        $titles = $crawler->filter('a[title]')->each(static fn (Crawler $link): string => (string) $link->attr('title'));
+
+        return array_values(array_filter($titles, static fn (string $title): bool => str_starts_with($title, 'DH\\')));
     }
 
     private function seedPeriodEntries(): void

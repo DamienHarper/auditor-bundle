@@ -27,13 +27,14 @@ dh_auditor:
 
 ## 🛤️ Routes
 
-The viewer registers three routes:
+The viewer registers four routes:
 
-| Route                              | URL                         | Description               |
-|------------------------------------|-----------------------------|---------------------------|
-| `dh_auditor_list_audits`           | `/audit`                    | List all audited entities |
-| `dh_auditor_show_entity_stream`    | `/audit/{entity}/{id?}`     | Entity audit stream       |
-| `dh_auditor_show_transaction_stream` | `/audit/transaction/{hash}` | Transaction details     |        
+| Route                                | URL                         | Description                     |
+|--------------------------------------|-----------------------------|---------------------------------|
+| `dh_auditor_list_audits`             | `/audit`                    | List all audited entities       |
+| `dh_auditor_show_entity_stream`      | `/audit/{entity}/{id?}`     | Entity audit stream             |
+| `dh_auditor_show_transaction_stream` | `/audit/transaction/{hash}` | Transaction details             |
+| `dh_auditor_show_user_stream`        | `/audit/user/{id}`          | Activity timeline of one user   |
 
 ### Route Configuration
 
@@ -98,6 +99,19 @@ Filter by the user who performed the action:
 ### Transaction View (`/audit/transaction/{hash}`)
 
 Groups all changes from a single database transaction across all entities.
+
+### User Timeline (`/audit/user/{id}`)
+
+Lists everything a user did, newest first, in a single timeline across all audited entities.
+The user is identified by the `blame_id` recorded with each entry (up to 255 characters); in
+every stream, the author of an entry links to this page.
+
+- Only entities the current viewer is allowed to see (see [Access Control](#-access-control))
+  are included, both in the list and in the events count.
+- Anonymous entries (no `blame_id`) have no timeline. Neither do entries recorded with an empty
+  `blame_id`, which is what happens when the Symfony user class has no `getId()` method.
+- Each audited entity is queried separately, for at most `page × page_size` rows: browsing deep
+  pages of a very active user costs more than browsing the first ones.
 
 ## 📊 Activity Graph
 
@@ -267,6 +281,11 @@ $url = $urlGenerator->generate('dh_auditor_show_entity_stream', [
 // Transaction
 $url = $urlGenerator->generate('dh_auditor_show_transaction_stream', [
     'hash' => $entry->transactionId,
+]);
+
+// User timeline
+$url = $urlGenerator->generate('dh_auditor_show_user_stream', [
+    'id' => $entry->userId,
 ]);
 ```
 

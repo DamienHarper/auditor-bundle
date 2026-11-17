@@ -25,6 +25,22 @@
 {{- entity|replace({'\\': '-'}) -}}
 {% endmacro namespaceToParam %}
 
+{#
+  Author of an audit entry: links to the user's global timeline when the entry carries a usable
+  blame_id, otherwise shows the recorded username (or "anonymous"). Users without a getId() method
+  are recorded with an empty blame_id, which must not produce a link.
+#}
+{% macro blame(entry) %}
+    {%- set user_id = entry.userId is null ? '' : entry.userId ~ '' -%}
+    {%- if user_id != '' -%}
+        <a href="{{ path('dh_auditor_show_user_stream', {id: user_id}) }}"
+           class="font-medium hover:underline"
+           onclick="event.stopPropagation();">{{ entry.username ?? user_id }}</a>
+    {%- else -%}
+        <span class="font-medium">{{ entry.username ?? 'audit.audit_details.anonymous'|trans(domain='auditor') }}</span>
+    {%- endif -%}
+{% endmacro blame %}
+
 {% macro type_badge(type) %}
     {%- if type == 'insert' -%}
         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">INSERT</span>
