@@ -50,6 +50,6 @@ final readonly class RoleChecker implements RoleCheckerInterface
             return false;
         }
 
-        return array_any($roles[$scope], fn ($role): bool => $this->authorizationChecker->isGranted($role));
+        return array_any($roles[$scope], fn (string $role): bool => $this->authorizationChecker->isGranted($role));
     }
 }
