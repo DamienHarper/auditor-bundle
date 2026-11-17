@@ -45,6 +45,7 @@ audit:
     clear_period: Zeitraum zurücksetzen
     all_actions: Alle Aktionen
     all_users: Alle Benutzer
+    all_fields: Alle Felder
     anonymous: Anonym
     type:
       insert: Einfügen

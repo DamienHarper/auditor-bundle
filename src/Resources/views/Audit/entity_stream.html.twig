@@ -56,6 +56,20 @@
                         </option>
                     {% endfor %}
                 </select>
+
+                {# Changed field filter #}
+                {% if filterOptions.fields|length > 0 %}
+                    <select id="filter-field" name="field" aria-label="{{ 'audit.filter.all_fields'|trans(domain='auditor') }}"
+                            class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                            onchange="this.form.requestSubmit()">
+                        <option value="">{{ 'audit.filter.all_fields'|trans(domain='auditor') }}</option>
+                        {% for field in filterOptions.fields %}
+                            <option value="{{ field }}" {% if filters.field == field %}selected{% endif %}>
+                                {{ field }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
                 {% for name, label in {'date_from': 'from', 'date_to': 'to'} %}
                     <label class="text-xs text-slate-500 dark:text-slate-400" for="filter-{{ name }}">
                         {{ ('audit.filter.' ~ label)|trans(domain='auditor') }}
@@ -67,7 +81,7 @@
                     {{ 'audit.filter.apply'|trans(domain='auditor') }}
                 </button>
                 {% if filters.date_from or filters.date_to %}
-                    <a href="{{ path('dh_auditor_show_entity_stream', {entity: helper.namespaceToParam(entity), id: id, type: filters.type, user: filters.user}) }}"
+                    <a href="{{ path('dh_auditor_show_entity_stream', {entity: helper.namespaceToParam(entity), id: id, type: filters.type, user: filters.user, field: filters.field}) }}"
                        class="text-sm px-3 py-1.5 text-slate-500 dark:text-slate-400 hover:underline">
                         {{ 'audit.filter.clear_period'|trans(domain='auditor') }}
                     </a>

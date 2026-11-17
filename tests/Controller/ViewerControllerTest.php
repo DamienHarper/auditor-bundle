@@ -276,6 +276,64 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertSame(404, $this->client->getResponse()->getStatusCode(), 'Response status is 404');
     }
 
+    #[Depends('testShowEntityHistoryAnonymously')]
+    public function testShowEntityHistoryFilteredByChangedField(): void
+    {
+        $this->login();
+        $uri = '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Post';
+
+        // The dropdown lists the audited fields and associations of Post, from its mapping.
+        $crawler = $this->client->request('GET', $uri);
+        $fieldOptions = $crawler->filter('#filter-field option')->each(static fn ($node) => $node->attr('value'));
+        $this->assertSame(['', 'author', 'author_id', 'body', 'coauthor', 'comments', 'created_at', 'deleted_at', 'tags', 'title'], $fieldOptions, 'Audited fields of Post are offered');
+
+        // Only the entries whose diff touches the field are listed.
+        $crawler = $this->client->request('GET', $uri.'?field=coauthor');
+        $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
+        $this->assertStringContainsString('3 events', $crawler->filter('h1+p')->text(), 'Exactly 3 coauthor changes');
+        $this->assertSame('coauthor', $crawler->filter('#filter-field option[selected]')->attr('value'), 'The filtered field is selected');
+
+        // Collections match the associations and dissociations recorded on them.
+        $crawler = $this->client->request('GET', $uri.'?field=tags');
+        $this->assertStringContainsString('10 events', $crawler->filter('h1+p')->text(), '8 tag associations and 2 dissociations');
+
+        // Filters are combined.
+        $crawler = $this->client->request('GET', $uri.'?field=tags&type=dissociate');
+        $this->assertStringContainsString('2 events', $crawler->filter('h1+p')->text(), '2 tag dissociations');
+
+        // Clearing the period keeps the changed field filter.
+        $crawler = $this->client->request('GET', $uri.'?field=tags&date_from=2000-01-01');
+        $this->assertStringContainsString('10 events', $crawler->filter('h1+p')->text(), 'Combined with a period');
+        $this->assertStringContainsString('field=tags', (string) $crawler->selectLink('Clear period')->attr('href'), 'Clearing the period keeps the field');
+
+        // Keys of the association diffs are not fields.
+        $crawler = $this->client->request('GET', $uri.'?field=source');
+        $this->assertStringContainsString('0 events', $crawler->filter('h1+p')->text(), 'source is not a field');
+
+        // A field that is no longer mapped stays filterable and selectable.
+        $crawler = $this->client->request('GET', $uri.'?field=subtitle');
+        $this->assertStringContainsString('0 events', $crawler->filter('h1+p')->text(), 'Unknown field matches nothing');
+        $this->assertSame('subtitle', $crawler->filter('#filter-field option[selected]')->attr('value'), 'The unknown field is selected');
+    }
+
+    #[Depends('testShowEntityHistoryFilteredByChangedField')]
+    public function testShowEntityHistoryFilteredByInvalidChangedField(): void
+    {
+        $this->login();
+        $this->client->catchExceptions(false);
+        $this->expectException(BadRequestHttpException::class);
+        $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Post?field='.urlencode("title' OR 1=1 --"));
+    }
+
+    #[Depends('testShowEntityHistoryFilteredByChangedField')]
+    public function testShowEntityHistoryFilteredByChangedFieldWithRoleNotGranted(): void
+    {
+        $this->login(['ROLE_USER']);
+        $this->client->catchExceptions(false);
+        $this->expectException(AccessDeniedException::class);
+        $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author?field=fullname');
+    }
+
     #[Depends('testShowEntityHistoryWithRoleNotGrantedForAuthorAuditViewing')]
     public function testShowTransactionHistoryAnonymously(): void
     {
