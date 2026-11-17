@@ -234,7 +234,7 @@ final class ViewerControllerTest extends WebTestCase
     public function testFilterByPeriod(array $filters, int $expectedCount): void
     {
         $this->seedPeriodEntries();
-        $this->login(['ROLE1']);
+        $this->login(['ROLE_1']);
         $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author/101', $filters);
 
         $this->assertResponseIsSuccessful();
@@ -265,7 +265,7 @@ final class ViewerControllerTest extends WebTestCase
     #[DataProvider('provideRejectsInvalidPeriodCases')]
     public function testRejectsInvalidPeriod(array $filters): void
     {
-        $this->login(['ROLE1']);
+        $this->login(['ROLE_1']);
         $this->client->catchExceptions(false);
         $this->expectException(BadRequestHttpException::class);
         $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author', $filters);
@@ -292,7 +292,7 @@ final class ViewerControllerTest extends WebTestCase
     {
         $this->seedPeriodEntries();
         $this->provider->getConfiguration()->setViewerPageSize(1);
-        $this->login(['ROLE1']);
+        $this->login(['ROLE_1']);
         $uri = '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author/101';
         $filters = ['date_from' => '2026-02-10', 'date_to' => '2026-02-10', 'type' => 'insert', 'user' => 'period-user'];
         $crawler = $this->client->request('GET', $uri, $filters);
@@ -311,6 +311,7 @@ final class ViewerControllerTest extends WebTestCase
         foreach ($filters as $name => $value) {
             $this->assertSame($value, $form->getValues()[$name]);
         }
+
         $this->assertArrayNotHasKey('page', $form->getValues());
         $this->assertSame($uri, parse_url($form->getUri(), PHP_URL_PATH));
 
@@ -326,7 +327,7 @@ final class ViewerControllerTest extends WebTestCase
             self::getContainer()->get(Environment::class),
             new ActivityGraphProvider(7, $layout, false, 300),
         ));
-        $this->login(['ROLE1']);
+        $this->login(['ROLE_1']);
         $crawler = $this->client->request('GET', '/audit');
         $this->assertResponseIsSuccessful();
 
@@ -340,7 +341,7 @@ final class ViewerControllerTest extends WebTestCase
             $this->assertSame($date, $bar->getAttribute('data-audit-date'));
             parse_str(parse_url($bar->getAttribute('href'), PHP_URL_QUERY), $query);
             $this->assertSame(['date_from' => $date, 'date_to' => $date], $query);
-            $this->assertStringContainsString($date, $bar->getAttribute('aria-label'));
+            $this->assertStringContainsString($date, (string) $bar->getAttribute('aria-label'));
         }
 
         $lastBar = $bars->last();

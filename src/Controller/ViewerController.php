@@ -154,11 +154,11 @@ final readonly class ViewerController
             $timezone = new \DateTimeZone($reader->getProvider()->getAuditor()->getConfiguration()->timezone);
             $dateFrom = $this->parseDateFilter($dateFromFilter, $timezone);
             $dateTo = $this->parseDateFilter($dateToFilter, $timezone)?->setTime(23, 59, 59);
-            if (null !== $dateFrom && null !== $dateTo && $dateFrom > $dateTo) {
+            if ($dateFrom instanceof \DateTimeImmutable && $dateTo instanceof \DateTimeImmutable && $dateFrom > $dateTo) {
                 throw new BadRequestHttpException('The start date must not be later than the end date.');
             }
 
-            if (null !== $dateFrom || null !== $dateTo) {
+            if ($dateFrom instanceof \DateTimeImmutable || $dateTo instanceof \DateTimeImmutable) {
                 $query->addFilter(new DateRangeFilter(Query::CREATED_AT, $dateFrom, $dateTo));
             }
 
