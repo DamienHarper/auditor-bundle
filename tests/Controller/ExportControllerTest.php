@@ -37,6 +37,11 @@ final class ExportControllerTest extends WebTestCase
         $this->setupEntitySchemas();
         $this->setupAuditSchemas();
         $this->setupEntities();
+
+        // Restrict Author audits to a role granted to one of the in-memory users of the test application.
+        $entities = $this->provider->getConfiguration()->getEntities();
+        $entities[Author::class]['roles']['view'] = ['ROLE_1', 'ROLE_2'];
+        $this->provider->getConfiguration()->setEntities($entities);
     }
 
     public function testExportNdjsonDefaultsAllEntities(): void
@@ -92,6 +97,7 @@ final class ExportControllerTest extends WebTestCase
 
     public function testExportWithEntityFilter(): void
     {
+        $this->login(['ROLE_1']);
         $entityParam = UrlHelper::namespaceToParam(Author::class);
         $this->client->request('GET', '/audit/export?entity='.$entityParam);
         $response = $this->client->getResponse();
@@ -166,10 +172,15 @@ final class ExportControllerTest extends WebTestCase
 
     private function login(array $roles = []): void
     {
+        // Log in as a user declared in the test application's in-memory provider, so it survives the token refresh.
+        [$username, $configuredRoles] = \in_array('ROLE_1', $roles, true)
+            ? ['role1.user', ['ROLE_1']]
+            : ['dark.vador', ['ROLE_USER']];
+
         $user = new InMemoryUser(
-            'dark.vador',
+            $username,
             '$argon2id$v=19$m=65536,t=4,p=1$g1yZVCS0GJ32k2fFqBBtqw$359jLODXkhqVWtD/rf+CjiNz9r/kIvhJlenPBnW851Y',
-            $roles
+            $configuredRoles
         );
 
         $this->client->loginUser($user);
