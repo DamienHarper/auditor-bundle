@@ -1,0 +1,14 @@
+dh_auditor:
+    providers:
+        doctrine:
+            entities:
+                DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author:
+                    retention:
+                        max_age: 'P1Y'
+                        max_entries: 100
+                DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post:
+                    retention:
+                        max_age: 'P30D'
+                DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Comment: ~
+                DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag:
+                    retention: ~

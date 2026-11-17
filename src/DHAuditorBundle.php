@@ -7,6 +7,8 @@ namespace DH\AuditorBundle;
 use DH\Auditor\Auditor;
 use DH\Auditor\Configuration;
 use DH\Auditor\Contract\DiffLabelResolverInterface;
+use DH\Auditor\Exception\InvalidArgumentException;
+use DH\Auditor\Model\RetentionPolicy;
 use DH\Auditor\Provider\Doctrine\Auditing\Attribute\AttributeLoader;
 use DH\Auditor\Provider\Doctrine\Configuration as DoctrineProviderConfiguration;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
@@ -50,6 +52,11 @@ use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
  */
 class DHAuditorBundle extends AbstractBundle
 {
+    /**
+     * Options allowed in the "retention" block of an entity.
+     */
+    private const array RETENTION_KEYS = ['max_age', 'max_entries'];
+
     #[\Override]
     public function getPath(): string
     {
@@ -396,8 +403,12 @@ class DHAuditorBundle extends AbstractBundle
             foreach ($doctrine['entities'] as $entity => $options) {
                 if (null === $options) {
                     $doctrine['entities'][$entity] = ['enabled' => true];
-                } elseif (!\array_key_exists('enabled', $options)) {
-                    $doctrine['entities'][$entity]['enabled'] = true;
+                } else {
+                    if (!\array_key_exists('enabled', $options)) {
+                        $options['enabled'] = true;
+                    }
+
+                    $doctrine['entities'][$entity] = $this->normalizeRetentionConfig($entity, $options);
                 }
             }
         }
@@ -473,6 +484,65 @@ class DHAuditorBundle extends AbstractBundle
         $v['doctrine'] = $doctrine;
 
         return $v;
+    }
+
+    /**
+     * Turns the optional "retention" block of an entity into the "max_age" / "max_entries" options of the
+     * Doctrine provider, validated with the same rules as #[Auditable] (an invalid value fails at container build).
+     *
+     * Only the keys given in the "retention" block are set: they override the #[Auditable] values key by key.
+     *
+     * @param array<string, mixed> $options
+     *
+     * @return array<string, mixed>
+     */
+    private function normalizeRetentionConfig(string $entity, array $options): array
+    {
+        if (!\array_key_exists('retention', $options)) {
+            return $options;
+        }
+
+        $retention = $options['retention'];
+        unset($options['retention']);
+
+        if (null === $retention) {
+            return $options;
+        }
+
+        if (!\is_array($retention)) {
+            throw new \InvalidArgumentException(\sprintf('The "retention" option of entity "%s" must be an array with "max_age" and/or "max_entries" keys.', $entity));
+        }
+
+        $unknownKeys = array_diff(array_keys($retention), self::RETENTION_KEYS);
+        if ([] !== $unknownKeys) {
+            throw new \InvalidArgumentException(\sprintf('Unknown "retention" option(s) "%s" for entity "%s"; allowed options are "%s".', implode('", "', $unknownKeys), $entity, implode('", "', self::RETENTION_KEYS)));
+        }
+
+        $maxAge = $retention['max_age'] ?? null;
+        $maxEntries = $retention['max_entries'] ?? null;
+        if (null !== $maxAge && !\is_string($maxAge)) {
+            throw new \InvalidArgumentException(\sprintf('The "retention.max_age" option of entity "%s" must be an ISO 8601 duration string (e.g. P1Y), %s given.', $entity, get_debug_type($maxAge)));
+        }
+
+        if (null !== $maxEntries && !\is_int($maxEntries)) {
+            throw new \InvalidArgumentException(\sprintf('The "retention.max_entries" option of entity "%s" must be an integer, %s given.', $entity, get_debug_type($maxEntries)));
+        }
+
+        try {
+            new RetentionPolicy($maxAge, $maxEntries);
+        } catch (InvalidArgumentException $invalidArgumentException) {
+            throw new \InvalidArgumentException(\sprintf('Invalid "retention" option for entity "%s": %s', $entity, $invalidArgumentException->getMessage()), 0, $invalidArgumentException);
+        }
+
+        if (\array_key_exists('max_age', $retention)) {
+            $options['max_age'] = $maxAge;
+        }
+
+        if (\array_key_exists('max_entries', $retention)) {
+            $options['max_entries'] = $maxEntries;
+        }
+
+        return $options;
     }
 
     /**
