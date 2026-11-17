@@ -9,6 +9,7 @@ audit:
     subtitle: Resumen de todas las entidades rastreadas
     no_audits: No se encontraron entidades auditadas.
   sort:
+    label: Ordenar por
     name_asc: 'Nombre (A-Z)'
     name_desc: 'Nombre (Z-A)'
     count_desc: Más eventos

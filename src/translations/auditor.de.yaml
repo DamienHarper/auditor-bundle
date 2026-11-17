@@ -9,6 +9,7 @@ audit:
     subtitle: Übersicht aller überwachten Entitäten
     no_audits: Keine auditierten Entitäten gefunden.
   sort:
+    label: Sortieren nach
     name_asc: 'Name (A-Z)'
     name_desc: 'Name (Z-A)'
     count_desc: Meiste Ereignisse

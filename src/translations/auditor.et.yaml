@@ -9,6 +9,7 @@ audit:
     subtitle: Ülevaade kõikidest jälgitavatest olemitest
     no_audits: Auditeeritud olemeid ei leitud.
   sort:
+    label: Sorteeri
     name_asc: 'Nimi (A-Z)'
     name_desc: 'Nimi (Z-A)'
     count_desc: Enim sündmusi

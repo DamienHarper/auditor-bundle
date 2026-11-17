@@ -96,6 +96,7 @@ final readonly class ViewerController
             'audited' => $audited,
             'reader' => $reader,
             'sort' => $sort->value,
+            'sortOptions' => EntitySort::cases(),
             'activityGraphEnabled' => $activityGraphEnabled,
             'activityGraphDays' => $activityGraphDays,
             'activityGraphLayout' => $activityGraphLayout,
@@ -179,31 +180,30 @@ final readonly class ViewerController
     }
 
     /**
-     * @param array<array-key, array{table: mixed, count: int, latest: ?Entry, activityGraph?: array<int|string, float|int>, activityGraphRaw?: array<int|string, int>}> $audited
+     * Sorts the audited entities; ties on event count or latest activity are broken by name (A-Z).
      *
-     * @return array<array-key, array{table: mixed, count: int, latest: ?Entry, activityGraph?: array<int|string, float|int>, activityGraphRaw?: array<int|string, int>}>
+     * @template T of array{count: int, latest: ?Entry}
+     *
+     * @param array<array-key, T> $audited audit summaries indexed by entity FQCN
+     *
+     * @return array<array-key, T>
      */
     private function sortAudited(array $audited, EntitySort $sort): array
     {
-        $entities = array_keys($audited);
+        uksort($audited, function (int|string $a, int|string $b) use ($audited, $sort): int {
+            $byName = strcasecmp($this->shortEntityName((string) $a), $this->shortEntityName((string) $b)) ?: strcmp((string) $a, (string) $b);
 
-        usort($entities, function (string $a, string $b) use ($audited, $sort): int {
             return match ($sort) {
-                EntitySort::NameAsc => strcasecmp($this->shortEntityName($a), $this->shortEntityName($b)),
-                EntitySort::NameDesc => strcasecmp($this->shortEntityName($b), $this->shortEntityName($a)),
-                EntitySort::CountAsc => $audited[$a]['count'] <=> $audited[$b]['count'],
-                EntitySort::CountDesc => $audited[$b]['count'] <=> $audited[$a]['count'],
-                EntitySort::ActivityAsc => $this->latestActivityTimestamp($audited[$a]) <=> $this->latestActivityTimestamp($audited[$b]),
-                EntitySort::ActivityDesc => $this->latestActivityTimestamp($audited[$b]) <=> $this->latestActivityTimestamp($audited[$a]),
+                EntitySort::NameAsc => $byName,
+                EntitySort::NameDesc => -$byName,
+                EntitySort::CountAsc => ($audited[$a]['count'] <=> $audited[$b]['count']) ?: $byName,
+                EntitySort::CountDesc => ($audited[$b]['count'] <=> $audited[$a]['count']) ?: $byName,
+                EntitySort::ActivityAsc => ($this->latestActivityTimestamp($audited[$a]['latest']) <=> $this->latestActivityTimestamp($audited[$b]['latest'])) ?: $byName,
+                EntitySort::ActivityDesc => ($this->latestActivityTimestamp($audited[$b]['latest']) <=> $this->latestActivityTimestamp($audited[$a]['latest'])) ?: $byName,
             };
         });
 
-        $sorted = [];
-        foreach ($entities as $entity) {
-            $sorted[$entity] = $audited[$entity];
-        }
-
-        return $sorted;
+        return $audited;
     }
 
     private function shortEntityName(string $entity): string
@@ -213,16 +213,9 @@ final readonly class ViewerController
         return false === $position ? $entity : mb_substr($entity, $position + 1);
     }
 
-    /**
-     * @param array{table: mixed, count: int, latest: ?Entry, activityGraph?: array<int|string, float|int>, activityGraphRaw?: array<int|string, int>} $data
-     */
-    private function latestActivityTimestamp(array $data): int
+    private function latestActivityTimestamp(?Entry $latest): int
     {
-        $latest = $data['latest'] ?? null;
-
-        return $latest instanceof Entry && $latest->createdAt instanceof \DateTimeImmutable
-            ? $latest->createdAt->getTimestamp()
-            : 0;
+        return $latest?->createdAt?->getTimestamp() ?? 0;
     }
 
     /**
