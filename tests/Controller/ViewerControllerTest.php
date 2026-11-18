@@ -38,6 +38,8 @@ final class ViewerControllerTest extends WebTestCase
 
         // boots the Kernel and populates container
         $this->client = self::createClient();
+        // keep the kernel between requests, so that the auditor user provider sees the logged-in user
+        $this->client->disableReboot();
 
         // provider with 1 em for both storage and auditing
         $this->createAndInitDoctrineProvider();
@@ -51,6 +53,11 @@ final class ViewerControllerTest extends WebTestCase
 
         // setup (seed) entities
         $this->setupEntities();
+
+        // Symfony's role voter only grants roles prefixed with "ROLE_"
+        $entities = $this->provider->getConfiguration()->getEntities();
+        $entities[Author::class]['roles']['view'] = ['ROLE_1', 'ROLE_2'];
+        $this->provider->getConfiguration()->setEntities($entities);
     }
 
     /**
@@ -71,11 +78,11 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertCount(1, $breadcrumbs, 'Nav has 1 item.');
         $this->assertSame('Home', mb_trim($breadcrumbs->text()), 'Nav has 1 item: Home');
 
+        // Author audits are restricted to ROLE_1/ROLE_2
         $cards = $crawler->filter('div.auditor-audits > div');
-        $this->assertCount(4, $cards, 'There are 4 entity audits.');
+        $this->assertCount(3, $cards, 'There are 3 entity audits.');
 
         $expected = [
-            [Author::class, 'author', '7 operation(s)', 'View audit'],
             [Comment::class, 'comment', '3 operation(s)', 'View audit'],
             [Post::class, 'post', '21 operation(s)', 'View audit'],
             [Tag::class, 'tag', '15 operation(s)', 'View audit'],
@@ -136,7 +143,7 @@ final class ViewerControllerTest extends WebTestCase
     #[Depends('testListAuditsWithRoleNotGrantedForAuthorAuditViewing')]
     public function testListAuditsWithRoleGrantedForAuthorAuditViewing(): void
     {
-        $this->login(['ROLE1']);
+        $this->login(['ROLE_1']);
         $crawler = $this->client->request('GET', '/audit');
 
         // asserts that the response status code is 2xx
@@ -176,7 +183,7 @@ final class ViewerControllerTest extends WebTestCase
     public function testShowEntityHistoryAnonymously(): void
     {
         $this->login();
-        $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author');
+        $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Post');
 
         // asserts that the response status code is 2xx
         $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
@@ -186,7 +193,18 @@ final class ViewerControllerTest extends WebTestCase
         $breadcrumbs = $crawler->filter('nav > ol > li');
         $this->assertCount(2, $breadcrumbs, 'Nav has 2 item.');
         $this->assertSame('Home', mb_trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
-        $this->assertSame(Author::class, mb_trim($breadcrumbs->eq(1)->children('div > a > code')->text()), 'Nav has 1 item: '.Author::class);
+        $this->assertSame(Post::class, mb_trim($breadcrumbs->eq(1)->filter('div > a > code')->text()), 'Nav has 1 item: '.Post::class);
+    }
+
+    #[Depends('testShowEntityHistoryAnonymously')]
+    public function testShowEntityHistoryWithoutLoginForAuthorAuditViewing(): void
+    {
+        // no user is logged in: the history of an entity restricted to some roles must not be shown
+        $this->client->catchExceptions(false);
+        $this->expectException(AccessDeniedException::class);
+        $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author');
+
+        $this->assertSame(403, $this->client->getResponse()->getStatusCode(), 'Response status is 403');
     }
 
     #[Depends('testShowEntityHistoryAnonymously')]
@@ -203,7 +221,7 @@ final class ViewerControllerTest extends WebTestCase
     #[Depends('testShowEntityHistoryWithRoleNotGrantedForAuthorAuditViewing')]
     public function testShowEntityHistoryWithRoleGrantedForAuthorAuditViewing(): void
     {
-        $this->login(['ROLE1']);
+        $this->login(['ROLE_1']);
         $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author');
 
         // asserts that the response status code is 2xx
@@ -214,7 +232,7 @@ final class ViewerControllerTest extends WebTestCase
         $breadcrumbs = $crawler->filter('nav > ol > li');
         $this->assertCount(2, $breadcrumbs, 'Nav has 2 item.');
         $this->assertSame('Home', mb_trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
-        $this->assertSame(Author::class, mb_trim($breadcrumbs->eq(1)->children('div > a > code')->text()), 'Nav has 1 item: '.Author::class);
+        $this->assertSame(Author::class, mb_trim($breadcrumbs->eq(1)->filter('div > a > code')->text()), 'Nav has 1 item: '.Author::class);
     }
 
     #[Depends('testShowEntityHistoryWithRoleGrantedForAuthorAuditViewing')]
@@ -232,6 +250,8 @@ final class ViewerControllerTest extends WebTestCase
     #[Depends('testShowEntityHistoryWithRoleNotGrantedForAuthorAuditViewing')]
     public function testShowTransactionHistoryAnonymously(): void
     {
+        // the reader checks the roles too: read the Author audits as a user granted to view them
+        $this->login(['ROLE_1']);
         $reader = $this->createReader();
 
         /** @var Entry[] $audits */
@@ -249,18 +269,20 @@ final class ViewerControllerTest extends WebTestCase
         $breadcrumbs = $crawler->filter('nav > ol > li');
         $this->assertCount(2, $breadcrumbs, 'Nav has 2 item.');
         $this->assertSame('Home', mb_trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
-        $this->assertSame($first->getTransactionHash(), mb_trim($breadcrumbs->eq(1)->children('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
+        $this->assertSame($first->getTransactionHash(), mb_trim($breadcrumbs->eq(1)->filter('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
 
         $sections = $crawler->filter('.flow-root > div');
-        $this->assertCount(4, $sections, 'There are 3 sections.');
-        $this->assertSame(Author::class, mb_trim($sections->eq(0)->children('div > code')->text()), Author::class);
-        $this->assertSame(Post::class, mb_trim($sections->eq(1)->children('div > code')->text()), Post::class);
-        $this->assertSame(Comment::class, mb_trim($sections->eq(2)->children('div > code')->text()), Comment::class);
+        // Author audits are restricted to ROLE_1/ROLE_2
+        $this->assertCount(3, $sections, 'There are 2 sections.');
+        $this->assertSame(Post::class, mb_trim($sections->eq(0)->filter('div > code')->text()), Post::class);
+        $this->assertSame(Comment::class, mb_trim($sections->eq(1)->filter('div > code')->text()), Comment::class);
     }
 
     #[Depends('testShowTransactionHistoryAnonymously')]
     public function testShowTransactionHistoryWithRoleNotGrantedForAuthorAuditViewing(): void
     {
+        // the reader checks the roles too: read the Author audits as a user granted to view them
+        $this->login(['ROLE_1']);
         $reader = $this->createReader();
 
         /** @var Entry[] $audits */
@@ -278,21 +300,26 @@ final class ViewerControllerTest extends WebTestCase
         $breadcrumbs = $crawler->filter('nav > ol > li');
         $this->assertCount(2, $breadcrumbs, 'Nav has 2 item.');
         $this->assertSame('Home', mb_trim($breadcrumbs->eq(0)->text()), 'Nav has 1 item: Home');
-        $this->assertSame($first->getTransactionHash(), mb_trim($breadcrumbs->eq(1)->children('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
+        $this->assertSame($first->getTransactionHash(), mb_trim($breadcrumbs->eq(1)->filter('div > a')->text()), 'Nav has 1 item: '.$first->getTransactionHash());
 
         $sections = $crawler->filter('.flow-root > div');
         $this->assertCount(3, $sections, 'There are 2 sections.');
-        $this->assertSame(Post::class, mb_trim($sections->eq(0)->children('div > code')->text()), Post::class);
-        $this->assertSame(Comment::class, mb_trim($sections->eq(1)->children('div > code')->text()), Comment::class);
+        $this->assertSame(Post::class, mb_trim($sections->eq(0)->filter('div > code')->text()), Post::class);
+        $this->assertSame(Comment::class, mb_trim($sections->eq(1)->filter('div > code')->text()), Comment::class);
     }
 
     private function login(array $roles = []): void
     {
+        // the firewall reloads the user from the in-memory provider: log in with a user that has the requested role
+        [$username, $configuredRoles] = \in_array('ROLE_1', $roles, true)
+            ? ['role1.user', ['ROLE_1']]
+            : ['dark.vador', ['ROLE_USER']];
+
         $class = class_exists(User::class) ? User::class : InMemoryUser::class;
         $user = new $class(
-            'dark.vador',
+            $username,
             '$argon2id$v=19$m=65536,t=4,p=1$g1yZVCS0GJ32k2fFqBBtqw$359jLODXkhqVWtD/rf+CjiNz9r/kIvhJlenPBnW851Y',
-            $roles
+            $configuredRoles
         );
 
         $this->client->loginUser($user);

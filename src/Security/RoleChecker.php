@@ -16,15 +16,6 @@ class RoleChecker implements RoleCheckerInterface
 
     public function __invoke(string $entity, string $scope): bool
     {
-        $userProvider = $this->provider->getAuditor()->getConfiguration()->getUserProvider();
-        $user = null !== $userProvider ? $userProvider() : null;
-        $authorizationChecker = null !== $userProvider ? $this->authorizationChecker : null;
-
-        if (!($user instanceof UserInterface) || !($authorizationChecker instanceof AuthorizationCheckerInterface)) {
-            // If no security defined or no user identified, consider access granted
-            return true;
-        }
-
         \assert($this->provider->getConfiguration() instanceof Configuration);
         $entities = $this->provider->getConfiguration()->getEntities();
         $roles = $entities[$entity]['roles'] ?? null;
@@ -39,9 +30,17 @@ class RoleChecker implements RoleCheckerInterface
             return true;
         }
 
-        // roles are defined for the give scope
+        $userProvider = $this->provider->getAuditor()->getConfiguration()->getUserProvider();
+        $user = null !== $userProvider ? $userProvider() : null;
+
+        if (!$user instanceof UserInterface) {
+            // Roles are required for this scope but no user is identified: deny access
+            return false;
+        }
+
+        // roles are defined for the given scope
         foreach ($roles[$scope] as $role) {
-            if ($authorizationChecker->isGranted($role)) {
+            if ($this->authorizationChecker->isGranted($role)) {
                 // role granted => access granted
                 return true;
             }
