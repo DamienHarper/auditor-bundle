@@ -66,9 +66,11 @@ final class RevisionComparator
                     continue;
                 }
 
-                $leaves = $this->flatten($field, $changeset);
+                $leaves = $entry->isDeepDiff($field)
+                    ? $this->flattenDeepDiff($field, $changeset)
+                    : [$field => ['old' => $changeset['old'] ?? null, 'new' => $changeset['new'] ?? null]];
                 if ([] === $leaves) {
-                    // A changeset without any old/new pair cannot be composed (e.g. a JSON value set to null).
+                    // A deep diff without any leaf cannot be composed (e.g. a JSON value set to null).
                     $unreadable[$field] = true;
 
                     continue;
@@ -131,34 +133,26 @@ final class RevisionComparator
     }
 
     /**
-     * Flattens a changeset into old/new pairs indexed by path ("field" or "field.key.subkey" for JSON fields).
+     * Flattens a JSON deep diff into old/new pairs indexed by path ("field.key.subkey").
      *
-     * @param array<array-key, mixed> $changeset
+     * @param array<array-key, mixed> $node
      *
      * @return array<string, array{old: mixed, new: mixed}>
      */
-    private function flatten(string $path, array $changeset): array
+    private function flattenDeepDiff(string $path, array $node): array
     {
-        if ($this->isLeaf($changeset)) {
-            return [$path => ['old' => $changeset['old'] ?? null, 'new' => $changeset['new'] ?? null]];
-        }
-
         $leaves = [];
-        foreach ($changeset as $key => $value) {
-            if (\is_array($value)) {
-                $leaves += $this->flatten($path.'.'.$key, $value);
+        foreach ($node as $key => $value) {
+            if (!\is_array($value)) {
+                continue;
             }
+
+            $leaves += Entry::isDiffLeaf($value)
+                ? [$path.'.'.$key => ['old' => $value['old'] ?? null, 'new' => $value['new'] ?? null]]
+                : $this->flattenDeepDiff($path.'.'.$key, $value);
         }
 
         return $leaves;
-    }
-
-    /**
-     * @param array<array-key, mixed> $changeset
-     */
-    private function isLeaf(array $changeset): bool
-    {
-        return [] !== $changeset && [] === array_diff(array_keys($changeset), ['old', 'new']);
     }
 
     /**

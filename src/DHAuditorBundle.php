@@ -37,6 +37,7 @@ use DH\AuditorBundle\Retention\RetentionSchedule;
 use DH\AuditorBundle\Routing\RoutingLoader;
 use DH\AuditorBundle\Security\RoleChecker;
 use DH\AuditorBundle\Security\SecurityProvider;
+use DH\AuditorBundle\Twig\DiffExtension;
 use DH\AuditorBundle\Twig\TimeAgoExtension;
 use DH\AuditorBundle\Twig\ViewableEntityExtension;
 use DH\AuditorBundle\User\ConsoleUserProvider;
@@ -379,6 +380,11 @@ class DHAuditorBundle extends AbstractBundle
         // Twig extension (uses #[AsTwigFilter] attribute)
         $services->set(TimeAgoExtension::class)
             ->args([new Reference('translator')])
+            ->autoconfigure()
+        ;
+
+        // Twig extension (uses #[AsTwigFunction] attribute)
+        $services->set(DiffExtension::class)
             ->autoconfigure()
         ;
     }

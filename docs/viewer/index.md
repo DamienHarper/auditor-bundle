@@ -318,6 +318,12 @@ templates/bundles/DHAuditorBundle/
 └── layout.html.twig                  # Base layout
 ```
 
+> [!NOTE]
+> The changeset of a JSON column is a deep diff: a tree whose leaves are `{new}`, `{old}` or `{new, old}`.
+> A JSON object whose own keys are `new`/`old` therefore looks like a field diff, so a custom
+> `entry.html.twig` must not tell them apart by their keys. Use `entry.isDeepDiff(field)` for the root of
+> a changeset, and the `dh_auditor_is_diff_leaf(node)` Twig function for the nodes inside a deep diff.
+
 ### Custom Layout
 
 ```twig
