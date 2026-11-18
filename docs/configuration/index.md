@@ -343,6 +343,30 @@ Notes:
 - A scheduled run shares the `audit:clean` lock: if the command is running on the same host, the run is skipped.
 - The configuration is validated when the container is built (cron expression, durations, allowed keys).
 
+### Logging
+
+No option is needed: the bundle injects the application's `logger` service into the Doctrine provider. The provider
+logs, at the `error` level, the failures it cannot throw without hiding the original error, e.g. audit entries stored
+on another connection that could not be deleted after their transaction was rolled back (the log context gives the
+`transaction_id` and the audit table, to clean them up by hand).
+
+With [MonologBundle](https://symfony.com/doc/current/logging.html), these messages go to the dedicated **`auditor`
+channel**, as do the `info` messages of the [scheduled pruning](#retention) (one per pruned entity, or when a run is
+skipped), so they can be routed to their own handler:
+
+```yaml
+# config/packages/monolog.yaml
+monolog:
+    handlers:
+        auditor:
+            type: stream
+            path: '%kernel.logs_dir%/auditor.log'
+            level: error
+            channels: ['auditor']
+```
+
+Without a `logger` service, nothing is logged.
+
 ## 📝 Complete Example
 
 ```yaml
