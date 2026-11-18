@@ -13,3 +13,6 @@ composer.lock
 .preload.php
 /var/tailwind/
 reference.php
+
+# Git worktrees (make wt-create)
+.claude/worktrees/
