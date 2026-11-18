@@ -1,0 +1,8 @@
+dh_auditor:
+    providers:
+        doctrine:
+            entities:
+                DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post: ~
+            retention:
+                schedule: '0 3 * * *'
+                default_max_age: 'P2Y'

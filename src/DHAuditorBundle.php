@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DH\AuditorBundle;
 
+use Cron\CronExpression;
 use DH\Auditor\Auditor;
 use DH\Auditor\Configuration;
 use DH\Auditor\Contract\DiffLabelResolverInterface;
@@ -31,6 +32,8 @@ use DH\AuditorBundle\DependencyInjection\Compiler\RegisterProvidersCompilerPass;
 use DH\AuditorBundle\Event\ConsoleEventSubscriber;
 use DH\AuditorBundle\Event\ViewerEventSubscriber;
 use DH\AuditorBundle\ExtraData\ExtraDataProvider;
+use DH\AuditorBundle\Retention\PruneAuditLogsHandler;
+use DH\AuditorBundle\Retention\RetentionSchedule;
 use DH\AuditorBundle\Routing\RoutingLoader;
 use DH\AuditorBundle\Security\RoleChecker;
 use DH\AuditorBundle\Security\SecurityProvider;
@@ -42,10 +45,12 @@ use DH\AuditorBundle\Viewer\ActivityGraphProvider;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
+use Symfony\Component\Scheduler\RecurringMessage;
 
 /**
  * @see Tests\DHAuditorBundleTest
@@ -150,11 +155,21 @@ class DHAuditorBundle extends AbstractBundle
 
         // Load providers
         foreach ($config['providers'] as $providerName => $providerConfig) {
+            // Scheduled pruning settings belong to the bundle, not to the provider configuration.
+            $retentionConfig = null;
+            if ('doctrine' === $providerName) {
+                /** @var array{schedule: ?string, default_max_age: ?string} $retentionConfig */
+                $retentionConfig = $providerConfig['retention'];
+                unset($providerConfig['retention']);
+            }
+
             $builder->setParameter('dh_auditor.provider.'.$providerName.'.configuration', $providerConfig);
 
             if ('doctrine' === $providerName) {
                 /** @var array{storage_services: list<string>, auditing_services: list<string>, viewer: array<string, mixed>|bool} $providerConfig */
                 $this->loadDoctrineProvider($services, $builder, $providerConfig);
+                \assert(null !== $retentionConfig);
+                $this->loadScheduledRetention($services, $retentionConfig);
                 // The alias dh_auditor.provider.doctrine is defined by loadDoctrineProvider(),
                 // so we can register a named argument alias here.
                 $builder->registerAliasForArgument('dh_auditor.provider.doctrine', ProviderInterface::class, 'doctrineProvider');
@@ -476,6 +491,9 @@ class DHAuditorBundle extends AbstractBundle
             $doctrine['viewer'] = $defaultViewerOptions;
         }
 
+        // "retention" (scheduled pruning) is disabled by default.
+        $doctrine['retention'] = $this->normalizeScheduledRetentionConfig($doctrine['retention'] ?? null);
+
         // "storage_mapper" is null by default
         if (!\array_key_exists('storage_mapper', $doctrine) || !\is_string($doctrine['storage_mapper'])) {
             $doctrine['storage_mapper'] = null;
@@ -484,6 +502,86 @@ class DHAuditorBundle extends AbstractBundle
         $v['doctrine'] = $doctrine;
 
         return $v;
+    }
+
+    /**
+     * @param array{schedule: ?string, default_max_age: ?string} $config
+     */
+    private function loadScheduledRetention(ServicesConfigurator $services, array $config): void
+    {
+        if (null === $config['schedule']) {
+            return;
+        }
+
+        $services->set(PruneAuditLogsHandler::class)
+            ->args([
+                new Reference(DoctrineProvider::class),
+                $config['default_max_age'],
+                new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+            ])
+            ->tag('messenger.message_handler')
+        ;
+
+        $services->set(RetentionSchedule::class)
+            ->args([$config['schedule']])
+            ->tag('scheduler.schedule_provider', ['name' => RetentionSchedule::NAME])
+        ;
+    }
+
+    /**
+     * Normalizes the "providers.doctrine.retention" block (scheduled pruning, disabled by default).
+     *
+     * @return array{schedule: ?string, default_max_age: ?string}
+     */
+    private function normalizeScheduledRetentionConfig(mixed $retention): array
+    {
+        $normalized = ['schedule' => null, 'default_max_age' => null];
+        if (null === $retention) {
+            return $normalized;
+        }
+
+        if (!\is_array($retention)) {
+            throw new \InvalidArgumentException('The "retention" option of the doctrine provider must be an array with "schedule" and/or "default_max_age" keys.');
+        }
+
+        $unknownKeys = array_diff(array_keys($retention), array_keys($normalized));
+        if ([] !== $unknownKeys) {
+            throw new \InvalidArgumentException(\sprintf('Unknown "retention" option(s) "%s" for the doctrine provider; allowed options are "schedule", "default_max_age".', implode('", "', $unknownKeys)));
+        }
+
+        $schedule = $retention['schedule'] ?? null;
+        if (null !== $schedule) {
+            if (!\is_string($schedule) || '' === mb_trim($schedule)) {
+                throw new \InvalidArgumentException('The "retention.schedule" option of the doctrine provider must be a cron expression (e.g. "0 3 * * *").');
+            }
+
+            if (!class_exists(RecurringMessage::class) || !class_exists(CronExpression::class)) {
+                throw new \LogicException('Scheduled audit logs pruning requires the Symfony Scheduler component and a cron expression parser: run "composer require symfony/scheduler dragonmantank/cron-expression".');
+            }
+
+            if (!CronExpression::isValidExpression($schedule)) {
+                throw new \InvalidArgumentException(\sprintf('The "retention.schedule" option of the doctrine provider must be a valid cron expression, "%s" given.', $schedule));
+            }
+
+            $normalized['schedule'] = $schedule;
+        }
+
+        $defaultMaxAge = $retention['default_max_age'] ?? null;
+        if (null !== $defaultMaxAge) {
+            if (!\is_string($defaultMaxAge)) {
+                throw new \InvalidArgumentException(\sprintf('The "retention.default_max_age" option of the doctrine provider must be an ISO 8601 duration string (e.g. P1Y), %s given.', get_debug_type($defaultMaxAge)));
+            }
+
+            try {
+                new RetentionPolicy($defaultMaxAge);
+            } catch (InvalidArgumentException $exception) {
+                throw new \InvalidArgumentException('Invalid "retention.default_max_age" option for the doctrine provider: '.$exception->getMessage(), 0, $exception);
+            }
+
+            $normalized['default_max_age'] = $defaultMaxAge;
+        }
+
+        return $normalized;
     }
 
     /**
