@@ -26,6 +26,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\User\InMemoryUser;
 use Twig\Environment;
+use Twig\Extension\CoreExtension;
 
 /**
  * @internal
@@ -685,6 +686,42 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertResponseIsSuccessful();
         $this->assertSame(['title Title A → Title C'], $this->comparedFields($crawler));
         $this->assertCount(0, $crawler->selectLink('Previous change'), 'There is no revision left before the purged ones.');
+    }
+
+    public function testViewerRendersDatesInTheAuditorTimezone(): void
+    {
+        [$postId] = $this->createPostHistory();
+        $entityManager = $this->provider->getAuditingServiceForEntity(Post::class)->getEntityManager();
+        $post = $entityManager->find(Post::class, $postId);
+        $this->assertInstanceOf(Post::class, $post);
+        $entityManager->remove($post); // REMOVE entries are rendered by their own branch of entry.html.twig
+        $entityManager->flush();
+
+        $revisions = $this->revisionIds(Post::class, $postId);
+        $connection = $this->provider->getStorageServiceForEntity(Post::class)->getEntityManager()->getConnection();
+        $table = $this->createReader()->getEntityAuditTableName(Post::class);
+        foreach ($revisions as $revision) {
+            $connection->executeStatement('UPDATE '.$table.' SET created_at = ? WHERE id = ?', ['2026-01-03 10:00:00', $revision]);
+        }
+
+        // Twig's default timezone (PHP's by default) differs from the auditor one (UTC in the test app):
+        // 10:00 UTC is already January 4 in Pacific/Kiritimati (UTC+14).
+        $twig = self::getContainer()->get(Environment::class);
+        $this->assertInstanceOf(Environment::class, $twig);
+        $twig->getExtension(CoreExtension::class)->setTimezone('Pacific/Kiritimati');
+        $this->login();
+
+        foreach ([
+            \sprintf('%s/%d', self::POST_URL, $postId),
+            \sprintf('%s/%d/revisions', self::POST_URL, $postId),
+            \sprintf('%s/%d/compare?from=%d&to=%d', self::POST_URL, $postId, $revisions[0], $revisions[2]),
+        ] as $url) {
+            $body = $this->client->request('GET', $url)->filter('body')->text();
+
+            $this->assertResponseIsSuccessful();
+            $this->assertStringContainsString('January 3, 2026', $body, $url.' renders dates in the auditor timezone.');
+            $this->assertStringNotContainsString('January 4, 2026', $body, $url.' does not convert dates to the Twig default timezone.');
+        }
     }
 
     public function testCompareRevisionsStepsThroughHistory(): void
