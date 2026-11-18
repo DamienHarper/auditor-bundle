@@ -88,15 +88,74 @@ final class RevisionComparatorTest extends TestCase
     }
 
     #[Test]
-    public function itReportsChangesThatCannotBeComposed(): void
+    public function itReadsAJsonObjectWhoseOwnKeyIsNewAsADeepDiff(): void
     {
-        // A JSON value set to null is recorded without any old/new pair.
+        // {"new": 1} updated to {"new": 2}, then {"new": 2} updated to {"new": 3, "x": {"new": 4}}.
         $comparison = new RevisionComparator()->compare([
-            $this->update(2, ['settings' => [], 'title' => ['old' => 'A', 'new' => 'B']]),
+            $this->update(2, ['settings' => ['new' => ['new' => 2, 'old' => 1]]], ['settings']),
+            $this->update(3, ['settings' => ['new' => ['new' => 3, 'old' => 2], 'x' => ['new' => ['new' => 4]]]], ['settings']),
         ]);
 
-        $this->assertSame(['title' => ['old' => 'A', 'new' => 'B']], $comparison->fields);
-        $this->assertSame(['settings'], $comparison->unreadable);
+        $this->assertSame([
+            'settings.new' => ['old' => 1, 'new' => 3],
+            'settings.x.new' => ['old' => null, 'new' => 4],
+        ], $comparison->fields);
+        $this->assertSame([], $comparison->inconsistent);
+    }
+
+    #[Test]
+    public function itReadsEveryKeyOfAJsonObjectMixingNewWithOtherKeys(): void
+    {
+        $comparison = new RevisionComparator()->compare([
+            $this->entry(2, 'insert', ['source' => self::AUTHOR_1, 'changes' => ['settings' => ['new' => ['new' => 1], 'x' => ['new' => 2]]], 'deep_diffs' => ['settings']]),
+        ]);
+
+        $this->assertSame([
+            'settings.new' => ['old' => null, 'new' => 1],
+            'settings.x' => ['old' => null, 'new' => 2],
+        ], $comparison->fields);
+    }
+
+    #[Test]
+    public function itReadsAFieldNotListedAsADeepDiffAsAFieldDiff(): void
+    {
+        // A to-one association holds arrays on both sides: still one field diff, next to a JSON deep diff.
+        $comparison = new RevisionComparator()->compare([
+            $this->update(2, ['author' => ['old' => self::AUTHOR_1, 'new' => self::AUTHOR_2], 'settings' => ['theme' => ['new' => 'dark']]], ['settings']),
+        ]);
+
+        $this->assertSame([
+            'author' => ['old' => self::AUTHOR_1, 'new' => self::AUTHOR_2],
+            'settings.theme' => ['old' => null, 'new' => 'dark'],
+        ], $comparison->fields);
+    }
+
+    #[Test]
+    public function itReadsEntriesWithoutDeepDiffsMarkerByTheirKeys(): void
+    {
+        // Rows written before the marker existed: a changeset with only "new"/"old" keys is a field diff.
+        $comparison = new RevisionComparator()->compare([
+            $this->update(2, ['author' => ['old' => self::AUTHOR_1, 'new' => self::AUTHOR_2], 'settings' => ['new' => ['new' => 2, 'old' => 1]]]),
+        ]);
+
+        $this->assertSame([
+            'author' => ['old' => self::AUTHOR_1, 'new' => self::AUTHOR_2],
+            'settings' => ['old' => null, 'new' => ['new' => 2, 'old' => 1]],
+        ], $comparison->fields);
+    }
+
+    #[Test]
+    public function itReportsChangesThatCannotBeComposed(): void
+    {
+        // A JSON value set to null is recorded as a deep diff without any leaf, with or without the marker.
+        foreach ([[], ['settings']] as $deepDiffs) {
+            $comparison = new RevisionComparator()->compare([
+                $this->update(2, ['settings' => [], 'title' => ['old' => 'A', 'new' => 'B']], $deepDiffs),
+            ]);
+
+            $this->assertSame(['title' => ['old' => 'A', 'new' => 'B']], $comparison->fields);
+            $this->assertSame(['settings'], $comparison->unreadable);
+        }
     }
 
     #[Test]
@@ -205,10 +264,16 @@ final class RevisionComparatorTest extends TestCase
 
     /**
      * @param array<string, mixed> $changes
+     * @param list<string>         $deepDiffs fields listed in the "deep_diffs" envelope marker (written only when not empty)
      */
-    private function update(int $id, array $changes): Entry
+    private function update(int $id, array $changes, array $deepDiffs = []): Entry
     {
-        return $this->entry($id, 'update', ['source' => self::AUTHOR_1, 'changes' => $changes]);
+        $diffs = ['source' => self::AUTHOR_1, 'changes' => $changes];
+        if ([] !== $deepDiffs) {
+            $diffs['deep_diffs'] = $deepDiffs;
+        }
+
+        return $this->entry($id, 'update', $diffs);
     }
 
     /**
