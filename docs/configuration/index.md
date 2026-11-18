@@ -158,15 +158,33 @@ dh_auditor:
                     roles:
                         view:
                             - ROLE_ADMIN
+
+                # With a retention policy
+                App\Entity\Payment:
+                    retention:
+                        max_age: 'P7Y'      # ISO 8601 duration
+                        max_entries: ~      # keep the N most recent entries
 ```
 
 **Entity options:**
 
-| Option            | Type    | Default | Description                          |
-|-------------------|---------|---------|--------------------------------------|
-| `enabled`         | `bool`  | `true`  | Enable/disable auditing for entity   |
-| `ignored_columns` | `array` | `[]`    | Properties to ignore for this entity |
-| `roles.view`      | `array` | `[]`    | Roles required to view audits        |
+| Option                  | Type      | Default | Description                                            |
+|-------------------------|-----------|---------|--------------------------------------------------------|
+| `enabled`               | `bool`    | `true`  | Enable/disable auditing for entity                     |
+| `ignored_columns`       | `array`   | `[]`    | Properties to ignore for this entity                   |
+| `roles.view`            | `array`   | `[]`    | Roles required to view audits                          |
+| `retention.max_age`     | `?string` | `~`     | Entries older than this ISO 8601 duration are pruned   |
+| `retention.max_entries` | `?int`    | `~`     | Only the N most recent entries are kept                |
+
+**Retention policies** are applied by `audit:clean` (and by scheduled pruning when enabled):
+
+- `max_age` replaces the global `audit:clean` cutoff for this entity; `max_entries` applies on top of the age rule.
+- Values are validated when the container is built: `max_age` must be an ISO 8601 duration greater than zero
+  (`P30D`, `P1Y`…), `max_entries` a positive integer, and only these two keys are allowed.
+- They override the `#[Auditable(maxAge: ..., maxEntries: ...)]` values key by key: setting only `max_age` keeps the
+  attribute `maxEntries`, and `max_age: ~` explicitly disables the attribute `maxAge` (e.g. per environment).
+- Without any `retention` option nor attribute value, nothing changes: the entity follows the global `audit:clean`
+  cutoff, as before.
 
 ### storage_services
 
