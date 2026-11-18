@@ -79,8 +79,8 @@ flowchart TB
 | Version | Status                      | Requirements                                                         |
 |:--------|:----------------------------|:---------------------------------------------------------------------|
 | 8.x     | Active development 🚀       | PHP >= 8.4, Symfony >= 8.0, Doctrine DBAL >= 4.0, Doctrine ORM >= 3.2|
-| 7.x     | Active support              | PHP >= 8.2, Symfony >= 5.4                                           |
-| 6.x     | End of Life                 | PHP >= 7.4, Symfony >= 4.4                                           |
+| 7.x     | Bug and security fixes      | PHP >= 8.4, Symfony >= 8.0, Doctrine DBAL >= 4.0, Doctrine ORM >= 3.2|
+| 6.x     | End of Life                 | PHP >= 8.2, Symfony >= 5.4                                           |
 
 ## 🚀 Quick Links
 
