@@ -42,39 +42,49 @@ jobs:
         id: versions
         env:
           TAG: ${{ inputs.tag || github.ref_name }}
+          VERSIONS_FILE: ./auditor-docs/auditor-bundle_versions.json
         run: |
           MAJOR=$(echo "$TAG" | cut -d. -f1)
           MINOR=$(echo "$TAG" | cut -d. -f2)
           PATCH=$(echo "$TAG" | cut -d. -f3)
-          NEW_LABEL="${MAJOR}.x"
-          LATEST_FROZEN=$(node -e "const v=require('./auditor-docs/auditor-bundle_versions.json'); console.log(v[0] || '')")
-          LATEST_FROZEN_MAJOR=$(echo "$LATEST_FROZEN" | cut -d. -f1)
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "new_label=$NEW_LABEL" >> $GITHUB_OUTPUT
-          echo "latest_frozen=$LATEST_FROZEN" >> $GITHUB_OUTPUT
-          echo "latest_frozen_major=$LATEST_FROZEN_MAJOR" >> $GITHUB_OUTPUT
-          if [ -n "$LATEST_FROZEN" ] && [ "$MAJOR" -gt "$LATEST_FROZEN_MAJOR" ] && [ "$MINOR" -eq "0" ] && [ "$PATCH" -eq "0" ]; then
-            echo "freeze=true" >> $GITHUB_OUTPUT
+          is_frozen() {
+            node -e "process.exit(require(process.argv[1]).includes(process.argv[2]) ? 0 : 1)" "$VERSIONS_FILE" "$1"
+          }
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          # A tag of an already frozen major comes from a maintenance branch: syncing it would
+          # overwrite the published docs of the newer major.
+          if is_frozen "${MAJOR}.x"; then
+            echo "::notice::${MAJOR}.x docs are frozen in auditor-docs, tag $TAG is not synced."
+            echo "sync=false" >> "$GITHUB_OUTPUT"
+            echo "freeze=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "sync=true" >> "$GITHUB_OUTPUT"
+          # On a new major (X.0.0), the published docs are those of the previous major: freeze them
+          # as (X-1).x before replacing them, unless that version is already frozen (re-run).
+          FREEZE_LABEL="$((MAJOR - 1)).x"
+          if [ "$MAJOR" -gt 1 ] && [ "$MINOR" -eq 0 ] && [ "$PATCH" -eq 0 ] && ! is_frozen "$FREEZE_LABEL"; then
+            echo "freeze=true" >> "$GITHUB_OUTPUT"
+            echo "freeze_label=$FREEZE_LABEL" >> "$GITHUB_OUTPUT"
           else
-            echo "freeze=false" >> $GITHUB_OUTPUT
+            echo "freeze=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Freeze current version (on major bump x.0.0 only)
+      - name: Freeze the published major (on X.0.0 only)
         if: steps.versions.outputs.freeze == 'true'
-        run: |
-          cd auditor-docs
-          PREV_MAJOR=$(( ${{ steps.versions.outputs.latest_frozen_major }} + 0 ))
-          FREEZE_LABEL="${PREV_MAJOR}.x"
-          if ! node -e "process.exit(require('./auditor-bundle_versions.json').includes('${FREEZE_LABEL}') ? 0 : 1)"; then
-            npm run docusaurus -- docs:version:auditor-bundle "${FREEZE_LABEL}"
-          fi
+        working-directory: auditor-docs
+        env:
+          FREEZE_LABEL: ${{ steps.versions.outputs.freeze_label }}
+        run: npm run docusaurus -- docs:version:auditor-bundle "$FREEZE_LABEL"
 
       - name: Sync docs
+        if: steps.versions.outputs.sync == 'true'
         run: |
           rm -rf auditor-docs/docs/auditor-bundle
           cp -r docs/ auditor-docs/docs/auditor-bundle
 
       - name: Inject Docusaurus front matter into index.md
+        if: steps.versions.outputs.sync == 'true'
         run: |
           INDEX="auditor-docs/docs/auditor-bundle/index.md"
           if ! head -1 "$INDEX" | grep -q '^---'; then
@@ -83,6 +93,7 @@ jobs:
           fi
 
       - name: Commit and push
+        if: steps.versions.outputs.sync == 'true'
         env:
           TAG: ${{ steps.versions.outputs.tag }}
         run: |
