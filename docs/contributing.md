@@ -38,6 +38,27 @@ composer install
 git checkout -b feature/my-new-feature
 ```
 
+#### Working in a Git worktree (optional)
+
+To work on several branches in parallel, the `Makefile` creates [Git worktrees](https://git-scm.com/docs/git-worktree) in `.claude/worktrees/<name>/` (git-ignored). A new branch starts from the freshly fetched default branch. Each worktree gets its own `vendor/` and `tools/` dependencies, and the `wt-*` targets run the Composer scripts with your local PHP.
+
+```bash
+# Create a worktree for a new branch and install its dependencies
+make wt-create branch=feature/my-new-feature
+
+# QA and tests in that worktree (wt= can be omitted when make runs from inside it)
+make wt-qa wt=feature-my-new-feature
+make wt-test wt=feature-my-new-feature args='--filter=ViewerControllerTest'
+
+# The Docker targets also work from a worktree
+make -C .claude/worktrees/feature-my-new-feature tests
+
+# Remove the worktree once its branch is merged (refused while it has uncommitted changes)
+make wt-clean wt=feature-my-new-feature confirm=yes
+```
+
+Run `make help` for the other targets (`wt-init`, `wt-list`, `wt-exec`, `wt-phpstan`).
+
 ### ✅ Running Tests
 
 #### Quick Tests (Local PHP)
@@ -69,6 +90,8 @@ The project includes a `Makefile` that allows you to test against different comb
 | `tests`   | Run the test suite using PHPUnit         |
 | `cs-fix`  | Run PHP-CS-Fixer to fix coding standards |
 | `phpstan` | Run PHPStan for static code analysis     |
+| `rector`  | Run Rector to apply automated refactorings |
+| `qa`      | Run Rector, PHP-CS-Fixer and PHPStan     |
 | `help`    | Display available commands and options   |
 
 **Options:**
@@ -136,6 +159,12 @@ composer rector      # Automated refactoring suggestions
 #### Using Make (Docker)
 
 ```bash
+# Run Rector, PHP-CS-Fixer and PHPStan, in this order
+make qa
+
+# Run Rector alone
+make rector
+
 # Run PHP-CS-Fixer
 make cs-fix
 
