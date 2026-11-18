@@ -16,14 +16,6 @@ final readonly class RoleChecker implements RoleCheckerInterface
 
     public function __invoke(string $entity, string $scope): bool
     {
-        $userProvider = $this->provider->getAuditor()->getConfiguration()->getUserProvider();
-        $user = null !== $userProvider ? $userProvider() : null;
-
-        if (!$user instanceof UserInterface) {
-            // If no security defined or no user identified, consider access granted
-            return true;
-        }
-
         \assert($this->provider->getConfiguration() instanceof Configuration);
         $entities = $this->provider->getConfiguration()->getEntities();
 
@@ -43,8 +35,14 @@ final readonly class RoleChecker implements RoleCheckerInterface
             return true;
         }
 
-        $authorizationChecker = $this->authorizationChecker;
+        $userProvider = $this->provider->getAuditor()->getConfiguration()->getUserProvider();
+        $user = null !== $userProvider ? $userProvider() : null;
 
-        return array_any($roles[$scope], static fn ($role): bool => $authorizationChecker->isGranted($role));
+        if (!$user instanceof UserInterface) {
+            // Roles are required for this scope but no user is identified: deny access
+            return false;
+        }
+
+        return array_any($roles[$scope], fn (string $role): bool => $this->authorizationChecker->isGranted($role));
     }
 }
