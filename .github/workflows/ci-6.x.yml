@@ -20,7 +20,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: 6.x
+          # Only the scheduled run (triggered from the default branch) must target 6.x: pull requests and pushes test their own code
+          ref: ${{ github.event_name == 'schedule' && '6.x' || github.ref }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -64,7 +65,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: 6.x
+          # Only the scheduled run (triggered from the default branch) must target 6.x: pull requests and pushes test their own code
+          ref: ${{ github.event_name == 'schedule' && '6.x' || github.ref }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2

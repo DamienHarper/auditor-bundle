@@ -5,6 +5,7 @@ security:
             memory:
                 users:
                     dark.vador: { password: '$argon2id$v=19$m=65536,t=4,p=1$g1yZVCS0GJ32k2fFqBBtqw$359jLODXkhqVWtD/rf+CjiNz9r/kIvhJlenPBnW851Y', roles: ['ROLE_USER'] }
+                    role1.user: { password: '$argon2id$v=19$m=65536,t=4,p=1$g1yZVCS0GJ32k2fFqBBtqw$359jLODXkhqVWtD/rf+CjiNz9r/kIvhJlenPBnW851Y', roles: ['ROLE_1'] }
 
     firewalls:
         dev:
