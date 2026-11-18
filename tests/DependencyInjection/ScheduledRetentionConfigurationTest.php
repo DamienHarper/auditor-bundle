@@ -19,6 +19,7 @@ use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
@@ -57,6 +58,20 @@ final class ScheduledRetentionConfigurationTest extends KernelTestCase
 
         // Symfony Scheduler turns the schedule into a dedicated transport.
         $this->assertArrayHasKey('messenger.transport.scheduler_'.RetentionSchedule::NAME, self::$definitions);
+    }
+
+    public function testScheduledPruningLogsOnTheAuditorChannel(): void
+    {
+        $this->bootWith(__DIR__.'/../Fixtures/Resources/config/retention/scheduled.yaml', withMessenger: true);
+
+        $this->assertArrayHasKey(PruneAuditLogsHandler::class, self::$definitions);
+        $definition = self::$definitions[PruneAuditLogsHandler::class];
+        $this->assertSame([['channel' => 'auditor']], $definition['tags']['monolog.logger'] ?? null);
+
+        // MonologBundle replaces this "logger" reference with the logger of the channel.
+        $logger = $definition['arguments'][2] ?? null;
+        $this->assertInstanceOf(Reference::class, $logger);
+        $this->assertSame('logger', (string) $logger);
     }
 
     public function testRetentionSettingsAreNotPassedToTheProviderConfiguration(): void

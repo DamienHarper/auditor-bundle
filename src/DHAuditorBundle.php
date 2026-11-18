@@ -531,6 +531,8 @@ class DHAuditorBundle extends AbstractBundle
                 new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE),
             ])
             ->tag('messenger.message_handler')
+            // with MonologBundle, the scheduled pruning logs go to the "auditor" channel, like the provider's
+            ->tag('monolog.logger', ['channel' => 'auditor'])
         ;
 
         $services->set(RetentionSchedule::class)

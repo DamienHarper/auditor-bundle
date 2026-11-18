@@ -351,7 +351,8 @@ on another connection that could not be deleted after their transaction was roll
 `transaction_id` and the audit table, to clean them up by hand).
 
 With [MonologBundle](https://symfony.com/doc/current/logging.html), these messages go to the dedicated **`auditor`
-channel**, so they can be routed to their own handler:
+channel**, as do the `info` messages of the [scheduled pruning](#retention) (one per pruned entity, or when a run is
+skipped), so they can be routed to their own handler:
 
 ```yaml
 # config/packages/monolog.yaml
