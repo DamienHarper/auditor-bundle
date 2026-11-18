@@ -195,10 +195,15 @@ class DHAuditorBundle extends AbstractBundle
         // The compiler pass also injects Auditor via setAuditor() on this definition, ensuring
         // the Auditor reference is set as soon as DoctrineProvider is instantiated regardless
         // of service resolution order.
+        // The logger reports the failures that cannot be thrown (e.g. audit rows left behind after a rollback);
+        // with MonologBundle, the "monolog.logger" tag routes it to the "auditor" channel. Without any logger
+        // service, the call is dropped and the provider keeps its NullLogger.
         $services->set(DoctrineProvider::class)
             ->args([new Reference(DoctrineProviderConfiguration::class)])
+            ->call('setLogger', [new Reference('logger', ContainerInterface::IGNORE_ON_INVALID_REFERENCE)])
             ->tag('dh_auditor.provider')
             ->tag('kernel.reset', ['method' => 'reset'])
+            ->tag('monolog.logger', ['channel' => 'auditor'])
         ;
 
         $services->alias('dh_auditor.provider.doctrine', DoctrineProvider::class);
