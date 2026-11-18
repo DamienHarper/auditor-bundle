@@ -170,7 +170,7 @@ watch-assets:
 #
 # Each worktree has its own vendor/ and tools; QA and tests run on the host PHP
 # through the composer agent-* scripts. For the Docker matrix, run the targets
-# above from the worktree: make -C .claude/worktrees/<name> tests db=pgsql
+# above from the worktree: make -C .claude/worktrees/<name> tests php=8.4
 # ============================================================================
 
 wt ?=
