@@ -14,7 +14,7 @@ This section contains upgrade guides for major versions.
 | Version | Status                 | Support Until |
 |:--------|:-----------------------|:--------------|
 | 8.x     | Active development 🚀  | Current       |
-| 7.x     | Active support         | TBD           |
+| 7.x     | Bug and security fixes | Until next major |
 | 6.x     | End of Life            | -             |
 
 ## ✅ General Upgrade Process
