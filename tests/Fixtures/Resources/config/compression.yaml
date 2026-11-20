@@ -1,0 +1,4 @@
+dh_auditor:
+    providers:
+        doctrine:
+            compression: true

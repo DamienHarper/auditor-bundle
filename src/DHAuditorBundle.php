@@ -420,6 +420,11 @@ class DHAuditorBundle extends AbstractBundle
             $doctrine['table_suffix'] = '_audit';
         }
 
+        // "compression" is disabled by default (only effective on MariaDB, see the DoctrineProvider documentation).
+        if (!\array_key_exists('compression', $doctrine)) {
+            $doctrine['compression'] = false;
+        }
+
         // "entities" are "enabled" by default.
         if (\array_key_exists('entities', $doctrine) && \is_array($doctrine['entities'])) {
             /**
