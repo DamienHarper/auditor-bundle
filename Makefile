@@ -7,7 +7,14 @@ args ?=
 # (PHP_VERSION;SYMFONY_VERSION)
 valid_combinations = \
     8.4;8.0 \
-    8.5;8.0
+    8.4;8.1 \
+    8.4;8.2 \
+    8.5;8.0 \
+    8.5;8.1 \
+    8.5;8.2 \
+    8.6;8.0 \
+    8.6;8.1 \
+    8.6;8.2
 
 current_combination = $(php);$(sf)
 
@@ -27,8 +34,8 @@ help:
 	@echo "  watch-assets - Watch and rebuild CSS assets on changes (development mode)."
 	@echo ""
 	@echo "Options:"
-	@echo "  php      - PHP version to use (default: $(php)). Supported: 8.4, 8.5"
-	@echo "  sf       - Symfony version to use (default: $(sf)). Supported: 8.0"
+	@echo "  php      - PHP version to use (default: $(php)). Supported: 8.4, 8.5, 8.6"
+	@echo "  sf       - Symfony version to use (default: $(sf)). Supported: 8.0, 8.1, 8.2"
 	@echo "  args     - Additional arguments:"
 	$(eval $(call set_args,tests))
 	@echo "             Defaults for 'tests' target:    $(args)"

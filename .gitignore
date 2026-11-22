@@ -13,3 +13,4 @@ composer.lock
 .preload.php
 /var/tailwind/
 reference.php
+/tests/App/config/schema.json

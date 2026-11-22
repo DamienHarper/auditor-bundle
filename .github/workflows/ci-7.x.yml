@@ -45,8 +45,10 @@ jobs:
         php:
           - '8.4'
           - '8.5'
+          - '8.6'
         symfony:
-          - '8.*'
+          - '8.0.*'
+          - '8.2.*'
       fail-fast: false
 
     steps:
@@ -78,7 +80,7 @@ jobs:
           restore-keys: ${{ matrix.php }}-composer-
 
       - name: Update project dependencies
-        run: SYMFONY_REQUIRE="^8.0" composer update --no-progress --ansi --prefer-stable
+        run: SYMFONY_REQUIRE="${{ matrix.symfony }}" composer update --no-progress --ansi --prefer-stable
 
       - name: Install auditor from source
         run: composer reinstall damienharper/auditor --prefer-install=source
