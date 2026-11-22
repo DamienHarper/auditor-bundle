@@ -1,0 +1,6 @@
+dh_auditor:
+    providers:
+        doctrine:
+            entities:
+                DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post:
+                    ignored_columns: { title: true }
