@@ -60,7 +60,8 @@ Displays all audited entities with:
 
 Shows audit entries for an entity:
 - 📅 Chronological list (newest first)
-- 🏷️ Operation type (insert/update/remove/associate/dissociate)
+- 🏷️ Operation type (insert/update/remove/associate/dissociate); an insert written by `audit:snapshot`
+  (the state of an entity that existed before auditing started) shows a `SNAPSHOT` badge
 - 👤 User and timestamp
 - 📝 Changed properties (diff)
 
@@ -75,7 +76,7 @@ The entity stream page includes filters to narrow down audit entries:
 
 **Action Type Filter**
 Filter by operation type:
-- `insert` - Record created
+- `insert` - Record created (snapshots included)
 - `update` - Record updated
 - `remove` - Record deleted
 - `associate` - Relation added

@@ -10,6 +10,7 @@ use DH\Auditor\Event\LifecycleEvent;
 use DH\Auditor\EventSubscriber\AuditEventSubscriber;
 use DH\Auditor\Provider\Doctrine\Configuration as DoctrineProviderConfiguration;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
+use DH\Auditor\Provider\Doctrine\Persistence\Command\SnapshotCommand;
 use DH\Auditor\Provider\Doctrine\Persistence\Event\CreateSchemaListener;
 use DH\Auditor\Provider\Doctrine\Persistence\Event\TableSchemaListener;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
@@ -21,9 +22,11 @@ use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Nyholm\BundleTest\TestKernel;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\Attributes\Small;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
+use Symfony\Component\Console\Command\LazyCommand;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 
@@ -82,6 +85,11 @@ final class DHAuditorBundleTest extends KernelTestCase
 
         $this->assertTrue($container->has(ConsoleEventSubscriber::class));
         $this->assertInstanceOf(ConsoleEventSubscriber::class, $container->get(ConsoleEventSubscriber::class));
+
+        $kernel = self::$kernel;
+        $this->assertInstanceOf(KernelInterface::class, $kernel);
+        $command = new Application($kernel)->find('audit:snapshot');
+        $this->assertInstanceOf(SnapshotCommand::class, $command instanceof LazyCommand ? $command->getCommand() : $command);
     }
 
     public function testDoctrineProviderRegisteredWithAuditor(): void

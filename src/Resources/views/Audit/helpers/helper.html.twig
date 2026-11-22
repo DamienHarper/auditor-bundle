@@ -41,8 +41,10 @@
     {%- endif -%}
 {% endmacro blame %}
 
-{% macro type_badge(type) %}
-    {%- if type == 'insert' -%}
+{% macro type_badge(type, snapshot = false) %}
+    {%- if type == 'insert' and snapshot -%}
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-400">SNAPSHOT</span>
+    {%- elseif type == 'insert' -%}
         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">INSERT</span>
     {%- elseif type == 'update' -%}
         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">UPDATE</span>

@@ -54,6 +54,7 @@ audit:
     target: Cible
     extra_data: Données complémentaires
     action_insert: enregistrement ajouté
+    action_snapshot: état initial enregistré
     action_update: enregistrement mis à jour
     action_remove: enregistrement supprimé
     action_associate: relation ajoutée

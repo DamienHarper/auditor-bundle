@@ -54,6 +54,7 @@ audit:
     target: Ціль
     extra_data: Додаткові дані
     action_insert: запис створено
+    action_snapshot: наявний запис зафіксовано
     action_update: запис оновлено
     action_remove: запис видалено
     action_associate: зв'язок додано
