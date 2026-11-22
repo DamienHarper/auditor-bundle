@@ -50,7 +50,7 @@ composer agent-qa          # agent-rector + agent-cs-fix + agent-phpstan
 
 ### Docker matrix (Makefile)
 ```bash
-make tests php=8.5                       # PHPUnit in Docker (PHP 8.4 or 8.5, Symfony 8.0); no db option
+make tests php=8.5                       # PHPUnit in Docker (PHP 8.4–8.6, Symfony 8.0–8.2); no db option
 make tests args='--filter=ViewerControllerTest'
 make qa                                  # rector + cs-fix + phpstan in Docker
 make build-assets                        # rebuild src/Resources/public/app.css (Tailwind, host PHP)

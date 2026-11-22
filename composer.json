@@ -59,6 +59,7 @@
     "symfony/framework-bundle": "^8.0",
     "symfony/messenger": "^8.0",
     "symfony/scheduler": "^8.0",
+    "symfony/validator": "^8.0",
     "symfony/var-dumper": "^8.0",
     "symfonycasts/tailwind-bundle": "^1.0"
   },
