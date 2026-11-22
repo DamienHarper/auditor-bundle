@@ -141,6 +141,40 @@ dh_auditor:
                 - password
 ```
 
+### ignored_columns_resolver
+
+| Type      | Default | Description                                                           |
+|-----------|---------|-----------------------------------------------------------------------|
+| `?string` | `~`     | Service ID of a callable returning the properties to ignore for a given entity object |
+
+`ignored_columns` and the entity options apply to every object of an entity class. To decide per object, implement
+`IgnoredColumnsResolverInterface` (or any invokable service) and reference the service:
+
+```php
+namespace App\Audit;
+
+use App\Entity\Document;
+use DH\Auditor\Provider\Doctrine\Auditing\IgnoredColumnsResolverInterface;
+
+final class DocumentIgnoredColumnsResolver implements IgnoredColumnsResolverInterface
+{
+    public function __invoke(object $entity): array
+    {
+        return $entity instanceof Document && $entity->isDraft() ? ['content'] : [];
+    }
+}
+```
+
+```yaml
+dh_auditor:
+    providers:
+        doctrine:
+            ignored_columns_resolver: App\Audit\DocumentIgnoredColumnsResolver
+```
+
+The resolver is called for every audited entity object on each flush, so keep it cheap. It can only ignore more
+properties: it never audits a property ignored by the configuration or left out of `audited_columns`.
+
 ### entities
 
 | Type    | Default | Description                   |
@@ -164,6 +198,10 @@ dh_auditor:
                         view:
                             - ROLE_ADMIN
 
+                # Only audit a few properties (allowlist)
+                App\Entity\Order:
+                    audited_columns: [status, total, customer]
+
                 # With a retention policy
                 App\Entity\Payment:
                     retention:
@@ -177,9 +215,20 @@ dh_auditor:
 |-------------------------|-----------|---------|--------------------------------------------------------|
 | `enabled`               | `bool`    | `true`  | Enable/disable auditing for entity                     |
 | `ignored_columns`       | `array`   | `[]`    | Properties to ignore for this entity                   |
+| `audited_columns`       | `?array`  | `~`     | Allowlist: only these properties are audited (`~`: all) |
 | `roles.view`            | `array`   | `[]`    | Roles required to view audits                          |
 | `retention.max_age`     | `?string` | `~`     | Entries older than this ISO 8601 duration are pruned   |
 | `retention.max_entries` | `?int`    | `~`     | Only the N most recent entries are kept                |
+
+**Audited properties.** A property is audited when it is not in the global `ignored_columns`, not in the entity
+`ignored_columns` nor marked with `#[Ignore]`, listed in `audited_columns` (when set) and not returned by the
+`ignored_columns_resolver` for that object. Ignoring always wins over the allowlist.
+
+- With `audited_columns`, an update that only changes other properties writes no audit entry; inserts and removals
+  are still audited. `audited_columns: []` only records inserts and removals.
+- These options apply to fields and to-one associations (the diffs), not to to-many associations
+  (`associate` / `dissociate` entries).
+- `ignored_columns` and `audited_columns` must be lists of property names (checked when the container is built).
 
 **Retention policies** are applied by `audit:clean` (and by scheduled pruning when enabled):
 

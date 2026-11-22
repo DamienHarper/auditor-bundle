@@ -171,19 +171,24 @@ class DHAuditorBundle extends AbstractBundle
 
         // Load providers
         foreach ($config['providers'] as $providerName => $providerConfig) {
-            // Scheduled pruning settings belong to the bundle, not to the provider configuration.
+            // Scheduled pruning settings belong to the bundle, not to the provider configuration; the ignored columns
+            // resolver is a service, set on the provider configuration by a method call.
             $retentionConfig = null;
+            $ignoredColumnsResolver = null;
             if ('doctrine' === $providerName) {
                 /** @var array{schedule: ?string, default_max_age: ?string} $retentionConfig */
                 $retentionConfig = $providerConfig['retention'];
-                unset($providerConfig['retention']);
+
+                /** @var ?string $ignoredColumnsResolver */
+                $ignoredColumnsResolver = $providerConfig['ignored_columns_resolver'];
+                unset($providerConfig['retention'], $providerConfig['ignored_columns_resolver']);
             }
 
             $builder->setParameter('dh_auditor.provider.'.$providerName.'.configuration', $providerConfig);
 
             if ('doctrine' === $providerName) {
                 /** @var array{storage_services: list<string>, auditing_services: list<string>, viewer: array<string, mixed>|bool} $providerConfig */
-                $this->loadDoctrineProvider($services, $builder, $providerConfig);
+                $this->loadDoctrineProvider($services, $builder, $providerConfig, $ignoredColumnsResolver);
                 \assert(null !== $retentionConfig);
                 $this->loadScheduledRetention($services, $retentionConfig);
                 // The alias dh_auditor.provider.doctrine is defined by loadDoctrineProvider(),
@@ -199,12 +204,16 @@ class DHAuditorBundle extends AbstractBundle
     /**
      * @param array{storage_services: list<string>, auditing_services: list<string>, viewer: array<string, mixed>|bool} $config
      */
-    private function loadDoctrineProvider(ServicesConfigurator $services, ContainerBuilder $builder, array $config): void
+    private function loadDoctrineProvider(ServicesConfigurator $services, ContainerBuilder $builder, array $config, ?string $ignoredColumnsResolver): void
     {
         // DoctrineProvider Configuration
-        $services->set(DoctrineProviderConfiguration::class)
+        $configurationDefinition = $services->set(DoctrineProviderConfiguration::class)
             ->args(['%dh_auditor.provider.doctrine.configuration%'])
         ;
+
+        if (null !== $ignoredColumnsResolver) {
+            $configurationDefinition->call('setIgnoredColumnsResolver', [new Reference($ignoredColumnsResolver)]);
+        }
 
         // DoctrineProvider — tagged so RegisterProvidersCompilerPass picks it up automatically.
         // The compiler pass also injects Auditor via setAuditor() on this definition, ensuring
@@ -454,6 +463,7 @@ class DHAuditorBundle extends AbstractBundle
                         $options['enabled'] = true;
                     }
 
+                    $this->validateColumnsConfig($entity, $options);
                     $doctrine['entities'][$entity] = $this->normalizeRetentionConfig($entity, $options);
                 }
             }
@@ -524,6 +534,15 @@ class DHAuditorBundle extends AbstractBundle
 
         // "retention" (scheduled pruning) is disabled by default.
         $doctrine['retention'] = $this->normalizeScheduledRetentionConfig($doctrine['retention'] ?? null);
+
+        // "ignored_columns_resolver" (a service ID) is null by default
+        if (!\array_key_exists('ignored_columns_resolver', $doctrine) || null === $doctrine['ignored_columns_resolver']) {
+            $doctrine['ignored_columns_resolver'] = null;
+        } elseif (\is_string($doctrine['ignored_columns_resolver']) && '' !== $doctrine['ignored_columns_resolver']) {
+            $doctrine['ignored_columns_resolver'] = mb_ltrim($doctrine['ignored_columns_resolver'], '@');
+        } else {
+            throw new \InvalidArgumentException(\sprintf('The "ignored_columns_resolver" option of the doctrine provider must be a service ID, %s given.', get_debug_type($doctrine['ignored_columns_resolver'])));
+        }
 
         // "storage_mapper" is null by default
         if (!\array_key_exists('storage_mapper', $doctrine) || !\is_string($doctrine['storage_mapper'])) {
@@ -615,6 +634,26 @@ class DHAuditorBundle extends AbstractBundle
         }
 
         return $normalized;
+    }
+
+    /**
+     * Checks the "ignored_columns" and "audited_columns" options of an entity: lists of property names, or null
+     * (no property ignored, respectively every property audited).
+     *
+     * @param array<string, mixed> $options
+     */
+    private function validateColumnsConfig(string $entity, array $options): void
+    {
+        foreach (['ignored_columns', 'audited_columns'] as $option) {
+            if (null === ($options[$option] ?? null)) {
+                continue;
+            }
+
+            $columns = $options[$option];
+            if (!\is_array($columns) || !array_is_list($columns) || array_any($columns, static fn (mixed $column): bool => !\is_string($column))) {
+                throw new \InvalidArgumentException(\sprintf('The "%s" option of entity "%s" must be a list of property names.', $option, $entity));
+            }
+        }
     }
 
     /**

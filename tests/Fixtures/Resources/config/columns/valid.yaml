@@ -1,0 +1,14 @@
+services:
+    DH\AuditorBundle\Tests\Fixtures\Columns\PostIgnoredColumnsResolver: ~
+
+dh_auditor:
+    providers:
+        doctrine:
+            ignored_columns_resolver: 'DH\AuditorBundle\Tests\Fixtures\Columns\PostIgnoredColumnsResolver'
+            entities:
+                DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post:
+                    audited_columns: [title, body]
+                    ignored_columns: [body]
+                DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Comment:
+                    audited_columns: ~
+                DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author: ~

@@ -1,0 +1,4 @@
+dh_auditor:
+    providers:
+        doctrine:
+            ignored_columns_resolver: [not, a, service]
