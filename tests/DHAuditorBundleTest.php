@@ -6,6 +6,8 @@ namespace DH\AuditorBundle\Tests;
 
 use DH\Auditor\Auditor;
 use DH\Auditor\Configuration as AuditorConfiguration;
+use DH\Auditor\Event\LifecycleEvent;
+use DH\Auditor\EventSubscriber\AuditEventSubscriber;
 use DH\Auditor\Provider\Doctrine\Configuration as DoctrineProviderConfiguration;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Provider\Doctrine\Persistence\Event\CreateSchemaListener;
@@ -22,6 +24,7 @@ use PHPUnit\Framework\Attributes\Small;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
@@ -99,6 +102,37 @@ final class DHAuditorBundleTest extends KernelTestCase
         $this->assertTrue($auditor->hasProvider(DoctrineProvider::class), 'DoctrineProvider must be registered with Auditor via the compiler pass');
     }
 
+    public function testAuditEventSubscriberIsDeclaredOnceInTheContainer(): void
+    {
+        self::bootKernel(['config' => static function (TestKernel $kernel): void {
+            $kernel->setClearCacheAfterShutdown(false);
+            $kernel->addTestBundle(DoctrineBundle::class);
+            $kernel->addTestBundle(SecurityBundle::class);
+            $kernel->addTestBundle(TwigBundle::class);
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/dh_auditor.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/doctrine.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/security.yaml');
+        }]);
+
+        $container = self::getContainer();
+
+        // Instantiating the Auditor must not add the subscriber at runtime (deprecated on Symfony 8.2's
+        // compiled dispatcher): the container declares it, so it is listed exactly once.
+        $this->assertInstanceOf(Auditor::class, $container->get(Auditor::class));
+
+        $dispatcher = $container->get('event_dispatcher');
+        Assert::assertInstanceOf(EventDispatcherInterface::class, $dispatcher);
+
+        $listeners = $dispatcher->getListeners(LifecycleEvent::class);
+        $subscribers = array_values(array_filter(
+            $listeners,
+            static fn (mixed $listener): bool => \is_array($listener) && $listener[0] instanceof AuditEventSubscriber,
+        ));
+
+        $this->assertCount(1, $subscribers, 'AuditEventSubscriber must be registered exactly once');
+        $this->assertSame(AuditEventSubscriber::PRIORITY, $dispatcher->getListenerPriority(LifecycleEvent::class, $subscribers[0]));
+    }
+
     public function testCustomProviderRegisteredViaTag(): void
     {
         self::bootKernel(['config' => static function (TestKernel $kernel): void {
@@ -152,6 +186,43 @@ final class DHAuditorBundleTest extends KernelTestCase
         $container = self::getContainer();
 
         $this->assertFalse($container->getParameter('dh_auditor.viewer_enabled'), 'dh_auditor.viewer_enabled must be false when viewer is not enabled in config');
+    }
+
+    public function testCompressionIsDisabledByDefault(): void
+    {
+        self::bootKernel(['config' => static function (TestKernel $kernel): void {
+            $kernel->setClearCacheAfterShutdown(false);
+            $kernel->addTestBundle(DoctrineBundle::class);
+            $kernel->addTestBundle(SecurityBundle::class);
+            $kernel->addTestBundle(TwigBundle::class);
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/dh_auditor.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/doctrine.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/security.yaml');
+        }]);
+
+        $configuration = self::getContainer()->get(DoctrineProviderConfiguration::class);
+        Assert::assertInstanceOf(DoctrineProviderConfiguration::class, $configuration);
+
+        $this->assertFalse($configuration->isCompressionEnabled(), '"compression" is disabled by default.');
+    }
+
+    public function testCompressionIsPassedToTheDoctrineProvider(): void
+    {
+        self::bootKernel(['config' => static function (TestKernel $kernel): void {
+            $kernel->setClearCacheAfterShutdown(false);
+            $kernel->addTestBundle(DoctrineBundle::class);
+            $kernel->addTestBundle(SecurityBundle::class);
+            $kernel->addTestBundle(TwigBundle::class);
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/dh_auditor.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/compression.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/doctrine.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/security.yaml');
+        }]);
+
+        $configuration = self::getContainer()->get(DoctrineProviderConfiguration::class);
+        Assert::assertInstanceOf(DoctrineProviderConfiguration::class, $configuration);
+
+        $this->assertTrue($configuration->isCompressionEnabled(), '"compression" is passed to the DoctrineProvider configuration.');
     }
 
     #[\Override]
