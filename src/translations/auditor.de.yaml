@@ -54,6 +54,7 @@ audit:
     target: Ziel
     extra_data: Zusätzliche Daten
     action_insert: Datensatz erstellt
+    action_snapshot: Bestehender Datensatz erfasst
     action_update: Datensatz aktualisiert
     action_remove: Datensatz gelöscht
     action_associate: Beziehung hinzugefügt

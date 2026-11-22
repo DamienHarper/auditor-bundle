@@ -54,6 +54,7 @@ audit:
     target: Sihtmärk
     extra_data: Lisaandmed
     action_insert: kirje loodud
+    action_snapshot: olemasolev kirje salvestatud
     action_update: kirje uuendatud
     action_remove: kirje kustutatud
     action_associate: seos lisatud

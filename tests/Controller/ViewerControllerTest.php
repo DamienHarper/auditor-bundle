@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\Tests\Controller;
 
 use DH\Auditor\Model\Entry;
+use DH\Auditor\Provider\Doctrine\Auditing\Snapshot\Snapshotter;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Comment;
@@ -223,6 +224,19 @@ final class ViewerControllerTest extends WebTestCase
         // Check entries are displayed
         $entries = $crawler->filter('details');
         $this->assertGreaterThanOrEqual(1, $entries->count(), 'There are audit entries');
+    }
+
+    public function testShowEntityHistoryFlagsSnapshots(): void
+    {
+        new Snapshotter($this->provider)->snapshot(Tag::class, force: true);
+
+        $this->login();
+        $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Tag');
+
+        $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
+        $this->assertGreaterThanOrEqual(1, $crawler->filter('summary:contains("SNAPSHOT")')->count(), 'Snapshot entries carry the SNAPSHOT badge.');
+        $this->assertStringContainsString('existing record captured', $crawler->text(), 'Snapshot entries are described as such.');
+        $this->assertGreaterThanOrEqual(1, $crawler->filter('summary:contains("INSERT")')->count(), 'Regular insert entries keep the INSERT badge.');
     }
 
     #[Depends('testShowEntityHistoryAnonymously')]
