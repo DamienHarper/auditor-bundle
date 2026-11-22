@@ -17,17 +17,21 @@ dh_auditor:
     user_provider: 'dh_auditor.user_provider'
     security_provider: 'dh_auditor.security_provider'
     role_checker: 'dh_auditor.role_checker'
+    extra_data_provider: ~                  # Service adding extra data to audit entries (opt-in)
 
     providers:
         doctrine:
             table_prefix: ''
             table_suffix: '_audit'
             ignored_columns: []
+            ignored_columns_resolver: ~     # Service returning the properties to ignore for an object
             entities: []
             storage_services: ['@doctrine.orm.default_entity_manager']
             auditing_services: ['@doctrine.orm.default_entity_manager']
             storage_mapper: ~
             utf8_convert: false             # Re-enable legacy UTF-8 conversion (opt-in)
+            full_snapshot_on_remove: false  # Record every audited field of removed entities (opt-in)
+            batch_size: 0                   # Multi-row INSERTs for audit entries (0: one INSERT per entry)
             compression: false              # Compress diffs/extra_data columns (MariaDB only)
             skip_disabled_entities: false   # No audit table for entities disabled by their configuration
             viewer: false
@@ -317,6 +321,42 @@ dh_auditor:
 
 > [!NOTE]
 > Enabling this option has a small performance cost as every stored value is passed through `mb_convert_encoding()`. Leave it disabled unless you know your data sources may produce non-UTF-8 strings.
+
+### full_snapshot_on_remove
+
+| Type   | Default | Description                                                    |
+|--------|---------|----------------------------------------------------------------|
+| `bool` | `false` | Record the last value of every audited field of a removed entity |
+
+By default, a `remove` entry only identifies the deleted entity (`getDiffSource()`), with empty changes. With this
+option, it also records every audited field as `old`, with `new` set to `null`: the viewer then shows the last state
+of the deleted object. Remove entries get larger.
+
+```yaml
+dh_auditor:
+    providers:
+        doctrine:
+            full_snapshot_on_remove: true
+```
+
+### batch_size
+
+| Type          | Default | Description                                                      |
+|---------------|---------|------------------------------------------------------------------|
+| `int` (≥ 0)   | `0`     | Write the audit entries of a transaction with multi-row `INSERT`s |
+
+With `0`, each audit entry is written with its own `INSERT`. A positive value buffers the audit entries of the
+database transaction being committed and writes them with multi-row `INSERT`s, right before the `COMMIT` or as soon as
+`batch_size` entries are buffered: flushes of many entities are faster. Values between `100` and `1000` are a good
+start; the `LifecycleEvent` payload of a buffered entry has no `id`. See the provider's [Batch INSERT](https://damienharper.github.io/auditor-docs/auditor-doctrine-provider/providers/doctrine/configuration#-batch-insert)
+documentation for the trade-offs.
+
+```yaml
+dh_auditor:
+    providers:
+        doctrine:
+            batch_size: 500
+```
 
 ### compression
 
