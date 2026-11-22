@@ -58,9 +58,11 @@ bin/console audit:schema:update --force
 
 > [!CAUTION]
 > `audit:schema:update` refuses to run if any audit table still has the legacy v1 schema. Run `audit:schema:migrate` first to preserve your data, then run `audit:schema:update`.
+> The migration drops the legacy columns and cannot be undone: back up the audit tables, stop writing audits
+> while it runs, and follow the [8.0 upgrade steps](v8.md#-upgrade-steps) in their order.
 
 ```bash
-# Migrate legacy audit tables to v2 (preserves all data)
+# Migrate legacy audit tables to v2 (converts the existing entries, then drops the legacy columns)
 bin/console audit:schema:migrate --force --convert-all
 
 # Then apply any remaining schema changes
