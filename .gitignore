@@ -16,3 +16,7 @@ reference.php
 
 # Git worktrees (make wt-create)
 .claude/worktrees/
+
+###> phpbench/phpbench ###
+.phpbench/
+###< phpbench/phpbench ###

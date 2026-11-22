@@ -630,6 +630,34 @@ final class ViewerControllerTest extends WebTestCase
     }
 
     /**
+     * A user who wrote entries from several IPs, or under several usernames, is listed once in the
+     * user filter, under their latest username; users are sorted by name.
+     */
+    public function testUserFilterListsEachUserOnceUnderTheirLatestName(): void
+    {
+        $this->seedUserEntry(Post::class, 'filter-user', 'old.name', '2026-01-01 10:00:00', '10.0.0.1');
+        $this->seedUserEntry(Post::class, 'filter-user', 'new.name', '2026-01-02 10:00:00', '10.0.0.2');
+        $this->seedUserEntry(Post::class, 'filter-user', 'new.name', '2026-01-03 10:00:00', '10.0.0.3');
+        $this->seedUserEntry(Post::class, 'other-user', 'alice', '2026-01-04 10:00:00', '10.0.0.4');
+
+        $this->login(['ROLE_1']);
+        $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Post');
+
+        $this->assertResponseIsSuccessful();
+        $options = $crawler->filter('#filter-user option')->each(
+            static fn (Crawler $option): array => [(string) $option->attr('value'), mb_trim($option->text())]
+        );
+        $seeded = array_values(array_filter($options, static fn (array $option): bool => \in_array($option[0], ['filter-user', 'other-user'], true)));
+
+        $this->assertSame([['other-user', 'alice'], ['filter-user', 'new.name']], $seeded, 'One option per user, latest username, sorted by name');
+
+        $names = array_column(array_filter($options, static fn (array $option): bool => !\in_array($option[0], ['', '__anonymous__'], true)), 1);
+        $sorted = $names;
+        usort($sorted, static fn (string $a, string $b): int => mb_strtolower($a) <=> mb_strtolower($b));
+        $this->assertSame($sorted, $names, 'Users are sorted by name');
+    }
+
+    /**
      * Entries link their author to the user timeline only when they carry a usable blame_id:
      * users without a getId() method are recorded with an empty blame_id, and entries may hold a
      * username without any blame_id.
@@ -943,7 +971,7 @@ final class ViewerControllerTest extends WebTestCase
     /**
      * Copies an insert audit row of $entity, attributed to the given user at the given date.
      */
-    private function seedUserEntry(string $entity, ?string $blameId, string $username, string $createdAt): void
+    private function seedUserEntry(string $entity, ?string $blameId, string $username, string $createdAt, ?string $ip = null): void
     {
         $table = $this->createReader()->getEntityAuditTableName($entity);
         $connection = $this->provider->getStorageServiceForEntity($entity)->getEntityManager()->getConnection();
@@ -951,7 +979,7 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertIsArray($row);
         unset($row['id']);
         $row['blame_id'] = $blameId;
-        $row['blame'] = json_encode(['username' => $username], JSON_THROW_ON_ERROR);
+        $row['blame'] = json_encode(['username' => $username] + (null === $ip ? [] : ['ip' => $ip]), JSON_THROW_ON_ERROR);
         $row['created_at'] = $createdAt;
         $connection->insert($table, $row);
     }

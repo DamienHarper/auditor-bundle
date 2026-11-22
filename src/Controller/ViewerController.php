@@ -540,9 +540,13 @@ final readonly class ViewerController
         $users = [];
 
         if ($hasBlameColumn) {
-            // Schema v2: username is encoded as JSON in the 'blame' column.
+            // Schema v2: username is encoded as JSON in the 'blame' column, which no index can cover.
+            // Only the latest row of each user is read: MAX(id) per blame_id is resolved from the
+            // blame_id index alone, then the blame of those rows is fetched by primary key (a derived
+            // table rather than IN (subquery), which MySQL would run as a full scan).
+            // A blame also holds the IP and firewall: one user is listed once, under their latest username.
             $usersSql = \sprintf(
-                'SELECT DISTINCT blame_id, blame FROM %s WHERE blame_id IS NOT NULL %s ORDER BY blame_id',
+                'SELECT a.blame_id, a.blame FROM %1$s a INNER JOIN (SELECT MAX(id) AS id FROM %1$s WHERE blame_id IS NOT NULL %2$s GROUP BY blame_id) latest ON a.id = latest.id',
                 $auditTable,
                 '' !== $objectIdCondition ? 'AND '.$objectIdCondition : ''
             );
@@ -562,6 +566,7 @@ final readonly class ViewerController
                     'name' => \is_string($blameUser) ? $blameUser : (\is_scalar($blameId) ? (string) $blameId : ''),
                 ];
             }, $usersResult);
+            usort($users, static fn (array $a, array $b): int => [mb_strtolower($a['name']), $a['id']] <=> [mb_strtolower($b['name']), $b['id']]);
         } elseif ($hasLegacyBlame) {
             // Schema v1 (legacy): username is stored in the dedicated 'blame_user' column.
             $usersSql = \sprintf(
@@ -584,14 +589,13 @@ final readonly class ViewerController
 
         // If neither column exists, $users remains [] (no blame info available).
 
-        // Check if there are anonymous entries (blame_id IS NULL)
-        $anonymousSql = \sprintf(
-            'SELECT COUNT(*) FROM %s WHERE blame_id IS NULL %s',
+        // Check if there are anonymous entries (blame_id IS NULL): the first one is enough
+        $anonymousSql = $connection->getDatabasePlatform()->modifyLimitQuery(\sprintf(
+            'SELECT 1 FROM %s WHERE blame_id IS NULL %s',
             $auditTable,
             '' !== $objectIdCondition ? 'AND '.$objectIdCondition : ''
-        );
-        $anonymousCount = $connection->executeQuery($anonymousSql, $params)->fetchOne();
-        $hasAnonymous = is_numeric($anonymousCount) && (int) $anonymousCount > 0;
+        ), 1);
+        $hasAnonymous = false !== $connection->executeQuery($anonymousSql, $params)->fetchOne();
 
         // The changed field filter needs native JSON support and the schema v2 structure
         // (schema_version column); legacy tables must be migrated first.

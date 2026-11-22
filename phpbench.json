@@ -1,0 +1,7 @@
+{
+    "$schema": "https://raw.githubusercontent.com/phpbench/phpbench/master/phpbench.schema.json",
+    "runner.bootstrap": "vendor/autoload.php",
+    "runner.path": "benchmarks",
+    "storage.driver": "xml",
+    "storage.xml_storage_path": ".phpbench"
+}

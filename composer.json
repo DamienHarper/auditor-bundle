@@ -43,6 +43,7 @@
   },
   "autoload-dev": {
     "psr-4": {
+      "DH\\AuditorBundle\\Benchmarks\\": "benchmarks",
       "DH\\AuditorBundle\\Tests\\": "tests",
       "DH\\Auditor\\Tests\\": "vendor/damienharper/auditor-doctrine-provider/tests"
     }
@@ -52,6 +53,7 @@
     "gedmo/doctrine-extensions": "^3.0",
     "matthiasnoback/symfony-dependency-injection-test": "^6.0",
     "nyholm/symfony-bundle-test": "^3.0",
+    "phpbench/phpbench": "^1.4",
     "phpunit/phpunit": "^13.4",
     "symfony/asset-mapper": "^8.0",
     "symfony/browser-kit": "^8.0",
@@ -63,6 +65,7 @@
     "symfonycasts/tailwind-bundle": "^1.0"
   },
   "scripts": {
+    "bench": "vendor/bin/phpbench run benchmarks/UserFilterBench.php --report=aggregate",
     "test": "./vendor/bin/phpunit --colors=always --no-coverage",
     "test:coverage": "XDEBUG_MODE=coverage ./vendor/bin/phpunit --colors=always",
     "testdox": "./vendor/bin/phpunit --colors=always --testdox --no-coverage",
