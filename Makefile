@@ -1,18 +1,15 @@
 # Default values
 php ?= 8.5
-sf ?= 8.0
+sf ?= 8.1
 args ?=
 
 # Allowed PHP and Symfony version combinations
 # (PHP_VERSION;SYMFONY_VERSION)
 valid_combinations = \
-    8.4;8.0 \
     8.4;8.1 \
     8.4;8.2 \
-    8.5;8.0 \
     8.5;8.1 \
     8.5;8.2 \
-    8.6;8.0 \
     8.6;8.1 \
     8.6;8.2
 
@@ -37,7 +34,7 @@ help:
 	@echo ""
 	@echo "Options:"
 	@echo "  php      - PHP version to use (default: $(php)). Supported: 8.4, 8.5, 8.6"
-	@echo "  sf       - Symfony version to use (default: $(sf)). Supported: 8.0, 8.1, 8.2"
+	@echo "  sf       - Symfony version to use (default: $(sf)). Supported: 8.1, 8.2"
 	@echo "  args     - Additional arguments:"
 	$(eval $(call set_args,tests))
 	@echo "             Defaults for 'tests' target:    $(args)"
@@ -49,7 +46,7 @@ help:
 	@echo "             Defaults for 'rector' target:   $(args)"
 	@echo ""
 	@echo "Examples:"
-	@echo "  make tests php=8.4 sf=8.0"
+	@echo "  make tests php=8.4 sf=8.1"
 	@echo "  make cs-fix"
 	@echo "  make phpstan"
 	@echo "  make build-assets"
