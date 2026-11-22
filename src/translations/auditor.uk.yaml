@@ -50,6 +50,7 @@ audit:
     icon_title: Порівняти ревізії
   entry:
     by: від
+    via: через
     source: Джерело
     target: Ціль
     extra_data: Додаткові дані

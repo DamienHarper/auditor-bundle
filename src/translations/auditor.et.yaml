@@ -50,6 +50,7 @@ audit:
     icon_title: Võrdle redaktsioone
   entry:
     by: kasutajalt
+    via: kaudu
     source: Allikas
     target: Sihtmärk
     extra_data: Lisaandmed

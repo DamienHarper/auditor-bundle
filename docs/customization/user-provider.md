@@ -267,5 +267,6 @@ class CompositeUserProvider implements UserProviderInterface
 
 ## 🚀 Next Steps
 
+- 🧭 [Blame Context](blame-context.md) - Record how a change was made (import, command, Messenger message…)
 - 🔒 [Security Provider](security-provider.md) - Customize IP/context detection
 - 🛡️ [Role Checker](role-checker.md) - Customize access control

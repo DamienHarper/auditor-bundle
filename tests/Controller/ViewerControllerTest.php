@@ -700,6 +700,29 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertSame([Post::class], $this->timelineEntities($crawler));
     }
 
+    public function testEntriesShowTheirBlameContext(): void
+    {
+        $table = $this->createReader()->getEntityAuditTableName(Post::class);
+        $connection = $this->provider->getStorageServiceForEntity(Post::class)->getEntityManager()->getConnection();
+        $row = $connection->fetchAssociative('SELECT * FROM '.$table." WHERE type = 'insert' ORDER BY id LIMIT 1");
+        $this->assertIsArray($row);
+        unset($row['id']);
+        $row['blame'] = json_encode([
+            'username' => 'importer',
+            'via' => ['type' => 'import', 'label' => 'Import batch #42', 'data' => ['file' => 'posts.csv']],
+        ], JSON_THROW_ON_ERROR);
+        $row['created_at'] = '2026-01-01 10:00:00';
+        $connection->insert($table, $row);
+
+        $this->login(['ROLE_1']);
+        $crawler = $this->client->request('GET', self::POST_URL);
+
+        $this->assertResponseIsSuccessful();
+        $badge = $crawler->filter('span[title=\'{"file":"posts.csv"}\']');
+        $this->assertCount(1, $badge, 'The blame context is shown once, with its data in the tooltip.');
+        $this->assertSame('via import · Import batch #42', $badge->text());
+    }
+
     public function testCompareRevisionsComposesTheChangesBetweenThem(): void
     {
         [$postId, $revisions] = $this->createPostHistory();

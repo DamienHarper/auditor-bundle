@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\Tests;
 
 use DH\Auditor\Auditor;
+use DH\Auditor\Blame\BlameContextStack;
+use DH\Auditor\Configuration;
 use DH\Auditor\Configuration as AuditorConfiguration;
 use DH\Auditor\Event\LifecycleEvent;
 use DH\Auditor\EventSubscriber\AuditEventSubscriber;
@@ -17,6 +19,7 @@ use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\AuditorBundle\Controller\ViewerController;
 use DH\AuditorBundle\DHAuditorBundle;
 use DH\AuditorBundle\Event\ConsoleEventSubscriber;
+use DH\AuditorBundle\Messenger\BlameContextMiddleware;
 use DH\AuditorBundle\Tests\Fixtures\Provider\StubProviderA;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Nyholm\BundleTest\TestKernel;
@@ -27,6 +30,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Console\Command\LazyCommand;
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 
@@ -90,6 +95,36 @@ final class DHAuditorBundleTest extends KernelTestCase
         $this->assertInstanceOf(KernelInterface::class, $kernel);
         $command = new Application($kernel)->find('audit:snapshot');
         $this->assertInstanceOf(SnapshotCommand::class, $command instanceof LazyCommand ? $command->getCommand() : $command);
+    }
+
+    public function testBlameContextServices(): void
+    {
+        self::bootKernel(['config' => static function (TestKernel $kernel): void {
+            $kernel->addTestBundle(DoctrineBundle::class);
+            $kernel->addTestBundle(SecurityBundle::class);
+            $kernel->addTestBundle(TwigBundle::class);
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/dh_auditor.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/doctrine.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/security.yaml');
+
+            // nothing uses these services in the test application: keep them in the container
+            $kernel->addTestCompilerPass(new class implements CompilerPassInterface {
+                public function process(ContainerBuilder $container): void
+                {
+                    $container->getDefinition(BlameContextStack::class)->setPublic(true);
+                    $container->getDefinition(BlameContextMiddleware::class)->setPublic(true);
+                    $container->getAlias('dh_auditor.blame_context_stack')->setPublic(true);
+                    $container->getAlias('dh_auditor.messenger.blame_context_middleware')->setPublic(true);
+                }
+            });
+        }]);
+
+        $container = self::getContainer();
+        $stack = $container->get(Configuration::class)->getBlameContextStack();
+
+        $this->assertSame($stack, $container->get(BlameContextStack::class), 'The blame context stack service is the one of the auditor configuration.');
+        $this->assertSame($stack, $container->get('dh_auditor.blame_context_stack'));
+        $this->assertInstanceOf(BlameContextMiddleware::class, $container->get('dh_auditor.messenger.blame_context_middleware'));
     }
 
     public function testDoctrineProviderRegisteredWithAuditor(): void

@@ -41,6 +41,20 @@
     {%- endif -%}
 {% endmacro blame %}
 
+{#
+  Blame context of an audit entry (an import, a console command, a Messenger message…), stored in the
+  "via" key of the blame JSON: its type and label, with its data in the tooltip.
+#}
+{% macro via(entry) %}
+    {%- set via = entry.via -%}
+    {%- if via is not null -%}
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300"
+              {% if via.data is defined and via.data is not empty %}title="{{ via.data|json_encode }}"{% endif %}>
+            {{- 'audit.entry.via'|trans(domain='auditor') }} {{ via.type }}{% if via.label is defined and via.label is not empty %} · {{ via.label }}{% endif -%}
+        </span>
+    {%- endif -%}
+{% endmacro via %}
+
 {% macro type_badge(type, snapshot = false) %}
     {%- if type == 'insert' and snapshot -%}
         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-400">SNAPSHOT</span>

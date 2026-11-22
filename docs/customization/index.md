@@ -14,6 +14,9 @@ The bundle uses three providers that can be customized:
 | Security Provider | Returns IP address and firewall name | `dh_auditor.security_provider`   |
 | Role Checker      | Checks if user can view entity audits | `dh_auditor.role_checker`       |         
 
+To record *how* a change was made (an import, a console command, a Messenger message…), see
+[Blame Context](blame-context.md).
+
 ```mermaid
 flowchart LR
     subgraph PROVIDERS["Customizable Providers"]

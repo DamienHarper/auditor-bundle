@@ -50,6 +50,7 @@ audit:
     icon_title: Confronta revisioni
   entry:
     by: da
+    via: tramite
     source: Origine
     target: Destinazione
     extra_data: Dati aggiuntivi

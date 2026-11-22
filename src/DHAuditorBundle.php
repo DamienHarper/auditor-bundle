@@ -6,6 +6,7 @@ namespace DH\AuditorBundle;
 
 use Cron\CronExpression;
 use DH\Auditor\Auditor;
+use DH\Auditor\Blame\BlameContextStack;
 use DH\Auditor\Configuration;
 use DH\Auditor\Contract\DiffLabelResolverInterface;
 use DH\Auditor\Event\LifecycleEvent;
@@ -35,6 +36,7 @@ use DH\AuditorBundle\DependencyInjection\Compiler\RegisterProvidersCompilerPass;
 use DH\AuditorBundle\Event\ConsoleEventSubscriber;
 use DH\AuditorBundle\Event\ViewerEventSubscriber;
 use DH\AuditorBundle\ExtraData\ExtraDataProvider;
+use DH\AuditorBundle\Messenger\BlameContextMiddleware;
 use DH\AuditorBundle\Retention\PruneAuditLogsHandler;
 use DH\AuditorBundle\Retention\RetentionSchedule;
 use DH\AuditorBundle\Routing\RoutingLoader;
@@ -54,6 +56,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
+use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
 use Symfony\Component\Scheduler\RecurringMessage;
 
 /**
@@ -145,6 +148,14 @@ class DHAuditorBundle extends AbstractBundle
         if (null !== $config['extra_data_provider']) {
             $configDefinition->call('setExtraDataProvider', [new Reference($config['extra_data_provider'])]);
         }
+
+        // Blame context stack, held by the auditor configuration: its current context is written in the "via" key of
+        // the blame JSON. Reset between two messages of a worker or two requests of a FrankenPHP / RoadRunner worker.
+        $services->set(BlameContextStack::class)
+            ->factory([new Reference(Configuration::class), 'getBlameContextStack'])
+            ->tag('kernel.reset', ['method' => 'reset'])
+        ;
+        $services->alias('dh_auditor.blame_context_stack', BlameContextStack::class);
 
         // Auditor service
         // The AuditEventSubscriber is declared in the container below instead of being attached by the
@@ -401,6 +412,14 @@ class DHAuditorBundle extends AbstractBundle
             ])
             ->autoconfigure()
         ;
+
+        // Messenger middleware blaming the user who dispatched a message (opt-in: add it to the buses)
+        if (interface_exists(MiddlewareInterface::class)) {
+            $services->set(BlameContextMiddleware::class)
+                ->args([new Reference(Configuration::class)])
+            ;
+            $services->alias('dh_auditor.messenger.blame_context_middleware', BlameContextMiddleware::class);
+        }
 
         // Twig extension (uses #[AsTwigFilter] attribute)
         $services->set(TimeAgoExtension::class)

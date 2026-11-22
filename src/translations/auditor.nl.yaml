@@ -50,6 +50,7 @@ audit:
     icon_title: Revisies vergelijken
   entry:
     by: door
+    via: via
     source: Bron
     target: Doel
     extra_data: Extra gegevens
