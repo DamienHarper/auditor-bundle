@@ -8,8 +8,10 @@ use DH\Auditor\Attribute\Security;
 use DH\Auditor\Exception\AccessDeniedException;
 use DH\Auditor\Exception\InvalidArgumentException;
 use DH\Auditor\Model\Entry;
+use DH\Auditor\Model\TransactionType;
 use DH\Auditor\Provider\Doctrine\Configuration;
 use DH\Auditor\Provider\Doctrine\Persistence\Helper\JsonPlatformHelper;
+use DH\Auditor\Provider\Doctrine\Persistence\Helper\SchemaHelper;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\DateRangeFilter;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\NullFilter;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\RangeFilter;
@@ -23,6 +25,7 @@ use DH\AuditorBundle\Helper\UrlHelper;
 use DH\AuditorBundle\Tests\Controller\ViewerControllerTest;
 use DH\AuditorBundle\Viewer\ActivityGraphProvider;
 use DH\AuditorBundle\Viewer\RevisionComparator;
+use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -67,13 +70,14 @@ final readonly class ViewerController
 
             foreach ($entities as $entity => $table) {
                 $query = $reader->createQuery($entity, ['page_size' => 1]);
-                $count = $query->count();
 
-                if ($count > 0) {
-                    $latest = $query->execute()[0] ?? null;
+                // the latest entry is read through an index; an entity without any is not counted (a COUNT reads
+                // the whole audit table)
+                $latest = $query->execute()[0] ?? null;
+                if ($latest instanceof Entry) {
                     $audited[$entity] = [
                         'table' => $table,
-                        'count' => $count,
+                        'count' => $this->activityGraphProvider?->getEventCount($entity, $query) ?? $query->count(),
                         'latest' => $latest,
                     ];
                 }
@@ -513,11 +517,11 @@ final readonly class ViewerController
         $connection = $storageService->getEntityManager()->getConnection();
         $auditTable = $reader->getEntityAuditTableName($entity);
 
-        // Introspect the actual table structure to detect the schema version.
+        // Introspect the columns of the audit table (not the whole database) to detect the schema version.
         // v2 tables have a 'blame' JSON column; v1 (legacy) tables use separate 'blame_user' columns.
-        $tableSchema = $connection->createSchemaManager()->introspectSchema()->getTable($auditTable);
-        $hasBlameColumn = $tableSchema->hasColumn('blame');      // schema v2
-        $hasLegacyBlame = $tableSchema->hasColumn('blame_user'); // schema v1 (legacy)
+        $columns = SchemaHelper::getTableColumnNames($connection, $auditTable);
+        $hasBlameColumn = \in_array('blame', $columns, true);      // schema v2
+        $hasLegacyBlame = \in_array('blame_user', $columns, true); // schema v1 (legacy)
 
         // Build base condition for object_id if provided
         $params = [];
@@ -528,14 +532,27 @@ final readonly class ViewerController
         }
 
         // Get distinct types
-        $typesSql = \sprintf(
-            'SELECT DISTINCT type FROM %s %s ORDER BY type',
-            $auditTable,
-            '' !== $objectIdCondition ? 'WHERE '.$objectIdCondition : ''
-        );
+        if ('' === $objectIdCondition && $connection->getDatabasePlatform() instanceof PostgreSQLPlatform) {
+            // PostgreSQL reads the whole type index for a DISTINCT: each known type is looked up in it instead
+            $typesSql = implode(' UNION ALL ', array_map(
+                static fn (TransactionType $type): string => \sprintf(
+                    "SELECT '%1\$s' AS type FROM (SELECT 1 FROM %2\$s WHERE type = '%1\$s' LIMIT 1) t_%1\$s",
+                    $type->value,
+                    $auditTable,
+                ),
+                TransactionType::cases(),
+            ));
+        } else {
+            $typesSql = \sprintf(
+                'SELECT DISTINCT type FROM %s %s',
+                $auditTable,
+                '' !== $objectIdCondition ? 'WHERE '.$objectIdCondition : ''
+            );
+        }
 
         /** @var list<string> $types */
         $types = $connection->executeQuery($typesSql, $params)->fetchFirstColumn();
+        sort($types);
 
         $users = [];
 
@@ -599,7 +616,7 @@ final readonly class ViewerController
 
         // The changed field filter needs native JSON support and the schema v2 structure
         // (schema_version column); legacy tables must be migrated first.
-        $fields = $tableSchema->hasColumn('schema_version') && JsonPlatformHelper::isJsonSearchSupported($connection)
+        $fields = \in_array('schema_version', $columns, true) && JsonPlatformHelper::isJsonSearchSupported($connection)
             ? $this->getAuditedFields($reader, $entity)
             : [];
 

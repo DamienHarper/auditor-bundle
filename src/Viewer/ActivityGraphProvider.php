@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DH\AuditorBundle\Viewer;
 
+use DH\Auditor\Provider\Doctrine\Persistence\Reader\Query;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
@@ -17,6 +18,8 @@ final readonly class ActivityGraphProvider
     public const string CACHE_TAG = 'dh_auditor.activity';
 
     private const string CACHE_KEY_PREFIX = 'dh_auditor.activity.v2.';
+
+    private const string COUNT_CACHE_KEY_PREFIX = 'dh_auditor.count.';
 
     public function __construct(
         public private(set) int $days,
@@ -79,6 +82,33 @@ final readonly class ActivityGraphProvider
      *
      * @return bool True if cache was cleared successfully
      */
+    /**
+     * Number of audit entries of an entity, kept in the activity cache (same lifetime and tag) when it is enabled:
+     * counting reads the whole audit table.
+     */
+    public function getEventCount(string $entity, Query $query): int
+    {
+        if (!$this->cacheEnabled || !$this->cache instanceof CacheItemPoolInterface) {
+            return $query->count();
+        }
+
+        $item = $this->cache->getItem(self::COUNT_CACHE_KEY_PREFIX.md5($entity));
+        if ($item->isHit() && \is_int($count = $item->get())) {
+            return $count;
+        }
+
+        $count = $query->count();
+        $item->set($count);
+        $item->expiresAfter($this->cacheTtl);
+        if ($item instanceof ItemInterface && $this->cache instanceof TagAwareAdapterInterface) {
+            $item->tag([self::CACHE_TAG]);
+        }
+
+        $this->cache->save($item);
+
+        return $count;
+    }
+
     public function clearCache(?string $entity = null): bool
     {
         if (!$this->cache instanceof CacheItemPoolInterface) {
@@ -86,7 +116,7 @@ final readonly class ActivityGraphProvider
         }
 
         if (null !== $entity) {
-            return $this->cache->deleteItem($this->getCacheKey($entity));
+            return $this->cache->deleteItems([$this->getCacheKey($entity), self::COUNT_CACHE_KEY_PREFIX.md5($entity)]);
         }
 
         if ($this->cache instanceof TagAwareAdapterInterface) {
