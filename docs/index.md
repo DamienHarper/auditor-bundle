@@ -91,8 +91,8 @@ composer require damienharper/auditor-doctrine-provider
 
 | Version | Status                      | Requirements                                                         |
 |:--------|:----------------------------|:---------------------------------------------------------------------|
-| 7.x     | Active development 🚀       | PHP >= 8.4, Symfony >= 8.0, Doctrine DBAL >= 4.0, Doctrine ORM >= 3.2|
-| 6.x     | Active support              | PHP >= 8.2, Symfony >= 5.4                                           |
+| 7.x     | Bug and security fixes      | PHP >= 8.4, Symfony >= 8.1, Doctrine DBAL >= 4.0, Doctrine ORM >= 3.2|
+| 6.x     | End of Life                 | PHP >= 8.2, Symfony >= 5.4                                           |
 | 5.x     | End of Life                 | PHP >= 7.4, Symfony >= 4.4                                           |
 
 ## 🚀 Quick Links
