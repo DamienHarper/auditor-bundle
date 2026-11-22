@@ -358,6 +358,13 @@ dh_auditor:
             batch_size: 500
 ```
 
+> [!TIP]
+> The default stays `0` only because a buffered entry has no `id` in its `LifecycleEvent` payload. If no listener of
+> your application reads `$payload['id']`, `batch_size: 500` makes flushes of hundreds of entities 10 to 18 % faster
+> on SQLite, 19 to 51 % on MySQL and 44 to 67 % on PostgreSQL (see the provider's
+> [Performance](https://damienharper.github.io/auditor-docs/auditor-doctrine-provider/providers/doctrine/performance)
+> page).
+
 ### compression
 
 | Type   | Default | Description                                                         |
