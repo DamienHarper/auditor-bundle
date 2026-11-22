@@ -207,6 +207,7 @@ class User
 flowchart TD
     A["Attribute #[Auditable]"] -->|overrides| B["YAML entities.*.enabled"]
     C["Attribute #[Ignore]"] -->|adds to| D["YAML ignored_columns"]
+    D -->|wins over| G["YAML entities.*.audited_columns"]
     E["Attribute #[Security]"] -->|overrides| F["YAML entities.*.roles"]
 ```
 
@@ -214,6 +215,7 @@ flowchart TD
 |-----------------|---------------------------------------------|
 | `#[Auditable]`  | Overrides `entities.*.enabled` from YAML    |
 | `#[Ignore]`     | Adds to `ignored_columns` (YAML + attribute)|
+| `#[Ignore]`     | Wins over `entities.*.audited_columns`: an ignored property is never audited |
 | `#[Security]`   | Overrides `entities.*.roles` from YAML      |
 
 ## ⚠️ Entity Not in YAML
