@@ -14,6 +14,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
 
 /**
@@ -156,13 +157,66 @@ final class ActivityGraphProviderTest extends WebTestCase
     {
         $cache = $this->createMock(CacheItemPoolInterface::class);
         $cache->expects($this->once())
-            ->method('deleteItem')
+            ->method('deleteItems')
             ->willReturn(true)
         ;
 
         $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
 
         $this->assertTrue($provider->clearCache('App\Entity\User'));
+    }
+
+    #[Test]
+    public function testClearCacheForEntityDeletesTheActivityAndTheCount(): void
+    {
+        $cache = $this->createMock(CacheItemPoolInterface::class);
+        $cache->expects($this->once())
+            ->method('deleteItems')
+            ->with($this->callback(static fn (array $keys): bool => 2 === \count($keys)
+                && str_starts_with($keys[0], 'dh_auditor.activity.')
+                && str_starts_with($keys[1], 'dh_auditor.count.')))
+            ->willReturn(true)
+        ;
+
+        $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
+
+        $this->assertTrue($provider->clearCache('App\Entity\User'));
+    }
+
+    #[Test]
+    public function testEventCountIsCached(): void
+    {
+        $cache = new ArrayAdapter();
+        $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
+        $reader = $this->createReader();
+
+        $entityManager = $this->provider->getAuditingServiceForEntity(Post::class)->getEntityManager();
+        $post = new Post();
+        $post->setTitle('Counted')->setBody('body')->setCreatedAt(new \DateTimeImmutable());
+        $entityManager->persist($post);
+        $entityManager->flush();
+
+        $count = $reader->createQuery(Post::class)->count();
+        $this->assertSame(1, $count);
+        $this->assertSame($count, $provider->getEventCount(Post::class, $reader->createQuery(Post::class)));
+
+        // deleted entries are still counted until the cache expires or is cleared
+        $this->provider->getAuditingServiceForEntity(Post::class)->getEntityManager()->getConnection()->executeStatement(
+            'DELETE FROM '.$reader->getEntityAuditTableName(Post::class)
+        );
+        $this->assertSame($count, $provider->getEventCount(Post::class, $reader->createQuery(Post::class)));
+
+        $provider->clearCache(Post::class);
+        $this->assertSame(0, $provider->getEventCount(Post::class, $reader->createQuery(Post::class)));
+    }
+
+    #[Test]
+    public function testEventCountWithoutCacheCounts(): void
+    {
+        $provider = new ActivityGraphProvider(7, 'bottom', false, 300);
+        $reader = $this->createReader();
+
+        $this->assertSame($reader->createQuery(Post::class)->count(), $provider->getEventCount(Post::class, $reader->createQuery(Post::class)));
     }
 
     #[Test]

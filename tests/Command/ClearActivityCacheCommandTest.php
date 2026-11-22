@@ -73,7 +73,7 @@ final class ClearActivityCacheCommandTest extends TestCase
     {
         $cache = $this->createMock(CacheItemPoolInterface::class);
         $cache->expects($this->once())
-            ->method('deleteItem')
+            ->method('deleteItems')
             ->willReturn(true)
         ;
 
@@ -110,7 +110,7 @@ final class ClearActivityCacheCommandTest extends TestCase
     public function testShowsWarningWhenClearEntityFails(): void
     {
         $cache = $this->createStub(CacheItemPoolInterface::class);
-        $cache->method('deleteItem')->willReturn(false);
+        $cache->method('deleteItems')->willReturn(false);
 
         $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
 
