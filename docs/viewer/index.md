@@ -239,7 +239,7 @@ security:
 > In association diffs (`associate` / `dissociate`), the related entity links to its audit stream
 > only when the current user can open it: the entity must be audited and its `view` roles granted.
 > Otherwise it is displayed as plain text. Templates can apply the same rule with the
-> `dh_auditor_is_viewable(entityClass)` Twig function.
+> `dh_auditor_is_viewable(entity)` Twig function (an entity object or class name).
 
 ## 🔗 URL Format
 
@@ -265,40 +265,63 @@ $namespace = UrlHelper::paramToNamespace('App-Entity-User');
 
 ## 🔧 Generating URLs
 
+Link your own pages to the viewer with the `AuditViewerUrlGenerator` service (autowirable) or its
+Twig functions. They hide the route names and parameters of the viewer, and the encoding of the
+entity class in its URLs.
+
+### Twig
+
+```twig
+{# Audit stream of an entity: an object, or a class name with an optional id #}
+<a href="{{ dh_auditor_entity_url(post) }}">History</a>
+<a href="{{ dh_auditor_entity_url('App\\Entity\\Post') }}">All posts</a>
+<a href="{{ dh_auditor_entity_url('App\\Entity\\Post', 42, {type: 'update'}) }}">Updates of post #42</a>
+
+{# Transaction and user timeline #}
+<a href="{{ dh_auditor_transaction_url(entry.transactionId) }}">Transaction</a>
+<a href="{{ dh_auditor_user_url(entry.userId) }}">User activity</a>
+
+{# Absolute URL, e.g. in an email #}
+{{ dh_auditor_entity_url(post, absolute: true) }}
+```
+
+Each function returns `null` when the viewer cannot show the page: viewer disabled, auditor
+disabled, entity not audited, or entity not persisted yet. Access rights are not checked: combine
+the link with `dh_auditor_is_viewable()` to show it only to users allowed to open it.
+
+```twig
+{% set history_url = dh_auditor_entity_url(post) %}
+{% if history_url and dh_auditor_is_viewable(post) %}
+    <a href="{{ history_url }}">History</a>
+{% endif %}
+```
+
+### PHP
+
 ```php
+use DH\AuditorBundle\Viewer\AuditViewerUrlGenerator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-// Entity list
-$url = $urlGenerator->generate('dh_auditor_list_audits');
+public function __construct(private AuditViewerUrlGenerator $auditUrls) {}
 
-// Entity stream
-$url = $urlGenerator->generate('dh_auditor_show_entity_stream', [
-    'entity' => 'App-Entity-User',
-]);
+// Audit stream of an entity object (its identifier is read from the entity)
+$url = $this->auditUrls->generateEntityUrl($post);
 
-// Specific entity
-$url = $urlGenerator->generate('dh_auditor_show_entity_stream', [
-    'entity' => 'App-Entity-User',
-    'id' => 42,
-]);
+// Audit stream of a class, of one object, with viewer filters
+$url = $this->auditUrls->generateEntityUrl(Post::class);
+$url = $this->auditUrls->generateEntityUrl(Post::class, 42, ['type' => 'update', 'user' => '42']);
 
-// With filters
-$url = $urlGenerator->generate('dh_auditor_show_entity_stream', [
-    'entity' => 'App-Entity-User',
-    'type' => 'update',
-    'user' => '42',
-]);
+// Absolute URL
+$url = $this->auditUrls->generateEntityUrl($post, referenceType: UrlGeneratorInterface::ABSOLUTE_URL);
 
-// Transaction
-$url = $urlGenerator->generate('dh_auditor_show_transaction_stream', [
-    'hash' => $entry->transactionId,
-]);
-
-// User timeline
-$url = $urlGenerator->generate('dh_auditor_show_user_stream', [
-    'id' => $entry->userId,
-]);
+// Transaction and user timeline
+$url = $this->auditUrls->generateTransactionUrl($entry->transactionId);
+$url = $this->auditUrls->generateUserUrl($entry->userId);
 ```
+
+The filters are the query parameters of the entity stream: `type`, `user`, `field`, `date_from`,
+`date_to` and `page`. The identifier of an entity object is converted like the `object_id` stored in
+the audit table (UUID, enum, custom type), and a Doctrine reference is not loaded to read it.
 
 ## 🎨 Customization
 
