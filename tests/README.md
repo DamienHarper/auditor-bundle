@@ -31,7 +31,7 @@ The project includes a `Makefile` that lets you test across different PHP and Sy
 # Show help
 make help
 
-# Run tests (defaults: PHP 8.5, Symfony 8.0)
+# Run tests (defaults: PHP 8.5, Symfony 8.1)
 make tests
 
 # Run tests with specific PHP version
@@ -52,7 +52,7 @@ make tests args='--filter=ViewerControllerTest'
 | Option | Values                                |
 |--------|---------------------------------------|
 | `php`  | `8.4`, `8.5`, `8.6`                   |
-| `sf`   | `8.0`, `8.1`, `8.2`                   |
+| `sf`   | `8.1`, `8.2`                          |
 
 > **Note:** Not all combinations are valid. Run `make help` to see allowed combinations.
 
@@ -61,7 +61,7 @@ make tests args='--filter=ViewerControllerTest'
 Before submitting a PR, test against multiple PHP/Symfony combinations:
 
 ```bash
-make tests php=8.4 sf=8.0
+make tests php=8.4 sf=8.1
 make tests php=8.5 sf=8.1
 make tests php=8.6 sf=8.2
 ```
