@@ -54,6 +54,7 @@ audit:
     target: Цель
     extra_data: Дополнительные данные
     action_insert: запись создана
+    action_snapshot: существующая запись зафиксирована
     action_update: запись обновлена
     action_remove: запись удалена
     action_associate: связь добавлена

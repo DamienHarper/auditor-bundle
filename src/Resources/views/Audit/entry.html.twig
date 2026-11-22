@@ -34,7 +34,7 @@
             <div class="flex items-center gap-3 min-w-0">
                 {# Type badge - fixed width for alignment #}
                 <span class="w-24 shrink-0">
-                    {{ helper.type_badge(entry.type) }}
+                    {{ helper.type_badge(entry.type, entry.isSnapshot()) }}
                 </span>
 
                 {# Entity info #}
@@ -131,7 +131,7 @@
             <div class="flex items-center gap-3 min-w-0">
                 {# Type badge - fixed width for alignment #}
                 <span class="w-24 shrink-0">
-                    {{ helper.type_badge(entry.type) }}
+                    {{ helper.type_badge(entry.type, entry.isSnapshot()) }}
                 </span>
 
                 {# Entity info #}
@@ -153,7 +153,9 @@
                     {# Action description #}
                     <span class="text-slate-500 dark:text-slate-400">·</span>
                     <span class="text-slate-400 dark:text-slate-500 text-xs italic shrink-0">
-                        {% if entry.type == 'insert' %}
+                        {% if entry.type == 'insert' and entry.isSnapshot() %}
+                            {{ 'audit.entry.action_snapshot'|trans(domain='auditor') }}
+                        {% elseif entry.type == 'insert' %}
                             {{ 'audit.entry.action_insert'|trans(domain='auditor') }}
                         {% elseif entry.type == 'update' %}
                             {{ 'audit.entry.action_update'|trans(domain='auditor') }}

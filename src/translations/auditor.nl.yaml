@@ -54,6 +54,7 @@ audit:
     target: Doel
     extra_data: Extra gegevens
     action_insert: record aangemaakt
+    action_snapshot: bestaand record vastgelegd
     action_update: record bijgewerkt
     action_remove: record verwijderd
     action_associate: relatie toegevoegd

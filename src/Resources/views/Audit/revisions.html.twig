@@ -45,7 +45,7 @@
             {% set is_selected = selected is not null and selected.id == entry.id %}
             {% set row_content %}
                 <span class="flex items-center gap-3 min-w-0">
-                    <span class="w-24 shrink-0">{{ helper.type_badge(entry.type) }}</span>
+                    <span class="w-24 shrink-0">{{ helper.type_badge(entry.type, entry.isSnapshot()) }}</span>
                     <span class="text-sm text-slate-900 dark:text-slate-100 truncate">{{ entry.createdAt|format_datetime('full', 'short', timezone: false) }}</span>
                     {% if is_selected %}
                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">

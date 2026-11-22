@@ -54,6 +54,7 @@ audit:
     target: Target
     extra_data: Extra Data
     action_insert: record created
+    action_snapshot: existing record captured
     action_update: record updated
     action_remove: record deleted
     action_associate: relation added

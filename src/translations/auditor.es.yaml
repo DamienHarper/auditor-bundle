@@ -54,6 +54,7 @@ audit:
     target: Destino
     extra_data: Datos adicionales
     action_insert: registro creado
+    action_snapshot: registro existente capturado
     action_update: registro actualizado
     action_remove: registro eliminado
     action_associate: relación añadida
