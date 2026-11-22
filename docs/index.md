@@ -20,7 +20,10 @@ slug: /
 
 - 🔌 **Automatic wiring** - Services are automatically configured via Symfony's DI
 - 🔒 **Security integration** - Uses Symfony's security for user tracking and access control
-- 🌐 **Built-in viewer** - Web interface to browse audit logs at `/audit`
+- 🌐 **Built-in viewer** - Web interface to browse audit logs at `/audit`, compare revisions, link to it from your pages
+- 📤 **Export** - Stream audit entries as NDJSON, JSON or CSV (`/audit/export`)
+- 🧭 **Blame contexts** - Record how a change was made (console command, Messenger message, import…)
+- 🗑️ **Scheduled retention** - Prune old audit entries with Symfony Scheduler
 - 🖥️ **Console support** - Tracks changes made via console commands
 - 🌍 **Internationalization** - Translations for 9 languages
 - ⚙️ **YAML configuration** - Simple configuration via `dh_auditor.yaml`
@@ -78,8 +81,8 @@ flowchart TB
 
 | Version | Status                      | Requirements                                                         |
 |:--------|:----------------------------|:---------------------------------------------------------------------|
-| 8.x     | Active development 🚀       | PHP >= 8.4, Symfony >= 8.1, Doctrine DBAL >= 4.0, Doctrine ORM >= 3.2|
-| 7.x     | Bug and security fixes      | PHP >= 8.4, Symfony >= 8.1, Doctrine DBAL >= 4.0, Doctrine ORM >= 3.2|
+| 8.x     | Active development 🚀       | PHP >= 8.4, Symfony >= 8.1, Doctrine DBAL >= 4.6, Doctrine ORM >= 3.7|
+| 7.x     | Bug and security fixes      | PHP >= 8.4, Symfony >= 8.1, Doctrine DBAL >= 4.3, Doctrine ORM >= 3.2|
 | 6.x     | End of Life                 | PHP >= 8.2, Symfony >= 5.4                                           |
 
 ## 🚀 Quick Links

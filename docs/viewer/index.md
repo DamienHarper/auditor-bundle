@@ -27,14 +27,17 @@ dh_auditor:
 
 ## 🛤️ Routes
 
-The viewer registers four routes:
+The viewer registers these routes:
 
-| Route                                | URL                         | Description                     |
-|--------------------------------------|-----------------------------|---------------------------------|
-| `dh_auditor_list_audits`             | `/audit`                    | List all audited entities       |
-| `dh_auditor_show_entity_stream`      | `/audit/{entity}/{id?}`     | Entity audit stream             |
-| `dh_auditor_show_transaction_stream` | `/audit/transaction/{hash}` | Transaction details             |
-| `dh_auditor_show_user_stream`        | `/audit/user/{id}`          | Activity timeline of one user   |
+| Route                                | URL                                | Description                         |
+|--------------------------------------|------------------------------------|-------------------------------------|
+| `dh_auditor_export`                  | `/audit/export`                    | Export of audit entries (streamed)  |
+| `dh_auditor_list_audits`             | `/audit`                           | List all audited entities           |
+| `dh_auditor_show_entity_stream`      | `/audit/{entity}/{id?}`            | Entity audit stream                 |
+| `dh_auditor_show_transaction_stream` | `/audit/transaction/{hash}`        | Transaction details                 |
+| `dh_auditor_show_user_stream`        | `/audit/user/{id}`                 | Activity timeline of one user       |
+| `dh_auditor_select_revisions`        | `/audit/{entity}/{id}/revisions`   | Pick two revisions of an object     |
+| `dh_auditor_compare_revisions`       | `/audit/{entity}/{id}/compare`     | Compare two revisions of an object  |
 
 ### Route Configuration
 
@@ -55,6 +58,9 @@ Displays all audited entities with:
 - 🗄️ Audit table name
 - 🔢 Number of audit entries
 - 🔗 Link to view history
+
+The list can be sorted by name, number of entries or latest activity (`?sort=name_asc`, `name_desc`, `count_desc`,
+`count_asc`, `activity_desc`, `activity_asc`).
 
 ### Entity Stream (`/audit/{entity}`)
 
@@ -97,6 +103,9 @@ Filter by the field touched by the change:
 > [!NOTE]
 > The changed field filter requires native JSON support (MySQL 5.7+, MariaDB 10.2.3+, PostgreSQL 9.4+, SQLite 3.38+) and an audit table migrated to the schema v2 structure (`audit:schema:migrate`). It is hidden otherwise. On large audit tables, combine it with a single entity (`/audit/{entity}/{id}`) or a period: the database has to read the diffs of every entry left by the other filters.
 
+**Date Range Filter**
+Keep the entries created between two days (inclusive), in the `dh_auditor.timezone` time zone.
+
 > [!TIP]
 > Filters can be combined and are preserved during pagination.
 
@@ -105,7 +114,14 @@ Filter by the field touched by the change:
 /audit/App-Entity-User?type=update&user=42
 /audit/App-Entity-User?type=insert&user=__anonymous__
 /audit/App-Entity-User?field=email
+/audit/App-Entity-User?date_from=2026-01-01&date_to=2026-03-31
 ```
+
+### Compare Revisions (`/audit/{entity}/{id}/compare`)
+
+From the stream of one object (`/audit/{entity}/{id}`), pick two of its revisions to see the state of the object
+before and after the changes made between them, field by field. The page links to the previous and next revisions,
+so that the comparison can be moved along the history.
 
 ### Transaction View (`/audit/transaction/{hash}`)
 
@@ -123,6 +139,27 @@ every stream, the author of an entry links to this page.
   `blame_id`, which is what happens when the Symfony user class has no `getId()` method.
 - Each audited entity is queried separately, for at most `page × page_size` rows: browsing deep
   pages of a very active user costs more than browsing the first ones.
+
+## 📤 Export
+
+`/audit/export` streams audit entries, so that large exports do not load everything in memory:
+
+| Parameter   | Description                                                                  |
+|-------------|------------------------------------------------------------------------------|
+| `format`    | `ndjson` (default, recommended for large exports), `json` or `csv`           |
+| `entity`    | Entity to export (`App-Entity-User`); all the entities the user can view when omitted |
+| `id`        | Object ID                                                                    |
+| `from`, `to`| Creation date range (ISO 8601, e.g. `2026-01-01`)                            |
+| `blame_id`  | User ID                                                                      |
+| `anonymize` | `1` to remove the user (ID, name, class, firewall) and the IP address        |
+
+```
+/audit/export?entity=App-Entity-User&format=csv&from=2026-01-01
+```
+
+The export follows the same access rules as the viewer (see [Access Control](#-access-control)): an entity the user
+cannot view is refused, or left out when no entity is given. From the command line, the provider's `audit:export`
+command offers the same filters.
 
 ## 📊 Activity Graph
 
