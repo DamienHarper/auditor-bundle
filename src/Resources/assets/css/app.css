@@ -31,3 +31,27 @@
         @apply rounded-b-md border-t px-3 py-2;
     }
 }
+
+/** Activity graph bars: one class per 5 % step, so that the templates carry no style attribute (strict CSP) **/
+@layer utilities {
+    .dh-auditor-bar-h-5 { height: 5%; }
+    .dh-auditor-bar-h-10 { height: 10%; }
+    .dh-auditor-bar-h-15 { height: 15%; }
+    .dh-auditor-bar-h-20 { height: 20%; }
+    .dh-auditor-bar-h-25 { height: 25%; }
+    .dh-auditor-bar-h-30 { height: 30%; }
+    .dh-auditor-bar-h-35 { height: 35%; }
+    .dh-auditor-bar-h-40 { height: 40%; }
+    .dh-auditor-bar-h-45 { height: 45%; }
+    .dh-auditor-bar-h-50 { height: 50%; }
+    .dh-auditor-bar-h-55 { height: 55%; }
+    .dh-auditor-bar-h-60 { height: 60%; }
+    .dh-auditor-bar-h-65 { height: 65%; }
+    .dh-auditor-bar-h-70 { height: 70%; }
+    .dh-auditor-bar-h-75 { height: 75%; }
+    .dh-auditor-bar-h-80 { height: 80%; }
+    .dh-auditor-bar-h-85 { height: 85%; }
+    .dh-auditor-bar-h-90 { height: 90%; }
+    .dh-auditor-bar-h-95 { height: 95%; }
+    .dh-auditor-bar-h-100 { height: 100%; }
+}

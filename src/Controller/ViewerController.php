@@ -115,14 +115,55 @@ final readonly class ViewerController
         ]);
     }
 
+    /**
+     * Entries of a transaction, grouped by entity and paginated like the other streams: a large
+     * transaction (an import, a batch) is rendered one page at a time.
+     */
     #[Route(path: '/audit/transaction/{hash}', name: 'dh_auditor_show_transaction_stream', methods: ['GET'])]
-    public function showTransactionAction(Reader $reader, string $hash): Response
+    public function showTransactionAction(Request $request, Reader $reader, string $hash): Response
     {
-        $audits = $reader->getAuditsByTransactionId($hash);
+        $page = max(1, $request->query->getInt('page', 1));
+
+        /** @var Configuration $configuration */
+        $configuration = $reader->getProvider()->getConfiguration();
+        $pageSize = $configuration->getViewerPageSize();
+
+        // Entries of the whole transaction, flattened in display order (grouped by entity), and counted per entity.
+        $flat = [];
+        $counts = [];
+        foreach ($reader->getAuditsByTransactionId($hash) as $entity => $entries) {
+            \assert(\is_string($entity) && \is_array($entries));
+            $counts[$entity] = \count($entries);
+            foreach ($entries as $entry) {
+                $flat[] = [$entity, $entry];
+            }
+        }
+
+        $numResults = \count($flat);
+        $numPages = (int) ceil($numResults / $pageSize);
+        $page = min($page, max(1, $numPages));
+
+        // Keep the entries of the requested page, still grouped by entity.
+        $paged = [];
+        foreach (\array_slice($flat, ($page - 1) * $pageSize, $pageSize) as [$entity, $entry]) {
+            $paged[$entity][] = $entry;
+        }
 
         return $this->renderView('@DHAuditor/Audit/transaction_stream.html.twig', [
             'hash' => $hash,
-            'audits' => $audits,
+            'audits' => $paged,
+            'counts' => $counts,
+            'paginator' => [
+                'currentPage' => $page,
+                'hasPreviousPage' => $page > 1,
+                'hasNextPage' => ($page * $pageSize) < $numResults,
+                'previousPage' => $page > 1 ? $page - 1 : null,
+                'nextPage' => ($page * $pageSize) < $numResults ? $page + 1 : null,
+                'numPages' => $numPages,
+                'haveToPaginate' => $numResults > $pageSize,
+                'numResults' => $numResults,
+                'pageSize' => $pageSize,
+            ],
         ]);
     }
 
@@ -171,8 +212,10 @@ final readonly class ViewerController
             }
         }
 
-        // usort() is stable: rows of a same entity keep the (created_at, id) order of their query.
-        usort($entries, static fn (array $a, array $b): int => $b['entry']->createdAt <=> $a['entry']->createdAt);
+        // Newest first; entries written at the same instant are ordered by id (newest first), then by
+        // entity, so that the order, and therefore the content of each page, never depends on the
+        // order in which the entities were queried.
+        usort($entries, static fn (array $a, array $b): int => [$b['entry']->createdAt, $b['entry']->id, $a['entity']] <=> [$a['entry']->createdAt, $a['entry']->id, $b['entity']]);
 
         return $this->renderView('@DHAuditor/Audit/user_stream.html.twig', [
             'id' => $id,

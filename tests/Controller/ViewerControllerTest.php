@@ -625,6 +625,86 @@ final class ViewerControllerTest extends WebTestCase
         yield 'out of range page falls back to the last one' => [99, [Post::class, Comment::class], false];
     }
 
+    /**
+     * @param list<string> $expectedEntities
+     */
+    #[DataProvider('provideShowUserTimelineOrdersSimultaneousEntriesByIdCases')]
+    public function testShowUserTimelineOrdersSimultaneousEntriesById(int $postId, int $commentId, array $expectedEntities): void
+    {
+        $this->seedUserEntry(Post::class, 'timeline-user', 'timeline.user', '2026-01-01 10:00:00', null, $postId);
+        $this->seedUserEntry(Comment::class, 'timeline-user', 'timeline.user', '2026-01-01 10:00:00', null, $commentId);
+
+        $this->login(['ROLE_1']);
+        $crawler = $this->client->request('GET', '/audit/user/timeline-user');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSame($expectedEntities, $this->timelineEntities($crawler), 'Same instant: newest id first, whatever the entity');
+    }
+
+    /**
+     * @return iterable<string, array{int, int, list<string>}>
+     */
+    public static function provideShowUserTimelineOrdersSimultaneousEntriesByIdCases(): iterable
+    {
+        yield 'post written last' => [1_001, 1_000, [Post::class, Comment::class]];
+
+        yield 'comment written last' => [1_000, 1_001, [Comment::class, Post::class]];
+    }
+
+    public function testShowTransactionHistoryIsPaginated(): void
+    {
+        $reader = $this->createReader();
+        $this->login(['ROLE_1']);
+
+        // the transaction with the most entries across entities
+        $sizes = [];
+        foreach ([Author::class, Post::class, Comment::class, Tag::class] as $entity) {
+            foreach ($reader->createQuery($entity, ['page_size' => null])->execute() as $entry) {
+                $sizes[$entry->transactionId] = ($sizes[$entry->transactionId] ?? 0) + 1;
+            }
+        }
+
+        arsort($sizes);
+        $transactionId = (string) array_key_first($sizes);
+        $total = $sizes[$transactionId];
+        $this->assertGreaterThan(2, $total, 'The fixture has a transaction of several entries');
+
+        $this->provider->getConfiguration()->setViewerPageSize(2);
+        $seen = 0;
+        $numPages = (int) ceil($total / 2);
+        for ($page = 1; $page <= $numPages; ++$page) {
+            $crawler = $this->client->request('GET', '/audit/transaction/'.$transactionId, ['page' => $page]);
+
+            $this->assertResponseIsSuccessful();
+            $this->assertStringContainsString($total.' events', $crawler->filter('h1+p')->text(), 'The header counts the whole transaction');
+            $entries = $crawler->filter('h2 + div > *')->count();
+            $this->assertSame($page < $numPages ? 2 : $total - 2 * ($numPages - 1), $entries, 'Page '.$page);
+            $this->assertSame($page < $numPages, $crawler->filter('a[href="/audit/transaction/'.$transactionId.'?page='.($page + 1).'"]')->count() > 0);
+            $seen += $entries;
+        }
+
+        $this->assertSame($total, $seen, 'Every entry is on exactly one page');
+    }
+
+    public function testViewerHasNoInlineScript(): void
+    {
+        $this->seedUserEntry(Post::class, 'timeline-user', 'timeline.user', '2026-01-01 10:00:00');
+        $this->login(['ROLE_1']);
+
+        $reader = $this->createReader();
+        $first = $reader->createQuery(Post::class)->execute()[0];
+
+        foreach (['/audit', self::POST_URL, '/audit/user/timeline-user', '/audit/transaction/'.$first->transactionId] as $url) {
+            $crawler = $this->client->request('GET', $url);
+            $this->assertResponseIsSuccessful();
+
+            $html = (string) $this->client->getResponse()->getContent();
+            $this->assertDoesNotMatchRegularExpression('/\son[a-z]+\s*=/i', $html, $url.': no event handler attribute');
+            $this->assertDoesNotMatchRegularExpression('/\sstyle\s*=/i', $html, $url.': no style attribute');
+            $this->assertSame(0, $crawler->filter('script:not([src])')->count(), $url.': no inline script');
+        }
+    }
+
     public function testShowUserTimelineWithoutMatches(): void
     {
         $this->login(['ROLE_1']);
@@ -1008,13 +1088,17 @@ final class ViewerControllerTest extends WebTestCase
     /**
      * Copies an insert audit row of $entity, attributed to the given user at the given date.
      */
-    private function seedUserEntry(string $entity, ?string $blameId, string $username, string $createdAt, ?string $ip = null): void
+    private function seedUserEntry(string $entity, ?string $blameId, string $username, string $createdAt, ?string $ip = null, ?int $id = null): void
     {
         $table = $this->createReader()->getEntityAuditTableName($entity);
         $connection = $this->provider->getStorageServiceForEntity($entity)->getEntityManager()->getConnection();
         $row = $connection->fetchAssociative('SELECT * FROM '.$table." WHERE type = 'insert' ORDER BY id LIMIT 1");
         $this->assertIsArray($row);
         unset($row['id']);
+        if (null !== $id) {
+            $row['id'] = $id;
+        }
+
         $row['blame_id'] = $blameId;
         $row['blame'] = json_encode(['username' => $username] + (null === $ip ? [] : ['ip' => $ip]), JSON_THROW_ON_ERROR);
         $row['created_at'] = $createdAt;

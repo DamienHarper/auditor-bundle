@@ -30,10 +30,10 @@
     <div class="flex flex-col">
 {% endif %}
         {# First line: badge, entity link, label, action description, hash #}
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3 min-w-0">
+        <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+            <div class="flex flex-1 basis-64 items-center gap-3 min-w-0">
                 {# Type badge - fixed width for alignment #}
-                <span class="w-24 shrink-0">
+                <span class="shrink-0 sm:w-24">
                     {{ helper.type_badge(entry.type, entry.isSnapshot()) }}
                 </span>
 
@@ -74,8 +74,7 @@
                 <a href="{{ path('dh_auditor_select_revisions', {entity: helper.namespaceToParam(entity), id: entry.objectId, selected: entry.id}) }}"
                    class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition"
                    title="{{ 'audit.revisions.icon_title'|trans(domain='auditor') }}"
-                   aria-label="{{ 'audit.revisions.icon_title'|trans(domain='auditor') }}"
-                   onclick="event.stopPropagation();">
+                   aria-label="{{ 'audit.revisions.icon_title'|trans(domain='auditor') }}">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10M7 7l3-3M7 7l3 3M17 17H7m10 0l-3-3m3 3l-3 3"/>
                     </svg>
@@ -91,7 +90,7 @@
         </div>
 
         {# Second line: date, user/command, blame context, IP, firewall #}
-        <div class="flex items-center gap-2 mt-1 ml-2 text-xs text-slate-500 dark:text-slate-400">
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 min-w-0 mt-1 ml-2 text-xs text-slate-500 dark:text-slate-400">
             <span>{{ entry.createdAt|format_datetime('full', 'short', timezone: false) }}</span>
             <span>·</span>
             <span>{{ 'audit.entry.by'|trans(domain='auditor') }}
@@ -128,10 +127,10 @@
 <details class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
     <summary class="flex flex-col px-4 py-3 cursor-pointer list-none">
         {# First line: badge, entity link, label, action description, hash, chevron #}
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3 min-w-0">
+        <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+            <div class="flex flex-1 basis-64 items-center gap-3 min-w-0">
                 {# Type badge - fixed width for alignment #}
-                <span class="w-24 shrink-0">
+                <span class="shrink-0 sm:w-24">
                     {{ helper.type_badge(entry.type, entry.isSnapshot()) }}
                 </span>
 
@@ -140,8 +139,7 @@
                     {# Entity name + ID #}
                     <a href="{{ path('dh_auditor_show_entity_stream', {'entity': helper.namespaceToParam(entity), 'id': entry.objectId}) }}"
                        class="font-medium text-slate-900 dark:text-slate-100 hover:underline shrink-0"
-                       title="{{ entity }}"
-                       onclick="event.stopPropagation();">
+                       title="{{ entity }}">
                         {{ entity|split('\\')|last }} #{{ entry.objectId }}
                     </a>
 
@@ -174,8 +172,7 @@
                 {% if tx_label is not empty and hide_transaction is not defined %}
                     <a href="{{ path('dh_auditor_show_transaction_stream', {hash: tx_id}) }}"
                        class="font-mono text-xs text-slate-400 hover:underline transition"
-                       title="{{ tx_id }}"
-                       onclick="event.stopPropagation();">
+                       title="{{ tx_id }}">
                         {{ tx_label }}
                     </a>
                 {% endif %}
@@ -184,8 +181,7 @@
                 <a href="{{ path('dh_auditor_select_revisions', {entity: helper.namespaceToParam(entity), id: entry.objectId, selected: entry.id}) }}"
                    class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition"
                    title="{{ 'audit.revisions.icon_title'|trans(domain='auditor') }}"
-                   aria-label="{{ 'audit.revisions.icon_title'|trans(domain='auditor') }}"
-                   onclick="event.stopPropagation();">
+                   aria-label="{{ 'audit.revisions.icon_title'|trans(domain='auditor') }}">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10M7 7l3-3M7 7l3 3M17 17H7m10 0l-3-3m3 3l-3 3"/>
                     </svg>
@@ -199,7 +195,7 @@
         </div>
 
         {# Second line: date, user/command, blame context, IP, firewall #}
-        <div class="flex items-center gap-2 mt-1 ml-2 text-xs text-slate-500 dark:text-slate-400">
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 min-w-0 mt-1 ml-2 text-xs text-slate-500 dark:text-slate-400">
             <span>{{ entry.createdAt|format_datetime('full', 'short', timezone: false) }}</span>
             <span>·</span>
             <span>{{ 'audit.entry.by'|trans(domain='auditor') }}
@@ -248,21 +244,21 @@
                 {% set diffs = entry.diffs %}
                 {% if diffs.source is defined and diffs.target is defined %}
                     <tr>
-                        <td class="pr-3 text-blue-600 dark:text-blue-400 break-words" style="max-width: 45%;">
+                        <td class="pr-3 text-blue-600 dark:text-blue-400 break-words max-w-[45%]">
                             {{ _self.displayRelatedEntity(diffs.source) }}
                         </td>
                         <td class="px-2 text-slate-400">
                             <svg class="w-5 h-5" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path opacity=".4" d=""/><path d="M497 441L601 337C610.4 327.6 610.4 312.4 601 303.1L497 199C487.6 189.6 472.4 189.6 463.1 199C453.8 208.4 453.7 223.6 463.1 232.9L526.1 295.9L114 295.9L177 232.9C186.4 223.5 186.4 208.3 177 199C167.6 189.7 152.4 189.6 143.1 199L39 303C29.6 312.4 29.6 327.6 39 336.9L143 441C152.4 450.4 167.6 450.4 176.9 441C186.2 431.6 186.3 416.4 176.9 407.1L113.9 344.1L526 344.1L463 407.1C453.6 416.5 453.6 431.7 463 441C472.4 450.3 487.6 450.4 496.9 441z"/></svg>
                         </td>
-                        <td class="pl-3 text-blue-600 dark:text-blue-400 break-words" style="max-width: 45%;">
+                        <td class="pl-3 text-blue-600 dark:text-blue-400 break-words max-w-[45%]">
                             {{ _self.displayRelatedEntity(diffs.target) }}
                         </td>
                     </tr>
                     {% if diffs.source.label is defined or diffs.target.label is defined %}
                         <tr class="text-xs italic text-slate-500 dark:text-slate-400">
-                            <td class="pr-3 break-words" style="max-width: 45%;">{{ diffs.source.label is iterable ? diffs.source.label|join(', ') : diffs.source.label|default('—') }}</td>
+                            <td class="pr-3 break-words max-w-[45%]">{{ diffs.source.label is iterable ? diffs.source.label|join(', ') : diffs.source.label|default('—') }}</td>
                             <td></td>
-                            <td class="pl-3 break-words" style="max-width: 45%;">{{ diffs.target.label is iterable ? diffs.target.label|join(', ') : diffs.target.label|default('—') }}</td>
+                            <td class="pl-3 break-words max-w-[45%]">{{ diffs.target.label is iterable ? diffs.target.label|join(', ') : diffs.target.label|default('—') }}</td>
                         </tr>
                     {% endif %}
                 {% endif %}
@@ -275,21 +271,21 @@
                 {% set diffs = entry.diffs %}
                 {% if diffs.source is defined and diffs.target is defined %}
                     <tr>
-                        <td class="pr-3 text-rose-600 dark:text-rose-400 break-words" style="max-width: 45%;">
+                        <td class="pr-3 text-rose-600 dark:text-rose-400 break-words max-w-[45%]">
                             {{ _self.displayRelatedEntity(diffs.source) }}
                         </td>
                         <td class="px-2 text-slate-400">
                             <svg class="w-5 h-5" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path opacity=".4" d=""/><path d="M497 441L601 337C610.4 327.6 610.4 312.4 601 303.1L497 199C487.6 189.6 472.4 189.6 463.1 199C453.8 208.4 453.7 223.6 463.1 232.9L526.1 295.9L114 295.9L177 232.9C186.4 223.5 186.4 208.3 177 199C167.6 189.7 152.4 189.6 143.1 199L39 303C29.6 312.4 29.6 327.6 39 336.9L143 441C152.4 450.4 167.6 450.4 176.9 441C186.2 431.6 186.3 416.4 176.9 407.1L113.9 344.1L526 344.1L463 407.1C453.6 416.5 453.6 431.7 463 441C472.4 450.3 487.6 450.4 496.9 441z"/></svg>
                         </td>
-                        <td class="pl-3 text-rose-600 dark:text-rose-400 break-words" style="max-width: 45%;">
+                        <td class="pl-3 text-rose-600 dark:text-rose-400 break-words max-w-[45%]">
                             {{ _self.displayRelatedEntity(diffs.target) }}
                         </td>
                     </tr>
                     {% if diffs.source.label is defined or diffs.target.label is defined %}
                         <tr class="text-xs italic text-slate-500 dark:text-slate-400">
-                            <td class="pr-3 break-words" style="max-width: 45%;">{{ diffs.source.label is iterable ? diffs.source.label|join(', ') : diffs.source.label|default('—') }}</td>
+                            <td class="pr-3 break-words max-w-[45%]">{{ diffs.source.label is iterable ? diffs.source.label|join(', ') : diffs.source.label|default('—') }}</td>
                             <td></td>
-                            <td class="pl-3 break-words" style="max-width: 45%;">{{ diffs.target.label is iterable ? diffs.target.label|join(', ') : diffs.target.label|default('—') }}</td>
+                            <td class="pl-3 break-words max-w-[45%]">{{ diffs.target.label is iterable ? diffs.target.label|join(', ') : diffs.target.label|default('—') }}</td>
                         </tr>
                     {% endif %}
                 {% endif %}
@@ -312,8 +308,8 @@
     {% if is_leaf %}
         {% if changeset.new is defined %}
             <tr>
-                <td class="pr-6 text-slate-500 dark:text-slate-400 break-words" style="max-width: 25%;">{{ field }}</td>
-                <td class="text-emerald-600 dark:text-emerald-400 break-words" style="max-width: 70%;">{{ helper.dump(changeset.new) }}</td>
+                <td class="pr-6 text-slate-500 dark:text-slate-400 break-words max-w-[25%]">{{ field }}</td>
+                <td class="text-emerald-600 dark:text-emerald-400 break-words max-w-[70%]">{{ helper.dump(changeset.new) }}</td>
             </tr>
         {% endif %}
     {% elseif changeset is iterable %}
@@ -330,8 +326,8 @@
     {% if is_leaf %}
         {% if changeset.old is defined or changeset.new is defined %}
             <tr>
-                <td class="pr-6 text-slate-500 dark:text-slate-400 break-words" style="max-width: 20%;">{{ field }}</td>
-                <td class="pr-3 text-slate-400 dark:text-slate-500 break-words" style="max-width: 25%;">
+                <td class="pr-6 text-slate-500 dark:text-slate-400 break-words max-w-[20%]">{{ field }}</td>
+                <td class="pr-3 text-slate-400 dark:text-slate-500 break-words max-w-[25%]">
                     {% if changeset.old is defined and changeset.old is not null %}
                         {{ helper.dump(changeset.old) }}
                     {% else %}
@@ -339,7 +335,7 @@
                     {% endif %}
                 </td>
                 <td class="px-2 text-slate-400 dark:text-slate-500 whitespace-nowrap">→</td>
-                <td class="pl-3 text-indigo-600 dark:text-indigo-400 break-words" style="max-width: 40%;">
+                <td class="pl-3 text-indigo-600 dark:text-indigo-400 break-words max-w-[40%]">
                     {% if changeset.new is defined and changeset.new is not null %}
                         {{ helper.dump(changeset.new) }}
                     {% else %}
@@ -362,8 +358,8 @@
     {% if is_leaf %}
         {% if changeset is iterable and changeset.old is defined %}
             <tr>
-                <td class="pr-6 text-slate-500 dark:text-slate-400 break-words" style="max-width: 25%;">{{ field }}</td>
-                <td class="text-rose-600 dark:text-rose-400 break-words" style="max-width: 70%;">
+                <td class="pr-6 text-slate-500 dark:text-slate-400 break-words max-w-[25%]">{{ field }}</td>
+                <td class="text-rose-600 dark:text-rose-400 break-words max-w-[70%]">
                     {% if changeset.old is not null %}
                         {{ helper.dump(changeset.old) }}
                     {% else %}
@@ -413,8 +409,8 @@
             <table class="text-xs font-mono">
                 {% for key, value in extraData %}
                     <tr>
-                        <td class="pr-6 text-slate-500 dark:text-slate-400 break-words align-top" style="max-width: 25%;">{{ key }}</td>
-                        <td class="text-violet-600 dark:text-violet-400 break-words" style="max-width: 70%;">{{ helper.dump(value) }}</td>
+                        <td class="pr-6 text-slate-500 dark:text-slate-400 break-words align-top max-w-[25%]">{{ key }}</td>
+                        <td class="text-violet-600 dark:text-violet-400 break-words max-w-[70%]">{{ helper.dump(value) }}</td>
                     </tr>
                 {% endfor %}
             </table>
