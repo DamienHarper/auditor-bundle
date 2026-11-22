@@ -286,6 +286,10 @@ On MySQL and MariaDB, audit tables can become the largest tables of a database, 
 (`JSON COMPRESSED`): MariaDB compresses and decompresses them transparently, so the viewer, the `Reader`, `JsonFilter`
 and JSON functions in SQL keep working unchanged.
 
+Compression trades CPU for disk space and I/O: reading a large history that is already in memory gets slower (every
+value is decompressed, about twice as slow for an entity with ~500 changes), while reads hitting the disk and writes
+get faster since there is much less data to move.
+
 The option has no effect on other platforms:
 
 - **PostgreSQL** already compresses large `JSONB` values automatically (TOAST);
@@ -304,7 +308,8 @@ bin/console audit:schema:update --force
 If you manage your schema with Doctrine Migrations, copy the SQL shown by `audit:schema:update --dump-sql` into a
 migration: `doctrine:migrations:diff` does not detect the compression of existing columns (and never reports a
 difference for compressed columns either). Converting rewrites the audit tables and compresses existing entries, which
-can take a while on large tables. Setting the option back to `false` and running `audit:schema:update` again restores
+can take a while on large tables. Before MariaDB 11.2, writes to the audit tables are locked during the rewrite, so
+audited flushes wait for it; since MariaDB 11.2, the rewrite runs online by default (`ALGORITHM=COPY, LOCK=NONE`). Setting the option back to `false` and running `audit:schema:update` again restores
 uncompressed columns without losing data.
 
 > [!NOTE]
