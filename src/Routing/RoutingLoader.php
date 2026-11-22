@@ -7,9 +7,9 @@ namespace DH\AuditorBundle\Routing;
 use DH\Auditor\Provider\Doctrine\Configuration;
 use DH\AuditorBundle\Controller\ExportController;
 use DH\AuditorBundle\Controller\ViewerController;
-use Symfony\Bundle\FrameworkBundle\Routing\AttributeRouteControllerLoader;
 use Symfony\Component\Config\Loader\Loader;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
+use Symfony\Component\Routing\Loader\AttributeClassLoader;
 use Symfony\Component\Routing\RouteCollection;
 
 #[AutoconfigureTag('routing.loader')]
@@ -18,7 +18,7 @@ final class RoutingLoader extends Loader
     private bool $isLoaded = false;
 
     public function __construct(
-        private readonly AttributeRouteControllerLoader $attributeRouteControllerLoader,
+        private readonly AttributeClassLoader $attributeRouteControllerLoader,
         private readonly array $configuration,
     ) {
         parent::__construct();
