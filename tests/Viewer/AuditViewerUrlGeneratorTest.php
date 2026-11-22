@@ -9,7 +9,6 @@ use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag;
 use DH\AuditorBundle\Viewer\AuditViewerUrlGenerator;
 use Doctrine\ORM\EntityManagerInterface;
-use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -18,7 +17,6 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  * @internal
  */
 #[Small]
-#[CoversClass(AuditViewerUrlGenerator::class)]
 final class AuditViewerUrlGeneratorTest extends KernelTestCase
 {
     private const string POST_PARAM = 'DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Post';

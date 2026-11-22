@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\Tests\Twig;
 
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
-use DH\AuditorBundle\Twig\ViewerUrlExtension;
-use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Small;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Twig\Environment;
@@ -15,7 +13,6 @@ use Twig\Environment;
  * @internal
  */
 #[Small]
-#[CoversClass(ViewerUrlExtension::class)]
 final class ViewerUrlExtensionTest extends KernelTestCase
 {
     private const string POST_PARAM = 'DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Post';
