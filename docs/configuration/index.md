@@ -29,6 +29,7 @@ dh_auditor:
             storage_mapper: ~
             utf8_convert: false             # Re-enable legacy UTF-8 conversion (opt-in)
             compression: false              # Compress diffs/extra_data columns (MariaDB only)
+            skip_disabled_entities: false   # No audit table for entities disabled by their configuration
             viewer: false
             retention:
                 schedule: ~                 # Cron expression for scheduled pruning (opt-in)
@@ -315,6 +316,32 @@ uncompressed columns without losing data.
 > [!NOTE]
 > See the [DoctrineProvider configuration](https://github.com/DamienHarper/auditor-doctrine-provider/blob/main/docs/providers/doctrine/configuration.md)
 > for details.
+
+### skip_disabled_entities
+
+| Type   | Default | Description                                                                  |
+|--------|---------|------------------------------------------------------------------------------|
+| `bool` | `false` | No audit table for entities disabled by their configuration (`enabled: false`) |
+
+```yaml
+dh_auditor:
+    providers:
+        doctrine:
+            skip_disabled_entities: true
+```
+
+An entity disabled by its configuration (`#[Auditable(enabled: false)]` or `enabled: false` under `entities`) is not
+audited, but it still gets an audit table by default, so that auditing can be enabled for it at runtime with
+`enableAuditFor()`. If you never do that (e.g. a linter requires `#[Auditable]` on every entity and some are never
+meant to be audited), this option leaves such entities without an audit table:
+
+- `audit:schema:update`, `doctrine:schema:update` and `doctrine:migrations:diff` all skip them;
+- `enableAuditFor()` throws a `LogicException` for them, instead of a flush failing later on a missing table;
+- the viewer and the `Reader` leave them out.
+
+Existing audit tables of these entities are not dropped. See the
+[DoctrineProvider configuration](https://github.com/DamienHarper/auditor-doctrine-provider/blob/main/docs/providers/doctrine/configuration.md)
+for details.
 
 ### viewer
 
