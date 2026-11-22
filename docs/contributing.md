@@ -98,16 +98,17 @@ The project includes a `Makefile` that allows you to test against different comb
 
 | Option | Values                     | Default  | Description          |
 |--------|----------------------------|----------|----------------------|
-| `php`  | `8.4`, `8.5`               | `8.5`    | PHP version          |
-| `sf`   | `8.0`                      | `8.0`    | Symfony version      |
+| `php`  | `8.4`, `8.5`, `8.6`        | `8.5`    | PHP version          |
+| `sf`   | `8.1`, `8.2`               | `8.1`    | Symfony version      |
 | `args` | Any PHPUnit/tool arguments | (varies) | Additional arguments |
 
 **Valid PHP/Symfony Combinations:**
 
 | PHP Version | Symfony Versions |
 |-------------|------------------|
-| 8.4         | 8.0              |
-| 8.5         | 8.0              |
+| 8.4         | 8.1, 8.2         |
+| 8.5         | 8.1, 8.2         |
+| 8.6         | 8.1, 8.2         |
 
 **Examples:**
 
@@ -115,7 +116,7 @@ The project includes a `Makefile` that allows you to test against different comb
 # Show all available commands and options
 make help
 
-# Run tests with defaults (PHP 8.5, Symfony 8.0)
+# Run tests with defaults (PHP 8.5, Symfony 8.1)
 make tests
 
 # Run tests with specific PHP version
@@ -205,8 +206,8 @@ Write clear, concise commit messages:
 When you submit a Pull Request, GitHub Actions will automatically run:
 
 - **PHPUnit tests** across the full matrix:
-  - PHP versions: 8.4, 8.5
-  - Symfony version: 8.0
+  - PHP versions: 8.4, 8.5, 8.6
+  - Symfony versions: 8.1, 8.2
 - **PHP-CS-Fixer** for code style validation
 - **PHPStan** for static analysis
 - **Code coverage** report
@@ -215,7 +216,7 @@ When you submit a Pull Request, GitHub Actions will automatically run:
 > Your PR must pass all CI checks before it can be merged. If a check fails, review the logs to identify and fix the issue.
 
 > [!TIP]
-> Run `make tests php=8.4` and `make tests php=8.5` locally before pushing to catch compatibility issues early.
+> Run `make tests php=8.4 sf=8.1` and `make tests php=8.6 sf=8.2` locally before pushing to catch compatibility issues early.
 
 ### ✍️ Writing Tests
 

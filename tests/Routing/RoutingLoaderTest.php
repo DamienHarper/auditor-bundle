@@ -10,7 +10,7 @@ use DH\AuditorBundle\Routing\RoutingLoader;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
-use Symfony\Bundle\FrameworkBundle\Routing\AttributeRouteControllerLoader;
+use Symfony\Component\Routing\Loader\AttributeClassLoader;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -51,7 +51,7 @@ final class RoutingLoaderTest extends TestCase
 
     private function createRoutingLoader(mixed $viewerConfiguration): RoutingLoader
     {
-        $attributeLoader = $this->createStub(AttributeRouteControllerLoader::class);
+        $attributeLoader = $this->createStub(AttributeClassLoader::class);
         $attributeLoader->method('load')->willReturnCallback(static function (mixed $class): RouteCollection {
             $collection = new RouteCollection();
             match ($class) {

@@ -11,15 +11,18 @@ This guide covers the installation of auditor-bundle in a Symfony application.
 | Requirement   | Version |
 |---------------|---------|
 | PHP           | >= 8.4  |
-| Symfony       | >= 8.0  |
+| Symfony       | >= 8.1  |
 | Doctrine DBAL | >= 4.0  |
 | Doctrine ORM  | >= 3.2  |
 | auditor       | >= 5.0  |
+
+Tested with PHP 8.4, 8.5 and 8.6, and Symfony 8.1 and 8.2.
 
 ### Previous Versions
 
 | Version | PHP    | Symfony | auditor |
 |---------|--------|---------|---------|
+| 7.x     | >= 8.4 | >= 8.1  | >= 4.0  |
 | 6.x     | >= 8.2 | >= 5.4  | >= 3.0  |
 | 5.x     | >= 7.4 | >= 4.4  | >= 2.0  |
 

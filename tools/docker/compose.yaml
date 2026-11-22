@@ -22,12 +22,22 @@ services:
 
 volumes:
   composer_root:
+  vendor_php8.6_sf8.2:
+  vendor_php8.6_sf8.1:
+  vendor_php8.6_sf8.0:
+  vendor_php8.5_sf8.2:
+  vendor_php8.5_sf8.1:
+  vendor_php8.4_sf8.2:
+  vendor_php8.4_sf8.1:
   vendor_php8.5_sf8.0:
   vendor_php8.4_sf8.0:
+  phpcsfixer_php8.6:
   phpcsfixer_php8.5:
   phpcsfixer_php8.4:
+  phpstan_php8.6:
   phpstan_php8.5:
   phpstan_php8.4:
+  rector_php8.6:
   rector_php8.5:
   rector_php8.4:
   phpstan_cache:

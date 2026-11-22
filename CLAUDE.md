@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-`auditor-bundle` (namespace `DH\AuditorBundle`) integrates the [`damienharper/auditor`](https://github.com/DamienHarper/auditor) audit-log library and its Doctrine provider into Symfony applications: container wiring and configuration (`dh_auditor`), a web audit viewer, an export endpoint, user/security providers, scheduled retention and an activity graph. Active development targets **8.x** on `master` (PHP ≥ 8.4, Symfony ^8.0, PHPUnit 13). All Doctrine code lives in `auditor-doctrine-provider`.
+`auditor-bundle` (namespace `DH\AuditorBundle`) integrates the [`damienharper/auditor`](https://github.com/DamienHarper/auditor) audit-log library and its Doctrine provider into Symfony applications: container wiring and configuration (`dh_auditor`), a web audit viewer, an export endpoint, user/security providers, scheduled retention and an activity graph. Active development targets **8.x** on `master` (PHP ≥ 8.4, Symfony ^8.1, PHPUnit 13). All Doctrine code lives in `auditor-doctrine-provider`.
 
 ## auditor family
 
@@ -50,7 +50,7 @@ composer agent-qa          # agent-rector + agent-cs-fix + agent-phpstan
 
 ### Docker matrix (Makefile)
 ```bash
-make tests php=8.5                       # PHPUnit in Docker (PHP 8.4 or 8.5, Symfony 8.0); no db option
+make tests php=8.5                       # PHPUnit in Docker (PHP 8.4–8.6, Symfony 8.1–8.2); no db option
 make tests args='--filter=ViewerControllerTest'
 make qa                                  # rector + cs-fix + phpstan in Docker
 make build-assets                        # rebuild src/Resources/public/app.css (Tailwind, host PHP)
