@@ -188,6 +188,43 @@ final class DHAuditorBundleTest extends KernelTestCase
         $this->assertFalse($container->getParameter('dh_auditor.viewer_enabled'), 'dh_auditor.viewer_enabled must be false when viewer is not enabled in config');
     }
 
+    public function testCompressionIsDisabledByDefault(): void
+    {
+        self::bootKernel(['config' => static function (TestKernel $kernel): void {
+            $kernel->setClearCacheAfterShutdown(false);
+            $kernel->addTestBundle(DoctrineBundle::class);
+            $kernel->addTestBundle(SecurityBundle::class);
+            $kernel->addTestBundle(TwigBundle::class);
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/dh_auditor.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/doctrine.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/security.yaml');
+        }]);
+
+        $configuration = self::getContainer()->get(DoctrineProviderConfiguration::class);
+        Assert::assertInstanceOf(DoctrineProviderConfiguration::class, $configuration);
+
+        $this->assertFalse($configuration->isCompressionEnabled(), '"compression" is disabled by default.');
+    }
+
+    public function testCompressionIsPassedToTheDoctrineProvider(): void
+    {
+        self::bootKernel(['config' => static function (TestKernel $kernel): void {
+            $kernel->setClearCacheAfterShutdown(false);
+            $kernel->addTestBundle(DoctrineBundle::class);
+            $kernel->addTestBundle(SecurityBundle::class);
+            $kernel->addTestBundle(TwigBundle::class);
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/dh_auditor.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/compression.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/doctrine.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/security.yaml');
+        }]);
+
+        $configuration = self::getContainer()->get(DoctrineProviderConfiguration::class);
+        Assert::assertInstanceOf(DoctrineProviderConfiguration::class, $configuration);
+
+        $this->assertTrue($configuration->isCompressionEnabled(), '"compression" is passed to the DoctrineProvider configuration.');
+    }
+
     #[\Override]
     protected static function getKernelClass(): string
     {
