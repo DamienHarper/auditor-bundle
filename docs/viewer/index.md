@@ -125,7 +125,8 @@ so that the comparison can be moved along the history.
 
 ### Transaction View (`/audit/transaction/{hash}`)
 
-Groups all changes from a single database transaction across all entities.
+Groups all changes from a single database transaction across all entities. The page is paginated like the other
+streams (`page_size` entries per page); the header and each entity title count the whole transaction.
 
 ### User Timeline (`/audit/user/{id}`)
 
@@ -139,6 +140,8 @@ every stream, the author of an entry links to this page.
   `blame_id`, which is what happens when the Symfony user class has no `getId()` method.
 - Each audited entity is queried separately, for at most `page × page_size` rows: browsing deep
   pages of a very active user costs more than browsing the first ones.
+- Entries written at the same instant are ordered by id, newest first, then by entity name: the content of each page
+  is stable.
 
 ## 📤 Export
 
@@ -239,6 +242,14 @@ The viewer includes a dark/light mode toggle button in the header.
 - **Persistence**: User preference is saved in `localStorage`
 
 The toggle works without page reload and persists across sessions.
+
+## 🔐 Content Security Policy
+
+The viewer carries no inline script, event handler attribute nor `style` attribute: its behaviours (theme, sort of
+the entity list, filters submitted on change) live in `bundles/dhauditor/viewer.js`, loaded by `layout.html.twig`, and
+its styles in `bundles/dhauditor/app.css`. It therefore works under a strict policy such as
+`script-src 'self'; style-src 'self'`, as long as the bundle assets are served from your origin
+(`bin/console assets:install`).
 
 ## 🔒 Access Control
 
@@ -394,6 +405,8 @@ templates/bundles/DHAuditorBundle/
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('bundles/dhauditor/app.css') }}">
+    {# theme, sort and filters of the viewer; loaded without defer so that the theme applies before the first paint #}
+    <script src="{{ asset('bundles/dhauditor/viewer.js') }}"></script>
 {% endblock %}
 
 {% block body %}

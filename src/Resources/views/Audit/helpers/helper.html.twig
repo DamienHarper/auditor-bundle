@@ -34,8 +34,7 @@
     {%- set user_id = entry.userId is null ? '' : entry.userId ~ '' -%}
     {%- if user_id != '' -%}
         <a href="{{ path('dh_auditor_show_user_stream', {id: user_id}) }}"
-           class="font-medium hover:underline"
-           onclick="event.stopPropagation();">{{ entry.username ?? user_id }}</a>
+           class="font-medium hover:underline">{{ entry.username ?? user_id }}</a>
     {%- else -%}
         <span class="font-medium">{{ entry.username ?? 'audit.audit_details.anonymous'|trans(domain='auditor') }}</span>
     {%- endif -%}
@@ -103,17 +102,17 @@
         {% set rawValue = rawData[loop.index0]|default(0) %}
         {% set date = dates[loop.index0]|default(null) %}
         {% set label = (date ? date ~ ' · ' : '') ~ 'audit.audit_details.events_count'|trans({'%count%': rawValue, '%formatted_count%': rawValue|number_format}, 'auditor') %}
-        {% set height = hasActivity ? (value > 0 ? max(15, value) : 4) : 20 %}
+        {# Bar height in 5 % steps, rendered by the dh-auditor-bar-h-* classes of app.css (no style attribute: CSP) #}
+        {% set height = hasActivity ? (value > 0 ? (max(15, value) / 5)|round * 5 : 5) : 20 %}
         {% set color = hasActivity ? 'bg-slate-300 dark:bg-indigo-500' : 'bg-slate-200 dark:bg-slate-600' %}
         {% if entity is not null and date is not null %}
             <a href="{{ path('dh_auditor_show_entity_stream', {entity: _self.namespaceToParam(entity), date_from: date, date_to: date}) }}"
                class="group flex flex-1 items-end h-full rounded-sm" title="{{ label }}" aria-label="{{ label }}"
                data-audit-date="{{ date }}" data-audit-count="{{ rawValue }}">
-                <span class="w-full rounded-sm transition-colors group-hover:bg-slate-400 dark:group-hover:bg-indigo-400 group-focus:bg-slate-400 dark:group-focus:bg-indigo-400 {{ color }}"
-                      style="height: {{ height }}%"></span>
+                <span class="w-full rounded-sm transition-colors group-hover:bg-slate-400 dark:group-hover:bg-indigo-400 group-focus:bg-slate-400 dark:group-focus:bg-indigo-400 {{ color }} dh-auditor-bar-h-{{ height }}"></span>
             </a>
         {% else %}
-            <div class="flex-1 rounded-sm {{ color }}" style="height: {{ height }}%" title="{{ label }}"></div>
+            <div class="flex-1 rounded-sm {{ color }} dh-auditor-bar-h-{{ height }}" title="{{ label }}"></div>
         {% endif %}
     {% endfor %}
 {% endmacro activity_bars %}

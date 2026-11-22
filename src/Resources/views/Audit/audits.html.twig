@@ -17,7 +17,7 @@
         <select id="sort-entities"
                 aria-label="{{ 'audit.sort.label'|trans(domain='auditor') }}"
                 class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
-                onchange="applySort()">
+                data-dh-auditor-sort>
             {% for option in sortOptions %}
                 <option value="{{ option.value }}" {% if sort == option.value %}selected{% endif %}>
                     {{ ('audit.sort.' ~ option.value)|trans(domain='auditor') }}
@@ -63,18 +63,4 @@
         {% endfor %}
     </div>
 
-    <script>
-        function applySort() {
-            const sort = document.getElementById('sort-entities').value;
-            const url = new URL(window.location.href);
-
-            if (sort) {
-                url.searchParams.set('sort', sort);
-            } else {
-                url.searchParams.delete('sort');
-            }
-
-            window.location.href = url.toString();
-        }
-    </script>
 {% endblock dh_auditor_content %}
