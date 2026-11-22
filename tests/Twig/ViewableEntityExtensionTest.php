@@ -127,6 +127,8 @@ final class ViewableEntityExtensionTest extends KernelTestCase
         $this->assertFalse($extension->isViewable(Comment::class));
         $this->assertFalse($extension->isViewable(Author::class));
         $this->assertFalse($extension->isViewable('App\Entity\RemovedFromConfiguration'));
+        $this->assertTrue($extension->isViewable(new Tag()), 'An entity object is accepted.');
+        $this->assertFalse($extension->isViewable(new Author()));
     }
 
     /**

@@ -43,9 +43,11 @@ use DH\AuditorBundle\Security\SecurityProvider;
 use DH\AuditorBundle\Twig\DiffExtension;
 use DH\AuditorBundle\Twig\TimeAgoExtension;
 use DH\AuditorBundle\Twig\ViewableEntityExtension;
+use DH\AuditorBundle\Twig\ViewerUrlExtension;
 use DH\AuditorBundle\User\ConsoleUserProvider;
 use DH\AuditorBundle\User\UserProvider;
 use DH\AuditorBundle\Viewer\ActivityGraphProvider;
+use DH\AuditorBundle\Viewer\AuditViewerUrlGenerator;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -276,6 +278,20 @@ class DHAuditorBundle extends AbstractBundle
         // Twig extension (uses #[AsTwigFunction] attribute)
         $services->set(ViewableEntityExtension::class)
             ->args([new Reference(DoctrineProvider::class)])
+            ->autoconfigure()
+        ;
+
+        // Viewer URL generator and its Twig functions (dh_auditor_entity_url(), …)
+        $services->set(AuditViewerUrlGenerator::class)
+            ->args([
+                new Reference(DoctrineProvider::class),
+                new Reference('router'),
+                '%dh_auditor.viewer_enabled%',
+            ])
+        ;
+
+        $services->set(ViewerUrlExtension::class)
+            ->args([new Reference(AuditViewerUrlGenerator::class)])
             ->autoconfigure()
         ;
 
