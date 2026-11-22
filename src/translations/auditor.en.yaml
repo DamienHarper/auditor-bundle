@@ -50,6 +50,7 @@ audit:
     icon_title: Compare revisions
   entry:
     by: by
+    via: via
     source: Source
     target: Target
     extra_data: Extra Data

@@ -90,13 +90,14 @@
             </div>
         </div>
 
-        {# Second line: date, user/command, IP, firewall #}
+        {# Second line: date, user/command, blame context, IP, firewall #}
         <div class="flex items-center gap-2 mt-1 ml-2 text-xs text-slate-500 dark:text-slate-400">
             <span>{{ entry.createdAt|format_datetime('full', 'short', timezone: false) }}</span>
             <span>·</span>
             <span>{{ 'audit.entry.by'|trans(domain='auditor') }}
                 {{ helper.blame(entry) }}
             </span>
+            {{ helper.via(entry) }}
             {% if entry.ip is not empty %}
                 <span>·</span>
                 <span class="font-mono">{{ entry.ip }}</span>
@@ -197,13 +198,14 @@
             </div>
         </div>
 
-        {# Second line: date, user/command, IP, firewall #}
+        {# Second line: date, user/command, blame context, IP, firewall #}
         <div class="flex items-center gap-2 mt-1 ml-2 text-xs text-slate-500 dark:text-slate-400">
             <span>{{ entry.createdAt|format_datetime('full', 'short', timezone: false) }}</span>
             <span>·</span>
             <span>{{ 'audit.entry.by'|trans(domain='auditor') }}
                 {{ helper.blame(entry) }}
             </span>
+            {{ helper.via(entry) }}
             {% if entry.ip is not empty %}
                 <span>·</span>
                 <span class="font-mono">{{ entry.ip }}</span>

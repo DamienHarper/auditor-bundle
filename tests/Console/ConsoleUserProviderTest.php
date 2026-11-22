@@ -63,6 +63,8 @@ final class ConsoleUserProviderTest extends KernelTestCase
         $this->assertNotEmpty($entries, 'There are audit entries');
         $this->assertSame('app:post:create', $entries[0]->userId, 'User ID is OK');
         $this->assertSame('app:post:create', $entries[0]->username, 'Username is OK');
+        $this->assertSame(['type' => 'console', 'label' => 'app:post:create'], $entries[0]->via, 'The blame context of the command is written');
+        $this->assertTrue($this->provider->getAuditor()->getConfiguration()->getBlameContextStack()->isEmpty(), 'The console blame context is popped once the command is over');
     }
 
     private function createAndInitDoctrineProvider(): void

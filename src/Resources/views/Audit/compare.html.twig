@@ -41,7 +41,7 @@
                     <span class="font-medium text-slate-900 dark:text-slate-100">{{ side.revision.createdAt|format_datetime('full', 'short', timezone: false) }}</span>
                 </div>
                 <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                    {{ side.revision.createdAt|time_ago }} · {{ 'audit.entry.by'|trans(domain='auditor') }} {{ helper.blame(side.revision) }}
+                    {{ side.revision.createdAt|time_ago }} · {{ 'audit.entry.by'|trans(domain='auditor') }} {{ helper.blame(side.revision) }} {{ helper.via(side.revision) }}
                 </div>
                 {% if side.step is not null %}
                     <a href="{{ path('dh_auditor_compare_revisions', {entity: entity_param, id: id, from: side.step.from, to: side.step.to}) }}"
