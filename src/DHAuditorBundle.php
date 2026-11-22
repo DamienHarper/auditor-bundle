@@ -6,6 +6,8 @@ namespace DH\AuditorBundle;
 
 use DH\Auditor\Auditor;
 use DH\Auditor\Configuration;
+use DH\Auditor\Event\LifecycleEvent;
+use DH\Auditor\EventSubscriber\AuditEventSubscriber;
 use DH\Auditor\Provider\Doctrine\Auditing\Attribute\AttributeLoader;
 use DH\Auditor\Provider\Doctrine\Configuration as DoctrineProviderConfiguration;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
@@ -122,10 +124,22 @@ class DHAuditorBundle extends AbstractBundle
         }
 
         // Auditor service
+        // The AuditEventSubscriber is declared in the container below instead of being attached by the
+        // Auditor constructor: the compiled event dispatcher deprecates runtime addListener() calls (Symfony 8.2).
         $services->set(Auditor::class)
             ->args([
                 new Reference(Configuration::class),
                 new Reference('event_dispatcher'),
+                false,
+            ])
+        ;
+
+        $services->set(AuditEventSubscriber::class)
+            ->args([new Reference(Auditor::class)])
+            ->tag('kernel.event_listener', [
+                'event' => LifecycleEvent::class,
+                'method' => '__invoke',
+                'priority' => AuditEventSubscriber::PRIORITY,
             ])
         ;
 
