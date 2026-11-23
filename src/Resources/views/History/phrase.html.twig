@@ -1,0 +1,10 @@
+{#- A history phrase: text escaped, values in <strong>, object references through their own template. -#}
+{%- for part in phrase.parts -%}
+    {%- if part.kind == 'value' -%}
+        <strong>{{ part.value }}</strong>
+    {%- elseif part.kind == 'object' -%}
+        {{- include('@DHAuditor/History/object_reference.html.twig', {reference: part}, with_context = false) -}}
+    {%- else -%}
+        {{- part -}}
+    {%- endif -%}
+{%- endfor -%}

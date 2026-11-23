@@ -44,8 +44,10 @@ use DH\AuditorBundle\Event\ViewerEventSubscriber;
 use DH\AuditorBundle\ExtraData\ExtraDataProvider;
 use DH\AuditorBundle\History\AuthorNameResolverInterface;
 use DH\AuditorBundle\History\HistoryPhraser;
+use DH\AuditorBundle\History\ObjectUrlResolverInterface;
 use DH\AuditorBundle\History\TranslatedFieldLabelResolver;
 use DH\AuditorBundle\History\ValueFormatter;
+use DH\AuditorBundle\History\ViewerObjectUrlResolver;
 use DH\AuditorBundle\Messenger\BlameContextMiddleware;
 use DH\AuditorBundle\Retention\PruneAuditLogsHandler;
 use DH\AuditorBundle\Retention\RetentionSchedule;
@@ -341,6 +343,13 @@ class DHAuditorBundle extends AbstractBundle
             ->autoconfigure()
         ;
 
+        // Object references of history phrases lead to the history of the object in the viewer; decorate the resolver
+        // to send some classes elsewhere
+        $services->set(ViewerObjectUrlResolver::class)
+            ->args([new Reference(AuditViewerUrlGenerator::class), new Reference(ViewableEntityExtension::class)])
+        ;
+        $services->alias(ObjectUrlResolverInterface::class, ViewerObjectUrlResolver::class);
+
         // Routing loader (uses #[AutoconfigureTag('routing.loader')] attribute)
         $services->set(RoutingLoader::class)
             ->args([
@@ -524,7 +533,7 @@ class DHAuditorBundle extends AbstractBundle
             ])
         ;
         $services->set(PhraseExtension::class)
-            ->args([new Reference(HistoryPhraser::class)])
+            ->args([new Reference(HistoryPhraser::class), new Reference(ObjectUrlResolverInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE)])
             ->autoconfigure()
         ;
 

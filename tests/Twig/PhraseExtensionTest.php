@@ -5,9 +5,18 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\Tests\Twig;
 
 use DH\Auditor\History\HistoryItem;
+use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
+use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag;
+use DH\AuditorBundle\History\Fragment;
 use DH\AuditorBundle\History\HistoryPhraser;
+use DH\AuditorBundle\History\ObjectUrlResolverInterface;
+use DH\AuditorBundle\History\Part\ObjectReference;
+use DH\AuditorBundle\History\Part\ValuePart;
+use DH\AuditorBundle\History\Phrase;
+use DH\AuditorBundle\History\ViewerObjectUrlResolver;
 use DH\AuditorBundle\Tests\Fixtures\History\HistoryFixtures;
+use DH\AuditorBundle\Viewer\AuditViewerUrlGenerator;
 use PHPUnit\Framework\Attributes\Small;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Twig\Environment;
@@ -24,15 +33,54 @@ final class PhraseExtensionTest extends KernelTestCase
     {
         $twig = self::getContainer()->get('twig');
         $this->assertInstanceOf(Environment::class, $twig);
+        $urls = self::getContainer()->get(AuditViewerUrlGenerator::class);
+        $this->assertInstanceOf(AuditViewerUrlGenerator::class, $urls);
 
-        $item = new HistoryItem('01JTX', [self::entry('update', Post::class, '1', ['body' => ['old' => 'A & B', 'new' => 'C']])]);
-        $template = $twig->createTemplate('{{ item|dh_auditor_author }} {{ item|dh_auditor_phrase }} | {{ (item|dh_auditor_phrase).html|raw }}');
+        $template = $twig->createTemplate('{{ item|dh_auditor_author }} {{ item|dh_auditor_phrase }} | {{ item|dh_auditor_phrase_text }}');
 
-        $this->assertSame('alice edited Body | edited Body', $template->render(['item' => $item]));
+        $item = new HistoryItem('01JTX', [self::entry('insert', Post::class, '1', [], 'A & <B>')]);
+        $this->assertSame(
+            \sprintf('alice created Post “<strong><a href="%s">A &amp; &lt;B&gt;</a></strong>” | created Post “A &amp; &lt;B&gt;”', $urls->generateEntityUrl(Post::class, '1')),
+            $template->render(['item' => $item]),
+            'An object reference links to its history in the viewer; the text filter has no markup, and Twig escapes it.',
+        );
 
-        $item = new HistoryItem('01JTX', [self::entry('update', Post::class, '1', ['coauthor' => ['old' => null, 'new' => ['class' => 'App\Entity\Author', 'id' => 1, 'label' => 'A & B']]])]);
+        $item = new HistoryItem('01JTX', [self::entry('update', Post::class, '1', [
+            'body' => ['old' => 'A', 'new' => 'B'],
+            'coauthor' => ['old' => null, 'new' => ['class' => 'App\Entity\Gone', 'id' => 1, 'label' => 'A & B']],
+            'summary' => ['old' => 'x', 'new' => '<i>y</i>'],
+        ])]);
+        $this->assertSame(
+            'alice edited Body, set Coauthor: <strong>A &amp; B</strong> and changed Summary: <strong>x</strong> → <strong>&lt;i&gt;y&lt;/i&gt;</strong> | edited Body, set Coauthor: A &amp; B and changed Summary: x → &lt;i&gt;y&lt;/i&gt;',
+            $template->render(['item' => $item]),
+            'Values in <strong>; an object without URL stays plain.',
+        );
+    }
 
-        $this->assertSame('alice set Coauthor: A &amp; B | set Coauthor: <strong>A &amp; B</strong>', $template->render(['item' => $item]), 'The text is escaped, the HTML is safe.');
+    public function testPhraseOfADescriber(): void
+    {
+        $twig = self::getContainer()->get('twig');
+        $this->assertInstanceOf(Environment::class, $twig);
+
+        $phrase = Phrase::of(Fragment::of(['moved to ', new ObjectReference(Tag::class, '3', '<php>'), ' by ', new ValuePart('<script>')]));
+
+        $this->assertSame(
+            \sprintf('moved to <strong><a href="%s">&lt;php&gt;</a></strong> by <strong>&lt;script&gt;</strong>', self::getContainer()->get(AuditViewerUrlGenerator::class)?->generateEntityUrl(Tag::class, '3')),
+            $twig->createTemplate('{{ phrase|dh_auditor_phrase }}')->render(['phrase' => $phrase]),
+            'A describer links objects without writing HTML.',
+        );
+    }
+
+    public function testHiddenLink(): void
+    {
+        $twig = self::getContainer()->get('twig');
+        $this->assertInstanceOf(Environment::class, $twig);
+
+        $this->assertInstanceOf(ViewerObjectUrlResolver::class, self::getContainer()->get(ObjectUrlResolverInterface::class));
+        $phrase = Phrase::of(Fragment::of([new ObjectReference(Author::class, '1', 'John')]));
+        $html = $twig->createTemplate('{{ phrase|dh_auditor_phrase }}')->render(['phrase' => $phrase]);
+
+        $this->assertSame('<strong>John</strong>', $html, 'A reader without the view role of the class gets no link.');
     }
 
     public function testEntityUnknownToDoctrine(): void

@@ -10,6 +10,10 @@ use DH\Auditor\History\Change;
 use DH\Auditor\History\ChangeKind;
 use DH\Auditor\History\HistoryItem;
 use DH\Auditor\Model\Entry;
+use DH\AuditorBundle\History\Part\ObjectReference;
+use DH\AuditorBundle\History\Part\PhrasePart;
+use DH\AuditorBundle\History\Part\TextPart;
+use DH\AuditorBundle\History\Part\ValuePart;
 use DH\AuditorBundle\Tests\History\HistoryPhraserTest;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Translation\TranslatorBagInterface;
@@ -35,7 +39,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  * The phrases get these ICU parameters: {label} (the object label, or "#id"), {old}, {new} (formatted values), {names}
  * (collection elements, or the changed paths of a JSON field, as "a, b and c"), {count} (number of elements or
  * objects), {field} (field label, "dh_auditor_fields" domain), {entity} (entity name: key "FQCN" of the
- * "dh_auditor_fields" domain, given {count}; the short class name otherwise).
+ * "dh_auditor_fields" domain, given {count}; the short class name otherwise). They are inserted after the
+ * translation, as parts of the fragment: {label}, the associated objects of {old} and {new} and the elements of
+ * {names} as object references, the other values as values, {field} and {entity} as text.
  *
  * @see HistoryPhraserTest
  */
@@ -56,8 +62,8 @@ final readonly class HistoryPhraser
     private const string FIELDS_DOMAIN = TranslatedFieldLabelResolver::DOMAIN;
 
     /**
-     * Values of the parameters are wrapped in these marks while the HTML phrase is translated, then escaped and put in
-     * <strong> (private use characters: no translation holds them).
+     * Marks of the parameters while a phrase is translated: the translation is then split on them (private use
+     * characters, which no translation holds).
      */
     private const string OPEN = "\u{E000}";
 
@@ -289,9 +295,7 @@ final readonly class HistoryPhraser
             $keys[] = 'default.'.($longText && \in_array($change->kind, [ChangeKind::Set, ChangeKind::Changed], true) ? 'edited' : $kind);
         }
 
-        [$text, $html] = $this->message($keys, $this->parameters($changes, $bulk));
-
-        return new Fragment($text, $changes, $this->icon($change, $type, $longText), $html);
+        return new Fragment($this->message($keys, $this->parameters($changes, $bulk)), $changes, $this->icon($change, $type, $longText));
     }
 
     private function isLongText(Change $change, ?string $type): bool
@@ -318,25 +322,25 @@ final readonly class HistoryPhraser
     }
 
     /**
-     * Parameters of the phrase of a fragment: plain values, and values wrapped for the HTML phrase.
+     * Parameters of the phrase of a fragment: {count} as a number, the others as parts ({names} as one part per name,
+     * joined later as "a, b and c").
      *
      * @param non-empty-list<Change> $changes
      *
-     * @return array<string, array{0: int|string, 1: bool}> name => [value, is a value to highlight]
+     * @return array<string, int|list<PhrasePart>>
      */
     private function parameters(array $changes, ?int $bulk): array
     {
         $change = $changes[0];
-        $count = $bulk ?? \count($changes);
 
         $parameters = [
-            'count' => [$count, false],
-            'entity' => [$this->entityName($change->entity, $bulk ?? 1), false],
-            'field' => [null === $change->field ? '' : $this->fieldLabelResolver->resolve($change->entity, $change->field), false],
-            'label' => [ValueFormatter::truncate($change->objectLabel ?? '#'.$change->objectId), true],
-            'old' => ['', true],
-            'new' => ['', true],
-            'names' => ['', true],
+            'count' => $bulk ?? \count($changes),
+            'entity' => [new TextPart($this->entityName($change->entity, $bulk ?? 1))],
+            'field' => [new TextPart(null === $change->field ? '' : $this->fieldLabelResolver->resolve($change->entity, $change->field))],
+            'label' => [new ObjectReference($change->entity, $change->objectId, ValueFormatter::truncate($change->objectLabel ?? '#'.$change->objectId))],
+            'old' => [],
+            'new' => [],
+            'names' => [],
         ];
 
         if (null !== $bulk || null === $change->field) {
@@ -346,22 +350,44 @@ final readonly class HistoryPhraser
         switch ($change->kind) {
             case ChangeKind::Added:
             case ChangeKind::Removed:
-                $names = array_map(static fn (Change $element): string => ValueFormatter::truncate($element->newLabel ?? $element->oldLabel ?? '#'.$element->getTargetId()), $changes);
-                $parameters['names'] = [implode(self::OPEN, $names), true];
+                $parameters['names'] = array_map(static function (Change $element): PhrasePart {
+                    $label = ValueFormatter::truncate($element->newLabel ?? $element->oldLabel ?? '#'.$element->getTargetId());
+                    $class = $element->getTargetClass();
+                    $id = $element->getTargetId();
+
+                    return null === $class || null === $id ? new ValuePart($label) : new ObjectReference($class, $id, $label);
+                }, $changes);
 
                 break;
 
             case ChangeKind::Json:
-                $parameters['names'] = [implode(self::OPEN, self::paths(\is_array($change->new) ? $change->new : [])), true];
+                $parameters['names'] = array_map(static fn (string $path): PhrasePart => new ValuePart($path), self::paths(\is_array($change->new) ? $change->new : []));
 
                 break;
 
             default:
-                $parameters['old'] = [ValueFormatter::truncate($this->values->format($change->entity, $change->field, $change->old, $change->oldLabel)), true];
-                $parameters['new'] = [ValueFormatter::truncate($this->values->format($change->entity, $change->field, $change->new, $change->newLabel)), true];
+                $parameters['old'] = [$this->value($change, $change->old, $change->oldLabel)];
+                $parameters['new'] = [$this->value($change, $change->new, $change->newLabel)];
         }
 
         return $parameters;
+    }
+
+    /**
+     * A value of a field change: a reference when it is an associated object (an association summary holding its
+     * class and identifier), a formatted value otherwise.
+     */
+    private function value(Change $change, mixed $value, ?string $label): PhrasePart
+    {
+        $formatted = ValueFormatter::truncate($this->values->format($change->entity, (string) $change->field, $value, $label));
+        if (!\is_array($value) || !\is_string($value['class'] ?? null)) {
+            return new ValuePart($formatted);
+        }
+
+        $key = \is_string($value['pkName'] ?? null) ? $value['pkName'] : 'id';
+        $id = $value[$key] ?? null;
+
+        return \is_int($id) || \is_string($id) ? new ObjectReference($value['class'], (string) $id, $formatted) : new ValuePart($formatted);
     }
 
     /**
@@ -393,62 +419,69 @@ final readonly class HistoryPhraser
     }
 
     /**
-     * Translates the first defined key, as text and as HTML.
+     * Translates the first defined key into parts: the parameters are replaced by marks, the translation is split on
+     * them, and each mark gives way to the parts of its parameter.
      *
-     * @param non-empty-list<string>                       $keys
-     * @param array<string, array{0: int|string, 1: bool}> $parameters
+     * @param non-empty-list<string>              $keys
+     * @param array<string, int|list<PhrasePart>> $parameters
      *
-     * @return array{0: string, 1: string}
+     * @return list<PhrasePart>
      */
     private function message(array $keys, array $parameters): array
     {
         $key = array_find($keys, fn (string $key): bool => $this->has($key)) ?? $keys[array_key_last($keys)];
 
-        $text = [];
         $marked = [];
-        $values = [];
-        foreach ($parameters as $name => [$value, $highlight]) {
-            if (!\is_string($value) || !$highlight) {
-                $text[$name] = $value;
+        $inserted = [];
+        foreach ($parameters as $name => $value) {
+            if (\is_int($value)) {
                 $marked[$name] = $value;
 
                 continue;
             }
 
-            // a list of names is held as names separated by OPEN: joined as "a, b and c"
-            $items = '' === $value ? [] : explode(self::OPEN, $value);
-            $text[$name] = $this->list($items);
-            $marked[$name] = $this->list(array_map(static function (string $item) use (&$values): string {
-                $values[] = $item;
-
-                return self::OPEN.(\count($values) - 1).self::CLOSE;
-            }, $items));
+            $marked[$name] = self::OPEN.$name.self::CLOSE;
+            $inserted[$name] = $this->list($value);
         }
 
-        $html = htmlspecialchars($this->translator->trans($key, $marked, self::DOMAIN), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-        $html = (string) preg_replace_callback('/'.self::OPEN.'(\d+)'.self::CLOSE.'/u', static fn (array $match): string => '<strong>'.htmlspecialchars($values[(int) $match[1]] ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'</strong>', $html);
+        $pieces = preg_split('/'.self::OPEN.'(\w+)'.self::CLOSE.'/u', $this->translator->trans($key, $marked, self::DOMAIN), -1, PREG_SPLIT_DELIM_CAPTURE) ?: [];
 
-        return [$this->translator->trans($key, $text, self::DOMAIN), $html];
+        $parts = [];
+        foreach ($pieces as $index => $piece) {
+            if (1 === $index % 2) {
+                array_push($parts, ...$inserted[$piece] ?? []);
+            } else {
+                $parts[] = new TextPart($piece);
+            }
+        }
+
+        return Phrase::mergeText($parts);
     }
 
     /**
-     * Joins names as "a, b and c"; beyond MAX_NAMES, "a, b, c and 4 others".
+     * Joins parts as "a, b and c"; beyond MAX_NAMES, "a, b, c and 4 others".
      *
-     * @param list<string> $items
+     * @param list<PhrasePart> $items
+     *
+     * @return list<PhrasePart>
      */
-    private function list(array $items): string
+    private function list(array $items): array
     {
         if (\count($items) > self::MAX_NAMES) {
-            $others = $this->trans('list.others', ['count' => \count($items) - 3]);
-            $items = [...\array_slice($items, 0, 3), $others];
+            $items = [...\array_slice($items, 0, 3), new TextPart($this->trans('list.others', ['count' => \count($items) - 3]))];
         }
 
-        $last = array_pop($items);
-        if (null === $last) {
-            return '';
+        $parts = [];
+        $last = \count($items) - 1;
+        foreach ($items as $index => $item) {
+            if ($index > 0) {
+                $parts[] = new TextPart($this->trans($index === $last ? 'list.and' : 'list.separator'));
+            }
+
+            $parts[] = $item;
         }
 
-        return [] === $items ? $last : implode($this->trans('list.separator'), $items).$this->trans('list.and').$last;
+        return $parts;
     }
 
     private function entityName(string $entity, int $count): string

@@ -1,0 +1,9 @@
+{#- An object named by a phrase, linked to the URL of dh_auditor_object_url() when the reader may see it. -#}
+{%- set url = dh_auditor_object_url(reference) -%}
+<strong>
+    {%- if url and url.visible -%}
+        <a href="{{ url.url }}">{{ reference.label }}</a>
+    {%- else -%}
+        {{- reference.label -}}
+    {%- endif -%}
+</strong>

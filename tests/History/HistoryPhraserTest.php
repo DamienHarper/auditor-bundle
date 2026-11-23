@@ -14,6 +14,9 @@ use DH\AuditorBundle\History\AuthorNameResolverInterface;
 use DH\AuditorBundle\History\ChangeDescriberInterface;
 use DH\AuditorBundle\History\Fragment;
 use DH\AuditorBundle\History\HistoryPhraser;
+use DH\AuditorBundle\History\Part\ObjectReference;
+use DH\AuditorBundle\History\Part\PhrasePart;
+use DH\AuditorBundle\History\Part\ValuePart;
 use DH\AuditorBundle\History\Phrase;
 use DH\AuditorBundle\History\TranslatedFieldLabelResolver;
 use DH\AuditorBundle\History\ValueFormatter;
@@ -34,7 +37,7 @@ final class HistoryPhraserTest extends TestCase
     {
         $phrase = $this->phraser()->phrase($this->item(self::entry('insert', Post::class, '1', ['title' => ['old' => null, 'new' => 'Why audit?']], 'Why audit?')));
 
-        $this->assertSame('created Post “Why audit?”', $phrase->text());
+        $this->assertSame('created Post “Why audit?”', (string) $phrase);
         $this->assertSame('created', $phrase->icon);
     }
 
@@ -68,7 +71,7 @@ final class HistoryPhraserTest extends TestCase
         ], array_map(strval(...), $phrase->fragments), 'Fields in the order of their mapping, unmapped ones last.');
         $this->assertSame(['text', 'status', 'toggle', 'edited', 'edited', 'json'], array_map(static fn (Fragment $fragment): ?string => $fragment->icon, $phrase->fragments));
         $this->assertSame('text', $phrase->icon, 'The icon of the phrase is the one of its main change.');
-        $this->assertStringEndsWith(', a vidé Deadline (30 nov. 2026) et a modifié Metadata (seo.description et tags)', $phrase->text());
+        $this->assertStringEndsWith(', a vidé Deadline (30 nov. 2026) et a modifié Metadata (seo.description et tags)', (string) $phrase);
     }
 
     public function testLongTextIsEditedWithoutValues(): void
@@ -76,7 +79,7 @@ final class HistoryPhraserTest extends TestCase
         $long = str_repeat('word ', 20);
         $phrase = $this->phraser()->phrase($this->item(self::entry('update', Post::class, '1', ['title' => ['old' => 'Short', 'new' => $long]])));
 
-        $this->assertSame('edited Title', $phrase->text(), 'A value longer than a phrase allows is not repeated in it.');
+        $this->assertSame('edited Title', (string) $phrase, 'A value longer than a phrase allows is not repeated in it.');
     }
 
     public function testTranslatedPhrases(): void
@@ -114,7 +117,7 @@ final class HistoryPhraserTest extends TestCase
             $this->tagEntry('associate', 1, 'symfony', 1),
         ));
 
-        $this->assertSame('added to Tags: symfony and audit and removed from Tags: php', $phrase->text());
+        $this->assertSame('added to Tags: symfony and audit and removed from Tags: php', (string) $phrase);
         $this->assertCount(2, $phrase->fragments[0]->changes);
         $this->assertSame('added', $phrase->icon);
     }
@@ -136,7 +139,7 @@ final class HistoryPhraserTest extends TestCase
             self::entry('insert', Comment::class, '9', [], 'Reviewed, thanks', rootPath: 'comments', id: 1),
         ));
 
-        $this->assertSame('changed Title: A → B and created Comment “Reviewed, thanks”', $phrase->text());
+        $this->assertSame('changed Title: A → B and created Comment “Reviewed, thanks”', (string) $phrase);
     }
 
     public function testBulkChangesAreSummarised(): void
@@ -171,26 +174,45 @@ final class HistoryPhraserTest extends TestCase
         $label = str_repeat('Lorem ipsum ', 10);
         $phrase = $this->phraser()->phrase($this->item(self::entry('insert', Post::class, '1', [], $label)));
 
-        $this->assertLessThanOrEqual(ValueFormatter::MAX_LENGTH, mb_strlen(mb_substr($phrase->text(), mb_strlen('created Post “'), -1)));
-        $this->assertStringEndsWith('…”', $phrase->text());
+        $this->assertLessThanOrEqual(ValueFormatter::MAX_LENGTH, mb_strlen(mb_substr((string) $phrase, mb_strlen('created Post “'), -1)));
+        $this->assertStringEndsWith('…”', (string) $phrase);
     }
 
-    public function testHtml(): void
+    public function testParts(): void
     {
         $phrase = $this->phraser()->phrase($this->item(
             $this->tagEntry('associate', 2, '<b>audit</b>', 2),
             $this->tagEntry('associate', 1, 'symfony', 1),
-            self::entry('update', Post::class, '1', ['title' => ['old' => 'A & B', 'new' => 'C']], id: 0),
+            self::entry('update', Post::class, '1', [
+                'title' => ['old' => 'A & B', 'new' => 'C'],
+                'author' => ['old' => null, 'new' => ['class' => 'App\Entity\Author', 'id' => 7, 'label' => 'Alice']],
+            ], id: 0),
+            self::entry('insert', Comment::class, '9', [], 'Nice', id: -1),
         ));
 
-        $this->assertSame('changed Title: <strong>A &amp; B</strong> → <strong>C</strong> and added to Tags: <strong>symfony</strong> and <strong>&lt;b&gt;audit&lt;/b&gt;</strong>', $phrase->html());
+        $this->assertSame([
+            'created Comment “', '<Comment#9 Nice>', '”, changed Title: ', '[A & B]', ' → ', '[C]', ', set Author: ',
+            '<App\Entity\Author#7 Alice>', ' and added to Tags: ', '<Tag#1 symfony>', ' and ', '<Tag#2 <b>audit</b>>',
+        ], $this->describeParts($phrase), 'Text, values and object references, joined by the separators of the phraser.');
     }
 
-    public function testHtmlOfATranslatedPhrase(): void
+    public function testPartsOfATranslatedPhrase(): void
     {
         $phraser = $this->phraser('en', [Post::class.'.created' => 'created the <article> {label}']);
 
-        $this->assertSame('created the &lt;article&gt; <strong>Why audit?</strong>', $phraser->phrase($this->item(self::entry('insert', Post::class, '1', [], 'Why audit?')))->html());
+        $this->assertSame(['created the <article> ', '<Post#1 Why audit?>'], $this->describeParts($phraser->phrase($this->item(self::entry('insert', Post::class, '1', [], 'Why audit?')))));
+    }
+
+    public function testLongListParts(): void
+    {
+        $entries = [];
+        foreach (['a', 'b', 'c', 'd', 'e', 'f', 'g'] as $index => $name) {
+            array_unshift($entries, $this->tagEntry('associate', $index + 1, $name, $index + 1));
+        }
+
+        $this->assertSame(['a ajouté les tags ', '<Tag#1 a>', ', ', '<Tag#2 b>', ', ', '<Tag#3 c>', ' et 4 autres'], $this->describeParts($this->phraser('fr', [
+            Post::class.'.tags.added' => '{count, plural, one {a ajouté le tag {names}} other {a ajouté les tags {names}}}',
+        ])->phrase($this->item(...$entries))), '{count} is the number of elements, the list is cut.');
     }
 
     public function testDescribers(): void
@@ -198,7 +220,7 @@ final class HistoryPhraserTest extends TestCase
         $describer = new class implements ChangeDescriberInterface {
             public function describe(Change $change, HistoryItem $item): ?Phrase
             {
-                return 'B' === $change->new ? Phrase::of(new Fragment('renamed the post to B', [$change], 'pencil')) : null;
+                return 'B' === $change->new ? Phrase::of(Fragment::of(['renamed the post to B'], [$change], 'pencil')) : null;
             }
         };
 
@@ -350,5 +372,19 @@ final class HistoryPhraserTest extends TestCase
     private function tagEntry(string $type, int $tagId, string $tagLabel, int $id): Entry
     {
         return self::entry($type, Post::class, '1', [], 'Why audit?', id: $id, target: self::target(Tag::class, $tagId, $tagLabel), field: 'tags');
+    }
+
+    /**
+     * Parts as strings: "[value]" for a value, "<Class#id label>" for an object reference (short class name).
+     *
+     * @return list<string>
+     */
+    private function describeParts(Phrase $phrase): array
+    {
+        return array_map(static fn (PhrasePart $part): string => match (true) {
+            $part instanceof ValuePart => '['.$part->value.']',
+            $part instanceof ObjectReference => '<'.str_replace(['DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\\'], '', $part->class).'#'.$part->id.' '.$part->label.'>',
+            default => (string) $part,
+        }, $phrase->getParts());
     }
 }
