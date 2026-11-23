@@ -173,7 +173,7 @@ Values are read through the Doctrine mapping of the field: an enum gives its lab
 time), a boolean "yes" or "no", no value "empty"; a value that cannot be read as its type is shown as stored. A value
 written with a label (`#[DiffLabel]`, the label of an associated entity) shows that label.
 
-The bundle ships these phrases in English and French. For another locale, translate the keys of
+The bundle ships these phrases in the languages of the viewer (de, en, es, et, fr, it, nl, ru, uk). For another locale, translate the keys of
 `vendor/damienharper/auditor-bundle/src/translations/dh_auditor_history+intl-icu.en.yaml`, or keep `en` among the
 translator fallbacks (`framework.translator.fallbacks`): without them, the keys show as they are.
 
@@ -322,6 +322,23 @@ called once per action: cache what it looks up.
 # config/services.yaml
 DH\AuditorBundle\History\AuthorNameResolverInterface: '@App\Audit\AuthorNameResolver'
 ```
+
+### Twig reference
+
+The templates of the bundle, and the partials of `History/` you may override, rely on these functions and filters:
+
+| Function or filter | Returns |
+|---|---|
+| `item\|dh_auditor_phrase` | the phrase of a `HistoryItem` (or `Phrase`, `Fragment`) as HTML, objects linked to their history |
+| `item\|dh_auditor_phrase_text` | the same phrase as plain text |
+| `item\|dh_auditor_shorten(n)` | the first `n` fragments of a phrase, followed by "and 4 other changes" |
+| `item\|dh_auditor_author` | the author of an action |
+| `dh_auditor_context(item, rootClass = null, rootId = null)` | what an action was done on ("on Post “Why audit?”"), or null |
+| `dh_auditor_entity_name(class, count = 1)` | the name of an entity (`dh_auditor_fields` domain, key FQCN), or its short class name |
+| `dh_auditor_object_url(reference)` | where an object reference leads (`ObjectUrl`), or null |
+| `dh_auditor_is_deleted(reference)` | whether the object of a reference no longer exists, as far as the page checked it |
+| `dh_auditor_history_item(entry)` | the action of a single `Entry` |
+| `dh_auditor_word_diff(old, new)` | a word by word comparison of two texts, as runs of `[kind, text]` (`equal`, `delete`, `insert`), or null |
 
 ## 🧩 In the pages of your application
 

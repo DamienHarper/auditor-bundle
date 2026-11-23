@@ -12,9 +12,12 @@ PHP attributes provide an alternative to YAML configuration for declaring audita
 | Attribute        | Target   | Description                                      |
 |------------------|----------|--------------------------------------------------|
 | `#[Auditable]`   | Class    | Marks an entity as auditable                     |
-| `#[Ignore]`      | Property | Excludes a property from auditing                |
+| `#[Ignore]`      | Property, or class with `field:` | Excludes a property from auditing |
 | `#[Security]`    | Class    | Defines roles required to view audits            |
-| `#[DiffLabel]`   | Property | Attaches a human-readable label resolver to a field |
+| `#[DiffLabel]`   | Property, or class with `field:` | Attaches a human-readable label resolver to a field |
+| `#[AuditRoot]`   | Class (repeatable) | Attaches the entries to the history of another entity (see [Histories](../customization/histories.md)) |
+
+`#[Auditable]` also takes a retention policy: `#[Auditable(maxAge: 'P1Y', maxEntries: 10_000)]`.
 
 All attributes are in the `DH\Auditor\Attribute` namespace (auditor core).
 
@@ -208,7 +211,7 @@ flowchart TD
     A["Attribute #[Auditable]"] -->|overrides| B["YAML entities.*.enabled"]
     C["Attribute #[Ignore]"] -->|adds to| D["YAML ignored_columns"]
     D -->|wins over| G["YAML entities.*.audited_columns"]
-    E["Attribute #[Security]"] -->|overrides| F["YAML entities.*.roles"]
+    E["Attribute #[Security] (or its absence)"] -->|overrides| F["YAML entities.*.roles"]
 ```
 
 | Attribute       | Behavior                                    |
@@ -217,30 +220,18 @@ flowchart TD
 | `#[Ignore]`     | Adds to `ignored_columns` (YAML + attribute)|
 | `#[Ignore]`     | Wins over `entities.*.audited_columns`: an ignored property is never audited |
 | `#[Security]`   | Overrides `entities.*.roles` from YAML      |
+| `#[AuditRoot]`  | Adds to `entities.*.roots` (YAML + attribute) |
+| `#[Auditable(maxAge, maxEntries)]` | YAML `retention` wins, key by key   |
 
-## ⚠️ Entity Not in YAML
+> [!WARNING]
+> For an entity marked `#[Auditable]`, the `enabled` and `roles` entity options of the YAML are not read: the
+> attributes decide. Without `#[Security]`, such an entity has **no view restriction**, even if `roles` is set in
+> YAML. Put the roles in `#[Security(view: [...])]`.
 
-> [!CAUTION]
-> If an entity has `#[Auditable]` but isn't in YAML `entities`, it will **not** be audited.
+## ✅ Entity Not in YAML
 
-```yaml
-# User is NOT listed here
-dh_auditor:
-    providers:
-        doctrine:
-            entities:
-                App\Entity\Post: ~
-```
-
-```php
-// This entity will NOT be audited (not in YAML)
-#[Auditable]
-class User {}
-```
-
-Either:
-- ✅ Add to YAML: `App\Entity\User: ~`
-- ✅ Or use YAML-only configuration
+An entity with `#[Auditable]` is audited even when it is not listed under `entities`: the attribute alone is enough.
+List it in YAML only to add options that have no attribute (`audited_columns`, `roots`, retention overrides…).
 
 ---
 

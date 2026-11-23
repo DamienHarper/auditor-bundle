@@ -183,10 +183,10 @@ dh_auditor:
 
 ### Caching
 
-The activity graph uses caching to improve performance on large audit tables. The number of entries shown for each
+The activity graph uses caching to improve performance on large audit tables. The number of actions shown for each
 entity on the audit index page is cached with it (same lifetime and tag): counting reads the whole audit table, so a
 count may lag behind by up to the cache lifetime, as the graph does. Without the activity graph, or with its cache
-disabled, the entries are counted on every page load.
+disabled, the actions are counted on every page load.
 
 > [!NOTE]
 > Caching requires `symfony/cache`:
@@ -393,6 +393,8 @@ templates/bundles/DHAuditorBundle/
 │   ├── _macros.html.twig             # Icons, origin badges, day headings
 │   ├── phrase.html.twig              # A phrase
 │   └── object_reference.html.twig    # An object named by a phrase
+├── Component/
+│   └── History.html.twig             # <twig:DhAuditor:History> component
 └── layout.html.twig                  # Base layout
 ```
 
@@ -430,8 +432,8 @@ templates/bundles/DHAuditorBundle/
 | `title`              | Page title                           | All pages                        |
 | `stylesheets`        | CSS includes                         | All pages                        |
 | `dh_auditor_content` | Main content area                    | All pages                        |
-| `dh_auditor_header`  | Sub-header with back link & filters  | Entity stream                    |
-| `dh_auditor_pager`   | Pagination                           | Entity stream                    |
+| `dh_auditor_header`  | Sub-header with back link & filters  | Entity stream, revisions, comparison |
+| `dh_auditor_pager`   | Pagination                           | Entity stream, revisions         |
 | `javascripts`        | JavaScript includes                  | All pages                        |      
 
 ## 📦 Assets

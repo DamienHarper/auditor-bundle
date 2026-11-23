@@ -1,7 +1,7 @@
 # auditor-bundle [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Create%20audit%20logs%20for%20all%20Doctrine%20ORM%20database%20related%20changes%20with%20auditor-bundle.&url=https://github.com/DamienHarper/auditor-bundle&hashtags=auditor-bundle)
 [![Latest Stable Version](https://poser.pugx.org/damienharper/auditor-bundle/v/stable)](https://packagist.org/packages/damienharper/auditor-bundle)
 [![Latest Unstable Version](https://poser.pugx.org/damienharper/auditor-bundle/v/unstable)](https://packagist.org/packages/damienharper/auditor-bundle)
-[![auditor-bundle 7.x CI](https://github.com/DamienHarper/auditor-bundle/actions/workflows/ci-7.x.yml/badge.svg)](https://github.com/DamienHarper/auditor-bundle/actions/workflows/ci-7.x.yml)
+[![auditor-bundle 8.x CI](https://github.com/DamienHarper/auditor-bundle/actions/workflows/ci-8.x.yml/badge.svg)](https://github.com/DamienHarper/auditor-bundle/actions/workflows/ci-8.x.yml)
 [![License](https://poser.pugx.org/damienharper/auditor-bundle/license)](https://packagist.org/packages/damienharper/auditor-bundle)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/DamienHarper/auditor-bundle/?branch=master)
 [![codecov](https://codecov.io/gh/DamienHarper/auditor-bundle/branch/master/graph/badge.svg)](https://app.codecov.io/gh/DamienHarper/auditor-bundle/branch/master)
@@ -18,7 +18,7 @@ Follow instructions at [auditor-bundle-demo](https://github.com/DamienHarper/aud
 
 
 ## Official Documentation
-`auditor-bundle` official documentation can be found [here](https://damienharper.github.io/auditor-docs/docs/auditor-bundle/index.html).
+`auditor-bundle` official documentation can be found [here](https://damienharper.github.io/auditor-docs/auditor-bundle/).
 
 
 ## Version Information
@@ -30,15 +30,15 @@ Follow instructions at [auditor-bundle-demo](https://github.com/DamienHarper/aud
 | 5.x     | End of life                 | PHP >= 7.4, Symfony >= 4.4                                              | [![auditor-bundle 5.x CI](https://github.com/DamienHarper/auditor-bundle/actions/workflows/ci-5.x.yml/badge.svg)](https://github.com/DamienHarper/auditor-bundle/actions/workflows/ci-5.x.yml)                                                                                                                                                                                                                                                                                                                                                                                 |
 | 4.x     | End of life                 | PHP >= 7.2, Symfony >= 3.4                                              |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
-Changelog is available [here](https://damienharper.github.io/auditor-docs/docs/auditor-bundle/release-notes.html)
+Changelog is available in the [releases](https://github.com/DamienHarper/auditor-bundle/releases).
 
 ## Upgrading
 
-See [UPGRADE-7.0.md](UPGRADE-7.0.md) for upgrade instructions from 6.x to 7.0.
+See [UPGRADE-8.0.md](UPGRADE-8.0.md) for upgrade instructions from 7.x to 8.0 (the audit tables must be migrated), and [UPGRADE-7.0.md](UPGRADE-7.0.md) from 6.x to 7.0.
 
 
 ## Usage
-Once [installed](https://damienharper.github.io/auditor-docs/docs/auditor-bundle/installation.html) and [configured](https://damienharper.github.io/auditor-docs/docs/auditor-bundle/configuration/general.html), any database change 
+Once [installed](https://damienharper.github.io/auditor-docs/auditor-bundle/getting-started/installation) and [configured](https://damienharper.github.io/auditor-docs/auditor-bundle/configuration/), any database change 
 affecting audited entities will be logged to audit logs automatically.
 Also, running schema update or similar will automatically setup audit logs for every 
 new auditable entity.

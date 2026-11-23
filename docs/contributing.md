@@ -179,6 +179,16 @@ make phpstan php=8.4
 make cs-fix args='fix --dry-run'
 ```
 
+### 🎨 Assets
+
+The viewer styles are written with Tailwind CSS 4 (`src/Resources/assets/css/app.css`), and the compiled
+`src/Resources/public/app.css` is **committed**. After a template or CSS change that uses new classes, rebuild it
+and commit the result:
+
+```bash
+make build-assets
+```
+
 ### 📝 Commit Messages
 
 Write clear, concise commit messages:

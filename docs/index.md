@@ -20,7 +20,8 @@ slug: /
 
 - 🔌 **Automatic wiring** - Services are automatically configured via Symfony's DI
 - 🔒 **Security integration** - Uses Symfony's security for user tracking and access control
-- 🌐 **Built-in viewer** - Web interface to browse audit logs at `/audit`, compare revisions, link to it from your pages
+- 🌐 **Built-in viewer** - Web interface at `/audit` telling each action as a readable phrase, compare revisions, link to it from your pages
+- 📜 **Histories across entities** - The history of a business object and of the entities attached to it, in the viewer or in your own pages (`<twig:DhAuditor:History>`)
 - 📤 **Export** - Stream audit entries as NDJSON, JSON or CSV (`/audit/export`)
 - 🧭 **Blame contexts** - Record how a change was made (console command, Messenger message, import…)
 - 🗑️ **Scheduled retention** - Prune old audit entries with Symfony Scheduler
@@ -96,6 +97,7 @@ flowchart TB
 ## 🔗 Related Projects
 
 - **[auditor](https://github.com/DamienHarper/auditor)** - The core audit library (required)
+- **[auditor-doctrine-provider](https://github.com/DamienHarper/auditor-doctrine-provider)** - The Doctrine ORM provider (required)
 
 ## 📜 License
 
