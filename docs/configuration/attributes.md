@@ -200,16 +200,20 @@ class User
 
 ```mermaid
 flowchart TD
-    A["Attribute #[Auditable]"] -->|overrides| B["YAML entities.*.enabled"]
-    C["Attribute #[Ignore]"] -->|adds to| D["YAML ignored_columns"]
-    E["Attribute #[Security]"] -->|overrides| F["YAML entities.*.roles"]
+    B["YAML entities.*.enabled: false"] -->|disables| A["Attribute #[Auditable]"]
+    C["Attribute #[Ignore]"] -->|replaces| D["YAML entities.*.ignored_columns"]
+    F["YAML entities.*.roles"] -->|overrides, scope by scope| E["Attribute #[Security]"]
 ```
 
 | Attribute       | Behavior                                    |
 |-----------------|---------------------------------------------|
-| `#[Auditable]`  | Overrides `entities.*.enabled` from YAML    |
-| `#[Ignore]`     | Adds to `ignored_columns` (YAML + attribute)|
-| `#[Security]`   | Overrides `entities.*.roles` from YAML      |
+| `#[Auditable]`  | YAML `enabled: false` disables the entity; YAML `enabled: true` does not re-enable `#[Auditable(enabled: false)]` |
+| `#[Ignore]`     | Replaces the entity `ignored_columns` of the YAML (the global `ignored_columns` still apply) |
+| `#[Security]`   | YAML `roles` win, scope by scope: an empty `roles` or a missing `view` key keeps the attribute roles |
+
+> [!NOTE]
+> These rules need auditor-doctrine-provider 1.4. For an `#[Auditable]` entity, the other entity options of the
+> YAML (such as `ignored_columns`) are not read: use `#[Ignore]`.
 
 ## ⚠️ Entity Not in YAML
 
