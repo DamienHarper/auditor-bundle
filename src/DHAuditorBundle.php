@@ -22,6 +22,7 @@ use DH\Auditor\Provider\ProviderInterface;
 use DH\AuditorBundle\Command\ClearActivityCacheCommand;
 use DH\AuditorBundle\Controller\ViewerController;
 use DH\AuditorBundle\DependencyInjection\Compiler\DoctrineMiddlewareCompilerPass;
+use DH\AuditorBundle\DependencyInjection\Compiler\RegisterDoctrineListenersCompilerPass;
 use DH\AuditorBundle\Event\ConsoleEventSubscriber;
 use DH\AuditorBundle\Event\ViewerEventSubscriber;
 use DH\AuditorBundle\ExtraData\ExtraDataProvider;
@@ -57,6 +58,8 @@ class DHAuditorBundle extends AbstractBundle
         parent::build($container);
 
         $container->addCompilerPass(new DoctrineMiddlewareCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);
+        // before the registration of the Doctrine listeners by DoctrineBundle (priority 0)
+        $container->addCompilerPass(new RegisterDoctrineListenersCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);
     }
 
     public function configure(DefinitionConfigurator $definition): void
