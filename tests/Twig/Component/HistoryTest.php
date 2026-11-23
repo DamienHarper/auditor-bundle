@@ -246,7 +246,7 @@ final class HistoryTest extends KernelTestCase
 
     public function testAnErrorOfTheApplicationIsNotHidden(): void
     {
-        $this->provider->getConfiguration()->setReadScope(static function (): void {
+        $this->provider->getConfiguration()->setReadScope(static function (): never {
             throw new InvalidArgumentException('Broken read scope.');
         });
 
@@ -294,7 +294,7 @@ final class HistoryTest extends KernelTestCase
     public function testElementsImplementTheInterface(): void
     {
         $this->expectException(RuntimeError::class);
-        $this->expectExceptionMessageIsOrContains('The elements of the "DhAuditor:History" component implement DH\\AuditorBundle\\History\\HistoryElementInterface, string given.');
+        $this->expectExceptionMessageIsOrContains('The elements of the "DhAuditor:History" component implement DH\AuditorBundle\History\HistoryElementInterface, string given.');
 
         $this->render(['subject' => $this->post(), 'with' => ['a comment']]);
     }
