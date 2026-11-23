@@ -141,6 +141,10 @@ In PHP, the `DH\AuditorBundle\History\HistoryPhraser` service gives the `Phrase`
 `changes` it tells), and `getParts()` lists the parts of the whole phrase: `TextPart`, `ValuePart` and
 `ObjectReference` (`class`, `id`, `label`), each with a `kind` (`text`, `value`, `object`). No part holds HTML.
 
+The icon of a phrase (`icon`) is the one of its main change (the creation or deletion, otherwise the first change):
+`created`, `snapshot`, `deleted`, `edited`, `status` (an enum), `toggle` (a boolean), `text` (a long text), `added`,
+`removed` or `json`. A describer may give another name, which your templates then need to know.
+
 The markup comes from `@DHAuditor/History/phrase.html.twig` and, for an object, from
 `@DHAuditor/History/object_reference.html.twig`: override them under `templates/bundles/DHAuditorBundle/History/` to
 change it (Turbo attributes on the links, for instance).
@@ -148,7 +152,8 @@ change it (Turbo attributes on the links, for instance).
 Each change gives one fragment: the changes of the root first, then those of the attached entities; the fields of an
 entry in the order of their Doctrine mapping. Elements added to (or removed from) the same collection make one
 fragment, and the same change made to more than 5 objects of an entity is summed up (*deleted 38 Post*). Lists read
-"a, b and c" ("a, b, c and 4 others" beyond 5), and values longer than 80 characters are cut.
+"a, b and c" ("a, b, c and 4 others" beyond 5), and values longer than 80 characters are cut. An action whose entries
+hold no change the bundle can read is told as *changed Post “Why audit?”*.
 
 ### Without configuration
 
@@ -163,9 +168,13 @@ fragment, and the same change made to more than 5 objects of an entity is summed
 | JSON field | edited Metadata (seo.description) |
 
 Values are read through the Doctrine mapping of the field: an enum gives its label when it implements
-`TranslatableInterface` (its value otherwise), a date the medium format of the locale, a boolean "yes" or "no", no
-value "empty". A value written with a label (`#[DiffLabel]`, the label of an associated entity) shows that label.
-The bundle ships these phrases in English and French.
+`TranslatableInterface` (its value otherwise), a date, time or datetime the format of the locale (medium date, short
+time), a boolean "yes" or "no", no value "empty"; a value that cannot be read as its type is shown as stored. A value
+written with a label (`#[DiffLabel]`, the label of an associated entity) shows that label.
+
+The bundle ships these phrases in English and French. For another locale, translate the keys of
+`vendor/damienharper/auditor-bundle/src/translations/dh_auditor_history+intl-icu.en.yaml`, or keep `en` among the
+translator fallbacks (`framework.translator.fallbacks`): without them, the keys show as they are.
 
 ### With translations
 
@@ -173,7 +182,8 @@ Field labels come from the `dh_auditor_fields` domain (see Labels above); so do 
 (the short class name otherwise). Phrases come from the `dh_auditor_history` domain in the ICU format, keyed by
 `FQCN.kind` for a creation, a snapshot or a deletion and `FQCN.field.kind` for a field change, where kind is
 `created`, `snapshot`, `deleted`, `set`, `changed`, `cleared`, `added`, `removed` or `json`; add `.bulk` for the
-summary of more than 5 objects. Use the `+intl-icu` suffix in the file names:
+summary of more than 5 objects. Use the `+intl-icu` suffix in the file names (a catalogue without it only gets its
+`{label}`… placeholders replaced, and `%count%` for its plurals):
 
 ```yaml
 # translations/dh_auditor_fields+intl-icu.fr.yaml
@@ -194,12 +204,16 @@ App\Entity\Post.deleted.bulk: 'a supprimé {count} {entity}'
 | `{names}` | added or removed elements, changed paths of a JSON field, as "a, b and c" |
 | `{count}` | number of elements, or of objects of a summary |
 | `{field}` | label of the field |
-| `{entity}` | name of the entity, plural when `{count}` asks for it |
+| `{entity}` | name of the entity, translated with the number of objects of a summary (1 otherwise) |
+
+Only `{count}` is a number an ICU `plural` or `select` can test: the other parameters are inserted after the
+translation, as parts of the phrase (the object of `{label}`, the values of `{old}` and `{new}`…).
 
 ### With PHP
 
 A change that needs the rest of the action to be told (*removed the ticket from initiative Q4 roadmap*) takes a
-describer. It returns the fragments of the change, built from text, values and object references, or null to keep the
+describer. It returns the fragments of the change, built from text, values and object references, or null (or an
+empty phrase) to hand the change on: to the describer of the entity for a field describer, then to the translated or
 default phrase:
 
 ```php
@@ -227,8 +241,13 @@ final class InitiativeDescriber implements ChangeDescriberInterface
 }
 ```
 
-Without `field`, the describer receives every change of the entity that no field describer takes, the creation and
-the deletion included. The object references a describer gives are linked like the others.
+Without `field`, the describer receives every change of the entity that no field describer tells (a field describer
+returning null hands the change to it), the creation and the deletion included. The object references a describer
+gives are linked like the others.
+
+A fragment tells the changes it lists (the described change when it lists none): a describer that tells several
+changes at once lists them all, and they are not told again by other fragments. Describers run while the history is
+displayed: they must cope with old entries (labels or values missing).
 
 ### Links
 
@@ -271,7 +290,15 @@ final readonly class TicketUrlResolver implements ObjectUrlResolverInterface
 
 ### Authors
 
-The author is the name recorded with the change; without user, "Command line" (a console command), "Anonymous user"
-(a web request) or "System". To show the current name of a user, implement
-`DH\AuditorBundle\History\AuthorNameResolverInterface` as a service: it returns the name, or null for a user
-that no longer exists ("Deleted user").
+The author is the name recorded with the change ("User 42" when only the user id was recorded); without user,
+"Command line" (a console command), "Anonymous user" (a web request behind a firewall) or "System" (anything else,
+message handlers included).
+
+To show the current name of a user, implement `DH\AuditorBundle\History\AuthorNameResolverInterface` and alias the
+interface to your service: it returns the name, or null for a user that no longer exists ("Deleted user"). It is
+called once per action: cache what it looks up.
+
+```yaml
+# config/services.yaml
+DH\AuditorBundle\History\AuthorNameResolverInterface: '@App\Audit\AuthorNameResolver'
+```
