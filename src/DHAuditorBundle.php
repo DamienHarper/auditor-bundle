@@ -16,6 +16,7 @@ use DH\Auditor\EventSubscriber\AuditEventSubscriber;
 use DH\Auditor\Exception\InvalidArgumentException;
 use DH\Auditor\Model\RetentionPolicy;
 use DH\Auditor\Provider\Doctrine\Auditing\Attribute\AttributeLoader;
+use DH\Auditor\Provider\Doctrine\Auditing\Root\ObjectIdentifier;
 use DH\Auditor\Provider\Doctrine\Configuration as DoctrineProviderConfiguration;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Provider\Doctrine\Persistence\Command\CleanAuditLogsCommand;
@@ -199,8 +200,8 @@ class DHAuditorBundle extends AbstractBundle
 
         // Load providers
         foreach ($config['providers'] as $providerName => $providerConfig) {
-            // Scheduled pruning settings belong to the bundle, not to the provider configuration; the ignored columns
-            // resolver is a service, set on the provider configuration by a method call.
+            // Scheduled pruning settings belong to the bundle, not to the provider configuration; the options of
+            // CALLABLE_SERVICE_OPTIONS are services, set on the provider configuration by method calls.
             $retentionConfig = null;
             $callableServices = [];
             if ('doctrine' === $providerName) {
@@ -379,9 +380,14 @@ class DHAuditorBundle extends AbstractBundle
             ->tag('console.command', ['command' => 'audit:roots:rebuild'])
         ;
 
+        // Identifier of an entity as the audit tables store it (object_id, root_id)
+        $services->set(ObjectIdentifier::class)
+            ->args([new Reference(DoctrineProvider::class)])
+        ;
+
         // Field-level history in templates (dh_auditor_last_change(), dh_auditor_field_label()…)
         $services->set(HistoryExtension::class)
-            ->args([new Reference(Reader::class), new Reference(DoctrineProvider::class), new Reference(FieldLabelResolverInterface::class)])
+            ->args([new Reference(Reader::class), new Reference(DoctrineProvider::class), new Reference(FieldLabelResolverInterface::class), new Reference(ObjectIdentifier::class)])
             ->autoconfigure()
         ;
 
@@ -745,11 +751,15 @@ class DHAuditorBundle extends AbstractBundle
         }
 
         $roots = $options['roots'];
-        if (!\is_array($roots) || !array_is_list($roots) || array_any($roots, static fn (mixed $root): bool => !\is_string($root))) {
+        if (!\is_array($roots) || !array_is_list($roots)) {
             throw new \InvalidArgumentException(\sprintf('The "roots" option of entity "%s" must be a list of property paths.', $entity));
         }
 
         foreach ($roots as $root) {
+            if (!\is_string($root)) {
+                throw new \InvalidArgumentException(\sprintf('The "roots" option of entity "%s" must be a list of property paths.', $entity));
+            }
+
             try {
                 new AuditRoot($root);
             } catch (\InvalidArgumentException $exception) {

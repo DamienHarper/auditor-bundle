@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\Tests\Twig;
 
 use DH\Auditor\History\ChangeKind;
+use DH\Auditor\Provider\Doctrine\Auditing\Root\ObjectIdentifier;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
@@ -32,6 +33,7 @@ final class HistoryExtensionTest extends TestCase
         $this->assertSame(ChangeKind::Changed, $changes['fullname']?->kind);
         $this->assertSame('John Doe', $changes['fullname']->new);
         $this->assertSame(ChangeKind::Created, $changes['email']?->kind);
+        $this->assertSame('john.doe@gmail.com', $changes['email']->getValue('email'), 'The value of a field never changed is read from the creation.');
         $this->assertSame('John Doe', $extension->lastChange($author, 'fullname')?->new);
     }
 
@@ -44,6 +46,14 @@ final class HistoryExtensionTest extends TestCase
         $this->assertSame(['fullname' => null], $this->extension()->lastChanges($author, ['fullname']));
     }
 
+    public function testNothingForAnObjectWithoutAudits(): void
+    {
+        $extension = $this->extension();
+
+        $this->assertSame(['name' => null], $extension->lastChanges(new \stdClass(), ['name']), 'Not an entity.');
+        $this->assertSame(['fullname' => null], $extension->lastChanges(new Author(), ['fullname']), 'Not persisted yet.');
+    }
+
     public function testFieldLabel(): void
     {
         $this->assertSame('Full name', $this->extension()->fieldLabel(Author::class, 'full_name'));
@@ -51,6 +61,6 @@ final class HistoryExtensionTest extends TestCase
 
     private function extension(): HistoryExtension
     {
-        return new HistoryExtension(new Reader($this->provider), $this->provider, new TranslatedFieldLabelResolver());
+        return new HistoryExtension(new Reader($this->provider), $this->provider, new TranslatedFieldLabelResolver(), new ObjectIdentifier($this->provider));
     }
 }

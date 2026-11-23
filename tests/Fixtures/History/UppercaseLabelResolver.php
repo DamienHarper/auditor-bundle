@@ -8,7 +8,7 @@ use DH\Auditor\Contract\EntityLabelResolverInterface;
 
 final class UppercaseLabelResolver implements EntityLabelResolverInterface
 {
-    public function __invoke(object $entity): ?string
+    public function __invoke(object $entity): string
     {
         return mb_strtoupper($entity::class);
     }

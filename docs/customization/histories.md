@@ -24,8 +24,8 @@ dh_auditor:
                     roots: [visit.property]
 ```
 
-Paths are validated when the container is built. After declaring a root on an entity that already has audit
-entries, update the schema (it adds the `audit_root` table) and index the existing entries:
+The syntax of the paths is checked when the container is built; a path that does not follow single-valued
+associations fails at the first flush. After declaring a root on an entity that already has audit entries, update the schema (it adds the `audit_root` table) and index the existing entries:
 
 ```bash
 php bin/console audit:schema:update --force
@@ -99,7 +99,7 @@ of an entity written in the diffs ("12 rue des Lilas" rather than `App\Entity\Pr
 ```twig
 {% set change = dh_auditor_last_change(property, 'price') %}
 {% if change %}
-    {{ dh_auditor_field_label(property, 'price') }} changed
+    {{ dh_auditor_field_label(property, 'price') }}: {{ change.value('price') }}, changed
     by {{ change.entry.username ?? 'system' }} {{ change.entry.createdAt|time_ago }}
 {% endif %}
 
@@ -114,4 +114,6 @@ of an entity written in the diffs ("12 rue des Lilas" rather than `App\Entity\Pr
 | `dh_auditor_last_changes(entity, fields)` | `field => ?Change` |
 | `dh_auditor_field_label(entity_or_class, field)` | the label of the field |
 
-The `last_change` functions return null when the current user cannot view the audits of the entity.
+The `last_change` functions return null when the entity is not audited, has no identifier yet, or when the current
+user cannot view its audits. For a field never changed, the change is the creation of the entity, which holds every
+field: read the value with `change.value(field)` (`Change::getValue()`) and its label with `change.label(field)`.
