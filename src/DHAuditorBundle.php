@@ -38,6 +38,7 @@ use DH\AuditorBundle\Controller\ViewerController;
 use DH\AuditorBundle\DependencyInjection\Compiler\DoctrineMiddlewareCompilerPass;
 use DH\AuditorBundle\DependencyInjection\Compiler\RegisterChangeDescribersCompilerPass;
 use DH\AuditorBundle\DependencyInjection\Compiler\RegisterDiffLabelResolversCompilerPass;
+use DH\AuditorBundle\DependencyInjection\Compiler\RegisterDoctrineListenersCompilerPass;
 use DH\AuditorBundle\DependencyInjection\Compiler\RegisterProvidersCompilerPass;
 use DH\AuditorBundle\Event\ConsoleEventSubscriber;
 use DH\AuditorBundle\Event\ViewerEventSubscriber;
@@ -112,6 +113,8 @@ class DHAuditorBundle extends AbstractBundle
         ;
 
         $container->addCompilerPass(new DoctrineMiddlewareCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);
+        // before the registration of the Doctrine listeners by DoctrineBundle (priority 0)
+        $container->addCompilerPass(new RegisterDoctrineListenersCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);
         $container->addCompilerPass(new RegisterProvidersCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 0);
         $container->addCompilerPass(new RegisterDiffLabelResolversCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 0);
 
