@@ -1,0 +1,4 @@
+dh_auditor:
+    providers:
+        doctrine:
+            read_scope: 42

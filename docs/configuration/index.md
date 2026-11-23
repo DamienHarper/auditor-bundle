@@ -25,6 +25,9 @@ dh_auditor:
             table_suffix: '_audit'
             ignored_columns: []
             ignored_columns_resolver: ~     # Service returning the properties to ignore for an object
+            root_resolver: ~                # Service returning extra audit roots of an object
+            entity_label_resolver: ~        # Service building the label of an entity written in the diffs
+            read_scope: ~                   # Service restricting every query the reader creates
             entities: []
             storage_services: ['@doctrine.orm.default_entity_manager']
             auditing_services: ['@doctrine.orm.default_entity_manager']
@@ -179,6 +182,16 @@ dh_auditor:
 The resolver is called for every audited entity object on each flush, so keep it cheap. It can only ignore more
 properties: it never audits a property ignored by the configuration or left out of `audited_columns`.
 
+### root_resolver, entity_label_resolver, read_scope
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `root_resolver` | `?string` | `~` | Service ID of a callable returning extra audit roots of an entity object |
+| `entity_label_resolver` | `?string` | `~` | Service ID of an `EntityLabelResolverInterface`: label of an entity in the diffs |
+| `read_scope` | `?string` | `~` | Service ID of a callable `(Query, string $entity): void` applied to every query of the reader |
+
+See [Histories](../customization/histories.md).
+
 ### entities
 
 | Type    | Default | Description                   |
@@ -206,6 +219,10 @@ dh_auditor:
                 App\Entity\Order:
                     audited_columns: [status, total, customer]
 
+                # Entries belonging to the history of another entity
+                App\Entity\PropertyFeature:
+                    roots: [property]
+
                 # With a retention policy
                 App\Entity\Payment:
                     retention:
@@ -223,6 +240,7 @@ dh_auditor:
 | `roles.view`            | `array`   | `[]`    | Roles required to view audits                          |
 | `retention.max_age`     | `?string` | `~`     | Entries older than this ISO 8601 duration are pruned   |
 | `retention.max_entries` | `?int`    | `~`     | Only the N most recent entries are kept                |
+| `roots`                 | `array`   | `[]`    | Audit root paths, merged with `#[AuditRoot]` (see [Histories](../customization/histories.md)) |
 
 **Audited properties.** A property is audited when it is not in the global `ignored_columns`, not in the entity
 `ignored_columns` nor marked with `#[Ignore]`, listed in `audited_columns` (when set) and not returned by the
