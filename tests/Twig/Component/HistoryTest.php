@@ -154,6 +154,19 @@ final class HistoryTest extends KernelTestCase
         $this->assertNull($crawler->filter('section')->attr('data-dh-auditor-first-cursor'));
     }
 
+    public function testNoLinkToTheViewerWhenItIsUnavailable(): void
+    {
+        $this->assertNotEmpty($this->render(['subject' => $this->post()])->filter('a[href^="/audit"]'));
+
+        // the viewer is unavailable while the auditor is disabled
+        $this->provider->getAuditor()->getConfiguration()->disable();
+        $crawler = $this->render(['subject' => $this->post(), 'details' => true]);
+
+        $this->assertGreaterThan(0, $crawler->filter('[data-dh-auditor-action]')->count());
+        $this->assertCount(0, $crawler->filter('a[href^="/audit"]'), 'No author, action, object or viewer link.');
+        $this->assertStringNotContainsString('Open in the viewer', $crawler->text());
+    }
+
     public function testDetails(): void
     {
         $this->assertGreaterThan(0, $this->render(['subject' => $this->post(), 'details' => true])->filter('[data-dh-auditor-details]')->count());
