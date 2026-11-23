@@ -76,7 +76,13 @@ final class HistoryConfigurationTest extends KernelTestCase
     {
         yield 'invalid root path' => ['invalid_roots', \sprintf('The "roots" option of entity "%s" is invalid', Post::class)];
 
+        yield 'roots not a list' => ['roots_not_a_list', \sprintf('The "roots" option of entity "%s" must be a list of property paths.', Post::class)];
+
+        yield 'roots not strings' => ['roots_not_strings', \sprintf('The "roots" option of entity "%s" must be a list of property paths.', Post::class)];
+
         yield 'read scope not a service ID' => ['invalid_read_scope', 'The "read_scope" option of the doctrine provider must be a service ID, int given.'];
+
+        yield 'empty read scope' => ['empty_read_scope', 'The "read_scope" option of the doctrine provider must be a service ID, string given.'];
     }
 
     #[\Override]
