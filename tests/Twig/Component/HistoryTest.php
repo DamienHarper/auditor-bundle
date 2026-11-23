@@ -150,6 +150,14 @@ final class HistoryTest extends KernelTestCase
         $this->render(['subject' => $this->post(), 'after' => 'nope']);
     }
 
+    public function testAnInvalidPageSizeIsAnError(): void
+    {
+        $this->expectException(RuntimeError::class);
+        $this->expectExceptionMessageIsOrContains('The page size must be at least 1.');
+
+        $this->render(['subject' => $this->post(), 'limit' => 0]);
+    }
+
     public function testAnInvalidCursorShowsTheFirstPage(): void
     {
         $crawler = $this->render(['subject' => $this->post(), 'limit' => 1, 'with' => [new Note('newest', '9999')]], Request::create('/posts/1?dh_auditor_after=nope'));
