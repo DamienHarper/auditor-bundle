@@ -5,9 +5,14 @@ audit:
   theme:
     toggle: Attiva/disattiva modalità chiara/scura
   home:
-    title: Entità auditate
-    subtitle: Panoramica di tutte le entità tracciate
+    title: 'Panoramica'
+    subtitle: 'Cosa è cambiato di recente, e dove.'
     no_audits: Nessuna entità auditata trovata.
+    recent_activity: 'Attività recente'
+    audited: 'Cosa è sottoposto ad audit'
+    entity: 'Entità'
+    actions: 'Azioni'
+    bulk_note: 'Un''azione che interessa molti oggetti è riassunta per tipo; il dettaglio è nell''azione.'
   sort:
     label: Ordina per
     name_asc: 'Nome (A-Z)'
@@ -87,6 +92,75 @@ audit:
     next: Prossimo
     last: Ultima
     page_info: 'Pagina %current% di %total%'
+  history:
+    deleted: '(eliminato)'
+    today: 'Oggi'
+    yesterday: 'Ieri'
+    details: 'Dettagli'
+    hide_details: 'Nascondi dettagli'
+    all_details: 'Tutti i dettagli →'
+    copy: 'Copia'
+    copied: 'Copiato'
+    older: 'Mostra azioni precedenti'
+    no_actions: 'Nessuna azione.'
+    context_separator: ':'
+    created_by: 'creato da %author% il %date%'
+    entries_count: '{0} nessuna voce|{1} 1 voce|]1,Inf[ %count% voci'
+    fields_count: '{1} 1 campo|]1,Inf[ %count% campi'
+    compare: 'Confronta due stati'
+    export: 'Esporta'
+    with_attached: 'Con le entità collegate'
+    expand_all: 'Espandi tutto (modalità tecnica)'
+    last_changes: 'Chi ha cambiato cosa per ultimo'
+    at_creation: 'alla creazione'
+    technical: 'Lato tecnico'
+    class: 'Classe'
+    identifier: 'Identificatore'
+    tables: 'Tabelle'
+    reading: 'Lettura'
+    entries: 'Voci'
+    object: 'Oggetto'
+    field: 'Campo'
+    firewall: 'firewall'
+    schema: 'schema'
+    filter:
+      option: '%filter%: %value%'
+      who: 'Chi'
+      what: 'Cosa'
+      origin: 'Origine'
+      when: 'Quando'
+      everyone: 'tutti'
+      everything: 'tutto'
+      all_origins: 'tutte'
+      all_time: 'sempre'
+      days: '{1} ultimo giorno|]1,Inf[ ultimi %count% giorni'
+    origin:
+      http: 'Web'
+      console: 'Riga di comando'
+      messenger: 'Messenger'
+      system: 'Sistema'
+    origin_help:
+      http: 'Una richiesta web di un utente autenticato'
+      console: 'Un comando da console'
+      messenger: 'Un gestore di messaggi Messenger'
+      system: 'Nessun utente: uno script, un job pianificato, una richiesta anonima…'
+  action:
+    title: 'Azione del %date%'
+    previous: '‹ Azione precedente'
+    next: 'Azione successiva ›'
+    objects: '{1} 1 oggetto interessato|]1,Inf[ %count% oggetti interessati'
+    technical: 'Dettagli tecnici'
+    table: 'Tabella · id'
+    type: 'Tipo'
+    raw_field: 'Campo grezzo'
+    ulid_date: 'Timestamp dell''ULID'
+    no_via: 'nessuna'
+    more_entries: '{1} e 1 altra voce|]1,Inf[ e altre %count% voci'
+    tables: '{1} 1 tabella|]1,Inf[ %count% tabelle'
+  user:
+    title: 'Cosa ha fatto %name%'
+    entities: '{1} su 1 tipo di oggetto|]1,Inf[ su %count% tipi di oggetti'
+    on: 'Su'
 
 time_ago:
   seconds_ago: '{0} proprio ora|{1} 1 secondo fa|]1,Inf[ %count% secondi fa'

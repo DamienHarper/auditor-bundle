@@ -5,9 +5,14 @@ audit:
   theme:
     toggle: Перемкнути світлу/темну тему
   home:
-    title: Сутності, що перевіряються
-    subtitle: Огляд усіх відстежуваних сутностей
+    title: 'Огляд'
+    subtitle: 'Що змінилося нещодавно і де.'
     no_audits: Сутності, що перевіряються, не знайдено.
+    recent_activity: 'Остання активність'
+    audited: 'Що аудитується'
+    entity: 'Сутність'
+    actions: 'Дії'
+    bulk_note: 'Дія над багатьма об’єктами підсумовується за типом; подробиці — у самій дії.'
   sort:
     label: Сортувати за
     name_asc: "Ім'я (А-Я)"
@@ -87,6 +92,75 @@ audit:
     next: Наступний
     last: Остання
     page_info: 'Сторінка %current% з %total%'
+  history:
+    deleted: '(видалено)'
+    today: 'Сьогодні'
+    yesterday: 'Вчора'
+    details: 'Подробиці'
+    hide_details: 'Сховати подробиці'
+    all_details: 'Усі подробиці →'
+    copy: 'Копіювати'
+    copied: 'Скопійовано'
+    older: 'Показати старіші дії'
+    no_actions: 'Немає дій.'
+    context_separator: ':'
+    created_by: 'створено: %author%, %date%'
+    entries_count: '%count% запис|%count% записи|%count% записів'
+    fields_count: '%count% поле|%count% поля|%count% полів'
+    compare: 'Порівняти два стани'
+    export: 'Експорт'
+    with_attached: 'Зі зв’язаними сутностями'
+    expand_all: 'Розгорнути все (технічний режим)'
+    last_changes: 'Хто що змінив останнім'
+    at_creation: 'під час створення'
+    technical: 'Технічна сторона'
+    class: 'Клас'
+    identifier: 'Ідентифікатор'
+    tables: 'Таблиці'
+    reading: 'Читання'
+    entries: 'Записи'
+    object: 'Об’єкт'
+    field: 'Поле'
+    firewall: 'файрвол'
+    schema: 'схема'
+    filter:
+      option: '%filter%: %value%'
+      who: 'Хто'
+      what: 'Що'
+      origin: 'Джерело'
+      when: 'Коли'
+      everyone: 'усі'
+      everything: 'усе'
+      all_origins: 'усі'
+      all_time: 'за весь час'
+      days: 'останній %count% день|останні %count% дні|останні %count% днів'
+    origin:
+      http: 'Веб'
+      console: 'Командний рядок'
+      messenger: 'Messenger'
+      system: 'Система'
+    origin_help:
+      http: 'Веб-запит користувача, що увійшов'
+      console: 'Консольна команда'
+      messenger: 'Обробник повідомлень Messenger'
+      system: 'Без користувача: скрипт, заплановане завдання, анонімний запит…'
+  action:
+    title: 'Дія від %date%'
+    previous: '‹ Попередня дія'
+    next: 'Наступна дія ›'
+    objects: 'зачеплено %count% об’єкт|зачеплено %count% об’єкти|зачеплено %count% об’єктів'
+    technical: 'Технічні подробиці'
+    table: 'Таблиця · id'
+    type: 'Тип'
+    raw_field: 'Сире поле'
+    ulid_date: 'Мітка часу ULID'
+    no_via: 'немає'
+    more_entries: 'і ще %count% запис|і ще %count% записи|і ще %count% записів'
+    tables: '%count% таблиця|%count% таблиці|%count% таблиць'
+  user:
+    title: 'Що зробив(ла) %name%'
+    entities: '%count% тип об’єктів|%count% типи об’єктів|%count% типів об’єктів'
+    on: 'Об’єкт'
 
 time_ago:
   seconds_ago: '{0} щойно|{1} 1 секунду тому|]1,Inf[ %count% секунд тому'

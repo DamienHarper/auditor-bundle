@@ -5,9 +5,14 @@ audit:
   theme:
     toggle: Basculer mode clair/sombre
   home:
-    title: Entités auditées
-    subtitle: Aperçu de toutes les entités suivies
+    title: 'Vue d''ensemble'
+    subtitle: 'Ce qui a changé récemment, et où.'
     no_audits: Aucune entité auditée trouvée.
+    recent_activity: 'Activité récente'
+    audited: 'Ce qui est audité'
+    entity: 'Entité'
+    actions: 'Actions'
+    bulk_note: 'Une action qui touche beaucoup d''objets se résume par type ; le détail est dans l''action.'
   sort:
     label: Trier par
     name_asc: 'Nom (A à Z)'
@@ -87,6 +92,75 @@ audit:
     next: Suivant
     last: Dernier
     page_info: 'Page %current% sur %total%'
+  history:
+    deleted: '(supprimé)'
+    today: 'Aujourd''hui'
+    yesterday: 'Hier'
+    details: 'Détails'
+    hide_details: 'Masquer les détails'
+    all_details: 'Tous les détails →'
+    copy: 'Copier'
+    copied: 'Copié'
+    older: 'Afficher les actions plus anciennes'
+    no_actions: 'Aucune action.'
+    context_separator: ' :'
+    created_by: 'créé par %author% le %date%'
+    entries_count: '{0} aucune entrée|{1} 1 entrée|]1,Inf[ %count% entrées'
+    fields_count: '{1} 1 champ|]1,Inf[ %count% champs'
+    compare: 'Comparer deux états'
+    export: 'Exporter'
+    with_attached: 'Avec les entités rattachées'
+    expand_all: 'Tout déplier (mode technique)'
+    last_changes: 'Qui a changé quoi en dernier'
+    at_creation: 'à la création'
+    technical: 'Côté technique'
+    class: 'Classe'
+    identifier: 'Identifiant'
+    tables: 'Tables'
+    reading: 'Lecture'
+    entries: 'Entrées'
+    object: 'Objet'
+    field: 'Champ'
+    firewall: 'pare-feu'
+    schema: 'schéma'
+    filter:
+      option: '%filter% : %value%'
+      who: 'Qui'
+      what: 'Quoi'
+      origin: 'Origine'
+      when: 'Quand'
+      everyone: 'tout le monde'
+      everything: 'tout'
+      all_origins: 'toutes'
+      all_time: 'depuis toujours'
+      days: '{1} dernier jour|]1,Inf[ %count% derniers jours'
+    origin:
+      http: 'Web'
+      console: 'Ligne de commande'
+      messenger: 'Messenger'
+      system: 'Système'
+    origin_help:
+      http: 'Une requête web d''un utilisateur connecté'
+      console: 'Une commande console'
+      messenger: 'Un gestionnaire de message Messenger'
+      system: 'Aucun utilisateur : un script, une tâche planifiée, une requête anonyme…'
+  action:
+    title: 'Action du %date%'
+    previous: '‹ Action précédente'
+    next: 'Action suivante ›'
+    objects: '{1} 1 objet touché|]1,Inf[ %count% objets touchés'
+    technical: 'Détails techniques'
+    table: 'Table · id'
+    type: 'Type'
+    raw_field: 'Champ brut'
+    ulid_date: 'Horodatage du ULID'
+    no_via: 'aucune'
+    more_entries: '{1} et 1 entrée de plus|]1,Inf[ et %count% entrées de plus'
+    tables: '{1} 1 table|]1,Inf[ %count% tables'
+  user:
+    title: 'Ce qu''a fait %name%'
+    entities: '{1} sur 1 type d''objets|]1,Inf[ sur %count% types d''objets'
+    on: 'Sur'
 
 time_ago:
   seconds_ago: '{0} à l''instant|{1} il y a 1 seconde|]1,Inf[ il y a %count% secondes'

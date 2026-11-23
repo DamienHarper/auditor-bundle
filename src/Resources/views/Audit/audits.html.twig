@@ -3,64 +3,72 @@
 {% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
 
 {% block dh_auditor_content %}
-    <div class="mb-8 mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-            <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">
-                {{ 'audit.home.title'|trans(domain='auditor') }}
-            </h1>
-            <p class="text-sm text-slate-500 dark:text-slate-400">
-                {{ 'audit.home.subtitle'|trans(domain='auditor') }}
-            </p>
+    <div class="mb-6 mt-4">
+        <h1 class="text-2xl font-semibold tracking-tight">{{ 'audit.home.title'|trans(domain='auditor') }}</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400">{{ 'audit.home.subtitle'|trans(domain='auditor') }}</p>
+    </div>
+
+    <section class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-sm font-semibold">{{ 'audit.home.recent_activity'|trans(domain='auditor') }}</h2>
+        {% if activity is empty %}
+            <p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">{{ 'audit.history.no_actions'|trans(domain='auditor') }}</p>
+        {% else %}
+            <ol class="divide-y divide-slate-100 dark:divide-slate-800">
+                {% for row in activity %}
+                    {{ include('@DHAuditor/History/_row.html.twig', {row: row, date_format: 'datetime', shorten: 1, details: false}, with_context = false) }}
+                {% endfor %}
+            </ol>
+            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ 'audit.home.bulk_note'|trans(domain='auditor') }}</p>
+        {% endif %}
+    </section>
+
+    <section class="mt-8">
+        <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 class="text-sm font-semibold">{{ 'audit.home.audited'|trans(domain='auditor') }}</h2>
+            <select id="sort-entities"
+                    aria-label="{{ 'audit.sort.label'|trans(domain='auditor') }}"
+                    class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                    data-dh-auditor-sort>
+                {% for option in sortOptions %}
+                    <option value="{{ option.value }}" {% if sort == option.value %}selected{% endif %}>
+                        {{ ('audit.sort.' ~ option.value)|trans(domain='auditor') }}
+                    </option>
+                {% endfor %}
+            </select>
         </div>
 
-        {# Sort selector #}
-        <select id="sort-entities"
-                aria-label="{{ 'audit.sort.label'|trans(domain='auditor') }}"
-                class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
-                data-dh-auditor-sort>
-            {% for option in sortOptions %}
-                <option value="{{ option.value }}" {% if sort == option.value %}selected{% endif %}>
-                    {{ ('audit.sort.' ~ option.value)|trans(domain='auditor') }}
-                </option>
-            {% endfor %}
-        </select>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {% for entity, entityAuditData in audited %}
-            <div class="relative rounded-xl border bg-white border-slate-200 p-4
-                      hover:bg-slate-50 hover:border-slate-300 transition
-                      dark:bg-slate-900 dark:border-slate-800 dark:hover:bg-slate-800">
-                <a href="{{ path('dh_auditor_show_entity_stream', {'entity': helper.namespaceToParam(entity)}) }}"
-                   class="absolute inset-0 rounded-xl"
-                   aria-label="{{ 'audit.audit_details.view_audit'|trans(domain='auditor') }} · {{ entity|split('\\')|last }}"></a>
-                {# Header row with entity name, event count, and optional inline sparkline #}
-                <div class="flex justify-between items-center gap-2">
-                    <span class="font-medium truncate" title="{{ entity|e('html_attr') }}">{{ entity|split('\\')|last }}</span>
-                    <div class="flex items-center gap-2 shrink-0 min-w-0 flex-1 justify-end">
-                        {% if activityGraphEnabled and activityGraphLayout == 'inline' and entityAuditData.activityGraph is defined %}
-                            {{ helper.activity_sparkline(entityAuditData.activityGraph, entityAuditData.activityGraphRaw|default([]), activityGraphDays, entityAuditData.activityGraphDates, entity) }}
-                        {% endif %}
-                        <span class="text-xs text-slate-500 dark:text-slate-400 shrink-0">
-                            {{ 'audit.audit_details.events_count'|trans({'%count%': entityAuditData.count, '%formatted_count%': entityAuditData.count|number_format}, 'auditor') }}
-                        </span>
-                    </div>
-                </div>
-                <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    {{ 'audit.audit_details.last_activity'|trans(domain='auditor') }} ·
-                    <span class="w-24 shrink-0">{{ helper.type_badge(entityAuditData.latest.type, entityAuditData.latest.isSnapshot()) }}</span> ·
-                    {{ entityAuditData.latest.createdAt|time_ago }}
-                </div>
-                {# Bottom sparkline (Option B) #}
-                {% if activityGraphEnabled and activityGraphLayout == 'bottom' and entityAuditData.activityGraph is defined %}
-                    {{ helper.activity_sparkline_bottom(entityAuditData.activityGraph, entityAuditData.activityGraphRaw|default([]), activityGraphDays, entityAuditData.activityGraphDates, entity) }}
-                {% endif %}
-            </div>
-        {% else %}
-            <div class="col-span-full text-center text-slate-500 dark:text-slate-400 py-8">
-                {{ 'audit.home.no_audits'|trans(domain='auditor') }}
-            </div>
-        {% endfor %}
-    </div>
-
+        <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-50 text-xs text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
+                    <tr>
+                        <th class="px-4 py-2 font-medium">{{ 'audit.home.entity'|trans(domain='auditor') }}</th>
+                        <th class="px-4 py-2 text-right font-medium">{{ 'audit.home.actions'|trans(domain='auditor') }}</th>
+                        {% if activityGraphEnabled %}<th class="hidden px-4 py-2 font-medium sm:table-cell">{{ 'audit.activity_graph.title'|trans(domain='auditor') }}</th>{% endif %}
+                        <th class="px-4 py-2 font-medium">{{ 'audit.audit_details.last_activity'|trans(domain='auditor') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    {% for entity, data in audited %}
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50" data-dh-auditor-entity="{{ entity }}">
+                            <td class="px-4 py-2">
+                                <a href="{{ path('dh_auditor_show_entity_stream', {entity: helper.namespaceToParam(entity)}) }}" class="font-medium hover:underline" title="{{ entity }}">{{ dh_auditor_entity_name(entity, 2) }}</a>
+                                <div class="font-mono text-xs text-slate-400">{{ entity }}</div>
+                            </td>
+                            <td class="px-4 py-2 text-right tabular-nums">{{ data.count|number_format }}</td>
+                            {% if activityGraphEnabled %}
+                                <td class="hidden px-4 py-2 sm:table-cell">
+                                    {% if data.activityGraph is defined %}
+                                        {{ helper.activity_sparkline(data.activityGraph, data.activityGraphRaw|default([]), activityGraphDays, data.activityGraphDates, entity) }}
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                            <td class="whitespace-nowrap px-4 py-2 text-slate-500 dark:text-slate-400">{{ data.latest.createdAt|time_ago }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="4" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">{{ 'audit.home.no_audits'|trans(domain='auditor') }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
 {% endblock dh_auditor_content %}

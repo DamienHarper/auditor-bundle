@@ -1,0 +1,49 @@
+{#- Pieces shared by the history templates. -#}
+
+{#- Icon of a change: created, snapshot, deleted, edited, status, toggle, text, added, removed, json (any other name
+    gets the edit icon). -#}
+{% macro icon(name) -%}
+    {%- set paths = {
+        created: 'M12 5v14M5 12h14',
+        snapshot: 'M4 7h3l2-3h6l2 3h3v12H4z M12 16a3 3 0 100-6 3 3 0 000 6z',
+        deleted: 'M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3',
+        status: 'M4 12l5 5L20 6',
+        toggle: 'M7 7h10a5 5 0 010 10H7A5 5 0 017 7z M7 12a2 2 0 104 0 2 2 0 00-4 0',
+        text: 'M4 6h16M4 10h16M4 14h10M4 18h7',
+        added: 'M12 5v14M5 12h14',
+        removed: 'M5 12h14',
+        json: 'M8 4c-2 0-2 2-2 4s-2 4-2 4 2 2 2 4 0 4 2 4M16 4c2 0 2 2 2 4s2 4 2 4-2 2-2 4 0 4-2 4',
+        edited: 'M4 20h4L19 9l-4-4L4 16z',
+    } -%}
+    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ paths[name] ?? paths.edited }}"/></svg>
+{%- endmacro %}
+
+{#- Where an action came from (BlameOrigin) and in which context (via), as badges. -#}
+{% macro origin(item) -%}
+    {%- set via = item.via -%}
+    <span class="inline-flex items-center rounded-md border border-slate-300 px-1.5 text-[11px] font-medium text-slate-600 dark:border-slate-600 dark:text-slate-300"
+          title="{{ ('audit.history.origin_help.' ~ item.origin.value)|trans(domain='auditor') }}">{{ ('audit.history.origin.' ~ item.origin.value)|trans(domain='auditor') }}</span>
+    {%- if via is not null %}
+        <span class="inline-flex items-center rounded-md border border-dashed border-slate-300 px-1.5 text-[11px] text-slate-500 dark:border-slate-600 dark:text-slate-400"
+              {% if via.data is defined and via.data is not empty %}title="{{ via.data|json_encode }}"{% endif %}>
+            {{- 'audit.entry.via'|trans(domain='auditor') }} {{ via.type }}{% if via.label is defined and via.label is not empty %} · {{ via.label }}{% endif -%}
+        </span>
+    {%- endif -%}
+{%- endmacro %}
+
+{#- Heading of the day of a date, in the timezone of the date (the viewer timezone): today, yesterday, or the date. -#}
+{% macro day_label(date) -%}
+    {%- set day = date|date('Y-m-d', false) -%}
+    {%- if day == 'now'|date('Y-m-d', date.timezone) -%}
+        {{ 'audit.history.today'|trans(domain='auditor') }}
+    {%- elseif day == 'yesterday'|date('Y-m-d', date.timezone) -%}
+        {{ 'audit.history.yesterday'|trans(domain='auditor') }}
+    {%- else -%}
+        {% set label = date|format_date('full', timezone: false) %}{{ label|first|upper ~ label|slice(1) }}
+    {%- endif -%}
+{%- endmacro %}
+
+{#- A raw value of a diff, as JSON. -#}
+{% macro raw(value) -%}
+    <code class="break-all font-mono text-xs">{{ value is null ? 'null' : value|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES')) }}</code>
+{%- endmacro %}

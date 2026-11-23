@@ -1,48 +1,58 @@
-{% extends "@DHAuditor/layout.html.twig" %}
+{% extends '@DHAuditor/layout.html.twig' %}
 
-{% import '@DHAuditor/Audit/helpers/pager.html.twig' as pager %}
+{% set name = latest ? dh_auditor_history_item(latest)|dh_auditor_author : id %}
+
+{% block title %}{{ name }} · auditor{% endblock %}
 
 {% block dh_auditor_content %}
-    {# Sub-header - sticky with back link #}
-    {% block dh_auditor_header %}
-    <div class="sticky top-16 z-40 -mx-6 px-6 py-3 mb-4 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur">
-        {# Back link #}
-        <a href="{{ path('dh_auditor_list_audits') }}"
-           class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 mb-3">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-            {{ 'audit.header.back_to_entities'|trans(domain='auditor') }}
-        </a>
+    <nav class="mb-3 text-sm text-slate-500 dark:text-slate-400" aria-label="breadcrumb">
+        <a href="{{ path('dh_auditor_list_audits') }}" class="hover:underline">{{ 'audit.header.home'|trans(domain='auditor') }}</a>
+        <span class="mx-1">/</span>
+        <span>{{ name }}</span>
+    </nav>
 
-        <div>
-            <h1 class="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                {{ username ?? id }}
-            </h1>
-            <p class="text-sm text-slate-500 dark:text-slate-400">
-                {{ 'audit.audit_details.events_count'|trans({'%count%': paginator.numResults, '%formatted_count%': paginator.numResults|number_format}, 'auditor') }}
-                · {{ 'audit.audit_details.most_recent'|trans(domain='auditor') }}
+    <div class="flex items-start gap-3">
+        <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-900 text-lg font-semibold text-white dark:bg-slate-100 dark:text-slate-900">{{ name|first|upper }}</span>
+        <div class="min-w-0">
+            <h1 class="text-2xl font-semibold tracking-tight">{{ 'audit.user.title'|trans({'%name%': name}, 'auditor') }}</h1>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                {{ 'audit.history.entries_count'|trans({'%count%': entryCount}, 'auditor') }}
+                {% if entities is not empty %}· {{ 'audit.user.entities'|trans({'%count%': entities|length}, 'auditor') }}{% endif %}
+                · <span class="font-mono">blame_id {{ id }}</span>
+                {% if latest and latest.userFqdn %}· <span class="font-mono">{{ latest.userFqdn }}</span>{% endif %}
+                {% if latest and latest.userFirewall %}· {{ 'audit.history.firewall'|trans(domain='auditor') }} {{ latest.userFirewall }}{% endif %}
             </p>
         </div>
     </div>
-    {% endblock dh_auditor_header %}
 
-    {# Entries list - single chronological timeline across all authorized entities #}
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 divide-y divide-slate-200 dark:divide-slate-800">
-        {% for item in entries %}
-            {{ include('@DHAuditor/Audit/entry.html.twig', {'entry': item.entry, 'entity': item.entity}) }}
-        {% else %}
-            <div class="p-8 text-center text-slate-500 dark:text-slate-400">
-                {{ 'audit.stream.no_entries'|trans(domain='auditor') }}
-            </div>
-        {% endfor %}
-    </div>
+    <form method="get" class="mt-6 flex flex-wrap items-center gap-2 text-sm">
+        <select name="on" data-dh-auditor-autosubmit aria-label="{{ 'audit.user.on'|trans(domain='auditor') }}"
+                class="rounded-lg border border-slate-300 bg-white px-2 py-1 dark:border-slate-600 dark:bg-slate-900">
+            <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.user.on'|trans(domain='auditor'), '%value%': 'audit.history.filter.everything'|trans(domain='auditor')}, 'auditor') }}</option>
+            {% for entity in entities %}
+                <option value="{{ entity }}" {{ filters.entity == entity ? 'selected' }}>{{ dh_auditor_entity_name(entity, 2) }}</option>
+            {% endfor %}
+        </select>
+        <select name="what" data-dh-auditor-autosubmit aria-label="{{ 'audit.history.filter.what'|trans(domain='auditor') }}"
+                class="rounded-lg border border-slate-300 bg-white px-2 py-1 dark:border-slate-600 dark:bg-slate-900">
+            <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.filter.what'|trans(domain='auditor'), '%value%': 'audit.history.filter.everything'|trans(domain='auditor')}, 'auditor') }}</option>
+            {% for type in types %}
+                <option value="{{ type.value }}" {{ filters.what == type.value ? 'selected' }}>{{ ('audit.filter.type.' ~ type.value)|trans(domain='auditor') }}</option>
+            {% endfor %}
+        </select>
+        <select name="when" data-dh-auditor-autosubmit aria-label="{{ 'audit.history.filter.when'|trans(domain='auditor') }}"
+                class="rounded-lg border border-slate-300 bg-white px-2 py-1 dark:border-slate-600 dark:bg-slate-900">
+            <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.filter.when'|trans(domain='auditor'), '%value%': 'audit.history.filter.all_time'|trans(domain='auditor')}, 'auditor') }}</option>
+            {% for days in periods %}
+                <option value="{{ days }}" {{ filters.days == days ? 'selected' }}>{{ 'audit.history.filter.days'|trans({'%count%': days}, 'auditor') }}</option>
+            {% endfor %}
+        </select>
+        <noscript><button type="submit" class="rounded-lg border border-slate-300 px-2 py-1">{{ 'audit.filter.apply'|trans(domain='auditor') }}</button></noscript>
+    </form>
 
-    {# Pager #}
-    {% block dh_auditor_pager %}
-        {{ pager.render_route('dh_auditor_show_user_stream', {id: id}, paginator) }}
-    {% endblock dh_auditor_pager %}
-{% endblock dh_auditor_content %}
+    <section class="mt-2" data-dh-auditor-actions>
+        <div data-dh-auditor-list>
+            {{ include('@DHAuditor/History/_actions.html.twig', {rows: rows, more: more, moreRoute: moreRoute, moreRouteParameters: moreRouteParameters, show_author: false}, with_context = false) }}
+        </div>
+    </section>
+{% endblock %}

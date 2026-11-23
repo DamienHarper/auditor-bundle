@@ -41,7 +41,7 @@ final class PhraseExtensionTest extends KernelTestCase
         $item = new HistoryItem('01JTX', [self::entry('insert', Post::class, '1', [], 'A & <B>')]);
         $this->assertSame(
             \sprintf('alice created Post “<strong><a href="%s">A &amp; &lt;B&gt;</a></strong>” | created Post “A &amp; &lt;B&gt;”', $urls->generateEntityUrl(Post::class, '1')),
-            $template->render(['item' => $item]),
+            $this->withoutClasses($template->render(['item' => $item])),
             'An object reference links to its history in the viewer; the text filter has no markup, and Twig escapes it.',
         );
 
@@ -52,7 +52,7 @@ final class PhraseExtensionTest extends KernelTestCase
         ])]);
         $this->assertSame(
             'alice edited Body, set Coauthor: <strong>A &amp; B</strong> and changed Summary: <strong>x</strong> → <strong>&lt;i&gt;y&lt;/i&gt;</strong> | edited Body, set Coauthor: A &amp; B and changed Summary: x → &lt;i&gt;y&lt;/i&gt;',
-            $template->render(['item' => $item]),
+            $this->withoutClasses($template->render(['item' => $item])),
             'Values in <strong>; an object without URL stays plain.',
         );
     }
@@ -66,7 +66,7 @@ final class PhraseExtensionTest extends KernelTestCase
 
         $this->assertSame(
             \sprintf('moved to <strong><a href="%s">&lt;php&gt;</a></strong> by <strong>&lt;script&gt;</strong>', self::getContainer()->get(AuditViewerUrlGenerator::class)?->generateEntityUrl(Tag::class, '3')),
-            $twig->createTemplate('{{ phrase|dh_auditor_phrase }}')->render(['phrase' => $phrase]),
+            $this->withoutClasses($twig->createTemplate('{{ phrase|dh_auditor_phrase }}')->render(['phrase' => $phrase])),
             'A describer links objects without writing HTML.',
         );
     }
@@ -78,7 +78,7 @@ final class PhraseExtensionTest extends KernelTestCase
 
         $this->assertInstanceOf(ViewerObjectUrlResolver::class, self::getContainer()->get(ObjectUrlResolverInterface::class));
         $phrase = Phrase::of(Fragment::of([new ObjectReference(Author::class, '1', 'John')]));
-        $html = $twig->createTemplate('{{ phrase|dh_auditor_phrase }}')->render(['phrase' => $phrase]);
+        $html = $this->withoutClasses($twig->createTemplate('{{ phrase|dh_auditor_phrase }}')->render(['phrase' => $phrase]));
 
         $this->assertSame('<strong>John</strong>', $html, 'A reader without the view role of the class gets no link.');
     }
@@ -110,5 +110,13 @@ final class PhraseExtensionTest extends KernelTestCase
         $item = new HistoryItem('01JTX', [self::entry('update', Post::class, '1', ['title' => ['old' => 'A', 'new' => 'B']])]);
 
         $this->assertSame('retitled the post', (string) $phraser->phrase($item), 'A service with #[AsChangeDescriber] is registered.');
+    }
+
+    /**
+     * The markup without its styling: escaping and structure are what is tested.
+     */
+    private function withoutClasses(string $html): string
+    {
+        return (string) preg_replace('/ class="[^"]*"/', '', $html);
     }
 }

@@ -1,0 +1,48 @@
+{#- One action of a history: icon, author, what it was done on (context), phrase, time, origin, and its technical
+    details. Variables: row ({item, phrase, context}), root (optional "FQCN:id"), date_format ("time" in a list grouped
+    by day, "datetime" otherwise), shorten (optional: number of fragments kept), details (false to leave them out),
+    show_author (false on the page of the author). -#}
+{% import '@DHAuditor/History/_macros.html.twig' as history %}
+{% set item = row.item %}
+<li class="flex gap-3 py-3" data-dh-auditor-action="{{ item.key }}" data-dh-auditor-entities="{{ item.getEntities()|join(' ') }}">
+    <span class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+        {{- history.icon(row.phrase.icon) -}}
+    </span>
+    <div class="min-w-0 flex-1">
+        <p class="text-sm leading-relaxed{{ (show_author ?? true) ? '' : ' first-letter:uppercase' }}">
+            {% if show_author ?? true -%}
+                {% if item.userId is not same as(null) and item.userId is not same as('') -%}
+                    <a href="{{ path('dh_auditor_show_user_stream', {id: item.userId}) }}" class="font-semibold hover:underline">{{ item|dh_auditor_author }}</a>
+                {%- else -%}
+                    <span class="font-semibold">{{ item|dh_auditor_author }}</span>
+                {%- endif %}
+            {%- endif %}
+            {% if row.context %}<span>{{ row.context|dh_auditor_phrase }}{{ 'audit.history.context_separator'|trans(domain='auditor') }}</span>{% endif %}
+            {% if shorten is defined and shorten %}
+                <span>{{ row.phrase|dh_auditor_shorten(shorten)|dh_auditor_phrase }}</span>
+            {% else %}
+                <span class="hidden sm:inline">{{ row.phrase|dh_auditor_phrase }}</span>
+                <span class="sm:hidden">{{ row.phrase|dh_auditor_shorten(3)|dh_auditor_phrase }}</span>
+            {% endif %}
+            <span class="whitespace-nowrap text-slate-400 dark:text-slate-500">·
+                <time datetime="{{ item.createdAt|date('c') }}" title="{{ item.createdAt|format_datetime('full', 'medium', timezone: false) }}">
+                    {%- if (date_format ?? 'time') == 'time' -%}
+                        {{ item.createdAt|format_time('short', timezone: false) }}
+                    {%- else -%}
+                        {{ item.createdAt|format_datetime('medium', 'short', timezone: false) }}
+                    {%- endif -%}
+                </time>
+            </span>
+            <span class="ml-1 inline-flex flex-wrap gap-1 align-middle">{{ history.origin(item) }}</span>
+        </p>
+        {% if details ?? true %}
+        <details class="group mt-1" data-dh-auditor-details>
+            <summary class="cursor-pointer list-none text-xs font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                <span class="group-open:hidden">{{ 'audit.history.details'|trans(domain='auditor') }}</span>
+                <span class="hidden group-open:inline">{{ 'audit.history.hide_details'|trans(domain='auditor') }}</span>
+            </summary>
+            {{ include('@DHAuditor/History/_details.html.twig', {item: item, root: root ?? null}, with_context = false) }}
+        </details>
+        {% endif %}
+    </div>
+</li>

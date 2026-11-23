@@ -11,10 +11,10 @@ final class AuthorNameResolver implements AuthorNameResolverInterface
 {
     public function resolve(int|string $userId, HistoryItem $item): ?string
     {
-        return match ((int) $userId) {
-            1 => 'alice',
-            2 => 'Bob Martin',
-            default => null,
+        return match ((string) $userId) {
+            '2' => 'Bob Martin',
+            '3' => null, // a deleted user
+            default => $item->username,
         };
     }
 }

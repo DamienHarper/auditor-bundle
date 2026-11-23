@@ -6,6 +6,7 @@ namespace DH\AuditorBundle\Twig;
 
 use DH\Auditor\Model\Entry;
 use DH\AuditorBundle\Tests\Twig\DiffExtensionTest;
+use DH\AuditorBundle\Viewer\WordDiff;
 use Twig\Attribute\AsTwigFunction;
 
 /**
@@ -21,5 +22,17 @@ final readonly class DiffExtension
     public function isDiffLeaf(mixed $node): bool
     {
         return \is_array($node) && Entry::isDiffLeaf($node);
+    }
+
+    /**
+     * Word by word comparison of two texts, as runs of [kind, text] (kind: equal, delete, insert); null when they are
+     * not both texts, or too long to compare (see WordDiff).
+     *
+     * @return null|list<array{0: 'delete'|'equal'|'insert', 1: string}>
+     */
+    #[AsTwigFunction('dh_auditor_word_diff')]
+    public function wordDiff(mixed $old, mixed $new): ?array
+    {
+        return (\is_string($old) || null === $old) && \is_string($new) ? WordDiff::diff($old ?? '', $new) : null;
     }
 }

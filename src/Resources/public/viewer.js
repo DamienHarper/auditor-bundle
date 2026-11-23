@@ -35,19 +35,105 @@
         root.classList.add('dark');
     }
 
-    document.addEventListener('click', function (event) {
-        var toggle = event.target instanceof Element ? event.target.closest('[data-dh-auditor-theme-toggle]') : null;
-        if (!toggle) {
+    // Technical mode of a history: opens (or closes) the details of every action of the list.
+    function expandAll(container, open) {
+        container.querySelectorAll('details[data-dh-auditor-details]').forEach(function (details) {
+            details.open = open;
+        });
+    }
+
+    function isExpanded(container) {
+        var toggle = container.querySelector('[data-dh-auditor-expand-all]');
+
+        return toggle instanceof HTMLInputElement && toggle.checked;
+    }
+
+    // "Show older actions": the link works without JavaScript; with it, the next rows are loaded in place.
+    function loadMore(link) {
+        var container = link.closest('[data-dh-auditor-more-container]');
+        var actions = link.closest('[data-dh-auditor-actions]');
+        if (!container || typeof window.fetch !== 'function') {
+            return false;
+        }
+
+        link.setAttribute('aria-busy', 'true');
+        window.fetch(link.href, {headers: {'X-DH-Auditor-Fragment': '1'}, credentials: 'same-origin'})
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error(response.statusText);
+                }
+
+                return response.text();
+            })
+            .then(function (html) {
+                var template = document.createElement('template');
+                template.innerHTML = html;
+                container.replaceWith(template.content);
+                if (actions && isExpanded(actions)) {
+                    expandAll(actions, true);
+                }
+            })
+            .catch(function () {
+                window.location.href = link.href;
+            });
+
+        return true;
+    }
+
+    function copy(button) {
+        var source = document.getElementById(button.getAttribute('data-dh-auditor-copy') || '');
+        if (!source || !navigator.clipboard) {
             return;
         }
 
-        var dark = root.classList.toggle('dark');
-        writeTheme(dark ? 'dark' : 'light');
+        navigator.clipboard.writeText(source.textContent || '').then(function () {
+            var label = button.getAttribute('data-dh-auditor-copied');
+            if (label) {
+                button.textContent = label;
+            }
+        });
+    }
+
+    document.addEventListener('click', function (event) {
+        var target = event.target instanceof Element ? event.target : null;
+        if (!target) {
+            return;
+        }
+
+        if (target.closest('[data-dh-auditor-theme-toggle]')) {
+            var dark = root.classList.toggle('dark');
+            writeTheme(dark ? 'dark' : 'light');
+
+            return;
+        }
+
+        var copyButton = target.closest('[data-dh-auditor-copy]');
+        if (copyButton) {
+            // the button sits in a <summary>: copying must not toggle the details
+            event.preventDefault();
+            copy(copyButton);
+
+            return;
+        }
+
+        var more = target.closest('a[data-dh-auditor-more]');
+        if (more && !event.metaKey && !event.ctrlKey && !event.shiftKey && 0 === event.button && loadMore(more)) {
+            event.preventDefault();
+        }
     });
 
     document.addEventListener('change', function (event) {
         var field = event.target;
         if (!(field instanceof HTMLSelectElement) && !(field instanceof HTMLInputElement)) {
+            return;
+        }
+
+        if (field.hasAttribute('data-dh-auditor-expand-all')) {
+            var actions = field.closest('[data-dh-auditor-actions]');
+            if (actions) {
+                expandAll(actions, field.checked);
+            }
+
             return;
         }
 

@@ -5,9 +5,14 @@ audit:
   theme:
     toggle: Lülita hele/tume režiim
   home:
-    title: Auditeeritud olemid
-    subtitle: Ülevaade kõikidest jälgitavatest olemitest
+    title: 'Ülevaade'
+    subtitle: 'Mis viimati muutus ja kus.'
     no_audits: Auditeeritud olemeid ei leitud.
+    recent_activity: 'Viimane tegevus'
+    audited: 'Mida auditeeritakse'
+    entity: 'Olem'
+    actions: 'Toimingud'
+    bulk_note: 'Paljusid objekte puudutav toiming võetakse kokku tüübi kaupa; üksikasjad on toimingus.'
   sort:
     label: Sorteeri
     name_asc: 'Nimi (A-Z)'
@@ -87,6 +92,75 @@ audit:
     next: Järgmine
     last: Viimane
     page_info: 'Leht %current% / %total%'
+  history:
+    deleted: '(kustutatud)'
+    today: 'Täna'
+    yesterday: 'Eile'
+    details: 'Üksikasjad'
+    hide_details: 'Peida üksikasjad'
+    all_details: 'Kõik üksikasjad →'
+    copy: 'Kopeeri'
+    copied: 'Kopeeritud'
+    older: 'Näita vanemaid toiminguid'
+    no_actions: 'Toiminguid pole.'
+    context_separator: ':'
+    created_by: 'loonud %author%, %date%'
+    entries_count: '{0} kirjeid pole|{1} 1 kirje|]1,Inf[ %count% kirjet'
+    fields_count: '{1} 1 väli|]1,Inf[ %count% välja'
+    compare: 'Võrdle kahte olekut'
+    export: 'Ekspordi'
+    with_attached: 'Koos seotud olemitega'
+    expand_all: 'Laienda kõik (tehniline režiim)'
+    last_changes: 'Kes mida viimati muutis'
+    at_creation: 'loomisel'
+    technical: 'Tehniline pool'
+    class: 'Klass'
+    identifier: 'Identifikaator'
+    tables: 'Tabelid'
+    reading: 'Lugemine'
+    entries: 'Kirjed'
+    object: 'Objekt'
+    field: 'Väli'
+    firewall: 'tulemüür'
+    schema: 'skeem'
+    filter:
+      option: '%filter%: %value%'
+      who: 'Kes'
+      what: 'Mis'
+      origin: 'Päritolu'
+      when: 'Millal'
+      everyone: 'kõik'
+      everything: 'kõik'
+      all_origins: 'kõik'
+      all_time: 'kogu aeg'
+      days: '{1} viimane päev|]1,Inf[ viimased %count% päeva'
+    origin:
+      http: 'Veeb'
+      console: 'Käsurida'
+      messenger: 'Messenger'
+      system: 'Süsteem'
+    origin_help:
+      http: 'Sisselogitud kasutaja veebipäring'
+      console: 'Konsoolikäsk'
+      messenger: 'Messengeri sõnumi käsitleja'
+      system: 'Kasutaja puudub: skript, ajastatud töö, anonüümne päring…'
+  action:
+    title: 'Toiming %date%'
+    previous: '‹ Eelmine toiming'
+    next: 'Järgmine toiming ›'
+    objects: '{1} 1 mõjutatud objekt|]1,Inf[ %count% mõjutatud objekti'
+    technical: 'Tehnilised üksikasjad'
+    table: 'Tabel · id'
+    type: 'Tüüp'
+    raw_field: 'Toorväli'
+    ulid_date: 'ULID ajatempel'
+    no_via: 'puudub'
+    more_entries: '{1} ja veel 1 kirje|]1,Inf[ ja veel %count% kirjet'
+    tables: '{1} 1 tabel|]1,Inf[ %count% tabelit'
+  user:
+    title: 'Mida %name% tegi'
+    entities: '{1} 1 objektitüübil|]1,Inf[ %count% objektitüübil'
+    on: 'Objekt'
 
 time_ago:
   seconds_ago: '{0} just nüüd|{1} 1 sekund tagasi|]1,Inf[ %count% sekundit tagasi'
