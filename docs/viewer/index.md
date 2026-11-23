@@ -51,65 +51,51 @@ dh_auditor:
 
 ## 📄 Pages
 
-### Entity List (`/audit`)
+The viewer tells each action (a database transaction) as a phrase, such as *alice changed Status: Draft → Published
+and added to Tags: symfony and audit*, with its technical details one click away. The phrases come from the
+[history phrases](../customization/histories.md#-phrases): translate or describe them to speak the words of your
+application. The objects they name link to their history, and are marked *(deleted)* when they no longer exist.
 
-Displays all audited entities with:
-- 📋 Entity class name
-- 🗄️ Audit table name
-- 🔢 Number of audit entries
-- 🔗 Link to view history
+### Overview (`/audit`)
 
-The list can be sorted by name, number of entries or latest activity (`?sort=name_asc`, `name_desc`, `count_desc`,
-`count_asc`, `activity_desc`, `activity_asc`).
+- **Recent activity**: the last 10 actions across the audited entities the reader may view, with what they were done
+  on (*alice on Post “Why audit?”: …*). An action touching many objects is summed up by type (*deleted 38 Post*).
+- **What is audited**: the audited entities (their name from the `dh_auditor_fields` domain, key FQCN), their number of
+  actions (distinct transactions, cached with the activity graph when its cache is on), their latest activity and,
+  when enabled, their [activity graph](#-activity-graph). The list can be sorted by name, number of actions or latest
+  activity (`?sort=name_asc`, `name_desc`, `count_desc`, `count_asc`, `activity_desc`, `activity_asc`).
+
+### Object History (`/audit/{entity}/{id}`)
+
+The history of one object and of the entities attached to it (`#[AuditRoot]`, `roots` entity option, see
+[Histories](../customization/histories.md)), newest first, grouped by day:
+
+- one row per action: icon, author (linked to their actions), phrase, time, origin (Web, Command line, Messenger,
+  System) and blame context; its details list every change with its raw field and values (long texts compared word
+  by word), the transaction and the blame, and link to the action page;
+- **filters**: who, what (`insert`, `update`, `remove`, `associate`, `dissociate`), field (needs native JSON
+  search), origin (`http`, `console`, `messenger`, `system`), when (last 7, 30 or 90 days), and, when entities can
+  be attached, with or without them;
+- **Show older actions** reads the next page through a cursor (`?after=`): a link, which `viewer.js` loads in place;
+- **Who changed what last**: the latest change of each field of the object;
+- **Technical side**: class, identifier, audit tables read, number of entries.
+
+```
+/audit/App-Entity-Post/42?who=12&what=update&field=status
+/audit/App-Entity-Post/42?origin=console&when=30&attached=0
+```
+
+Only the `view` role of the object's class is checked: its history shows the entries of the attached entities even
+to a reader who cannot view their class (their links to their own history are hidden).
 
 ### Entity Stream (`/audit/{entity}`)
 
-Shows audit entries for an entity:
-- 📅 Chronological list (newest first)
-- 🏷️ Operation type (insert/update/remove/associate/dissociate); an insert written by `audit:snapshot`
-  (the state of an entity that existed before auditing started) shows a `SNAPSHOT` badge
-- 👤 User and timestamp
-- 📝 Changed properties (diff)
-
-Filter by specific entity ID:
-```
-/audit/App-Entity-User/42
-```
-
-#### 🔍 Filters
-
-The entity stream page includes filters to narrow down audit entries:
-
-**Action Type Filter**
-Filter by operation type:
-- `insert` - Record created (snapshots included)
-- `update` - Record updated
-- `remove` - Record deleted
-- `associate` - Relation added
-- `dissociate` - Relation removed
-
-**User Filter**
-Filter by the user who performed the action:
-- All registered users who have made changes
-- Anonymous (for actions without user attribution)
-- CLI commands (each command is tracked by its name, e.g., `app:import-users`)
-
-**Changed Field Filter**
-Filter by the field touched by the change:
-- Lists the audited fields and associations of the entity, from its Doctrine mapping
-- Inserts and updates that changed the field, and removes recorded with a full snapshot
-- For a collection, the items added to (`associate`) or removed from (`dissociate`) it
+Every action on an entity, with the filters of the stream: type, user (`__anonymous__` for the entries without
+user), changed field, and period.
 
 > [!NOTE]
-> The changed field filter requires native JSON support (MySQL 5.7+, MariaDB 10.2.3+, PostgreSQL 9.4+, SQLite 3.38+) and an audit table migrated to the schema v2 structure (`audit:schema:migrate`). It is hidden otherwise. On large audit tables, combine it with a single entity (`/audit/{entity}/{id}`) or a period: the database has to read the diffs of every entry left by the other filters.
+> The changed field filter requires native JSON support (MySQL 5.7+, MariaDB 10.2.3+, PostgreSQL 9.4+, SQLite 3.38+) and an audit table migrated to the schema v2 structure (`audit:schema:migrate`). It is hidden otherwise. On large audit tables, combine it with a period: the database has to read the diffs of every entry left by the other filters.
 
-**Date Range Filter**
-Keep the entries created between two days (inclusive), in the `dh_auditor.timezone` time zone.
-
-> [!TIP]
-> Filters can be combined and are preserved during pagination.
-
-**URL parameters:**
 ```
 /audit/App-Entity-User?type=update&user=42
 /audit/App-Entity-User?type=insert&user=__anonymous__
@@ -117,31 +103,31 @@ Keep the entries created between two days (inclusive), in the `dh_auditor.timezo
 /audit/App-Entity-User?date_from=2026-01-01&date_to=2026-03-31
 ```
 
+The dates are days, inclusive, in the `dh_auditor.timezone` time zone. Filters are kept by the pager.
+
+### Action (`/audit/transaction/{hash}`)
+
+One action: its phrase, the list of what it did, then every entry it wrote (up to 200), with its table and id, raw
+fields and values, the transaction (and the date of its ULID), the blame and the raw diffs, which can be copied as
+JSON. Opened from the history of an object (`?root=App\Entity\Post:42`), it links to the previous and next
+actions of that history.
+
+### Actions of a User (`/audit/user/{id}`)
+
+Everything a user did, across the audited entities the reader may view, object by object (*On Post “Why audit?”:
+…*), with filters on the entity (`on`), the type (`what`) and the period (`when`). The user is identified by the
+`blame_id` recorded with each entry (up to 255 characters).
+
+- Anonymous entries (no `blame_id`) have no page. Neither do entries recorded with an empty `blame_id`, which is what
+  happens when the Symfony user class has no `getId()` method.
+- Each audited entity is queried separately, for at most `page × page_size` rows: browsing deep pages of a very
+  active user costs more than browsing the first ones. An action may be split between two pages.
+
 ### Compare Revisions (`/audit/{entity}/{id}/compare`)
 
-From the stream of one object (`/audit/{entity}/{id}`), pick two of its revisions to see the state of the object
-before and after the changes made between them, field by field. The page links to the previous and next revisions,
-so that the comparison can be moved along the history.
-
-### Transaction View (`/audit/transaction/{hash}`)
-
-Groups all changes from a single database transaction across all entities. The page is paginated like the other
-streams (`page_size` entries per page); the header and each entity title count the whole transaction.
-
-### User Timeline (`/audit/user/{id}`)
-
-Lists everything a user did, newest first, in a single timeline across all audited entities.
-The user is identified by the `blame_id` recorded with each entry (up to 255 characters); in
-every stream, the author of an entry links to this page.
-
-- Only entities the current viewer is allowed to see (see [Access Control](#-access-control))
-  are included, both in the list and in the events count.
-- Anonymous entries (no `blame_id`) have no timeline. Neither do entries recorded with an empty
-  `blame_id`, which is what happens when the Symfony user class has no `getId()` method.
-- Each audited entity is queried separately, for at most `page × page_size` rows: browsing deep
-  pages of a very active user costs more than browsing the first ones.
-- Entries written at the same instant are ordered by id, newest first, then by entity name: the content of each page
-  is stable.
+From the history of an object, **Compare two states** lists its revisions: pick two of them to see the state of the
+object before and after the changes made between them, field by field. The page links to the previous and next
+revisions, so that the comparison can be moved along the history.
 
 ## 📤 Export
 
@@ -249,7 +235,8 @@ The toggle works without page reload and persists across sessions.
 ## 🔐 Content Security Policy
 
 The viewer carries no inline script, event handler attribute nor `style` attribute: its behaviours (theme, sort of
-the entity list, filters submitted on change) live in `bundles/dhauditor/viewer.js`, loaded by `layout.html.twig`, and
+the entity list, filters submitted on change, technical mode, copy of the raw diffs, older actions loaded in place)
+live in `bundles/dhauditor/viewer.js`, loaded by `layout.html.twig`, and
 its styles in `bundles/dhauditor/app.css`. It therefore works under a strict policy such as
 `script-src 'self'; style-src 'self'`, as long as the bundle assets are served from your origin
 (`bin/console assets:install`).
@@ -383,13 +370,24 @@ Create files in `templates/bundles/DHAuditorBundle/`:
 ```
 templates/bundles/DHAuditorBundle/
 ├── Audit/
-│   ├── audits.html.twig              # Entity list
-│   ├── entity_stream.html.twig       # Entity audit stream
-│   ├── transaction_stream.html.twig  # Transaction view
-│   ├── entry.html.twig               # Single entry
+│   ├── audits.html.twig              # Overview
+│   ├── object_history.html.twig      # History of an object
+│   ├── entity_stream.html.twig       # Stream of an entity
+│   ├── transaction_stream.html.twig  # Action
+│   ├── user_stream.html.twig         # Actions of a user
+│   ├── revisions.html.twig           # Revisions of an object
+│   ├── compare.html.twig             # Comparison of two revisions
+│   ├── entry.html.twig               # Macros of the comparison
 │   └── helpers/
 │       ├── helper.html.twig          # Helper macros
 │       └── pager.html.twig           # Pagination
+├── History/
+│   ├── _actions.html.twig            # Actions grouped by day, and the link to older ones
+│   ├── _row.html.twig                # One action
+│   ├── _details.html.twig            # Technical details of an action
+│   ├── _macros.html.twig             # Icons, origin badges, day headings
+│   ├── phrase.html.twig              # A phrase
+│   └── object_reference.html.twig    # An object named by a phrase
 └── layout.html.twig                  # Base layout
 ```
 
