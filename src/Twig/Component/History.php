@@ -137,19 +137,8 @@ final class History
         }
 
         $limit = $this->limit ?? $this->pageSize();
-
-        try {
-            $page = $query->fetch($limit, $after, groupKey: $this->grouper);
-        } catch (InvalidArgumentException $invalidArgumentException) {
-            // a cursor of the query string that is not one (a link edited by hand…): the first page; an "after" option
-            // or anything else (a page size below 1…) is an error of the application
-            if (null === $after || null !== $this->after) {
-                throw $invalidArgumentException;
-            }
-
-            $after = null;
-            $page = $query->fetch($limit, groupKey: $this->grouper);
-        }
+        // an invalid "after" option, or a page size below 1, is an error of the application and is thrown
+        $page = $query->fetch($limit, $after, groupKey: $this->grouper);
 
         $this->firstCursor = $page->firstCursor;
 
@@ -270,13 +259,14 @@ final class History
     }
 
     /**
-     * Cursor of the query string, when it holds one (a string: "?dh_auditor_after[]=" is ignored).
+     * Cursor of the query string, when it holds one: a cursor edited by hand (or "?dh_auditor_after[]=") shows the
+     * first page.
      */
     private function cursorOf(?Request $request): ?string
     {
         $cursor = $request?->query->all()[$this->cursorParameter] ?? null;
 
-        return \is_string($cursor) && '' !== $cursor ? $cursor : null;
+        return \is_string($cursor) && RootQuery::isCursor($cursor) ? $cursor : null;
     }
 
     private function pageSize(): int
