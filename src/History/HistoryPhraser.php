@@ -113,6 +113,107 @@ final readonly class HistoryPhraser
     }
 
     /**
+     * What an action was done on, for a list that mixes objects ("on Post “Why audit?”", "on 2 Post"): the object with
+     * the most changes, or the number of objects when all the changes concern several objects of one entity. Null
+     * when the action only creates, snapshots or deletes objects (its phrase names them), or when it concerns only the
+     * given object (in the history of that object).
+     */
+    public function context(HistoryItem $item, ?string $rootClass = null, ?string $rootId = null): ?Phrase
+    {
+        $changes = $item->getChanges();
+        // creations and deletions name their objects themselves
+        if (array_all($changes, static fn (Change $change): bool => $change->kind->isEntityLevel())) {
+            return null;
+        }
+
+        /** @var array<string, array{change: Change, count: int}> $objects */
+        $objects = [];
+        foreach ($changes as $change) {
+            $key = $change->entity.'#'.$change->objectId;
+            $objects[$key] ??= ['change' => $change, 'count' => 0];
+            ++$objects[$key]['count'];
+        }
+
+        if (null !== $rootClass && [$rootClass.'#'.$rootId] === array_keys($objects)) {
+            return null;
+        }
+
+        $entities = array_unique(array_map(static fn (array $object): string => $object['change']->entity, $objects));
+        if (\count($objects) > 1 && 1 === \count($entities) && 1 === \count(array_unique(array_column($objects, 'count')))) {
+            $entity = $changes[0]->entity;
+
+            return new Phrase([new Fragment($this->message(['context.objects'], [
+                'count' => \count($objects),
+                'entity' => [new TextPart($this->entityName($entity, \count($objects)))],
+            ]))]);
+        }
+
+        // the object with the most changes, the first one on a tie
+        $main = $changes[0];
+        $most = 0;
+        foreach ($objects as $object) {
+            if ($object['count'] > $most) {
+                $main = $object['change'];
+                $most = $object['count'];
+            }
+        }
+
+        // an action that creates or deletes that object names it in its phrase
+        if (array_any($changes, static fn (Change $change): bool => $change->kind->isEntityLevel() && $change->entity === $main->entity && $change->objectId === $main->objectId)) {
+            return null;
+        }
+
+        return new Phrase([new Fragment($this->message(['context.object'], [
+            'entity' => [new TextPart($this->entityName($main->entity, 1))],
+            'label' => [new ObjectReference($main->entity, $main->objectId, self::objectLabel($main->objectLabel, $main->entity, $main->objectId))],
+        ]))]);
+    }
+
+    /**
+     * Puts first the fragments that tell changes of an object (the object a context names, the root of the history an
+     * action is opened from), so that a shortened phrase starts with them.
+     */
+    public function focus(Phrase $phrase, string $class, string $id): Phrase
+    {
+        $concerns = static fn (Fragment $fragment): bool => array_any($fragment->changes, static fn (Change $change): bool => $change->entity === $class && $change->objectId === $id);
+        $first = array_values(array_filter($phrase->fragments, $concerns));
+        if ([] === $first) {
+            return $phrase;
+        }
+
+        $others = array_values(array_filter($phrase->fragments, static fn (Fragment $fragment): bool => !$concerns($fragment)));
+
+        return new Phrase([...$first, ...$others], $phrase->icon, $this->trans('list.separator'), $this->trans('list.and'));
+    }
+
+    /**
+     * The object a context names, or null when it names a number of objects.
+     */
+    public static function contextObject(Phrase $context): ?ObjectReference
+    {
+        $reference = array_find($context->getParts(), static fn (PhrasePart $part): bool => $part instanceof ObjectReference);
+
+        return $reference instanceof ObjectReference ? $reference : null;
+    }
+
+    /**
+     * Keeps the first fragments of a phrase, followed by "and 4 other changes" (a list of recent activity, a small
+     * screen).
+     */
+    public function shorten(Phrase $phrase, int $fragments): Phrase
+    {
+        $count = \count($phrase->fragments);
+        if ($count <= $fragments) {
+            return $phrase;
+        }
+
+        $kept = \array_slice($phrase->fragments, 0, $fragments);
+        $kept[] = new Fragment([new TextPart($this->trans('more_changes', ['%count%' => $count - $fragments]))], array_merge(...array_map(static fn (Fragment $fragment): array => $fragment->changes, \array_slice($phrase->fragments, $fragments))));
+
+        return new Phrase($kept, $phrase->icon, $this->trans('list.separator'), $this->trans('list.and'));
+    }
+
+    /**
      * Name of the author of an action: the name recorded in the blame ("User 42" when only the id was recorded), or the
      * current one with an AuthorNameResolverInterface service ("Deleted user" when it returns null); without user,
      * "System", "Command line" or "Anonymous user".
@@ -137,6 +238,21 @@ final readonly class HistoryPhraser
             BlameOrigin::Http => $this->trans('author.anonymous'),
             default => $this->trans('author.system'),
         };
+    }
+
+    /**
+     * Name of an entity: key "FQCN" of the "dh_auditor_fields" domain, translated with $count; the short class name
+     * without translation.
+     */
+    public function entityName(string $entity, int $count = 1): string
+    {
+        if ($this->has($entity, self::FIELDS_DOMAIN)) {
+            return $this->translator->trans($entity, ['%count%' => $count], self::FIELDS_DOMAIN);
+        }
+
+        $short = mb_strrchr($entity, '\\');
+
+        return false === $short ? $entity : mb_substr($short, 1);
     }
 
     /**
@@ -397,7 +513,7 @@ final readonly class HistoryPhraser
             'count' => $bulk ?? \count($changes),
             'entity' => [new TextPart($this->entityName($change->entity, $bulk ?? 1))],
             'field' => [new TextPart(null === $change->field ? '' : $this->fieldLabelResolver->resolve($change->entity, $change->field))],
-            'label' => [new ObjectReference($change->entity, $change->objectId, ValueFormatter::truncate($change->objectLabel ?? '#'.$change->objectId))],
+            'label' => [new ObjectReference($change->entity, $change->objectId, self::objectLabel($change->objectLabel, $change->entity, $change->objectId))],
             'old' => [],
             'new' => [],
             'names' => [],
@@ -411,7 +527,7 @@ final readonly class HistoryPhraser
             case ChangeKind::Added:
             case ChangeKind::Removed:
                 $parameters['names'] = array_map(static function (Change $element): PhrasePart {
-                    $label = ValueFormatter::truncate($element->newLabel ?? $element->oldLabel ?? '#'.$element->getTargetId());
+                    $label = self::objectLabel($element->newLabel ?? $element->oldLabel, (string) $element->getTargetClass(), (string) $element->getTargetId());
                     $class = $element->getTargetClass();
                     $id = $element->getTargetId();
 
@@ -448,6 +564,15 @@ final readonly class HistoryPhraser
         $id = $value[$key] ?? null;
 
         return \is_int($id) || \is_string($id) ? new ObjectReference($value['class'], (string) $id, $formatted) : new ValuePart($formatted);
+    }
+
+    /**
+     * Label of an object, cut for a phrase: "#id" without label, or for the label the provider writes for an object
+     * without one ("FQCN#id").
+     */
+    private static function objectLabel(?string $label, string $class, string $id): string
+    {
+        return ValueFormatter::truncate(null === $label || '' === $label || $class.'#'.$id === $label ? '#'.$id : $label);
     }
 
     /**
@@ -544,17 +669,6 @@ final readonly class HistoryPhraser
         }
 
         return $parts;
-    }
-
-    private function entityName(string $entity, int $count): string
-    {
-        if ($this->has($entity, self::FIELDS_DOMAIN)) {
-            return $this->translator->trans($entity, ['%count%' => $count], self::FIELDS_DOMAIN);
-        }
-
-        $short = mb_strrchr($entity, '\\');
-
-        return false === $short ? $entity : mb_substr($short, 1);
     }
 
     private function has(string $key, string $domain = self::DOMAIN): bool

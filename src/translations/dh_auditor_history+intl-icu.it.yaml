@@ -36,3 +36,7 @@ author:
   anonymous: Utente anonimo
   deleted: Utente eliminato
   unknown: 'Utente {id}'
+context:
+  object: 'su {entity} «{label}»'
+  objects: 'su {count} {entity}'
+more_changes: '{count, plural, one {# altra modifica} other {# altre modifiche}}'

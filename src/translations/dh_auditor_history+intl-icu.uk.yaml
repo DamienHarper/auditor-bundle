@@ -36,3 +36,7 @@ author:
   anonymous: Анонімний користувач
   deleted: Видалений користувач
   unknown: 'Користувач {id}'
+context:
+  object: 'у {entity} «{label}»'
+  objects: 'у {entity}: {count}'
+more_changes: '{count, plural, one {ще # зміна} few {ще # зміни} many {ще # змін} other {ще # зміни}}'

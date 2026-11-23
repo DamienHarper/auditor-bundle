@@ -37,3 +37,7 @@ author:
   anonymous: Anonymous user
   deleted: Deleted user
   unknown: 'User {id}'
+context:
+  object: 'on {entity} “{label}”'
+  objects: 'on {count} {entity}'
+more_changes: '{count, plural, one {# other change} other {# other changes}}'

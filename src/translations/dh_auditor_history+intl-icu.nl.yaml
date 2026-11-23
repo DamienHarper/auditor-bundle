@@ -36,3 +36,7 @@ author:
   anonymous: Anonieme gebruiker
   deleted: Verwijderde gebruiker
   unknown: 'Gebruiker {id}'
+context:
+  object: 'bij {entity} „{label}”'
+  objects: 'bij {count} {entity}'
+more_changes: '{count, plural, one {# andere wijziging} other {# andere wijzigingen}}'
