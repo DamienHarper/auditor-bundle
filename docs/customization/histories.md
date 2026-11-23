@@ -119,3 +119,107 @@ user cannot view its audits, or when its identifier cannot be turned into a stri
 changed, the change is the creation of the entity, which holds the requested fields: read the value with
 `change.value(field)` (`Change::getValue()`) and its label with `change.label(field)`. For a JSON field changed since,
 `change.value(field)` is the deep diff tree (`change.kind` is `Json`): do not print it as is.
+
+## 💬 Phrases
+
+The bundle tells an action (a `HistoryItem`) as a phrase a reader understands, such as *alice changed Status:
+Draft → Published and added to Tags: symfony and audit*:
+
+```twig
+{% for item in items %}
+    {{ item|dh_auditor_author }} {{ item|dh_auditor_phrase }}
+{% endfor %}
+```
+
+`|dh_auditor_phrase` returns a `DH\AuditorBundle\History\Phrase`: it prints as escaped text, `.html` is the HTML
+version with the values in `<strong>` (`{{ (item|dh_auditor_phrase).html|raw }}`), `.icon` names the icon of its main
+change, and `.fragments` lists its parts (`text`, `html`, `icon` and the `changes` each one tells). In PHP, use the
+`DH\AuditorBundle\History\HistoryPhraser` service (`phrase()`, `author()`).
+
+Each change gives one fragment: the changes of the root first, then those of the attached entities; the fields of an
+entry in the order of their Doctrine mapping. Elements added to (or removed from) the same collection make one
+fragment, and the same change made to more than 5 objects of an entity is summed up (*deleted 38 Post*). Lists read
+"a, b and c" ("a, b, c and 4 others" beyond 5), and values longer than 80 characters are cut.
+
+### Without configuration
+
+| Change | Phrase |
+|---|---|
+| created, snapshot, deleted | created Post “Why audit?” |
+| set | set Published at: Nov 22, 2026, 6:41 PM |
+| changed | changed Status: Draft → Published |
+| changed (long text) | edited Body |
+| cleared | cleared Deadline (Nov 30, 2026) |
+| added, removed | added to Tags: symfony and audit |
+| JSON field | edited Metadata (seo.description) |
+
+Values are read through the Doctrine mapping of the field: an enum gives its label when it implements
+`TranslatableInterface` (its value otherwise), a date the medium format of the locale, a boolean "yes" or "no", no
+value "empty". A value written with a label (`#[DiffLabel]`, the label of an associated entity) shows that label.
+The bundle ships these phrases in English and French.
+
+### With translations
+
+Field labels come from the `dh_auditor_fields` domain (see Labels above); so do entity names, keyed by FQCN
+(the short class name otherwise). Phrases come from the `dh_auditor_history` domain in the ICU format, keyed by
+`FQCN.kind` for a creation, a snapshot or a deletion and `FQCN.field.kind` for a field change, where kind is
+`created`, `snapshot`, `deleted`, `set`, `changed`, `cleared`, `added`, `removed` or `json`; add `.bulk` for the
+summary of more than 5 objects. Use the `+intl-icu` suffix in the file names:
+
+```yaml
+# translations/dh_auditor_fields+intl-icu.fr.yaml
+App\Entity\Post: '{count, plural, one {article} other {articles}}'
+App\Entity\Post.status: Statut
+
+# translations/dh_auditor_history+intl-icu.fr.yaml
+App\Entity\Post.created: "a créé l'article « {label} »"
+App\Entity\Post.status.changed: 'a passé le statut de {old} à {new}'
+App\Entity\Post.tags.added: '{count, plural, one {a ajouté le tag {names}} other {a ajouté les tags {names}}}'
+App\Entity\Post.deleted.bulk: 'a supprimé {count} {entity}'
+```
+
+| Parameter | Value |
+|---|---|
+| `{label}` | label of the object (or `#id`) |
+| `{old}`, `{new}` | formatted values of a field change |
+| `{names}` | added or removed elements, changed paths of a JSON field, as "a, b and c" |
+| `{count}` | number of elements, or of objects of a summary |
+| `{field}` | label of the field |
+| `{entity}` | name of the entity, plural when `{count}` asks for it |
+
+### With PHP
+
+A change that needs the rest of the action to be told (*deleted the initiative X, which linked the ticket*) takes a
+describer. It returns the fragments of the change, or null to keep the default phrase:
+
+```php
+use DH\Auditor\History\Change;
+use DH\Auditor\History\HistoryItem;
+use DH\AuditorBundle\Attribute\AsChangeDescriber;
+use DH\AuditorBundle\History\ChangeDescriberInterface;
+use DH\AuditorBundle\History\Fragment;
+use DH\AuditorBundle\History\Phrase;
+
+#[AsChangeDescriber(entity: Ticket::class, field: 'initiative')]
+final class InitiativeDescriber implements ChangeDescriberInterface
+{
+    public function describe(Change $change, HistoryItem $item): ?Phrase
+    {
+        if (null !== $change->new) {
+            return null;
+        }
+
+        return Phrase::of(new Fragment(\sprintf('removed the ticket from initiative %s', $change->oldLabel), [$change], 'removed'));
+    }
+}
+```
+
+Without `field`, the describer receives every change of the entity that no field describer takes, the creation and
+the deletion included. A `Fragment` is escaped for its HTML version unless you pass one.
+
+### Authors
+
+The author is the name recorded with the change; without user, "Command line" (a console command), "Anonymous user"
+(a web request) or "System". To show the current name of a user, implement
+`DH\AuditorBundle\History\AuthorNameResolverInterface` as a service: it returns the name, or null for a user
+that no longer exists ("Deleted user").

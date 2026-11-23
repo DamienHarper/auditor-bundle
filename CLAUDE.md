@@ -81,7 +81,7 @@ work from a worktree (`make -C .claude/worktrees/<name> tests`).
 - `providers.doctrine`: `table_prefix`, `table_suffix`, `ignored_columns`, `ignored_columns_resolver` / `root_resolver` / `entity_label_resolver` / `read_scope` (service IDs set by method calls, see `CALLABLE_SERVICE_OPTIONS`), `entities` (with `roles.view`, `retention` and `roots`), `storage_services`, `auditing_services`, `viewer` (off by default; `page_size`, `activity_graph`), `retention` (`schedule`, `default_max_age`), `storage_mapper`.
 - The `DoctrineProvider` service is tagged `dh_auditor.provider` and aliased `dh_auditor.provider.doctrine`.
 
-Compiler passes (`src/DependencyInjection/Compiler/`): `DoctrineMiddlewareCompilerPass` adds the auditor DBAL middleware to each auditing connection, `RegisterProvidersCompilerPass` registers the providers on `Auditor`, `RegisterDiffLabelResolversCompilerPass` collects the `DiffLabelResolverInterface` services (service ID = FQCN).
+Compiler passes (`src/DependencyInjection/Compiler/`): `DoctrineMiddlewareCompilerPass` adds the auditor DBAL middleware to each auditing connection, `RegisterProvidersCompilerPass` registers the providers on `Auditor`, `RegisterDiffLabelResolversCompilerPass` collects the `DiffLabelResolverInterface` services (service ID = FQCN), `RegisterChangeDescribersCompilerPass` gives `HistoryPhraser` a locator of the `#[AsChangeDescriber]` services.
 
 ### Key classes
 
@@ -97,8 +97,9 @@ Compiler passes (`src/DependencyInjection/Compiler/`): `DoctrineMiddlewareCompil
 | `ExtraDataProvider` | `src/ExtraData/ExtraDataProvider.php` | Opt-in `extra_data` (route name and params) |
 | `PruneAuditLogsHandler`, `RetentionSchedule` | `src/Retention/` | Scheduled pruning through Messenger and Scheduler |
 | `ActivityGraphProvider`, `RevisionComparator` | `src/Viewer/` | Activity graph (cached), revision compare |
-| Twig extensions | `src/Twig/` | `time_ago`, `dh_auditor_is_viewable()`, `dh_auditor_is_diff_leaf()`, `dh_auditor_last_change(s)()`, `dh_auditor_field_label()` |
+| Twig extensions | `src/Twig/` | `time_ago`, `dh_auditor_is_viewable()`, `dh_auditor_is_diff_leaf()`, `dh_auditor_last_change(s)()`, `dh_auditor_field_label()`, `\|dh_auditor_phrase`, `\|dh_auditor_author` |
 | `TranslatedFieldLabelResolver` | `src/History/` | `FieldLabelResolverInterface` service: `dh_auditor_fields` domain, key `FQCN.field`, humanized fallback |
+| `HistoryPhraser`, `ValueFormatter` | `src/History/` | A `HistoryItem` told as a `Phrase` of `Fragment`s (`dh_auditor_history` ICU domain, `#[AsChangeDescriber]` services) and its author; raw diff values read through the Doctrine mapping |
 | `ClearActivityCacheCommand` | `src/Command/` | `audit:cache:clear` |
 
 ### Templates and assets
