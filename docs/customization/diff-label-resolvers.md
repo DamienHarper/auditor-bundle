@@ -94,14 +94,17 @@ After the next flush, any change to `categoryId` will include the resolved label
 
 ## 🔄 How It Works
 
-Labels are resolved during the **post-commit callback** of the DBAL middleware (after the Doctrine transaction commits but before the audit rows are written). The label is stored as a `{"value": x, "label": "y"}` pair in the JSON diff.
+Labels are resolved while the audit rows are built, by the DBAL middleware, **just before the COMMIT** of the
+database transaction of the flush, in that transaction. The label is stored as a `{"value": x, "label": "y"}` pair
+in the JSON diff.
 
 ```
-flush() → DB commits → post-commit callback:
+flush() → COMMIT requested → audit flusher (same transaction):
     diff() detects #[DiffLabel] on 'categoryId'
     → calls CategoryResolver(1) → "Books"
     → stores {"old": {"value": 1, "label": "Books"}, "new": {"value": 2, "label": "Electronics"}}
     → audit row inserted
+→ COMMIT
 ```
 
 **The raw value is always preserved.** The label is stored alongside `value`, never replacing it. Your application code that reads `$entry->getDiffs()` and accesses `$diffs['categoryId']['new']` will receive `['label' => 'Electronics', 'value' => 2]` instead of `2`.
@@ -130,7 +133,7 @@ Returning `null` is the correct way to signal "I cannot resolve a label for this
 
 ## ⚠️ Resolver Constraints
 
-Resolvers run **inside the DBAL post-commit callback**, which means:
+Resolvers run **inside the audit flusher, before the COMMIT, in the transaction being committed**, which means:
 
 - ✅ **Safe**: Pure in-memory lookups (arrays, cache)
 - ✅ **Safe**: Read-only queries on a separate connection or read-only EM
@@ -239,16 +242,21 @@ The resulting audit diff for an update to both fields:
 
 ```json
 {
-  "categoryId": {
-    "old": {"value": 1, "label": "Books"},
-    "new": {"value": 3, "label": "Software"}
-  },
-  "supplierId": {
-    "old": {"value": 42, "label": "Acme Corp"},
-    "new": {"value": 67, "label": "Globex Inc"}
+  "source": {"id": "12", "class": "App\\Entity\\Product", "label": "App\\Entity\\Product#12", "table": "product"},
+  "changes": {
+    "categoryId": {
+      "old": {"value": 1, "label": "Books"},
+      "new": {"value": 3, "label": "Software"}
+    },
+    "supplierId": {
+      "old": {"value": 42, "label": "Acme Corp"},
+      "new": {"value": 67, "label": "Globex Inc"}
+    }
   }
 }
 ```
+
+`$entry->getDiffs()` returns the `changes` part.
 
 ---
 

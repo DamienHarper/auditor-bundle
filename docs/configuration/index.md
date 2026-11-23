@@ -299,7 +299,7 @@ dh_auditor:
 
 | Type            | Default | Description                              |
 |-----------------|---------|------------------------------------------|
-| `string\|null`  | `null`  | Service ID for routing audits to storage |
+| `string\|null`  | `null`  | Class name of an invokable class (constructor without arguments) routing audits to storage services; it is not a service ID |
 
 Required when using multiple storage services.
 
@@ -485,6 +485,7 @@ dh_auditor:
 |-------------|--------|---------|---------------------|
 | `enabled`   | `bool` | `false` | Enable the viewer   |
 | `page_size` | `int`  | `50`    | Results per page    |
+| `activity_graph` | `array` | | Activity graph of the overview (`enabled`, `days`, `layout`, `cache`), see [Activity Graph](../viewer/index.md#-activity-graph) |
 
 ### retention
 
