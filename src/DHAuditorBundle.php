@@ -5,20 +5,24 @@ declare(strict_types=1);
 namespace DH\AuditorBundle;
 
 use Cron\CronExpression;
+use DH\Auditor\Attribute\AuditRoot;
 use DH\Auditor\Auditor;
 use DH\Auditor\Blame\BlameContextStack;
 use DH\Auditor\Configuration;
 use DH\Auditor\Contract\DiffLabelResolverInterface;
+use DH\Auditor\Contract\FieldLabelResolverInterface;
 use DH\Auditor\Event\LifecycleEvent;
 use DH\Auditor\EventSubscriber\AuditEventSubscriber;
 use DH\Auditor\Exception\InvalidArgumentException;
 use DH\Auditor\Model\RetentionPolicy;
 use DH\Auditor\Provider\Doctrine\Auditing\Attribute\AttributeLoader;
+use DH\Auditor\Provider\Doctrine\Auditing\Root\ObjectIdentifier;
 use DH\Auditor\Provider\Doctrine\Configuration as DoctrineProviderConfiguration;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Provider\Doctrine\Persistence\Command\CleanAuditLogsCommand;
 use DH\Auditor\Provider\Doctrine\Persistence\Command\ExportAuditLogsCommand;
 use DH\Auditor\Provider\Doctrine\Persistence\Command\MigrateSchemaCommand;
+use DH\Auditor\Provider\Doctrine\Persistence\Command\RebuildRootsCommand;
 use DH\Auditor\Provider\Doctrine\Persistence\Command\SnapshotCommand;
 use DH\Auditor\Provider\Doctrine\Persistence\Command\UpdateSchemaCommand;
 use DH\Auditor\Provider\Doctrine\Persistence\Event\CreateSchemaListener;
@@ -36,6 +40,7 @@ use DH\AuditorBundle\DependencyInjection\Compiler\RegisterProvidersCompilerPass;
 use DH\AuditorBundle\Event\ConsoleEventSubscriber;
 use DH\AuditorBundle\Event\ViewerEventSubscriber;
 use DH\AuditorBundle\ExtraData\ExtraDataProvider;
+use DH\AuditorBundle\History\TranslatedFieldLabelResolver;
 use DH\AuditorBundle\Messenger\BlameContextMiddleware;
 use DH\AuditorBundle\Retention\PruneAuditLogsHandler;
 use DH\AuditorBundle\Retention\RetentionSchedule;
@@ -43,6 +48,7 @@ use DH\AuditorBundle\Routing\RoutingLoader;
 use DH\AuditorBundle\Security\RoleChecker;
 use DH\AuditorBundle\Security\SecurityProvider;
 use DH\AuditorBundle\Twig\DiffExtension;
+use DH\AuditorBundle\Twig\HistoryExtension;
 use DH\AuditorBundle\Twig\TimeAgoExtension;
 use DH\AuditorBundle\Twig\ViewableEntityExtension;
 use DH\AuditorBundle\Twig\ViewerUrlExtension;
@@ -70,6 +76,16 @@ class DHAuditorBundle extends AbstractBundle
      * Options allowed in the "retention" block of an entity.
      */
     private const array RETENTION_KEYS = ['max_age', 'max_entries'];
+
+    /**
+     * Options of the doctrine provider that name an invokable service, with the configuration method that sets it.
+     */
+    private const array CALLABLE_SERVICE_OPTIONS = [
+        'ignored_columns_resolver' => 'setIgnoredColumnsResolver',
+        'root_resolver' => 'setRootResolver',
+        'entity_label_resolver' => 'setEntityLabelResolver',
+        'read_scope' => 'setReadScope',
+    ];
 
     #[\Override]
     public function getPath(): string
@@ -184,24 +200,30 @@ class DHAuditorBundle extends AbstractBundle
 
         // Load providers
         foreach ($config['providers'] as $providerName => $providerConfig) {
-            // Scheduled pruning settings belong to the bundle, not to the provider configuration; the ignored columns
-            // resolver is a service, set on the provider configuration by a method call.
+            // Scheduled pruning settings belong to the bundle, not to the provider configuration; the options of
+            // CALLABLE_SERVICE_OPTIONS are services, set on the provider configuration by method calls.
             $retentionConfig = null;
-            $ignoredColumnsResolver = null;
+            $callableServices = [];
             if ('doctrine' === $providerName) {
                 /** @var array{schedule: ?string, default_max_age: ?string} $retentionConfig */
                 $retentionConfig = $providerConfig['retention'];
+                unset($providerConfig['retention']);
 
-                /** @var ?string $ignoredColumnsResolver */
-                $ignoredColumnsResolver = $providerConfig['ignored_columns_resolver'];
-                unset($providerConfig['retention'], $providerConfig['ignored_columns_resolver']);
+                foreach (array_keys(self::CALLABLE_SERVICE_OPTIONS) as $option) {
+                    $serviceId = $providerConfig[$option] ?? null;
+                    if (\is_string($serviceId)) {
+                        $callableServices[$option] = $serviceId;
+                    }
+
+                    unset($providerConfig[$option]);
+                }
             }
 
             $builder->setParameter('dh_auditor.provider.'.$providerName.'.configuration', $providerConfig);
 
             if ('doctrine' === $providerName) {
                 /** @var array{storage_services: list<string>, auditing_services: list<string>, viewer: array<string, mixed>|bool} $providerConfig */
-                $this->loadDoctrineProvider($services, $builder, $providerConfig, $ignoredColumnsResolver);
+                $this->loadDoctrineProvider($services, $builder, $providerConfig, $callableServices);
                 \assert(null !== $retentionConfig);
                 $this->loadScheduledRetention($services, $retentionConfig);
                 // The alias dh_auditor.provider.doctrine is defined by loadDoctrineProvider(),
@@ -216,16 +238,17 @@ class DHAuditorBundle extends AbstractBundle
 
     /**
      * @param array{storage_services: list<string>, auditing_services: list<string>, viewer: array<string, mixed>|bool} $config
+     * @param array<string, string>                                                                                     $callableServices option => service ID
      */
-    private function loadDoctrineProvider(ServicesConfigurator $services, ContainerBuilder $builder, array $config, ?string $ignoredColumnsResolver): void
+    private function loadDoctrineProvider(ServicesConfigurator $services, ContainerBuilder $builder, array $config, array $callableServices): void
     {
         // DoctrineProvider Configuration
         $configurationDefinition = $services->set(DoctrineProviderConfiguration::class)
             ->args(['%dh_auditor.provider.doctrine.configuration%'])
         ;
 
-        if (null !== $ignoredColumnsResolver) {
-            $configurationDefinition->call('setIgnoredColumnsResolver', [new Reference($ignoredColumnsResolver)]);
+        foreach ($callableServices as $option => $serviceId) {
+            $configurationDefinition->call(self::CALLABLE_SERVICE_OPTIONS[$option], [new Reference($serviceId)]);
         }
 
         // DoctrineProvider — tagged so RegisterProvidersCompilerPass picks it up automatically.
@@ -352,6 +375,22 @@ class DHAuditorBundle extends AbstractBundle
             ->tag('console.command', ['command' => 'audit:snapshot'])
         ;
 
+        $services->set(RebuildRootsCommand::class)
+            ->call('setAuditor', [new Reference(Auditor::class)])
+            ->tag('console.command', ['command' => 'audit:roots:rebuild'])
+        ;
+
+        // Identifier of an entity as the audit tables store it (object_id, root_id)
+        $services->set(ObjectIdentifier::class)
+            ->args([new Reference(DoctrineProvider::class)])
+        ;
+
+        // Field-level history in templates (dh_auditor_last_change(), dh_auditor_field_label()…)
+        $services->set(HistoryExtension::class)
+            ->args([new Reference(Reader::class), new Reference(DoctrineProvider::class), new Reference(FieldLabelResolverInterface::class), new Reference(ObjectIdentifier::class)])
+            ->autoconfigure()
+        ;
+
         // Expose viewer-enabled state as a container parameter so other services
         // (e.g. ViewerEventSubscriber) can react without coupling to DoctrineProvider.
         $isViewerEnabled = \is_array($config['viewer']) && ($config['viewer']['enabled'] ?? false);
@@ -452,6 +491,12 @@ class DHAuditorBundle extends AbstractBundle
             ->autoconfigure()
         ;
 
+        // Field labels from the "dh_auditor_fields" translation domain
+        $services->set(TranslatedFieldLabelResolver::class)
+            ->args([new Reference('translator', ContainerInterface::NULL_ON_INVALID_REFERENCE)])
+        ;
+        $services->alias(FieldLabelResolverInterface::class, TranslatedFieldLabelResolver::class);
+
         // Twig extension (uses #[AsTwigFunction] attribute)
         $services->set(DiffExtension::class)
             ->autoconfigure()
@@ -499,6 +544,7 @@ class DHAuditorBundle extends AbstractBundle
                     }
 
                     $this->validateColumnsConfig($entity, $options);
+                    $this->validateRootsConfig($entity, $options);
                     $doctrine['entities'][$entity] = $this->normalizeRetentionConfig($entity, $options);
                 }
             }
@@ -570,13 +616,15 @@ class DHAuditorBundle extends AbstractBundle
         // "retention" (scheduled pruning) is disabled by default.
         $doctrine['retention'] = $this->normalizeScheduledRetentionConfig($doctrine['retention'] ?? null);
 
-        // "ignored_columns_resolver" (a service ID) is null by default
-        if (!\array_key_exists('ignored_columns_resolver', $doctrine) || null === $doctrine['ignored_columns_resolver']) {
-            $doctrine['ignored_columns_resolver'] = null;
-        } elseif (\is_string($doctrine['ignored_columns_resolver']) && '' !== $doctrine['ignored_columns_resolver']) {
-            $doctrine['ignored_columns_resolver'] = mb_ltrim($doctrine['ignored_columns_resolver'], '@');
-        } else {
-            throw new \InvalidArgumentException(\sprintf('The "ignored_columns_resolver" option of the doctrine provider must be a service ID, %s given.', get_debug_type($doctrine['ignored_columns_resolver'])));
+        // "ignored_columns_resolver", "root_resolver", "entity_label_resolver" and "read_scope" (service IDs) are null by default
+        foreach (array_keys(self::CALLABLE_SERVICE_OPTIONS) as $option) {
+            if (!\array_key_exists($option, $doctrine) || null === $doctrine[$option]) {
+                $doctrine[$option] = null;
+            } elseif (\is_string($doctrine[$option]) && '' !== $doctrine[$option]) {
+                $doctrine[$option] = mb_ltrim($doctrine[$option], '@');
+            } else {
+                throw new \InvalidArgumentException(\sprintf('The "%s" option of the doctrine provider must be a service ID, %s given.', $option, get_debug_type($doctrine[$option])));
+            }
         }
 
         // "storage_mapper" is null by default
@@ -687,6 +735,35 @@ class DHAuditorBundle extends AbstractBundle
             $columns = $options[$option];
             if (!\is_array($columns) || !array_is_list($columns) || array_any($columns, static fn (mixed $column): bool => !\is_string($column))) {
                 throw new \InvalidArgumentException(\sprintf('The "%s" option of entity "%s" must be a list of property names.', $option, $entity));
+            }
+        }
+    }
+
+    /**
+     * Checks the "roots" option of an entity: a list of audit root paths, validated like #[AuditRoot].
+     *
+     * @param array<string, mixed> $options
+     */
+    private function validateRootsConfig(string $entity, array $options): void
+    {
+        if (null === ($options['roots'] ?? null)) {
+            return;
+        }
+
+        $roots = $options['roots'];
+        if (!\is_array($roots) || !array_is_list($roots)) {
+            throw new \InvalidArgumentException(\sprintf('The "roots" option of entity "%s" must be a list of property paths.', $entity));
+        }
+
+        foreach ($roots as $root) {
+            if (!\is_string($root)) {
+                throw new \InvalidArgumentException(\sprintf('The "roots" option of entity "%s" must be a list of property paths.', $entity));
+            }
+
+            try {
+                new AuditRoot($root);
+            } catch (\InvalidArgumentException $exception) {
+                throw new \InvalidArgumentException(\sprintf('The "roots" option of entity "%s" is invalid: %s', $entity, $exception->getMessage()), 0, $exception);
             }
         }
     }

@@ -78,7 +78,7 @@ work from a worktree (`make -C .claude/worktrees/<name> tests`).
 `DHAuditorBundle` (`src/DHAuditorBundle.php`) extends `AbstractBundle`: the `dh_auditor` configuration tree is in `configure()` and the service wiring in `loadExtension()` — there is no `DependencyInjection/Configuration.php` nor Extension class.
 
 - Root keys: `enabled`, `timezone`, `user_provider`, `security_provider`, `role_checker`, `extra_data_provider`, `providers`.
-- `providers.doctrine`: `table_prefix`, `table_suffix`, `ignored_columns`, `entities` (with `roles.view` and `retention`), `storage_services`, `auditing_services`, `viewer` (off by default; `page_size`, `activity_graph`), `retention` (`schedule`, `default_max_age`), `storage_mapper`.
+- `providers.doctrine`: `table_prefix`, `table_suffix`, `ignored_columns`, `ignored_columns_resolver` / `root_resolver` / `entity_label_resolver` / `read_scope` (service IDs set by method calls, see `CALLABLE_SERVICE_OPTIONS`), `entities` (with `roles.view`, `retention` and `roots`), `storage_services`, `auditing_services`, `viewer` (off by default; `page_size`, `activity_graph`), `retention` (`schedule`, `default_max_age`), `storage_mapper`.
 - The `DoctrineProvider` service is tagged `dh_auditor.provider` and aliased `dh_auditor.provider.doctrine`.
 
 Compiler passes (`src/DependencyInjection/Compiler/`): `DoctrineMiddlewareCompilerPass` adds the auditor DBAL middleware to each auditing connection, `RegisterProvidersCompilerPass` registers the providers on `Auditor`, `RegisterDiffLabelResolversCompilerPass` collects the `DiffLabelResolverInterface` services (service ID = FQCN).
@@ -97,7 +97,8 @@ Compiler passes (`src/DependencyInjection/Compiler/`): `DoctrineMiddlewareCompil
 | `ExtraDataProvider` | `src/ExtraData/ExtraDataProvider.php` | Opt-in `extra_data` (route name and params) |
 | `PruneAuditLogsHandler`, `RetentionSchedule` | `src/Retention/` | Scheduled pruning through Messenger and Scheduler |
 | `ActivityGraphProvider`, `RevisionComparator` | `src/Viewer/` | Activity graph (cached), revision compare |
-| Twig extensions | `src/Twig/` | `time_ago`, `dh_auditor_is_viewable()`, `dh_auditor_is_diff_leaf()` |
+| Twig extensions | `src/Twig/` | `time_ago`, `dh_auditor_is_viewable()`, `dh_auditor_is_diff_leaf()`, `dh_auditor_last_change(s)()`, `dh_auditor_field_label()` |
+| `TranslatedFieldLabelResolver` | `src/History/` | `FieldLabelResolverInterface` service: `dh_auditor_fields` domain, key `FQCN.field`, humanized fallback |
 | `ClearActivityCacheCommand` | `src/Command/` | `audit:cache:clear` |
 
 ### Templates and assets

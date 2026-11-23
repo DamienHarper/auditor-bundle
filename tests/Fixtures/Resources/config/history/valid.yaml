@@ -1,0 +1,17 @@
+services:
+    DH\AuditorBundle\Tests\Fixtures\History\PostRootResolver: ~
+    DH\AuditorBundle\Tests\Fixtures\History\UppercaseLabelResolver: ~
+    DH\AuditorBundle\Tests\Fixtures\History\NoopReadScope: ~
+
+dh_auditor:
+    providers:
+        doctrine:
+            root_resolver: 'DH\AuditorBundle\Tests\Fixtures\History\PostRootResolver'
+            entity_label_resolver: '@DH\AuditorBundle\Tests\Fixtures\History\UppercaseLabelResolver'
+            read_scope: 'DH\AuditorBundle\Tests\Fixtures\History\NoopReadScope'
+            entities:
+                DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post:
+                    roots: [author]
+                DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Comment:
+                    roots: [post, post.author]
+                DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author: ~
