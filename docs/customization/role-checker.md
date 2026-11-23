@@ -28,24 +28,22 @@ The default `DH\AuditorBundle\Security\RoleChecker`:
 ```php
 public function __invoke(string $entity, string $scope): bool
 {
-    $user = $this->provider->getAuditor()->getConfiguration()->getUserProvider()();
-
-    if (!$user instanceof UserInterface) {
-        return true;  // No user = grant access
-    }
-
     $entities = $this->provider->getConfiguration()->getEntities();
-    $entityConfig = $entities[$entity] ?? null;
-    $roles = $entityConfig['roles'] ?? null;
+    $roles = $entities[$entity]['roles'] ?? null;
 
     if (null === $roles || !array_key_exists($scope, $roles)) {
-        return true;  // No roles configured = grant access
+        return true;  // No roles configured for this scope = grant access
+    }
+
+    $userProvider = $this->provider->getAuditor()->getConfiguration()->getUserProvider();
+    $user = null !== $userProvider ? $userProvider() : null;
+
+    if (!$user instanceof UserInterface) {
+        return false;  // Roles configured but no user = deny access
     }
 
     // Check if user has any of the required roles
-    return array_any($roles[$scope], fn($role) => 
-        $this->authorizationChecker->isGranted($role)
-    );
+    return array_any($roles[$scope], fn (string $role): bool => $this->authorizationChecker->isGranted($role));
 }
 ```
 
@@ -54,7 +52,7 @@ public function __invoke(string $entity, string $scope): bool
 | Scenario                        | Access  |
 |---------------------------------|---------|
 | No roles configured for entity  | ✅ Granted |
-| No user authenticated           | ✅ Granted |
+| Roles configured, no user authenticated | ❌ Denied |
 | User has required role          | ✅ Granted |
 | User lacks required role        | ❌ Denied  |   
 

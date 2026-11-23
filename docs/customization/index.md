@@ -53,7 +53,7 @@ The default `RoleChecker`:
 - ✅ Uses Symfony's `AuthorizationChecker`
 - ✅ Checks roles configured per entity
 - ✅ Grants access if no roles configured
-- ✅ Grants access if no user authenticated
+- ❌ Denies access when the entity has roles and no user is authenticated
 
 ## 🖥️ Console Commands
 
