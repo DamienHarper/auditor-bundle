@@ -231,7 +231,7 @@ flowchart TD
 ## ✅ Entity Not in YAML
 
 An entity with `#[Auditable]` is audited even when it is not listed under `entities`: the attribute alone is enough.
-List it in YAML only to add options that have no attribute (`audited_columns`, `roots`, retention overrides…).
+List it in YAML only to add `audited_columns`, override the retention, or add roots to the `#[AuditRoot]` ones.
 
 ---
 

@@ -242,7 +242,7 @@ The resulting audit diff for an update to both fields:
 
 ```json
 {
-  "source": {"id": "12", "class": "App\\Entity\\Product", "label": "Product#12", "table": "product"},
+  "source": {"id": "12", "class": "App\\Entity\\Product", "label": "App\\Entity\\Product#12", "table": "product"},
   "changes": {
     "categoryId": {
       "old": {"value": 1, "label": "Books"},
