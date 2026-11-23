@@ -319,6 +319,8 @@ entity class in its URLs.
 
 {# Transaction and user timeline #}
 <a href="{{ dh_auditor_transaction_url(entry.transactionId) }}">Transaction</a>
+{# ... opened from the history of post #42: the action page offers its previous and next actions #}
+<a href="{{ dh_auditor_transaction_url(entry.transactionId, root: 'App\\Entity\\Post:42') }}">Transaction</a>
 <a href="{{ dh_auditor_user_url(entry.userId) }}">User activity</a>
 
 {# Absolute URL, e.g. in an email #}
