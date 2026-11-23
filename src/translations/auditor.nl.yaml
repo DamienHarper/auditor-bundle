@@ -162,6 +162,11 @@ audit:
     title: 'Wat %name% deed'
     entities: '[0,1] op %count% objecttype|]1,Inf[ op %count% objecttypen'
     on: 'Op'
+  component:
+    title: 'Activiteit'
+    older: 'Ouder'
+    open_in_viewer: 'Openen in de viewer'
+    empty: 'Nog geen activiteit.'
 
 time_ago:
   seconds_ago: '{0} zojuist|{1} 1 seconde geleden|]1,Inf[ %count% seconden geleden'

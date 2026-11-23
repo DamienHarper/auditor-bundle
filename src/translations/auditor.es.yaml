@@ -162,6 +162,11 @@ audit:
     title: 'Lo que hizo %name%'
     entities: '[0,1] en %count% tipo de objeto|]1,Inf[ en %count% tipos de objetos'
     on: 'En'
+  component:
+    title: 'Actividad'
+    older: 'Más antiguas'
+    open_in_viewer: 'Abrir en el visor'
+    empty: 'Todavía no hay actividad.'
 
 time_ago:
   seconds_ago: '{0} ahora mismo|{1} hace 1 segundo|]1,Inf[ hace %count% segundos'
