@@ -1,0 +1,38 @@
+# Auditiajaloo neutraalsed laused, kui rakendus ei määra olemi või välja jaoks lauset.
+default:
+  created: 'lõi {entity} „{label}“'
+  snapshot: 'salvestas {entity} „{label}“ algoleku'
+  deleted: 'kustutas {entity} „{label}“'
+  set: 'määras {field}: {new}'
+  changed: 'muutis {field}: {old} → {new}'
+  edited: 'muutis {field}'
+  cleared: 'tühjendas {field} ({old})'
+  added: 'lisas {field}: {names}'
+  removed: 'eemaldas {field}: {names}'
+  json: 'muutis {field} ({names})'
+  unknown: 'muutis {entity} „{label}“'
+  bulk:
+    created: 'lõi {count} {entity}'
+    snapshot: 'salvestas {count} {entity} algoleku'
+    deleted: 'kustutas {count} {entity}'
+    set: 'määras {field} {count} {entity} puhul'
+    changed: 'muutis {field} {count} {entity} puhul'
+    cleared: 'tühjendas {field} {count} {entity} puhul'
+    added: 'lisas {field} {count} {entity} puhul'
+    removed: 'eemaldas {field} {count} {entity} puhul'
+    json: 'muutis {field} {count} {entity} puhul'
+value:
+  'yes': jah
+  'no': ei
+  empty: tühi
+  unreadable: loetamatu väärtus
+list:
+  separator: ', '
+  and: ' ja '
+  others: '{count, plural, one {# muu} other {# muud}}'
+author:
+  system: Süsteem
+  console: Käsurida
+  anonymous: Anonüümne kasutaja
+  deleted: Kustutatud kasutaja
+  unknown: 'Kasutaja {id}'

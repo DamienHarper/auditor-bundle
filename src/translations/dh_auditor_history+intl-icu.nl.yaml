@@ -1,0 +1,38 @@
+# Neutrale zinnen van de auditgeschiedenis, gebruikt wanneer de applicatie geen zin voor een entiteit of veld definieert.
+default:
+  created: 'heeft {entity} „{label}” aangemaakt'
+  snapshot: 'heeft de beginstatus van {entity} „{label}” vastgelegd'
+  deleted: 'heeft {entity} „{label}” verwijderd'
+  set: 'heeft {field} ingesteld: {new}'
+  changed: 'heeft {field} gewijzigd: {old} → {new}'
+  edited: 'heeft {field} bewerkt'
+  cleared: 'heeft {field} leeggemaakt ({old})'
+  added: 'heeft toegevoegd aan {field}: {names}'
+  removed: 'heeft verwijderd uit {field}: {names}'
+  json: 'heeft {field} bewerkt ({names})'
+  unknown: 'heeft {entity} „{label}” gewijzigd'
+  bulk:
+    created: 'heeft {count} {entity} aangemaakt'
+    snapshot: 'heeft de beginstatus van {count} {entity} vastgelegd'
+    deleted: 'heeft {count} {entity} verwijderd'
+    set: 'heeft {field} ingesteld bij {count} {entity}'
+    changed: 'heeft {field} gewijzigd bij {count} {entity}'
+    cleared: 'heeft {field} leeggemaakt bij {count} {entity}'
+    added: 'heeft toegevoegd aan {field} bij {count} {entity}'
+    removed: 'heeft verwijderd uit {field} bij {count} {entity}'
+    json: 'heeft {field} bewerkt bij {count} {entity}'
+value:
+  'yes': ja
+  'no': nee
+  empty: leeg
+  unreadable: onleesbare waarde
+list:
+  separator: ', '
+  and: ' en '
+  others: '{count, plural, one {# andere} other {# andere}}'
+author:
+  system: Systeem
+  console: Opdrachtregel
+  anonymous: Anonieme gebruiker
+  deleted: Verwijderde gebruiker
+  unknown: 'Gebruiker {id}'

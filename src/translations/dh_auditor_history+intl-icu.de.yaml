@@ -1,0 +1,38 @@
+# Neutrale Sätze der Audit-Historie, wenn die Anwendung keinen Satz für eine Entität oder ein Feld definiert.
+default:
+  created: 'hat {entity} „{label}“ erstellt'
+  snapshot: 'hat den Anfangszustand von {entity} „{label}“ erfasst'
+  deleted: 'hat {entity} „{label}“ gelöscht'
+  set: 'hat {field} gesetzt: {new}'
+  changed: 'hat {field} geändert: {old} → {new}'
+  edited: 'hat {field} bearbeitet'
+  cleared: 'hat {field} geleert ({old})'
+  added: 'hat zu {field} hinzugefügt: {names}'
+  removed: 'hat aus {field} entfernt: {names}'
+  json: 'hat {field} bearbeitet ({names})'
+  unknown: 'hat {entity} „{label}“ geändert'
+  bulk:
+    created: 'hat {count} {entity} erstellt'
+    snapshot: 'hat den Anfangszustand von {count} {entity} erfasst'
+    deleted: 'hat {count} {entity} gelöscht'
+    set: 'hat {field} bei {count} {entity} gesetzt'
+    changed: 'hat {field} bei {count} {entity} geändert'
+    cleared: 'hat {field} bei {count} {entity} geleert'
+    added: 'hat bei {count} {entity} zu {field} hinzugefügt'
+    removed: 'hat bei {count} {entity} aus {field} entfernt'
+    json: 'hat {field} bei {count} {entity} bearbeitet'
+value:
+  'yes': ja
+  'no': nein
+  empty: leer
+  unreadable: unlesbarer Wert
+list:
+  separator: ', '
+  and: ' und '
+  others: '{count, plural, one {# weiteres} other {# weitere}}'
+author:
+  system: System
+  console: Kommandozeile
+  anonymous: Anonymer Benutzer
+  deleted: Gelöschter Benutzer
+  unknown: 'Benutzer {id}'

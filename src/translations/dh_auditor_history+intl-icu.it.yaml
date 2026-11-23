@@ -1,0 +1,38 @@
+# Frasi neutre della cronologia di audit, usate quando l'applicazione non definisce una frase per un'entità o un campo.
+default:
+  created: 'ha creato {entity} «{label}»'
+  snapshot: 'ha registrato lo stato iniziale di {entity} «{label}»'
+  deleted: 'ha eliminato {entity} «{label}»'
+  set: 'ha impostato {field}: {new}'
+  changed: 'ha cambiato {field}: {old} → {new}'
+  edited: 'ha modificato {field}'
+  cleared: 'ha svuotato {field} ({old})'
+  added: 'ha aggiunto a {field}: {names}'
+  removed: 'ha rimosso da {field}: {names}'
+  json: 'ha modificato {field} ({names})'
+  unknown: 'ha modificato {entity} «{label}»'
+  bulk:
+    created: 'ha creato {count} {entity}'
+    snapshot: 'ha registrato lo stato iniziale di {count} {entity}'
+    deleted: 'ha eliminato {count} {entity}'
+    set: 'ha impostato {field} su {count} {entity}'
+    changed: 'ha cambiato {field} su {count} {entity}'
+    cleared: 'ha svuotato {field} su {count} {entity}'
+    added: 'ha aggiunto a {field} su {count} {entity}'
+    removed: 'ha rimosso da {field} su {count} {entity}'
+    json: 'ha modificato {field} su {count} {entity}'
+value:
+  'yes': sì
+  'no': 'no'
+  empty: vuoto
+  unreadable: valore illeggibile
+list:
+  separator: ', '
+  and: ' e '
+  others: '{count, plural, one {# altro} other {# altri}}'
+author:
+  system: Sistema
+  console: Riga di comando
+  anonymous: Utente anonimo
+  deleted: Utente eliminato
+  unknown: 'Utente {id}'
