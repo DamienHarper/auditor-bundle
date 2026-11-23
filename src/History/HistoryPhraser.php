@@ -81,7 +81,7 @@ final readonly class HistoryPhraser
         $icon = null;
 
         foreach ($this->groups($item) as $group) {
-            $described = 1 === \count($group['changes']) && null === $group['bulk'] ? $this->describe($group['changes'][0], $item) : null;
+            $described = $group['described'];
             $groupFragments = $described->fragments ?? [$this->fragment($group['changes'], $group['bulk'])];
 
             if (null === $icon && $mainChange instanceof Change && \in_array($mainChange, $group['changes'], true)) {
@@ -123,16 +123,30 @@ final readonly class HistoryPhraser
     /**
      * Changes of the item in the order of the phrase, grouped by fragment.
      *
-     * @return list<array{changes: non-empty-list<Change>, bulk: ?int}> bulk: number of objects of a summary
+     * A change a describer tells stays alone; the others are merged (collections) or summed up (bulk changes).
+     *
+     * @return list<array{changes: non-empty-list<Change>, bulk: ?int, described: ?Phrase}> bulk: number of objects of
+     *                                                                                      a summary; described: the
+     *                                                                                      phrase of a describer
      */
     private function groups(HistoryItem $item): array
     {
         $changes = $this->ordered($item->getChanges());
 
+        $described = [];
+        foreach ($changes as $index => $change) {
+            $phrase = $this->describe($change, $item);
+            if ($phrase instanceof Phrase) {
+                $described[$index] = $phrase;
+            }
+        }
+
         // more than BULK_THRESHOLD objects with the same entity, kind and field: one summary, where the first one was
         $objects = [];
-        foreach ($changes as $change) {
-            $objects[$this->bulkKey($change)][$change->objectId] = true;
+        foreach ($changes as $index => $change) {
+            if (!isset($described[$index])) {
+                $objects[$this->bulkKey($change)][$change->objectId] = true;
+            }
         }
 
         /** @var list<non-empty-list<Change>> $groups */
@@ -143,7 +157,18 @@ final readonly class HistoryPhraser
 
         /** @var array<string, int> $bulkGroups group of each bulk key */
         $bulkGroups = [];
-        foreach ($changes as $change) {
+
+        /** @var array<int, Phrase> $phrases phrase of the groups of a described change */
+        $phrases = [];
+        foreach ($changes as $index => $change) {
+            if (isset($described[$index])) {
+                $phrases[\count($groups)] = $described[$index];
+                $groups[] = [$change];
+                $bulks[] = null;
+
+                continue;
+            }
+
             $key = $this->bulkKey($change);
             if (\count($objects[$key]) > self::BULK_THRESHOLD) {
                 if (isset($bulkGroups[$key])) {
@@ -158,7 +183,7 @@ final readonly class HistoryPhraser
             }
 
             $last = \count($groups) - 1;
-            if ($last >= 0 && null === $bulks[$last] && $this->merges($groups[$last][0], $change)) {
+            if ($last >= 0 && null === $bulks[$last] && !isset($phrases[$last]) && $this->merges($groups[$last][0], $change)) {
                 $groups[$last][] = $change;
 
                 continue;
@@ -168,7 +193,12 @@ final readonly class HistoryPhraser
             $bulks[] = null;
         }
 
-        return array_map(static fn (array $group, ?int $bulk): array => ['changes' => $group, 'bulk' => $bulk], $groups, $bulks);
+        $result = [];
+        foreach ($groups as $index => $group) {
+            $result[] = ['changes' => $group, 'bulk' => $bulks[$index], 'described' => $phrases[$index] ?? null];
+        }
+
+        return $result;
     }
 
     /**

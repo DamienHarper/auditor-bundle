@@ -226,6 +226,74 @@ final class HistoryPhraserTest extends TestCase
         )));
     }
 
+    public function testAFieldDescriberFallsBackToTheEntityDescriber(): void
+    {
+        $field = new class implements ChangeDescriberInterface {
+            public function describe(Change $change, HistoryItem $item): ?Phrase
+            {
+                return match ($change->new) {
+                    'B' => null,
+                    'C' => new Phrase([]),
+                    default => Phrase::of('renamed it'),
+                };
+            }
+        };
+        $entity = new class implements ChangeDescriberInterface {
+            public function describe(Change $change, HistoryItem $item): ?Phrase
+            {
+                return 'C' === $change->new ? null : Phrase::of('touched the post');
+            }
+        };
+
+        $phraser = $this->phraser('en', [], [], new ServiceLocator([
+            Post::class.'::title' => static fn (): ChangeDescriberInterface => $field,
+            Post::class => static fn (): ChangeDescriberInterface => $entity,
+        ]));
+
+        $this->assertSame('touched the post', (string) $phraser->phrase($this->item(self::entry('update', Post::class, '1', ['title' => ['old' => 'A', 'new' => 'B']]))), 'A null field description goes to the entity describer.');
+        $this->assertSame('changed Title: A → C', (string) $phraser->phrase($this->item(self::entry('update', Post::class, '1', ['title' => ['old' => 'A', 'new' => 'C']]))), 'An empty phrase is no description.');
+    }
+
+    public function testDescribedChangesAreNeitherMergedNorSummed(): void
+    {
+        $describer = new class implements ChangeDescriberInterface {
+            public function describe(Change $change, HistoryItem $item): ?Phrase
+            {
+                return 'audit' === $change->newLabel || '6' === $change->objectId ? Phrase::of('described '.($change->newLabel ?? $change->objectId)) : null;
+            }
+        };
+
+        $phraser = $this->phraser('en', [], [], new ServiceLocator([
+            Post::class.'::tags' => static fn (): ChangeDescriberInterface => $describer,
+            Comment::class => static fn (): ChangeDescriberInterface => $describer,
+        ]));
+
+        $this->assertSame('added to Tags: symfony and php and described audit', (string) $phraser->phrase($this->item(
+            $this->tagEntry('associate', 2, 'audit', 3),
+            $this->tagEntry('associate', 3, 'php', 2),
+            $this->tagEntry('associate', 1, 'symfony', 1),
+        )), 'Each element is described, not only the first one of a fragment.');
+
+        $entries = [];
+        foreach (range(1, 6) as $id) {
+            $entries[] = self::entry('remove', Comment::class, (string) $id, [], 'Comment '.$id, id: $id);
+        }
+
+        $this->assertStringStartsWith('described 6, deleted Comment “Comment 5”', (string) $phraser->phrase($this->item(...$entries)), 'A described change is not counted in a summary: 5 objects are left.');
+    }
+
+    public function testOnlyCollectionChangesOfTheSameObjectAreMerged(): void
+    {
+        $this->assertSame('changed Title: A → B and changed Title: B → C', (string) $this->phraser()->phrase($this->item(
+            self::entry('update', Post::class, '1', ['title' => ['old' => 'B', 'new' => 'C']], id: 2),
+            self::entry('update', Post::class, '1', ['title' => ['old' => 'A', 'new' => 'B']], id: 1),
+        )));
+        $this->assertSame('added to Tags: symfony and added to Tags: php', (string) $this->phraser()->phrase($this->item(
+            self::entry('associate', Post::class, '2', [], 'Other', id: 2, target: self::target(Tag::class, 3, 'php'), field: 'tags'),
+            $this->tagEntry('associate', 1, 'symfony', 1),
+        )), 'Two posts, two fragments.');
+    }
+
     public function testAuthor(): void
     {
         $phraser = $this->phraser('fr');
@@ -237,6 +305,7 @@ final class HistoryPhraserTest extends TestCase
         $this->assertSame('Utilisateur anonyme', $phraser->author($this->item(self::entry('insert', Post::class, '1', blame: ['user_firewall' => 'main'], userId: null))));
         $this->assertSame('Utilisateur 42', $phraser->author($this->item(self::entry('insert', Post::class, '1', blame: ['user_firewall' => 'main'], userId: 42))), 'A user whose name was not recorded.');
         $this->assertSame('alice', $phraser->author($this->item(self::entry('insert', Post::class, '1', blame: ['username' => 'alice', 'via' => ['type' => 'console']]))), 'A command run on behalf of a user.');
+        $this->assertSame('bob', $phraser->author($this->item(self::entry('insert', Post::class, '1', blame: ['username' => 'bob', 'via' => ['type' => 'console']], userId: null))), 'A name recorded without user id.');
     }
 
     public function testAuthorNameResolver(): void

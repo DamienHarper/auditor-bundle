@@ -35,6 +35,16 @@ final class PhraseExtensionTest extends KernelTestCase
         $this->assertSame('alice set Coauthor: A &amp; B | set Coauthor: <strong>A &amp; B</strong>', $template->render(['item' => $item]), 'The text is escaped, the HTML is safe.');
     }
 
+    public function testEntityUnknownToDoctrine(): void
+    {
+        $phraser = self::getContainer()->get(HistoryPhraser::class);
+        $this->assertInstanceOf(HistoryPhraser::class, $phraser);
+
+        $item = new HistoryItem('01JTX', [self::entry('update', 'App\Entity\Removed', '1', ['name' => ['old' => 'A', 'new' => 'B']])]);
+
+        $this->assertSame('changed Name: A → B', (string) $phraser->phrase($item), 'An audited class that no longer exists keeps its raw values.');
+    }
+
     public function testDescribersOfTheApplication(): void
     {
         $phraser = self::getContainer()->get(HistoryPhraser::class);

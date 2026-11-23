@@ -75,6 +75,7 @@ final class ValueFormatterTest extends TestCase
         $formatter = new ValueFormatter($this->registry(), self::translator());
 
         $this->assertSame('Alice', $formatter->format(Post::class, 'author', ['class' => 'App\Entity\Author', 'id' => 1, 'label' => 'Alice'], 'Alice'));
+        $this->assertSame('Ready', $formatter->format(Post::class, 'status', 'published', 'Ready'), 'A #[DiffLabel] label.');
         $this->assertSame('Alice', $formatter->format(Post::class, 'author', ['class' => 'App\Entity\Author', 'id' => 1, 'label' => 'Alice']), 'An association summary is read through its label.');
         $this->assertSame('Author #1', $formatter->format(Post::class, 'author', ['class' => 'App\Entity\Author', 'id' => 1]), 'An association summary without label.');
     }
