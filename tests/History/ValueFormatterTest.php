@@ -100,6 +100,7 @@ final class ValueFormatterTest extends TestCase
         $this->assertSame('Ready', $formatter->format(Post::class, 'status', 'published', 'Ready'), 'A #[DiffLabel] label.');
         $this->assertSame('Alice', $formatter->format(Post::class, 'author', ['class' => 'App\Entity\Author', 'id' => 1, 'label' => 'Alice']), 'An association summary is read through its label.');
         $this->assertSame('Author #1', $formatter->format(Post::class, 'author', ['class' => 'App\Entity\Author', 'id' => 1]), 'An association summary without label.');
+        $this->assertSame('Author #1', $formatter->format(Post::class, 'author', ['class' => 'Author', 'id' => 1]), 'A class without namespace.');
     }
 
     public function testUnreadableValue(): void

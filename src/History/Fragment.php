@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\History;
 
 use DH\Auditor\History\Change;
-use DH\AuditorBundle\History\Part\ObjectReference;
 use DH\AuditorBundle\History\Part\PhrasePart;
 use DH\AuditorBundle\History\Part\TextPart;
-use DH\AuditorBundle\History\Part\ValuePart;
 
 /**
  * What a phrase tells about one change, or about a group of changes (merged, summed up or told by a describer), such
@@ -45,15 +43,5 @@ final readonly class Fragment implements \Stringable
     public static function of(array $parts, array $changes = [], ?string $icon = null): self
     {
         return new self(array_map(static fn (PhrasePart|string $part): PhrasePart => \is_string($part) ? new TextPart($part) : $part, $parts), $changes, $icon);
-    }
-
-    /**
-     * The values and object references of the fragment.
-     *
-     * @return list<ObjectReference|ValuePart>
-     */
-    public function getValues(): array
-    {
-        return array_values(array_filter($this->parts, static fn (PhrasePart $part): bool => $part instanceof ValuePart || $part instanceof ObjectReference));
     }
 }
