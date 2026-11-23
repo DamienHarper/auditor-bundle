@@ -1,0 +1,36 @@
+# Phrases neutres de l'historique d'audit, utilisées quand l'application ne définit pas de phrase pour une entité ou un champ.
+default:
+  created: 'a créé {entity} « {label} »'
+  snapshot: 'a enregistré l''état initial de {entity} « {label} »'
+  deleted: 'a supprimé {entity} « {label} »'
+  set: 'a renseigné {field} : {new}'
+  changed: 'a changé {field} : {old} → {new}'
+  edited: 'a modifié {field}'
+  cleared: 'a vidé {field} ({old})'
+  added: 'a ajouté à {field} : {names}'
+  removed: 'a retiré de {field} : {names}'
+  json: 'a modifié {field} ({names})'
+  bulk:
+    created: 'a créé {count} {entity}'
+    snapshot: 'a enregistré l''état initial de {count} {entity}'
+    deleted: 'a supprimé {count} {entity}'
+    set: 'a renseigné {field} sur {count} {entity}'
+    changed: 'a changé {field} sur {count} {entity}'
+    cleared: 'a vidé {field} sur {count} {entity}'
+    added: 'a ajouté à {field} sur {count} {entity}'
+    removed: 'a retiré de {field} sur {count} {entity}'
+    json: 'a modifié {field} sur {count} {entity}'
+value:
+  'yes': oui
+  'no': non
+  empty: vide
+list:
+  separator: ', '
+  and: ' et '
+  others: '{count, plural, one {# autre} other {# autres}}'
+author:
+  system: Système
+  console: Ligne de commande
+  anonymous: Utilisateur anonyme
+  deleted: Utilisateur supprimé
+  unknown: 'Utilisateur {id}'
