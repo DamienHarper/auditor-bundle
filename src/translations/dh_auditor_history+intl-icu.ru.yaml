@@ -1,0 +1,42 @@
+# Нейтральные фразы истории аудита, когда приложение не задаёт фразу для сущности или поля.
+default:
+  created: 'создал(а) {entity} «{label}»'
+  snapshot: 'зафиксировал(а) начальное состояние {entity} «{label}»'
+  deleted: 'удалил(а) {entity} «{label}»'
+  set: 'задал(а) {field}: {new}'
+  changed: 'изменил(а) {field}: {old} → {new}'
+  edited: 'отредактировал(а) {field}'
+  cleared: 'очистил(а) {field} ({old})'
+  added: 'добавил(а) в {field}: {names}'
+  removed: 'убрал(а) из {field}: {names}'
+  json: 'отредактировал(а) {field} ({names})'
+  unknown: 'изменил(а) {entity} «{label}»'
+  bulk:
+    created: 'создал(а) {entity}: {count}'
+    snapshot: 'зафиксировал(а) начальное состояние {entity}: {count}'
+    deleted: 'удалил(а) {entity}: {count}'
+    set: 'задал(а) {field} у {entity}: {count}'
+    changed: 'изменил(а) {field} у {entity}: {count}'
+    cleared: 'очистил(а) {field} у {entity}: {count}'
+    added: 'добавил(а) в {field} у {entity}: {count}'
+    removed: 'убрал(а) из {field} у {entity}: {count}'
+    json: 'отредактировал(а) {field} у {entity}: {count}'
+value:
+  'yes': да
+  'no': нет
+  empty: пусто
+  unreadable: нечитаемое значение
+list:
+  separator: ', '
+  and: ' и '
+  others: '{count, plural, one {ещё #} few {ещё #} many {ещё #} other {ещё #}}'
+author:
+  system: Система
+  console: Командная строка
+  anonymous: Анонимный пользователь
+  deleted: Удалённый пользователь
+  unknown: 'Пользователь {id}'
+context:
+  object: 'в {entity} «{label}»'
+  objects: 'в {entity}: {count}'
+more_changes: '{count, plural, one {ещё # изменение} few {ещё # изменения} many {ещё # изменений} other {ещё # изменения}}'

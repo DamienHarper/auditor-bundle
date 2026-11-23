@@ -3,6 +3,8 @@
 {% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
 {% import '@DHAuditor/Audit/helpers/pager.html.twig' as pager %}
 
+{% set id = null %}
+
 {% block dh_auditor_content %}
     {# Sub-header - sticky with back link #}
     {% block dh_auditor_header %}
@@ -19,7 +21,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-lg font-semibold text-slate-900 dark:text-slate-100" title="{{ entity }}">
-                    {{ entity|split('\\')|last }}{% if id is not null %} #{{ id }}{% endif %}
+                    {{ dh_auditor_entity_name(entity, 2) }}
                 </h1>
                 <p class="text-sm text-slate-500 dark:text-slate-400">
                     {{ 'audit.audit_details.events_count'|trans({'%count%': paginator.numResults, '%formatted_count%': paginator.numResults|number_format}, 'auditor') }}
@@ -91,15 +93,13 @@
     </div>
     {% endblock dh_auditor_header %}
 
-    {# Entries list #}
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 divide-y divide-slate-200 dark:divide-slate-800">
-        {% for entry in paginator.results %}
-            {{ include('@DHAuditor/Audit/entry.html.twig', {'entry': entry, 'entity': entity}) }}
-        {% else %}
-            <div class="p-8 text-center text-slate-500 dark:text-slate-400">
-                {{ 'audit.stream.no_entries'|trans(domain='auditor') }}
-            </div>
-        {% endfor %}
+    {# Actions of the page #}
+    <div class="rounded-xl border border-slate-200 bg-white px-4 dark:border-slate-800 dark:bg-slate-900" data-dh-auditor-actions>
+        <label class="mt-3 inline-flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300">
+            <input type="checkbox" data-dh-auditor-expand-all>
+            {{ 'audit.history.expand_all'|trans(domain='auditor') }}
+        </label>
+        {{ include('@DHAuditor/History/_actions.html.twig', {rows: rows, more: null}, with_context = false) }}
     </div>
 
     {# Pager #}

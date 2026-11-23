@@ -5,9 +5,14 @@ audit:
   theme:
     toggle: Переключить светлую/тёмную тему
   home:
-    title: Проверяемые сущности
-    subtitle: Обзор всех отслеживаемых сущностей
+    title: 'Обзор'
+    subtitle: 'Что изменилось недавно и где.'
     no_audits: Проверяемые сущности не найдены.
+    recent_activity: 'Недавняя активность'
+    audited: 'Что аудируется'
+    entity: 'Сущность'
+    actions: 'Действия'
+    bulk_note: 'Действие над многими объектами сводится по типу; подробности — в самом действии.'
   sort:
     label: Сортировать по
     name_asc: 'Имя (А-Я)'
@@ -87,6 +92,76 @@ audit:
     next: Следующий
     last: Последняя
     page_info: 'Страница %current% из %total%'
+  history:
+    deleted: '(удалено)'
+    today: 'Сегодня'
+    yesterday: 'Вчера'
+    details: 'Подробности'
+    hide_details: 'Скрыть подробности'
+    all_details: 'Все подробности →'
+    copy: 'Копировать'
+    copied: 'Скопировано'
+    copy_failed: 'Не удалось скопировать'
+    older: 'Показать более ранние действия'
+    no_actions: 'Нет действий.'
+    context_separator: ':'
+    created_by: 'создано: %author%, %date%'
+    entries_count: '%count% запись|%count% записи|%count% записей'
+    fields_count: '%count% поле|%count% поля|%count% полей'
+    compare: 'Сравнить два состояния'
+    export: 'Экспорт'
+    with_attached: 'Со связанными сущностями'
+    expand_all: 'Развернуть всё (технический режим)'
+    last_changes: 'Кто что изменил последним'
+    at_creation: 'при создании'
+    technical: 'Техническая сторона'
+    class: 'Класс'
+    identifier: 'Идентификатор'
+    tables: 'Таблицы'
+    reading: 'Чтение'
+    entries: 'Записи'
+    object: 'Объект'
+    field: 'Поле'
+    firewall: 'файрвол'
+    schema: 'схема'
+    filter:
+      option: '%filter%: %value%'
+      who: 'Кто'
+      what: 'Что'
+      origin: 'Источник'
+      when: 'Когда'
+      everyone: 'все'
+      everything: 'всё'
+      all_origins: 'все'
+      all_time: 'за всё время'
+      days: 'последний %count% день|последние %count% дня|последние %count% дней'
+    origin:
+      http: 'Веб'
+      console: 'Командная строка'
+      messenger: 'Messenger'
+      system: 'Система'
+    origin_help:
+      http: 'Веб-запрос под файрволом Symfony (с входом или без)'
+      console: 'Консольная команда'
+      messenger: 'Обработчик сообщений Messenger'
+      system: 'Ни файрвола, ни команды, ни сообщения: скрипт, задание по расписанию, запрос вне файрвола…'
+  action:
+    title: 'Действие от %date%'
+    previous: '‹ Предыдущее действие'
+    next: 'Следующее действие ›'
+    objects: 'затронут %count% объект|затронуто %count% объекта|затронуто %count% объектов'
+    technical: 'Технические подробности'
+    table: 'Таблица · id'
+    type: 'Тип'
+    raw_field: 'Исходное поле'
+    ulid_date: 'Метка времени ULID'
+    no_via: 'нет'
+    more_entries: 'и ещё %count% запись|и ещё %count% записи|и ещё %count% записей'
+    tables: '%count% таблица|%count% таблицы|%count% таблиц'
+  user:
+    title: 'Что сделал(а) %name%'
+    entities: '%count% тип объектов|%count% типа объектов|%count% типов объектов'
+    on: 'Объект'
 
 time_ago:
   seconds_ago: '{0} только что|{1} 1 секунду назад|]1,Inf[ %count% секунд назад'

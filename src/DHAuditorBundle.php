@@ -64,6 +64,9 @@ use DH\AuditorBundle\User\ConsoleUserProvider;
 use DH\AuditorBundle\User\UserProvider;
 use DH\AuditorBundle\Viewer\ActivityGraphProvider;
 use DH\AuditorBundle\Viewer\AuditViewerUrlGenerator;
+use DH\AuditorBundle\Viewer\ObjectExistence;
+use DH\AuditorBundle\Viewer\ObjectHistory;
+use DH\AuditorBundle\Viewer\Overview;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
@@ -350,6 +353,18 @@ class DHAuditorBundle extends AbstractBundle
         ;
         $services->alias(ObjectUrlResolverInterface::class, ViewerObjectUrlResolver::class);
 
+        // Data of the viewer pages: the history of an object, the home page, the "(deleted)" marker of the phrases
+        $services->set(ObjectHistory::class)
+            ->args([new Reference(Reader::class), new Reference(ActivityGraphProvider::class, ContainerInterface::NULL_ON_INVALID_REFERENCE)])
+        ;
+        $services->set(Overview::class)
+            ->args([new Reference(Reader::class), new Reference(ActivityGraphProvider::class, ContainerInterface::NULL_ON_INVALID_REFERENCE)])
+        ;
+        $services->set(ObjectExistence::class)
+            ->args([new Reference(DoctrineProvider::class)])
+            ->tag('kernel.reset', ['method' => 'reset'])
+        ;
+
         // Routing loader (uses #[AutoconfigureTag('routing.loader')] attribute)
         $services->set(RoutingLoader::class)
             ->args([
@@ -533,7 +548,11 @@ class DHAuditorBundle extends AbstractBundle
             ])
         ;
         $services->set(PhraseExtension::class)
-            ->args([new Reference(HistoryPhraser::class), new Reference(ObjectUrlResolverInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE)])
+            ->args([
+                new Reference(HistoryPhraser::class),
+                new Reference(ObjectUrlResolverInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
+                new Reference(ObjectExistence::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
+            ])
             ->autoconfigure()
         ;
 

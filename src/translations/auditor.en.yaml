@@ -5,9 +5,14 @@ audit:
   theme:
     toggle: Toggle dark/light mode
   home:
-    title: Audited Entities
-    subtitle: Overview of all tracked entities
+    title: 'Overview'
+    subtitle: 'What changed recently, and where.'
     no_audits: No audited entities found.
+    recent_activity: 'Recent activity'
+    audited: 'What is audited'
+    entity: 'Entity'
+    actions: 'Actions'
+    bulk_note: 'An action touching many objects is summed up by type; the details are in the action.'
   sort:
     label: Sort by
     name_asc: 'Name (A-Z)'
@@ -87,6 +92,76 @@ audit:
     next: Next
     last: Last
     page_info: 'Page %current% of %total%'
+  history:
+    deleted: '(deleted)'
+    today: 'Today'
+    yesterday: 'Yesterday'
+    details: 'Details'
+    hide_details: 'Hide details'
+    all_details: 'All details →'
+    copy: 'Copy'
+    copied: 'Copied'
+    copy_failed: 'Copy failed'
+    older: 'Show older actions'
+    no_actions: 'No action.'
+    context_separator: ':'
+    created_by: 'created by %author% on %date%'
+    entries_count: '{0} no entry|{1} 1 entry|]1,Inf[ %count% entries'
+    fields_count: '[0,1] %count% field|]1,Inf[ %count% fields'
+    compare: 'Compare two states'
+    export: 'Export'
+    with_attached: 'With the attached entities'
+    expand_all: 'Expand all (technical mode)'
+    last_changes: 'Who changed what last'
+    at_creation: 'at creation'
+    technical: 'Technical side'
+    class: 'Class'
+    identifier: 'Identifier'
+    tables: 'Tables'
+    reading: 'Reading'
+    entries: 'Entries'
+    object: 'Object'
+    field: 'Field'
+    firewall: 'firewall'
+    schema: 'schema'
+    filter:
+      option: '%filter%: %value%'
+      who: 'Who'
+      what: 'What'
+      origin: 'Origin'
+      when: 'When'
+      everyone: 'everyone'
+      everything: 'everything'
+      all_origins: 'all'
+      all_time: 'all time'
+      days: '[0,1] last day|]1,Inf[ last %count% days'
+    origin:
+      http: 'Web'
+      console: 'Command line'
+      messenger: 'Messenger'
+      system: 'System'
+    origin_help:
+      http: 'A web request, under a Symfony firewall (signed in or not)'
+      console: 'A console command'
+      messenger: 'A Messenger message handler'
+      system: 'No firewall, command or message context: a script, a scheduled job, a request outside any firewall…'
+  action:
+    title: 'Action of %date%'
+    previous: '‹ Previous action'
+    next: 'Next action ›'
+    objects: '[0,1] %count% object touched|]1,Inf[ %count% objects touched'
+    technical: 'Technical details'
+    table: 'Table · id'
+    type: 'Type'
+    raw_field: 'Raw field'
+    ulid_date: 'ULID timestamp'
+    no_via: 'none'
+    more_entries: '[0,1] and %count% more entry|]1,Inf[ and %count% more entries'
+    tables: '[0,1] %count% table|]1,Inf[ %count% tables'
+  user:
+    title: 'What %name% did'
+    entities: '[0,1] on %count% type of object|]1,Inf[ on %count% types of objects'
+    on: 'On'
 
 time_ago:
   seconds_ago: '{0} just now|{1} 1 second ago|]1,Inf[ %count% seconds ago'

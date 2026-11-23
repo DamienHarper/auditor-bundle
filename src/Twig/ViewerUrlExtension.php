@@ -22,7 +22,7 @@ final readonly class ViewerUrlExtension
     ) {}
 
     /**
-     * {{ dh_auditor_entity_url(post) }}, {{ dh_auditor_entity_url('App\\Entity\\Post', 42, {type: 'update'}) }}.
+     * {{ dh_auditor_entity_url(post) }}, {{ dh_auditor_entity_url('App\\Entity\\Post', 42, {what: 'update'}) }}.
      *
      * @param class-string|object                                   $entity
      * @param array<string, null|bool|float|int|string|\Stringable> $filters

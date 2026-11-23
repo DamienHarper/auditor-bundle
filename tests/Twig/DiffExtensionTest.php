@@ -146,6 +146,16 @@ final class DiffExtensionTest extends KernelTestCase
         $this->assertSame('yes', $twig->createTemplate("{{ dh_auditor_is_diff_leaf({new: 1}) ? 'yes' : 'no' }}")->render());
     }
 
+    public function testWordDiff(): void
+    {
+        $extension = new DiffExtension();
+
+        $this->assertSame([['equal', 'a '], ['delete', 'b'], ['insert', 'c']], $extension->wordDiff('a b', 'a c'));
+        $this->assertSame([['insert', 'text']], $extension->wordDiff(null, 'text'), 'From no value.');
+        $this->assertNull($extension->wordDiff(['a'], 'text'), 'Not a text.');
+        $this->assertNull($extension->wordDiff('text', 12), 'Not a text.');
+    }
+
     /**
      * @param array<string, mixed> $changes
      * @param list<string>         $deepDiffs fields listed in the "deep_diffs" envelope marker (written only when not empty)
@@ -164,8 +174,20 @@ final class DiffExtensionTest extends KernelTestCase
         /** @var Environment $twig */
         $twig = self::getContainer()->get('twig');
 
+        // the diff macros of entry.html.twig, applied to each field of the entry as the comparison does
+        $template = $twig->createTemplate(<<<'TWIG'
+            {% import '@DHAuditor/Audit/entry.html.twig' as macros %}
+            <table>
+            {% for field, changeset in entry.diffs %}
+                {% if entry.type == 'insert' %}{{ macros.displayInsertValue(field, changeset, not entry.isDeepDiff(field)) }}
+                {% elseif entry.type == 'remove' %}{{ macros.displayRemoveValue(field, changeset, not entry.isDeepDiff(field)) }}
+                {% else %}{{ macros.displayUpdateDiff(field, changeset, not entry.isDeepDiff(field)) }}{% endif %}
+            {% endfor %}
+            </table>
+            TWIG);
+
         $crawler = new Crawler();
-        $crawler->addHtmlContent($twig->render('@DHAuditor/Audit/entry.html.twig', [
+        $crawler->addHtmlContent($template->render([
             'entry' => Entry::fromArray([
                 'id' => 1,
                 'schema_version' => 2,

@@ -5,9 +5,14 @@ audit:
   theme:
     toggle: Hell/Dunkel-Modus umschalten
   home:
-    title: Auditierte Entitäten
-    subtitle: Übersicht aller überwachten Entitäten
+    title: 'Übersicht'
+    subtitle: 'Was sich zuletzt geändert hat, und wo.'
     no_audits: Keine auditierten Entitäten gefunden.
+    recent_activity: 'Letzte Aktivität'
+    audited: 'Was auditiert wird'
+    entity: 'Entität'
+    actions: 'Aktionen'
+    bulk_note: 'Eine Aktion, die viele Objekte betrifft, wird nach Typ zusammengefasst; die Details stehen in der Aktion.'
   sort:
     label: Sortieren nach
     name_asc: 'Name (A-Z)'
@@ -23,7 +28,7 @@ audit:
     property: Eigenschaft
     old_value: Alter Wert
     new_value: Neuer Wert
-    events_count: '{1} %formatted_count% Ereignis|]1,Inf[ %formatted_count% Ereignisse'
+    events_count: '[0,1] %formatted_count% Ereignis|]1,Inf[ %formatted_count% Ereignisse'
     last_activity: Letzte Aktivität
     anonymous: anonymer Benutzer
   transaction:
@@ -87,6 +92,76 @@ audit:
     next: Weiter
     last: Letzte
     page_info: 'Seite %current% von %total%'
+  history:
+    deleted: '(gelöscht)'
+    today: 'Heute'
+    yesterday: 'Gestern'
+    details: 'Details'
+    hide_details: 'Details ausblenden'
+    all_details: 'Alle Details →'
+    copy: 'Kopieren'
+    copied: 'Kopiert'
+    copy_failed: 'Kopieren fehlgeschlagen'
+    older: 'Ältere Aktionen anzeigen'
+    no_actions: 'Keine Aktion.'
+    context_separator: ':'
+    created_by: 'erstellt von %author% am %date%'
+    entries_count: '{0} kein Eintrag|{1} 1 Eintrag|]1,Inf[ %count% Einträge'
+    fields_count: '[0,1] %count% Feld|]1,Inf[ %count% Felder'
+    compare: 'Zwei Zustände vergleichen'
+    export: 'Exportieren'
+    with_attached: 'Mit den zugehörigen Entitäten'
+    expand_all: 'Alles aufklappen (technischer Modus)'
+    last_changes: 'Wer hat was zuletzt geändert'
+    at_creation: 'bei der Erstellung'
+    technical: 'Technische Seite'
+    class: 'Klasse'
+    identifier: 'Kennung'
+    tables: 'Tabellen'
+    reading: 'Lesen'
+    entries: 'Einträge'
+    object: 'Objekt'
+    field: 'Feld'
+    firewall: 'Firewall'
+    schema: 'Schema'
+    filter:
+      option: '%filter%: %value%'
+      who: 'Wer'
+      what: 'Was'
+      origin: 'Herkunft'
+      when: 'Wann'
+      everyone: 'alle'
+      everything: 'alles'
+      all_origins: 'alle'
+      all_time: 'gesamter Zeitraum'
+      days: '[0,1] letzter Tag|]1,Inf[ letzte %count% Tage'
+    origin:
+      http: 'Web'
+      console: 'Kommandozeile'
+      messenger: 'Messenger'
+      system: 'System'
+    origin_help:
+      http: 'Eine Webanfrage unter einer Symfony-Firewall (angemeldet oder nicht)'
+      console: 'Ein Konsolenbefehl'
+      messenger: 'Ein Messenger-Nachrichtenhandler'
+      system: 'Weder Firewall noch Befehl noch Nachricht: ein Skript, ein geplanter Job, eine Anfrage außerhalb jeder Firewall…'
+  action:
+    title: 'Aktion vom %date%'
+    previous: '‹ Vorherige Aktion'
+    next: 'Nächste Aktion ›'
+    objects: '[0,1] %count% Objekt betroffen|]1,Inf[ %count% Objekte betroffen'
+    technical: 'Technische Details'
+    table: 'Tabelle · ID'
+    type: 'Typ'
+    raw_field: 'Rohfeld'
+    ulid_date: 'ULID-Zeitstempel'
+    no_via: 'keine'
+    more_entries: '[0,1] und %count% weiterer Eintrag|]1,Inf[ und %count% weitere Einträge'
+    tables: '[0,1] %count% Tabelle|]1,Inf[ %count% Tabellen'
+  user:
+    title: 'Was %name% getan hat'
+    entities: '[0,1] bei %count% Objekttyp|]1,Inf[ bei %count% Objekttypen'
+    on: 'Bei'
 
 time_ago:
   seconds_ago: '{0} gerade eben|{1} vor 1 Sekunde|]1,Inf[ vor %count% Sekunden'

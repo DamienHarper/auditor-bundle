@@ -1,0 +1,140 @@
+{% extends '@DHAuditor/layout.html.twig' %}
+{% import '@DHAuditor/History/_macros.html.twig' as history %}
+
+{% set entity_param = entity|replace({'\\': '-'}) %}
+{% set short_name = dh_auditor_entity_name(entity) %}
+{% set title = label ?? (short_name ~ ' #' ~ id) %}
+
+{% block title %}{{ title }} · auditor{% endblock %}
+
+{% block dh_auditor_content %}
+    <nav class="mb-3 text-sm text-slate-500 dark:text-slate-400" aria-label="breadcrumb">
+        <a href="{{ path('dh_auditor_list_audits') }}" class="hover:underline">{{ 'audit.header.home'|trans(domain='auditor') }}</a>
+        <span class="mx-1">/</span>
+        <a href="{{ path('dh_auditor_show_entity_stream', {entity: entity_param}) }}" class="hover:underline">{{ dh_auditor_entity_name(entity, 2) }}</a>
+        <span class="mx-1">/</span>
+        <span>#{{ id }}</span>
+    </nav>
+
+    <div class="flex flex-wrap items-start justify-between gap-4">
+        <div class="min-w-0">
+            <h1 class="text-2xl font-semibold tracking-tight">{{ title }}</h1>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                {{ short_name }} #{{ id }}
+                {%- if creation %}
+                    · {{ 'audit.history.created_by'|trans({'%author%': creationItem|dh_auditor_author, '%date%': creation.createdAt|format_date('medium', timezone: false)}, 'auditor') }}
+                {%- endif %}
+                · {{ 'audit.history.entries_count'|trans({'%count%': entryCount}, 'auditor') }}
+            </p>
+            <p class="mt-1 break-all font-mono text-xs text-slate-400">{{ entity }} · {{ tables|first }}</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ path('dh_auditor_select_revisions', {entity: entity_param, id: id}) }}"
+               class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800">{{ 'audit.history.compare'|trans(domain='auditor') }}</a>
+            <a href="{{ path('dh_auditor_export', {entity: entity_param, id: id}) }}"
+               class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800">{{ 'audit.history.export'|trans(domain='auditor') }}</a>
+        </div>
+    </div>
+
+    <div class="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <section data-dh-auditor-actions>
+            <form method="get" class="flex flex-wrap items-center gap-2 text-sm">
+                <select name="who" data-dh-auditor-autosubmit aria-label="{{ 'audit.history.filter.who'|trans(domain='auditor') }}"
+                        class="rounded-lg border border-slate-300 bg-white px-2 py-1 dark:border-slate-600 dark:bg-slate-900">
+                    <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.filter.who'|trans(domain='auditor'), '%value%': 'audit.history.filter.everyone'|trans(domain='auditor')}, 'auditor') }}</option>
+                    {% for user in authors.users %}
+                        <option value="{{ user.id }}" {{ filters.who == user.id ? 'selected' }}>{{ user.name }}</option>
+                    {% endfor %}
+                    {# an author left out of the list (older entries, list cached) stays selected #}
+                    {% if filters.who is not null and filters.who != '__anonymous__' and filters.who not in authors.users|column('id') %}
+                        <option value="{{ filters.who }}" selected>{{ filters.who }}</option>
+                    {% endif %}
+                    {% if authors.anonymous or filters.who == '__anonymous__' %}
+                        <option value="__anonymous__" {{ filters.who == '__anonymous__' ? 'selected' }}>{{ 'audit.filter.anonymous'|trans(domain='auditor') }}</option>
+                    {% endif %}
+                </select>
+                <select name="what" data-dh-auditor-autosubmit aria-label="{{ 'audit.history.filter.what'|trans(domain='auditor') }}"
+                        class="rounded-lg border border-slate-300 bg-white px-2 py-1 dark:border-slate-600 dark:bg-slate-900">
+                    <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.filter.what'|trans(domain='auditor'), '%value%': 'audit.history.filter.everything'|trans(domain='auditor')}, 'auditor') }}</option>
+                    {% for type in types %}
+                        <option value="{{ type.value }}" {{ filters.what == type.value ? 'selected' }}>{{ ('audit.filter.type.' ~ type.value)|trans(domain='auditor') }}</option>
+                    {% endfor %}
+                </select>
+                {% if fields is not empty %}
+                    <select name="field" data-dh-auditor-autosubmit aria-label="{{ 'audit.history.field'|trans(domain='auditor') }}"
+                            class="rounded-lg border border-slate-300 bg-white px-2 py-1 dark:border-slate-600 dark:bg-slate-900">
+                        <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.field'|trans(domain='auditor'), '%value%': 'audit.filter.all_fields'|trans(domain='auditor')}, 'auditor') }}</option>
+                        {% for field in fields %}
+                            <option value="{{ field }}" {{ filters.field == field ? 'selected' }}>{{ dh_auditor_field_label(entity, field) }}</option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
+                <select name="origin" data-dh-auditor-autosubmit aria-label="{{ 'audit.history.filter.origin'|trans(domain='auditor') }}"
+                        class="rounded-lg border border-slate-300 bg-white px-2 py-1 dark:border-slate-600 dark:bg-slate-900">
+                    <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.filter.origin'|trans(domain='auditor'), '%value%': 'audit.history.filter.all_origins'|trans(domain='auditor')}, 'auditor') }}</option>
+                    {% for origin in origins %}
+                        <option value="{{ origin.value }}" {{ filters.origin == origin.value ? 'selected' }}>{{ ('audit.history.origin.' ~ origin.value)|trans(domain='auditor') }}</option>
+                    {% endfor %}
+                </select>
+                <select name="when" data-dh-auditor-autosubmit aria-label="{{ 'audit.history.filter.when'|trans(domain='auditor') }}"
+                        class="rounded-lg border border-slate-300 bg-white px-2 py-1 dark:border-slate-600 dark:bg-slate-900">
+                    <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.filter.when'|trans(domain='auditor'), '%value%': 'audit.history.filter.all_time'|trans(domain='auditor')}, 'auditor') }}</option>
+                    {% for days in periods %}
+                        <option value="{{ days }}" {{ filters.days == days ? 'selected' }}>{{ 'audit.history.filter.days'|trans({'%count%': days}, 'auditor') }}</option>
+                    {% endfor %}
+                </select>
+                {% if hasAttached %}
+                    <label class="ml-1 inline-flex items-center gap-1.5">
+                        <input type="hidden" name="attached" value="0">
+                        <input type="checkbox" name="attached" value="1" data-dh-auditor-autosubmit {{ filters.attached ? 'checked' }}>
+                        {{ 'audit.history.with_attached'|trans(domain='auditor') }}
+                    </label>
+                {% endif %}
+                <noscript><button type="submit" class="rounded-lg border border-slate-300 px-2 py-1">{{ 'audit.filter.apply'|trans(domain='auditor') }}</button></noscript>
+            </form>
+            <label class="mt-2 inline-flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300">
+                <input type="checkbox" data-dh-auditor-expand-all>
+                {{ 'audit.history.expand_all'|trans(domain='auditor') }}
+            </label>
+
+            <div data-dh-auditor-list>
+                {{ include('@DHAuditor/History/_actions.html.twig', {rows: rows, root: root, more: more, moreRoute: moreRoute, moreRouteParameters: moreRouteParameters}, with_context = false) }}
+            </div>
+        </section>
+
+        <aside class="space-y-6">
+            {% if lastChanges is not empty %}
+                <section class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+                    <h2 class="text-sm font-semibold">{{ 'audit.history.last_changes'|trans(domain='auditor') }}</h2>
+                    <ul class="mt-2 space-y-1.5 text-sm">
+                        {% for field, change in lastChanges %}
+                            {% set change_item = dh_auditor_history_item(change.entry) %}
+                            <li>
+                                <span class="font-medium">{{ dh_auditor_field_label(entity, field) }}</span>
+                                <span class="text-slate-500 dark:text-slate-400">·
+                                    {{ change_item|dh_auditor_author }},
+                                    {% if change.kind.isEntityLevel() %}{{ 'audit.history.at_creation'|trans(domain='auditor') }}{% else %}{{ change.entry.createdAt|time_ago }}{% endif %}
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            {% endif %}
+            <section class="rounded-xl border border-slate-200 bg-white p-4 text-sm dark:border-slate-700 dark:bg-slate-900">
+                <h2 class="font-semibold">{{ 'audit.history.technical'|trans(domain='auditor') }}</h2>
+                <dl class="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
+                    <dt class="text-slate-500 dark:text-slate-400">{{ 'audit.history.class'|trans(domain='auditor') }}</dt>
+                    <dd class="break-all font-mono">{{ entity }}</dd>
+                    <dt class="text-slate-500 dark:text-slate-400">{{ 'audit.history.identifier'|trans(domain='auditor') }}</dt>
+                    <dd class="font-mono">{{ id }}</dd>
+                    <dt class="text-slate-500 dark:text-slate-400">{{ 'audit.history.tables'|trans(domain='auditor') }}</dt>
+                    <dd class="break-all font-mono">{{ tables|join(', ') }}</dd>
+                    <dt class="text-slate-500 dark:text-slate-400">{{ 'audit.history.reading'|trans(domain='auditor') }}</dt>
+                    <dd class="break-all font-mono">createRootQuery({{ entity|split('\\')|last }}, {{ id }})</dd>
+                    <dt class="text-slate-500 dark:text-slate-400">{{ 'audit.history.entries'|trans(domain='auditor') }}</dt>
+                    <dd>{{ 'audit.history.entries_count'|trans({'%count%': entryCount}, 'auditor') }}</dd>
+                </dl>
+            </section>
+        </aside>
+    </div>
+{% endblock %}

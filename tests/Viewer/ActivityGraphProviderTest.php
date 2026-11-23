@@ -167,20 +167,50 @@ final class ActivityGraphProviderTest extends WebTestCase
     }
 
     #[Test]
-    public function testClearCacheForEntityDeletesTheActivityAndTheCount(): void
+    public function testClearCacheForEntityDeletesTheActivityAndTheCounts(): void
     {
         $cache = $this->createMock(CacheItemPoolInterface::class);
         $cache->expects($this->once())
             ->method('deleteItems')
-            ->with($this->callback(static fn (array $keys): bool => 2 === \count($keys)
-                && str_starts_with($keys[0], 'dh_auditor.activity.')
-                && str_starts_with($keys[1], 'dh_auditor.count.')))
-            ->willReturn(true)
+            ->willReturnCallback(function (array $keys): true {
+                $this->assertCount(3, $keys);
+                $this->assertStringStartsWith('dh_auditor.activity.', $keys[0]);
+                $this->assertStringStartsWith('dh_auditor.count.', $keys[1]);
+                $this->assertStringStartsWith('dh_auditor.actions.', $keys[2]);
+
+                return true;
+            })
         ;
 
         $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
 
         $this->assertTrue($provider->clearCache('App\Entity\User'));
+    }
+
+    #[Test]
+    public function testACachedValueOfAnotherShapeIsComputedAgain(): void
+    {
+        $cache = new ArrayAdapter();
+        $item = $cache->getItem('key');
+        $cache->save($item->set('not a count'));
+        $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
+
+        $this->assertSame(3, $provider->remember('key', static fn (): int => 3, \is_int(...)));
+        $this->assertSame(3, $cache->getItem('key')->get(), 'And stored again.');
+    }
+
+    #[Test]
+    public function testActionCountIsCached(): void
+    {
+        $provider = new ActivityGraphProvider(7, 'bottom', true, 300, new ArrayAdapter());
+        $calls = 0;
+        $count = static function () use (&$calls): int {
+            return 10 + ++$calls;
+        };
+
+        $this->assertSame(11, $provider->getActionCount('App\Entity\User', $count));
+        $this->assertSame(11, $provider->getActionCount('App\Entity\User', $count), 'Read from the cache.');
+        $this->assertSame(12, new ActivityGraphProvider(7, 'bottom', false, 300, new ArrayAdapter())->getActionCount('App\Entity\User', $count), 'Computed when the cache is disabled.');
     }
 
     #[Test]

@@ -48,6 +48,7 @@ final class HistoryPhraserTest extends TestCase
         $this->assertSame("a enregistré l'état initial de Tag « php »", (string) $phraser->phrase($this->item(self::entry('insert', Tag::class, '3', ['title' => ['old' => null, 'new' => 'php']], 'php', snapshot: true))));
         $this->assertSame('a supprimé Comment « spam »', (string) $phraser->phrase($this->item(self::entry('remove', Comment::class, '9', [], 'spam'))));
         $this->assertSame('a supprimé Comment « #9 »', (string) $phraser->phrase($this->item(self::entry('remove', Comment::class, '9'))), 'An object without label is named by its id.');
+        $this->assertSame('a supprimé Comment « #9 »', (string) $phraser->phrase($this->item(self::entry('remove', Comment::class, '9', [], Comment::class.'#9'))), 'So is one labelled by its class and id.');
     }
 
     public function testAnActionWithoutReadableChange(): void
@@ -542,6 +543,69 @@ final class HistoryPhraserTest extends TestCase
         $this->expectExceptionMessageIsOrContains(\sprintf('The change describer of %s is a stdClass, not a %s.', Post::class, ChangeDescriberInterface::class));
 
         $phraser->phrase($this->item(self::entry('insert', Post::class, '1')));
+    }
+
+    public function testContext(): void
+    {
+        $phraser = $this->phraser('fr', [], [Post::class => '{count, plural, one {l’article} other {articles}}']);
+
+        $this->assertSame('sur l’article « Why audit? »', (string) $phraser->context($this->item(
+            self::entry('insert', Comment::class, '9', [], 'Nice', id: 3),
+            self::entry('update', Post::class, '1', ['title' => ['old' => 'A', 'new' => 'B'], 'body' => ['old' => 'a', 'new' => 'b']], 'Why audit?', id: 2),
+        )), 'The object with the most changes.');
+        $this->assertSame('sur 2 articles', (string) $phraser->context($this->item(
+            self::entry('update', Post::class, '1', ['body' => ['old' => 'a', 'new' => 'b']], 'A', id: 2),
+            self::entry('update', Post::class, '2', ['body' => ['old' => 'a', 'new' => 'b']], 'B', id: 1),
+        )), 'Several objects of one entity.');
+        $this->assertNull($phraser->context($this->item(self::entry('remove', Comment::class, '9', [], 'spam'))), 'A creation or deletion names its object itself.');
+        $this->assertNull($phraser->context($this->item(self::entry('insert', Tag::class, '1', [], 'a', id: 2), self::entry('insert', Tag::class, '2', [], 'b', id: 1))), 'So do several.');
+        $this->assertNull($phraser->context($this->item(self::entry('update', Post::class, '1', ['title' => ['old' => 'A', 'new' => 'B']], 'A')), Post::class, '1'), 'Not in the history of that object.');
+        $this->assertSame(['sur l’article « ', '<Post#1 Why audit?>', ' »'], array_map(static fn (PhrasePart $part): string => $part instanceof ObjectReference ? '<Post#'.$part->id.' '.$part->label.'>' : (string) $part, $phraser->context($this->item(
+            self::entry('update', Post::class, '1', ['title' => ['old' => 'A', 'new' => 'B']], 'Why audit?'),
+        ))?->getParts() ?? []), 'The object is a reference.');
+    }
+
+    public function testFocus(): void
+    {
+        $phraser = $this->phraser();
+        $item = $this->item(
+            self::entry('update', Post::class, '1', ['title' => ['old' => 'A', 'new' => 'B'], 'body' => ['old' => 'a', 'new' => 'b']], 'Why audit?', id: 2),
+            self::entry('insert', Comment::class, '9', [], 'Nice', id: 1),
+        );
+        $context = $phraser->context($item);
+        $this->assertInstanceOf(Phrase::class, $context);
+
+        $this->assertSame('changed Title: A → B, edited Body and created Comment “Nice”', (string) $phraser->focus($phraser->phrase($item), Post::class, '1'), 'The changes of the post first.');
+        $this->assertSame(Post::class.'#1', ($reference = HistoryPhraser::contextObject($context)) instanceof ObjectReference ? $reference->class.'#'.$reference->id : null);
+        $phrase = $phraser->phrase($item);
+        $this->assertSame($phrase, $phraser->focus($phrase, Tag::class, '1'), 'Nothing to move: the same phrase.');
+        $this->assertNull($phraser->context($this->item(
+            self::entry('update', Comment::class, '9', ['body' => ['old' => 'a', 'new' => 'b']], 'Nice', id: 3),
+            self::entry('remove', Comment::class, '9', [], 'Nice', id: 2),
+        )), 'An action that deletes its main object names it.');
+    }
+
+    public function testShorten(): void
+    {
+        $phraser = $this->phraser('fr');
+        $phrase = $phraser->phrase($this->item(self::entry('update', Post::class, '1', [
+            'title' => ['old' => 'A', 'new' => 'B'],
+            'body' => ['old' => 'a', 'new' => 'b'],
+            'status' => ['old' => 'draft', 'new' => 'published'],
+            'featured' => ['old' => false, 'new' => true],
+        ])));
+
+        $this->assertSame('a changé Title : A → B, a modifié Body et 2 autres changements', (string) $phraser->shorten($phrase, 2));
+        $this->assertSame((string) $phrase, (string) $phraser->shorten($phrase, 4), 'Short enough.');
+        $this->assertSame('a changé Title : A → B, a modifié Body, a changé Status : Brouillon → Publié et 1 autre changement', (string) $phraser->shorten($phrase, 3));
+
+        $tags = $phraser->phrase($this->item(
+            $this->tagEntry('associate', 3, 'c', 3),
+            $this->tagEntry('associate', 2, 'b', 2),
+            $this->tagEntry('associate', 1, 'a', 1),
+            self::entry('update', Post::class, '1', ['title' => ['old' => 'A', 'new' => 'B']], id: 0),
+        ));
+        $this->assertSame('a changé Title : A → B et 3 autres changements', (string) $phraser->shorten($tags, 1), 'The three tags added are three changes, told by one fragment.');
     }
 
     public function testAuthor(): void

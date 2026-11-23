@@ -44,9 +44,12 @@ final class AuditViewerUrlGenerator
      * - an entity object: the stream of that object (null while it has no identifier yet);
      * - a class name: the stream of the whole class, or of one object when $id is given.
      *
+     * The filters are added to the query string. The stream of a class takes type, user, field, date_from, date_to and
+     * page; the history of an object takes what, who, field, origin, when (7, 30 or 90 days) and attached, and gets the
+     * type and user filters as what and who.
+     *
      * @param class-string|object                                   $entity
      * @param array<string, null|bool|float|int|string|\Stringable> $filters viewer filters added to the query string
-     *                                                                       (type, user, field, date_from, date_to, page)
      */
     public function generateEntityUrl(object|string $entity, int|string|\Stringable|null $id = null, array $filters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
@@ -63,6 +66,16 @@ final class AuditViewerUrlGenerator
         }
 
         $parameters = array_filter($filters, static fn (mixed $value): bool => null !== $value && '' !== $value);
+        if (null !== $id && '' !== (string) $id) {
+            // the history of an object names these filters "what" and "who"
+            foreach (['type' => 'what', 'user' => 'who'] as $streamName => $historyName) {
+                if (isset($parameters[$streamName])) {
+                    $parameters[$historyName] ??= $parameters[$streamName];
+                    unset($parameters[$streamName]);
+                }
+            }
+        }
+
         $parameters['entity'] = UrlHelper::namespaceToParam($class);
         if (null !== $id && '' !== (string) $id) {
             $parameters['id'] = (string) $id;

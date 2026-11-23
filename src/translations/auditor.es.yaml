@@ -5,9 +5,14 @@ audit:
   theme:
     toggle: Alternar modo claro/oscuro
   home:
-    title: Entidades auditadas
-    subtitle: Resumen de todas las entidades rastreadas
+    title: 'Resumen'
+    subtitle: 'Qué cambió recientemente, y dónde.'
     no_audits: No se encontraron entidades auditadas.
+    recent_activity: 'Actividad reciente'
+    audited: 'Qué se audita'
+    entity: 'Entidad'
+    actions: 'Acciones'
+    bulk_note: 'Una acción que afecta a muchos objetos se resume por tipo; el detalle está en la acción.'
   sort:
     label: Ordenar por
     name_asc: 'Nombre (A-Z)'
@@ -87,6 +92,76 @@ audit:
     next: Siguiente
     last: Última
     page_info: 'Página %current% de %total%'
+  history:
+    deleted: '(eliminado)'
+    today: 'Hoy'
+    yesterday: 'Ayer'
+    details: 'Detalles'
+    hide_details: 'Ocultar detalles'
+    all_details: 'Todos los detalles →'
+    copy: 'Copiar'
+    copied: 'Copiado'
+    copy_failed: 'No se pudo copiar'
+    older: 'Mostrar acciones anteriores'
+    no_actions: 'Ninguna acción.'
+    context_separator: ':'
+    created_by: 'creado por %author% el %date%'
+    entries_count: '{0} ninguna entrada|{1} 1 entrada|]1,Inf[ %count% entradas'
+    fields_count: '[0,1] %count% campo|]1,Inf[ %count% campos'
+    compare: 'Comparar dos estados'
+    export: 'Exportar'
+    with_attached: 'Con las entidades vinculadas'
+    expand_all: 'Desplegar todo (modo técnico)'
+    last_changes: 'Quién cambió qué por última vez'
+    at_creation: 'en la creación'
+    technical: 'Aspecto técnico'
+    class: 'Clase'
+    identifier: 'Identificador'
+    tables: 'Tablas'
+    reading: 'Lectura'
+    entries: 'Entradas'
+    object: 'Objeto'
+    field: 'Campo'
+    firewall: 'cortafuegos'
+    schema: 'esquema'
+    filter:
+      option: '%filter%: %value%'
+      who: 'Quién'
+      what: 'Qué'
+      origin: 'Origen'
+      when: 'Cuándo'
+      everyone: 'todos'
+      everything: 'todo'
+      all_origins: 'todos'
+      all_time: 'todo el tiempo'
+      days: '[0,1] último día|]1,Inf[ últimos %count% días'
+    origin:
+      http: 'Web'
+      console: 'Línea de comandos'
+      messenger: 'Messenger'
+      system: 'Sistema'
+    origin_help:
+      http: 'Una petición web, bajo un cortafuegos de Symfony (con sesión o sin ella)'
+      console: 'Un comando de consola'
+      messenger: 'Un manejador de mensajes de Messenger'
+      system: 'Ni cortafuegos, ni comando, ni mensaje: un script, una tarea programada, una petición fuera de todo cortafuegos…'
+  action:
+    title: 'Acción del %date%'
+    previous: '‹ Acción anterior'
+    next: 'Acción siguiente ›'
+    objects: '[0,1] %count% objeto afectado|]1,Inf[ %count% objetos afectados'
+    technical: 'Detalles técnicos'
+    table: 'Tabla · id'
+    type: 'Tipo'
+    raw_field: 'Campo bruto'
+    ulid_date: 'Marca de tiempo del ULID'
+    no_via: 'ninguna'
+    more_entries: '[0,1] y %count% entrada más|]1,Inf[ y %count% entradas más'
+    tables: '[0,1] %count% tabla|]1,Inf[ %count% tablas'
+  user:
+    title: 'Lo que hizo %name%'
+    entities: '[0,1] en %count% tipo de objeto|]1,Inf[ en %count% tipos de objetos'
+    on: 'En'
 
 time_ago:
   seconds_ago: '{0} ahora mismo|{1} hace 1 segundo|]1,Inf[ hace %count% segundos'

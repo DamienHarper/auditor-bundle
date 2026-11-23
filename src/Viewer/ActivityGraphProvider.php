@@ -21,6 +21,8 @@ final readonly class ActivityGraphProvider
 
     private const string COUNT_CACHE_KEY_PREFIX = 'dh_auditor.count.';
 
+    private const string ACTION_COUNT_CACHE_KEY_PREFIX = 'dh_auditor.actions.';
+
     public function __construct(
         public private(set) int $days,
         public private(set) string $layout,
@@ -76,29 +78,48 @@ final readonly class ActivityGraphProvider
     }
 
     /**
-     * Clear the activity graph cache.
-     *
-     * @param null|string $entity Clear cache for a specific entity, or all if null
-     *
-     * @return bool True if cache was cleared successfully
-     */
-    /**
      * Number of audit entries of an entity, kept in the activity cache (same lifetime and tag) when it is enabled:
      * counting reads the whole audit table.
      */
     public function getEventCount(string $entity, Query $query): int
     {
+        return $this->remember(self::COUNT_CACHE_KEY_PREFIX.md5($entity), $query->count(...), \is_int(...));
+    }
+
+    /**
+     * Number of actions (distinct transactions) of an entity, kept in the activity cache like the entry count.
+     *
+     * @param \Closure(): int $count
+     */
+    public function getActionCount(string $entity, \Closure $count): int
+    {
+        return $this->remember(self::ACTION_COUNT_CACHE_KEY_PREFIX.md5($entity), $count, \is_int(...));
+    }
+
+    /**
+     * Computes a value, or reads it from the activity cache (same lifetime and tag) when it is enabled. A cached value
+     * that $valid rejects (written by another version, another shape) is computed again.
+     *
+     * @template T
+     *
+     * @param \Closure(): T              $compute
+     * @param null|\Closure(mixed): bool $valid
+     *
+     * @return T
+     */
+    public function remember(string $key, \Closure $compute, ?\Closure $valid = null): mixed
+    {
         if (!$this->cacheEnabled || !$this->cache instanceof CacheItemPoolInterface) {
-            return $query->count();
+            return $compute();
         }
 
-        $item = $this->cache->getItem(self::COUNT_CACHE_KEY_PREFIX.md5($entity));
-        if ($item->isHit() && \is_int($count = $item->get())) {
-            return $count;
+        $item = $this->cache->getItem($key);
+        if ($item->isHit() && (!$valid instanceof \Closure || $valid($item->get()))) {
+            return $item->get();
         }
 
-        $count = $query->count();
-        $item->set($count);
+        $value = $compute();
+        $item->set($value);
         $item->expiresAfter($this->cacheTtl);
         if ($item instanceof ItemInterface && $this->cache instanceof TagAwareAdapterInterface) {
             $item->tag([self::CACHE_TAG]);
@@ -106,9 +127,18 @@ final readonly class ActivityGraphProvider
 
         $this->cache->save($item);
 
-        return $count;
+        return $value;
     }
 
+    /**
+     * Clear the activity graph cache.
+     *
+     * The authors of the histories (ObjectHistory::authors()) are only cleared with the whole cache (tag-aware pool).
+     *
+     * @param null|string $entity Clear cache for a specific entity, or all if null
+     *
+     * @return bool True if cache was cleared successfully
+     */
     public function clearCache(?string $entity = null): bool
     {
         if (!$this->cache instanceof CacheItemPoolInterface) {
@@ -116,7 +146,7 @@ final readonly class ActivityGraphProvider
         }
 
         if (null !== $entity) {
-            return $this->cache->deleteItems([$this->getCacheKey($entity), self::COUNT_CACHE_KEY_PREFIX.md5($entity)]);
+            return $this->cache->deleteItems([$this->getCacheKey($entity), self::COUNT_CACHE_KEY_PREFIX.md5($entity), self::ACTION_COUNT_CACHE_KEY_PREFIX.md5($entity)]);
         }
 
         if ($this->cache instanceof TagAwareAdapterInterface) {

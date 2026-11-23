@@ -5,9 +5,14 @@ audit:
   theme:
     toggle: Wissel licht/donker modus
   home:
-    title: Gecontroleerde entiteiten
-    subtitle: Overzicht van alle gevolgde entiteiten
+    title: 'Overzicht'
+    subtitle: 'Wat er recent veranderde, en waar.'
     no_audits: Geen gecontroleerde entiteiten gevonden.
+    recent_activity: 'Recente activiteit'
+    audited: 'Wat wordt geaudit'
+    entity: 'Entiteit'
+    actions: 'Acties'
+    bulk_note: 'Een actie die veel objecten raakt, wordt per type samengevat; de details staan in de actie.'
   sort:
     label: Sorteren op
     name_asc: 'Naam (A-Z)'
@@ -87,6 +92,76 @@ audit:
     next: Volgende
     last: Laatste
     page_info: 'Pagina %current% van %total%'
+  history:
+    deleted: '(verwijderd)'
+    today: 'Vandaag'
+    yesterday: 'Gisteren'
+    details: 'Details'
+    hide_details: 'Details verbergen'
+    all_details: 'Alle details →'
+    copy: 'Kopiëren'
+    copied: 'Gekopieerd'
+    copy_failed: 'Kopiëren mislukt'
+    older: 'Oudere acties tonen'
+    no_actions: 'Geen actie.'
+    context_separator: ':'
+    created_by: 'aangemaakt door %author% op %date%'
+    entries_count: '{0} geen invoer|{1} 1 invoer|]1,Inf[ %count% invoeren'
+    fields_count: '[0,1] %count% veld|]1,Inf[ %count% velden'
+    compare: 'Twee toestanden vergelijken'
+    export: 'Exporteren'
+    with_attached: 'Met de gekoppelde entiteiten'
+    expand_all: 'Alles uitklappen (technische modus)'
+    last_changes: 'Wie wijzigde wat het laatst'
+    at_creation: 'bij het aanmaken'
+    technical: 'Technische kant'
+    class: 'Klasse'
+    identifier: 'Identificatie'
+    tables: 'Tabellen'
+    reading: 'Lezen'
+    entries: 'Invoeren'
+    object: 'Object'
+    field: 'Veld'
+    firewall: 'firewall'
+    schema: 'schema'
+    filter:
+      option: '%filter%: %value%'
+      who: 'Wie'
+      what: 'Wat'
+      origin: 'Herkomst'
+      when: 'Wanneer'
+      everyone: 'iedereen'
+      everything: 'alles'
+      all_origins: 'alle'
+      all_time: 'altijd'
+      days: '[0,1] laatste dag|]1,Inf[ laatste %count% dagen'
+    origin:
+      http: 'Web'
+      console: 'Opdrachtregel'
+      messenger: 'Messenger'
+      system: 'Systeem'
+    origin_help:
+      http: 'Een webverzoek onder een Symfony-firewall (aangemeld of niet)'
+      console: 'Een consolecommando'
+      messenger: 'Een Messenger-berichtafhandelaar'
+      system: 'Geen firewall, commando of bericht: een script, een geplande taak, een verzoek buiten elke firewall…'
+  action:
+    title: 'Actie van %date%'
+    previous: '‹ Vorige actie'
+    next: 'Volgende actie ›'
+    objects: '[0,1] %count% object geraakt|]1,Inf[ %count% objecten geraakt'
+    technical: 'Technische details'
+    table: 'Tabel · id'
+    type: 'Type'
+    raw_field: 'Ruw veld'
+    ulid_date: 'ULID-tijdstempel'
+    no_via: 'geen'
+    more_entries: '[0,1] en nog %count% invoer|]1,Inf[ en nog %count% invoeren'
+    tables: '[0,1] %count% tabel|]1,Inf[ %count% tabellen'
+  user:
+    title: 'Wat %name% deed'
+    entities: '[0,1] op %count% objecttype|]1,Inf[ op %count% objecttypen'
+    on: 'Op'
 
 time_ago:
   seconds_ago: '{0} zojuist|{1} 1 seconde geleden|]1,Inf[ %count% seconden geleden'

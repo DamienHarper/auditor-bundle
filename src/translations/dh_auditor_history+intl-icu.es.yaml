@@ -1,0 +1,42 @@
+# Frases neutras del historial de auditoría, usadas cuando la aplicación no define una frase para una entidad o un campo.
+default:
+  created: 'creó {entity} «{label}»'
+  snapshot: 'registró el estado inicial de {entity} «{label}»'
+  deleted: 'eliminó {entity} «{label}»'
+  set: 'estableció {field}: {new}'
+  changed: 'cambió {field}: {old} → {new}'
+  edited: 'modificó {field}'
+  cleared: 'vació {field} ({old})'
+  added: 'añadió a {field}: {names}'
+  removed: 'quitó de {field}: {names}'
+  json: 'modificó {field} ({names})'
+  unknown: 'modificó {entity} «{label}»'
+  bulk:
+    created: 'creó {count} {entity}'
+    snapshot: 'registró el estado inicial de {count} {entity}'
+    deleted: 'eliminó {count} {entity}'
+    set: 'estableció {field} en {count} {entity}'
+    changed: 'cambió {field} en {count} {entity}'
+    cleared: 'vació {field} en {count} {entity}'
+    added: 'añadió a {field} en {count} {entity}'
+    removed: 'quitó de {field} en {count} {entity}'
+    json: 'modificó {field} en {count} {entity}'
+value:
+  'yes': sí
+  'no': 'no'
+  empty: vacío
+  unreadable: valor ilegible
+list:
+  separator: ', '
+  and: ' y '
+  others: '{count, plural, one {# más} other {# más}}'
+author:
+  system: Sistema
+  console: Línea de comandos
+  anonymous: Usuario anónimo
+  deleted: Usuario eliminado
+  unknown: 'Usuario {id}'
+context:
+  object: 'en {entity} «{label}»'
+  objects: 'en {count} {entity}'
+more_changes: '{count, plural, one {# cambio más} other {# cambios más}}'
