@@ -93,6 +93,11 @@ services:
     tags:
       - { name: kernel.event_subscriber }
 
+  DH\AuditorBundle\Event\DoctrineProviderBootSubscriber:
+    arguments: [!service_locator { DH\Auditor\Provider\Doctrine\DoctrineProvider: '@DH\Auditor\Provider\Doctrine\DoctrineProvider' }]
+    tags:
+      - { name: kernel.event_subscriber }
+
   DH\AuditorBundle\Event\ConsoleEventSubscriber:
     arguments: ['@DH\AuditorBundle\User\ConsoleUserProvider', '@DH\Auditor\Configuration', '@dh_auditor.user_provider']
     tags:
