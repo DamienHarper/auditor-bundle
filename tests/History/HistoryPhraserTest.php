@@ -577,6 +577,8 @@ final class HistoryPhraserTest extends TestCase
 
         $this->assertSame('changed Title: A → B, edited Body and created Comment “Nice”', (string) $phraser->focus($phraser->phrase($item), Post::class, '1'), 'The changes of the post first.');
         $this->assertSame(Post::class.'#1', ($reference = HistoryPhraser::contextObject($context)) instanceof ObjectReference ? $reference->class.'#'.$reference->id : null);
+        $phrase = $phraser->phrase($item);
+        $this->assertSame($phrase, $phraser->focus($phrase, Tag::class, '1'), 'Nothing to move: the same phrase.');
         $this->assertNull($phraser->context($this->item(
             self::entry('update', Comment::class, '9', ['body' => ['old' => 'a', 'new' => 'b']], 'Nice', id: 3),
             self::entry('remove', Comment::class, '9', [], 'Nice', id: 2),

@@ -58,6 +58,26 @@ final class ObjectHistoryTest extends TestCase
         $this->assertSame('insert', $creation->type);
     }
 
+    public function testAnonymousAuthors(): void
+    {
+        $postId = $this->createCommentedPost();
+        $this->provider->getAuditor()->getConfiguration()->setUserProvider(static fn (): ?User => null);
+        $entityManager = $this->provider->getAuditingServiceForEntity(Post::class)->getEntityManager();
+        $post = $entityManager->find(Post::class, (int) $postId);
+        $this->assertInstanceOf(Post::class, $post);
+        $post->setTitle('Changed without user');
+        $entityManager->flush();
+
+        $history = new ObjectHistory(new Reader($this->provider));
+
+        $this->assertTrue($history->authors(Post::class, $postId, true)['anonymous']);
+        $this->assertSame(['alice'], array_column($history->authors(Post::class, $postId, true)['users'], 'name'));
+
+        $page = $history->page(Post::class, $postId, new HistoryFilters(who: HistoryFilters::ANONYMOUS), null, 100);
+        $this->assertCount(1, $page->entries, 'The change made without user.');
+        $this->assertNull($page->entries[0]->userId);
+    }
+
     /**
      * A post written by alice, then commented.
      */

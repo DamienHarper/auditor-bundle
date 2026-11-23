@@ -49,6 +49,14 @@ final class WordDiffTest extends TestCase
         $this->assertNull(WordDiff::diff($long, 'short'), 'Beyond the limit, old and new are shown without diff.');
     }
 
+    public function testTooManyDifferencesToCompare(): void
+    {
+        $old = implode(' ', array_map(static fn (int $i): string => 'a'.$i, range(1, 600)));
+        $new = implode(' ', array_map(static fn (int $i): string => 'b'.$i, range(1, 600)));
+
+        $this->assertNull(WordDiff::diff($old, $new), 'Within the word limit, but too different to compare.');
+    }
+
     public function testLongTextsWithASmallChange(): void
     {
         $words = implode(' ', range(1, 1_500));

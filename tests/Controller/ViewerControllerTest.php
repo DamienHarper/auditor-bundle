@@ -786,6 +786,49 @@ final class ViewerControllerTest extends WebTestCase
         $page = $this->client->request('GET', (string) $more->attr('href'));
         $this->assertStringContainsString('<html', (string) $this->client->getResponse()->getContent(), 'Without the header, the link opens a whole page.');
         $this->assertCount(1, $page->filter('[data-dh-auditor-action]'));
+
+        $last = $this->client->request('GET', (string) $fragment->filter('a[data-dh-auditor-more]')->attr('href'), [], [], ['HTTP_X_DH_AUDITOR_FRAGMENT' => '1']);
+        $this->assertCount(1, $last->filter('[data-dh-auditor-action]'), 'The oldest action.');
+        $this->assertCount(0, $last->filter('a[data-dh-auditor-more]'), 'Nothing older.');
+    }
+
+    public function testObjectHistoryNeedsTheViewRole(): void
+    {
+        $this->login(['ROLE_USER']);
+        $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author/1');
+
+        $this->assertResponseStatusCodeSame(403);
+    }
+
+    public function testDeletedObjectsAreMarked(): void
+    {
+        [$postId] = $this->createPostHistory();
+        $entityManager = $this->provider->getAuditingServiceForEntity(Post::class)->getEntityManager();
+        $post = $entityManager->find(Post::class, $postId);
+        $this->assertInstanceOf(Post::class, $post);
+        $entityManager->remove($post);
+        $entityManager->flush();
+        $this->login();
+
+        $crawler = $this->client->request('GET', \sprintf('%s/%d', self::POST_URL, $postId));
+
+        $this->assertStringContainsString('(deleted)', $crawler->filter('[data-dh-auditor-action]')->first()->text(), 'The deleted post is marked in its own history.');
+    }
+
+    public function testUserActionsFilters(): void
+    {
+        $this->seedUserEntry(Comment::class, 'timeline-user', 'timeline.user', '2020-01-01 10:00:00');
+        $this->seedUserEntry(Post::class, 'timeline-user', 'timeline.user', new \DateTimeImmutable('-1 day')->format('Y-m-d H:i:s'));
+        $this->login(['ROLE_1']);
+
+        $crawler = $this->client->request('GET', '/audit/user/timeline-user', ['on' => Post::class]);
+        $this->assertSame([Post::class], $this->timelineEntities($crawler), 'On one entity.');
+
+        $crawler = $this->client->request('GET', '/audit/user/timeline-user', ['when' => '7']);
+        $this->assertSame([Post::class], $this->timelineEntities($crawler), 'In the last days.');
+
+        $crawler = $this->client->request('GET', '/audit/user/timeline-user');
+        $this->assertSame([Post::class, Comment::class], $this->timelineEntities($crawler));
     }
 
     public function testActionLinksToItsNeighboursInTheHistoryItWasOpenedFrom(): void

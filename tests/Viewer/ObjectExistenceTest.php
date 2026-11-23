@@ -43,6 +43,9 @@ final class ObjectExistenceTest extends TestCase
         $existence->prime([new ObjectReference(Author::class, 'abc', 'x')]);
 
         $this->assertTrue($existence->isDeleted(new ObjectReference(Author::class, 'abc', 'x')), 'No integer identifier can match it.');
+
+        $existence->prime([new ObjectReference(Author::class, '1abc', 'x')]);
+        $this->assertTrue($existence->isDeleted(new ObjectReference(Author::class, '1abc', 'x')), 'Not author 1.');
     }
 
     public function testReset(): void

@@ -146,6 +146,16 @@ final class DiffExtensionTest extends KernelTestCase
         $this->assertSame('yes', $twig->createTemplate("{{ dh_auditor_is_diff_leaf({new: 1}) ? 'yes' : 'no' }}")->render());
     }
 
+    public function testWordDiff(): void
+    {
+        $extension = new DiffExtension();
+
+        $this->assertSame([['equal', 'a '], ['delete', 'b'], ['insert', 'c']], $extension->wordDiff('a b', 'a c'));
+        $this->assertSame([['insert', 'text']], $extension->wordDiff(null, 'text'), 'From no value.');
+        $this->assertNull($extension->wordDiff(['a'], 'text'), 'Not a text.');
+        $this->assertNull($extension->wordDiff('text', 12), 'Not a text.');
+    }
+
     /**
      * @param array<string, mixed> $changes
      * @param list<string>         $deepDiffs fields listed in the "deep_diffs" envelope marker (written only when not empty)
