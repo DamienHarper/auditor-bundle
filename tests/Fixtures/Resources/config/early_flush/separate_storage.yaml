@@ -1,0 +1,9 @@
+dh_auditor:
+    providers:
+        doctrine:
+            entities:
+                DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag: ~
+            auditing_services:
+                - '@doctrine.orm.default_entity_manager'
+            storage_services:
+                - '@doctrine.orm.audits_entity_manager'
