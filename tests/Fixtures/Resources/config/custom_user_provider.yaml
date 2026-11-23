@@ -1,0 +1,7 @@
+services:
+    app.custom_user_provider:
+        class: DH\AuditorBundle\Tests\Fixtures\User\CustomUserProvider
+        public: true
+
+dh_auditor:
+    user_provider: 'app.custom_user_provider'
