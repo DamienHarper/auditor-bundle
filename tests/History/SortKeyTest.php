@@ -33,5 +33,6 @@ final class SortKeyTest extends TestCase
             'Dates are compared in UTC.',
         );
         $this->assertLessThan(SortKey::of(new \DateTimeImmutable('@0'), 'b'), SortKey::of(new \DateTimeImmutable('@0'), 'a'));
+        $this->assertLessThan($entry->getSortKey(), SortKey::of(new \DateTimeImmutable('2026-11-20 10:00:00', new \DateTimeZone('UTC'))), 'At the same instant, without discriminator, an element sorts before (below) the entry.');
     }
 }

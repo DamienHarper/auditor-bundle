@@ -58,7 +58,7 @@ final class History
     public ?HistoryGrouper $grouper = null;
 
     /**
-     * Entries per page (the page size of the viewer by default).
+     * Entries per page (the page size of the viewer by default), more when needed to keep the last action whole.
      */
     public ?int $limit = null;
 
@@ -73,7 +73,8 @@ final class History
     public bool|string $details = false;
 
     /**
-     * Cursor of the page to read (read from the query string by default).
+     * Cursor of the page to read (read from the query string by default). Unlike the one of the query string, an
+     * invalid cursor given here is an error.
      */
     public ?string $after = null;
 
@@ -83,7 +84,8 @@ final class History
     public string $cursorParameter = 'dh_auditor_after';
 
     /**
-     * Position of the most recent entry of the page: read newer entries with RootQuery::fetch(since: firstCursor).
+     * Position of the most recent entry of the page (null while the history is empty): on the first page, read the
+     * entries recorded since with RootQuery::fetch(since: firstCursor).
      */
     public ?string $firstCursor = null;
 
@@ -122,8 +124,9 @@ final class History
 
         usort($elements, static fn (HistoryElementInterface $a, HistoryElementInterface $b): int => $b->getSortKey() <=> $a->getSortKey());
 
-        $request = $this->requestStack->getCurrentRequest();
-        $after = $this->after ?? ('' === ($cursor = (string) $request?->query->getString($this->cursorParameter)) ? null : $cursor);
+        // the page the reader sees, also when the component is rendered by a sub-request (render(controller()))
+        $request = $this->requestStack->getMainRequest();
+        $after = $this->after ?? $this->cursorOf($request);
 
         $query = $this->query();
         if (!$query instanceof RootQuery) {
@@ -138,9 +141,9 @@ final class History
         try {
             $page = $query->fetch($limit, $after, groupKey: $this->grouper);
         } catch (InvalidArgumentException $invalidArgumentException) {
-            // a cursor of the query string that is not one: the first page; anything else is an error of the
-            // application (a page size below 1…)
-            if (null === $after) {
+            // a cursor of the query string that is not one (a link edited by hand…): the first page; an "after" option
+            // or anything else (a page size below 1…) is an error of the application
+            if (null === $after || null !== $this->after) {
                 throw $invalidArgumentException;
             }
 
@@ -157,6 +160,12 @@ final class History
         if ($page->hasMore) {
             $next = $query->fetch(1, $page->lastCursor, groupKey: false);
             $lower = $next->isEmpty() ? null : $next->entries[0]->getSortKey();
+        }
+
+        if (null !== $after && $page->isEmpty()) {
+            // past the end of the history (its last entries pruned since the link was made): the elements were shown
+            // on the previous pages
+            $elements = [];
         }
 
         $elements = array_values(array_filter($elements, static fn (HistoryElementInterface $element): bool => (null === $upper || $element->getSortKey() <= $upper) && (null === $lower || $element->getSortKey() > $lower)));
@@ -201,7 +210,7 @@ final class History
     }
 
     /**
-     * The subject as the links of the viewer name it ("FQCN:id"), or null when it has no history.
+     * The subject as the links of the viewer name it ("FQCN:id"), or null when it has no history the reader may see.
      */
     public function getRoot(): ?string
     {
@@ -209,7 +218,7 @@ final class History
     }
 
     /**
-     * History of the subject in the viewer, when it is enabled.
+     * History of the subject in the viewer, when it is enabled and the reader may see the history.
      */
     public function getViewerUrl(): ?string
     {
@@ -235,21 +244,39 @@ final class History
             return null;
         }
 
-        try {
-            $id = $this->identifier->identify($this->provider->getAuditingServiceForEntity($class)->getEntityManager(), $this->subject);
-            if (null === $id) {
-                return null;
-            }
+        // a misconfigured entity manager is an error of the application, not a missing history
+        $entityManager = $this->provider->getAuditingServiceForEntity($class)->getEntityManager();
 
+        try {
+            $id = $this->identifier->identify($entityManager, $this->subject);
+        } catch (InvalidArgumentException) {
+            // an identifier that cannot be turned into a string
+            return null;
+        }
+
+        if (null === $id) {
+            return null;
+        }
+
+        try {
             $query = $this->reader->createRootQuery($class, $id, $this->attached ? [] : ['include' => [$class]]);
-        } catch (AccessDeniedException|InvalidArgumentException) {
-            // not viewable, or an identifier that cannot be read
+        } catch (AccessDeniedException) {
             return null;
         }
 
         $this->root = $class.':'.$id;
 
         return $query;
+    }
+
+    /**
+     * Cursor of the query string, when it holds one (a string: "?dh_auditor_after[]=" is ignored).
+     */
+    private function cursorOf(?Request $request): ?string
+    {
+        $cursor = $request?->query->all()[$this->cursorParameter] ?? null;
+
+        return \is_string($cursor) && '' !== $cursor ? $cursor : null;
     }
 
     private function pageSize(): int
