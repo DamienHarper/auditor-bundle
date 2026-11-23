@@ -81,7 +81,7 @@ work from a worktree (`make -C .claude/worktrees/<name> tests`).
 - `providers.doctrine`: `table_prefix`, `table_suffix`, `ignored_columns`, `ignored_columns_resolver` / `root_resolver` / `entity_label_resolver` / `read_scope` (service IDs set by method calls, see `CALLABLE_SERVICE_OPTIONS`), `entities` (with `roles.view`, `retention` and `roots`), `storage_services`, `auditing_services`, `viewer` (off by default; `page_size`, `activity_graph`), `retention` (`schedule`, `default_max_age`), `storage_mapper`.
 - The `DoctrineProvider` service is tagged `dh_auditor.provider` and aliased `dh_auditor.provider.doctrine`.
 
-Compiler passes (`src/DependencyInjection/Compiler/`): `DoctrineMiddlewareCompilerPass` adds the auditor DBAL middleware to each auditing connection, `RegisterProvidersCompilerPass` registers the providers on `Auditor`, `RegisterDiffLabelResolversCompilerPass` collects the `DiffLabelResolverInterface` services (service ID = FQCN).
+Compiler passes (`src/DependencyInjection/Compiler/`): `DoctrineMiddlewareCompilerPass` adds the auditor DBAL middleware to each auditing connection, `RegisterProvidersCompilerPass` registers the providers on `Auditor`, `RegisterDiffLabelResolversCompilerPass` collects the `DiffLabelResolverInterface` services (service ID = FQCN), `RegisterChangeDescribersCompilerPass` gives `HistoryPhraser` a locator of the `#[AsChangeDescriber]` services.
 
 ### Key classes
 
@@ -97,13 +97,15 @@ Compiler passes (`src/DependencyInjection/Compiler/`): `DoctrineMiddlewareCompil
 | `ExtraDataProvider` | `src/ExtraData/ExtraDataProvider.php` | Opt-in `extra_data` (route name and params) |
 | `PruneAuditLogsHandler`, `RetentionSchedule` | `src/Retention/` | Scheduled pruning through Messenger and Scheduler |
 | `ActivityGraphProvider`, `RevisionComparator` | `src/Viewer/` | Activity graph (cached), revision compare |
-| Twig extensions | `src/Twig/` | `time_ago`, `dh_auditor_is_viewable()`, `dh_auditor_is_diff_leaf()`, `dh_auditor_last_change(s)()`, `dh_auditor_field_label()` |
+| Twig extensions | `src/Twig/` | `time_ago`, `dh_auditor_is_viewable()`, `dh_auditor_is_diff_leaf()`, `dh_auditor_last_change(s)()`, `dh_auditor_field_label()`, `\|dh_auditor_phrase`, `\|dh_auditor_phrase_text`, `\|dh_auditor_author`, `dh_auditor_object_url()` |
 | `TranslatedFieldLabelResolver` | `src/History/` | `FieldLabelResolverInterface` service: `dh_auditor_fields` domain, key `FQCN.field`, humanized fallback |
+| `HistoryPhraser`, `ValueFormatter` | `src/History/` | A `HistoryItem` told as a `Phrase` of `Fragment`s made of typed parts (`Part/`: text, value, object reference; no HTML), from the `dh_auditor_history` ICU domain or `#[AsChangeDescriber]` services, and its author; raw diff values read through the Doctrine mapping |
+| `ObjectUrlResolverInterface`, `ViewerObjectUrlResolver` | `src/History/` | URL of an object reference (default: its history in the viewer, visible with the `view` role, or to all without role checker); rendered by `History/phrase.html.twig` and `History/object_reference.html.twig` |
 | `ClearActivityCacheCommand` | `src/Command/` | `audit:cache:clear` |
 
 ### Templates and assets
 
-- Plain Twig in `src/Resources/views/` (`layout.html.twig`, `Audit/*.html.twig`), overridable under `templates/bundles/DHAuditorBundle/`. No Stimulus, AssetMapper or Twig components.
+- Plain Twig in `src/Resources/views/` (`layout.html.twig`, `Audit/*.html.twig`, `History/*.html.twig`), overridable under `templates/bundles/DHAuditorBundle/`. No Stimulus, AssetMapper or Twig components.
 - Tailwind CSS 4: source `src/Resources/assets/css/app.css`, compiled `src/Resources/public/app.css` **committed**. After a template or CSS change that uses new classes, run `make build-assets` and commit the compiled file.
 - JSON deep diffs: templates must use `entry.isDeepDiff(field)` and `dh_auditor_is_diff_leaf(node)`, not key checks. Association links use `dh_auditor_is_viewable()`.
 

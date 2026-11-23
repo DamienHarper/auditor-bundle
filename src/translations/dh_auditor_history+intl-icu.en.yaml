@@ -1,0 +1,39 @@
+# Neutral phrases of the audit history, used when the application does not define a phrase for an entity or a field.
+# An application phrase is keyed by FQCN ("App\Entity\Post.created", "App\Entity\Post.status.changed"): see the docs.
+default:
+  created: 'created {entity} “{label}”'
+  snapshot: 'recorded the initial state of {entity} “{label}”'
+  deleted: 'deleted {entity} “{label}”'
+  set: 'set {field}: {new}'
+  changed: 'changed {field}: {old} → {new}'
+  edited: 'edited {field}'
+  cleared: 'cleared {field} ({old})'
+  added: 'added to {field}: {names}'
+  removed: 'removed from {field}: {names}'
+  json: 'edited {field} ({names})'
+  unknown: 'changed {entity} “{label}”'
+  bulk:
+    created: 'created {count} {entity}'
+    snapshot: 'recorded the initial state of {count} {entity}'
+    deleted: 'deleted {count} {entity}'
+    set: 'set {field} on {count} {entity}'
+    changed: 'changed {field} on {count} {entity}'
+    cleared: 'cleared {field} on {count} {entity}'
+    added: 'added to {field} on {count} {entity}'
+    removed: 'removed from {field} on {count} {entity}'
+    json: 'edited {field} on {count} {entity}'
+value:
+  'yes': 'yes'
+  'no': 'no'
+  empty: empty
+  unreadable: unreadable value
+list:
+  separator: ', '
+  and: ' and '
+  others: '{count, plural, one {# other} other {# others}}'
+author:
+  system: System
+  console: Command line
+  anonymous: Anonymous user
+  deleted: Deleted user
+  unknown: 'User {id}'
