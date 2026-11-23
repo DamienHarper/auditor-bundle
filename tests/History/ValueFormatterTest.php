@@ -46,6 +46,7 @@ final class ValueFormatterTest extends TestCase
         yield 'int enum, not a number' => ['en', 'priority', 'x', 'x'];
 
         yield 'string enum stored as an int' => ['en', 'kind', 7, '7'];
+        yield 'numeric string enum stored as an int' => ['en', 'status', 3, 'Legacy'];
 
         yield 'boolean stored as a string' => ['en', 'featured', 'false', 'no'];
 
@@ -98,6 +99,13 @@ final class ValueFormatterTest extends TestCase
         $this->assertSame('Ready', $formatter->format(Post::class, 'status', 'published', 'Ready'), 'A #[DiffLabel] label.');
         $this->assertSame('Alice', $formatter->format(Post::class, 'author', ['class' => 'App\Entity\Author', 'id' => 1, 'label' => 'Alice']), 'An association summary is read through its label.');
         $this->assertSame('Author #1', $formatter->format(Post::class, 'author', ['class' => 'App\Entity\Author', 'id' => 1]), 'An association summary without label.');
+    }
+
+    public function testUnreadableValue(): void
+    {
+        $value = array_reduce(range(1, 600), static fn (mixed $carry): array => [$carry], 1);
+
+        $this->assertSame('unreadable value', new ValueFormatter($this->registry(), self::translator())->format(Post::class, 'unknown', $value), 'Deeper than JSON can encode.');
     }
 
     public function testType(): void

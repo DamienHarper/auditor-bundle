@@ -403,6 +403,56 @@ final class HistoryPhraserTest extends TestCase
         $this->assertSame('text', $phrase->icon, 'The main change (the body, first in the mapping) is told by the described fragment.');
     }
 
+    public function testAToldChangeIsNotDescribedAgain(): void
+    {
+        $title = new class implements ChangeDescriberInterface {
+            public function describe(Change $change, HistoryItem $item): ?Phrase
+            {
+                $body = array_find($item->getChanges(), static fn (Change $other): bool => 'body' === $other->field);
+
+                return Phrase::of(Fragment::of(['rewrote the post'], [$change, $body ?? $change]));
+            }
+        };
+        $body = new class implements ChangeDescriberInterface {
+            public function describe(Change $change, HistoryItem $item): ?Phrase
+            {
+                return Phrase::of('rewrote the body');
+            }
+        };
+
+        $phraser = $this->phraser('en', [], [], new ServiceLocator([
+            Post::class.'::title' => static fn (): ChangeDescriberInterface => $title,
+            Post::class.'::body' => static fn (): ChangeDescriberInterface => $body,
+        ]));
+
+        $this->assertSame('rewrote the post', (string) $phraser->phrase($this->item(self::entry('update', Post::class, '1', [
+            'body' => ['old' => 'a', 'new' => 'b'],
+            'title' => ['old' => 'A', 'new' => 'B'],
+        ]))));
+    }
+
+    public function testTheIconOfAMainChangeToldByAnotherFragment(): void
+    {
+        $describer = new class implements ChangeDescriberInterface {
+            public function describe(Change $change, HistoryItem $item): ?Phrase
+            {
+                $body = array_find($item->getChanges(), static fn (Change $other): bool => 'body' === $other->field);
+
+                return Phrase::of(Fragment::of(['rewrote the post'], [$change, $body ?? $change], 'rewrite'));
+            }
+        };
+
+        $phraser = $this->phraser('en', [], [], new ServiceLocator([Post::class.'::featured' => static fn (): ChangeDescriberInterface => $describer]));
+        $phrase = $phraser->phrase($this->item(self::entry('update', Post::class, '1', [
+            'body' => ['old' => 'a', 'new' => 'b'],
+            'featured' => ['old' => false, 'new' => true],
+            'title' => ['old' => 'A', 'new' => 'B'],
+        ])));
+
+        $this->assertSame('changed Title: A → B and rewrote the post', (string) $phrase);
+        $this->assertSame('rewrite', $phrase->icon, 'The main change (body) is told by the fragment of the featured describer.');
+    }
+
     public function testAFragmentOfADescriberTellsItsChange(): void
     {
         $describer = new class implements ChangeDescriberInterface {
