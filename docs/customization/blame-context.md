@@ -41,7 +41,7 @@ between two requests of a FrankenPHP or RoadRunner worker, so a context left beh
 ## 🖥️ Console commands
 
 Every command runs in a `console` context labelled with the command name: its audit entries get
-`"via": {"type": "console", "label": "app:import-users"}`. The [console user provider](user-provider.md#️-console-commands)
+`"via": {"type": "console", "label": "app:import-users"}`. The [console user provider](user-provider.md#-console-commands)
 is unchanged: the command name is still the blamed user.
 
 ## 📨 Messenger
