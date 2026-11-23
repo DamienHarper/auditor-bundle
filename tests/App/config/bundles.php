@@ -6,6 +6,7 @@ use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
+use Symfony\UX\TwigComponent\TwigComponentBundle;
 use Symfonycasts\TailwindBundle\SymfonycastsTailwindBundle;
 use Twig\Extra\TwigExtraBundle\TwigExtraBundle;
 
@@ -17,4 +18,5 @@ return [
     DHAuditorBundle::class => ['all' => true],
     TwigExtraBundle::class => ['all' => true],
     SymfonycastsTailwindBundle::class => ['all' => true],
+    TwigComponentBundle::class => ['all' => true],
 ];

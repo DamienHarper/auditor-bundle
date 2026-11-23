@@ -86,15 +86,16 @@ final class AuditViewerUrlGenerator
 
     /**
      * Returns the URL of the page grouping every change made in one database transaction
-     * ($entry->transactionId).
+     * ($entry->transactionId), optionally opened from the history of an object ("FQCN:id"), which offers the previous and
+     * next actions of that history.
      */
-    public function generateTransactionUrl(string $transactionId, int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    public function generateTransactionUrl(string $transactionId, int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH, ?string $root = null): ?string
     {
         if ('' === $transactionId || !$this->isViewerAvailable()) {
             return null;
         }
 
-        return $this->urlGenerator->generate(self::TRANSACTION_STREAM_ROUTE, ['hash' => $transactionId], $referenceType);
+        return $this->urlGenerator->generate(self::TRANSACTION_STREAM_ROUTE, ['hash' => $transactionId] + (null === $root || '' === $root ? [] : ['root' => $root]), $referenceType);
     }
 
     /**

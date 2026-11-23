@@ -98,7 +98,10 @@ Compiler passes (`src/DependencyInjection/Compiler/`): `DoctrineMiddlewareCompil
 | `PruneAuditLogsHandler`, `RetentionSchedule` | `src/Retention/` | Scheduled pruning through Messenger and Scheduler |
 | `ActivityGraphProvider`, `RevisionComparator` | `src/Viewer/` | Activity graph and counts (cached), revision compare |
 | `ObjectHistory`, `Overview`, `HistoryFilters`, `ActionNavigator`, `ObjectExistence`, `WordDiff` | `src/Viewer/` | Data of the viewer pages: object history by cursor and its filters, recent activity and action counts, previous / next action, "(deleted)" marker, word diff |
-| Twig extensions | `src/Twig/` | `time_ago`, `dh_auditor_is_viewable()`, `dh_auditor_is_diff_leaf()`, `dh_auditor_last_change(s)()`, `dh_auditor_field_label()`, `\|dh_auditor_phrase`, `\|dh_auditor_phrase_text`, `\|dh_auditor_shorten`, `\|dh_auditor_author`, `dh_auditor_object_url()`, `dh_auditor_context()`, `dh_auditor_entity_name()`, `dh_auditor_is_deleted()`, `dh_auditor_history_item()`, `dh_auditor_word_diff()` |
+| `HistoryRows` | `src/Viewer/` | Rows of a list of actions (phrase, context, "(deleted)" priming), shared by the viewer and the component |
+| Twig extensions | `src/Twig/` | `time_ago`, `dh_auditor_is_viewable()`, `dh_auditor_is_diff_leaf()`, `dh_auditor_last_change(s)()`, `dh_auditor_field_label()`, `\|dh_auditor_phrase`, `\|dh_auditor_phrase_text`, `\|dh_auditor_shorten`, `\|dh_auditor_author`, `dh_auditor_object_url()`, `dh_auditor_context()`, `dh_auditor_entity_name()`, `dh_auditor_is_deleted()`, `dh_auditor_history_item()`, `dh_auditor_word_diff()`, `dh_auditor_entity_url()`, `dh_auditor_transaction_url()` (`root:` option), `dh_auditor_user_url()` (null when the viewer is unavailable) |
+| `History` (`<twig:DhAuditor:History>`) | `src/Twig/Component/` | History of an object in the pages of the host app, on `RootQuery`, one page per "older" link (cursor in the query string of the main request); registered only when `symfony/ux-twig-component` is installed |
+| `HistoryElementInterface`, `SortKey` | `src/History/` | Elements of the host app mixed with the actions of the component, by a sort key comparable with `Entry::getSortKey()` |
 | `TranslatedFieldLabelResolver` | `src/History/` | `FieldLabelResolverInterface` service: `dh_auditor_fields` domain, key `FQCN.field`, humanized fallback |
 | `HistoryPhraser`, `ValueFormatter` | `src/History/` | A `HistoryItem` told as a `Phrase` of `Fragment`s made of typed parts (`Part/`: text, value, object reference; no HTML), from the `dh_auditor_history` ICU domain or `#[AsChangeDescriber]` services, and its author; raw diff values read through the Doctrine mapping |
 | `ObjectUrlResolverInterface`, `ViewerObjectUrlResolver` | `src/History/` | URL of an object reference (default: its history in the viewer, visible with the `view` role, or to all without role checker); rendered by `History/phrase.html.twig` and `History/object_reference.html.twig` |
@@ -106,7 +109,7 @@ Compiler passes (`src/DependencyInjection/Compiler/`): `DoctrineMiddlewareCompil
 
 ### Templates and assets
 
-- Plain Twig in `src/Resources/views/` (`layout.html.twig`, `Audit/*.html.twig`, `History/*.html.twig`: one row per action in `History/_row.html.twig`), overridable under `templates/bundles/DHAuditorBundle/`. No Stimulus, AssetMapper or Twig components.
+- Plain Twig in `src/Resources/views/` (`layout.html.twig`, `Audit/*.html.twig`, `History/*.html.twig`: one row per action in `History/_row.html.twig`), overridable under `templates/bundles/DHAuditorBundle/`. No Stimulus nor AssetMapper; one optional Twig component (`Component/History.html.twig`), which renders the `History/` row partials outside the viewer: they link through the viewer URL functions, never `path()`.
 - Tailwind CSS 4: source `src/Resources/assets/css/app.css`, compiled `src/Resources/public/app.css` **committed**. After a template or CSS change that uses new classes, run `make build-assets` and commit the compiled file.
 - JSON deep diffs: templates must use `entry.isDeepDiff(field)` and `dh_auditor_is_diff_leaf(node)`, not key checks. Association links use `dh_auditor_is_viewable()`.
 

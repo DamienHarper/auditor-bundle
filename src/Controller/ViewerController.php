@@ -25,12 +25,12 @@ use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\AuditorBundle\Enum\EntitySort;
 use DH\AuditorBundle\Helper\UrlHelper;
 use DH\AuditorBundle\History\HistoryPhraser;
-use DH\AuditorBundle\History\Part\ObjectReference;
 use DH\AuditorBundle\History\Phrase;
 use DH\AuditorBundle\Tests\Controller\ViewerControllerTest;
 use DH\AuditorBundle\Viewer\ActionNavigator;
 use DH\AuditorBundle\Viewer\ActivityGraphProvider;
 use DH\AuditorBundle\Viewer\HistoryFilters;
+use DH\AuditorBundle\Viewer\HistoryRows;
 use DH\AuditorBundle\Viewer\ObjectExistence;
 use DH\AuditorBundle\Viewer\ObjectHistory;
 use DH\AuditorBundle\Viewer\Overview;
@@ -574,27 +574,7 @@ final readonly class ViewerController
      */
     private function rows(array $items, HistoryPhraser $phraser, ObjectExistence $existence, bool $withContext = false): array
     {
-        $rows = [];
-        $references = [];
-        foreach ($items as $item) {
-            $phrase = $phraser->phrase($item);
-            $context = $withContext ? $phraser->context($item) : null;
-            $focus = $context instanceof Phrase ? HistoryPhraser::contextObject($context) : null;
-            $row = ['item' => $item, 'phrase' => $focus instanceof ObjectReference ? $phraser->focus($phrase, $focus->class, $focus->id) : $phrase, 'context' => $context];
-            foreach ([$row['phrase'], $row['context']] as $phrase) {
-                foreach ($phrase?->getParts() ?? [] as $part) {
-                    if ($part instanceof ObjectReference) {
-                        $references[] = $part;
-                    }
-                }
-            }
-
-            $rows[] = $row;
-        }
-
-        $existence->prime($references);
-
-        return $rows;
+        return new HistoryRows($phraser, $existence)->build($items, $withContext);
     }
 
     /**

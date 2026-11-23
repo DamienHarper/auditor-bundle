@@ -162,6 +162,11 @@ audit:
     title: 'Mida %name% tegi'
     entities: '[0,1] %count% objektitüübil|]1,Inf[ %count% objektitüübil'
     on: 'Objekt'
+  component:
+    title: 'Tegevus'
+    older: 'Vanemad'
+    open_in_viewer: 'Ava vaaturis'
+    empty: 'Tegevust veel pole.'
 
 time_ago:
   seconds_ago: '{0} just nüüd|{1} 1 sekund tagasi|]1,Inf[ %count% sekundit tagasi'

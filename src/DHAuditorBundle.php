@@ -55,6 +55,7 @@ use DH\AuditorBundle\Retention\RetentionSchedule;
 use DH\AuditorBundle\Routing\RoutingLoader;
 use DH\AuditorBundle\Security\RoleChecker;
 use DH\AuditorBundle\Security\SecurityProvider;
+use DH\AuditorBundle\Twig\Component\History;
 use DH\AuditorBundle\Twig\DiffExtension;
 use DH\AuditorBundle\Twig\HistoryExtension;
 use DH\AuditorBundle\Twig\PhraseExtension;
@@ -65,6 +66,7 @@ use DH\AuditorBundle\User\ConsoleUserProvider;
 use DH\AuditorBundle\User\UserProvider;
 use DH\AuditorBundle\Viewer\ActivityGraphProvider;
 use DH\AuditorBundle\Viewer\AuditViewerUrlGenerator;
+use DH\AuditorBundle\Viewer\HistoryRows;
 use DH\AuditorBundle\Viewer\ObjectExistence;
 use DH\AuditorBundle\Viewer\ObjectHistory;
 use DH\AuditorBundle\Viewer\Overview;
@@ -79,6 +81,7 @@ use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
 use Symfony\Component\Scheduler\RecurringMessage;
+use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
 /**
  * @see Tests\DHAuditorBundleTest
@@ -558,6 +561,32 @@ class DHAuditorBundle extends AbstractBundle
             ])
             ->autoconfigure()
         ;
+
+        // Rows of a list of actions (phrase, context), shared by the viewer and the <twig:DhAuditor:History> component
+        $services->set(HistoryRows::class)
+            ->args([new Reference(HistoryPhraser::class), new Reference(ObjectExistence::class)])
+        ;
+
+        // <twig:DhAuditor:History>, for the pages of the application: only with symfony/ux-twig-component
+        if (class_exists(AsTwigComponent::class)) {
+            $services->set(History::class)
+                ->args([
+                    new Reference(Reader::class),
+                    new Reference(DoctrineProvider::class),
+                    new Reference(ObjectIdentifier::class),
+                    new Reference(HistoryRows::class),
+                    new Reference(AuditViewerUrlGenerator::class),
+                    new Reference('request_stack'),
+                    new Reference('security.authorization_checker', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+                ])
+                ->tag('twig.component', [
+                    'key' => History::NAME,
+                    'template' => '@DHAuditor/Component/History.html.twig',
+                    'expose_public_props' => true,
+                    'attributes_var' => 'attributes',
+                ])
+            ;
+        }
 
         // Twig extension (uses #[AsTwigFunction] attribute)
         $services->set(DiffExtension::class)

@@ -99,5 +99,5 @@ This is handled by `ConsoleEventSubscriber` and requires no configuration.
 - 🛡️ [Role Checker](role-checker.md) - Custom access control
 - 📦 [Extra Data](extra-data.md) - Attach additional data to audit entries
 - 🏷️ [Diff Label Resolvers](diff-label-resolvers.md) - Human-readable labels in audit diffs
-- 🌳 [Histories](histories.md) - History of an object across entities, last change of a field, field labels
+- 🌳 [Histories](histories.md) - History of an object across entities, last change of a field, field labels, the `<twig:DhAuditor:History>` component
 - 🔌 [Custom Provider](custom-provider.md) - Register a custom audit backend via tag

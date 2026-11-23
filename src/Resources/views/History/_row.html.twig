@@ -11,8 +11,9 @@
     <div class="min-w-0 flex-1">
         <p class="text-sm leading-relaxed{{ (show_author ?? true) ? '' : ' first-letter:uppercase' }}">
             {% if show_author ?? true -%}
-                {% if item.userId is not same as(null) and item.userId is not same as('') -%}
-                    <a href="{{ path('dh_auditor_show_user_stream', {id: item.userId}) }}" class="font-semibold hover:underline">{{ item|dh_auditor_author }}</a>
+                {% set user_url = item.userId is same as(null) ? null : dh_auditor_user_url(item.userId) %}
+                {%- if user_url -%}
+                    <a href="{{ user_url }}" class="font-semibold hover:underline">{{ item|dh_auditor_author }}</a>
                 {%- else -%}
                     <span class="font-semibold">{{ item|dh_auditor_author }}</span>
                 {%- endif %}
@@ -25,8 +26,9 @@
                 <span class="sm:hidden">{{ row.phrase|dh_auditor_shorten(3)|dh_auditor_phrase }}</span>
             {% endif %}
             {% set transaction = (item.entries|first).transactionId %}
+            {% set transaction_url = transaction ? dh_auditor_transaction_url(transaction, root: root ?? null) : null %}
             <span class="whitespace-nowrap text-slate-400 dark:text-slate-500">·
-                {% if transaction %}<a href="{{ path('dh_auditor_show_transaction_stream', {hash: transaction}|merge(root ?? false ? {root: root} : {})) }}" class="hover:underline">{% endif %}
+                {% if transaction_url %}<a href="{{ transaction_url }}" class="hover:underline">{% endif %}
                 <time datetime="{{ item.createdAt|date('c') }}" title="{{ item.createdAt|format_datetime('full', 'medium', timezone: false) }}">
                     {%- if (date_format ?? 'time') == 'time' -%}
                         {{ item.createdAt|format_time('short', timezone: false) }}
@@ -34,7 +36,7 @@
                         {{ item.createdAt|format_datetime('medium', 'short', timezone: false) }}
                     {%- endif -%}
                 </time>
-                {%- if transaction %}</a>{% endif %}
+                {%- if transaction_url %}</a>{% endif %}
             </span>
             <span class="ml-1 inline-flex flex-wrap gap-1 align-middle">{{ history.origin(item) }}</span>
         </p>

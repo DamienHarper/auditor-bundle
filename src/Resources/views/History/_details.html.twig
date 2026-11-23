@@ -81,8 +81,9 @@
     {% if first.userFirewall %}<span>{{ 'audit.history.firewall'|trans(domain='auditor') }} {{ first.userFirewall }}</span>{% endif %}
     {% if first.extraData.route is defined %}<span>route {{ first.extraData.route }}</span>{% endif %}
     <span>{{ 'audit.history.schema'|trans(domain='auditor') }} v{{ first.schemaVersion }}</span>
-    {% if first.transactionId %}
+    {% set transaction_url = first.transactionId ? dh_auditor_transaction_url(first.transactionId, root: root ?? null) : null %}
+    {% if transaction_url %}
         <a class="ml-auto font-sans text-xs font-medium text-indigo-600 hover:underline dark:text-indigo-400"
-           href="{{ path('dh_auditor_show_transaction_stream', {hash: first.transactionId}|merge(root is defined and root ? {root: root} : {})) }}">{{ 'audit.history.all_details'|trans(domain='auditor') }}</a>
+           href="{{ transaction_url }}">{{ 'audit.history.all_details'|trans(domain='auditor') }}</a>
     {% endif %}
 </div>

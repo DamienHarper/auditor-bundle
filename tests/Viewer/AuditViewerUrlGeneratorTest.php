@@ -96,6 +96,17 @@ final class AuditViewerUrlGeneratorTest extends KernelTestCase
         $this->assertNull($generator->generateUserUrl(''));
     }
 
+    public function testTransactionUrlKeepsTheHistoryItWasOpenedFrom(): void
+    {
+        $generator = $this->getGenerator();
+
+        $this->assertSame(
+            '/audit/transaction/01JABCDEFGHJKMNPQRSTVWXYZ0?root=App%5CEntity%5CPost:42',
+            $generator->generateTransactionUrl('01JABCDEFGHJKMNPQRSTVWXYZ0', root: 'App\Entity\Post:42'),
+        );
+        $this->assertSame('/audit/transaction/01JABCDEFGHJKMNPQRSTVWXYZ0', $generator->generateTransactionUrl('01JABCDEFGHJKMNPQRSTVWXYZ0', root: ''));
+    }
+
     public function testNoUrlWhenTheAuditorIsDisabled(): void
     {
         $generator = $this->getGenerator();

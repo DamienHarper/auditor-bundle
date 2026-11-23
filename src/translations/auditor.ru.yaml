@@ -162,6 +162,11 @@ audit:
     title: 'Что сделал(а) %name%'
     entities: '%count% тип объектов|%count% типа объектов|%count% типов объектов'
     on: 'Объект'
+  component:
+    title: 'Активность'
+    older: 'Более ранние'
+    open_in_viewer: 'Открыть в просмотрщике'
+    empty: 'Пока нет активности.'
 
 time_ago:
   seconds_ago: '{0} только что|{1} 1 секунду назад|]1,Inf[ %count% секунд назад'

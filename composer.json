@@ -61,6 +61,7 @@
     "symfony/framework-bundle": "^8.1",
     "symfony/messenger": "^8.1",
     "symfony/scheduler": "^8.1",
+    "symfony/ux-twig-component": "^2.30",
     "symfony/validator": "^8.1",
     "symfony/var-dumper": "^8.1",
     "symfonycasts/tailwind-bundle": "^1.0"
@@ -101,7 +102,8 @@
   "suggest": {
     "symfony/cache": "Required for activity graph caching in the audit viewer",
     "symfony/scheduler": "Required for scheduled audit logs pruning (providers.doctrine.retention.schedule)",
-    "dragonmantank/cron-expression": "Required for scheduled audit logs pruning (cron expressions)"
+    "dragonmantank/cron-expression": "Required for scheduled audit logs pruning (cron expressions)",
+    "symfony/ux-twig-component": "Required for the <twig:DhAuditor:History> component in the host application"
   },
   "extra": {
     "branch-alias": {

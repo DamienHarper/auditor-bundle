@@ -47,6 +47,10 @@ final class ViewerUrlExtensionTest extends KernelTestCase
         $this->assertSame('/audit/transaction/01JABCDEFGHJKMNPQRSTVWXYZ0', $this->render("{{ dh_auditor_transaction_url('01JABCDEFGHJKMNPQRSTVWXYZ0') }}"));
         $this->assertSame('/audit/user/42', $this->render('{{ dh_auditor_user_url(42) }}'));
         $this->assertSame('http://localhost/audit/user/42', $this->render('{{ dh_auditor_user_url(42, true) }}'));
+        $this->assertSame(
+            '/audit/transaction/01JABCDEFGHJKMNPQRSTVWXYZ0?root=App%5CEntity%5CPost:42',
+            $this->render("{{ dh_auditor_transaction_url('01JABCDEFGHJKMNPQRSTVWXYZ0', root: 'App\\\\Entity\\\\Post:42') }}"),
+        );
     }
 
     /**

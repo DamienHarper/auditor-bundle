@@ -33,10 +33,13 @@ final readonly class ViewerUrlExtension
         return $this->urlGenerator->generateEntityUrl($entity, $id, $filters, $this->referenceType($absolute));
     }
 
+    /**
+     * {{ dh_auditor_transaction_url(entry.transactionId) }}, {{ dh_auditor_transaction_url(id, root: 'App\\Entity\\Post:42') }}.
+     */
     #[AsTwigFunction('dh_auditor_transaction_url')]
-    public function transactionUrl(string $transactionId, bool $absolute = false): ?string
+    public function transactionUrl(string $transactionId, bool $absolute = false, ?string $root = null): ?string
     {
-        return $this->urlGenerator->generateTransactionUrl($transactionId, $this->referenceType($absolute));
+        return $this->urlGenerator->generateTransactionUrl($transactionId, $this->referenceType($absolute), $root);
     }
 
     #[AsTwigFunction('dh_auditor_user_url')]

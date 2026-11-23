@@ -322,3 +322,93 @@ called once per action: cache what it looks up.
 # config/services.yaml
 DH\AuditorBundle\History\AuthorNameResolverInterface: '@App\Audit\AuthorNameResolver'
 ```
+
+## 🧩 In the pages of your application
+
+The `<twig:DhAuditor:History>` component shows the history of an object in your own pages, next to its form for
+instance: the actions on the object and on the entities attached to it, told as phrases, most recent first. It needs
+`symfony/ux-twig-component`; the bundle only registers it when the package is installed.
+
+```bash
+composer require symfony/ux-twig-component
+```
+
+```twig
+<twig:DhAuditor:History :subject="post" />
+```
+
+| Option | Default | |
+|---|---|---|
+| `subject` | (required) | The audited entity |
+| `with` | `[]` | Elements of your application mixed with the actions (see below) |
+| `grouper` | one action per transaction | A `DH\Auditor\History\HistoryGrouper` with a key of your own |
+| `limit` | the page size of the viewer | Entries per page, more when needed to keep the last action whole |
+| `attached` | `true` | Whether the actions on the attached entities are included |
+| `details` | `false` | Technical details of the actions: `true`, or a role (`details="ROLE_ADMIN"`) |
+| `after` | from the query string | Cursor of the page to show (an invalid one is an error, unlike in the query string) |
+| `cursorParameter` | `dh_auditor_after` | Query string parameter of the cursor |
+
+Without access to the audits of its class (`roles.view`), with an object that is not audited or not persisted yet,
+the component shows no action.
+
+### Elements of your application
+
+Comments, notes or emails that are not audited can be mixed with the actions. They implement
+`DH\AuditorBundle\History\HistoryElementInterface`, whose sort key compares with the one of the audit entries
+(`Entry::getSortKey()`): build it with `SortKey::of()`.
+
+```php
+use DH\AuditorBundle\History\HistoryElementInterface;
+use DH\AuditorBundle\History\SortKey;
+
+final class Comment implements HistoryElementInterface
+{
+    // ...
+
+    public function getSortKey(): string
+    {
+        return SortKey::of($this->createdAt, 'comment-'.$this->id);
+    }
+}
+```
+
+```twig
+<twig:DhAuditor:History :subject="post" :with="post.comments">
+    <twig:block name="element">
+        <strong>{{ element.author }}</strong> · {{ element.createdAt|date }}
+        <p>{{ element.body }}</p>
+    </twig:block>
+</twig:DhAuditor:History>
+```
+
+The `element` block renders one element (`{{ element }}` by default, which needs a `__toString()` method); the `title`
+and `empty` blocks replace the
+heading and the text shown without any line.
+
+### Pages
+
+The component shows one page of actions. Its "Older" link reloads the current page with the cursor of the next one in
+the query string (`?dh_auditor_after=…`, the other parameters kept; the page the reader sees, also when the component is rendered by `render(controller())`); give two components on the same page their own
+`cursorParameter`. An element of your application is shown once, on the page whose actions surround it. In an
+application that uses Turbo, wrap the component in a `<turbo-frame>` to load the older actions in place.
+
+On the first page, the `data-dh-auditor-first-cursor` attribute of the component (`firstCursor` in PHP) holds the
+position of its most recent entry: read the actions recorded since with `RootQuery::fetch(since: $cursor)`, to push
+them with a Turbo Stream for instance. The attribute is absent while the history is empty.
+
+"Open in the viewer" leads to the history of the object in the viewer, when it is enabled.
+
+### Styling
+
+The component renders the rows of the viewer, styled with Tailwind CSS. With Tailwind 4 in your application, add the
+bundle templates to the sources of its stylesheet (the path below is relative to `assets/styles/app.css`):
+
+```css
+@source "../../vendor/damienharper/auditor-bundle/src/Resources/views";
+```
+
+The `dark:` classes of the bundle follow a `dark` class on an ancestor (`@variant dark (&:where(.dark, .dark *));` in
+the viewer stylesheet): declare the same variant to switch them with your theme rather than with the system setting.
+
+Otherwise, override `@DHAuditor/Component/History.html.twig` and the templates of `@DHAuditor/History/` it renders
+(`_row`, `_macros`, `_details`, `phrase`, `object_reference`) under `templates/bundles/DHAuditorBundle/`.
