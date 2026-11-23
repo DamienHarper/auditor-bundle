@@ -196,6 +196,13 @@ final class HistoryPhraserTest extends TestCase
         ], $this->describeParts($phrase), 'Text, values and object references, joined by the separators of the phraser.');
     }
 
+    public function testAnAssociationWithoutIdentifierIsAValue(): void
+    {
+        $this->assertSame(['set Author: ', '[Alice]'], self::describeParts($this->phraser()->phrase($this->item(
+            self::entry('update', Post::class, '1', ['author' => ['old' => null, 'new' => ['class' => 'App\\Entity\\Author', 'id' => null, 'label' => 'Alice']]]),
+        ))));
+    }
+
     public function testPartsOfATranslatedPhrase(): void
     {
         $phraser = $this->phraser('en', [Post::class.'.created' => 'created the <article> {label}']);
