@@ -406,7 +406,7 @@ final class HistoryPhraserTest extends TestCase
     public function testAToldChangeIsNotDescribedAgain(): void
     {
         $title = new class implements ChangeDescriberInterface {
-            public function describe(Change $change, HistoryItem $item): ?Phrase
+            public function describe(Change $change, HistoryItem $item): Phrase
             {
                 $body = array_find($item->getChanges(), static fn (Change $other): bool => 'body' === $other->field);
 
@@ -414,7 +414,7 @@ final class HistoryPhraserTest extends TestCase
             }
         };
         $body = new class implements ChangeDescriberInterface {
-            public function describe(Change $change, HistoryItem $item): ?Phrase
+            public function describe(Change $change, HistoryItem $item): Phrase
             {
                 return Phrase::of('rewrote the body');
             }
@@ -434,7 +434,7 @@ final class HistoryPhraserTest extends TestCase
     public function testTheIconOfAMainChangeToldByAnotherFragment(): void
     {
         $describer = new class implements ChangeDescriberInterface {
-            public function describe(Change $change, HistoryItem $item): ?Phrase
+            public function describe(Change $change, HistoryItem $item): Phrase
             {
                 $body = array_find($item->getChanges(), static fn (Change $other): bool => 'body' === $other->field);
 

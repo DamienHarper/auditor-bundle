@@ -46,6 +46,7 @@ final class ValueFormatterTest extends TestCase
         yield 'int enum, not a number' => ['en', 'priority', 'x', 'x'];
 
         yield 'string enum stored as an int' => ['en', 'kind', 7, '7'];
+
         yield 'numeric string enum stored as an int' => ['en', 'status', 3, 'Legacy'];
 
         yield 'boolean stored as a string' => ['en', 'featured', 'false', 'no'];
