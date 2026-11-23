@@ -21,6 +21,8 @@ use DH\AuditorBundle\DHAuditorBundle;
 use DH\AuditorBundle\Event\ConsoleEventSubscriber;
 use DH\AuditorBundle\Messenger\BlameContextMiddleware;
 use DH\AuditorBundle\Tests\Fixtures\Provider\StubProviderA;
+use DH\AuditorBundle\Tests\Fixtures\User\CustomUserProvider;
+use DH\AuditorBundle\User\ConsoleUserProvider;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Nyholm\BundleTest\TestKernel;
 use PHPUnit\Framework\Assert;
@@ -29,7 +31,13 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\LazyCommand;
+use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\Event\ConsoleTerminateEvent;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -194,6 +202,48 @@ final class DHAuditorBundleTest extends KernelTestCase
         Assert::assertInstanceOf(Auditor::class, $auditor);
 
         $this->assertTrue($auditor->hasProvider(StubProviderA::class), 'Custom provider tagged with dh_auditor.provider must be auto-registered with Auditor');
+    }
+
+    public function testConfiguredUserProviderIsRestoredAfterACommand(): void
+    {
+        self::bootKernel(['config' => static function (TestKernel $kernel): void {
+            $kernel->setClearCacheAfterShutdown(false);
+            $kernel->addTestBundle(DoctrineBundle::class);
+            $kernel->addTestBundle(SecurityBundle::class);
+            $kernel->addTestBundle(TwigBundle::class);
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/dh_auditor.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/doctrine.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/security.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/custom_user_provider.yaml');
+        }]);
+
+        $container = self::getContainer();
+        $configuration = $container->get(AuditorConfiguration::class);
+        Assert::assertInstanceOf(AuditorConfiguration::class, $configuration);
+        $customUserProvider = $container->get('app.custom_user_provider');
+        $this->assertInstanceOf(CustomUserProvider::class, $customUserProvider);
+        $this->assertSame($customUserProvider, $configuration->getUserProvider(), 'The configured user provider is set on the auditor configuration.');
+
+        $dispatcher = $container->get('event_dispatcher');
+        Assert::assertInstanceOf(EventDispatcherInterface::class, $dispatcher);
+        $command = new Command('app:test');
+        $input = new ArrayInput([]);
+        $output = new NullOutput();
+
+        $dispatcher->dispatch(new ConsoleCommandEvent($command, $input, $output), ConsoleEvents::COMMAND);
+        $consoleUserProvider = $configuration->getUserProvider();
+        $this->assertInstanceOf(ConsoleUserProvider::class, $consoleUserProvider, 'The console user provider is used while the command runs.');
+
+        // a command run from another one
+        $innerCommand = new Command('app:inner');
+        $dispatcher->dispatch(new ConsoleCommandEvent($innerCommand, $input, $output), ConsoleEvents::COMMAND);
+        $this->assertSame('app:inner', $consoleUserProvider()?->identifier);
+        $dispatcher->dispatch(new ConsoleTerminateEvent($innerCommand, $input, $output, Command::SUCCESS), ConsoleEvents::TERMINATE);
+        $this->assertSame($consoleUserProvider, $configuration->getUserProvider(), 'The outer command still runs: the console user provider stays.');
+        $this->assertSame('app:test', $consoleUserProvider()?->identifier, 'The outer command is blamed again.');
+
+        $dispatcher->dispatch(new ConsoleTerminateEvent($command, $input, $output, Command::SUCCESS), ConsoleEvents::TERMINATE);
+        $this->assertSame($customUserProvider, $configuration->getUserProvider(), 'The configured user provider is restored once the command ends, not the default one.');
     }
 
     public function testBundleBootsWithNoProviders(): void

@@ -89,6 +89,9 @@ public function __invoke(): ?UserInterface
 - `doctrine:fixtures:load` - Fixtures loading
 - `app:sync-products` - Sync command
 
+While a command runs, the console user provider replaces the configured `user_provider`; the configured one is
+restored when the command ends.
+
 ## 🔧 Creating a Custom Provider
 
 ### Basic Example
