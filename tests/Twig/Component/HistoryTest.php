@@ -8,7 +8,6 @@ use DH\Auditor\History\HistoryGrouper;
 use DH\Auditor\Model\Entry;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
-use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
 use DH\AuditorBundle\Tests\Fixtures\History\Note;
@@ -143,13 +142,16 @@ final class HistoryTest extends KernelTestCase
 
     public function testNoHistoryWhenItCannotBeViewed(): void
     {
-        $author = $this->provider->getAuditingServiceForEntity(Author::class)->getEntityManager()->find(Author::class, 1);
-        $this->assertInstanceOf(Author::class, $author);
+        $configuration = $this->provider->getAuditor()->getConfiguration();
+        $configuration->setRoleChecker(static fn (): bool => true);
+        $this->assertGreaterThan(0, $this->render(['subject' => $this->post()])->filter('[data-dh-auditor-action]')->count());
 
-        $crawler = $this->render(['subject' => $author, 'with' => [new Note('a', '0001')]]);
+        $configuration->setRoleChecker(static fn (): bool => false);
+        $crawler = $this->render(['subject' => $this->post(), 'with' => [new Note('a', '0001')]]);
 
-        $this->assertCount(0, $crawler->filter('[data-dh-auditor-action]'), 'Author audits need roles the reader does not have.');
-        $this->assertCount(1, $crawler->filter('[data-dh-auditor-element]'));
+        $this->assertCount(0, $crawler->filter('[data-dh-auditor-action]'));
+        $this->assertCount(1, $crawler->filter('[data-dh-auditor-element]'), 'The elements of the application are still shown.');
+        $this->assertNull($crawler->filter('section')->attr('data-dh-auditor-first-cursor'));
     }
 
     public function testDetails(): void
