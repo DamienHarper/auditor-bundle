@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\DependencyInjection\Compiler;
 
 use DH\AuditorBundle\Attribute\AsChangeDescriber;
+use DH\AuditorBundle\History\ChangeDescriberInterface;
 use DH\AuditorBundle\History\HistoryPhraser;
 use DH\AuditorBundle\Tests\DependencyInjection\Compiler\RegisterChangeDescribersCompilerPassTest;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -32,6 +33,11 @@ final class RegisterChangeDescribersCompilerPass implements CompilerPassInterfac
 
         $describers = [];
         foreach ($container->findTaggedServiceIds(self::TAG) as $id => $tags) {
+            $class = $container->getReflectionClass($container->findDefinition($id)->getClass(), false);
+            if (!$class?->implementsInterface(ChangeDescriberInterface::class)) {
+                throw new InvalidArgumentException(\sprintf('The service "%s" is tagged "%s" but does not implement %s.', $id, self::TAG, ChangeDescriberInterface::class));
+            }
+
             foreach ($tags as $attributes) {
                 $attributes = \is_array($attributes) ? $attributes : [];
                 $entity = $attributes['entity'] ?? null;
@@ -40,7 +46,11 @@ final class RegisterChangeDescribersCompilerPass implements CompilerPassInterfac
                 }
 
                 $field = $attributes['field'] ?? null;
-                $key = \is_string($field) && '' !== $field ? $entity.'::'.$field : $entity;
+                if (null !== $field && (!\is_string($field) || '' === $field)) {
+                    throw new InvalidArgumentException(\sprintf('The "field" attribute of the "%s" tag of service "%s" must be a field name; leave it out to describe the whole entity.', self::TAG, $id));
+                }
+
+                $key = null === $field ? $entity : $entity.'::'.$field;
                 if (isset($describers[$key])) {
                     throw new InvalidArgumentException(\sprintf('The services "%s" and "%s" both describe the changes of %s.', $describers[$key], $id, $key));
                 }

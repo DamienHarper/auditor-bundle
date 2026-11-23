@@ -7,7 +7,6 @@ namespace DH\AuditorBundle\Tests\Fixtures\History;
 use DH\Auditor\Model\Entry;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use DH\AuditorBundle\History\HistoryPhraser;
-use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\ManagerRegistry;
@@ -21,10 +20,11 @@ use Symfony\Component\Translation\Translator;
 trait HistoryFixtures
 {
     /**
-     * @param array<string, string> $messages application messages of the "dh_auditor_history" domain (ICU)
-     * @param array<string, string> $fields   application messages of the "dh_auditor_fields" domain (ICU)
+     * @param array<string, string>                $messages application messages of the "dh_auditor_history" domain (ICU)
+     * @param array<string, string>                $fields   application messages of the "dh_auditor_fields" domain (ICU)
+     * @param array<string, array<string, string>> $plain    application messages without ICU, by domain then key
      */
-    private static function translator(string $locale = 'en', array $messages = [], array $fields = []): Translator
+    private static function translator(string $locale = 'en', array $messages = [], array $fields = [], array $plain = []): Translator
     {
         $translator = new Translator($locale);
         $translator->addLoader('yaml', new YamlFileLoader());
@@ -35,12 +35,15 @@ trait HistoryFixtures
 
         $translator->addResource('array', $messages, $locale, HistoryPhraser::DOMAIN.'+intl-icu');
         $translator->addResource('array', $fields, $locale, 'dh_auditor_fields+intl-icu');
+        foreach ($plain as $domain => $plainMessages) {
+            $translator->addResource('array', $plainMessages, $locale, $domain);
+        }
 
         return $translator;
     }
 
     /**
-     * A registry knowing the metadata of Post (the fields are made up, only their mapping is read): status (enum, translatable), kind (enum), featured
+     * A registry knowing the metadata of Post (the fields are made up, only their mapping is read): status (enum, translatable), kind (enum), priority (int enum in a bigint column), startsAt (time), featured
      * (boolean), publishedAt (datetime_immutable), deadline (date_immutable), body (text), title (string).
      */
     private function registry(): ManagerRegistry
@@ -50,14 +53,13 @@ trait HistoryFixtures
         $metadata->mapField(['fieldName' => 'body', 'type' => 'text']);
         $metadata->mapField(['fieldName' => 'status', 'type' => 'string', 'enumType' => PostStatus::class]);
         $metadata->mapField(['fieldName' => 'kind', 'type' => 'string', 'enumType' => PostKind::class]);
+        $metadata->mapField(['fieldName' => 'priority', 'type' => 'bigint', 'enumType' => PostPriority::class]);
+        $metadata->mapField(['fieldName' => 'startsAt', 'type' => 'time_immutable']);
         $metadata->mapField(['fieldName' => 'featured', 'type' => 'boolean']);
         $metadata->mapField(['fieldName' => 'publishedAt', 'type' => 'datetime_immutable']);
         $metadata->mapField(['fieldName' => 'deadline', 'type' => 'date_immutable']);
 
-        $connection = DriverManager::getConnection(['driver' => 'pdo_sqlite', 'memory' => true]);
-
         $manager = $this->createStub(EntityManagerInterface::class);
-        $manager->method('getConnection')->willReturn($connection);
         $manager->method('getClassMetadata')->willReturn($metadata);
 
         $registry = $this->createStub(ManagerRegistry::class);

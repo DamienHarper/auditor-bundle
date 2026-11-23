@@ -18,8 +18,9 @@ final readonly class Fragment implements \Stringable
     /**
      * @param list<PhrasePart> $parts   text, values and object references, in reading order
      * @param list<Change>     $changes changes told by the fragment
-     * @param null|string      $icon    name of the icon of the fragment: created, snapshot, deleted, edited, status,
-     *                                  toggle, text, added, removed, json (or any name a describer gives)
+     * @param null|string      $icon    name of the icon of the fragment; the bundle uses created, snapshot, deleted,
+     *                                  edited, status, toggle, text, added, removed and json, and a describer may give
+     *                                  another name its templates know
      */
     public function __construct(
         public array $parts,

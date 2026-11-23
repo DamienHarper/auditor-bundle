@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\Tests\DependencyInjection\Compiler;
 
 use DH\AuditorBundle\DependencyInjection\Compiler\RegisterChangeDescribersCompilerPass;
+use DH\AuditorBundle\History\ChangeDescriberInterface;
 use DH\AuditorBundle\History\HistoryPhraser;
+use DH\AuditorBundle\Tests\Fixtures\History\PostTitleDescriber;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractCompilerPassTestCase;
 use PHPUnit\Framework\Attributes\Small;
 use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
@@ -22,7 +24,7 @@ final class RegisterChangeDescribersCompilerPassTest extends AbstractCompilerPas
 {
     public function testNothingWithoutPhraser(): void
     {
-        $this->setDefinition('app.describer', new Definition()->addTag(RegisterChangeDescribersCompilerPass::TAG, ['entity' => 'App\Entity\Post']));
+        $this->setDefinition('app.describer', new Definition(PostTitleDescriber::class)->addTag(RegisterChangeDescribersCompilerPass::TAG, ['entity' => 'App\Entity\Post']));
 
         $this->compile();
 
@@ -32,8 +34,8 @@ final class RegisterChangeDescribersCompilerPassTest extends AbstractCompilerPas
     public function testDescribersAreLocatedByEntityAndField(): void
     {
         $this->setDefinition(HistoryPhraser::class, new Definition(HistoryPhraser::class));
-        $this->setDefinition('app.post_describer', new Definition()->addTag(RegisterChangeDescribersCompilerPass::TAG, ['entity' => 'App\Entity\Post']));
-        $this->setDefinition('app.status_describer', new Definition()
+        $this->setDefinition('app.post_describer', new Definition(PostTitleDescriber::class)->addTag(RegisterChangeDescribersCompilerPass::TAG, ['entity' => 'App\Entity\Post']));
+        $this->setDefinition('app.status_describer', new Definition(PostTitleDescriber::class)
             ->addTag(RegisterChangeDescribersCompilerPass::TAG, ['entity' => 'App\Entity\Post', 'field' => 'status'])
             ->addTag(RegisterChangeDescribersCompilerPass::TAG, ['entity' => 'App\Entity\Ticket', 'field' => 'status']));
 
@@ -53,8 +55,8 @@ final class RegisterChangeDescribersCompilerPassTest extends AbstractCompilerPas
     public function testTwoDescribersForTheSameField(): void
     {
         $this->setDefinition(HistoryPhraser::class, new Definition(HistoryPhraser::class));
-        $this->setDefinition('app.a', new Definition()->addTag(RegisterChangeDescribersCompilerPass::TAG, ['entity' => 'App\Entity\Post', 'field' => 'status']));
-        $this->setDefinition('app.b', new Definition()->addTag(RegisterChangeDescribersCompilerPass::TAG, ['entity' => 'App\Entity\Post', 'field' => 'status']));
+        $this->setDefinition('app.a', new Definition(PostTitleDescriber::class)->addTag(RegisterChangeDescribersCompilerPass::TAG, ['entity' => 'App\Entity\Post', 'field' => 'status']));
+        $this->setDefinition('app.b', new Definition(PostTitleDescriber::class)->addTag(RegisterChangeDescribersCompilerPass::TAG, ['entity' => 'App\Entity\Post', 'field' => 'status']));
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageIsOrContains('The services "app.a" and "app.b" both describe the changes of App\Entity\Post::status.');
@@ -65,10 +67,32 @@ final class RegisterChangeDescribersCompilerPassTest extends AbstractCompilerPas
     public function testEntityIsRequired(): void
     {
         $this->setDefinition(HistoryPhraser::class, new Definition(HistoryPhraser::class));
-        $this->setDefinition('app.a', new Definition()->addTag(RegisterChangeDescribersCompilerPass::TAG));
+        $this->setDefinition('app.a', new Definition(PostTitleDescriber::class)->addTag(RegisterChangeDescribersCompilerPass::TAG));
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessageIsOrContains('The "dh_auditor.change_describer" tag of service "app.a" needs an "entity" attribute.');
+
+        $this->compile();
+    }
+
+    public function testTheServiceMustBeADescriber(): void
+    {
+        $this->setDefinition(HistoryPhraser::class, new Definition(HistoryPhraser::class));
+        $this->setDefinition('app.a', new Definition(\stdClass::class)->addTag(RegisterChangeDescribersCompilerPass::TAG, ['entity' => 'App\Entity\Post']));
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageIsOrContains(\sprintf('The service "app.a" is tagged "dh_auditor.change_describer" but does not implement %s.', ChangeDescriberInterface::class));
+
+        $this->compile();
+    }
+
+    public function testAnEmptyFieldIsRefused(): void
+    {
+        $this->setDefinition(HistoryPhraser::class, new Definition(HistoryPhraser::class));
+        $this->setDefinition('app.a', new Definition(PostTitleDescriber::class)->addTag(RegisterChangeDescribersCompilerPass::TAG, ['entity' => 'App\Entity\Post', 'field' => '']));
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageIsOrContains('The "field" attribute of the "dh_auditor.change_describer" tag of service "app.a" must be a field name; leave it out to describe the whole entity.');
 
         $this->compile();
     }

@@ -6,3 +6,6 @@ services:
   DH\AuditorBundle\Tests\App\Command\CreatePostCommand:
 
   DH\AuditorBundle\Tests\Fixtures\History\PostTitleDescriber:
+
+  DH\AuditorBundle\Tests\Fixtures\History\AuthorNameResolver:
+  DH\AuditorBundle\History\AuthorNameResolverInterface: '@DH\AuditorBundle\Tests\Fixtures\History\AuthorNameResolver'

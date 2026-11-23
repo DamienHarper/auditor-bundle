@@ -39,6 +39,24 @@ final class ValueFormatterTest extends TestCase
 
         yield 'unknown enum case' => ['en', 'kind', 'gone', 'gone'];
 
+        yield 'int enum stored as a string' => ['en', 'priority', '2', 'High'];
+
+        yield 'int enum stored as an int' => ['en', 'priority', 1, 'Low'];
+
+        yield 'int enum, not a number' => ['en', 'priority', 'x', 'x'];
+
+        yield 'string enum stored as an int' => ['en', 'kind', 7, '7'];
+
+        yield 'boolean stored as a string' => ['en', 'featured', 'false', 'no'];
+
+        yield 'boolean stored as a letter' => ['fr', 'featured', 't', 'oui'];
+
+        yield 'boolean not readable' => ['en', 'featured', 'maybe', 'maybe'];
+
+        yield 'time' => ['en', 'startsAt', '18:41:00', '6:41 PM'];
+
+        yield 'date stored as a timestamp' => ['en', 'deadline', 1_764_460_800, '1764460800'];
+
         yield 'boolean true' => ['fr', 'featured', true, 'oui'];
 
         yield 'boolean stored as an integer' => ['en', 'featured', 0, 'no'];
@@ -60,6 +78,8 @@ final class ValueFormatterTest extends TestCase
         yield 'unmapped field' => ['en', 'unknown', 'raw', 'raw'];
 
         yield 'array' => ['en', 'unknown', ['a' => 1], '{"a":1}'];
+
+        yield 'array with invalid UTF-8' => ['en', 'unknown', ['a' => "b\xB1"], "{\"a\":\"b\u{FFFD}\"}"];
     }
 
     public function testRawValueWithoutMetadata(): void

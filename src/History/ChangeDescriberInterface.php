@@ -13,14 +13,18 @@ use DH\AuditorBundle\Attribute\AsChangeDescriber;
  * whole action (the other changes, the raw entries) through the history item.
  *
  * Register it with #[AsChangeDescriber(entity: Post::class, field: 'status')]; without field, it describes every change
- * of the entity that no field describer takes, the creation and the deletion included.
+ * of the entity that no field describer tells (a field describer returning null hands the change to it), the creation
+ * and the deletion included.
+ *
+ * A fragment tells the changes it lists, the described one when it lists none; the changes listed are not told again.
  *
  * @see AsChangeDescriber
  */
 interface ChangeDescriberInterface
 {
     /**
-     * @return null|Phrase the fragments telling the change, or null for the default phrase
+     * @return null|Phrase the fragments telling the change, or null (or an empty phrase) to hand it on: to the describer
+     *                     of the entity, then to the translated or default phrase
      */
     public function describe(Change $change, HistoryItem $item): ?Phrase;
 }

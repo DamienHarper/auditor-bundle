@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\History;
 
 use DH\AuditorBundle\Tests\History\ValueFormatterTest;
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -20,8 +19,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  *
  * Diffs hold the values as the database stores them (Type::convertToDatabaseValue()): the Doctrine mapping of the
  * field tells how to read them back. An enum gives its label when it implements TranslatableInterface (its value
- * otherwise), a date the medium format of the locale, a boolean "yes" or "no", no value "empty". A field without
- * mapping keeps its raw value.
+ * otherwise), a date, time or datetime the format of the locale (medium date, short time), a boolean "yes" or "no",
+ * no value "empty". A field without mapping, or a value that cannot be read as its type, keeps its raw value.
+ *
+ * @internal used by HistoryPhraser; applications label values with #[DiffLabel] or TranslatableInterface enums
  *
  * @see ValueFormatterTest
  */
@@ -64,26 +65,26 @@ final readonly class ValueFormatter
             return $this->trans($value ? 'value.yes' : 'value.no');
         }
 
-        [$mapping, $connection] = $this->mapping($entity, $field);
+        $mapping = $this->mapping($entity, $field);
 
         return match (true) {
             !$mapping instanceof FieldMapping => $this->string($value),
             null !== $mapping->enumType => $this->formatEnum($mapping->enumType, $value),
-            Types::BOOLEAN === $mapping->type => $this->trans((bool) $value ? 'value.yes' : 'value.no'),
-            $connection instanceof Connection && \in_array($mapping->type, [...self::DATE_TYPES, ...self::TIME_TYPES, ...self::DATETIME_TYPES], true) => $this->formatDate($mapping->type, $value, $connection),
+            Types::BOOLEAN === $mapping->type => $this->formatBoolean($value),
+            \in_array($mapping->type, [...self::DATE_TYPES, ...self::TIME_TYPES, ...self::DATETIME_TYPES], true) => $this->formatDate($mapping->type, $value),
             default => $this->string($value),
         };
     }
 
     /**
-     * Kind of value of a field: "enum" for an enum, otherwise the Doctrine type ("boolean", "text"…); null for a field
-     * Doctrine does not map.
+     * Kind of value of a field: "enum" for an enum, otherwise the Doctrine type ("boolean", "text"…); null for an
+     * association or a property Doctrine does not map as a field.
      *
      * @param class-string|string $entity
      */
     public function typeOf(string $entity, string $field): ?string
     {
-        [$mapping] = $this->mapping($entity, $field);
+        $mapping = $this->mapping($entity, $field);
         if (!$mapping instanceof FieldMapping) {
             return null;
         }
@@ -130,19 +131,12 @@ final readonly class ValueFormatter
 
     /**
      * @param class-string|string $entity
-     *
-     * @return array{0: ?FieldMapping, 1: ?Connection}
      */
-    private function mapping(string $entity, string $field): array
+    private function mapping(string $entity, string $field): ?FieldMapping
     {
         $metadata = $this->metadata($entity);
-        if (!$metadata instanceof ClassMetadata || !$metadata->hasField($field)) {
-            return [null, null];
-        }
 
-        $manager = $this->registry->getManagerForClass($metadata->getName());
-
-        return [$metadata->getFieldMapping($field), $manager instanceof EntityManagerInterface ? $manager->getConnection() : null];
+        return $metadata instanceof ClassMetadata && $metadata->hasField($field) ? $metadata->getFieldMapping($field) : null;
     }
 
     /**
@@ -167,7 +161,20 @@ final readonly class ValueFormatter
      */
     private function formatEnum(string $enumType, mixed $value): string
     {
-        $case = is_subclass_of($enumType, \BackedEnum::class) && (\is_int($value) || \is_string($value)) ? $enumType::tryFrom($value) : null;
+        $case = null;
+        if (is_subclass_of($enumType, \BackedEnum::class)) {
+            // the stored value may not have the type of the enum: an int enum in a bigint column is stored as a string
+            $backing = (string) new \ReflectionEnum($enumType)->getBackingType();
+            $value = match (true) {
+                'int' === $backing && \is_string($value) && 1 === preg_match('/^-?\d+$/', $value) => (int) $value,
+                'string' === $backing && \is_int($value) => (string) $value,
+                default => $value,
+            };
+
+            if (('int' === $backing && \is_int($value)) || ('string' === $backing && \is_string($value))) {
+                $case = $enumType::tryFrom($value);
+            }
+        }
 
         return match (true) {
             $case instanceof TranslatableInterface => $case->trans($this->translator, $this->locale()),
@@ -176,16 +183,33 @@ final readonly class ValueFormatter
         };
     }
 
-    private function formatDate(string $type, mixed $value, Connection $connection): string
+    /**
+     * A boolean stored as such, as 0 or 1, or as a word ("true", "f"…); its raw value when it reads as none of them.
+     */
+    private function formatBoolean(mixed $value): string
     {
-        try {
-            $date = $connection->convertToPHPValue($value, $type);
-        } catch (\Throwable) {
+        $boolean = \is_string($value) && 1 === mb_strlen($value) ? match (mb_strtolower($value)) {
+            't', 'y' => true,
+            'f', 'n' => false,
+            default => null,
+        } : filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE);
+
+        return null === $boolean ? $this->string($value) : $this->trans($boolean ? 'value.yes' : 'value.no');
+    }
+
+    /**
+     * Reads the date as the database stored it (no connection is needed) and formats it for the locale.
+     */
+    private function formatDate(string $type, mixed $value): string
+    {
+        if (!\is_string($value)) {
             return $this->string($value);
         }
 
-        if (!$date instanceof \DateTimeInterface) {
-            return $this->string($value);
+        try {
+            $date = new \DateTimeImmutable($value);
+        } catch (\DateMalformedStringException) {
+            return $value;
         }
 
         $formatter = new \IntlDateFormatter(
@@ -214,7 +238,7 @@ final readonly class ValueFormatter
             return (false === $short ? $value['class'] : mb_substr($short, 1)).' #'.$this->string($value['id']);
         }
 
-        return json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION) ?: '';
+        return $this->json($value);
     }
 
     private function string(mixed $value): string
@@ -224,8 +248,15 @@ final readonly class ValueFormatter
             \is_int($value), \is_float($value) => (string) $value,
             \is_bool($value) => $value ? '1' : '0',
             $value instanceof \Stringable => (string) $value,
-            default => json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '',
+            default => $this->json($value),
         };
+    }
+
+    private function json(mixed $value): string
+    {
+        $json = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR);
+
+        return false === $json ? $this->trans('value.unreadable') : $json;
     }
 
     private function trans(string $key): string

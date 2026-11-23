@@ -24,6 +24,7 @@ final readonly class ViewerObjectUrlResolver implements ObjectUrlResolverInterfa
 
     public function resolve(ObjectReference $reference): ?ObjectUrl
     {
+        // the class of an audit entry may no longer exist; the URL generator also needs a class-string
         if (!class_exists($reference->class)) {
             return null;
         }

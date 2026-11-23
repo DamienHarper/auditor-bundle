@@ -7,6 +7,7 @@ namespace DH\AuditorBundle\History;
 use DH\Auditor\Contract\FieldLabelResolverInterface;
 use DH\Auditor\History\BlameOrigin;
 use DH\Auditor\History\Change;
+use DH\Auditor\History\ChangeExtractor;
 use DH\Auditor\History\ChangeKind;
 use DH\Auditor\History\HistoryItem;
 use DH\Auditor\Model\Entry;
@@ -27,7 +28,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  * Each change gives a fragment, in this order: the changes of the root before those of the attached objects
  * (Entry::$rootPath), then the order of the action, the fields of an entry in the order of their mapping. A fragment
  * comes from, in turn:
- * - a ChangeDescriberInterface service registered for the entity and the field, then for the entity;
+ * - a ChangeDescriberInterface service registered for the entity and the field, then for the entity (the changes the
+ *   fragments of a describer list are not told again);
  * - the phrase of the application in the "dh_auditor_history" domain (ICU), keyed "FQCN.kind" for the creation,
  *   snapshot and deletion ("App\Entity\Post.created") and "FQCN.field.kind" for a field ("App\Entity\Post.status.changed");
  * - the neutral phrase of the bundle ("default.kind").
@@ -39,7 +41,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  * The phrases get these ICU parameters: {label} (the object label, or "#id"), {old}, {new} (formatted values), {names}
  * (collection elements, or the changed paths of a JSON field, as "a, b and c"), {count} (number of elements or
  * objects), {field} (field label, "dh_auditor_fields" domain), {entity} (entity name: key "FQCN" of the
- * "dh_auditor_fields" domain, given {count}; the short class name otherwise). They are inserted after the
+ * "dh_auditor_fields" domain, translated with the number of objects of a summary, 1 otherwise; the short class name
+ * without translation). They are inserted after the
  * translation, as parts of the fragment: {label}, the associated objects of {old} and {new} and the elements of
  * {names} as object references, the other values as values, {field} and {entity} as text.
  *
@@ -52,12 +55,12 @@ final readonly class HistoryPhraser
     /**
      * Beyond this number of objects of the same entity changed the same way, an action tells how many, not which.
      */
-    public const int BULK_THRESHOLD = 5;
+    private const int BULK_THRESHOLD = 5;
 
     /**
      * Beyond this number of names, a list tells the first ones and how many others.
      */
-    public const int MAX_NAMES = 5;
+    private const int MAX_NAMES = 5;
 
     private const string FIELDS_DOMAIN = TranslatedFieldLabelResolver::DOMAIN;
 
@@ -71,9 +74,11 @@ final readonly class HistoryPhraser
 
     /**
      * @param null|ContainerInterface $describers ChangeDescriberInterface services by "FQCN::field" or "FQCN"
+     *
+     * @internal the bundle builds this service: use it, do not build it
      */
     public function __construct(
-        private TranslatorInterface $translator,
+        private TranslatorBagInterface&TranslatorInterface $translator,
         private FieldLabelResolverInterface $fieldLabelResolver,
         private ValueFormatter $values,
         private ?ContainerInterface $describers = null,
@@ -89,15 +94,20 @@ final readonly class HistoryPhraser
         foreach ($this->groups($item) as $group) {
             $described = $group['described'];
             $groupFragments = $described->fragments ?? [$this->fragment($group['changes'], $group['bulk'])];
+            $toldChanges = array_merge(...array_map(static fn (Fragment $fragment): array => $fragment->changes, $groupFragments));
 
-            if (null === $icon && $mainChange instanceof Change && \in_array($mainChange, $group['changes'], true)) {
+            if (null === $icon && $mainChange instanceof Change && \in_array($mainChange, $toldChanges, true)) {
                 $icon = $described->icon ?? $groupFragments[0]->icon ?? null;
             }
 
             array_push($fragments, ...$groupFragments);
         }
 
-        return new Phrase($fragments, $icon ?? $fragments[0]->icon ?? null, $this->trans('list.separator'), $this->trans('list.and'));
+        if ([] === $fragments) {
+            $fragments[] = $this->unreadable($item);
+        }
+
+        return new Phrase($fragments, $icon ?? $fragments[0]->icon, $this->trans('list.separator'), $this->trans('list.and'));
     }
 
     /**
@@ -112,7 +122,7 @@ final readonly class HistoryPhraser
                 return $this->authorNameResolver->resolve($userId, $item) ?? $this->trans('author.deleted');
             }
 
-            return $item->username ?? $this->trans('author.unknown', ['id' => (string) $userId]);
+            return null !== $item->username && '' !== $item->username ? $item->username : $this->trans('author.unknown', ['{id}' => (string) $userId]);
         }
 
         if (null !== $item->username && '' !== $item->username) {
@@ -124,6 +134,23 @@ final readonly class HistoryPhraser
             BlameOrigin::Http => $this->trans('author.anonymous'),
             default => $this->trans('author.system'),
         };
+    }
+
+    /**
+     * The fragment of an action whose entries hold no change the extractor can read (an empty diff, a format it does
+     * not know): "changed Post “Why audit?”".
+     */
+    private function unreadable(HistoryItem $item): Fragment
+    {
+        $entry = $item->entries[0];
+        $entity = ChangeExtractor::entityOf($entry);
+        $source = $entry->getDiffSource() ?? [];
+        $label = \is_string($source['label'] ?? null) ? $source['label'] : '#'.$entry->objectId;
+
+        return new Fragment($this->message(['default.unknown'], [
+            'entity' => [new TextPart($this->entityName($entity, 1))],
+            'label' => [new ObjectReference($entity, $entry->objectId, ValueFormatter::truncate($label))],
+        ]), [], 'edited');
     }
 
     /**
@@ -139,13 +166,29 @@ final readonly class HistoryPhraser
     {
         $changes = $this->ordered($item->getChanges());
 
+        // a describer tells its change, and the other changes its fragments list: those are not told again
         $described = [];
+        $told = [];
         foreach ($changes as $index => $change) {
+            if (isset($told[spl_object_id($change)])) {
+                continue;
+            }
+
             $phrase = $this->describe($change, $item);
-            if ($phrase instanceof Phrase) {
-                $described[$index] = $phrase;
+            if (!$phrase instanceof Phrase) {
+                continue;
+            }
+
+            $fragments = array_map(static fn (Fragment $fragment): Fragment => [] === $fragment->changes ? new Fragment($fragment->parts, [$change], $fragment->icon) : $fragment, $phrase->fragments);
+            $described[$index] = new Phrase($fragments, $phrase->icon);
+            foreach ($fragments as $fragment) {
+                foreach ($fragment->changes as $toldChange) {
+                    $told[spl_object_id($toldChange)] = true;
+                }
             }
         }
+
+        $changes = array_filter($changes, static fn (Change $change, int $index): bool => isset($described[$index]) || !isset($told[spl_object_id($change)]), ARRAY_FILTER_USE_BOTH);
 
         // more than BULK_THRESHOLD objects with the same entity, kind and field: one summary, where the first one was
         $objects = [];
@@ -266,7 +309,7 @@ final readonly class HistoryPhraser
 
             $describer = $this->describers->get($id);
             if (!$describer instanceof ChangeDescriberInterface) {
-                continue;
+                throw new \LogicException(\sprintf('The change describer of %s is a %s, not a %s.', $id, get_debug_type($describer), ChangeDescriberInterface::class));
             }
 
             $phrase = $describer->describe($change, $item);
@@ -434,13 +477,15 @@ final readonly class HistoryPhraser
         $marked = [];
         $inserted = [];
         foreach ($parameters as $name => $value) {
+            // full forms ("{label}", "%count%"): an ICU message reads them as "label" and "count", a message without ICU
+            // only replaces them, not every word holding their name
             if (\is_int($value)) {
-                $marked[$name] = $value;
+                $marked['%'.$name.'%'] = $value;
 
                 continue;
             }
 
-            $marked[$name] = self::OPEN.$name.self::CLOSE;
+            $marked['{'.$name.'}'] = self::OPEN.$name.self::CLOSE;
             $inserted[$name] = $this->list($value);
         }
 
@@ -468,7 +513,7 @@ final readonly class HistoryPhraser
     private function list(array $items): array
     {
         if (\count($items) > self::MAX_NAMES) {
-            $items = [...\array_slice($items, 0, 3), new TextPart($this->trans('list.others', ['count' => \count($items) - 3]))];
+            $items = [...\array_slice($items, 0, 3), new TextPart($this->trans('list.others', ['%count%' => \count($items) - 3]))];
         }
 
         $parts = [];
@@ -487,7 +532,7 @@ final readonly class HistoryPhraser
     private function entityName(string $entity, int $count): string
     {
         if ($this->has($entity, self::FIELDS_DOMAIN)) {
-            return $this->translator->trans($entity, ['count' => $count], self::FIELDS_DOMAIN);
+            return $this->translator->trans($entity, ['%count%' => $count], self::FIELDS_DOMAIN);
         }
 
         $short = mb_strrchr($entity, '\\');
@@ -497,13 +542,9 @@ final readonly class HistoryPhraser
 
     private function has(string $key, string $domain = self::DOMAIN): bool
     {
-        if ($this->translator instanceof TranslatorBagInterface) {
-            $locale = $this->translator instanceof LocaleAwareInterface ? $this->translator->getLocale() : null;
+        $locale = $this->translator instanceof LocaleAwareInterface ? $this->translator->getLocale() : null;
 
-            return $this->translator->getCatalogue($locale)->has($key, $domain);
-        }
-
-        return $this->translator->trans($key, [], $domain) !== $key;
+        return $this->translator->getCatalogue($locale)->has($key, $domain);
     }
 
     /**

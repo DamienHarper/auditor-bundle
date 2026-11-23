@@ -93,6 +93,15 @@ final class PhraseExtensionTest extends KernelTestCase
         $this->assertSame('changed Name: A → B', (string) $phraser->phrase($item), 'An audited class that no longer exists keeps its raw values.');
     }
 
+    public function testAuthorNameResolverOfTheApplication(): void
+    {
+        $phraser = self::getContainer()->get(HistoryPhraser::class);
+        $this->assertInstanceOf(HistoryPhraser::class, $phraser);
+
+        $this->assertSame('Bob Martin', $phraser->author(new HistoryItem('01JTX', [self::entry('insert', Post::class, '1', blame: ['username' => 'bob'], userId: 2)])), 'The service aliased to the interface gives the current name.');
+        $this->assertSame('Deleted user', $phraser->author(new HistoryItem('01JTX', [self::entry('insert', Post::class, '1', blame: ['username' => 'carol'], userId: 3)])));
+    }
+
     public function testDescribersOfTheApplication(): void
     {
         $phraser = self::getContainer()->get(HistoryPhraser::class);

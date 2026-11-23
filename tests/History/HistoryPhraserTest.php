@@ -50,6 +50,15 @@ final class HistoryPhraserTest extends TestCase
         $this->assertSame('a supprimé Comment « #9 »', (string) $phraser->phrase($this->item(self::entry('remove', Comment::class, '9'))), 'An object without label is named by its id.');
     }
 
+    public function testAnActionWithoutReadableChange(): void
+    {
+        $phrase = $this->phraser('fr')->phrase($this->item(self::entry('update', Post::class, '1', [], 'Why audit?')));
+
+        $this->assertSame('a modifié Post « Why audit? »', (string) $phrase, 'Never an empty phrase.');
+        $this->assertSame('edited', $phrase->icon);
+        $this->assertCount(1, $phrase->fragments);
+    }
+
     public function testFieldChangesWithoutConfiguration(): void
     {
         $phrase = $this->phraser('fr')->phrase($this->item(self::entry('update', Post::class, '1', [
@@ -102,6 +111,25 @@ final class HistoryPhraserTest extends TestCase
         $this->assertSame('a changé Featured : non → oui', (string) $phraser->phrase($this->item(self::entry('update', Post::class, '1', ['featured' => ['old' => false, 'new' => true]]))), 'A field without phrase keeps the neutral one.');
     }
 
+    public function testCatalogueWithoutIcu(): void
+    {
+        $translator = self::translator('en', [], [], [
+            'dh_auditor_fields' => [Post::class => 'Account', Post::class.'.title' => 'New title'],
+            HistoryPhraser::DOMAIN => [Post::class.'.created' => 'created a renewed {entity} {label}', Post::class.'.deleted.bulk' => 'deleted %count% {entity}'],
+        ]);
+        $phraser = new HistoryPhraser($translator, new TranslatedFieldLabelResolver($translator), new ValueFormatter($this->registry(), $translator));
+
+        $this->assertSame('created a renewed Account Why audit?', (string) $phraser->phrase($this->item(self::entry('insert', Post::class, '1', [], 'Why audit?'))), 'Only the parameters are replaced, not the words that hold their names.');
+
+        $entries = [];
+        foreach (range(1, 6) as $id) {
+            $entries[] = self::entry('remove', Post::class, (string) $id, [], 'Post '.$id, id: $id);
+        }
+
+        $this->assertSame('deleted 6 Account', (string) $phraser->phrase($this->item(...$entries)));
+        $this->assertSame('changed New title: a → b', (string) $phraser->phrase($this->item(self::entry('update', Post::class, '1', ['title' => ['old' => 'a', 'new' => 'b']]))));
+    }
+
     public function testEntityNames(): void
     {
         $phraser = $this->phraser('fr', [], [Post::class => '{count, plural, one {article} other {articles}}']);
@@ -140,6 +168,8 @@ final class HistoryPhraserTest extends TestCase
         ));
 
         $this->assertSame('changed Title: A → B and created Comment “Reviewed, thanks”', (string) $phrase);
+        $this->assertSame('created', $phrase->icon, 'The icon of the phrase is the one of the main change (the creation), not of the first fragment.');
+        $this->assertSame('edited', $phrase->fragments[0]->icon);
     }
 
     public function testBulkChangesAreSummarised(): void
@@ -167,6 +197,30 @@ final class HistoryPhraserTest extends TestCase
             (string) $this->phraser('fr', [Post::class.'.deleted.bulk' => 'a mis {count} {entity} à la corbeille'], [Post::class => '{count, plural, one {article} other {articles}}'])->phrase($this->item(...\array_slice($entries, 0, 6))),
         );
         $this->assertSame('deleted Post “Post 6”, deleted Post “Post 5”, deleted Post “Post 4”, deleted Post “Post 3” and deleted Post “Post 2”', (string) $this->phraser()->phrase($this->item(...\array_slice($entries, 1, 5))), 'Up to 5 objects, each one is told.');
+    }
+
+    public function testBulkSummaryOfCollectionChanges(): void
+    {
+        $entries = [];
+        $id = 0;
+        foreach (range(1, 6) as $post) {
+            foreach ([1, 2] as $tag) {
+                $entries[] = self::entry('associate', Post::class, (string) $post, [], 'Post '.$post, id: ++$id, target: self::target(Tag::class, $tag, 'tag '.$tag), field: 'tags');
+            }
+        }
+
+        $entries[] = self::entry('update', Post::class, '1', ['title' => ['old' => 'a', 'new' => 'b']], id: ++$id);
+        $phrase = $this->phraser()->phrase($this->item(...array_reverse($entries)));
+
+        $this->assertSame('added to Tags on 6 Post and changed Title: a → b', (string) $phrase, 'The summary counts objects, and a later change does not join it.');
+        $this->assertCount(12, $phrase->fragments[0]->changes);
+    }
+
+    public function testSingularOfATranslatedPhrase(): void
+    {
+        $phraser = $this->phraser('fr', [Post::class.'.tags.added' => '{count, plural, one {a ajouté le tag {names}} other {a ajouté les tags {names}}}']);
+
+        $this->assertSame('a ajouté le tag symfony', (string) $phraser->phrase($this->item($this->tagEntry('associate', 1, 'symfony', 1))));
     }
 
     public function testValuesAreCut(): void
@@ -199,7 +253,7 @@ final class HistoryPhraserTest extends TestCase
     public function testAnAssociationWithoutIdentifierIsAValue(): void
     {
         $this->assertSame(['set Author: ', '[Alice]'], self::describeParts($this->phraser()->phrase($this->item(
-            self::entry('update', Post::class, '1', ['author' => ['old' => null, 'new' => ['class' => 'App\\Entity\\Author', 'id' => null, 'label' => 'Alice']]]),
+            self::entry('update', Post::class, '1', ['author' => ['old' => null, 'new' => ['class' => 'App\Entity\Author', 'id' => null, 'label' => 'Alice']]]),
         ))));
     }
 
@@ -327,6 +381,58 @@ final class HistoryPhraserTest extends TestCase
         )), 'Two posts, two fragments.');
     }
 
+    public function testEachChangeIsToldOnce(): void
+    {
+        $describer = new class implements ChangeDescriberInterface {
+            public function describe(Change $change, HistoryItem $item): ?Phrase
+            {
+                $body = array_find($item->getChanges(), static fn (Change $other): bool => 'body' === $other->field);
+
+                return null === $body ? null : Phrase::of(Fragment::of(['rewrote the post'], [$change, $body], 'text'));
+            }
+        };
+
+        $phraser = $this->phraser('en', [], [], new ServiceLocator([Post::class.'::title' => static fn (): ChangeDescriberInterface => $describer]));
+        $phrase = $phraser->phrase($this->item(self::entry('update', Post::class, '1', [
+            'body' => ['old' => 'a', 'new' => 'b'],
+            'title' => ['old' => 'A', 'new' => 'B'],
+            'featured' => ['old' => false, 'new' => true],
+        ])));
+
+        $this->assertSame('rewrote the post and changed Featured: no → yes', (string) $phrase, 'The body change the describer told is not told again.');
+        $this->assertSame('text', $phrase->icon, 'The main change (the body, first in the mapping) is told by the described fragment.');
+    }
+
+    public function testAFragmentOfADescriberTellsItsChange(): void
+    {
+        $describer = new class implements ChangeDescriberInterface {
+            public function describe(Change $change, HistoryItem $item): Phrase
+            {
+                return Phrase::of('renamed it', 'twice');
+            }
+        };
+
+        $phraser = $this->phraser('fr', [], [], new ServiceLocator([Post::class.'::title' => static fn (): ChangeDescriberInterface => $describer]));
+        $phrase = $phraser->phrase($this->item(self::entry('update', Post::class, '1', [
+            'title' => ['old' => 'A', 'new' => 'B'],
+            'featured' => ['old' => false, 'new' => true],
+        ])));
+
+        $this->assertSame('renamed it, twice et a changé Featured : non → oui', (string) $phrase, 'The fragments of a describer are joined by the separators of the phraser.');
+        $this->assertSame('title', $phrase->fragments[0]->changes[0]->field ?? null, 'A fragment without changes tells the described one.');
+        $this->assertSame('title', $phrase->fragments[1]->changes[0]->field ?? null);
+    }
+
+    public function testADescriberServiceMustBeADescriber(): void
+    {
+        $phraser = $this->phraser('en', [], [], new ServiceLocator([Post::class => static fn (): \stdClass => new \stdClass()]));
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessageIsOrContains(\sprintf('The change describer of %s is a stdClass, not a %s.', Post::class, ChangeDescriberInterface::class));
+
+        $phraser->phrase($this->item(self::entry('insert', Post::class, '1')));
+    }
+
     public function testAuthor(): void
     {
         $phraser = $this->phraser('fr');
@@ -337,6 +443,7 @@ final class HistoryPhraserTest extends TestCase
         $this->assertSame('Système', $phraser->author($this->item(self::entry('insert', Post::class, '1', blame: [], userId: null))));
         $this->assertSame('Utilisateur anonyme', $phraser->author($this->item(self::entry('insert', Post::class, '1', blame: ['user_firewall' => 'main'], userId: null))));
         $this->assertSame('Utilisateur 42', $phraser->author($this->item(self::entry('insert', Post::class, '1', blame: ['user_firewall' => 'main'], userId: 42))), 'A user whose name was not recorded.');
+        $this->assertSame('Utilisateur 42', $phraser->author($this->item(self::entry('insert', Post::class, '1', blame: ['username' => '', 'user_firewall' => 'main'], userId: 42))), 'An empty name is no name.');
         $this->assertSame('alice', $phraser->author($this->item(self::entry('insert', Post::class, '1', blame: ['username' => 'alice', 'via' => ['type' => 'console']]))), 'A command run on behalf of a user.');
         $this->assertSame('bob', $phraser->author($this->item(self::entry('insert', Post::class, '1', blame: ['username' => 'bob', 'via' => ['type' => 'console']], userId: null))), 'A name recorded without user id.');
     }

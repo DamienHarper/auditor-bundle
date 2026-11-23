@@ -10,6 +10,7 @@ default:
   added: 'a ajouté à {field} : {names}'
   removed: 'a retiré de {field} : {names}'
   json: 'a modifié {field} ({names})'
+  unknown: 'a modifié {entity} « {label} »'
   bulk:
     created: 'a créé {count} {entity}'
     snapshot: 'a enregistré l''état initial de {count} {entity}'
@@ -24,6 +25,7 @@ value:
   'yes': oui
   'no': non
   empty: vide
+  unreadable: valeur illisible
 list:
   separator: ', '
   and: ' et '
