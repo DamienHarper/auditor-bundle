@@ -115,5 +115,7 @@ of an entity written in the diffs ("12 rue des Lilas" rather than `App\Entity\Pr
 | `dh_auditor_field_label(entity_or_class, field)` | the label of the field |
 
 The `last_change` functions return null when the entity is not audited, has no identifier yet, or when the current
-user cannot view its audits. For a field never changed, the change is the creation of the entity, which holds every
-field: read the value with `change.value(field)` (`Change::getValue()`) and its label with `change.label(field)`.
+user cannot view its audits; they throw when an identifier value cannot be turned into a string. For a field never
+changed, the change is the creation of the entity, which holds the requested fields: read the value with
+`change.value(field)` (`Change::getValue()`) and its label with `change.label(field)`. For a JSON field changed since,
+`change.value(field)` is the deep diff tree (`change.kind` is `Json`): do not print it as is.
