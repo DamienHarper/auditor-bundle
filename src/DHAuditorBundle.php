@@ -31,16 +31,21 @@ use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\Auditor\Provider\Doctrine\Service\AuditingService;
 use DH\Auditor\Provider\Doctrine\Service\StorageService;
 use DH\Auditor\Provider\ProviderInterface;
+use DH\AuditorBundle\Attribute\AsChangeDescriber;
 use DH\AuditorBundle\Command\ClearActivityCacheCommand;
 use DH\AuditorBundle\Controller\ExportController;
 use DH\AuditorBundle\Controller\ViewerController;
 use DH\AuditorBundle\DependencyInjection\Compiler\DoctrineMiddlewareCompilerPass;
+use DH\AuditorBundle\DependencyInjection\Compiler\RegisterChangeDescribersCompilerPass;
 use DH\AuditorBundle\DependencyInjection\Compiler\RegisterDiffLabelResolversCompilerPass;
 use DH\AuditorBundle\DependencyInjection\Compiler\RegisterProvidersCompilerPass;
 use DH\AuditorBundle\Event\ConsoleEventSubscriber;
 use DH\AuditorBundle\Event\ViewerEventSubscriber;
 use DH\AuditorBundle\ExtraData\ExtraDataProvider;
+use DH\AuditorBundle\History\AuthorNameResolverInterface;
+use DH\AuditorBundle\History\HistoryPhraser;
 use DH\AuditorBundle\History\TranslatedFieldLabelResolver;
+use DH\AuditorBundle\History\ValueFormatter;
 use DH\AuditorBundle\Messenger\BlameContextMiddleware;
 use DH\AuditorBundle\Retention\PruneAuditLogsHandler;
 use DH\AuditorBundle\Retention\RetentionSchedule;
@@ -49,6 +54,7 @@ use DH\AuditorBundle\Security\RoleChecker;
 use DH\AuditorBundle\Security\SecurityProvider;
 use DH\AuditorBundle\Twig\DiffExtension;
 use DH\AuditorBundle\Twig\HistoryExtension;
+use DH\AuditorBundle\Twig\PhraseExtension;
 use DH\AuditorBundle\Twig\TimeAgoExtension;
 use DH\AuditorBundle\Twig\ViewableEntityExtension;
 use DH\AuditorBundle\Twig\ViewerUrlExtension;
@@ -57,6 +63,7 @@ use DH\AuditorBundle\User\UserProvider;
 use DH\AuditorBundle\Viewer\ActivityGraphProvider;
 use DH\AuditorBundle\Viewer\AuditViewerUrlGenerator;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
+use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -105,6 +112,11 @@ class DHAuditorBundle extends AbstractBundle
         $container->addCompilerPass(new DoctrineMiddlewareCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);
         $container->addCompilerPass(new RegisterProvidersCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 0);
         $container->addCompilerPass(new RegisterDiffLabelResolversCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 0);
+
+        $container->registerAttributeForAutoconfiguration(AsChangeDescriber::class, static function (ChildDefinition $definition, AsChangeDescriber $attribute): void {
+            $definition->addTag(RegisterChangeDescribersCompilerPass::TAG, ['entity' => $attribute->entity, 'field' => $attribute->field]);
+        });
+        $container->addCompilerPass(new RegisterChangeDescribersCompilerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 0);
     }
 
     public function configure(DefinitionConfigurator $definition): void
@@ -496,6 +508,25 @@ class DHAuditorBundle extends AbstractBundle
             ->args([new Reference('translator', ContainerInterface::NULL_ON_INVALID_REFERENCE)])
         ;
         $services->alias(FieldLabelResolverInterface::class, TranslatedFieldLabelResolver::class);
+
+        // History items told as phrases (|dh_auditor_phrase, |dh_auditor_author); the change describers are added by
+        // RegisterChangeDescribersCompilerPass
+        $services->set(ValueFormatter::class)
+            ->args([new Reference('doctrine'), new Reference('translator')])
+        ;
+        $services->set(HistoryPhraser::class)
+            ->args([
+                '$translator' => new Reference('translator'),
+                '$fieldLabelResolver' => new Reference(FieldLabelResolverInterface::class),
+                '$values' => new Reference(ValueFormatter::class),
+                '$describers' => null,
+                '$authorNameResolver' => new Reference(AuthorNameResolverInterface::class, ContainerInterface::NULL_ON_INVALID_REFERENCE),
+            ])
+        ;
+        $services->set(PhraseExtension::class)
+            ->args([new Reference(HistoryPhraser::class)])
+            ->autoconfigure()
+        ;
 
         // Twig extension (uses #[AsTwigFunction] attribute)
         $services->set(DiffExtension::class)

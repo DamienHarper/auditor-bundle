@@ -4,3 +4,5 @@ services:
     autoconfigure: true
 
   DH\AuditorBundle\Tests\App\Command\CreatePostCommand:
+
+  DH\AuditorBundle\Tests\Fixtures\History\PostTitleDescriber:
