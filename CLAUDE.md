@@ -97,14 +97,15 @@ Compiler passes (`src/DependencyInjection/Compiler/`): `DoctrineMiddlewareCompil
 | `ExtraDataProvider` | `src/ExtraData/ExtraDataProvider.php` | Opt-in `extra_data` (route name and params) |
 | `PruneAuditLogsHandler`, `RetentionSchedule` | `src/Retention/` | Scheduled pruning through Messenger and Scheduler |
 | `ActivityGraphProvider`, `RevisionComparator` | `src/Viewer/` | Activity graph (cached), revision compare |
-| Twig extensions | `src/Twig/` | `time_ago`, `dh_auditor_is_viewable()`, `dh_auditor_is_diff_leaf()`, `dh_auditor_last_change(s)()`, `dh_auditor_field_label()`, `\|dh_auditor_phrase`, `\|dh_auditor_author` |
+| Twig extensions | `src/Twig/` | `time_ago`, `dh_auditor_is_viewable()`, `dh_auditor_is_diff_leaf()`, `dh_auditor_last_change(s)()`, `dh_auditor_field_label()`, `\|dh_auditor_phrase`, `\|dh_auditor_phrase_text`, `\|dh_auditor_author`, `dh_auditor_object_url()` |
 | `TranslatedFieldLabelResolver` | `src/History/` | `FieldLabelResolverInterface` service: `dh_auditor_fields` domain, key `FQCN.field`, humanized fallback |
-| `HistoryPhraser`, `ValueFormatter` | `src/History/` | A `HistoryItem` told as a `Phrase` of `Fragment`s (`dh_auditor_history` ICU domain, `#[AsChangeDescriber]` services) and its author; raw diff values read through the Doctrine mapping |
+| `HistoryPhraser`, `ValueFormatter` | `src/History/` | A `HistoryItem` told as a `Phrase` of `Fragment`s made of typed parts (`Part/`: text, value, object reference; no HTML), from the `dh_auditor_history` ICU domain or `#[AsChangeDescriber]` services, and its author; raw diff values read through the Doctrine mapping |
+| `ObjectUrlResolverInterface`, `ViewerObjectUrlResolver` | `src/History/` | URL of an object reference (default: its history in the viewer, visible with the `view` role); rendered by `History/phrase.html.twig` and `History/object_reference.html.twig` |
 | `ClearActivityCacheCommand` | `src/Command/` | `audit:cache:clear` |
 
 ### Templates and assets
 
-- Plain Twig in `src/Resources/views/` (`layout.html.twig`, `Audit/*.html.twig`), overridable under `templates/bundles/DHAuditorBundle/`. No Stimulus, AssetMapper or Twig components.
+- Plain Twig in `src/Resources/views/` (`layout.html.twig`, `Audit/*.html.twig`, `History/*.html.twig`), overridable under `templates/bundles/DHAuditorBundle/`. No Stimulus, AssetMapper or Twig components.
 - Tailwind CSS 4: source `src/Resources/assets/css/app.css`, compiled `src/Resources/public/app.css` **committed**. After a template or CSS change that uses new classes, run `make build-assets` and commit the compiled file.
 - JSON deep diffs: templates must use `entry.isDeepDiff(field)` and `dh_auditor_is_diff_leaf(node)`, not key checks. Association links use `dh_auditor_is_viewable()`.
 

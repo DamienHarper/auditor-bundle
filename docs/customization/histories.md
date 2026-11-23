@@ -131,10 +131,19 @@ Draft → Published and added to Tags: symfony and audit*:
 {% endfor %}
 ```
 
-`|dh_auditor_phrase` returns a `DH\AuditorBundle\History\Phrase`: it prints as escaped text, `.html` is the HTML
-version with the values in `<strong>` (`{{ (item|dh_auditor_phrase).html|raw }}`), `.icon` names the icon of its main
-change, and `.fragments` lists its parts (`text`, `html`, `icon` and the `changes` each one tells). In PHP, use the
-`DH\AuditorBundle\History\HistoryPhraser` service (`phrase()`, `author()`).
+`|dh_auditor_phrase` renders the phrase as HTML: its text escaped, its values in `<strong>`, and the objects it names
+(the post that was created, the tag that was added, the author that was set) linked to their history in the viewer
+when the reader may view the audits of their class. `|dh_auditor_phrase_text` gives the phrase without markup, for a
+`title` attribute or an export. Both filters take a `HistoryItem` or a `Phrase`.
+
+In PHP, the `DH\AuditorBundle\History\HistoryPhraser` service gives the `Phrase` (`phrase()`) and the author
+(`author()`). A phrase is a list of fragments, one per change (`fragments`, each with its `parts`, its `icon` and the
+`changes` it tells), and `getParts()` lists the parts of the whole phrase: `TextPart`, `ValuePart` and
+`ObjectReference` (`class`, `id`, `label`), each with a `kind` (`text`, `value`, `object`). No part holds HTML.
+
+The markup comes from `@DHAuditor/History/phrase.html.twig` and, for an object, from
+`@DHAuditor/History/object_reference.html.twig`: override them under `templates/bundles/DHAuditorBundle/History/` to
+change it (Turbo attributes on the links, for instance).
 
 Each change gives one fragment: the changes of the root first, then those of the attached entities; the fields of an
 entry in the order of their Doctrine mapping. Elements added to (or removed from) the same collection make one
@@ -189,8 +198,9 @@ App\Entity\Post.deleted.bulk: 'a supprimé {count} {entity}'
 
 ### With PHP
 
-A change that needs the rest of the action to be told (*deleted the initiative X, which linked the ticket*) takes a
-describer. It returns the fragments of the change, or null to keep the default phrase:
+A change that needs the rest of the action to be told (*removed the ticket from initiative Q4 roadmap*) takes a
+describer. It returns the fragments of the change, built from text, values and object references, or null to keep the
+default phrase:
 
 ```php
 use DH\Auditor\History\Change;
@@ -198,6 +208,7 @@ use DH\Auditor\History\HistoryItem;
 use DH\AuditorBundle\Attribute\AsChangeDescriber;
 use DH\AuditorBundle\History\ChangeDescriberInterface;
 use DH\AuditorBundle\History\Fragment;
+use DH\AuditorBundle\History\Part\ObjectReference;
 use DH\AuditorBundle\History\Phrase;
 
 #[AsChangeDescriber(entity: Ticket::class, field: 'initiative')]
@@ -205,17 +216,58 @@ final class InitiativeDescriber implements ChangeDescriberInterface
 {
     public function describe(Change $change, HistoryItem $item): ?Phrase
     {
-        if (null !== $change->new) {
+        if (null !== $change->new || !\is_array($change->old)) {
             return null;
         }
 
-        return Phrase::of(new Fragment(\sprintf('removed the ticket from initiative %s', $change->oldLabel), [$change], 'removed'));
+        $initiative = new ObjectReference(Initiative::class, (string) $change->old['id'], $change->oldLabel ?? '');
+
+        return Phrase::of(Fragment::of(['removed the ticket from initiative ', $initiative], [$change], 'removed'));
     }
 }
 ```
 
 Without `field`, the describer receives every change of the entity that no field describer takes, the creation and
-the deletion included. A `Fragment` is escaped for its HTML version unless you pass one.
+the deletion included. The object references a describer gives are linked like the others.
+
+### Links
+
+The objects of a phrase lead to the URL that the `DH\AuditorBundle\History\ObjectUrlResolverInterface` service
+gives: by default, their history in the viewer, followed only by readers granted the `view` role of their class (no
+link when the viewer is disabled or the class is not audited). Decorate it to send some classes to pages of your
+application:
+
+```php
+use DH\AuditorBundle\History\ObjectUrl;
+use DH\AuditorBundle\History\ObjectUrlResolverInterface;
+use DH\AuditorBundle\History\Part\ObjectReference;
+use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
+use Symfony\Component\DependencyInjection\Attribute\AutowireDecorated;
+
+#[AsDecorator(ObjectUrlResolverInterface::class)]
+final readonly class TicketUrlResolver implements ObjectUrlResolverInterface
+{
+    public function __construct(
+        #[AutowireDecorated] private ObjectUrlResolverInterface $inner,
+        private UrlGeneratorInterface $urls,
+        private Security $security,
+    ) {}
+
+    public function resolve(ObjectReference $reference): ?ObjectUrl
+    {
+        if (Ticket::class !== $reference->class) {
+            return $this->inner->resolve($reference);
+        }
+
+        return new ObjectUrl(
+            $this->urls->generate('ticket_show', ['id' => $reference->id]),
+            $this->security->isGranted('TICKET_VIEW', $reference->id),
+        );
+    }
+}
+```
+
+`ObjectUrl::$visible` tells whether the reader may follow the link; null keeps the object as plain text.
 
 ### Authors
 
