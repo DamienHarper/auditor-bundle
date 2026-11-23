@@ -8,7 +8,10 @@ use DH\Auditor\History\HistoryGrouper;
 use DH\Auditor\Model\Entry;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
+use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author;
+use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Comment;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
+use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
 use DH\AuditorBundle\Tests\Fixtures\History\Note;
 use DH\AuditorBundle\Twig\Component\History;
@@ -151,6 +154,7 @@ final class HistoryTest extends KernelTestCase
 
         $this->assertCount(0, $crawler->filter('[data-dh-auditor-action]'));
         $this->assertCount(1, $crawler->filter('[data-dh-auditor-element]'), 'The elements of the application are still shown.');
+        $this->assertStringNotContainsString('Open in the viewer', $crawler->text());
         $this->assertNull($crawler->filter('section')->attr('data-dh-auditor-first-cursor'));
     }
 
@@ -163,7 +167,7 @@ final class HistoryTest extends KernelTestCase
         $crawler = $this->render(['subject' => $this->post(), 'details' => true]);
 
         $this->assertGreaterThan(0, $crawler->filter('[data-dh-auditor-action]')->count());
-        $this->assertCount(0, $crawler->filter('a[href^="/audit"]'), 'No author, action, object or viewer link.');
+        $this->assertCount(0, $crawler->filter('section a'), 'No author, action, object or viewer link.');
         $this->assertStringNotContainsString('Open in the viewer', $crawler->text());
     }
 
@@ -182,11 +186,18 @@ final class HistoryTest extends KernelTestCase
 
     public function testWithoutTheAttachedEntities(): void
     {
-        $all = $this->render(['subject' => $this->post()])->filter('[data-dh-auditor-action]')->count();
-        $own = $this->render(['subject' => $this->post(), 'attached' => false])->filter('[data-dh-auditor-action]')->count();
+        $entityManager = $this->provider->getAuditingServiceForEntity(Post::class)->getEntityManager();
+        $post = new Post()->setTitle('Why audit?')->setBody('…')->setCreatedAt(new \DateTimeImmutable());
+        $entityManager->persist($post);
+        $entityManager->flush();
+        $entityManager->persist(new Comment()->setBody('Nice')->setAuthor('john')->setCreatedAt(new \DateTimeImmutable())->setPost($post));
+        $entityManager->flush();
 
-        $this->assertCount($own, HistoryGrouper::byTransaction($this->entries(attached: false)));
-        $this->assertLessThanOrEqual($all, $own);
+        $entities = fn (array $props): string => implode(' ', $this->render($props)->filter('[data-dh-auditor-action]')->each(static fn (Crawler $li): string => (string) $li->attr('data-dh-auditor-entities')));
+
+        $this->assertStringContainsString(Comment::class, $entities(['subject' => $post]), 'The creation of the comment is part of the history of its post.');
+        $this->assertStringNotContainsString(Comment::class, $entities(['subject' => $post, 'attached' => false]));
+        $this->assertStringContainsString(Post::class, $entities(['subject' => $post, 'attached' => false]));
     }
 
     public function testElementsImplementTheInterface(): void
@@ -210,6 +221,16 @@ final class HistoryTest extends KernelTestCase
             TWIG)->render(['post' => $this->post(), 'notes' => [new Note('custom', '9999')]]);
 
         $this->assertSame('custom', new Crawler($html)->filter('[data-dh-auditor-element] em')->text());
+    }
+
+    private function configureEntities(): void
+    {
+        $this->provider->getConfiguration()->setEntities([
+            Author::class => ['enabled' => true],
+            Post::class => ['enabled' => true],
+            Comment::class => ['enabled' => true, 'roots' => ['post']],
+            Tag::class => ['enabled' => true],
+        ]);
     }
 
     private function createAndInitDoctrineProvider(): void
