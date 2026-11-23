@@ -273,6 +273,10 @@ final class HistoryPhraserTest extends TestCase
             $this->tagEntry('associate', 3, 'php', 2),
             $this->tagEntry('associate', 1, 'symfony', 1),
         )), 'Each element is described, not only the first one of a fragment.');
+        $this->assertSame('described audit and added to Tags: symfony', (string) $phraser->phrase($this->item(
+            $this->tagEntry('associate', 1, 'symfony', 2),
+            $this->tagEntry('associate', 2, 'audit', 1),
+        )), 'An element is not merged into the fragment of a described one.');
 
         $entries = [];
         foreach (range(1, 6) as $id) {
