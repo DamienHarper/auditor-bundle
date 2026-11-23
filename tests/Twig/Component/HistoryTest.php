@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DH\AuditorBundle\Tests\Twig\Component;
 
+use DH\Auditor\Exception\InvalidArgumentException;
 use DH\Auditor\History\HistoryGrouper;
 use DH\Auditor\Model\Entry;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
@@ -241,6 +242,18 @@ final class HistoryTest extends KernelTestCase
         $this->assertGreaterThan(0, $crawler->filter('[data-dh-auditor-action]')->count());
         $this->assertCount(0, $crawler->filter('section a'), 'No author, action, object or viewer link.');
         $this->assertStringNotContainsString('Open in the viewer', $crawler->text());
+    }
+
+    public function testAnErrorOfTheApplicationIsNotHidden(): void
+    {
+        $this->provider->getConfiguration()->setReadScope(static function (): void {
+            throw new InvalidArgumentException('Broken read scope.');
+        });
+
+        $this->expectException(RuntimeError::class);
+        $this->expectExceptionMessageIsOrContains('Broken read scope.');
+
+        $this->render(['subject' => $this->post()]);
     }
 
     public function testDetails(): void
