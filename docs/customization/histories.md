@@ -342,10 +342,10 @@ composer require symfony/ux-twig-component
 | `subject` | (required) | The audited entity |
 | `with` | `[]` | Elements of your application mixed with the actions (see below) |
 | `grouper` | one action per transaction | A `DH\Auditor\History\HistoryGrouper` with a key of your own |
-| `limit` | the page size of the viewer | Entries per page |
+| `limit` | the page size of the viewer | Entries per page, more when needed to keep the last action whole |
 | `attached` | `true` | Whether the actions on the attached entities are included |
 | `details` | `false` | Technical details of the actions: `true`, or a role (`details="ROLE_ADMIN"`) |
-| `after` | from the query string | Cursor of the page to show |
+| `after` | from the query string | Cursor of the page to show (an invalid one is an error, unlike in the query string) |
 | `cursorParameter` | `dh_auditor_after` | Query string parameter of the cursor |
 
 Without access to the audits of its class (`roles.view`), with an object that is not audited or not persisted yet,
@@ -381,30 +381,34 @@ final class Comment implements HistoryElementInterface
 </twig:DhAuditor:History>
 ```
 
-The `element` block renders one element (`{{ element }}` by default); the `title` and `empty` blocks replace the
+The `element` block renders one element (`{{ element }}` by default, which needs a `__toString()` method); the `title`
+and `empty` blocks replace the
 heading and the text shown without any line.
 
 ### Pages
 
 The component shows one page of actions. Its "Older" link reloads the current page with the cursor of the next one in
-the query string (`?dh_auditor_after=…`, the other parameters kept); give two components on the same page their own
+the query string (`?dh_auditor_after=…`, the other parameters kept; the page the reader sees, also when the component is rendered by `render(controller())`); give two components on the same page their own
 `cursorParameter`. An element of your application is shown once, on the page whose actions surround it. In an
 application that uses Turbo, wrap the component in a `<turbo-frame>` to load the older actions in place.
 
-The `data-dh-auditor-first-cursor` attribute of the component (`firstCursor` in PHP) holds the position of its most
-recent entry: read the actions recorded since with `RootQuery::fetch(since: $cursor)`, to push them with a Turbo
-Stream for instance.
+On the first page, the `data-dh-auditor-first-cursor` attribute of the component (`firstCursor` in PHP) holds the
+position of its most recent entry: read the actions recorded since with `RootQuery::fetch(since: $cursor)`, to push
+them with a Turbo Stream for instance. The attribute is absent while the history is empty.
 
 "Open in the viewer" leads to the history of the object in the viewer, when it is enabled.
 
 ### Styling
 
 The component renders the rows of the viewer, styled with Tailwind CSS. With Tailwind 4 in your application, add the
-bundle templates to its sources:
+bundle templates to the sources of its stylesheet (the path below is relative to `assets/styles/app.css`):
 
 ```css
 @source "../../vendor/damienharper/auditor-bundle/src/Resources/views";
 ```
 
-Otherwise, override `@DHAuditor/Component/History.html.twig` and `@DHAuditor/History/_row.html.twig` under
-`templates/bundles/DHAuditorBundle/`.
+The `dark:` classes of the bundle follow a `dark` class on an ancestor (`@variant dark (&:where(.dark, .dark *));` in
+the viewer stylesheet): declare the same variant to switch them with your theme rather than with the system setting.
+
+Otherwise, override `@DHAuditor/Component/History.html.twig` and the templates of `@DHAuditor/History/` it renders
+(`_row`, `_macros`, `_details`, `phrase`, `object_reference`) under `templates/bundles/DHAuditorBundle/`.
