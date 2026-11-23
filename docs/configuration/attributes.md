@@ -5,7 +5,7 @@
 PHP attributes provide an alternative to YAML configuration for declaring auditable entities.
 
 > [!NOTE]
-> Attributes take precedence over YAML configuration.
+> Attributes and YAML configuration are combined: see [Precedence Rules](#-precedence-rules).
 
 ## 📋 Available Attributes
 
@@ -208,30 +208,30 @@ class User
 
 ```mermaid
 flowchart TD
-    A["Attribute #[Auditable]"] -->|overrides| B["YAML entities.*.enabled"]
+    B["YAML entities.*.enabled: false"] -->|disables| A["Attribute #[Auditable]"]
     C["Attribute #[Ignore]"] -->|adds to| D["YAML ignored_columns"]
     D -->|wins over| G["YAML entities.*.audited_columns"]
-    E["Attribute #[Security] (or its absence)"] -->|overrides| F["YAML entities.*.roles"]
+    F["YAML entities.*.roles"] -->|overrides, scope by scope| E["Attribute #[Security]"]
 ```
 
 | Attribute       | Behavior                                    |
 |-----------------|---------------------------------------------|
-| `#[Auditable]`  | Overrides `entities.*.enabled` from YAML    |
+| `#[Auditable]`  | YAML `enabled: false` disables the entity; YAML `enabled: true` does not re-enable `#[Auditable(enabled: false)]` |
 | `#[Ignore]`     | Adds to `ignored_columns` (YAML + attribute)|
 | `#[Ignore]`     | Wins over `entities.*.audited_columns`: an ignored property is never audited |
-| `#[Security]`   | Overrides `entities.*.roles` from YAML      |
+| `#[Security]`   | YAML `roles` win, scope by scope: an empty `roles` or a missing `view` key keeps the attribute roles |
 | `#[AuditRoot]`  | Adds to `entities.*.roots` (YAML + attribute) |
 | `#[Auditable(maxAge, maxEntries)]` | YAML `retention` wins, key by key   |
 
-> [!WARNING]
-> For an entity marked `#[Auditable]`, the `enabled` and `roles` entity options of the YAML are not read: the
-> attributes decide. Without `#[Security]`, such an entity has **no view restriction**, even if `roles` is set in
-> YAML. Put the roles in `#[Security(view: [...])]`.
+> [!NOTE]
+> `enabled: true` is the default of every entity listed in YAML: it cannot tell an explicit value from the default,
+> so it never re-enables an `#[Auditable(enabled: false)]` entity.
 
 ## ✅ Entity Not in YAML
 
 An entity with `#[Auditable]` is audited even when it is not listed under `entities`: the attribute alone is enough.
-List it in YAML only to add `audited_columns`, override the retention, or add roots to the `#[AuditRoot]` ones.
+List it in YAML only to add `audited_columns` or `ignored_columns`, set `roles`, disable it (`enabled: false`),
+override the retention, or add roots to the `#[AuditRoot]` ones.
 
 ---
 
