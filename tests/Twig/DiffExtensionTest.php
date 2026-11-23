@@ -174,8 +174,20 @@ final class DiffExtensionTest extends KernelTestCase
         /** @var Environment $twig */
         $twig = self::getContainer()->get('twig');
 
+        // the diff macros of entry.html.twig, applied to each field of the entry as the comparison does
+        $template = $twig->createTemplate(<<<'TWIG'
+            {% import '@DHAuditor/Audit/entry.html.twig' as macros %}
+            <table>
+            {% for field, changeset in entry.diffs %}
+                {% if entry.type == 'insert' %}{{ macros.displayInsertValue(field, changeset, not entry.isDeepDiff(field)) }}
+                {% elseif entry.type == 'remove' %}{{ macros.displayRemoveValue(field, changeset, not entry.isDeepDiff(field)) }}
+                {% else %}{{ macros.displayUpdateDiff(field, changeset, not entry.isDeepDiff(field)) }}{% endif %}
+            {% endfor %}
+            </table>
+            TWIG);
+
         $crawler = new Crawler();
-        $crawler->addHtmlContent($twig->render('@DHAuditor/Audit/entry.html.twig', [
+        $crawler->addHtmlContent($template->render([
             'entry' => Entry::fromArray([
                 'id' => 1,
                 'schema_version' => 2,

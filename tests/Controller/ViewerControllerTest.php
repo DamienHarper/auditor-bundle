@@ -762,6 +762,8 @@ final class ViewerControllerTest extends WebTestCase
 
         yield 'period' => [['when' => '12']];
 
+        yield 'period with trailing text' => [['when' => '7abc']];
+
         yield 'cursor' => [['after' => 'not-a-cursor']];
     }
 
@@ -870,6 +872,168 @@ final class ViewerControllerTest extends WebTestCase
         $actions = \count(array_unique(array_map(static fn (Entry $entry): ?string => $entry->transactionId, $reader->createQuery(Post::class, ['page_size' => null])->execute())));
         $row = $crawler->filter('tr[data-dh-auditor-entity]')->reduce(static fn (Crawler $tr): bool => Post::class === $tr->attr('data-dh-auditor-entity'));
         $this->assertSame((string) $actions, mb_trim($row->filter('td')->eq(1)->text()), 'Entities count their actions.');
+    }
+
+    public function testLegacyEntriesDoNotBreakThePages(): void
+    {
+        $table = $this->createReader()->getEntityAuditTableName(Post::class);
+        $connection = $this->provider->getStorageServiceForEntity(Post::class)->getEntityManager()->getConnection();
+        $row = $connection->fetchAssociative('SELECT * FROM '.$table." WHERE type = 'insert' ORDER BY id LIMIT 1");
+        $this->assertIsArray($row);
+        unset($row['id']);
+        $hash = sha1('legacy');
+        $connection->insert($table, [
+            'schema_version' => 1,
+            'diffs' => json_encode(['title' => ['old' => null, 'new' => 'Legacy title']], JSON_THROW_ON_ERROR),
+            'transaction_id' => $hash,
+            'blame_id' => 'legacy-user',
+            'blame' => json_encode(['username' => 'legacy.user'], JSON_THROW_ON_ERROR),
+            'created_at' => '2026-01-01 10:00:00',
+        ] + $row);
+        $this->login(['ROLE_1']);
+
+        foreach (['/audit', self::POST_URL, '/audit/user/legacy-user', '/audit/transaction/'.$hash] as $url) {
+            $this->client->request('GET', $url);
+            $this->assertResponseIsSuccessful($url.' reads entries of the schema v1.');
+        }
+
+        $this->assertStringNotContainsString('ULID', (string) $this->client->getResponse()->getContent(), 'A SHA1 transaction has no ULID date.');
+    }
+
+    public function testActionOfALegacyTransactionInAHistory(): void
+    {
+        [$postId] = $this->createPostHistory();
+        $actions = array_values(array_unique(array_map(
+            static fn (Entry $entry): ?string => $entry->transactionId,
+            $this->createReader()->createQuery(Post::class, ['object_id' => $postId, 'page_size' => null])->execute(),
+        )));
+        $hash = sha1('migrated from 7.x');
+        $this->provider->getStorageServiceForEntity(Post::class)->getEntityManager()->getConnection()->executeStatement(
+            \sprintf('UPDATE %s SET transaction_id = ? WHERE transaction_id = ?', $this->createReader()->getEntityAuditTableName(Post::class)),
+            [$hash, $actions[1]],
+        );
+        $this->login();
+        $root = urlencode(Post::class.':'.$postId);
+
+        $crawler = $this->client->request('GET', '/audit/transaction/'.$hash.'?root='.$root);
+        $this->assertResponseIsSuccessful();
+        $this->assertStringContainsString('/audit/transaction/'.$actions[2], (string) $crawler->filter('a[rel="prev"]')->attr('href'));
+        $this->assertStringContainsString('/audit/transaction/'.$actions[0], (string) $crawler->filter('a[rel="next"]')->attr('href'));
+
+        $crawler = $this->client->request('GET', '/audit/transaction/'.$actions[0].'?root='.$root);
+        $this->assertStringContainsString('/audit/transaction/'.$hash, (string) $crawler->filter('a[rel="prev"]')->attr('href'));
+    }
+
+    public function testRecentActivityIsTheLatestActionsAcrossEntities(): void
+    {
+        $this->seedUserEntry(Comment::class, 'u', 'u', '2030-01-01 10:00:00');
+        $this->seedUserEntry(Post::class, 'u', 'u', '2030-01-02 10:00:00');
+        $this->seedUserEntry(Tag::class, 'u', 'u', '2030-01-03 10:00:00', transactionId: 'one-action');
+        $this->seedUserEntry(Post::class, 'u', 'u', '2030-01-03 10:00:00', transactionId: 'one-action');
+        $this->login(['ROLE_1']);
+
+        $crawler = $this->client->request('GET', '/audit');
+        $actions = $crawler->filter('section')->first()->filter('[data-dh-auditor-entities]')->each(static fn (Crawler $action): string => (string) $action->attr('data-dh-auditor-entities'));
+
+        $entities = static fn (string $list): array => (static function (array $classes): array {
+            sort($classes);
+
+            return $classes;
+        })(explode(' ', $list));
+        $this->assertSame([Post::class, Tag::class], $entities($actions[0]), 'An action written in two tables is one row, the most recent first.');
+        $this->assertSame([Post::class], $entities($actions[1]));
+        $this->assertSame([Comment::class], $entities($actions[2]));
+        $this->assertCount(1, $crawler->filter('section')->first()->filter('[data-dh-auditor-action] a[href^="/audit/transaction/"]')->first(), 'The time of a row links to its action.');
+    }
+
+    public function testDaysAcrossOlderActions(): void
+    {
+        [$postId] = $this->createPostHistory();
+        $table = $this->createReader()->getEntityAuditTableName(Post::class);
+        $connection = $this->provider->getStorageServiceForEntity(Post::class)->getEntityManager()->getConnection();
+        $yesterday = new \DateTimeImmutable('yesterday 10:00', new \DateTimeZone('UTC'));
+        $oldest = $this->revisionIds(Post::class, $postId);
+        $connection->executeStatement(\sprintf('UPDATE %s SET created_at = ? WHERE id IN (?, ?)', $table), [$yesterday->format('Y-m-d H:i:s'), $oldest[0], $oldest[1]]);
+        $this->provider->getConfiguration()->setViewerPageSize(1);
+        $this->login();
+
+        $page = $this->client->request('GET', \sprintf('%s/%d', self::POST_URL, $postId));
+        $this->assertSame(['Today'], $page->filter('h3')->each(static fn (Crawler $h3): string => $h3->text()));
+        $more = (string) $page->filter('a[data-dh-auditor-more]')->attr('href');
+        $this->assertStringContainsString('day='.date('Y-m-d'), $more, 'The day the page ended on.');
+
+        $first = $this->client->request('GET', $more, [], [], ['HTTP_X_DH_AUDITOR_FRAGMENT' => '1']);
+        $this->assertSame(['Yesterday'], $first->filter('h3')->each(static fn (Crawler $h3): string => $h3->text()), 'A new day.');
+        $next = (string) $first->filter('a[data-dh-auditor-more]')->attr('href');
+        $this->assertStringContainsString('day='.$yesterday->format('Y-m-d'), $next);
+
+        $second = $this->client->request('GET', $next, [], [], ['HTTP_X_DH_AUDITOR_FRAGMENT' => '1']);
+        $this->assertCount(0, $second->filter('h3'), 'The same day goes on.');
+        $this->assertCount(1, $second->filter('[data-dh-auditor-action]'));
+    }
+
+    public function testShortPhraseOnSmallScreens(): void
+    {
+        $entityManager = $this->provider->getAuditingServiceForEntity(Post::class)->getEntityManager();
+        $post = new Post()->setTitle('A')->setBody('a')->setCreatedAt(new \DateTimeImmutable('2026-01-01'));
+        $entityManager->persist($post);
+        $entityManager->flush();
+        $post->setTitle('B')->setBody('b')->setCreatedAt(new \DateTimeImmutable('2026-01-02'))->setDeletedAt(new \DateTimeImmutable('2026-01-03'));
+        $entityManager->flush();
+        $this->login();
+
+        $crawler = $this->client->request('GET', \sprintf('%s/%d', self::POST_URL, (int) $post->getId()));
+        $row = $crawler->filter('[data-dh-auditor-action]')->first();
+
+        $this->assertStringContainsString('1 other change', $row->filterXPath('.//span[contains(concat(" ", @class, " "), " sm:hidden ")]')->text(), 'Three fragments on a small screen.');
+        $this->assertStringNotContainsString('other change', $row->filterXPath('.//span[contains(concat(" ", @class, " "), " sm:inline ")]')->text(), 'The whole phrase otherwise.');
+    }
+
+    public function testUserPageFilters(): void
+    {
+        $this->seedUserEntry(Post::class, 'timeline-user', 'timeline.user', '2026-01-01 10:00:00');
+        $this->seedUserEntry(Post::class, 'timeline-user', 'timeline.user', '2026-01-02 10:00:00');
+        $this->provider->getConfiguration()->setViewerPageSize(1);
+        $this->login(['ROLE_1']);
+
+        $this->client->request('GET', '/audit/user/timeline-user', ['on' => 'App\Entity\Unknown']);
+        $this->assertResponseStatusCodeSame(400);
+
+        $crawler = $this->client->request('GET', '/audit/user/timeline-user', ['on' => Post::class, 'who' => 'x', 'field' => 'title']);
+        parse_str((string) parse_url((string) $crawler->filter('a[data-dh-auditor-more]')->attr('href'), PHP_URL_QUERY), $query);
+        $this->assertSame(['day', 'on', 'page'], (static function (array $keys): array {
+            sort($keys);
+
+            return $keys;
+        })(array_keys($query)), 'Only the filters of the page are carried on.');
+    }
+
+    public function testActionIgnoresARootThatDoesNotHoldIt(): void
+    {
+        [$postId] = $this->createPostHistory();
+        [$otherId] = $this->createPostHistory();
+        $action = $this->createReader()->createQuery(Post::class, ['object_id' => $postId, 'page_size' => 1])->execute()[0];
+        $this->login();
+
+        $crawler = $this->client->request('GET', '/audit/transaction/'.$action->transactionId.'?root='.urlencode(Post::class.':'.$otherId));
+        $this->assertResponseIsSuccessful();
+        $this->assertCount(0, $crawler->filter('a[rel="prev"], a[rel="next"]'));
+        $this->assertStringNotContainsString('#'.$otherId, $crawler->filter('nav[aria-label="breadcrumb"]')->text(), 'Not the history of another post.');
+
+        $this->login(['ROLE_USER']);
+        $crawler = $this->client->request('GET', '/audit/transaction/'.$action->transactionId.'?root='.urlencode(Author::class.':1'));
+        $this->assertResponseIsSuccessful();
+        $this->assertStringNotContainsString('Author', $crawler->filter('nav[aria-label="breadcrumb"]')->text(), 'Not a history the reader may not view.');
+    }
+
+    public function testAuthorFilterKeepsAnAuthorLeftOutOfTheList(): void
+    {
+        [$postId] = $this->createPostHistory();
+        $this->login();
+
+        $crawler = $this->client->request('GET', \sprintf('%s/%d', self::POST_URL, $postId), ['who' => 'someone-else']);
+
+        $this->assertSame('someone-else', $crawler->filter('select[name="who"] option[selected]')->attr('value'));
     }
 
     public function testShowUserTimelineWithoutMatches(): void
@@ -1250,7 +1414,7 @@ final class ViewerControllerTest extends WebTestCase
     /**
      * Copies an insert audit row of $entity, attributed to the given user at the given date.
      */
-    private function seedUserEntry(string $entity, ?string $blameId, string $username, string $createdAt, ?string $ip = null, ?int $id = null): void
+    private function seedUserEntry(string $entity, ?string $blameId, string $username, string $createdAt, ?string $ip = null, ?int $id = null, ?string $transactionId = null): void
     {
         $table = $this->createReader()->getEntityAuditTableName($entity);
         $connection = $this->provider->getStorageServiceForEntity($entity)->getEntityManager()->getConnection();
@@ -1264,7 +1428,7 @@ final class ViewerControllerTest extends WebTestCase
         $row['blame_id'] = $blameId;
         $row['blame'] = json_encode(['username' => $username] + (null === $ip ? [] : ['ip' => $ip]), JSON_THROW_ON_ERROR);
         $row['created_at'] = $createdAt;
-        $row['transaction_id'] = 'seeded-'.bin2hex(random_bytes(8)); // an action of its own
+        $row['transaction_id'] = $transactionId ?? 'seeded-'.bin2hex(random_bytes(8)); // an action of its own by default
         $connection->insert($table, $row);
     }
 

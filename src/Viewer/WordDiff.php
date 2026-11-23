@@ -30,7 +30,7 @@ final class WordDiff
     {
         $a = self::tokens($old);
         $b = self::tokens($new);
-        if (self::words($a) > self::MAX_WORDS || self::words($b) > self::MAX_WORDS) {
+        if (null === $a || null === $b || self::words($a) > self::MAX_WORDS || self::words($b) > self::MAX_WORDS) {
             return null;
         }
 
@@ -66,11 +66,17 @@ final class WordDiff
     /**
      * Words and the spaces between them, as separate tokens.
      *
-     * @return list<string>
+     * @return null|list<string> null for a text that is not valid UTF-8
      */
-    private static function tokens(string $text): array
+    private static function tokens(string $text): ?array
     {
-        return '' === $text ? [] : (preg_split('/(\s+)/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY) ?: []);
+        if ('' === $text) {
+            return [];
+        }
+
+        $tokens = preg_split('/(\s+)/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+
+        return false === $tokens ? null : $tokens;
     }
 
     /**

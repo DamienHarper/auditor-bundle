@@ -19,10 +19,17 @@ final class ActionNavigatorTest extends TestCase
     {
         $entries = [self::entry(6, 'T4'), self::entry(5, 'T3'), self::entry(4, 'T3'), self::entry(3, 'T2'), self::entry(2, 'T1'), self::entry(1, 'T1')];
 
-        $this->assertSame(['newer' => 'T4', 'older' => 'T2'], ActionNavigator::neighbours($entries, 'T3'));
-        $this->assertSame(['newer' => null, 'older' => 'T3'], ActionNavigator::neighbours($entries, 'T4'), 'The most recent action.');
-        $this->assertSame(['newer' => 'T2', 'older' => null], ActionNavigator::neighbours($entries, 'T1'), 'The oldest action.');
-        $this->assertSame(['newer' => null, 'older' => null], ActionNavigator::neighbours($entries, 'T9'), 'Not in this history.');
+        $this->assertSame(['newer' => 'T4', 'older' => 'T2', 'found' => true], ActionNavigator::neighbours($entries, 'T3'));
+        $this->assertSame(['newer' => null, 'older' => 'T3', 'found' => true], ActionNavigator::neighbours($entries, 'T4'), 'The most recent action.');
+        $this->assertSame(['newer' => 'T2', 'older' => null, 'found' => true], ActionNavigator::neighbours($entries, 'T1'), 'The oldest action.');
+        $this->assertSame(['newer' => null, 'older' => null, 'found' => false], ActionNavigator::neighbours($entries, 'T9'), 'Not in this history.');
+    }
+
+    public function testEntriesWithoutTransactionAreNoNeighbours(): void
+    {
+        $entries = [self::entry(3, 'T3'), self::entry(2, null), self::entry(1, 'T1')];
+
+        $this->assertSame(['newer' => null, 'older' => 'T1', 'found' => true], ActionNavigator::neighbours($entries, 'T3'), 'No link to an entry without transaction.');
     }
 
     public function testStopsOnceTheOlderActionIsFound(): void
@@ -48,10 +55,10 @@ final class ActionNavigatorTest extends TestCase
             $entries[] = self::entry($id, 'T'.$id);
         }
 
-        $this->assertSame(['newer' => null, 'older' => null], ActionNavigator::neighbours($entries, 'T1'), 'Too far in the history.');
+        $this->assertSame(['newer' => null, 'older' => null, 'found' => false], ActionNavigator::neighbours($entries, 'T1'), 'Too far in the history.');
     }
 
-    private static function entry(int $id, string $transactionId): Entry
+    private static function entry(int $id, ?string $transactionId): Entry
     {
         return Entry::fromArray(['id' => $id, 'schema_version' => 2, 'type' => 'update', 'object_id' => '1', 'transaction_id' => $transactionId, 'diffs' => '{}', 'created_at' => new \DateTimeImmutable('@'.(1_700_000_000 + $id))]);
     }

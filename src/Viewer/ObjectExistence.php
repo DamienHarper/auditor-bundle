@@ -14,13 +14,21 @@ use Symfony\Contracts\Service\ResetInterface;
  * Tells which objects named by the phrases of a page no longer exist, to mark them "(deleted)".
  *
  * The page primes the references it shows: one query per class (WHERE id IN …) finds the ones that still exist. A
- * reference not primed, of a class Doctrine does not know or with a composite identifier, is never marked.
+ * reference not primed, of a class that is not audited, with a composite identifier or with an identifier that is
+ * neither an integer nor a string (UUID, ULID, enum, custom type), is never marked. The query goes through the entity
+ * manager: an object hidden by a Doctrine SQL filter (soft delete, tenant) is marked as deleted.
  *
  * @see ObjectExistenceTest
  */
 final class ObjectExistence implements ResetInterface
 {
     private const array INTEGER_TYPES = [Types::INTEGER, Types::SMALLINT, Types::BIGINT];
+
+    /**
+     * Identifier types compared as they are written in the audit tables; the others (UUID, ULID, enums, custom types)
+     * are converted by Doctrine, and their objects are never checked.
+     */
+    private const array STRING_TYPES = [Types::STRING, Types::ASCII_STRING, Types::GUID, Types::TEXT];
 
     /**
      * @var array<string, array<string, bool>> class => id => deleted
@@ -76,7 +84,11 @@ final class ObjectExistence implements ResetInterface
         }
 
         $field = $metadata->getSingleIdentifierFieldName();
-        $integer = \in_array($metadata->getTypeOfField($field), self::INTEGER_TYPES, true);
+        $type = $metadata->getTypeOfField($field);
+        $integer = \in_array($type, self::INTEGER_TYPES, true);
+        if (!$integer && !\in_array($type, self::STRING_TYPES, true)) {
+            return null;
+        }
 
         $exists = array_fill_keys($ids, false);
         $values = $integer ? array_values(array_map(intval(...), array_filter($ids, static fn (string $id): bool => 1 === preg_match('/^-?\d+$/', $id)))) : $ids;

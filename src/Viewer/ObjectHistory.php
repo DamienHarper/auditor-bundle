@@ -107,8 +107,12 @@ final readonly class ObjectHistory
             return ['users' => $list, 'anonymous' => $anonymous];
         };
 
-        return $this->cache instanceof ActivityGraphProvider
-            ? $this->cache->remember('dh_auditor.authors.'.md5($class.'#'.$id.'#'.($attached ? '1' : '0')), $compute)
+        /** @var Configuration $configuration */
+        $configuration = $this->reader->getProvider()->getConfiguration();
+
+        // a read scope depends on the reader (a tenant…): its authors are not shared through the cache
+        return $this->cache instanceof ActivityGraphProvider && null === $configuration->getReadScope()
+            ? $this->cache->remember('dh_auditor.authors.'.md5($class.'#'.$id.'#'.($attached ? '1' : '0')), $compute, \is_array(...))
             : $compute();
     }
 

@@ -128,7 +128,7 @@
                 <details class="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
                     <summary class="flex cursor-pointer items-center justify-between gap-2 px-4 py-2 font-mono text-xs">
                         <span>{{ tables[written.entity] }} · {{ entry.id }} · diffs</span>
-                        <button type="button" class="font-sans font-medium text-indigo-600 hover:underline dark:text-indigo-400" data-dh-auditor-copy="dh-auditor-json-{{ loop.index }}" data-dh-auditor-copied="{{ 'audit.history.copied'|trans(domain='auditor') }}">{{ 'audit.history.copy'|trans(domain='auditor') }}</button>
+                        <button type="button" class="font-sans font-medium text-indigo-600 hover:underline dark:text-indigo-400" data-dh-auditor-copy="dh-auditor-json-{{ loop.index }}" data-dh-auditor-copied="{{ 'audit.history.copied'|trans(domain='auditor') }}" data-dh-auditor-copy-failed="{{ 'audit.history.copy_failed'|trans(domain='auditor') }}">{{ 'audit.history.copy'|trans(domain='auditor') }}</button>
                     </summary>
                     <pre id="dh-auditor-json-{{ loop.index }}" class="overflow-x-auto rounded-b-xl bg-slate-900 p-4 text-xs leading-relaxed text-slate-100">{{ {diffs: entry.diffs, blame: entry.blame}|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES')) }}</pre>
                 </details>

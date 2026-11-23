@@ -25,8 +25,8 @@ final readonly class DiffExtension
     }
 
     /**
-     * Word by word comparison of two texts, as runs of [kind, text] (kind: equal, delete, insert); null when they are
-     * not both texts, or too long to compare (see WordDiff).
+     * Word by word comparison of two texts, as runs of [kind, text] (kind: equal, delete, insert); null when the new
+     * value is not a text, the old one neither a text nor null, or when they are too long to compare (see WordDiff).
      *
      * @return null|list<array{0: 'delete'|'equal'|'insert', 1: string}>
      */

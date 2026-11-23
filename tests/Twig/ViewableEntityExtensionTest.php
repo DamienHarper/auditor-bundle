@@ -193,11 +193,17 @@ final class ViewableEntityExtensionTest extends KernelTestCase
         /** @var Environment $twig */
         $twig = self::getContainer()->get('twig');
 
+        // the macro the comparison renders the two sides of an association with
+        $template = $twig->createTemplate(<<<'TWIG'
+            {% import '@DHAuditor/Audit/entry.html.twig' as macros %}
+            <table><tr>
+                <td>{{ macros.displayRelatedEntity(entry.diffs.source) }}</td>
+                <td>{{ macros.displayRelatedEntity(entry.diffs.target) }}</td>
+            </tr></table>
+            TWIG);
+
         $crawler = new Crawler();
-        $crawler->addHtmlContent($twig->render('@DHAuditor/Audit/entry.html.twig', [
-            'entry' => Entry::fromArray($row),
-            'entity' => $diffs['source']['class'],
-        ]));
+        $crawler->addHtmlContent($template->render(['entry' => Entry::fromArray($row)]));
 
         return $crawler;
     }

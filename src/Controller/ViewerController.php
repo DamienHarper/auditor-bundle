@@ -118,7 +118,8 @@ final readonly class ViewerController
 
     /**
      * One action (a database transaction): what it did, then every entry it wrote. Opened from the history of an
-     * object (?root=FQCN:id), it links to the previous and next actions of that history.
+     * object (?root=FQCN:id) that holds it, it links to the previous and next actions of that history (unfiltered,
+     * attached entities included, within the latest ActionNavigator::MAX_ENTRIES entries).
      */
     #[Route(path: '/audit/transaction/{hash}', name: 'dh_auditor_show_transaction_stream', methods: ['GET'])]
     public function showTransactionAction(Request $request, Reader $reader, ObjectHistory $history, HistoryPhraser $phraser, ObjectExistence $existence, string $hash): Response
@@ -142,19 +143,25 @@ final readonly class ViewerController
         usort($entries, static fn (array $a, array $b): int => [$a['entry']->createdAt, $a['entity'], $a['entry']->id] <=> [$b['entry']->createdAt, $b['entity'], $b['entry']->id]);
 
         $item = new HistoryItem($hash, array_reverse(array_column($entries, 'entry')));
-        $root = $this->parseRoot($request, $reader);
-        $rows = $this->rows([$item], $phraser, $existence, withContext: null === $root);
-        if (null !== $root) {
-            $rows[0]['phrase'] = $phraser->focus($rows[0]['phrase'], $root['class'], $root['id']);
-        }
 
-        $neighbours = ['newer' => null, 'older' => null];
+        // the history the action was opened from, kept when the reader may view it and the action is part of it
+        $root = $this->parseRoot($request, $reader);
+        $neighbours = ['newer' => null, 'older' => null, 'found' => false];
         if (null !== $root) {
             try {
                 $neighbours = ActionNavigator::neighbours($history->query($root['class'], $root['id'], new HistoryFilters())->iterate(), $hash);
-            } catch (AccessDeniedException|InvalidArgumentException) {
+            } catch (AccessDeniedException) {
+                $neighbours['found'] = false;
+            }
+
+            if (!$neighbours['found']) {
                 $root = null;
             }
+        }
+
+        $rows = $this->rows([$item], $phraser, $existence, withContext: null === $root);
+        if (null !== $root) {
+            $rows[0]['phrase'] = $phraser->focus($rows[0]['phrase'], $root['class'], $root['id']);
         }
 
         return $this->renderView('@DHAuditor/Audit/transaction_stream.html.twig', [
@@ -189,9 +196,13 @@ final readonly class ViewerController
         /** @var array<string, Query> $queries */
         $queries = [];
         $entities = [];
+        $viewable = [];
         $numResults = 0;
         foreach (array_keys($configuration->getEntities()) as $entity) {
             $entity = (string) $entity;
+            if (!$reader->getProvider()->hasAuditTable($entity)) {
+                continue;
+            }
 
             try {
                 $query = $reader->createQuery($entity, array_filter(['blame_id' => $id, 'page_size' => null, 'type' => $filters->what], static fn (mixed $value): bool => null !== $value));
@@ -199,6 +210,7 @@ final readonly class ViewerController
                 continue;
             }
 
+            $viewable[] = $entity;
             if (null !== $filters->days) {
                 $query->addFilter(new DateRangeFilter(Query::CREATED_AT, new \DateTimeImmutable('today', $timezone)->modify(\sprintf('-%d days', $filters->days - 1))));
             }
@@ -211,6 +223,10 @@ final readonly class ViewerController
                     $numResults += $count;
                 }
             }
+        }
+
+        if (null !== $filters->entity && !\in_array($filters->entity, $viewable, true)) {
+            throw new BadRequestHttpException(\sprintf('Unknown entity "%s".', $filters->entity));
         }
 
         $page = min($page, max(1, (int) ceil($numResults / $pageSize)));
@@ -238,7 +254,8 @@ final readonly class ViewerController
             'filters' => $filters,
             'periods' => HistoryFilters::PERIODS,
             'types' => TransactionType::cases(),
-            'more' => ($page * $pageSize) < $numResults ? ['page' => $page + 1] + $filters->toQuery() : null,
+            // only the filters of this page
+            'more' => ($page * $pageSize) < $numResults ? ['page' => $page + 1] + array_intersect_key($filters->toQuery(), ['on' => true, 'what' => true, 'when' => true]) : null,
             'moreRoute' => 'dh_auditor_show_user_stream',
             'moreRouteParameters' => ['id' => $id],
         ];
@@ -499,6 +516,11 @@ final readonly class ViewerController
         } catch (AccessDeniedException) {
             throw new SymfonyAccessDeniedException('Access Denied.');
         } catch (InvalidArgumentException $e) {
+            // a cursor or a field of the query string; anything else is an error of the application or its configuration
+            if (null === $after && null === $filters->field) {
+                throw $e;
+            }
+
             throw new BadRequestHttpException($e->getMessage(), $e);
         }
 
@@ -583,7 +605,8 @@ final readonly class ViewerController
     private function parseRoot(Request $request, Reader $reader): ?array
     {
         $root = $request->query->getString('root');
-        $separator = mb_strrpos($root, ':');
+        // a class name holds no colon, an identifier may
+        $separator = mb_strpos($root, ':');
         if (false === $separator) {
             return null;
         }

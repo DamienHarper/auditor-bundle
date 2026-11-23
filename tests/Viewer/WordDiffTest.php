@@ -49,6 +49,11 @@ final class WordDiffTest extends TestCase
         $this->assertNull(WordDiff::diff($long, 'short'), 'Beyond the limit, old and new are shown without diff.');
     }
 
+    public function testInvalidUtf8(): void
+    {
+        $this->assertNull(WordDiff::diff("caf\xE9", 'café'), 'Not compared: old and new are shown instead.');
+    }
+
     public function testTooManyDifferencesToCompare(): void
     {
         $old = implode(' ', array_map(static fn (int $i): string => 'a'.$i, range(1, 600)));

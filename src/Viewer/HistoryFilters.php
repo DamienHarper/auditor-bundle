@@ -11,7 +11,8 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Filters of a history page, read from the query string: who (user id, or "__anonymous__"), what (entry type),
- * field, origin, when (days), and whether the attached entities are included.
+ * field, origin, when (days), whether the attached entities are included, and the entity (on, on the actions of a
+ * user).
  */
 final readonly class HistoryFilters
 {
@@ -47,7 +48,7 @@ final readonly class HistoryFilters
         }
 
         $days = $value('when');
-        if (null !== $days && !\in_array((int) $days, self::PERIODS, true)) {
+        if (null !== $days && !\in_array($days, array_map(strval(...), self::PERIODS), true)) {
             throw new BadRequestHttpException(\sprintf('Unknown period "%s".', $days));
         }
 

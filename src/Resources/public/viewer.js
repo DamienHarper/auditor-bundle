@@ -59,8 +59,9 @@
         link.setAttribute('aria-busy', 'true');
         window.fetch(link.href, {headers: {'X-DH-Auditor-Fragment': '1'}, credentials: 'same-origin'})
             .then(function (response) {
-                if (!response.ok) {
-                    throw new Error(response.statusText);
+                // a redirect (an expired session sent to the login page…) or an error: open the page itself
+                if (!response.ok || response.redirected) {
+                    throw new Error(response.redirected ? 'redirected' : response.statusText);
                 }
 
                 return response.text();
@@ -72,8 +73,8 @@
                 if (actions && isExpanded(actions)) {
                     expandAll(actions, true);
                 }
-            })
-            .catch(function () {
+            }, function (error) {
+                console.error('auditor: older actions could not be loaded in place', error);
                 window.location.href = link.href;
             });
 
@@ -86,13 +87,28 @@
             return;
         }
 
-        navigator.clipboard.writeText(source.textContent || '').then(function () {
-            var label = button.getAttribute('data-dh-auditor-copied');
+        var show = function (attribute) {
+            var label = button.getAttribute(attribute);
             if (label) {
                 button.textContent = label;
             }
+        };
+
+        navigator.clipboard.writeText(source.textContent || '').then(function () {
+            show('data-dh-auditor-copied');
+        }, function () {
+            show('data-dh-auditor-copy-failed');
         });
     }
+
+    // the copy buttons need the clipboard API (a secure context): hide them without it
+    document.addEventListener('DOMContentLoaded', function () {
+        if (!navigator.clipboard) {
+            document.querySelectorAll('[data-dh-auditor-copy]').forEach(function (button) {
+                button.hidden = true;
+            });
+        }
+    });
 
     document.addEventListener('click', function (event) {
         var target = event.target instanceof Element ? event.target : null;

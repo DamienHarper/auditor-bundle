@@ -114,9 +114,10 @@ final readonly class HistoryPhraser
 
     /**
      * What an action was done on, for a list that mixes objects ("on Post “Why audit?”", "on 2 Post"): the object with
-     * the most changes, or the number of objects when all the changes concern several objects of one entity. Null
-     * when the action only creates, snapshots or deletes objects (its phrase names them), or when it concerns only the
-     * given object (in the history of that object).
+     * the most changes, or the number of objects when all the changes concern several objects of one entity, each
+     * changed the same number of times. Null when the action only creates, snapshots or deletes objects (its phrase
+     * names them), when it creates or deletes the object it would name, or when it concerns only the given object (in
+     * the history of that object).
      */
     public function context(HistoryItem $item, ?string $rootClass = null, ?string $rootId = null): ?Phrase
     {
@@ -197,8 +198,8 @@ final readonly class HistoryPhraser
     }
 
     /**
-     * Keeps the first fragments of a phrase, followed by "and 4 other changes" (a list of recent activity, a small
-     * screen).
+     * Keeps the first fragments of a phrase, followed by "and 4 other changes", the number of changes the other
+     * fragments tell (a list of recent activity, a small screen).
      */
     public function shorten(Phrase $phrase, int $fragments): Phrase
     {
@@ -208,7 +209,9 @@ final readonly class HistoryPhraser
         }
 
         $kept = \array_slice($phrase->fragments, 0, $fragments);
-        $kept[] = new Fragment([new TextPart($this->trans('more_changes', ['%count%' => $count - $fragments]))], array_merge(...array_map(static fn (Fragment $fragment): array => $fragment->changes, \array_slice($phrase->fragments, $fragments))));
+        $others = array_merge(...array_map(static fn (Fragment $fragment): array => $fragment->changes, \array_slice($phrase->fragments, $fragments)));
+        // the changes left out (a fragment may tell several: a summary, merged elements), or the fragments without any
+        $kept[] = new Fragment([new TextPart($this->trans('more_changes', ['%count%' => \count($others) > 0 ? \count($others) : $count - $fragments]))], $others);
 
         return new Phrase($kept, $phrase->icon, $this->trans('list.separator'), $this->trans('list.and'));
     }

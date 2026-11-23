@@ -13,10 +13,13 @@ use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
 use DH\Auditor\User\User;
+use DH\AuditorBundle\Tests\Fixtures\History\NoopReadScope;
+use DH\AuditorBundle\Viewer\ActivityGraphProvider;
 use DH\AuditorBundle\Viewer\HistoryFilters;
 use DH\AuditorBundle\Viewer\ObjectHistory;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
 /**
  * @internal
@@ -56,6 +59,23 @@ final class ObjectHistoryTest extends TestCase
         $creation = $history->creation(Post::class, $postId);
         $this->assertInstanceOf(Entry::class, $creation);
         $this->assertSame('insert', $creation->type);
+    }
+
+    public function testAuthorsAreNotCachedWithAReadScope(): void
+    {
+        $postId = $this->createCommentedPost();
+        $cache = new ActivityGraphProvider(7, 'bottom', true, 300, new ArrayAdapter());
+        $history = new ObjectHistory(new Reader($this->provider), $cache);
+
+        $this->assertSame(['alice'], array_column($history->authors(Post::class, $postId, true)['users'], 'name'));
+        $this->provider->getAuditor()->getConfiguration()->setUserProvider(static fn (): User => new User('8', 'bob'));
+        $this->provider->getAuditingServiceForEntity(Post::class)->getEntityManager()->find(Post::class, (int) $postId)?->setTitle('By bob');
+        $this->provider->getAuditingServiceForEntity(Post::class)->getEntityManager()->flush();
+
+        $this->assertSame(['alice'], array_column($history->authors(Post::class, $postId, true)['users'], 'name'), 'Cached.');
+
+        $this->provider->getConfiguration()->setReadScope(new NoopReadScope());
+        $this->assertSame(['alice', 'bob'], array_column($history->authors(Post::class, $postId, true)['users'], 'name'), 'A read scope depends on the reader: not cached.');
     }
 
     public function testAnonymousAuthors(): void

@@ -28,7 +28,7 @@ audit:
     property: Eigenschaft
     old_value: Alter Wert
     new_value: Neuer Wert
-    events_count: '{1} %formatted_count% Ereignis|]1,Inf[ %formatted_count% Ereignisse'
+    events_count: '[0,1] %formatted_count% Ereignis|]1,Inf[ %formatted_count% Ereignisse'
     last_activity: Letzte Aktivität
     anonymous: anonymer Benutzer
   transaction:
@@ -101,12 +101,13 @@ audit:
     all_details: 'Alle Details →'
     copy: 'Kopieren'
     copied: 'Kopiert'
+    copy_failed: 'Kopieren fehlgeschlagen'
     older: 'Ältere Aktionen anzeigen'
     no_actions: 'Keine Aktion.'
     context_separator: ':'
     created_by: 'erstellt von %author% am %date%'
     entries_count: '{0} kein Eintrag|{1} 1 Eintrag|]1,Inf[ %count% Einträge'
-    fields_count: '{1} 1 Feld|]1,Inf[ %count% Felder'
+    fields_count: '[0,1] %count% Feld|]1,Inf[ %count% Felder'
     compare: 'Zwei Zustände vergleichen'
     export: 'Exportieren'
     with_attached: 'Mit den zugehörigen Entitäten'
@@ -133,33 +134,33 @@ audit:
       everything: 'alles'
       all_origins: 'alle'
       all_time: 'gesamter Zeitraum'
-      days: '{1} letzter Tag|]1,Inf[ letzte %count% Tage'
+      days: '[0,1] letzter Tag|]1,Inf[ letzte %count% Tage'
     origin:
       http: 'Web'
       console: 'Kommandozeile'
       messenger: 'Messenger'
       system: 'System'
     origin_help:
-      http: 'Eine Webanfrage eines angemeldeten Benutzers'
+      http: 'Eine Webanfrage unter einer Symfony-Firewall (angemeldet oder nicht)'
       console: 'Ein Konsolenbefehl'
       messenger: 'Ein Messenger-Nachrichtenhandler'
-      system: 'Kein Benutzer: ein Skript, ein geplanter Job, eine anonyme Anfrage…'
+      system: 'Weder Firewall noch Befehl noch Nachricht: ein Skript, ein geplanter Job, eine Anfrage außerhalb jeder Firewall…'
   action:
     title: 'Aktion vom %date%'
     previous: '‹ Vorherige Aktion'
     next: 'Nächste Aktion ›'
-    objects: '{1} 1 Objekt betroffen|]1,Inf[ %count% Objekte betroffen'
+    objects: '[0,1] %count% Objekt betroffen|]1,Inf[ %count% Objekte betroffen'
     technical: 'Technische Details'
     table: 'Tabelle · ID'
     type: 'Typ'
     raw_field: 'Rohfeld'
     ulid_date: 'ULID-Zeitstempel'
     no_via: 'keine'
-    more_entries: '{1} und 1 weiterer Eintrag|]1,Inf[ und %count% weitere Einträge'
-    tables: '{1} 1 Tabelle|]1,Inf[ %count% Tabellen'
+    more_entries: '[0,1] und %count% weiterer Eintrag|]1,Inf[ und %count% weitere Einträge'
+    tables: '[0,1] %count% Tabelle|]1,Inf[ %count% Tabellen'
   user:
     title: 'Was %name% getan hat'
-    entities: '{1} bei 1 Objekttyp|]1,Inf[ bei %count% Objekttypen'
+    entities: '[0,1] bei %count% Objekttyp|]1,Inf[ bei %count% Objekttypen'
     on: 'Bei'
 
 time_ago:

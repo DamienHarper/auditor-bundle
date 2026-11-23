@@ -24,7 +24,9 @@
                 <span class="hidden sm:inline">{{ row.phrase|dh_auditor_phrase }}</span>
                 <span class="sm:hidden">{{ row.phrase|dh_auditor_shorten(3)|dh_auditor_phrase }}</span>
             {% endif %}
+            {% set transaction = (item.entries|first).transactionId %}
             <span class="whitespace-nowrap text-slate-400 dark:text-slate-500">·
+                {% if transaction %}<a href="{{ path('dh_auditor_show_transaction_stream', {hash: transaction}|merge(root ?? false ? {root: root} : {})) }}" class="hover:underline">{% endif %}
                 <time datetime="{{ item.createdAt|date('c') }}" title="{{ item.createdAt|format_datetime('full', 'medium', timezone: false) }}">
                     {%- if (date_format ?? 'time') == 'time' -%}
                         {{ item.createdAt|format_time('short', timezone: false) }}
@@ -32,6 +34,7 @@
                         {{ item.createdAt|format_datetime('medium', 'short', timezone: false) }}
                     {%- endif -%}
                 </time>
+                {%- if transaction %}</a>{% endif %}
             </span>
             <span class="ml-1 inline-flex flex-wrap gap-1 align-middle">{{ history.origin(item) }}</span>
         </p>

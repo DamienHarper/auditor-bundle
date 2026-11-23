@@ -25,7 +25,7 @@ final class ViewerUrlExtensionTest extends KernelTestCase
         $this->assertSame('/audit/'.self::POST_PARAM.'/5', $this->render('{{ dh_auditor_entity_url(post) }}', ['post' => $post]));
         $this->assertSame('/audit/'.self::POST_PARAM, $this->render('{{ dh_auditor_entity_url(class) }}', ['class' => Post::class]));
         $this->assertSame(
-            '/audit/'.self::POST_PARAM.'/5?type=update',
+            '/audit/'.self::POST_PARAM.'/5?what=update',
             $this->render("{{ dh_auditor_entity_url(class, 5, {type: 'update'}) }}", ['class' => Post::class]),
         );
         $this->assertSame(

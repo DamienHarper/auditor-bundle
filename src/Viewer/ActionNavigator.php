@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace DH\AuditorBundle\Viewer;
 
-use DH\Auditor\History\HistoryGrouper;
 use DH\Auditor\Model\Entry;
 use DH\AuditorBundle\Tests\Viewer\ActionNavigatorTest;
 
@@ -24,7 +23,8 @@ final class ActionNavigator
     /**
      * @param iterable<Entry> $entries the history, most recent first
      *
-     * @return array{newer: ?string, older: ?string} transaction ids of the neighbouring actions
+     * @return array{newer: ?string, older: ?string, found: bool} transaction ids of the neighbouring actions, and
+     *                                                            whether the action is in the entries read
      */
     public static function neighbours(iterable $entries, string $transactionId): array
     {
@@ -38,13 +38,14 @@ final class ActionNavigator
                 break;
             }
 
-            $key = HistoryGrouper::transactionKey($entry);
-            if ($key === $current) {
+            // an entry without transaction (legacy) is no action of its own to link to
+            $key = $entry->transactionId;
+            if (null === $key || '' === $key || $key === $current) {
                 continue;
             }
 
             if ($found) {
-                return ['newer' => $newer, 'older' => $key];
+                return ['newer' => $newer, 'older' => $key, 'found' => true];
             }
 
             if ($key === $transactionId) {
@@ -56,6 +57,6 @@ final class ActionNavigator
             $current = $key;
         }
 
-        return ['newer' => $found ? $newer : null, 'older' => null];
+        return ['newer' => $found ? $newer : null, 'older' => null, 'found' => $found];
     }
 }

@@ -83,7 +83,7 @@ final readonly class ActivityGraphProvider
      */
     public function getEventCount(string $entity, Query $query): int
     {
-        return $this->remember(self::COUNT_CACHE_KEY_PREFIX.md5($entity), $query->count(...));
+        return $this->remember(self::COUNT_CACHE_KEY_PREFIX.md5($entity), $query->count(...), \is_int(...));
     }
 
     /**
@@ -93,26 +93,28 @@ final readonly class ActivityGraphProvider
      */
     public function getActionCount(string $entity, \Closure $count): int
     {
-        return $this->remember(self::ACTION_COUNT_CACHE_KEY_PREFIX.md5($entity), $count);
+        return $this->remember(self::ACTION_COUNT_CACHE_KEY_PREFIX.md5($entity), $count, \is_int(...));
     }
 
     /**
-     * Computes a value, or reads it from the activity cache (same lifetime and tag) when it is enabled.
+     * Computes a value, or reads it from the activity cache (same lifetime and tag) when it is enabled. A cached value
+     * that $valid rejects (written by another version, another shape) is computed again.
      *
      * @template T
      *
-     * @param \Closure(): T $compute
+     * @param \Closure(): T              $compute
+     * @param null|\Closure(mixed): bool $valid
      *
      * @return T
      */
-    public function remember(string $key, \Closure $compute): mixed
+    public function remember(string $key, \Closure $compute, ?\Closure $valid = null): mixed
     {
         if (!$this->cacheEnabled || !$this->cache instanceof CacheItemPoolInterface) {
             return $compute();
         }
 
         $item = $this->cache->getItem($key);
-        if ($item->isHit()) {
+        if ($item->isHit() && (!$valid instanceof \Closure || $valid($item->get()))) {
             return $item->get();
         }
 
@@ -130,6 +132,8 @@ final readonly class ActivityGraphProvider
 
     /**
      * Clear the activity graph cache.
+     *
+     * The authors of the histories (ObjectHistory::authors()) are only cleared with the whole cache (tag-aware pool).
      *
      * @param null|string $entity Clear cache for a specific entity, or all if null
      *

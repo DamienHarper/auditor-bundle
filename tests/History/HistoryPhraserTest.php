@@ -598,6 +598,14 @@ final class HistoryPhraserTest extends TestCase
         $this->assertSame('a changé Title : A → B, a modifié Body et 2 autres changements', (string) $phraser->shorten($phrase, 2));
         $this->assertSame((string) $phrase, (string) $phraser->shorten($phrase, 4), 'Short enough.');
         $this->assertSame('a changé Title : A → B, a modifié Body, a changé Status : Brouillon → Publié et 1 autre changement', (string) $phraser->shorten($phrase, 3));
+
+        $tags = $phraser->phrase($this->item(
+            $this->tagEntry('associate', 3, 'c', 3),
+            $this->tagEntry('associate', 2, 'b', 2),
+            $this->tagEntry('associate', 1, 'a', 1),
+            self::entry('update', Post::class, '1', ['title' => ['old' => 'A', 'new' => 'B']], id: 0),
+        ));
+        $this->assertSame('a changé Title : A → B et 3 autres changements', (string) $phraser->shorten($tags, 1), 'The three tags added are three changes, told by one fragment.');
     }
 
     public function testAuthor(): void

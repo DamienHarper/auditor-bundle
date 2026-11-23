@@ -45,7 +45,11 @@
                     {% for user in authors.users %}
                         <option value="{{ user.id }}" {{ filters.who == user.id ? 'selected' }}>{{ user.name }}</option>
                     {% endfor %}
-                    {% if authors.anonymous %}
+                    {# an author left out of the list (older entries, list cached) stays selected #}
+                    {% if filters.who is not null and filters.who != '__anonymous__' and filters.who not in authors.users|column('id') %}
+                        <option value="{{ filters.who }}" selected>{{ filters.who }}</option>
+                    {% endif %}
+                    {% if authors.anonymous or filters.who == '__anonymous__' %}
                         <option value="__anonymous__" {{ filters.who == '__anonymous__' ? 'selected' }}>{{ 'audit.filter.anonymous'|trans(domain='auditor') }}</option>
                     {% endif %}
                 </select>

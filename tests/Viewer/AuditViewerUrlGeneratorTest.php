@@ -57,8 +57,18 @@ final class AuditViewerUrlGeneratorTest extends KernelTestCase
         $generator = $this->getGenerator();
 
         $this->assertSame(
-            '/audit/'.self::POST_PARAM.'/42?type=update&user=__anonymous__',
+            '/audit/'.self::POST_PARAM.'/42?what=update&who=__anonymous__',
             $generator->generateEntityUrl(Post::class, 42, ['type' => 'update', 'user' => '__anonymous__', 'field' => null, 'date_from' => '']),
+            'The history of an object names the type and user filters "what" and "who".',
+        );
+        $this->assertSame(
+            '/audit/'.self::POST_PARAM.'?type=update&user=12',
+            $generator->generateEntityUrl(Post::class, null, ['type' => 'update', 'user' => '12']),
+            'The stream of an entity keeps them.',
+        );
+        $this->assertSame(
+            '/audit/'.self::POST_PARAM.'/42?what=insert&origin=console&when=30',
+            $generator->generateEntityUrl(Post::class, 42, ['what' => 'insert', 'origin' => 'console', 'when' => 30]),
         );
         $this->assertSame(
             'http://localhost/audit/'.self::POST_PARAM.'?field=title',

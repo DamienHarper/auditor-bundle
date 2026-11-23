@@ -188,6 +188,18 @@ final class ActivityGraphProviderTest extends WebTestCase
     }
 
     #[Test]
+    public function testACachedValueOfAnotherShapeIsComputedAgain(): void
+    {
+        $cache = new ArrayAdapter();
+        $item = $cache->getItem('key');
+        $cache->save($item->set('not a count'));
+        $provider = new ActivityGraphProvider(7, 'bottom', true, 300, $cache);
+
+        $this->assertSame(3, $provider->remember('key', static fn (): int => 3, \is_int(...)));
+        $this->assertSame(3, $cache->getItem('key')->get(), 'And stored again.');
+    }
+
+    #[Test]
     public function testActionCountIsCached(): void
     {
         $provider = new ActivityGraphProvider(7, 'bottom', true, 300, new ArrayAdapter());
