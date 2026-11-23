@@ -431,6 +431,67 @@ final class HistoryPhraserTest extends TestCase
         ]))));
     }
 
+    public function testAChangeToldByALaterFragmentIsNotToldTwice(): void
+    {
+        $title = new class implements ChangeDescriberInterface {
+            public function describe(Change $change, HistoryItem $item): Phrase
+            {
+                return Phrase::of('renamed the post');
+            }
+        };
+        $body = new class implements ChangeDescriberInterface {
+            public function describe(Change $change, HistoryItem $item): Phrase
+            {
+                $title = array_find($item->getChanges(), static fn (Change $other): bool => 'title' === $other->field);
+
+                return Phrase::of(Fragment::of(['rewrote the post'], [$change, $title ?? $change]));
+            }
+        };
+
+        $phraser = $this->phraser('en', [], [], new ServiceLocator([
+            Post::class.'::title' => static fn (): ChangeDescriberInterface => $title,
+            Post::class.'::body' => static fn (): ChangeDescriberInterface => $body,
+        ]));
+
+        $this->assertSame('rewrote the post and changed Featured: no → yes', (string) $phraser->phrase($this->item(self::entry('update', Post::class, '1', [
+            'body' => ['old' => 'a', 'new' => 'b'],
+            'featured' => ['old' => false, 'new' => true],
+            'title' => ['old' => 'A', 'new' => 'B'],
+        ]))), 'The title, mapped before the body, is told by the body fragment that lists it.');
+    }
+
+    public function testAChangeLeftByADroppedFragmentIsToldByDefault(): void
+    {
+        $title = new class implements ChangeDescriberInterface {
+            public function describe(Change $change, HistoryItem $item): Phrase
+            {
+                $featured = array_find($item->getChanges(), static fn (Change $other): bool => 'featured' === $other->field);
+
+                return Phrase::of(Fragment::of(['renamed and featured the post'], [$change, $featured ?? $change]));
+            }
+        };
+        $body = new class implements ChangeDescriberInterface {
+            public function describe(Change $change, HistoryItem $item): Phrase
+            {
+                $changes = array_values(array_filter($item->getChanges(), static fn (Change $other): bool => \in_array($other->field, ['body', 'title', 'status'], true)));
+
+                return Phrase::of(Fragment::of(['rewrote the post'], $changes));
+            }
+        };
+
+        $phraser = $this->phraser('en', [], [], new ServiceLocator([
+            Post::class.'::title' => static fn (): ChangeDescriberInterface => $title,
+            Post::class.'::body' => static fn (): ChangeDescriberInterface => $body,
+        ]));
+
+        $this->assertSame('rewrote the post and changed Featured: no → yes', (string) $phraser->phrase($this->item(self::entry('update', Post::class, '1', [
+            'body' => ['old' => 'a', 'new' => 'b'],
+            'featured' => ['old' => false, 'new' => true],
+            'status' => ['old' => 'draft', 'new' => 'published'],
+            'title' => ['old' => 'A', 'new' => 'B'],
+        ]))), 'The fragment listing the most changes wins; the featured change its rival listed is told by default.');
+    }
+
     public function testTheIconOfAMainChangeToldByAnotherFragment(): void
     {
         $describer = new class implements ChangeDescriberInterface {

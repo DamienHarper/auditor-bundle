@@ -25,11 +25,12 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  * Tells an action (a history item) as a phrase a reader understands, such as "changed Status: Draft → Published and
  * added to Tags: symfony and audit", and names its author.
  *
- * Each change gives a fragment, in this order: the changes of the root before those of the attached objects
- * (Entry::$rootPath), then the order of the action, the fields of an entry in the order of their mapping. A fragment
- * comes from, in turn:
+ * Each change, or group of changes, gives a fragment, in this order: the changes of the root before those of the
+ * attached objects (Entry::$rootPath), then the order of the action, the fields of an entry in the order of their
+ * mapping. A fragment comes from, in turn:
  * - a ChangeDescriberInterface service registered for the entity and the field, then for the entity (the changes the
- *   fragments of a describer list are not told again);
+ *   fragments of a describer list are not told again; between two describers listing the same change, the one telling
+ *   the most changes wins);
  * - the phrase of the application in the "dh_auditor_history" domain (ICU), keyed "FQCN.kind" for the creation,
  *   snapshot and deletion ("App\Entity\Post.created") and "FQCN.field.kind" for a field ("App\Entity\Post.status.changed");
  * - the neutral phrase of the bundle ("default.kind").
@@ -44,7 +45,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  * "dh_auditor_fields" domain, translated with the number of objects of a summary, 1 otherwise; the short class name
  * without translation). They are inserted after the
  * translation, as parts of the fragment: {label}, the associated objects of {old} and {new} and the elements of
- * {names} as object references, the other values as values, {field} and {entity} as text.
+ * {names} as object references when their class and identifier are known, the other values (JSON paths included) as
+ * values, {field} and {entity} as text.
  *
  * @see HistoryPhraserTest
  */
@@ -111,8 +113,9 @@ final readonly class HistoryPhraser
     }
 
     /**
-     * Name of the author of an action: the name recorded in the blame (or the current one, with an
-     * AuthorNameResolverInterface service); without user, "System", "Command line" or "Anonymous user".
+     * Name of the author of an action: the name recorded in the blame ("User 42" when only the id was recorded), or the
+     * current one with an AuthorNameResolverInterface service ("Deleted user" when it returns null); without user,
+     * "System", "Command line" or "Anonymous user".
      */
     public function author(HistoryItem $item): string
     {
@@ -166,29 +169,43 @@ final readonly class HistoryPhraser
     {
         $changes = $this->ordered($item->getChanges());
 
-        // a describer tells its change, and the other changes its fragments list: those are not told again
-        $described = [];
-        $told = [];
+        // a describer tells its change, and the other changes its fragments list. When two described phrases tell the
+        // same change, the one telling the most changes is kept (the first one on a tie); the changes only the other one
+        // told get their default fragments.
+        $candidates = [];
         foreach ($changes as $index => $change) {
-            if (isset($told[spl_object_id($change)])) {
-                continue;
-            }
-
             $phrase = $this->describe($change, $item);
             if (!$phrase instanceof Phrase) {
                 continue;
             }
 
             $fragments = array_map(static fn (Fragment $fragment): Fragment => [] === $fragment->changes ? new Fragment($fragment->parts, [$change], $fragment->icon) : $fragment, $phrase->fragments);
-            $described[$index] = new Phrase($fragments, $phrase->icon);
+            $tells = [];
             foreach ($fragments as $fragment) {
                 foreach ($fragment->changes as $toldChange) {
-                    $told[spl_object_id($toldChange)] = true;
+                    $tells[spl_object_id($toldChange)] = true;
                 }
             }
+
+            $candidates[$index] = ['phrase' => new Phrase($fragments, $phrase->icon), 'tells' => $tells];
+        }
+
+        $order = array_keys($candidates);
+        usort($order, static fn (int $a, int $b): int => [\count($candidates[$b]['tells']), $a] <=> [\count($candidates[$a]['tells']), $b]);
+
+        $described = [];
+        $told = [];
+        foreach ($order as $index) {
+            if ([] !== array_intersect_key($candidates[$index]['tells'], $told)) {
+                continue;
+            }
+
+            $described[$index] = $candidates[$index]['phrase'];
+            $told += $candidates[$index]['tells'];
         }
 
         $changes = array_filter($changes, static fn (Change $change, int $index): bool => isset($described[$index]) || !isset($told[spl_object_id($change)]), ARRAY_FILTER_USE_BOTH);
+        ksort($described);
 
         // more than BULK_THRESHOLD objects with the same entity, kind and field: one summary, where the first one was
         $objects = [];
