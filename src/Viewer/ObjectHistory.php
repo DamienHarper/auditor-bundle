@@ -96,13 +96,11 @@ final readonly class ObjectHistory
                     continue;
                 }
 
-                $users[(string) $userId] ??= $entry->username ?? (string) $userId;
+                // the id is kept in the value: a numeric key would turn into an int
+                $users[(string) $userId] ??= ['id' => (string) $userId, 'name' => $entry->username ?? (string) $userId];
             }
 
-            $list = [];
-            foreach ($users as $userId => $name) {
-                $list[] = ['id' => $userId, 'name' => $name];
-            }
+            $list = array_values($users);
 
             usort($list, static fn (array $a, array $b): int => [mb_strtolower($a['name']), $a['id']] <=> [mb_strtolower($b['name']), $b['id']]);
 
