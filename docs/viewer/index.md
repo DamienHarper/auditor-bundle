@@ -54,7 +54,9 @@ dh_auditor:
 The viewer tells each action (a database transaction) as a phrase, such as *alice changed Status: Draft → Published
 and added to Tags: symfony and audit*, with its technical details one click away. The phrases come from the
 [history phrases](../customization/histories.md#-phrases): translate or describe them to speak the words of your
-application. The objects they name link to their history, and are marked *(deleted)* when they no longer exist.
+application. The objects they name link to their history, and are marked *(deleted)* when they no longer exist (when
+their identifier is an integer or a string; an object hidden by a Doctrine SQL filter, such as a soft delete, is
+marked as well).
 
 ### Overview (`/audit`)
 
@@ -77,7 +79,7 @@ The history of one object and of the entities attached to it (`#[AuditRoot]`, `r
   search), origin (`http`, `console`, `messenger`, `system`), when (last 7, 30 or 90 days), and, when entities can
   be attached, with or without them;
 - **Show older actions** reads the next page through a cursor (`?after=`): a link, which `viewer.js` loads in place;
-- **Who changed what last**: the latest change of each field of the object;
+- **Who changed what last**: the 8 fields changed most recently, with who changed them and when (or *at creation*);
 - **Technical side**: class, identifier, audit tables read, number of entries.
 
 ```
@@ -114,8 +116,8 @@ actions of that history.
 
 ### Actions of a User (`/audit/user/{id}`)
 
-Everything a user did, across the audited entities the reader may view, object by object (*On Post “Why audit?”:
-…*), with filters on the entity (`on`), the type (`what`) and the period (`when`). The user is identified by the
+Everything a user did, across the audited entities the reader may view, newest first, each action with what it was
+done on (*On Post “Why audit?”: …*), with filters on the entity (`on`), the type (`what`) and the period (`when`). The user is identified by the
 `blame_id` recorded with each entry (up to 255 characters).
 
 - Anonymous entries (no `blame_id`) have no page. Neither do entries recorded with an empty `blame_id`, which is what
@@ -313,7 +315,7 @@ entity class in its URLs.
 {# Audit stream of an entity: an object, or a class name with an optional id #}
 <a href="{{ dh_auditor_entity_url(post) }}">History</a>
 <a href="{{ dh_auditor_entity_url('App\\Entity\\Post') }}">All posts</a>
-<a href="{{ dh_auditor_entity_url('App\\Entity\\Post', 42, {type: 'update'}) }}">Updates of post #42</a>
+<a href="{{ dh_auditor_entity_url('App\\Entity\\Post', 42, {what: 'update'}) }}">Updates of post #42</a>
 
 {# Transaction and user timeline #}
 <a href="{{ dh_auditor_transaction_url(entry.transactionId) }}">Transaction</a>
@@ -347,7 +349,7 @@ $url = $this->auditUrls->generateEntityUrl($post);
 
 // Audit stream of a class, of one object, with viewer filters
 $url = $this->auditUrls->generateEntityUrl(Post::class);
-$url = $this->auditUrls->generateEntityUrl(Post::class, 42, ['type' => 'update', 'user' => '42']);
+$url = $this->auditUrls->generateEntityUrl(Post::class, 42, ['what' => 'update', 'who' => '42']);
 
 // Absolute URL
 $url = $this->auditUrls->generateEntityUrl($post, referenceType: UrlGeneratorInterface::ABSOLUTE_URL);
@@ -357,8 +359,9 @@ $url = $this->auditUrls->generateTransactionUrl($entry->transactionId);
 $url = $this->auditUrls->generateUserUrl($entry->userId);
 ```
 
-The filters are the query parameters of the entity stream: `type`, `user`, `field`, `date_from`,
-`date_to` and `page`. The identifier of an entity object is converted like the `object_id` stored in
+The filters are the query parameters of the page: `type`, `user`, `field`, `date_from`, `date_to` and `page` for
+the stream of an entity; `what`, `who`, `field`, `origin`, `when` and `attached` for the history of an object, which
+gets the `type` and `user` filters as `what` and `who`. The identifier of an entity object is converted like the `object_id` stored in
 the audit table (UUID, enum, custom type), and a Doctrine reference is not loaded to read it.
 
 ## 🎨 Customization
@@ -377,7 +380,7 @@ templates/bundles/DHAuditorBundle/
 │   ├── user_stream.html.twig         # Actions of a user
 │   ├── revisions.html.twig           # Revisions of an object
 │   ├── compare.html.twig             # Comparison of two revisions
-│   ├── entry.html.twig               # Macros of the comparison
+│   ├── entry.html.twig               # Diff macros, imported by the comparison
 │   └── helpers/
 │       ├── helper.html.twig          # Helper macros
 │       └── pager.html.twig           # Pagination
@@ -406,7 +409,8 @@ templates/bundles/DHAuditorBundle/
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('bundles/dhauditor/app.css') }}">
-    {# theme, sort and filters of the viewer; loaded without defer so that the theme applies before the first paint #}
+    {# behaviours of the viewer (theme, sort, filters, technical mode, copy, older actions); loaded without defer so
+       that the theme applies before the first paint #}
     <script src="{{ asset('bundles/dhauditor/viewer.js') }}"></script>
 {% endblock %}
 
@@ -424,7 +428,7 @@ templates/bundles/DHAuditorBundle/
 | `title`              | Page title                           | All pages                        |
 | `stylesheets`        | CSS includes                         | All pages                        |
 | `dh_auditor_content` | Main content area                    | All pages                        |
-| `dh_auditor_header`  | Sub-header with back link & filters  | Entity stream, Transaction view  |
+| `dh_auditor_header`  | Sub-header with back link & filters  | Entity stream                    |
 | `dh_auditor_pager`   | Pagination                           | Entity stream                    |
 | `javascripts`        | JavaScript includes                  | All pages                        |      
 
