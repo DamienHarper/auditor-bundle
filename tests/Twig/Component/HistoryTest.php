@@ -203,7 +203,7 @@ final class HistoryTest extends KernelTestCase
     public function testElementsImplementTheInterface(): void
     {
         $this->expectException(RuntimeError::class);
-        $this->expectExceptionMessageIsOrContains('HistoryElementInterface');
+        $this->expectExceptionMessageIsOrContains('The elements of the "DhAuditor:History" component implement DH\\AuditorBundle\\History\\HistoryElementInterface, string given.');
 
         $this->render(['subject' => $this->post(), 'with' => ['a comment']]);
     }
