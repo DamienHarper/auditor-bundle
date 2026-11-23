@@ -17,6 +17,10 @@ use DH\AuditorBundle\Attribute\AsChangeDescriber;
  * and the deletion included.
  *
  * A fragment tells the changes it lists, the described one when it lists none; the changes listed are not told again.
+ * Between two describers listing the same change, the one telling the most changes wins.
+ *
+ * #[AsChangeDescriber] works on autoconfigured services; otherwise tag the service "dh_auditor.change_describer" with
+ * the "entity" and "field" attributes.
  *
  * @see AsChangeDescriber
  */

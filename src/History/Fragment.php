@@ -11,7 +11,8 @@ use DH\AuditorBundle\History\Part\TextPart;
 use DH\AuditorBundle\History\Part\ValuePart;
 
 /**
- * One part of a phrase, such as "changed Status: Draft → Published", and the changes it tells.
+ * What a phrase tells about one change, or about a group of changes (merged, summed up or told by a describer), such
+ * as "changed Status: Draft → Published"; it is made of parts (text, values, object references).
  */
 final readonly class Fragment implements \Stringable
 {

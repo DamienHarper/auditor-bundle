@@ -137,11 +137,12 @@ when the reader may view the audits of their class. `|dh_auditor_phrase_text` gi
 `title` attribute or an export. Both filters take a `HistoryItem` or a `Phrase`.
 
 In PHP, the `DH\AuditorBundle\History\HistoryPhraser` service gives the `Phrase` (`phrase()`) and the author
-(`author()`). A phrase is a list of fragments, one per change (`fragments`, each with its `parts`, its `icon` and the
+(`author()`). A phrase is made of fragments, one per change or group of changes (`fragments`, each with its `parts`, its `icon` and the
 `changes` it tells), and `getParts()` lists the parts of the whole phrase: `TextPart`, `ValuePart` and
 `ObjectReference` (`class`, `id`, `label`), each with a `kind` (`text`, `value`, `object`). No part holds HTML.
 
-The icon of a phrase (`icon`) is the one of its main change (the creation or deletion, otherwise the first change):
+The icon of a phrase (`icon`) is the one of its main change (the first creation, snapshot or deletion, otherwise the
+first change of the action):
 `created`, `snapshot`, `deleted`, `edited`, `status` (an enum), `toggle` (a boolean), `text` (a long text), `added`,
 `removed` or `json`. A describer may give another name, which your templates then need to know.
 
@@ -149,7 +150,7 @@ The markup comes from `@DHAuditor/History/phrase.html.twig` and, for an object, 
 `@DHAuditor/History/object_reference.html.twig`: override them under `templates/bundles/DHAuditorBundle/History/` to
 change it (Turbo attributes on the links, for instance).
 
-Each change gives one fragment: the changes of the root first, then those of the attached entities; the fields of an
+Each change, or group of changes, gives one fragment: the changes of the root first, then those of the attached entities; the fields of an
 entry in the order of their Doctrine mapping. Elements added to (or removed from) the same collection make one
 fragment, and the same change made to more than 5 objects of an entity is summed up (*deleted 38 Post*). Lists read
 "a, b and c" ("a, b, c and 4 others" beyond 5), and values longer than 80 characters are cut. An action whose entries
@@ -182,8 +183,8 @@ Field labels come from the `dh_auditor_fields` domain (see Labels above); so do 
 (the short class name otherwise). Phrases come from the `dh_auditor_history` domain in the ICU format, keyed by
 `FQCN.kind` for a creation, a snapshot or a deletion and `FQCN.field.kind` for a field change, where kind is
 `created`, `snapshot`, `deleted`, `set`, `changed`, `cleared`, `added`, `removed` or `json`; add `.bulk` for the
-summary of more than 5 objects. Use the `+intl-icu` suffix in the file names (a catalogue without it only gets its
-`{label}`… placeholders replaced, and `%count%` for its plurals):
+summary of more than 5 objects. Use the `+intl-icu` suffix in the file names (a catalogue without it only gets its `{label}`, `{old}`, `{new}`,
+`{names}`, `{field}` and `{entity}` placeholders replaced; write the count as `%count%`, also used for its plurals):
 
 ```yaml
 # translations/dh_auditor_fields+intl-icu.fr.yaml
@@ -211,13 +212,14 @@ translation, as parts of the phrase (the object of `{label}`, the values of `{ol
 
 ### With PHP
 
-A change that needs the rest of the action to be told (*removed the ticket from initiative Q4 roadmap*) takes a
-describer. It returns the fragments of the change, built from text, values and object references, or null (or an
-empty phrase) to hand the change on: to the describer of the entity for a field describer, then to the translated or
-default phrase:
+A change that needs the rest of the action to be told (*deleted initiative Q4 roadmap, which held the ticket*, rather
+than *cleared Initiative* followed by *deleted Initiative “Q4 roadmap”*) takes a describer. It returns the fragments
+of the change, built from text, values and object references, or null (or an empty phrase) to hand the change on: to
+the describer of the entity for a field describer, then to the translated or default phrase:
 
 ```php
 use DH\Auditor\History\Change;
+use DH\Auditor\History\ChangeKind;
 use DH\Auditor\History\HistoryItem;
 use DH\AuditorBundle\Attribute\AsChangeDescriber;
 use DH\AuditorBundle\History\ChangeDescriberInterface;
@@ -230,38 +232,56 @@ final class InitiativeDescriber implements ChangeDescriberInterface
 {
     public function describe(Change $change, HistoryItem $item): ?Phrase
     {
-        if (null !== $change->new || !\is_array($change->old)) {
+        // the summary of the initiative the ticket was in, as the diff holds it
+        $old = $change->old;
+        if (ChangeKind::Cleared !== $change->kind || !\is_array($old)) {
             return null;
         }
 
-        $initiative = new ObjectReference(Initiative::class, (string) $change->old['id'], $change->oldLabel ?? '');
+        $id = (string) ($old[$old['pkName'] ?? 'id'] ?? '');
 
-        return Phrase::of(Fragment::of(['removed the ticket from initiative ', $initiative], [$change], 'removed'));
+        // the same action deleted that initiative?
+        $deletion = array_find($item->getChanges(), static fn (Change $other): bool => ChangeKind::Deleted === $other->kind
+            && Initiative::class === $other->entity
+            && $id === $other->objectId);
+        if (null === $deletion) {
+            return null;
+        }
+
+        $initiative = new ObjectReference(Initiative::class, $id, $change->oldLabel ?? '#'.$id);
+
+        // both changes are listed: the deletion is not told again
+        return Phrase::of(Fragment::of(['deleted initiative ', $initiative, ', which held the ticket'], [$change, $deletion], 'deleted'));
     }
 }
 ```
 
 Without `field`, the describer receives every change of the entity that no field describer tells (a field describer
 returning null hands the change to it), the creation and the deletion included. The object references a describer
-gives are linked like the others.
+gives are linked like the others. `#[AsChangeDescriber]` works on autoconfigured services; otherwise, tag the service
+`dh_auditor.change_describer` with the `entity` and `field` attributes.
 
 A fragment tells the changes it lists (the described change when it lists none): a describer that tells several
-changes at once lists them all, and they are not told again by other fragments. Describers run while the history is
+changes at once lists them all, and they are not told again by other fragments. When the phrases of two describers
+list the same change, the one telling the most changes is kept, and the changes only the other one told get their
+default phrase. Describers run while the history is
 displayed: they must cope with old entries (labels or values missing).
 
 ### Links
 
 The objects of a phrase lead to the URL that the `DH\AuditorBundle\History\ObjectUrlResolverInterface` service
-gives: by default, their history in the viewer, followed only by readers granted the `view` role of their class (no
-link when the viewer is disabled or the class is not audited). Decorate it to send some classes to pages of your
+gives: by default, their history in the viewer, followed only by readers granted the `view` role of their class (by
+every reader when no role checker is configured; no link when the viewer is disabled or the class is not audited). Decorate it to send some classes to pages of your
 application:
 
 ```php
 use DH\AuditorBundle\History\ObjectUrl;
 use DH\AuditorBundle\History\ObjectUrlResolverInterface;
 use DH\AuditorBundle\History\Part\ObjectReference;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
 use Symfony\Component\DependencyInjection\Attribute\AutowireDecorated;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[AsDecorator(ObjectUrlResolverInterface::class)]
 final readonly class TicketUrlResolver implements ObjectUrlResolverInterface

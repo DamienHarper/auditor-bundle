@@ -100,7 +100,7 @@ Compiler passes (`src/DependencyInjection/Compiler/`): `DoctrineMiddlewareCompil
 | Twig extensions | `src/Twig/` | `time_ago`, `dh_auditor_is_viewable()`, `dh_auditor_is_diff_leaf()`, `dh_auditor_last_change(s)()`, `dh_auditor_field_label()`, `\|dh_auditor_phrase`, `\|dh_auditor_phrase_text`, `\|dh_auditor_author`, `dh_auditor_object_url()` |
 | `TranslatedFieldLabelResolver` | `src/History/` | `FieldLabelResolverInterface` service: `dh_auditor_fields` domain, key `FQCN.field`, humanized fallback |
 | `HistoryPhraser`, `ValueFormatter` | `src/History/` | A `HistoryItem` told as a `Phrase` of `Fragment`s made of typed parts (`Part/`: text, value, object reference; no HTML), from the `dh_auditor_history` ICU domain or `#[AsChangeDescriber]` services, and its author; raw diff values read through the Doctrine mapping |
-| `ObjectUrlResolverInterface`, `ViewerObjectUrlResolver` | `src/History/` | URL of an object reference (default: its history in the viewer, visible with the `view` role); rendered by `History/phrase.html.twig` and `History/object_reference.html.twig` |
+| `ObjectUrlResolverInterface`, `ViewerObjectUrlResolver` | `src/History/` | URL of an object reference (default: its history in the viewer, visible with the `view` role, or to all without role checker); rendered by `History/phrase.html.twig` and `History/object_reference.html.twig` |
 | `ClearActivityCacheCommand` | `src/Command/` | `audit:cache:clear` |
 
 ### Templates and assets

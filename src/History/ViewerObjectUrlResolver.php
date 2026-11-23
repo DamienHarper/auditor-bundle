@@ -11,7 +11,7 @@ use DH\AuditorBundle\Viewer\AuditViewerUrlGenerator;
 
 /**
  * Leads a reference to the history of the object in the viewer, visible to readers granted the "view" role of its
- * class. No URL when the viewer is disabled or the class is not audited.
+ * class (to every reader without role checker). No URL when the viewer is disabled or the class is not audited.
  *
  * @see ViewerObjectUrlResolverTest
  */
