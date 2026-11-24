@@ -21,6 +21,9 @@ default:
     added: 'добавил(а) в {field} у {entity}: {count}'
     removed: 'убрал(а) из {field} у {entity}: {count}'
     json: 'отредактировал(а) {field} у {entity}: {count}'
+# a summary of a few objects that names them; a field change that names its object
+named: '{summary}: {names}'
+field_of: '{field} у {entity} «{label}»'
 value:
   'yes': да
   'no': нет
@@ -38,5 +41,4 @@ author:
   unknown: 'Пользователь {id}'
 context:
   object: 'в {entity} «{label}»'
-  objects: 'в {entity}: {count}'
 more_changes: '{count, plural, one {ещё # изменение} few {ещё # изменения} many {ещё # изменений} other {ещё # изменения}}'

@@ -87,15 +87,21 @@ final readonly class HistoryPhraser
         private ?AuthorNameResolverInterface $authorNameResolver = null,
     ) {}
 
-    public function phrase(HistoryItem $item): Phrase
+    /**
+     * The phrase of an action. In an action that changes several objects, a field change names its object ("changed
+     * Colour of Tag “php”: …"), unless it is the root of the history the action is shown in ($rootClass, $rootId) or
+     * its phrase names it already.
+     */
+    public function phrase(HistoryItem $item, ?string $rootClass = null, ?string $rootId = null): Phrase
     {
         $fragments = [];
         $mainChange = $item->getMainChange();
         $icon = null;
+        $several = \count($this->changedObjects($this->toldChanges($item->getChanges()))) > 1;
 
         foreach ($this->groups($item) as $group) {
             $described = $group['described'];
-            $groupFragments = $described->fragments ?? [$this->fragment($group['changes'], $group['bulk'])];
+            $groupFragments = $described->fragments ?? [$this->fragment($group['changes'], $group['bulk'], $group['named'], $several && !$this->isObject($group['changes'][0], $rootClass, $rootId))];
             $toldChanges = array_merge(...array_map(static fn (Fragment $fragment): array => $fragment->changes, $groupFragments));
 
             if (null === $icon && $mainChange instanceof Change && \in_array($mainChange, $toldChanges, true)) {
@@ -113,50 +119,22 @@ final readonly class HistoryPhraser
     }
 
     /**
-     * What an action was done on, for a list that mixes objects ("on Post “Why audit?”", "on 2 Post"): the object with
-     * the most changes, or the number of objects when all the changes concern several objects of one entity, each
-     * changed the same number of times. Null when the action only creates, snapshots or deletes objects (its phrase
-     * names them), when it creates or deletes the object it would name, or when it concerns only the given object (in
-     * the history of that object).
+     * What an action was done on, for a list that mixes objects ("on Post “Why audit?”"): the object whose fields the
+     * action changes, when it changes the fields of one object only (the phrase names the objects otherwise). Null as
+     * well when the action creates or deletes that object (its phrase names it), or when it is the given object (in the
+     * history of that object).
      */
     public function context(HistoryItem $item, ?string $rootClass = null, ?string $rootId = null): ?Phrase
     {
         $changes = $item->getChanges();
-        // creations and deletions name their objects themselves
-        if (array_all($changes, static fn (Change $change): bool => $change->kind->isEntityLevel())) {
+        $objects = $this->changedObjects($changes);
+        if (1 !== \count($objects)) {
             return null;
         }
 
-        /** @var array<string, array{change: Change, count: int}> $objects */
-        $objects = [];
-        foreach ($changes as $change) {
-            $key = $change->entity.'#'.$change->objectId;
-            $objects[$key] ??= ['change' => $change, 'count' => 0];
-            ++$objects[$key]['count'];
-        }
-
-        if (null !== $rootClass && [$rootClass.'#'.$rootId] === array_keys($objects)) {
+        $main = reset($objects);
+        if ($this->isObject($main, $rootClass, $rootId)) {
             return null;
-        }
-
-        $entities = array_unique(array_map(static fn (array $object): string => $object['change']->entity, $objects));
-        if (\count($objects) > 1 && 1 === \count($entities) && 1 === \count(array_unique(array_column($objects, 'count')))) {
-            $entity = $changes[0]->entity;
-
-            return new Phrase([new Fragment($this->message(['context.objects'], [
-                'count' => \count($objects),
-                'entity' => [new TextPart($this->entityName($entity, \count($objects)))],
-            ]))]);
-        }
-
-        // the object with the most changes, the first one on a tie
-        $main = $changes[0];
-        $most = 0;
-        foreach ($objects as $object) {
-            if ($object['count'] > $most) {
-                $main = $object['change'];
-                $most = $object['count'];
-            }
         }
 
         // an action that creates or deletes that object names it in its phrase
@@ -278,11 +256,11 @@ final readonly class HistoryPhraser
     /**
      * Changes of the item in the order of the phrase, grouped by fragment.
      *
-     * A change a describer tells stays alone; the others are merged (collections) or summed up (bulk changes).
+     * A change a describer tells stays alone; the others are merged (collections) or summed up (bulk changes). Each
+     * group gives: bulk, the number of objects of a summary; named, whether the summary names them; described, the
+     * phrase of a describer.
      *
-     * @return list<array{changes: non-empty-list<Change>, bulk: ?int, described: ?Phrase}> bulk: number of objects of
-     *                                                                                      a summary; described: the
-     *                                                                                      phrase of a describer
+     * @return list<array{changes: non-empty-list<Change>, bulk: ?int, named: bool, described: ?Phrase}>
      */
     private function groups(HistoryItem $item): array
     {
@@ -326,12 +304,23 @@ final readonly class HistoryPhraser
         $changes = array_filter($changes, static fn (Change $change, int $index): bool => isset($described[$index]) || !isset($told[spl_object_id($change)]), ARRAY_FILTER_USE_BOTH);
         ksort($described);
 
-        // more than BULK_THRESHOLD objects with the same entity, kind and field: one summary, where the first one was
+        // more than BULK_THRESHOLD objects with the same entity, kind and field: one summary, where the first one was.
+        // Fewer (but several) objects: one summary that names them when they are created or deleted, or when the
+        // phrase of each one would be the same without its object ("edited Bio" five times); each one is told
+        // otherwise, and names its object (see phrase())
         $objects = [];
         foreach ($changes as $index => $change) {
             if (!isset($described[$index])) {
-                $objects[$this->bulkKey($change)][$change->objectId] = true;
+                $objects[$this->bulkKey($change)][$change->objectId][] = $change;
             }
+        }
+
+        $summed = [];
+        foreach ($objects as $key => $keyObjects) {
+            $count = \count($keyObjects);
+            $first = reset($keyObjects)[0];
+            $summed[$key] = $count > self::BULK_THRESHOLD
+                || ($count > 1 && ($first->kind->isEntityLevel() || $this->tellsTheSame($keyObjects)));
         }
 
         /** @var list<non-empty-list<Change>> $groups */
@@ -355,7 +344,7 @@ final readonly class HistoryPhraser
             }
 
             $key = $this->bulkKey($change);
-            if (\count($objects[$key]) > self::BULK_THRESHOLD) {
+            if ($summed[$key]) {
                 if (isset($bulkGroups[$key])) {
                     $groups[$bulkGroups[$key]][] = $change;
                 } else {
@@ -380,7 +369,8 @@ final readonly class HistoryPhraser
 
         $result = [];
         foreach ($groups as $index => $group) {
-            $result[] = ['changes' => $group, 'bulk' => $bulks[$index], 'described' => $phrases[$index] ?? null];
+            $bulk = $bulks[$index];
+            $result[] = ['changes' => $group, 'bulk' => $bulk, 'named' => null !== $bulk && $bulk <= self::BULK_THRESHOLD, 'described' => $phrases[$index] ?? null];
         }
 
         return $result;
@@ -495,8 +485,10 @@ final readonly class HistoryPhraser
 
     /**
      * @param non-empty-list<Change> $changes
+     * @param bool                   $named   a summary that names its objects ("deleted 2 Post: A and B")
+     * @param bool                   $object  a field change that names its object, unless its phrase does already
      */
-    private function fragment(array $changes, ?int $bulk): Fragment
+    private function fragment(array $changes, ?int $bulk, bool $named = false, bool $object = false): Fragment
     {
         $change = $changes[0];
         $type = null === $change->field ? null : $this->values->typeOf($change->entity, $change->field);
@@ -510,7 +502,75 @@ final readonly class HistoryPhraser
             $keys[] = 'default.'.($longText && \in_array($change->kind, [ChangeKind::Set, ChangeKind::Changed], true) ? 'edited' : $kind);
         }
 
-        return new Fragment($this->message($keys, $this->parameters($changes, $bulk)), $changes, $this->icon($change, $type, $longText));
+        $parts = $this->message($keys, $this->parameters($changes, $bulk));
+        if ($named) {
+            $names = [];
+            foreach ($changes as $each) {
+                $names[$each->objectId] ??= new ObjectReference($each->entity, $each->objectId, self::objectLabel($each->objectLabel, $each->entity, $each->objectId), ChangeKind::Deleted === $each->kind);
+            }
+
+            $parts = $this->message(['named'], ['summary' => $parts, 'names' => array_values($names)], ['summary']);
+        } elseif ($object && null !== $change->field && null === $bulk && !$this->namesObject(new Fragment($parts), $change)) {
+            $parts = $this->message($keys, ['field' => $this->message(['field_of'], [
+                'field' => [new TextPart($this->fieldLabelResolver->resolve($change->entity, $change->field))],
+                'entity' => [new TextPart($this->entityName($change->entity, 1))],
+                'label' => [new ObjectReference($change->entity, $change->objectId, self::objectLabel($change->objectLabel, $change->entity, $change->objectId))],
+            ])] + $this->parameters($changes, $bulk), ['field']);
+        }
+
+        return new Fragment($parts, $changes, $this->icon($change, $type, $longText));
+    }
+
+    /**
+     * Tells whether the changes of each object would be told the same way, the object left out, and without naming it.
+     *
+     * @param array<string, non-empty-list<Change>> $objects changes by object id
+     */
+    private function tellsTheSame(array $objects): bool
+    {
+        $told = [];
+        foreach ($objects as $changes) {
+            $fragment = $this->fragment($changes, null);
+            if ($this->namesObject($fragment, $changes[0])) {
+                return false;
+            }
+
+            $told[(string) new Phrase([$fragment])] = true;
+        }
+
+        return 1 === \count($told);
+    }
+
+    /**
+     * Objects whose fields an action changes, by "FQCN#id": the first change of each.
+     *
+     * @param list<Change> $changes
+     *
+     * @return array<string, Change>
+     */
+    private function changedObjects(array $changes): array
+    {
+        $objects = [];
+        foreach ($changes as $change) {
+            if (!$change->kind->isEntityLevel()) {
+                $objects[$change->entity.'#'.$change->objectId] ??= $change;
+            }
+        }
+
+        return $objects;
+    }
+
+    private function isObject(Change $change, ?string $class, ?string $id): bool
+    {
+        return null !== $class && $change->entity === $class && $change->objectId === $id;
+    }
+
+    /**
+     * Tells whether a fragment names the object of a change.
+     */
+    private function namesObject(Fragment $fragment, Change $change): bool
+    {
+        return array_any($fragment->parts, static fn (PhrasePart $part): bool => $part instanceof ObjectReference && $part->class === $change->entity && $part->id === $change->objectId);
     }
 
     private function isLongText(Change $change, ?string $type): bool
@@ -648,10 +708,11 @@ final readonly class HistoryPhraser
      *
      * @param non-empty-list<string>              $keys
      * @param array<string, int|list<PhrasePart>> $parameters
+     * @param list<string>                        $verbatim   parameters inserted as they are, not as a list
      *
      * @return list<PhrasePart>
      */
-    private function message(array $keys, array $parameters): array
+    private function message(array $keys, array $parameters, array $verbatim = []): array
     {
         $key = array_find($keys, fn (string $key): bool => $this->has($key)) ?? $keys[array_key_last($keys)];
 
@@ -667,7 +728,7 @@ final readonly class HistoryPhraser
             }
 
             $marked['{'.$name.'}'] = self::OPEN.$name.self::CLOSE;
-            $inserted[$name] = $this->list($value);
+            $inserted[$name] = \in_array($name, $verbatim, true) ? $value : $this->list($value);
         }
 
         $pieces = preg_split('/'.self::OPEN.'(\w+)'.self::CLOSE.'/u', $this->translator->trans($key, $marked, self::DOMAIN), -1, PREG_SPLIT_DELIM_CAPTURE) ?: [];

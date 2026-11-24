@@ -160,7 +160,7 @@ final readonly class ViewerController
             }
         }
 
-        $rows = $this->rows([$item], $phraser, $existence, withContext: null === $root);
+        $rows = $this->rows([$item], $phraser, $existence, withContext: null === $root, root: null === $root ? null : [$root['class'], $root['id']]);
         if (null !== $root) {
             $rows[0]['phrase'] = $phraser->focus($rows[0]['phrase'], $root['class'], $root['id']);
         }
@@ -527,7 +527,7 @@ final readonly class ViewerController
             'entity' => $entity,
             'id' => $id,
             'filters' => $filters,
-            'rows' => $this->rows($page->group(), $phraser, $existence),
+            'rows' => $this->rows($page->group(), $phraser, $existence, root: [$entity, $id]),
             'more' => $page->hasMore && null !== $page->lastCursor ? ['after' => $page->lastCursor] + $filters->toQuery() : null,
             'moreRoute' => 'dh_auditor_show_entity_stream',
             'moreRouteParameters' => ['entity' => UrlHelper::namespaceToParam($entity), 'id' => $id],
@@ -567,13 +567,14 @@ final readonly class ViewerController
     /**
      * Phrases of the actions of a page, the objects they name checked for deletion in one query per class.
      *
-     * @param list<HistoryItem> $items
+     * @param list<HistoryItem>                $items
+     * @param null|array{0: string, 1: string} $root  class and id of the history the actions are shown in
      *
      * @return list<array{item: HistoryItem, phrase: Phrase, context: ?Phrase}>
      */
-    private function rows(array $items, HistoryPhraser $phraser, ObjectExistence $existence, bool $withContext = false): array
+    private function rows(array $items, HistoryPhraser $phraser, ObjectExistence $existence, bool $withContext = false, ?array $root = null): array
     {
-        return new HistoryRows($phraser, $existence)->build($items, $withContext);
+        return new HistoryRows($phraser, $existence)->build($items, $withContext, $root);
     }
 
     /**

@@ -235,8 +235,8 @@ final class ViewerControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Tag');
 
         $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
-        $this->assertStringContainsString('recorded the initial state of Tag', $crawler->text(), 'Snapshot entries are told as such.');
-        $this->assertStringContainsString('created Tag', $crawler->text(), 'Regular insert entries are told as creations.');
+        $this->assertStringContainsString('recorded the initial state of 5 Tag', $crawler->text(), 'Snapshot entries are told as such.');
+        $this->assertStringContainsString('created 5 Tag', $crawler->text(), 'Regular insert entries are told as creations.');
     }
 
     #[Depends('testShowEntityHistoryAnonymously')]
