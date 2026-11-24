@@ -1058,7 +1058,26 @@ final class ViewerControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Comment');
 
         $this->assertSame(['import', 'alone'], $this->actionKeys($crawler), 'A very large action does not push the next one out of its page.');
-        $this->assertStringContainsString('created '.WholeActions::MAX_ENTRIES.' Comment', $crawler->filter('[data-dh-auditor-action="import"]')->text());
+        $this->assertStringContainsString('created '.(WholeActions::MAX_ENTRIES - 1).' Comment', $crawler->filter('[data-dh-auditor-action="import"]')->text());
+        $this->assertStringContainsString('object 9999', $crawler->filter('[data-dh-auditor-action="alone"]')->text());
+    }
+
+    public function testAPageOfActionsReadsAtMostALimitOfEntries(): void
+    {
+        $half = intdiv(WholeActions::MAX_ENTRIES, 2);
+        $this->seedAction(Comment::class, 'first', '2030-01-03 10:00:00', range(1_001, 1_000 + $half + 100));
+        $this->seedAction(Comment::class, 'second', '2030-01-02 10:00:00', range(5_001, 5_000 + $half + 100));
+        $this->seedAction(Comment::class, 'small', '2030-01-01 10:00:00', range(9_001, 9_010));
+        $this->provider->getConfiguration()->setViewerPageSize(3);
+        $this->login(['ROLE_1']);
+
+        $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Comment');
+
+        $this->assertSame(['first', 'second', 'small'], $this->actionKeys($crawler));
+        $share = intdiv(WholeActions::MAX_ENTRIES - 10, 2);
+        $this->assertStringContainsString('created '.$share.' Comment', $crawler->filter('[data-dh-auditor-action="first"]')->text(), 'The large actions share what the small ones leave of the page.');
+        $this->assertStringContainsString('created '.$share.' Comment', $crawler->filter('[data-dh-auditor-action="second"]')->text());
+        $this->assertStringContainsString('created 10 Comment', $crawler->filter('[data-dh-auditor-action="small"]')->text(), 'A small action is told whole.');
     }
 
     public function testAnEntryWithoutTransactionIsAnActionOfItsOwn(): void

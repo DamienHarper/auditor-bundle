@@ -19,7 +19,8 @@ use DH\AuditorBundle\Tests\Controller\ViewerControllerTest;
 final class WholeActions
 {
     /**
-     * Entries read at most for one action: beyond, an action tells only its most recent entries.
+     * Entries read at most for a page (about, by audit table): the actions too large for their share tell only their most
+     * recent entries, so that a page stays bounded and no action pushes the others out of it.
      */
     public const int MAX_ENTRIES = 1_000;
 
@@ -45,6 +46,7 @@ final class WholeActions
      */
     public static function read(array $queries, array $transactions): array
     {
+        $share = self::share(array_map(static fn (TransactionSummary $transaction): int => $transaction->entries, $transactions));
         $rows = [];
         foreach ($queries as $entity => $query) {
             $entity = (string) $entity;
@@ -56,9 +58,9 @@ final class WholeActions
                     if ($transaction->table === $query->getTable() && null !== $transaction->entryId) {
                         array_push($rows, ...self::entries($entity, $query, Query::ID, [(string) $transaction->entryId], 1));
                     }
-                } elseif ($transaction->entries > self::MAX_ENTRIES) {
-                    // a very large action: only its most recent entries, so that it does not crowd out the others
-                    array_push($rows, ...self::entries($entity, $query, $column, [$transaction->transactionId], self::MAX_ENTRIES));
+                } elseif ($transaction->entries > $share) {
+                    // a large action: only its most recent entries, so that the page stays bounded
+                    array_push($rows, ...self::entries($entity, $query, $column, [$transaction->transactionId], $share));
                 } else {
                     $small[] = $transaction->transactionId;
                 }
@@ -84,6 +86,29 @@ final class WholeActions
     public static function compare(array $a, array $b): int
     {
         return [$b['entry']->createdAt, $b['entry']->id, $a['entity']] <=> [$a['entry']->createdAt, $a['entry']->id, $b['entity']];
+    }
+
+    /**
+     * Entries an action may tell on a page of actions of $sizes entries: every action is told whole when the page holds
+     * MAX_ENTRIES entries at most; otherwise the small actions are told whole and the large ones share what they leave.
+     *
+     * @param list<int> $sizes
+     */
+    private static function share(array $sizes): int
+    {
+        sort($sizes);
+        $budget = self::MAX_ENTRIES;
+        $left = \count($sizes);
+        foreach ($sizes as $size) {
+            if ($size * $left > $budget) {
+                return max(1, intdiv($budget, $left));
+            }
+
+            $budget -= $size;
+            --$left;
+        }
+
+        return self::MAX_ENTRIES;
     }
 
     /**

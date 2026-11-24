@@ -62,7 +62,8 @@ marked as well).
 
 - **Recent activity**: the last 10 actions across the audited entities the reader may view, with what they were done
   on (*alice on Post “Why audit?”: …*). An action touching many objects is summed up by type (*deleted 38 Post*); it
-  is read whole (up to its 1,000 most recent entries), whatever the number of its entries.
+  is read whole, whatever the number of its entries (a page reads 1,000 entries at most: past that, the largest
+  actions tell only their most recent entries).
 - **What is audited**: the audited entities (their name from the `dh_auditor_fields` domain, key FQCN), their number of
   actions (distinct transactions, cached with the activity graph when its cache is on), their latest activity and,
   when enabled, their [activity graph](#-activity-graph). The list can be sorted by name, number of actions or latest
@@ -112,7 +113,8 @@ user), changed field, and period.
 The dates are days, inclusive, in the `dh_auditor.timezone` time zone. Filters are kept by the pager.
 
 Pages hold `page_size` actions (transactions), whatever their number of entries: every page but the last holds as
-many actions, each one whole (up to its 1,000 most recent entries). The header counts the actions the filters keep,
+many actions, each one whole. A page reads 1,000 entries at most: past that, the small actions stay whole and the
+largest ones share the rest, each telling only its most recent entries. The header counts the actions the filters keep,
 and a page beyond the last one shows the last one. The actions of a page are found by grouping the entries the filters
 keep by transaction in the database: on a large audit table, a filter (type, user, period) keeps that cheap.
 
