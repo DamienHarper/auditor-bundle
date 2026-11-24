@@ -54,7 +54,16 @@
     <section class="mt-8">
         <h2 class="text-sm font-semibold">{{ 'audit.action.technical'|trans(domain='auditor') }}</h2>
         <div class="mt-2 overflow-x-auto rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-            <table class="w-full text-left text-xs">
+            {#- Fixed column widths: the old and new values get the same room, whatever their length -#}
+            <table class="w-full min-w-[48rem] table-fixed text-left text-xs text-slate-700 dark:text-slate-200">
+                <colgroup>
+                    <col class="w-[14%]">
+                    <col class="w-[9%]">
+                    <col class="w-[13%]">
+                    <col class="w-[14%]">
+                    <col class="w-1/4">
+                    <col class="w-1/4">
+                </colgroup>
                 <thead class="bg-slate-50 text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
                     <tr>
                         <th class="px-3 py-2 font-medium">{{ 'audit.action.table'|trans(domain='auditor') }}</th>
@@ -72,19 +81,19 @@
                         {% set object = written.entity|split('\\')|last ~ ' #' ~ entry.objectId %}
                         {% if entry.type in ['associate', 'dissociate'] %}
                             <tr>
-                                <td class="whitespace-nowrap px-3 py-2 font-mono">{{ tables[written.entity] }} · {{ entry.id }}</td>
+                                <td class="break-words px-3 py-2 font-mono">{{ tables[written.entity] }} · {{ entry.id }}</td>
                                 <td class="px-3 py-2 font-mono">{{ entry.type }}</td>
-                                <td class="whitespace-nowrap px-3 py-2" title="{{ written.entity }}">{{ object }}</td>
-                                <td class="px-3 py-2 font-mono">{{ diffs.source.field ?? '' }}</td>
+                                <td class="break-words px-3 py-2" title="{{ written.entity }}">{{ object }}</td>
+                                <td class="break-words px-3 py-2 font-mono">{{ diffs.source.field ?? '' }}</td>
                                 <td class="px-3 py-2" colspan="2">{{ history.raw(diffs.target ?? null) }}</td>
                             </tr>
                         {% else %}
                             {% for field, diff in diffs %}
                                 <tr>
-                                    <td class="whitespace-nowrap px-3 py-2 font-mono">{% if loop.first %}{{ tables[written.entity] }} · {{ entry.id }}{% endif %}</td>
+                                    <td class="break-words px-3 py-2 font-mono">{% if loop.first %}{{ tables[written.entity] }} · {{ entry.id }}{% endif %}</td>
                                     <td class="px-3 py-2 font-mono">{% if loop.first %}{{ entry.type }}{% endif %}</td>
-                                    <td class="whitespace-nowrap px-3 py-2" title="{{ written.entity }}">{% if loop.first %}{{ object }}{% endif %}</td>
-                                    <td class="px-3 py-2 font-mono">{{ field }}{% if entry.isDeepDiff(field) %} <span class="text-slate-400">(deep diff)</span>{% endif %}</td>
+                                    <td class="break-words px-3 py-2" title="{{ written.entity }}">{% if loop.first %}{{ object }}{% endif %}</td>
+                                    <td class="break-words px-3 py-2 font-mono">{{ field }}{% if entry.isDeepDiff(field) %} <span class="text-slate-400">(deep diff)</span>{% endif %}</td>
                                     {% if entry.isDeepDiff(field) %}
                                         <td class="px-3 py-2" colspan="2">{{ history.raw(diff) }}</td>
                                     {% else %}
@@ -94,9 +103,9 @@
                                 </tr>
                             {% else %}
                                 <tr>
-                                    <td class="whitespace-nowrap px-3 py-2 font-mono">{{ tables[written.entity] }} · {{ entry.id }}</td>
+                                    <td class="break-words px-3 py-2 font-mono">{{ tables[written.entity] }} · {{ entry.id }}</td>
                                     <td class="px-3 py-2 font-mono">{{ entry.type }}</td>
-                                    <td class="whitespace-nowrap px-3 py-2" title="{{ written.entity }}">{{ object }}</td>
+                                    <td class="break-words px-3 py-2" title="{{ written.entity }}">{{ object }}</td>
                                     <td class="px-3 py-2 text-slate-400" colspan="3">—</td>
                                 </tr>
                             {% endfor %}

@@ -39,6 +39,26 @@ final class HistoryDetailsTest extends KernelTestCase
         $this->assertSame(['Object', 'Field', 'Change'], $table->filter('thead th')->each(static fn (Crawler $th): string => mb_trim($th->text())));
     }
 
+    public function testChangesAreStackedOnANarrowScreen(): void
+    {
+        $crawler = $this->render([
+            $this->entry('update', ['title' => ['old' => 'First', 'new' => 'Second']]),
+            $this->entry('remove', ['title' => ['old' => 'First', 'new' => null]]),
+        ]);
+
+        $classes = static fn (Crawler $node): array => explode(' ', (string) $node->attr('class'));
+        $table = $crawler->filter('table')->first();
+        $this->assertContains('block', $classes($table), 'On a narrow screen, the details are not a table.');
+        $this->assertContains('sm:table', $classes($table), 'From the sm breakpoint, they are.');
+        $this->assertContains('hidden', $classes($table->filter('thead')), 'The column headers only make sense for columns.');
+        foreach ($table->filter('table > tbody > tr, tr[data-field]') as $row) {
+            $this->assertContains('sm:table-row', $classes(new Crawler($row)));
+            foreach (new Crawler($row)->children() as $cell) {
+                $this->assertSame(['block', 'sm:table-cell'], array_values(array_intersect(['block', 'sm:table-cell'], $classes(new Crawler($cell)))), 'Each cell is stacked on a narrow screen.');
+            }
+        }
+    }
+
     /**
      * @param array{old: mixed, new: mixed} $change
      * @param list<string>                  $deleted
@@ -61,9 +81,9 @@ final class HistoryDetailsTest extends KernelTestCase
     {
         yield 'most of a text kept: the changed words inline' => [
             ['old' => 'Aut adipisci necessitatibus laudantium mollitia.', 'new' => 'Aut adipisci necessitatibus laudantium mollitia - Revised Edition'],
-            '"Aut adipisci necessitatibus laudantium mollitia.mollitia - Revised Edition"',
-            ['mollitia.'],
-            ['mollitia - Revised Edition'],
+            '"Aut adipisci necessitatibus laudantium mollitia. - Revised Edition"',
+            ['.'],
+            ['- Revised Edition'],
         ];
 
         yield 'short values replaced: old → new' => [
