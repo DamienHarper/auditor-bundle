@@ -108,12 +108,12 @@
         {% if comparison.associations is not empty %}
             <div class="px-3 py-3 text-xs{% if comparison.fields is not empty %} border-t border-dh-border{% endif %}">
                 <h2 class="font-medium uppercase tracking-wide text-dh-muted-foreground">{{ 'audit.compare.associations'|trans(domain='auditor') }}</h2>
-                <ul class="mt-1.5 space-y-1 font-mono" data-dh-auditor-relations>
+                <ul class="mt-1.5 space-y-1" data-dh-auditor-relations>
                     {% for field, links in comparison.associations %}
                         {% for change in [{type: 'associate', targets: links.added}, {type: 'dissociate', targets: links.removed}] %}
                             {% for target in change.targets %}
                                 <li class="break-words">
-                                    <span class="text-dh-muted-foreground">{{ field }}</span>
+                                    <span class="font-mono text-dh-muted-foreground">{{ field }}</span>
                                     {{ history.sign(change.type == 'associate') }}
                                     {{ history.related(target) }}
                                     {%- if target.label is defined and target.label is not empty %}

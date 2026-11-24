@@ -64,8 +64,8 @@
                         <span class="block break-all font-mono text-[11px] text-dh-muted-foreground">{{ change.field }}</span>
                     </td>
                     {% if change.kind.value in ['added', 'removed'] %}
-                        <td class="block break-words px-3 py-0.5 font-mono sm:table-cell sm:py-2">
-                            {{ history.sign(change.kind.value == 'added') }} {{ (change.getTargetClass() ?? '')|split('\\')|last }}#{{ change.getTargetId() }}
+                        <td class="block break-words px-3 py-0.5 sm:table-cell sm:py-2">
+                            {{ history.sign(change.kind.value == 'added') }} {{ (change.getTargetClass() ?? '')|split('\\')|last }} #{{ change.getTargetId() }}
                             {% if (change.newLabel ?? change.oldLabel) is not null %}“{{ change.newLabel ?? change.oldLabel }}”{% endif %}
                         </td>
                     {% elseif change.kind.value == 'json' %}

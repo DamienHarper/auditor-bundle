@@ -160,7 +160,7 @@ final class HistoryDetailsTest extends KernelTestCase
         $changes = array_map(static fn (array $row): string => $row[2], $cells);
         sort($changes);
 
-        $this->assertSame(['+ Tag#5 “php”', '− Tag#5 “php”'], $changes);
+        $this->assertSame(['+ Tag #5 “php”', '− Tag #5 “php”'], $changes);
     }
 
     public function testTextsKeepTheirLineBreaks(): void
