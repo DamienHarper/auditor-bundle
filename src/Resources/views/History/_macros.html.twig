@@ -18,6 +18,25 @@
     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ paths[name] ?? paths.edited }}"/></svg>
 {%- endmacro %}
 
+{#- Colors of the icon of a change, by its meaning: creation (green), deletion (red), a snapshot (neutral), any other
+    change, links between objects included (blue). -#}
+{% macro icon_tone(name) -%}
+    {%- if name == 'created' -%}bg-dh-create text-dh-create-foreground
+    {%- elseif name == 'deleted' -%}bg-dh-delete text-dh-delete-foreground
+    {%- elseif name == 'snapshot' -%}bg-dh-muted text-dh-muted-foreground
+    {%- else -%}bg-dh-update text-dh-update-foreground
+    {%- endif -%}
+{%- endmacro %}
+
+{#- The sign of a link added to (+) or removed from (−) a relation. -#}
+{% macro sign(added) -%}
+    {%- if added -%}
+        <span class="inline-flex size-4 items-center justify-center rounded-sm bg-dh-inserted font-sans font-bold text-dh-inserted-foreground">+</span>
+    {%- else -%}
+        <span class="inline-flex size-4 items-center justify-center rounded-sm bg-dh-deleted font-sans font-bold text-dh-deleted-foreground">−</span>
+    {%- endif -%}
+{%- endmacro %}
+
 {#- Where an action came from (BlameOrigin) and in which context (via), as badges. -#}
 {% macro origin(item) -%}
     {%- set via = item.via -%}
@@ -103,7 +122,7 @@
 {% macro related(summary) -%}
     {%- set id = summary.pkName is defined ? summary[summary.pkName] : summary.id -%}
     {%- if dh_auditor_is_viewable(summary.class) -%}
-        <a href="{{ path('dh_auditor_show_entity_stream', {entity: summary.class|replace({'\\': '-'}), id: id}) }}" class="hover:underline" title="{{ summary.class }}">{{ summary.class|split('\\')|last }} #{{ id }}</a>
+        <a href="{{ path('dh_auditor_show_entity_stream', {entity: summary.class|replace({'\\': '-'}), id: id}) }}" class="text-dh-link underline decoration-dh-link/40 underline-offset-2 hover:decoration-current" title="{{ summary.class }}">{{ summary.class|split('\\')|last }} #{{ id }}</a>
     {%- else -%}
         <span title="{{ summary.class }}">{{ summary.class|split('\\')|last }} #{{ id }}</span>
     {%- endif -%}

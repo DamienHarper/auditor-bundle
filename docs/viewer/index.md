@@ -234,8 +234,10 @@ php bin/console audit:cache:clear --entity="App\Entity\User"
 
 The viewer follows the conventions of [shadcn/ui](https://ui.shadcn.com) without depending on it: every color of its
 templates is a CSS variable, exposed to Tailwind as a `dh-*` color (`bg-dh-card`, `text-dh-muted-foreground`,
-`border-dh-input`…). The palette is neutral; the teal of the auditor logo (`dh-brand`) marks the activity bars, the
-selected revision and the focus ring. Controls share one size (`h-8`, `rounded-lg`), badges are pills (`h-5`).
+`border-dh-input`…). The palette is neutral and the primary button near black; the teal of the auditor logo marks the activity
+bars, the selected revision and the focus ring (`dh-brand`), and, darkened to read as text, the links, the time of an
+action and the current page (`dh-link`). The icon of an action tells its meaning: green for a creation, red for a
+deletion, blue for any other change. Controls share one size (`h-8`, `rounded-lg`), badges are pills (`h-5`).
 
 The tokens live in `src/Resources/assets/css/theme.css`, already compiled into `bundles/dhauditor/app.css`:
 
@@ -243,13 +245,15 @@ The tokens live in `src/Resources/assets/css/theme.css`, already compiled into `
 |-----------------------------------------------|--------------------------------------------------|
 | `--dh-background`, `--dh-foreground`          | Page                                             |
 | `--dh-card`, `--dh-card-foreground`           | Cards, tables                                    |
-| `--dh-primary`, `--dh-primary-foreground`     | Primary actions, current page, checkboxes        |
+| `--dh-primary`, `--dh-primary-foreground`     | Primary button (Apply), checkboxes               |
 | `--dh-muted`, `--dh-muted-foreground`         | Table headers, icons, secondary text             |
 | `--dh-accent`, `--dh-accent-foreground`       | Hovered and selected rows                        |
 | `--dh-border`, `--dh-input`, `--dh-ring`      | Borders, control borders, focus ring             |
 | `--dh-brand`, `--dh-brand-from`, `--dh-brand-to` | Teal of the logo (bars, selection), its gradient |
 | `--dh-deleted`, `--dh-inserted` (+ `-foreground`) | Removed and added text in the diffs          |
 | `--dh-warning` (+ `-foreground`, `-border`)   | Notices of the comparison page                   |
+| `--dh-link`, `--dh-link-foreground`           | Links, the clickable time of an action, current page |
+| `--dh-create`, `--dh-update`, `--dh-delete` (+ `-foreground`) | Icon of an action by its meaning     |
 
 Redefine any of them to restyle the viewer, after the bundle stylesheet (for instance in a stylesheet block of an
 overridden `layout.html.twig`):

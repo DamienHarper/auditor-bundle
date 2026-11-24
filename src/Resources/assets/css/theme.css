@@ -33,6 +33,14 @@
     --color-dh-warning: var(--dh-warning);
     --color-dh-warning-foreground: var(--dh-warning-foreground);
     --color-dh-warning-border: var(--dh-warning-border);
+    --color-dh-link: var(--dh-link);
+    --color-dh-link-foreground: var(--dh-link-foreground);
+    --color-dh-create: var(--dh-create);
+    --color-dh-create-foreground: var(--dh-create-foreground);
+    --color-dh-update: var(--dh-update);
+    --color-dh-update-foreground: var(--dh-update-foreground);
+    --color-dh-delete: var(--dh-delete);
+    --color-dh-delete-foreground: var(--dh-delete-foreground);
 }
 
 @layer base {
@@ -61,6 +69,16 @@
         --dh-warning: #fffbeb;
         --dh-warning-foreground: #92400e;
         --dh-warning-border: #fde68a;
+        /* Links, the clickable time of an action, the current page: the logo teal, darkened to read as text (AA) */
+        --dh-link: #0f766e;
+        --dh-link-foreground: #ffffff;
+        /* Meaning of an action, on its icon: creation, modification, deletion */
+        --dh-create: #dcfce7;
+        --dh-create-foreground: #15803d;
+        --dh-update: #dbeafe;
+        --dh-update-foreground: #1d4ed8;
+        --dh-delete: #ffe4e6;
+        --dh-delete-foreground: #be123c;
     }
 
     .dark {
@@ -86,5 +104,13 @@
         --dh-warning: rgb(120 53 15 / 20%);
         --dh-warning-foreground: #fde68a;
         --dh-warning-border: rgb(146 64 14 / 50%);
+        --dh-link: #2dd4bf;
+        --dh-link-foreground: #042f2e;
+        --dh-create: rgb(22 101 52 / 35%);
+        --dh-create-foreground: #86efac;
+        --dh-update: rgb(30 64 175 / 35%);
+        --dh-update-foreground: #93c5fd;
+        --dh-delete: rgb(159 18 57 / 35%);
+        --dh-delete-foreground: #fda4af;
     }
 }

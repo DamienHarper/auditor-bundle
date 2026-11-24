@@ -31,7 +31,7 @@
                 {% else %}
                     {{ 'audit.revisions.pick_second'|trans(domain='auditor') }}
                     <a href="{{ path('dh_auditor_select_revisions', {entity: entity_param, id: id}) }}"
-                       class="ml-1 font-medium text-dh-foreground underline underline-offset-4 hover:decoration-2">
+                       class="ml-1 font-medium text-dh-link underline underline-offset-4 hover:decoration-2">
                         {{ 'audit.revisions.change_selection'|trans(domain='auditor') }}
                     </a>
                 {% endif %}

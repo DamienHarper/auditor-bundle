@@ -83,7 +83,7 @@
                 </button>
                 {% if filters.date_from or filters.date_to %}
                     <a href="{{ path('dh_auditor_show_entity_stream', {entity: helper.namespaceToParam(entity), id: id, type: filters.type, user: filters.user, field: filters.field}) }}"
-                       class="col-span-2 inline-flex h-8 items-center px-2 text-sm text-dh-muted-foreground underline underline-offset-4 hover:decoration-2">
+                       class="col-span-2 inline-flex h-8 items-center px-2 text-sm text-dh-link underline underline-offset-4 hover:decoration-2">
                         {{ 'audit.filter.clear_period'|trans(domain='auditor') }}
                     </a>
                 {% endif %}

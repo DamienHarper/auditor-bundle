@@ -22,7 +22,7 @@
                 {{ 'audit.compare.title'|trans(domain='auditor') }}
             </h1>
             <a href="{{ path('dh_auditor_select_revisions', {entity: entity_param, id: id, selected: from.id}) }}"
-               class="text-sm font-medium text-dh-foreground underline underline-offset-4 hover:decoration-2">
+               class="text-sm font-medium text-dh-link underline underline-offset-4 hover:decoration-2">
                 {{ 'audit.compare.change_revisions'|trans(domain='auditor') }}
             </a>
         </div>
@@ -45,7 +45,7 @@
                 </div>
                 {% if side.step is not null %}
                     <a href="{{ path('dh_auditor_compare_revisions', {entity: entity_param, id: id, from: side.step.from, to: side.step.to}) }}"
-                       class="inline-flex items-center gap-1 mt-2 text-xs font-medium text-dh-foreground underline underline-offset-4 hover:decoration-2">
+                       class="inline-flex items-center gap-1 mt-2 text-xs font-medium text-dh-link underline underline-offset-4 hover:decoration-2">
                         {{ side.step_title|trans(domain='auditor') }}
                     </a>
                 {% endif %}
@@ -93,7 +93,7 @@
                         <tr class="block py-1.5 align-top sm:table-row sm:py-0" data-field="{{ field }}">
                             <td class="block break-words px-3 py-0.5 sm:table-cell sm:py-2">
                                 {{ '.' in field ? field : dh_auditor_field_label(entity, field) }}
-                                <span class="ml-1 font-mono text-dh-muted-foreground">{{ field }}</span>
+                                <span class="block break-all font-mono text-[11px] text-dh-muted-foreground">{{ field }}</span>
                             </td>
                             {#- a to-one relation is stored as a summary of the related object: show its label, as the action details do -#}
                             {% set old = change.old is iterable and change.old.label is defined ? change.old.label : change.old %}
@@ -114,7 +114,7 @@
                             {% for target in change.targets %}
                                 <li class="break-words">
                                     <span class="text-dh-muted-foreground">{{ field }}</span>
-                                    {% if change.type == 'associate' %}<span class="text-dh-inserted-foreground">+</span>{% else %}<span class="text-dh-deleted-foreground">−</span>{% endif %}
+                                    {{ history.sign(change.type == 'associate') }}
                                     {{ history.related(target) }}
                                     {%- if target.label is defined and target.label is not empty %}
                                         <span class="text-dh-muted-foreground">· {{ target.label is iterable ? target.label|join(', ') : target.label }}</span>
