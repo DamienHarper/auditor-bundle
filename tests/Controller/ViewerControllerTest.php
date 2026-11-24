@@ -674,6 +674,24 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertCount($total, $crawler->filter('pre[id^="dh-auditor-json-"]'), 'Every entry is shown');
     }
 
+    public function testTheTechnicalDetailsOfAnActionHaveFixedColumns(): void
+    {
+        $this->login(['ROLE_1']);
+        $first = $this->createReader()->createQuery(Post::class)->execute()[0];
+
+        $crawler = $this->client->request('GET', '/audit/transaction/'.$first->transactionId);
+
+        $this->assertResponseIsSuccessful();
+        $table = $crawler->filter('section table')->first();
+        $this->assertStringContainsString('table-fixed', (string) $table->attr('class'), 'The columns do not depend on the values of the action.');
+        $this->assertStringContainsString('dark:text-slate-200', (string) $table->attr('class'), 'The values stay readable in dark mode.');
+        $this->assertSame(
+            ['w-[14%]', 'w-[9%]', 'w-[13%]', 'w-[14%]', 'w-1/4', 'w-1/4'],
+            $table->filter('colgroup > col')->each(static fn (Crawler $col): string => (string) $col->attr('class')),
+            'The old and new values get the same room.',
+        );
+    }
+
     public function testViewerHasNoInlineScript(): void
     {
         $this->seedUserEntry(Post::class, 'timeline-user', 'timeline.user', '2026-01-01 10:00:00');
