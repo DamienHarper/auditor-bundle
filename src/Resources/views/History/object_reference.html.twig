@@ -4,7 +4,7 @@
 {%- set url = dh_auditor_object_url(reference) -%}
 <strong class="font-medium">
     {%- if url and url.visible -%}
-        <a href="{{ url.url }}" class="underline decoration-dh-muted-foreground/50 underline-offset-2 hover:decoration-current">{{ reference.label }}</a>
+        <a href="{{ url.url }}" class="text-dh-link underline decoration-dh-link/40 underline-offset-2 hover:decoration-current">{{ reference.label }}</a>
     {%- else -%}
         {{- reference.label -}}
     {%- endif -%}

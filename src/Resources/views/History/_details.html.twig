@@ -28,7 +28,6 @@
                 <td class="block break-words px-3 py-0.5 text-dh-muted-foreground empty:hidden sm:table-cell sm:py-2 sm:empty:table-cell">
                     {%- if object != previous -%}
                         <span class="font-medium text-dh-foreground" title="{{ change.entity }}">{{ object }}</span>
-                        <span class="ml-1 font-mono">{{ change.entry.type }}</span>
                     {%- endif -%}
                 </td>
                 {% if change.kind.isEntityLevel() %}
@@ -48,7 +47,7 @@
                                     <tbody class="block sm:table-row-group">
                                     {% for field, value in values %}
                                         <tr class="block py-1 align-top sm:table-row sm:py-0" data-field="{{ field }}">
-                                            <td class="block break-words px-3 text-dh-muted-foreground sm:table-cell sm:py-1">{{ dh_auditor_field_label(change.entity, field) }} <span class="font-mono">{{ field }}</span></td>
+                                            <td class="block break-words px-3 text-dh-muted-foreground sm:table-cell sm:py-1">{{ dh_auditor_field_label(change.entity, field) }} <span class="block break-all font-mono text-[11px] text-dh-muted-foreground">{{ field }}</span></td>
                                             <td class="block px-3 sm:table-cell sm:py-1">{{ history.value(change.labels[field] is defined and value is iterable ? change.labels[field] : value) }}</td>
                                         </tr>
                                     {% endfor %}
@@ -62,11 +61,11 @@
                 {% else %}
                     <td class="block break-words px-3 py-0.5 sm:table-cell sm:py-2">
                         {{ dh_auditor_field_label(change.entity, change.field) }}
-                        <span class="ml-1 font-mono text-dh-muted-foreground">{{ change.field }}</span>
+                        <span class="block break-all font-mono text-[11px] text-dh-muted-foreground">{{ change.field }}</span>
                     </td>
                     {% if change.kind.value in ['added', 'removed'] %}
                         <td class="block break-words px-3 py-0.5 font-mono sm:table-cell sm:py-2">
-                            {% if change.kind.value == 'added' %}<span class="text-dh-inserted-foreground">+</span>{% else %}<span class="text-dh-deleted-foreground">−</span>{% endif %} {{ (change.getTargetClass() ?? '')|split('\\')|last }}#{{ change.getTargetId() }}
+                            {{ history.sign(change.kind.value == 'added') }} {{ (change.getTargetClass() ?? '')|split('\\')|last }}#{{ change.getTargetId() }}
                             {% if (change.newLabel ?? change.oldLabel) is not null %}“{{ change.newLabel ?? change.oldLabel }}”{% endif %}
                         </td>
                     {% elseif change.kind.value == 'json' %}
@@ -92,7 +91,7 @@
     <span>{{ 'audit.history.schema'|trans(domain='auditor') }} v{{ first.schemaVersion }}</span>
     {% set transaction_url = first.transactionId ? dh_auditor_transaction_url(first.transactionId, root: root ?? null) : null %}
     {% if transaction_url %}
-        <a class="ml-auto font-sans text-xs font-medium text-dh-foreground underline underline-offset-4 hover:decoration-2"
+        <a class="ml-auto font-sans text-xs font-medium text-dh-link underline underline-offset-4 hover:decoration-2"
            href="{{ transaction_url }}">{{ 'audit.history.all_details'|trans(domain='auditor') }}</a>
     {% endif %}
 </div>

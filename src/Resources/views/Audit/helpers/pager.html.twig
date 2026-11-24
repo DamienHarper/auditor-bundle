@@ -73,7 +73,7 @@
 
             {% for page in startPage..endPage %}
                 {% if page == paginator.currentPage %}
-                    <span class="inline-flex items-center justify-center size-8 rounded-lg border border-dh-input bg-dh-card text-sm font-medium text-dh-foreground shadow-xs dark:bg-dh-input/30">
+                    <span class="inline-flex items-center justify-center size-8 rounded-lg bg-dh-link text-sm font-medium text-dh-link-foreground">
                         {{ page }}
                     </span>
                 {% else %}

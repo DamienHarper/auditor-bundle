@@ -45,7 +45,7 @@
     <ul class="mt-6 space-y-2">
         {% for fragment in row.phrase.fragments %}
             <li class="flex gap-3 text-sm">
-                <span class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-dh-muted text-dh-muted-foreground">{{ history.icon(fragment.icon) }}</span>
+                <span class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full {{ history.icon_tone(fragment.icon) }}">{{ history.icon(fragment.icon) }}</span>
                 <span class="pt-0.5">{{ fragment|dh_auditor_phrase }}</span>
             </li>
         {% endfor %}
@@ -137,7 +137,7 @@
                 <details class="rounded-xl border border-dh-border bg-dh-card">
                     <summary class="flex cursor-pointer items-center justify-between gap-2 px-4 py-2 font-mono text-xs">
                         <span>{{ tables[written.entity] }} · {{ entry.id }} · diffs</span>
-                        <button type="button" class="font-sans font-medium text-dh-foreground underline underline-offset-4 hover:decoration-2" data-dh-auditor-copy="dh-auditor-json-{{ loop.index }}" data-dh-auditor-copied="{{ 'audit.history.copied'|trans(domain='auditor') }}" data-dh-auditor-copy-failed="{{ 'audit.history.copy_failed'|trans(domain='auditor') }}">{{ 'audit.history.copy'|trans(domain='auditor') }}</button>
+                        <button type="button" class="font-sans font-medium text-dh-link underline underline-offset-4 hover:decoration-2" data-dh-auditor-copy="dh-auditor-json-{{ loop.index }}" data-dh-auditor-copied="{{ 'audit.history.copied'|trans(domain='auditor') }}" data-dh-auditor-copy-failed="{{ 'audit.history.copy_failed'|trans(domain='auditor') }}">{{ 'audit.history.copy'|trans(domain='auditor') }}</button>
                     </summary>
                     <pre id="dh-auditor-json-{{ loop.index }}" class="overflow-x-auto rounded-b-xl bg-dh-muted p-4 text-xs leading-relaxed text-dh-foreground">{{ {diffs: entry.diffs, blame: entry.blame}|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES')) }}</pre>
                 </details>
