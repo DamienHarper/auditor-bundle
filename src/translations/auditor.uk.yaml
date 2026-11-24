@@ -122,6 +122,7 @@ audit:
     entries: 'Записи'
     object: 'Об’єкт'
     field: 'Поле'
+    change: 'Зміна'
     firewall: 'файрвол'
     schema: 'схема'
     filter:

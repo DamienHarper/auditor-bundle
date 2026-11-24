@@ -16,8 +16,9 @@ use Symfony\Component\DomCrawler\Crawler;
 use Twig\Environment;
 
 /**
- * The technical details of an action: every value sits in the Old value or New value column, the columns have fixed
- * widths, and an association shows its label.
+ * The technical details of an action: one Change column with fixed widths, whose rendering depends on the values
+ * (changed words inline, old → new, old above new), one row per field for a creation or removal, and the label of an
+ * association.
  *
  * @internal
  */
@@ -28,71 +29,130 @@ final class HistoryDetailsTest extends KernelTestCase
 
     private const array STATUS = ['value' => 'draft', 'label' => 'Draft'];
 
-    /**
-     * @param array<string, mixed> $changes
-     * @param 'new'|'old'          $column  the column that holds the values
-     */
-    #[DataProvider('provideEntityLevelDetailsShowOneRowPerFieldInTheirColumnCases')]
-    public function testEntityLevelDetailsShowOneRowPerFieldInTheirColumn(string $type, array $changes, string $column, bool $snapshot = false): void
+    public function testColumnsHaveFixedWidths(): void
     {
-        $rows = $this->fieldRows($this->render([$this->entry($type, $changes, $snapshot)]));
-        $other = 'old' === $column ? 'new' : 'old';
+        $table = $this->render([$this->entry('update', ['title' => ['old' => 'First', 'new' => 'Second']])])->filter('table')->first();
 
-        $fields = array_keys($rows);
-        sort($fields);
-        $this->assertSame(['author', 'status', 'title'], $fields, 'One row per field.');
-        $this->assertSame('"John"', $rows['author'][$column], 'The association shows the label of its target, not its JSON summary.');
-        $this->assertSame('"First"', $rows['title'][$column], 'A plain field shows its raw value.');
-        $this->assertSame('"draft"', $rows['status'][$column], 'A #[DiffLabel] field shows its raw value, as in the details of a field change.');
-        foreach ($rows as $field => $row) {
-            $this->assertSame('—', $row[$other], \sprintf('The %s column of "%s" is empty.', $other, $field));
-        }
+        $this->assertStringContainsString('table-fixed', (string) $table->attr('class'));
+        $this->assertStringContainsString('dark:text-slate-200', (string) $table->attr('class'), 'The values stay readable in dark mode.');
+        $this->assertSame(['w-1/5', 'w-1/5', 'w-3/5'], $table->filter('colgroup > col')->each(static fn (Crawler $col): string => (string) $col->attr('class')));
+        $this->assertSame(['Object', 'Field', 'Change'], $table->filter('thead th')->each(static fn (Crawler $th): string => mb_trim($th->text())));
     }
 
     /**
-     * @return iterable<string, array{0: string, 1: array<string, mixed>, 2: string, 3?: bool}>
+     * @param array{old: mixed, new: mixed} $change
+     * @param list<string>                  $deleted
+     * @param list<string>                  $inserted
      */
-    public static function provideEntityLevelDetailsShowOneRowPerFieldInTheirColumnCases(): iterable
+    #[DataProvider('provideFieldChangesShowInOneCellCases')]
+    public function testFieldChangesShowInOneCell(array $change, string $text, array $deleted, array $inserted): void
+    {
+        $cell = $this->changeCell($this->render([$this->entry('update', ['title' => $change])]));
+
+        $this->assertSame($text, $this->text($cell), 'The whole change sits in the Change column.');
+        $this->assertSame($deleted, $cell->filter('del')->each(fn (Crawler $node): string => $this->text($node)));
+        $this->assertSame($inserted, $cell->filter('ins')->each(fn (Crawler $node): string => $this->text($node)));
+    }
+
+    /**
+     * @return iterable<string, array{array{old: mixed, new: mixed}, string, list<string>, list<string>}>
+     */
+    public static function provideFieldChangesShowInOneCellCases(): iterable
+    {
+        yield 'most of a text kept: the changed words inline' => [
+            ['old' => 'Aut adipisci necessitatibus laudantium mollitia.', 'new' => 'Aut adipisci necessitatibus laudantium mollitia - Revised Edition'],
+            '"Aut adipisci necessitatibus laudantium mollitia.mollitia - Revised Edition"',
+            ['mollitia.'],
+            ['mollitia - Revised Edition'],
+        ];
+
+        yield 'short values replaced: old → new' => [
+            ['old' => 'draft', 'new' => 'published'],
+            '"draft" → "published"',
+            ['"draft"'],
+            ['"published"'],
+        ];
+
+        yield 'a text rewritten: old above new' => [
+            ['old' => 'Sit aliquid sequi quia distinctio odit quos consequatur debitis sunt provident.', 'new' => 'Rerum quia fuga velit doloribus ea qui non dolores et quasi veritatis eaque.'],
+            '"Sit aliquid sequi quia distinctio odit quos consequatur debitis sunt provident." "Rerum quia fuga velit doloribus ea qui non dolores et quasi veritatis eaque."',
+            ['"Sit aliquid sequi quia distinctio odit quos consequatur debitis sunt provident."'],
+            ['"Rerum quia fuga velit doloribus ea qui non dolores et quasi veritatis eaque."'],
+        ];
+
+        yield 'a value set from null' => [['old' => null, 'new' => 'First'], 'null → "First"', [], ['"First"']];
+
+        yield 'a value cleared' => [['old' => 'First', 'new' => null], '"First" → null', ['"First"'], []];
+
+        yield 'an association: its labels' => [['old' => null, 'new' => self::AUTHOR], 'null → "John"', [], ['"John"']];
+
+        yield 'numbers' => [['old' => 1, 'new' => 2], '1 → 2', ['1'], ['2']];
+    }
+
+    /**
+     * @param array<string, mixed> $changes
+     */
+    #[DataProvider('provideEntityLevelDetailsShowOneRowPerFieldCases')]
+    public function testEntityLevelDetailsShowOneRowPerField(string $type, array $changes, bool $snapshot = false): void
+    {
+        $crawler = $this->render([$this->entry($type, $changes, $snapshot)]);
+
+        $rows = [];
+        foreach ($crawler->filter('tr[data-field]') as $node) {
+            $cells = new Crawler($node)->filter('td');
+            $this->assertCount(2, $cells, 'A field and its value.');
+            $rows[(string) $node->getAttribute('data-field')] = $this->text($cells->eq(1));
+        }
+
+        ksort($rows);
+        $this->assertSame(['author' => '"John"', 'status' => '"draft"', 'title' => '"First"'], $rows, 'The label of an association, the raw value of the other fields.');
+        $this->assertCount(0, $crawler->filter('tr[data-field] del, tr[data-field] ins'), 'The values of a creation or removal are not marked.');
+    }
+
+    /**
+     * @return iterable<string, array{0: string, 1: array<string, mixed>, 2?: bool}>
+     */
+    public static function provideEntityLevelDetailsShowOneRowPerFieldCases(): iterable
     {
         $created = ['title' => ['old' => null, 'new' => 'First'], 'author' => ['old' => null, 'new' => self::AUTHOR], 'status' => ['old' => null, 'new' => self::STATUS]];
 
-        yield 'creation' => ['insert', $created, 'new'];
+        yield 'creation' => ['insert', $created];
 
-        yield 'snapshot' => ['insert', $created, 'new', true];
+        yield 'snapshot' => ['insert', $created, true];
 
-        yield 'removal with full_snapshot_on_remove' => ['remove', ['title' => ['old' => 'First', 'new' => null], 'author' => ['old' => self::AUTHOR, 'new' => null], 'status' => ['old' => self::STATUS, 'new' => null]], 'old'];
+        yield 'removal with full_snapshot_on_remove' => ['remove', ['title' => ['old' => 'First', 'new' => null], 'author' => ['old' => self::AUTHOR, 'new' => null], 'status' => ['old' => self::STATUS, 'new' => null]]];
     }
 
-    public function testCollectionElementsSitInTheColumnOfTheirSide(): void
+    public function testCollectionElementsShowInTheChangeColumn(): void
     {
         $crawler = $this->render([$this->collectionEntry('dissociate'), $this->collectionEntry('associate', 2)]);
 
-        $cells = $crawler->filter('table > tbody > tr')->each(
-            static fn (Crawler $row): array => $row->filter('td')->each(static fn (Crawler $cell): string => (string) preg_replace('/\s+/', ' ', mb_trim($cell->text())))
-        );
+        $cells = $crawler->filter('table > tbody > tr')->each(fn (Crawler $row): array => $row->filter('td')->each(fn (Crawler $cell): string => $this->text($cell)));
+        $changes = array_map(static fn (array $row): string => $row[2], $cells);
+        sort($changes);
 
-        $values = array_map(static fn (array $row): array => \array_slice($row, 2), $cells);
-        $this->assertCount(2, $values);
-        $this->assertContains(['− Tag#5 “php”', '—'], $values, 'A removed element sits in the Old value column.');
-        $this->assertContains(['—', '+ Tag#5 “php”'], $values, 'An added element sits in the New value column.');
+        $this->assertSame(['+ Tag#5 “php”', '− Tag#5 “php”'], $changes);
+    }
+
+    public function testTextsKeepTheirLineBreaks(): void
+    {
+        $text = "First paragraph.\n\nSecond paragraph.";
+
+        foreach ([$this->entry('update', ['title' => ['old' => null, 'new' => $text]]), $this->entry('insert', ['title' => ['old' => null, 'new' => $text]])] as $entry) {
+            $code = $this->render([$entry])->filter('table code')->last();
+
+            $this->assertSame('"'.$text.'"', $code->text(null, false), 'A text is shown with its line breaks, not as escaped JSON.');
+            $this->assertStringContainsString('whitespace-pre-wrap', (string) $code->attr('class'));
+        }
     }
 
     public function testRawValuesWrapBetweenWords(): void
     {
-        $crawler = $this->render([$this->entry('update', ['title' => ['old' => 'First', 'new' => 'Second']])]);
+        $crawler = $this->render([$this->entry('insert', ['title' => ['old' => null, 'new' => 'First']])]);
 
         $classes = explode(' ', (string) $crawler->filter('table code')->first()->attr('class'));
         $this->assertContains('break-words', $classes, 'A long text wraps between its words.');
         $this->assertNotContains('break-all', $classes, 'A long text is not cut in the middle of a word.');
-    }
-
-    public function testColumnsHaveFixedWidths(): void
-    {
-        $crawler = $this->render([$this->entry('update', ['title' => ['old' => 'First', 'new' => 'Second']])]);
-
-        $table = $crawler->filter('table')->first();
-        $this->assertStringContainsString('table-fixed', (string) $table->attr('class'));
-        $this->assertSame(['w-1/5', 'w-1/5', 'w-[30%]', 'w-[30%]'], $table->filter('colgroup > col')->each(static fn (Crawler $col): string => (string) $col->attr('class')));
     }
 
     /**
@@ -111,18 +171,14 @@ final class HistoryDetailsTest extends KernelTestCase
         return $crawler;
     }
 
-    /**
-     * @return array<string, array{old: string, new: string}> raw field => rendered old and new values
-     */
-    private function fieldRows(Crawler $crawler): array
+    private function changeCell(Crawler $crawler): Crawler
     {
-        $rows = [];
-        foreach ($crawler->filter('tr[data-field]') as $node) {
-            $cells = new Crawler($node)->filter('td');
-            $rows[(string) $node->getAttribute('data-field')] = ['old' => mb_trim($cells->eq(1)->text()), 'new' => mb_trim($cells->eq(2)->text())];
-        }
+        return $crawler->filter('table > tbody > tr')->first()->filter('td')->eq(2);
+    }
 
-        return $rows;
+    private function text(Crawler $node): string
+    {
+        return (string) preg_replace('/\s+/', ' ', mb_trim($node->text()));
     }
 
     /**

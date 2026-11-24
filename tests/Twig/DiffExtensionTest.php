@@ -156,6 +156,39 @@ final class DiffExtensionTest extends KernelTestCase
         $this->assertNull($extension->wordDiff('text', 12), 'Not a text.');
     }
 
+    #[DataProvider('provideTextChangeCases')]
+    public function testTextChange(mixed $old, mixed $new, ?string $expectedMode): void
+    {
+        $change = new DiffExtension()->textChange($old, $new);
+
+        $this->assertSame($expectedMode, $change['mode'] ?? null);
+    }
+
+    /**
+     * @return iterable<string, array{mixed, mixed, null|string}>
+     */
+    public static function provideTextChangeCases(): iterable
+    {
+        yield 'most of the text kept: the changed words inline' => ['Aut adipisci necessitatibus laudantium mollitia.', 'Aut adipisci necessitatibus laudantium mollitia - Revised Edition', 'inline'];
+
+        yield 'short value replaced: old → new' => ['draft', 'published', 'replace'];
+
+        yield 'long text rewritten: old above new' => ['Sit aliquid sequi quia distinctio odit quos consequatur debitis sunt provident.', 'Rerum quia fuga velit doloribus ea qui non dolores et quasi veritatis eaque.', 'stack'];
+
+        yield 'from null: not a text change' => [null, 'text', null];
+
+        yield 'to null: not a text change' => ['text', null, null];
+
+        yield 'not texts' => [1, 2, null];
+    }
+
+    public function testTextChangeKeepsTheRunsOfTheWordDiff(): void
+    {
+        $change = new DiffExtension()->textChange('a b', 'a c');
+
+        $this->assertSame(['mode' => 'replace', 'runs' => [['equal', 'a '], ['delete', 'b'], ['insert', 'c']]], $change, 'Short values replaced, half of their words changed.');
+    }
+
     /**
      * @param array<string, mixed> $changes
      * @param list<string>         $deepDiffs fields listed in the "deep_diffs" envelope marker (written only when not empty)

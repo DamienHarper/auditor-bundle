@@ -122,6 +122,7 @@ audit:
     entries: 'Voci'
     object: 'Oggetto'
     field: 'Campo'
+    change: 'Modifica'
     firewall: 'firewall'
     schema: 'schema'
     filter:

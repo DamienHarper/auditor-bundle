@@ -122,6 +122,7 @@ audit:
     entries: 'Entries'
     object: 'Object'
     field: 'Field'
+    change: 'Change'
     firewall: 'firewall'
     schema: 'schema'
     filter:
