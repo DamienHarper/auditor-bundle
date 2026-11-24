@@ -3,27 +3,29 @@
 {% import '@DHAuditor/History/_macros.html.twig' as history %}
 {% set first = item.entries|first %}
 <div class="mt-3 overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
-    {#- Fixed column widths, so that the columns line up from one action to the next. A change shows in one column, in a
-        form that depends on its values: the changed words in place, old → new, or the old text above the new one. -#}
-    <table class="w-full min-w-[40rem] table-fixed text-left text-xs text-slate-700 dark:text-slate-200">
+    {#- On a narrow screen, each change is stacked (object, field, then the change) instead of three squeezed columns.
+        From the sm breakpoint, a table whose column widths never change, so that the columns line up from one
+        action to the next. A change shows in one column, in a form that depends on its values: the changed words in
+        place, old → new, or the old text above the new one. -#}
+    <table class="block w-full text-left text-xs text-slate-700 sm:table sm:min-w-[40rem] sm:table-fixed dark:text-slate-200">
         <colgroup>
             <col class="w-1/5">
             <col class="w-1/5">
             <col class="w-3/5">
         </colgroup>
-        <thead class="bg-slate-50 text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
+        <thead class="hidden bg-slate-50 text-slate-500 sm:table-header-group dark:bg-slate-800/60 dark:text-slate-400">
             <tr>
                 <th class="px-3 py-2 font-medium">{{ 'audit.history.object'|trans(domain='auditor') }}</th>
                 <th class="px-3 py-2 font-medium">{{ 'audit.history.field'|trans(domain='auditor') }}</th>
                 <th class="px-3 py-2 font-medium">{{ 'audit.history.change'|trans(domain='auditor') }}</th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+        <tbody class="block divide-y divide-slate-100 sm:table-row-group dark:divide-slate-800">
         {% set previous = null %}
         {% for change in item.changes %}
             {% set object = change.entity|split('\\')|last ~ ' #' ~ change.objectId %}
-            <tr class="align-top">
-                <td class="break-words px-3 py-2 text-slate-500 dark:text-slate-400">
+            <tr class="block py-1.5 align-top sm:table-row sm:py-0">
+                <td class="block break-words px-3 py-0.5 text-slate-500 empty:hidden sm:table-cell sm:py-2 sm:empty:table-cell dark:text-slate-400">
                     {%- if object != previous -%}
                         <span class="font-medium text-slate-700 dark:text-slate-200" title="{{ change.entity }}">{{ object }}</span>
                         <span class="ml-1 font-mono">{{ change.entry.type }}</span>
@@ -35,19 +37,19 @@
                         {#- One row per field, the value as it was written: the type of the entry tells whether it was
                             created or removed. <details> cannot wrap table rows, so the rows sit in a nested table whose
                             columns have the widths of the Field and Change columns (20 % and 60 % of the row). -#}
-                        <td class="p-0" colspan="2">
+                        <td class="block p-0 sm:table-cell" colspan="2">
                             <details>
-                                <summary class="cursor-pointer px-3 py-2 text-slate-500 dark:text-slate-400">{{ 'audit.history.fields_count'|trans({'%count%': values|length}, 'auditor') }}</summary>
-                                <table class="w-full table-fixed">
+                                <summary class="cursor-pointer px-3 py-0.5 sm:py-2 text-slate-500 dark:text-slate-400">{{ 'audit.history.fields_count'|trans({'%count%': values|length}, 'auditor') }}</summary>
+                                <table class="block w-full sm:table sm:table-fixed">
                                     <colgroup>
                                         <col class="w-1/4">
                                         <col class="w-3/4">
                                     </colgroup>
-                                    <tbody>
+                                    <tbody class="block sm:table-row-group">
                                     {% for field, value in values %}
-                                        <tr class="align-top" data-field="{{ field }}">
-                                            <td class="break-words px-3 py-1 text-slate-500 dark:text-slate-400">{{ dh_auditor_field_label(change.entity, field) }} <span class="font-mono">{{ field }}</span></td>
-                                            <td class="px-3 py-1">{{ history.value(change.labels[field] is defined and value is iterable ? change.labels[field] : value) }}</td>
+                                        <tr class="block py-1 align-top sm:table-row sm:py-0" data-field="{{ field }}">
+                                            <td class="block break-words px-3 text-slate-500 sm:table-cell sm:py-1 dark:text-slate-400">{{ dh_auditor_field_label(change.entity, field) }} <span class="font-mono">{{ field }}</span></td>
+                                            <td class="block px-3 sm:table-cell sm:py-1">{{ history.value(change.labels[field] is defined and value is iterable ? change.labels[field] : value) }}</td>
                                         </tr>
                                     {% endfor %}
                                     </tbody>
@@ -55,25 +57,25 @@
                             </details>
                         </td>
                     {% else %}
-                        <td class="px-3 py-2" colspan="2"><span class="text-slate-400">—</span></td>
+                        <td class="block px-3 py-0.5 sm:table-cell sm:py-2" colspan="2"><span class="text-slate-400">—</span></td>
                     {% endif %}
                 {% else %}
-                    <td class="break-words px-3 py-2">
+                    <td class="block break-words px-3 py-0.5 sm:table-cell sm:py-2">
                         {{ dh_auditor_field_label(change.entity, change.field) }}
                         <span class="ml-1 font-mono text-slate-400">{{ change.field }}</span>
                     </td>
                     {% if change.kind.value in ['added', 'removed'] %}
-                        <td class="break-words px-3 py-2 font-mono">
+                        <td class="block break-words px-3 py-0.5 font-mono sm:table-cell sm:py-2">
                             {{ change.kind.value == 'added' ? '+' : '−' }} {{ (change.getTargetClass() ?? '')|split('\\')|last }}#{{ change.getTargetId() }}
                             {% if (change.newLabel ?? change.oldLabel) is not null %}“{{ change.newLabel ?? change.oldLabel }}”{% endif %}
                         </td>
                     {% elseif change.kind.value == 'json' %}
-                        <td class="px-3 py-2">{{ history.raw(change.new) }}</td>
+                        <td class="block px-3 py-0.5 sm:table-cell sm:py-2">{{ history.raw(change.new) }}</td>
                     {% else %}
                         {% set old = change.oldLabel is not null and change.old is iterable ? change.oldLabel : change.old %}
                         {% set new = change.newLabel is not null and change.new is iterable ? change.newLabel : change.new %}
                         {% set text = dh_auditor_text_change(old, new) %}
-                        <td class="px-3 py-2">
+                        <td class="block px-3 py-0.5 sm:table-cell sm:py-2">
                             {%- if text is not null and text.mode == 'inline' -%}
                                 <code class="whitespace-pre-wrap break-words font-mono text-xs">"
                                     {%- for run in text.runs -%}
