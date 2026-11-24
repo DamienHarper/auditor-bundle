@@ -8,6 +8,7 @@ use DH\Auditor\History\HistoryItem;
 use DH\Auditor\Model\Entry;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
+use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Small;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -15,8 +16,8 @@ use Symfony\Component\DomCrawler\Crawler;
 use Twig\Environment;
 
 /**
- * The technical details of an action that concerns the whole entity (creation, snapshot, removal with
- * full_snapshot_on_remove) show the label of an association, as the details of a field change do.
+ * The technical details of an action: every value sits in the Old value or New value column, the columns have fixed
+ * widths, and an association shows its label.
  *
  * @internal
  */
@@ -29,45 +30,122 @@ final class HistoryDetailsTest extends KernelTestCase
 
     /**
      * @param array<string, mixed> $changes
+     * @param 'new'|'old'          $column  the column that holds the values
      */
-    #[DataProvider('provideEntityLevelDetailsShowTheLabelOfAnAssociationCases')]
-    public function testEntityLevelDetailsShowTheLabelOfAnAssociation(string $type, array $changes, bool $snapshot = false): void
+    #[DataProvider('provideEntityLevelDetailsShowOneRowPerFieldInTheirColumnCases')]
+    public function testEntityLevelDetailsShowOneRowPerFieldInTheirColumn(string $type, array $changes, string $column, bool $snapshot = false): void
     {
-        $values = $this->renderedValues($type, $changes, $snapshot);
+        $rows = $this->fieldRows($this->render([$this->entry($type, $changes, $snapshot)]));
+        $other = 'old' === $column ? 'new' : 'old';
 
-        $this->assertSame('"John"', $values['author'], 'The association shows the label of its target, not its JSON summary.');
-        $this->assertSame('"First"', $values['title'], 'A plain field shows its raw value.');
-        $this->assertSame('"draft"', $values['status'], 'A #[DiffLabel] field shows its raw value, as in the details of a field change.');
+        $fields = array_keys($rows);
+        sort($fields);
+        $this->assertSame(['author', 'status', 'title'], $fields, 'One row per field.');
+        $this->assertSame('"John"', $rows['author'][$column], 'The association shows the label of its target, not its JSON summary.');
+        $this->assertSame('"First"', $rows['title'][$column], 'A plain field shows its raw value.');
+        $this->assertSame('"draft"', $rows['status'][$column], 'A #[DiffLabel] field shows its raw value, as in the details of a field change.');
+        foreach ($rows as $field => $row) {
+            $this->assertSame('—', $row[$other], \sprintf('The %s column of "%s" is empty.', $other, $field));
+        }
     }
 
     /**
-     * @return iterable<string, array{0: string, 1: array<string, mixed>, 2?: bool}>
+     * @return iterable<string, array{0: string, 1: array<string, mixed>, 2: string, 3?: bool}>
      */
-    public static function provideEntityLevelDetailsShowTheLabelOfAnAssociationCases(): iterable
+    public static function provideEntityLevelDetailsShowOneRowPerFieldInTheirColumnCases(): iterable
     {
-        yield 'creation' => ['insert', ['title' => ['old' => null, 'new' => 'First'], 'author' => ['old' => null, 'new' => self::AUTHOR], 'status' => ['old' => null, 'new' => self::STATUS]]];
+        $created = ['title' => ['old' => null, 'new' => 'First'], 'author' => ['old' => null, 'new' => self::AUTHOR], 'status' => ['old' => null, 'new' => self::STATUS]];
 
-        yield 'snapshot' => ['insert', ['title' => ['old' => null, 'new' => 'First'], 'author' => ['old' => null, 'new' => self::AUTHOR], 'status' => ['old' => null, 'new' => self::STATUS]], true];
+        yield 'creation' => ['insert', $created, 'new'];
 
-        yield 'removal with full_snapshot_on_remove' => ['remove', ['title' => ['old' => 'First', 'new' => null], 'author' => ['old' => self::AUTHOR, 'new' => null], 'status' => ['old' => self::STATUS, 'new' => null]]];
+        yield 'snapshot' => ['insert', $created, 'new', true];
+
+        yield 'removal with full_snapshot_on_remove' => ['remove', ['title' => ['old' => 'First', 'new' => null], 'author' => ['old' => self::AUTHOR, 'new' => null], 'status' => ['old' => self::STATUS, 'new' => null]], 'old'];
+    }
+
+    public function testCollectionElementsSitInTheColumnOfTheirSide(): void
+    {
+        $crawler = $this->render([$this->collectionEntry('dissociate'), $this->collectionEntry('associate', 2)]);
+
+        $cells = $crawler->filter('table > tbody > tr')->each(
+            static fn (Crawler $row): array => $row->filter('td')->each(static fn (Crawler $cell): string => (string) preg_replace('/\s+/', ' ', mb_trim($cell->text())))
+        );
+
+        $values = array_map(static fn (array $row): array => \array_slice($row, 2), $cells);
+        $this->assertCount(2, $values);
+        $this->assertContains(['− Tag#5 “php”', '—'], $values, 'A removed element sits in the Old value column.');
+        $this->assertContains(['—', '+ Tag#5 “php”'], $values, 'An added element sits in the New value column.');
+    }
+
+    public function testColumnsHaveFixedWidths(): void
+    {
+        $crawler = $this->render([$this->entry('update', ['title' => ['old' => 'First', 'new' => 'Second']])]);
+
+        $table = $crawler->filter('table')->first();
+        $this->assertStringContainsString('table-fixed', (string) $table->attr('class'));
+        $this->assertSame(['w-1/5', 'w-1/5', 'w-[30%]', 'w-[30%]'], $table->filter('colgroup > col')->each(static fn (Crawler $col): string => (string) $col->attr('class')));
+    }
+
+    /**
+     * @param list<Entry> $entries
+     */
+    private function render(array $entries): Crawler
+    {
+        self::bootKernel();
+
+        /** @var Environment $twig */
+        $twig = self::getContainer()->get('twig');
+
+        $crawler = new Crawler();
+        $crawler->addHtmlContent($twig->render('@DHAuditor/History/_details.html.twig', ['item' => new HistoryItem('1', $entries)]));
+
+        return $crawler;
+    }
+
+    /**
+     * @return array<string, array{old: string, new: string}> raw field => rendered old and new values
+     */
+    private function fieldRows(Crawler $crawler): array
+    {
+        $rows = [];
+        foreach ($crawler->filter('tr[data-field]') as $node) {
+            $cells = new Crawler($node)->filter('td');
+            $rows[(string) $node->getAttribute('data-field')] = ['old' => mb_trim($cells->eq(1)->text()), 'new' => mb_trim($cells->eq(2)->text())];
+        }
+
+        return $rows;
     }
 
     /**
      * @param array<string, mixed> $changes
-     *
-     * @return array<string, string> raw field => rendered value
      */
-    private function renderedValues(string $type, array $changes, bool $snapshot): array
+    private function entry(string $type, array $changes, bool $snapshot = false): Entry
     {
-        self::bootKernel();
-
         $diffs = ['source' => ['id' => 1, 'class' => Post::class, 'label' => 'First', 'table' => 'post'], 'changes' => $changes];
         if ($snapshot) {
             $diffs['snapshot'] = true;
         }
 
-        $entry = Entry::fromArray([
-            'id' => 1,
+        return $this->fromDiffs($type, $diffs);
+    }
+
+    private function collectionEntry(string $type, int $id = 1): Entry
+    {
+        return $this->fromDiffs($type, [
+            'source' => ['id' => 1, 'class' => Post::class, 'label' => 'First', 'table' => 'post', 'field' => 'tags'],
+            'target' => ['id' => 5, 'class' => Tag::class, 'label' => 'php', 'table' => 'tag', 'field' => 'posts'],
+            'is_owning_side' => true,
+            'join_table' => 'post__tag',
+        ], $id);
+    }
+
+    /**
+     * @param array<string, mixed> $diffs
+     */
+    private function fromDiffs(string $type, array $diffs, int $id = 1): Entry
+    {
+        return Entry::fromArray([
+            'id' => $id,
             'schema_version' => 2,
             'type' => $type,
             'object_id' => '1',
@@ -76,19 +154,5 @@ final class HistoryDetailsTest extends KernelTestCase
             'created_at' => new \DateTimeImmutable(),
             'entity' => Post::class,
         ]);
-
-        /** @var Environment $twig */
-        $twig = self::getContainer()->get('twig');
-
-        $crawler = new Crawler();
-        $crawler->addHtmlContent($twig->render('@DHAuditor/History/_details.html.twig', ['item' => new HistoryItem('1', [$entry])]));
-
-        $values = [];
-        foreach ($crawler->filter('dl dt') as $index => $term) {
-            $field = new Crawler($term)->filter('span.font-mono')->text();
-            $values[$field] = mb_trim($crawler->filter('dl dd')->eq($index)->text());
-        }
-
-        return $values;
     }
 }
