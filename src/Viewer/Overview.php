@@ -8,7 +8,6 @@ use DH\Auditor\Attribute\Security;
 use DH\Auditor\Exception\AccessDeniedException;
 use DH\Auditor\History\HistoryGrouper;
 use DH\Auditor\History\HistoryItem;
-use DH\Auditor\Model\Entry;
 use DH\Auditor\Provider\Doctrine\Persistence\Helper\SchemaHelper;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\Auditor\Provider\Doctrine\Persistence\Schema\SchemaManager;
@@ -59,8 +58,8 @@ final readonly class Overview
     }
 
     /**
-     * The most recent actions across the audited entities: the latest entries of each table, grouped by transaction.
-     * An action whose entries are spread over many tables may show only part of them.
+     * The most recent actions across the audited entities: the latest entries of each table give the latest actions,
+     * which are then read whole (WholeActions::MAX_ENTRIES at most) across the tables.
      *
      * @param list<string> $entities
      *
@@ -68,22 +67,29 @@ final readonly class Overview
      */
     public function recentActivity(array $entities, int $limit): array
     {
-        $entries = [];
+        $queries = [];
+        $rows = [];
         foreach ($entities as $entity) {
             try {
-                $latest = $this->reader->createQuery($entity, ['page_size' => self::RECENT_ENTRIES_PER_TABLE])->execute();
+                $query = $this->reader->createQuery($entity, ['page_size' => null]);
             } catch (AccessDeniedException) {
                 continue;
             }
 
-            foreach ($latest as $entry) {
-                $entries[] = $entry;
+            $queries[$entity] = $query;
+            foreach ((clone $query)->limit(self::RECENT_ENTRIES_PER_TABLE)->execute() as $entry) {
+                $rows[] = ['entity' => $entity, 'entry' => $entry];
             }
         }
 
-        usort($entries, static fn (Entry $a, Entry $b): int => [$b->createdAt, $b->transactionId, $b->id] <=> [$a->createdAt, $a->transactionId, $a->id]);
+        usort($rows, WholeActions::compare(...));
 
-        return \array_slice(HistoryGrouper::byTransaction($entries), 0, $limit);
+        // the entries of the latest actions, then those of these actions the latest entries left out
+        $latest = \array_slice(HistoryGrouper::byTransaction(array_column($rows, 'entry')), 0, $limit);
+        $kept = array_fill_keys(array_map(static fn (HistoryItem $item): string => $item->key, $latest), true);
+        $rows = array_values(array_filter($rows, static fn (array $row): bool => isset($kept[HistoryGrouper::transactionKey($row['entry'])])));
+
+        return \array_slice(HistoryGrouper::byTransaction(array_column(WholeActions::complete($queries, $rows), 'entry')), 0, $limit);
     }
 
     /**
