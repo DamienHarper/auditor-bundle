@@ -21,16 +21,18 @@ final readonly class HistoryRows
     ) {}
 
     /**
-     * @param list<HistoryItem> $items
+     * @param list<HistoryItem>                $items
+     * @param null|array{0: string, 1: string} $root  class and id of the history the actions are shown in: its own
+     *                                                changes do not name it
      *
      * @return list<array{item: HistoryItem, phrase: Phrase, context: ?Phrase}>
      */
-    public function build(array $items, bool $withContext = false): array
+    public function build(array $items, bool $withContext = false, ?array $root = null): array
     {
         $rows = [];
         $references = [];
         foreach ($items as $item) {
-            $phrase = $this->phraser->phrase($item);
+            $phrase = $this->phraser->phrase($item, $root[0] ?? null, $root[1] ?? null);
             $context = $withContext ? $this->phraser->context($item) : null;
             $focus = $context instanceof Phrase ? HistoryPhraser::contextObject($context) : null;
             $row = ['item' => $item, 'phrase' => $focus instanceof ObjectReference ? $this->phraser->focus($phrase, $focus->class, $focus->id) : $phrase, 'context' => $context];

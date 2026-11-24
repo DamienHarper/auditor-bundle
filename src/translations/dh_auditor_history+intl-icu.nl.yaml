@@ -21,6 +21,9 @@ default:
     added: 'heeft toegevoegd aan {field} bij {count} {entity}'
     removed: 'heeft verwijderd uit {field} bij {count} {entity}'
     json: 'heeft {field} bewerkt bij {count} {entity}'
+# a summary of a few objects that names them; a field change that names its object
+named: '{summary}: {names}'
+field_of: '{field} van {entity} „{label}”'
 value:
   'yes': ja
   'no': nee
@@ -38,5 +41,4 @@ author:
   unknown: 'Gebruiker {id}'
 context:
   object: 'bij {entity} „{label}”'
-  objects: 'bij {count} {entity}'
 more_changes: '{count, plural, one {# andere wijziging} other {# andere wijzigingen}}'

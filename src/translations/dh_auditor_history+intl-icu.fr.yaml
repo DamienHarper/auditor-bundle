@@ -21,6 +21,9 @@ default:
     added: 'a ajouté à {field} sur {count} {entity}'
     removed: 'a retiré de {field} sur {count} {entity}'
     json: 'a modifié {field} sur {count} {entity}'
+# a summary of a few objects that names them; a field change that names its object
+named: '{summary} : {names}'
+field_of: '{field} de {entity} « {label} »'
 value:
   'yes': oui
   'no': non
@@ -38,5 +41,4 @@ author:
   unknown: 'Utilisateur {id}'
 context:
   object: 'sur {entity} « {label} »'
-  objects: 'sur {count} {entity}'
 more_changes: '{count, plural, one {# autre changement} other {# autres changements}}'

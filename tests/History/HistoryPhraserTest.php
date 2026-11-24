@@ -222,7 +222,7 @@ final class HistoryPhraserTest extends TestCase
         }
 
         $this->assertSame(
-            'changed Body on 6 Comment, changed Title: a → b and deleted 6 Post',
+            'changed Body on 6 Comment, changed Title of Tag “#1”: a → b and deleted 6 Post',
             (string) $this->phraser()->phrase($this->item(...$entries)),
         );
         $this->assertSame(
@@ -233,7 +233,66 @@ final class HistoryPhraserTest extends TestCase
             'a mis 6 articles à la corbeille',
             (string) $this->phraser('fr', [Post::class.'.deleted.bulk' => 'a mis {count} {entity} à la corbeille'], [Post::class => '{count, plural, one {article} other {articles}}'])->phrase($this->item(...\array_slice($entries, 0, 6))),
         );
-        $this->assertSame('deleted Post “Post 6”, deleted Post “Post 5”, deleted Post “Post 4”, deleted Post “Post 3” and deleted Post “Post 2”', (string) $this->phraser()->phrase($this->item(...\array_slice($entries, 1, 5))), 'Up to 5 objects, each one is told.');
+        $this->assertSame('deleted 5 Post: Post 6, Post 5, Post 4, Post 3 and Post 2', (string) $this->phraser()->phrase($this->item(...\array_slice($entries, 1, 5))), 'Up to 5 objects, they are named.');
+    }
+
+    public function testObjectsChangedTheSameWayAreNamed(): void
+    {
+        $long = str_repeat('word ', 20);
+        $phrase = $this->phraser()->phrase($this->item(
+            self::entry('update', Post::class, '1', ['body' => ['old' => 'a', 'new' => $long]], 'Post 1', id: 3),
+            self::entry('update', Post::class, '2', ['body' => ['old' => 'b', 'new' => $long]], 'Post 2', id: 2),
+            self::entry('insert', Comment::class, '9', [], 'Nice', id: 1),
+        ));
+
+        $this->assertSame('created Comment “Nice” and changed Body on 2 Post: Post 2 and Post 1', (string) $phrase, 'Told the same way: once, naming the objects.');
+        $this->assertCount(2, $phrase->fragments[1]->changes);
+        $this->assertSame(['changed Body on 2 Post: ', '<Post#2 Post 2>', ' and ', '<Post#1 Post 1>'], $this->describeParts(new Phrase([$phrase->fragments[1]])));
+        $this->assertSame('a changé Body sur 2 Post : Post 1 et Post 2', (string) $this->phraser('fr')->phrase($this->item(...array_map(static fn (Change $change): Entry => $change->entry, $phrase->fragments[1]->changes))));
+
+        $this->assertSame('changed Title of Post “Post 2”: c → d and changed Title of Post “Post 1”: a → b', (string) $this->phraser()->phrase($this->item(
+            self::entry('update', Post::class, '1', ['title' => ['old' => 'a', 'new' => 'b']], 'Post 1', id: 2),
+            self::entry('update', Post::class, '2', ['title' => ['old' => 'c', 'new' => 'd']], 'Post 2', id: 1),
+        )), 'Told differently: each one, naming its object.');
+
+        $deleted = $this->phraser()->phrase($this->item(self::entry('remove', Comment::class, '9', [], 'spam', id: 2), self::entry('remove', Comment::class, '8', [], 'ads', id: 1)));
+        $this->assertSame('deleted 2 Comment: ads and spam', (string) $deleted);
+        $this->assertTrue(array_all($deleted->getParts(), static fn (PhrasePart $part): bool => !$part instanceof ObjectReference || $part->deletedByThePhrase), 'The objects the phrase deletes.');
+    }
+
+    public function testObjectsAPhraseNamesAreToldOneByOne(): void
+    {
+        $phraser = $this->phraser('en', [Post::class.'.title.changed' => 'renamed “{label}” to {new}']);
+
+        $this->assertSame('renamed “Post 2” to d and renamed “Post 1” to b', (string) $phraser->phrase($this->item(
+            self::entry('update', Post::class, '1', ['title' => ['old' => 'a', 'new' => 'b']], 'Post 1', id: 2),
+            self::entry('update', Post::class, '2', ['title' => ['old' => 'c', 'new' => 'd']], 'Post 2', id: 1),
+        )));
+    }
+
+    public function testAFieldChangeNamesItsObjectInAnActionOnSeveralObjects(): void
+    {
+        $phraser = $this->phraser('en', [Post::class.'.title.changed' => 'renamed “{label}” to {new}']);
+        $item = $this->item(
+            self::entry('update', Tag::class, '1', ['title' => ['old' => 'php', 'new' => 'PHP']], 'php', id: 3),
+            self::entry('update', Post::class, '1', ['title' => ['old' => 'a', 'new' => 'b']], 'Why audit?', id: 2),
+            $this->tagEntry('associate', 2, 'audit', 1),
+        );
+
+        $this->assertSame('added to Tags of Post “Why audit?”: audit, renamed “Why audit?” to b and changed Title of Tag “php”: php → PHP', (string) $phraser->phrase($item));
+        $this->assertStringContainsString('a changé Title de Tag « php » : php → PHP', (string) $this->phraser('fr')->phrase($this->item($item->entries[0], self::entry('update', Post::class, '2', ['title' => ['old' => 'a', 'new' => 'b']], 'Post 2', id: 0))));
+        $this->assertSame('changed Title: php → PHP', (string) $this->phraser()->phrase($this->item($item->entries[0])), 'An action on one object: the context names it.');
+    }
+
+    public function testTheRootOfAHistoryIsNotNamed(): void
+    {
+        $item = $this->item(
+            self::entry('update', Post::class, '1', ['title' => ['old' => 'A', 'new' => 'B']], 'Why audit?', id: 2),
+            self::entry('update', Comment::class, '9', ['body' => ['old' => 'a', 'new' => 'b']], 'Nice', rootPath: 'post', id: 1),
+        );
+
+        $this->assertSame('changed Title: A → B and changed Body of Comment “Nice”: a → b', (string) $this->phraser()->phrase($item, Post::class, '1'));
+        $this->assertSame('changed Title of Post “Why audit?”: A → B and changed Body of Comment “Nice”: a → b', (string) $this->phraser()->phrase($item));
     }
 
     public function testBulkSummaryOfCollectionChanges(): void
@@ -249,7 +308,7 @@ final class HistoryPhraserTest extends TestCase
         $entries[] = self::entry('update', Post::class, '1', ['title' => ['old' => 'a', 'new' => 'b']], id: ++$id);
         $phrase = $this->phraser()->phrase($this->item(...array_reverse($entries)));
 
-        $this->assertSame('added to Tags on 6 Post and changed Title: a → b', (string) $phrase, 'The summary counts objects, and a later change does not join it.');
+        $this->assertSame('added to Tags on 6 Post and changed Title of Post “#1”: a → b', (string) $phrase, 'The summary counts objects, and a later change does not join it.');
         $this->assertCount(12, $phrase->fragments[0]->changes);
     }
 
@@ -403,7 +462,7 @@ final class HistoryPhraserTest extends TestCase
             $entries[] = self::entry('remove', Comment::class, (string) $id, [], 'Comment '.$id, id: $id);
         }
 
-        $this->assertStringStartsWith('described 6, deleted Comment “Comment 5”', (string) $phraser->phrase($this->item(...$entries)), 'A described change is not counted in a summary: 5 objects are left.');
+        $this->assertStringStartsWith('described 6 and deleted 5 Comment: Comment 5, ', (string) $phraser->phrase($this->item(...$entries)), 'A described change is not counted in a summary: 5 objects are left.');
     }
 
     public function testOnlyCollectionChangesOfTheSameObjectAreMerged(): void
@@ -412,7 +471,7 @@ final class HistoryPhraserTest extends TestCase
             self::entry('update', Post::class, '1', ['title' => ['old' => 'B', 'new' => 'C']], id: 2),
             self::entry('update', Post::class, '1', ['title' => ['old' => 'A', 'new' => 'B']], id: 1),
         )));
-        $this->assertSame('added to Tags: symfony and added to Tags: php', (string) $this->phraser()->phrase($this->item(
+        $this->assertSame('added to Tags of Post “Why audit?”: symfony and added to Tags of Post “Other”: php', (string) $this->phraser()->phrase($this->item(
             self::entry('associate', Post::class, '2', [], 'Other', id: 2, target: self::target(Tag::class, 3, 'php'), field: 'tags'),
             $this->tagEntry('associate', 1, 'symfony', 1),
         )), 'Two posts, two fragments.');
@@ -589,10 +648,14 @@ final class HistoryPhraserTest extends TestCase
             self::entry('insert', Comment::class, '9', [], 'Nice', id: 3),
             self::entry('update', Post::class, '1', ['title' => ['old' => 'A', 'new' => 'B'], 'body' => ['old' => 'a', 'new' => 'b']], 'Why audit?', id: 2),
         )), 'The object with the most changes.');
-        $this->assertSame('sur 2 articles', (string) $phraser->context($this->item(
+        $this->assertNull($phraser->context($this->item(
             self::entry('update', Post::class, '1', ['body' => ['old' => 'a', 'new' => 'b']], 'A', id: 2),
             self::entry('update', Post::class, '2', ['body' => ['old' => 'a', 'new' => 'b']], 'B', id: 1),
-        )), 'Several objects of one entity.');
+        )), 'Several objects: the phrase names them.');
+        $this->assertNull($phraser->context($this->item(
+            self::entry('update', Tag::class, '1', ['title' => ['old' => 'a', 'new' => 'b']], 'php', id: 3),
+            self::entry('update', Post::class, '1', ['title' => ['old' => 'A', 'new' => 'B'], 'body' => ['old' => 'a', 'new' => 'b']], 'Why audit?', id: 2),
+        )), 'Not the object with the most changes of several.');
         $this->assertNull($phraser->context($this->item(self::entry('remove', Comment::class, '9', [], 'spam'))), 'A creation or deletion names its object itself.');
         $this->assertNull($phraser->context($this->item(self::entry('insert', Tag::class, '1', [], 'a', id: 2), self::entry('insert', Tag::class, '2', [], 'b', id: 1))), 'So do several.');
         $this->assertNull($phraser->context($this->item(self::entry('update', Post::class, '1', ['title' => ['old' => 'A', 'new' => 'B']], 'A')), Post::class, '1'), 'Not in the history of that object.');

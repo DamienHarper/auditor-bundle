@@ -152,7 +152,11 @@ change it (Turbo attributes on the links, for instance).
 
 Each change, or group of changes, gives one fragment: the changes of the root first, then those of the attached entities; the fields of an
 entry in the order of their Doctrine mapping. Elements added to (or removed from) the same collection make one
-fragment, and the same change made to more than 5 objects of an entity is summed up (*deleted 38 Post*). Lists read
+fragment, and the same change made to more than 5 objects of an entity is summed up (*deleted 38 Post*). Up to 5
+objects, the summary names them when they are created or deleted, or when each one would be told the same way
+(*deleted 2 Comment: spam and ads*, *changed Bio on 3 Author: Alice, Bob and Carol*); otherwise each one is told. In an
+action that changes the fields of several objects, a field change names its object (*changed Colour of Tag “php”:
+blue → red*), unless its phrase names it already or it is the object whose history is shown. Lists read
 "a, b and c" ("a, b, c and 4 others" beyond 5), and values longer than 80 characters are cut. An action whose entries
 hold no change the bundle can read is told as *changed Post “Why audit?”*.
 
@@ -183,7 +187,8 @@ Field labels come from the `dh_auditor_fields` domain (see Labels above); so do 
 (the short class name otherwise). Phrases come from the `dh_auditor_history` domain in the ICU format, keyed by
 `FQCN.kind` for a creation, a snapshot or a deletion and `FQCN.field.kind` for a field change, where kind is
 `created`, `snapshot`, `deleted`, `set`, `changed`, `cleared`, `added`, `removed` or `json`; add `.bulk` for the
-summary of more than 5 objects. Use the `+intl-icu` suffix in the file names (a catalogue without it only gets its `{label}`, `{old}`, `{new}`,
+summary of several objects (followed by their names, `named` key, up to 5 objects). The `field_of` key gives the
+`{field}` of a field change that names its object (*Colour of Tag “php”*). Use the `+intl-icu` suffix in the file names (a catalogue without it only gets its `{label}`, `{old}`, `{new}`,
 `{names}`, `{field}` and `{entity}` placeholders replaced; write the count as `%count%`, also used for its plurals):
 
 ```yaml
@@ -333,7 +338,7 @@ The templates of the bundle, and the partials of `History/` you may override, re
 | `item\|dh_auditor_phrase_text` | the same phrase as plain text |
 | `item\|dh_auditor_shorten(n)` | the first `n` fragments of a phrase, followed by "and 4 other changes" |
 | `item\|dh_auditor_author` | the author of an action |
-| `dh_auditor_context(item, rootClass = null, rootId = null)` | what an action was done on ("on Post “Why audit?”"), or null |
+| `dh_auditor_context(item, rootClass = null, rootId = null)` | what an action was done on ("on Post “Why audit?”") when it changes the fields of one object only, or null |
 | `dh_auditor_entity_name(class, count = 1)` | the name of an entity (`dh_auditor_fields` domain, key FQCN), or its short class name |
 | `dh_auditor_object_url(reference)` | where an object reference leads (`ObjectUrl`), or null |
 | `dh_auditor_is_deleted(reference)` | whether the object of a reference no longer exists, as far as the page checked it |
