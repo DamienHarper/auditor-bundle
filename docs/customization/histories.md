@@ -339,6 +339,7 @@ The templates of the bundle, and the partials of `History/` you may override, re
 | `dh_auditor_is_deleted(reference)` | whether the object of a reference no longer exists, as far as the page checked it |
 | `dh_auditor_history_item(entry)` | the action of a single `Entry` |
 | `dh_auditor_word_diff(old, new)` | a word by word comparison of two texts, as runs of `[kind, text]` (`equal`, `delete`, `insert`), or null |
+| `dh_auditor_value_text(value)` | a value as the action details show it: a text as it is, between quotes only when it would be misread without them (`dh_auditor_is_ambiguous_text()`), any other value as JSON |
 
 ## 🧩 In the pages of your application
 

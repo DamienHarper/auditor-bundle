@@ -27,27 +27,27 @@
 
     <form method="get" class="mt-6 flex flex-wrap items-center gap-2 text-sm">
         <select name="on" data-dh-auditor-autosubmit aria-label="{{ 'audit.user.on'|trans(domain='auditor') }}"
-                class="rounded-lg border border-slate-300 bg-white px-2 py-1 dark:border-slate-600 dark:bg-slate-900">
+                class="dh-auditor-control">
             <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.user.on'|trans(domain='auditor'), '%value%': 'audit.history.filter.everything'|trans(domain='auditor')}, 'auditor') }}</option>
             {% for entity in entities %}
                 <option value="{{ entity }}" {{ filters.entity == entity ? 'selected' }}>{{ dh_auditor_entity_name(entity, 2) }}</option>
             {% endfor %}
         </select>
         <select name="what" data-dh-auditor-autosubmit aria-label="{{ 'audit.history.filter.what'|trans(domain='auditor') }}"
-                class="rounded-lg border border-slate-300 bg-white px-2 py-1 dark:border-slate-600 dark:bg-slate-900">
+                class="dh-auditor-control">
             <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.filter.what'|trans(domain='auditor'), '%value%': 'audit.history.filter.everything'|trans(domain='auditor')}, 'auditor') }}</option>
             {% for type in types %}
                 <option value="{{ type.value }}" {{ filters.what == type.value ? 'selected' }}>{{ ('audit.filter.type.' ~ type.value)|trans(domain='auditor') }}</option>
             {% endfor %}
         </select>
         <select name="when" data-dh-auditor-autosubmit aria-label="{{ 'audit.history.filter.when'|trans(domain='auditor') }}"
-                class="rounded-lg border border-slate-300 bg-white px-2 py-1 dark:border-slate-600 dark:bg-slate-900">
+                class="dh-auditor-control">
             <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.filter.when'|trans(domain='auditor'), '%value%': 'audit.history.filter.all_time'|trans(domain='auditor')}, 'auditor') }}</option>
             {% for days in periods %}
                 <option value="{{ days }}" {{ filters.days == days ? 'selected' }}>{{ 'audit.history.filter.days'|trans({'%count%': days}, 'auditor') }}</option>
             {% endfor %}
         </select>
-        <noscript><button type="submit" class="rounded-lg border border-slate-300 px-2 py-1">{{ 'audit.filter.apply'|trans(domain='auditor') }}</button></noscript>
+        <noscript><button type="submit" class="dh-auditor-control">{{ 'audit.filter.apply'|trans(domain='auditor') }}</button></noscript>
     </form>
 
     <section class="mt-2" data-dh-auditor-actions>

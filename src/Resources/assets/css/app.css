@@ -5,6 +5,13 @@
 /* Dark mode: use class strategy instead of media query */
 @variant dark (&:where(.dark, .dark *));
 
+/** Form controls of the viewer (filters, sort, buttons next to them): one height, one look **/
+@layer components {
+    .dh-auditor-control {
+        @apply h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:[color-scheme:dark];
+    }
+}
+
 /** Cards **/
 @layer components {
     div.card {
