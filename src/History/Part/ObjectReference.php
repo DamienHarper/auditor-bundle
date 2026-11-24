@@ -17,14 +17,17 @@ final readonly class ObjectReference implements PhrasePart
     public string $kind;
 
     /**
-     * @param string $class FQCN of the object
-     * @param string $id    identifier of the object, as the audit tables store it
-     * @param string $label label of the object
+     * @param string $class              FQCN of the object
+     * @param string $id                 identifier of the object, as the audit tables store it
+     * @param string $label              label of the object
+     * @param bool   $deletedByThePhrase the phrase tells the deletion of the object ("deleted Comment “spam”"): templates
+     *                                   do not mark it as no longer existing
      */
     public function __construct(
         public string $class,
         public string $id,
         public string $label,
+        public bool $deletedByThePhrase = false,
     ) {
         $this->kind = 'object';
     }

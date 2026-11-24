@@ -138,6 +138,18 @@ final class HistoryPhraserTest extends TestCase
         $this->assertSame('a créé article « Why audit? »', (string) $phraser->phrase($this->item(self::entry('insert', Post::class, '1', [], 'Why audit?'))));
     }
 
+    public function testTheObjectOfADeletionIsDeletedByThePhrase(): void
+    {
+        $references = static fn (Phrase $phrase): array => array_values(array_map(
+            static fn (ObjectReference $reference): bool => $reference->deletedByThePhrase,
+            array_filter($phrase->getParts(), static fn (PhrasePart $part): bool => $part instanceof ObjectReference),
+        ));
+
+        $this->assertSame([true], $references($this->phraser()->phrase($this->item(self::entry('remove', Comment::class, '9', [], 'spam')))), 'The phrase of a deletion tells it: the object needs no mark.');
+        $this->assertSame([false], $references($this->phraser()->phrase($this->item(self::entry('insert', Post::class, '1', ['title' => ['old' => null, 'new' => 'a']], 'a')))));
+        $this->assertSame([false], $references($this->phraser()->phrase($this->item($this->tagEntry('dissociate', 3, 'php', 1)))), 'A collection element is not deleted by the phrase.');
+    }
+
     public function testAnElementDeletedOrCreatedByTheActionIsNotToldTwice(): void
     {
         $comment = self::target(Comment::class, 9, 'spam', 'post');

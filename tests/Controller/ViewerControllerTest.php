@@ -832,7 +832,11 @@ final class ViewerControllerTest extends WebTestCase
 
         $crawler = $this->client->request('GET', \sprintf('%s/%d', self::POST_URL, $postId));
 
-        $this->assertStringContainsString('(deleted)', $crawler->filter('[data-dh-auditor-action]')->first()->text(), 'The deleted post is marked in its own history.');
+        $actions = $crawler->filter('[data-dh-auditor-action]');
+        $deletion = $actions->first()->text();
+        $this->assertStringContainsString('deleted', $deletion);
+        $this->assertStringNotContainsString('(deleted)', $deletion, 'The phrase of the deletion already says it.');
+        $this->assertStringContainsString('(deleted)', $actions->last()->text(), 'An earlier action marks the post that no longer exists.');
     }
 
     public function testUserActionsFilters(): void
