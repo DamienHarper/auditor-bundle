@@ -1104,14 +1104,19 @@ final class ViewerControllerTest extends WebTestCase
 
     public function testObjectHistoryPagesHoldActions(): void
     {
-        [$postId] = $this->createPostHistory();
-        $this->provider->getConfiguration()->setViewerPageSize(1);
+        [$postId, $revisions] = $this->createPostHistory();
+        // the two updates made one action of two entries
+        $connection = $this->provider->getStorageServiceForEntity(Post::class)->getEntityManager()->getConnection();
+        $table = $this->createReader()->getEntityAuditTableName(Post::class);
+        $connection->executeStatement(\sprintf('UPDATE %1$s SET transaction_id = (SELECT transaction_id FROM %1$s WHERE id = ?), created_at = (SELECT created_at FROM %1$s WHERE id = ?) WHERE id = ?', $table), [$revisions[2], $revisions[2], $revisions[1]]);
+        $this->provider->getConfiguration()->setViewerPageSize(2);
         $this->login();
 
         $page = $this->client->request('GET', \sprintf('%s/%d', self::POST_URL, $postId));
-        $this->assertCount(1, $page->filter('[data-dh-auditor-action]'), 'One action per page.');
-        $actions = $this->createReader()->createRootQuery(Post::class, (string) $postId)->countTransactions();
-        $this->assertStringContainsString($actions.' action', $page->filter('h1 + p')->text());
+        $this->assertCount(2, $page->filter('[data-dh-auditor-action]'), 'Two actions per page, the first one of two entries.');
+        $this->assertCount(0, $page->filter('a[data-dh-auditor-more]'));
+        $this->assertStringContainsString('2 actions', $page->filter('h1 + p')->text());
+        $this->assertStringContainsString('3 entries', $page->filter('aside')->text(), 'The technical side counts the entries.');
     }
 
     public function testDaysAcrossOlderActions(): void
