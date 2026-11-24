@@ -230,9 +230,39 @@ php bin/console audit:cache:clear --entity="App\Entity\User"
 | Graph enabled, no data           | Placeholder with "No recent activity" message    |
 | Graph enabled, with data         | Bars are normalized (tallest bar = 100%)         |
 
+## 🎨 Theme
+
+The viewer follows the conventions of [shadcn/ui](https://ui.shadcn.com) without depending on it: every color of its
+templates is a CSS variable, exposed to Tailwind as a `dh-*` color (`bg-dh-card`, `text-dh-muted-foreground`,
+`border-dh-input`…). The palette is neutral; the teal of the auditor logo (`dh-brand`) marks the activity bars, the
+selected revision and the focus ring. Controls share one size (`h-8`, `rounded-lg`), badges are pills (`h-5`).
+
+The tokens live in `src/Resources/assets/css/theme.css`, already compiled into `bundles/dhauditor/app.css`:
+
+| Token                                         | Role                                             |
+|-----------------------------------------------|--------------------------------------------------|
+| `--dh-background`, `--dh-foreground`          | Page                                             |
+| `--dh-card`, `--dh-card-foreground`           | Cards, tables                                    |
+| `--dh-primary`, `--dh-primary-foreground`     | Primary actions, current page, checkboxes        |
+| `--dh-muted`, `--dh-muted-foreground`         | Table headers, icons, secondary text             |
+| `--dh-accent`, `--dh-accent-foreground`       | Hovered and selected rows                        |
+| `--dh-border`, `--dh-input`, `--dh-ring`      | Borders, control borders, focus ring             |
+| `--dh-brand`, `--dh-brand-from`, `--dh-brand-to` | Teal of the logo (bars, selection), its gradient |
+| `--dh-deleted`, `--dh-inserted` (+ `-foreground`) | Removed and added text in the diffs          |
+| `--dh-warning` (+ `-foreground`, `-border`)   | Notices of the comparison page                   |
+
+Redefine any of them to restyle the viewer, after the bundle stylesheet (for instance in a stylesheet block of an
+overridden `layout.html.twig`):
+
+```css
+:root { --dh-primary: #4f46e5; --dh-brand: #4f46e5; }
+.dark { --dh-primary: #a5b4fc; --dh-brand: #a5b4fc; }
+```
+
 ## 🌙 Dark Mode
 
-The viewer includes a dark/light mode toggle button in the header.
+The viewer includes a dark/light mode toggle button in the header. The dark values of the tokens apply under a `dark`
+class on an ancestor, set on `<html>` by `viewer.js`.
 
 ### Behavior
 
@@ -390,7 +420,6 @@ templates/bundles/DHAuditorBundle/
 │   ├── user_stream.html.twig         # Actions of a user
 │   ├── revisions.html.twig           # Revisions of an object
 │   ├── compare.html.twig             # Comparison of two revisions
-│   ├── entry.html.twig               # Diff macros, imported by the comparison
 │   └── helpers/
 │       ├── helper.html.twig          # Helper macros
 │       └── pager.html.twig           # Pagination
@@ -398,7 +427,7 @@ templates/bundles/DHAuditorBundle/
 │   ├── _actions.html.twig            # Actions grouped by day, and the link to older ones
 │   ├── _row.html.twig                # One action
 │   ├── _details.html.twig            # Technical details of an action
-│   ├── _macros.html.twig             # Icons, origin badges, day headings
+│   ├── _macros.html.twig             # Icons, origin badges, day headings, change rendering
 │   ├── phrase.html.twig              # A phrase
 │   └── object_reference.html.twig    # An object named by a phrase
 ├── Component/
@@ -408,9 +437,14 @@ templates/bundles/DHAuditorBundle/
 
 > [!NOTE]
 > The changeset of a JSON column is a deep diff: a tree whose leaves are `{new}`, `{old}` or `{new, old}`.
-> A JSON object whose own keys are `new`/`old` therefore looks like a field diff, so a custom
-> `entry.html.twig` must not tell them apart by their keys. Use `entry.isDeepDiff(field)` for the root of
-> a changeset, and the `dh_auditor_is_diff_leaf(node)` Twig function for the nodes inside a deep diff.
+> A JSON object whose own keys are `new`/`old` therefore looks like a field diff, so a custom template must not
+> tell them apart by their keys. Use `entry.isDeepDiff(field)` for the root of a changeset, and the
+> `dh_auditor_is_diff_leaf(node)` Twig function for the nodes inside a deep diff.
+
+> [!IMPORTANT]
+> `bundles/dhauditor/app.css` only contains the classes of the bundle templates. An overridden template styles
+> itself with the `dh-*` tokens (see [Theme](#-theme)); a class that no bundle template uses any more, such as the
+> 7.x `bg-slate-50` or `text-indigo-600`, has no style.
 
 ### Custom Layout
 

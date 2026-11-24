@@ -21,10 +21,10 @@
 {#- Where an action came from (BlameOrigin) and in which context (via), as badges. -#}
 {% macro origin(item) -%}
     {%- set via = item.via -%}
-    <span class="inline-flex items-center rounded-md border border-slate-300 px-1.5 text-[11px] font-medium text-slate-600 dark:border-slate-600 dark:text-slate-300"
+    <span class="inline-flex h-5 items-center rounded-full border border-dh-border px-2 text-[11px] font-medium text-dh-foreground"
           title="{{ ('audit.history.origin_help.' ~ item.origin.value)|trans(domain='auditor') }}">{{ ('audit.history.origin.' ~ item.origin.value)|trans(domain='auditor') }}</span>
     {%- if via is not null %}
-        <span class="inline-flex items-center rounded-md border border-dashed border-slate-300 px-1.5 text-[11px] text-slate-500 dark:border-slate-600 dark:text-slate-400"
+        <span class="inline-flex h-5 items-center rounded-full border border-dashed border-dh-border px-2 text-[11px] text-dh-muted-foreground"
               {% if via.data is defined and via.data is not empty %}title="{{ via.data|json_encode }}"{% endif %}>
             {{- 'audit.entry.via'|trans(domain='auditor') }} {{ via.type }}{% if via.label is defined and via.label is not empty %} · {{ via.label }}{% endif -%}
         </span>
@@ -50,12 +50,12 @@
 
 {#- Text deleted by a change. -#}
 {% macro deleted(text) -%}
-    <del class="bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200">{{ text }}</del>
+    <del class="rounded-sm bg-dh-deleted text-dh-deleted-foreground">{{ text }}</del>
 {%- endmacro %}
 
 {#- Text inserted by a change. -#}
 {% macro inserted(text) -%}
-    <ins class="bg-emerald-100 text-emerald-800 no-underline dark:bg-emerald-900/40 dark:text-emerald-200">{{ text }}</ins>
+    <ins class="rounded-sm bg-dh-inserted text-dh-inserted-foreground no-underline">{{ text }}</ins>
 {%- endmacro %}
 
 {#- A value of the action details, with its line breaks: a text without quotes unless they are needed to read it
@@ -67,9 +67,44 @@
 {#- One side of an old → new change, marked as deleted or inserted; null stays unmarked. -#}
 {% macro marked(value, side) -%}
     {%- if value is null -%}
-        <code class="font-mono text-xs text-slate-400">null</code>
+        <code class="font-mono text-xs text-dh-muted-foreground">null</code>
     {%- else -%}
         {%- set shown = dh_auditor_value_text(value) -%}
         <code class="whitespace-pre-wrap break-words font-mono text-xs">{{ side == 'deleted' ? _self.deleted(shown) : _self.inserted(shown) }}</code>
+    {%- endif -%}
+{%- endmacro %}
+
+{#- A change of a value, in a form that depends on the values (dh_auditor_text_change()): the changed words in place,
+    the old text above the new one, or old → new. Shared by the action details and the comparison of two revisions. -#}
+{% macro text_change(old, new) -%}
+    {%- set text = dh_auditor_text_change(old, new) -%}
+    {%- if text is not null and text.mode == 'inline' -%}
+        {#- between quotes only when one of the texts needs them to be read -#}
+        {%- set quote = dh_auditor_is_ambiguous_text(old) or dh_auditor_is_ambiguous_text(new) ? '"' : '' -%}
+        <code class="whitespace-pre-wrap break-words font-mono text-xs">{{ quote }}
+            {%- for run in text.runs -%}
+                {%- if run[0] == 'delete' -%}{{ _self.deleted(run[1]) }}
+                {%- elseif run[0] == 'insert' -%}{{ _self.inserted(run[1]) }}
+                {%- else -%}{{ run[1] }}{%- endif -%}
+            {%- endfor -%}
+        {{ quote }}</code>
+    {%- elseif text is not null and text.mode == 'stack' -%}
+        <div class="flex flex-col gap-1">
+            <code class="whitespace-pre-wrap break-words font-mono text-xs">{{ _self.deleted(dh_auditor_value_text(old)) }}</code>
+            <code class="whitespace-pre-wrap break-words font-mono text-xs">{{ _self.inserted(dh_auditor_value_text(new)) }}</code>
+        </div>
+    {%- else -%}
+        {{ _self.marked(old, 'deleted') }} <span class="text-dh-muted-foreground">→</span> {{ _self.marked(new, 'inserted') }}
+    {%- endif -%}
+{%- endmacro %}
+
+{#- One side of a relation (an association diff summary), linked to the history of the object when it is viewable. The
+    provider stores the identifier under the primary key name, and adds "pkName" when that name is not "id". -#}
+{% macro related(summary) -%}
+    {%- set id = summary.pkName is defined ? summary[summary.pkName] : summary.id -%}
+    {%- if dh_auditor_is_viewable(summary.class) -%}
+        <a href="{{ path('dh_auditor_show_entity_stream', {entity: summary.class|replace({'\\': '-'}), id: id}) }}" class="hover:underline" title="{{ summary.class }}">{{ summary.class|split('\\')|last }} #{{ id }}</a>
+    {%- else -%}
+        <span title="{{ summary.class }}">{{ summary.class|split('\\')|last }} #{{ id }}</span>
     {%- endif -%}
 {%- endmacro %}

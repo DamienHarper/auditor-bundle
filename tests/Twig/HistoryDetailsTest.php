@@ -34,7 +34,7 @@ final class HistoryDetailsTest extends KernelTestCase
         $table = $this->render([$this->entry('update', ['title' => ['old' => 'First', 'new' => 'Second']])])->filter('table')->first();
 
         $this->assertStringContainsString('table-fixed', (string) $table->attr('class'));
-        $this->assertStringContainsString('dark:text-slate-200', (string) $table->attr('class'), 'The values stay readable in dark mode.');
+        $this->assertStringContainsString('text-dh-foreground', (string) $table->attr('class'), 'The values take the foreground token, readable in both themes.');
         $this->assertSame(['w-1/5', 'w-1/5', 'w-3/5'], $table->filter('colgroup > col')->each(static fn (Crawler $col): string => (string) $col->attr('class')));
         $this->assertSame(['Object', 'Field', 'Change'], $table->filter('thead th')->each(static fn (Crawler $th): string => mb_trim($th->text())));
     }

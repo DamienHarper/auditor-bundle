@@ -427,11 +427,24 @@ The component renders the rows of the viewer, styled with Tailwind CSS. With Tai
 bundle templates to the sources of its stylesheet (the path below is relative to `assets/styles/app.css`):
 
 ```css
+@import "tailwindcss";
+@import "../../vendor/damienharper/auditor-bundle/src/Resources/assets/css/theme.css";
 @source "../../vendor/damienharper/auditor-bundle/src/Resources/views";
 ```
 
-The `dark:` classes of the bundle follow a `dark` class on an ancestor (`@variant dark (&:where(.dark, .dark *));` in
-the viewer stylesheet): declare the same variant to switch them with your theme rather than with the system setting.
+`theme.css` declares the `dh-*` colors the templates use (see [Theme](../viewer/index.md#-theme)), with their dark
+values under a `dark` class on an ancestor. A page that follows `prefers-color-scheme` without such a class copies the
+`.dark` block of `theme.css` into a `@media (prefers-color-scheme: dark) { :root { … } }` rule. To blend the component
+into a shadcn/ui theme, map the tokens onto yours:
+
+```css
+:root {
+    --dh-card: var(--card);
+    --dh-foreground: var(--foreground);
+    --dh-muted-foreground: var(--muted-foreground);
+    --dh-border: var(--border);
+}
+```
 
 Otherwise, override `@DHAuditor/Component/History.html.twig` and the templates of `@DHAuditor/History/` it renders
 (`_row`, `_macros`, `_details`, `phrase`, `object_reference`) under `templates/bundles/DHAuditorBundle/`.

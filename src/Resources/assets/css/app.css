@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./theme.css";
 
 @source "../../views/**/*.html.twig";
 
@@ -8,7 +9,7 @@
 /** Form controls of the viewer (filters, sort, buttons next to them): one height, one look **/
 @layer components {
     .dh-auditor-control {
-        @apply h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:[color-scheme:dark];
+        @apply h-8 rounded-lg border border-dh-input bg-dh-card px-2.5 text-sm text-dh-foreground shadow-xs transition-colors hover:bg-dh-accent focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-dh-ring dark:bg-dh-input/30 dark:[color-scheme:dark];
     }
 }
 

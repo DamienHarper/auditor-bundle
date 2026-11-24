@@ -5,17 +5,17 @@
 {% block title %}{{ name }} · auditor{% endblock %}
 
 {% block dh_auditor_content %}
-    <nav class="mb-3 text-sm text-slate-500 dark:text-slate-400" aria-label="breadcrumb">
+    <nav class="mb-3 text-sm text-dh-muted-foreground" aria-label="breadcrumb">
         <a href="{{ path('dh_auditor_list_audits') }}" class="hover:underline">{{ 'audit.header.home'|trans(domain='auditor') }}</a>
         <span class="mx-1">/</span>
         <span>{{ name }}</span>
     </nav>
 
     <div class="flex items-start gap-3">
-        <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-900 text-lg font-semibold text-white dark:bg-slate-100 dark:text-slate-900">{{ name|first|upper }}</span>
+        <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-dh-primary text-lg font-semibold text-dh-primary-foreground">{{ name|first|upper }}</span>
         <div class="min-w-0">
             <h1 class="text-2xl font-semibold tracking-tight">{{ 'audit.user.title'|trans({'%name%': name}, 'auditor') }}</h1>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            <p class="mt-1 text-sm text-dh-muted-foreground">
                 {{ 'audit.history.entries_count'|trans({'%count%': entryCount}, 'auditor') }}
                 {% if entities is not empty %}· {{ 'audit.user.entities'|trans({'%count%': entities|length}, 'auditor') }}{% endif %}
                 · <span class="font-mono">blame_id {{ id }}</span>

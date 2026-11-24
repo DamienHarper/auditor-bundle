@@ -7,7 +7,7 @@
 {% block title %}{{ 'audit.action.title'|trans({'%date%': item.createdAt|format_datetime('medium', 'short', timezone: false)}, 'auditor') }} · auditor{% endblock %}
 
 {% block dh_auditor_content %}
-    <nav class="mb-3 text-sm text-slate-500 dark:text-slate-400" aria-label="breadcrumb">
+    <nav class="mb-3 text-sm text-dh-muted-foreground" aria-label="breadcrumb">
         <a href="{{ path('dh_auditor_list_audits') }}" class="hover:underline">{{ 'audit.header.home'|trans(domain='auditor') }}</a>
         {% if root %}
             <span class="mx-1">/</span>
@@ -24,7 +24,7 @@
                 {% if row.context %}{{ row.context|dh_auditor_phrase }}{{ 'audit.history.context_separator'|trans(domain='auditor') }}{% endif %}
                 {{ row.phrase|dh_auditor_shorten(1)|dh_auditor_phrase }}
             </h1>
-            <p class="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+            <p class="mt-1 flex flex-wrap items-center gap-2 text-sm text-dh-muted-foreground">
                 <time datetime="{{ item.createdAt|date('c') }}">{% set full_date = item.createdAt|format_datetime('full', 'short', timezone: false) %}{{ full_date|first|upper ~ full_date|slice(1) }}</time>
                 {{ history.origin(item) }}
                 <span>· {{ 'audit.action.objects'|trans({'%count%': objects}, 'auditor') }}</span>
@@ -33,10 +33,10 @@
         {% if root %}
             <div class="flex gap-2 text-sm">
                 {% if neighbours.older %}
-                    <a href="{{ path('dh_auditor_show_transaction_stream', {hash: neighbours.older, root: root.param}) }}" class="rounded-lg border border-slate-300 px-3 py-1.5 hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800" rel="prev">{{ 'audit.action.previous'|trans(domain='auditor') }}</a>
+                    <a href="{{ path('dh_auditor_show_transaction_stream', {hash: neighbours.older, root: root.param}) }}" class="dh-auditor-control inline-flex items-center font-medium" rel="prev">{{ 'audit.action.previous'|trans(domain='auditor') }}</a>
                 {% endif %}
                 {% if neighbours.newer %}
-                    <a href="{{ path('dh_auditor_show_transaction_stream', {hash: neighbours.newer, root: root.param}) }}" class="rounded-lg border border-slate-300 px-3 py-1.5 hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800" rel="next">{{ 'audit.action.next'|trans(domain='auditor') }}</a>
+                    <a href="{{ path('dh_auditor_show_transaction_stream', {hash: neighbours.newer, root: root.param}) }}" class="dh-auditor-control inline-flex items-center font-medium" rel="next">{{ 'audit.action.next'|trans(domain='auditor') }}</a>
                 {% endif %}
             </div>
         {% endif %}
@@ -45,7 +45,7 @@
     <ul class="mt-6 space-y-2">
         {% for fragment in row.phrase.fragments %}
             <li class="flex gap-3 text-sm">
-                <span class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">{{ history.icon(fragment.icon) }}</span>
+                <span class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-dh-muted text-dh-muted-foreground">{{ history.icon(fragment.icon) }}</span>
                 <span class="pt-0.5">{{ fragment|dh_auditor_phrase }}</span>
             </li>
         {% endfor %}
@@ -53,9 +53,9 @@
 
     <section class="mt-8">
         <h2 class="text-sm font-semibold">{{ 'audit.action.technical'|trans(domain='auditor') }}</h2>
-        <div class="mt-2 overflow-x-auto rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <div class="mt-2 overflow-x-auto rounded-xl border border-dh-border bg-dh-card">
             {#- Fixed column widths: the old and new values get the same room, whatever their length -#}
-            <table class="w-full min-w-[48rem] table-fixed text-left text-xs text-slate-700 dark:text-slate-200">
+            <table class="w-full min-w-[48rem] table-fixed text-left text-xs text-dh-foreground">
                 <colgroup>
                     <col class="w-[14%]">
                     <col class="w-[9%]">
@@ -64,7 +64,7 @@
                     <col class="w-1/4">
                     <col class="w-1/4">
                 </colgroup>
-                <thead class="bg-slate-50 text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
+                <thead class="bg-dh-muted/50 text-dh-muted-foreground">
                     <tr>
                         <th class="px-3 py-2 font-medium">{{ 'audit.action.table'|trans(domain='auditor') }}</th>
                         <th class="px-3 py-2 font-medium">{{ 'audit.action.type'|trans(domain='auditor') }}</th>
@@ -74,7 +74,7 @@
                         <th class="px-3 py-2 font-medium">new</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 align-top dark:divide-slate-800">
+                <tbody class="divide-y divide-dh-border align-top">
                     {% for written in entries %}
                         {% set entry = written.entry %}
                         {% set diffs = entry.diffs %}
@@ -93,7 +93,7 @@
                                     <td class="break-words px-3 py-2 font-mono">{% if loop.first %}{{ tables[written.entity] }} · {{ entry.id }}{% endif %}</td>
                                     <td class="px-3 py-2 font-mono">{% if loop.first %}{{ entry.type }}{% endif %}</td>
                                     <td class="break-words px-3 py-2" title="{{ written.entity }}">{% if loop.first %}{{ object }}{% endif %}</td>
-                                    <td class="break-words px-3 py-2 font-mono">{{ field }}{% if entry.isDeepDiff(field) %} <span class="text-slate-400">(deep diff)</span>{% endif %}</td>
+                                    <td class="break-words px-3 py-2 font-mono">{{ field }}{% if entry.isDeepDiff(field) %} <span class="text-dh-muted-foreground">(deep diff)</span>{% endif %}</td>
                                     {% if entry.isDeepDiff(field) %}
                                         <td class="px-3 py-2" colspan="2">{{ history.raw(diff) }}</td>
                                     {% else %}
@@ -106,7 +106,7 @@
                                     <td class="break-words px-3 py-2 font-mono">{{ tables[written.entity] }} · {{ entry.id }}</td>
                                     <td class="px-3 py-2 font-mono">{{ entry.type }}</td>
                                     <td class="break-words px-3 py-2" title="{{ written.entity }}">{{ object }}</td>
-                                    <td class="px-3 py-2 text-slate-400" colspan="3">—</td>
+                                    <td class="px-3 py-2 text-dh-muted-foreground" colspan="3">—</td>
                                 </tr>
                             {% endfor %}
                         {% endif %}
@@ -115,31 +115,31 @@
             </table>
         </div>
         {% if entryCount > entries|length %}
-            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">{{ 'audit.action.more_entries'|trans({'%count%': entryCount - entries|length}, 'auditor') }}</p>
+            <p class="mt-2 text-xs text-dh-muted-foreground">{{ 'audit.action.more_entries'|trans({'%count%': entryCount - entries|length}, 'auditor') }}</p>
         {% endif %}
 
-        <dl class="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 rounded-xl border border-slate-200 bg-white p-4 text-xs dark:border-slate-800 dark:bg-slate-900">
-            <dt class="text-slate-500 dark:text-slate-400">transaction_id</dt><dd class="break-all font-mono">{{ hash }}</dd>
-            {% if ulidDate %}<dt class="text-slate-500 dark:text-slate-400">{{ 'audit.action.ulid_date'|trans(domain='auditor') }}</dt><dd class="font-mono">{{ ulidDate|format_datetime('medium', 'medium', timezone: false) }}</dd>{% endif %}
-            <dt class="text-slate-500 dark:text-slate-400">blame_id</dt><dd class="font-mono">{{ first.userId ?? '—' }}</dd>
-            <dt class="text-slate-500 dark:text-slate-400">user_fqdn</dt><dd class="break-all font-mono">{{ first.userFqdn ?? '—' }}</dd>
-            <dt class="text-slate-500 dark:text-slate-400">{{ 'audit.history.firewall'|trans(domain='auditor') }}</dt><dd class="font-mono">{{ first.userFirewall ?? '—' }}</dd>
-            <dt class="text-slate-500 dark:text-slate-400">IP</dt><dd class="font-mono">{{ first.ip ?? '—' }}</dd>
-            <dt class="text-slate-500 dark:text-slate-400">via</dt><dd class="font-mono">{{ first.via is not null ? (first.via.type ~ (first.via.label is defined ? ' · ' ~ first.via.label : '')) : 'audit.action.no_via'|trans(domain='auditor') }}</dd>
-            <dt class="text-slate-500 dark:text-slate-400">schema_version</dt><dd class="font-mono">{{ first.schemaVersion }}</dd>
-            {% if first.extraData is not empty %}<dt class="text-slate-500 dark:text-slate-400">extra_data</dt><dd>{{ history.raw(first.extraData) }}</dd>{% endif %}
-            <dt class="text-slate-500 dark:text-slate-400">{{ 'audit.history.entries'|trans(domain='auditor') }}</dt><dd>{{ 'audit.history.entries_count'|trans({'%count%': entryCount}, 'auditor') }} · {{ 'audit.action.tables'|trans({'%count%': tables|length}, 'auditor') }}</dd>
+        <dl class="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 rounded-xl border border-dh-border bg-dh-card p-4 text-xs">
+            <dt class="text-dh-muted-foreground">transaction_id</dt><dd class="break-all font-mono">{{ hash }}</dd>
+            {% if ulidDate %}<dt class="text-dh-muted-foreground">{{ 'audit.action.ulid_date'|trans(domain='auditor') }}</dt><dd class="font-mono">{{ ulidDate|format_datetime('medium', 'medium', timezone: false) }}</dd>{% endif %}
+            <dt class="text-dh-muted-foreground">blame_id</dt><dd class="font-mono">{{ first.userId ?? '—' }}</dd>
+            <dt class="text-dh-muted-foreground">user_fqdn</dt><dd class="break-all font-mono">{{ first.userFqdn ?? '—' }}</dd>
+            <dt class="text-dh-muted-foreground">{{ 'audit.history.firewall'|trans(domain='auditor') }}</dt><dd class="font-mono">{{ first.userFirewall ?? '—' }}</dd>
+            <dt class="text-dh-muted-foreground">IP</dt><dd class="font-mono">{{ first.ip ?? '—' }}</dd>
+            <dt class="text-dh-muted-foreground">via</dt><dd class="font-mono">{{ first.via is not null ? (first.via.type ~ (first.via.label is defined ? ' · ' ~ first.via.label : '')) : 'audit.action.no_via'|trans(domain='auditor') }}</dd>
+            <dt class="text-dh-muted-foreground">schema_version</dt><dd class="font-mono">{{ first.schemaVersion }}</dd>
+            {% if first.extraData is not empty %}<dt class="text-dh-muted-foreground">extra_data</dt><dd>{{ history.raw(first.extraData) }}</dd>{% endif %}
+            <dt class="text-dh-muted-foreground">{{ 'audit.history.entries'|trans(domain='auditor') }}</dt><dd>{{ 'audit.history.entries_count'|trans({'%count%': entryCount}, 'auditor') }} · {{ 'audit.action.tables'|trans({'%count%': tables|length}, 'auditor') }}</dd>
         </dl>
 
         <div class="mt-4 space-y-2">
             {% for written in entries %}
                 {% set entry = written.entry %}
-                <details class="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+                <details class="rounded-xl border border-dh-border bg-dh-card">
                     <summary class="flex cursor-pointer items-center justify-between gap-2 px-4 py-2 font-mono text-xs">
                         <span>{{ tables[written.entity] }} · {{ entry.id }} · diffs</span>
-                        <button type="button" class="font-sans font-medium text-indigo-600 hover:underline dark:text-indigo-400" data-dh-auditor-copy="dh-auditor-json-{{ loop.index }}" data-dh-auditor-copied="{{ 'audit.history.copied'|trans(domain='auditor') }}" data-dh-auditor-copy-failed="{{ 'audit.history.copy_failed'|trans(domain='auditor') }}">{{ 'audit.history.copy'|trans(domain='auditor') }}</button>
+                        <button type="button" class="font-sans font-medium text-dh-foreground underline underline-offset-4 hover:decoration-2" data-dh-auditor-copy="dh-auditor-json-{{ loop.index }}" data-dh-auditor-copied="{{ 'audit.history.copied'|trans(domain='auditor') }}" data-dh-auditor-copy-failed="{{ 'audit.history.copy_failed'|trans(domain='auditor') }}">{{ 'audit.history.copy'|trans(domain='auditor') }}</button>
                     </summary>
-                    <pre id="dh-auditor-json-{{ loop.index }}" class="overflow-x-auto rounded-b-xl bg-slate-900 p-4 text-xs leading-relaxed text-slate-100">{{ {diffs: entry.diffs, blame: entry.blame}|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES')) }}</pre>
+                    <pre id="dh-auditor-json-{{ loop.index }}" class="overflow-x-auto rounded-b-xl bg-dh-muted p-4 text-xs leading-relaxed text-dh-foreground">{{ {diffs: entry.diffs, blame: entry.blame}|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES')) }}</pre>
                 </details>
             {% endfor %}
         </div>
