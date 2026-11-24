@@ -18,7 +18,7 @@ Follow instructions at [auditor-bundle-demo](https://github.com/DamienHarper/aud
 
 
 ## Official Documentation
-`auditor-bundle` official documentation can be found [here](https://damienharper.github.io/auditor-docs/docs/auditor-bundle/index.html).
+`auditor-bundle` official documentation can be found [here](https://damienharper.github.io/auditor-docs/auditor-bundle).
 
 
 ## Version Information
@@ -30,7 +30,7 @@ Follow instructions at [auditor-bundle-demo](https://github.com/DamienHarper/aud
 | 5.x     | End of life                 | PHP >= 7.4, Symfony >= 4.4                                              | [![auditor-bundle 5.x CI](https://github.com/DamienHarper/auditor-bundle/actions/workflows/ci-5.x.yml/badge.svg)](https://github.com/DamienHarper/auditor-bundle/actions/workflows/ci-5.x.yml)                                                                                                                                                                                                                                                                                                                                                                                 |
 | 4.x     | End of life                 | PHP >= 7.2, Symfony >= 3.4                                              |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
-Changelog is available [here](https://damienharper.github.io/auditor-docs/docs/auditor-bundle/release-notes.html)
+Changelog is available in the [releases](https://github.com/DamienHarper/auditor-bundle/releases).
 
 ## Upgrading
 
@@ -38,7 +38,7 @@ See [UPGRADE-7.0.md](UPGRADE-7.0.md) for upgrade instructions from 6.x to 7.0.
 
 
 ## Usage
-Once [installed](https://damienharper.github.io/auditor-docs/docs/auditor-bundle/installation.html) and [configured](https://damienharper.github.io/auditor-docs/docs/auditor-bundle/configuration/general.html), any database change 
+Once [installed](https://damienharper.github.io/auditor-docs/auditor-bundle/getting-started/installation) and [configured](https://damienharper.github.io/auditor-docs/auditor-bundle/configuration), any database change 
 affecting audited entities will be logged to audit logs automatically.
 Also, running schema update or similar will automatically setup audit logs for every 
 new auditable entity.
