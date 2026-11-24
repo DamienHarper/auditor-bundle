@@ -61,9 +61,9 @@ final class HistoryDetailsTest extends KernelTestCase
     {
         yield 'most of a text kept: the changed words inline' => [
             ['old' => 'Aut adipisci necessitatibus laudantium mollitia.', 'new' => 'Aut adipisci necessitatibus laudantium mollitia - Revised Edition'],
-            '"Aut adipisci necessitatibus laudantium mollitia.mollitia - Revised Edition"',
-            ['mollitia.'],
-            ['mollitia - Revised Edition'],
+            '"Aut adipisci necessitatibus laudantium mollitia. - Revised Edition"',
+            ['.'],
+            ['- Revised Edition'],
         ];
 
         yield 'short values replaced: old → new' => [

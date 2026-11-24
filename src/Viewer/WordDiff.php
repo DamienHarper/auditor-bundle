@@ -64,7 +64,8 @@ final class WordDiff
     }
 
     /**
-     * Words and the spaces between them, as separate tokens.
+     * Words, the spaces between them and the punctuation marks, as separate tokens: a punctuation mark that follows a
+     * word changes on its own ("mollitia." → "mollitia - Revised Edition" only deletes the full stop).
      *
      * @return null|list<string> null for a text that is not valid UTF-8
      */
@@ -74,17 +75,19 @@ final class WordDiff
             return [];
         }
 
-        $tokens = preg_split('/(\s+)/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $tokens = preg_split('/(\s+|[^\p{L}\p{N}\s])/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
 
         return false === $tokens ? null : $tokens;
     }
 
     /**
+     * Number of words among the tokens: spaces and punctuation marks do not count.
+     *
      * @param list<string> $tokens
      */
     private static function words(array $tokens): int
     {
-        return \count(array_filter($tokens, static fn (string $token): bool => '' !== mb_trim($token)));
+        return \count(array_filter($tokens, static fn (string $token): bool => 1 === preg_match('/[\p{L}\p{N}]/u', $token)));
     }
 
     /**
