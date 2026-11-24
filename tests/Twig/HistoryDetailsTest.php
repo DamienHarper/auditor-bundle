@@ -77,6 +77,15 @@ final class HistoryDetailsTest extends KernelTestCase
         $this->assertContains(['—', '+ Tag#5 “php”'], $values, 'An added element sits in the New value column.');
     }
 
+    public function testRawValuesWrapBetweenWords(): void
+    {
+        $crawler = $this->render([$this->entry('update', ['title' => ['old' => 'First', 'new' => 'Second']])]);
+
+        $classes = explode(' ', (string) $crawler->filter('table code')->first()->attr('class'));
+        $this->assertContains('break-words', $classes, 'A long text wraps between its words.');
+        $this->assertNotContains('break-all', $classes, 'A long text is not cut in the middle of a word.');
+    }
+
     public function testColumnsHaveFixedWidths(): void
     {
         $crawler = $this->render([$this->entry('update', ['title' => ['old' => 'First', 'new' => 'Second']])]);

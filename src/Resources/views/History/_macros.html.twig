@@ -45,5 +45,5 @@
 
 {#- A raw value of a diff, as JSON. -#}
 {% macro raw(value) -%}
-    <code class="break-all font-mono text-xs">{{ value is null ? 'null' : value|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES')) }}</code>
+    <code class="break-words font-mono text-xs">{{ value is null ? 'null' : value|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES')) }}</code>
 {%- endmacro %}
