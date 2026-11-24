@@ -111,7 +111,7 @@ final class WholeActions
     }
 
     /**
-     * @param list<Entry> $entries
+     * @param array<Entry> $entries
      *
      * @return list<array{entity: string, entry: Entry}>
      */

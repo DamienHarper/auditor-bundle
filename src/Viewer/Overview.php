@@ -9,8 +9,6 @@ use DH\Auditor\Exception\AccessDeniedException;
 use DH\Auditor\History\HistoryGrouper;
 use DH\Auditor\History\HistoryItem;
 use DH\Auditor\Provider\Doctrine\Persistence\Helper\SchemaHelper;
-use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\SimpleFilter;
-use DH\Auditor\Provider\Doctrine\Persistence\Reader\Query;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\Auditor\Provider\Doctrine\Persistence\Schema\SchemaManager;
 use DH\Auditor\Provider\Doctrine\Service\AuditingService;
