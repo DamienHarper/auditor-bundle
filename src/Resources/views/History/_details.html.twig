@@ -32,7 +32,7 @@
                                 <dl class="mt-1 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5">
                                     {% for field, value in values %}
                                         <dt class="text-slate-500 dark:text-slate-400">{{ dh_auditor_field_label(change.entity, field) }} <span class="font-mono">{{ field }}</span></dt>
-                                        <dd>{{ history.raw(value) }}</dd>
+                                        <dd>{{ history.raw(change.labels[field] is defined and value is iterable ? change.labels[field] : value) }}</dd>
                                     {% endfor %}
                                 </dl>
                             </details>
