@@ -35,6 +35,7 @@ use DH\AuditorBundle\Viewer\ObjectExistence;
 use DH\AuditorBundle\Viewer\ObjectHistory;
 use DH\AuditorBundle\Viewer\Overview;
 use DH\AuditorBundle\Viewer\RevisionComparator;
+use DH\AuditorBundle\Viewer\WholeActions;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -239,11 +240,9 @@ final readonly class ViewerController
             }
         }
 
-        // Newest first; entries written at the same instant are ordered by id (newest first), then by entity, so
-        // that the content of each page never depends on the order in which the entities were queried.
-        usort($entries, static fn (array $a, array $b): int => [$b['entry']->createdAt, $b['entry']->id, $a['entity']] <=> [$a['entry']->createdAt, $a['entry']->id, $b['entity']]);
+        usort($entries, WholeActions::compare(...));
         $latest = $entries[0]['entry'] ?? null;
-        $pageEntries = array_column(\array_slice($entries, ($page - 1) * $pageSize, $pageSize), 'entry');
+        $pageEntries = array_column(WholeActions::complete($queries, \array_slice($entries, ($page - 1) * $pageSize, $pageSize)), 'entry');
 
         $parameters = [
             'id' => $id,
@@ -358,8 +357,8 @@ final readonly class ViewerController
             throw new SymfonyAccessDeniedException('Access Denied.');
         }
 
-        /** @var list<Entry> $pageEntries */
-        $pageEntries = iterator_to_array($pager['results'], false);
+        // the actions of the page, whole
+        $pageEntries = array_column(WholeActions::complete([$entity => $query], array_map(static fn (Entry $entry): array => ['entity' => $entity, 'entry' => $entry], iterator_to_array($pager['results'], false))), 'entry');
 
         return $this->renderView('@DHAuditor/Audit/entity_stream.html.twig', [
             'entity' => $entity,

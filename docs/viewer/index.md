@@ -61,7 +61,8 @@ marked as well).
 ### Overview (`/audit`)
 
 - **Recent activity**: the last 10 actions across the audited entities the reader may view, with what they were done
-  on (*alice on Post “Why audit?”: …*). An action touching many objects is summed up by type (*deleted 38 Post*).
+  on (*alice on Post “Why audit?”: …*). An action touching many objects is summed up by type (*deleted 38 Post*); it
+  is read whole (up to 1,000 entries), whatever the number of its entries.
 - **What is audited**: the audited entities (their name from the `dh_auditor_fields` domain, key FQCN), their number of
   actions (distinct transactions, cached with the activity graph when its cache is on), their latest activity and,
   when enabled, their [activity graph](#-activity-graph). The list can be sorted by name, number of actions or latest
@@ -109,6 +110,10 @@ user), changed field, and period.
 
 The dates are days, inclusive, in the `dh_auditor.timezone` time zone. Filters are kept by the pager.
 
+Pages hold `page_size` entries, but an action is never cut: it is shown whole on the page of its most recent entry
+(up to 1,000 entries), and left out of the next pages. A page can hold more actions than another, or none when all its
+entries belong to an action of the previous page.
+
 ### Action (`/audit/transaction/{hash}`)
 
 One action: its phrase, the list of what it did, then every entry it wrote (up to 200), with its table and id, raw
@@ -125,7 +130,8 @@ done on (*On Post “Why audit?”: …*), with filters on the entity (`on`), th
 - Anonymous entries (no `blame_id`) have no page. Neither do entries recorded with an empty `blame_id`, which is what
   happens when the Symfony user class has no `getId()` method.
 - Each audited entity is queried separately, for at most `page × page_size` rows: browsing deep pages of a very
-  active user costs more than browsing the first ones. An action may be split between two pages.
+  active user costs more than browsing the first ones. As in the entity stream, an action is shown whole on the page
+  of its most recent entry.
 
 ### Compare Revisions (`/audit/{entity}/{id}/compare`)
 

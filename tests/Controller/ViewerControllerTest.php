@@ -972,6 +972,57 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertStringContainsString('relative', (string) $link->closest('[data-dh-auditor-action]')?->attr('class'), 'The row bounds the stretched link.');
     }
 
+    public function testRecentActivityTellsTheLatestActionsWhole(): void
+    {
+        $this->seedAction(Comment::class, 'import', '2030-01-02 10:00:00', range(1_001, 1_025));
+        $this->seedAction(Post::class, 'import', '2030-01-02 10:00:00', [1_001]);
+        $this->login(['ROLE_1']);
+
+        $crawler = $this->client->request('GET', '/audit');
+        $import = $crawler->filter('section')->first()->filter('[data-dh-auditor-action="import"]');
+
+        $this->assertCount(1, $import);
+        $this->assertStringContainsString('created 25 Comment', $import->text(), 'More entries than read per table: the action is read whole.');
+    }
+
+    public function testEntityHistoryShowsAnActionWholeOnThePageOfItsLatestEntry(): void
+    {
+        $this->seedAction(Comment::class, 'import', '2030-01-02 10:00:00', range(1_001, 1_006));
+        $this->seedAction(Comment::class, 'alone', '2030-01-01 10:00:00', [1_007]);
+        $this->provider->getConfiguration()->setViewerPageSize(2);
+        $this->login(['ROLE_1']);
+
+        $url = '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Comment';
+        $first = $this->client->request('GET', $url);
+        $this->assertSame(['import'], $this->actionKeys($first));
+        $this->assertStringContainsString('created 6 Comment', $first->filter('[data-dh-auditor-action="import"]')->text());
+
+        $second = $this->client->request('GET', $url, ['page' => 2]);
+        $this->assertSame([], $this->actionKeys($second), 'The rest of the action was shown on the previous page.');
+
+        $fourth = $this->client->request('GET', $url, ['page' => 4]);
+        $this->assertSame('alone', $this->actionKeys($fourth)[0] ?? null);
+    }
+
+    public function testUserTimelineShowsAnActionWholeOnThePageOfItsLatestEntry(): void
+    {
+        $this->seedAction(Comment::class, 'import', '2030-01-02 10:00:00', range(1_001, 1_006), 'timeline-user');
+        $this->seedAction(Post::class, 'import', '2030-01-02 10:00:00', [1_001], 'timeline-user');
+        $this->seedAction(Comment::class, 'alone', '2030-01-01 10:00:00', [1_007], 'timeline-user');
+        $this->provider->getConfiguration()->setViewerPageSize(2);
+        $this->login(['ROLE_1']);
+
+        $first = $this->client->request('GET', '/audit/user/timeline-user');
+        $this->assertSame(['import'], $this->actionKeys($first));
+        $this->assertStringContainsString('created 6 Comment', $first->filter('[data-dh-auditor-action="import"]')->text());
+
+        $second = $this->client->request('GET', '/audit/user/timeline-user', ['page' => 2]);
+        $this->assertSame([], $this->actionKeys($second), 'The rest of the action was shown on the previous page.');
+
+        $fourth = $this->client->request('GET', '/audit/user/timeline-user', ['page' => 4]);
+        $this->assertSame(['alone'], $this->actionKeys($fourth));
+    }
+
     public function testDaysAcrossOlderActions(): void
     {
         [$postId] = $this->createPostHistory();
@@ -1456,6 +1507,41 @@ final class ViewerControllerTest extends WebTestCase
         $row['created_at'] = $createdAt;
         $row['transaction_id'] = $transactionId ?? 'seeded-'.bin2hex(random_bytes(8)); // an action of its own by default
         $connection->insert($table, $row);
+    }
+
+    /**
+     * Copies an insert audit row of $entity once per object id: one action that creates these objects.
+     *
+     * @param list<int> $objectIds
+     */
+    private function seedAction(string $entity, string $transactionId, string $createdAt, array $objectIds, ?string $blameId = null): void
+    {
+        $table = $this->createReader()->getEntityAuditTableName($entity);
+        $connection = $this->provider->getStorageServiceForEntity($entity)->getEntityManager()->getConnection();
+        $row = $connection->fetchAssociative('SELECT * FROM '.$table." WHERE type = 'insert' ORDER BY id LIMIT 1");
+        $this->assertIsArray($row);
+        unset($row['id']);
+        foreach ($objectIds as $objectId) {
+            $diffs = json_decode((string) $row['diffs'], true, 512, JSON_THROW_ON_ERROR);
+            \assert(\is_array($diffs) && \is_array($diffs['source'] ?? null));
+            $diffs['source']['id'] = $objectId;
+            $diffs['source']['label'] = 'object '.$objectId;
+            $connection->insert($table, [
+                'object_id' => (string) $objectId,
+                'diffs' => json_encode($diffs, JSON_THROW_ON_ERROR),
+                'blame_id' => $blameId,
+                'created_at' => $createdAt,
+                'transaction_id' => $transactionId,
+            ] + $row);
+        }
+    }
+
+    /**
+     * @return list<string> key of each rendered action, in display order
+     */
+    private function actionKeys(Crawler $crawler): array
+    {
+        return $crawler->filter('[data-dh-auditor-action]')->each(static fn (Crawler $action): string => (string) $action->attr('data-dh-auditor-action'));
     }
 
     /**
