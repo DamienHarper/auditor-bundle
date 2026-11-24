@@ -56,7 +56,16 @@ must be rewritten from the new ones:
   `Audit/object_history.html.twig`;
 - `Audit/transaction_stream.html.twig` renders one action, no longer paginated;
 - `Audit/user_stream.html.twig` receives actions (`rows`) instead of `entries`;
-- `Audit/entry.html.twig` only holds the diff macros of the comparison page.
+- `Audit/entry.html.twig` is removed: the comparison page renders its changes like the action details, with the
+  `text_change()` and `related()` macros of `History/_macros.html.twig`.
+
+The templates are styled with design tokens instead of the Tailwind palette (`bg-dh-card` instead of
+`bg-white dark:bg-slate-900`, `text-dh-muted-foreground` instead of `text-slate-500 dark:text-slate-400`…). The
+precompiled `app.css` only holds the classes of the bundle templates: an overridden template that keeps 7.x classes
+(`slate-*`, `indigo-*`, `emerald-*`…) loses their styles. Rewrite it with the `dh-*` tokens (see
+[Theme](docs/viewer/index.md#-theme)). An application that compiles the `<twig:DhAuditor:History>` component with its
+own Tailwind imports `src/Resources/assets/css/theme.css` (see
+[Styling](docs/customization/histories.md#styling)).
 
 Route names are unchanged, but the history of an object reads other query parameters: `type` → `what`,
 `user` → `who`, `date_from` / `date_to` → `when` (last 7, 30 or 90 days), `page` → the `after` cursor.

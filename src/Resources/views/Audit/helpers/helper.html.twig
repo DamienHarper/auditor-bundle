@@ -47,28 +47,27 @@
 {% macro via(entry) %}
     {%- set via = entry.via -%}
     {%- if via is not null -%}
-        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300"
+        <span class="inline-flex h-5 items-center rounded-full px-2 text-xs font-medium border border-dh-border text-dh-foreground"
               {% if via.data is defined and via.data is not empty %}title="{{ via.data|json_encode }}"{% endif %}>
             {{- 'audit.entry.via'|trans(domain='auditor') }} {{ via.type }}{% if via.label is defined and via.label is not empty %} · {{ via.label }}{% endif -%}
         </span>
     {%- endif -%}
 {% endmacro via %}
 
+{#- Type of an audit entry, in three meanings: creation (inserted), deletion (deleted), anything else (neutral) -#}
 {% macro type_badge(type, snapshot = false) %}
     {%- if type == 'insert' and snapshot -%}
-        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-400">SNAPSHOT</span>
+        <span class="inline-flex h-5 items-center rounded-full px-2 text-xs font-medium border border-dh-border text-dh-foreground">SNAPSHOT</span>
     {%- elseif type == 'insert' -%}
-        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">INSERT</span>
-    {%- elseif type == 'update' -%}
-        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">UPDATE</span>
+        <span class="inline-flex h-5 items-center rounded-full px-2 text-xs font-medium bg-dh-inserted text-dh-inserted-foreground">INSERT</span>
     {%- elseif type == 'remove' -%}
-        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400">REMOVE</span>
+        <span class="inline-flex h-5 items-center rounded-full px-2 text-xs font-medium bg-dh-deleted text-dh-deleted-foreground">REMOVE</span>
     {%- elseif type == 'associate' -%}
-        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">LINK</span>
+        <span class="inline-flex h-5 items-center rounded-full px-2 text-xs font-medium bg-dh-muted text-dh-foreground">LINK</span>
     {%- elseif type == 'dissociate' -%}
-        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-300">UNLINK</span>
+        <span class="inline-flex h-5 items-center rounded-full px-2 text-xs font-medium bg-dh-muted text-dh-foreground">UNLINK</span>
     {%- else -%}
-        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400">{{ type|upper }}</span>
+        <span class="inline-flex h-5 items-center rounded-full px-2 text-xs font-medium bg-dh-muted text-dh-foreground">{{ type|upper }}</span>
     {%- endif -%}
 {% endmacro type_badge %}
 
@@ -82,11 +81,11 @@
 {# Option B: Sparkline en bas, pleine largeur de la card #}
 {% macro activity_sparkline_bottom(data, rawData, days, dates = [], entity = null) %}
     {% set hasActivity = data|filter(v => v > 0)|length > 0 %}
-    <div class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+    <div class="mt-2 pt-2 border-t border-dh-border">
         <div class="relative z-10 flex items-end gap-px h-5">
             {{ _self.activity_bars(data, rawData, dates, entity) }}
         </div>
-        <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+        <div class="text-xs text-dh-muted-foreground mt-1">
             {% if hasActivity %}
                 {{ 'audit.activity_graph.title'|trans(domain='auditor') }} · {{ 'audit.activity_graph.period'|trans({'%days%': days}, 'auditor') }}
             {% else %}
@@ -104,12 +103,12 @@
         {% set label = (date ? date ~ ' · ' : '') ~ 'audit.audit_details.events_count'|trans({'%count%': rawValue, '%formatted_count%': rawValue|number_format}, 'auditor') %}
         {# Bar height in 5 % steps, rendered by the dh-auditor-bar-h-* classes of app.css (no style attribute: CSP) #}
         {% set height = hasActivity ? (value > 0 ? (max(15, value) / 5)|round * 5 : 5) : 20 %}
-        {% set color = hasActivity ? 'bg-slate-300 dark:bg-indigo-500' : 'bg-slate-200 dark:bg-slate-600' %}
+        {% set color = hasActivity ? 'bg-dh-brand' : 'bg-dh-muted' %}
         {% if entity is not null and date is not null %}
             <a href="{{ path('dh_auditor_show_entity_stream', {entity: _self.namespaceToParam(entity), date_from: date, date_to: date}) }}"
                class="group flex flex-1 items-end h-full rounded-sm" title="{{ label }}" aria-label="{{ label }}"
                data-audit-date="{{ date }}" data-audit-count="{{ rawValue }}">
-                <span class="w-full rounded-sm transition-colors group-hover:bg-slate-400 dark:group-hover:bg-indigo-400 group-focus:bg-slate-400 dark:group-focus:bg-indigo-400 {{ color }} dh-auditor-bar-h-{{ height }}"></span>
+                <span class="w-full rounded-sm transition-colors group-hover:bg-dh-brand-to group-focus-visible:bg-dh-brand-to {{ color }} dh-auditor-bar-h-{{ height }}"></span>
             </a>
         {% else %}
             <div class="flex-1 rounded-sm {{ color }} dh-auditor-bar-h-{{ height }}" title="{{ label }}"></div>

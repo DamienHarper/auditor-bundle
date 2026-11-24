@@ -195,10 +195,10 @@ final class ViewableEntityExtensionTest extends KernelTestCase
 
         // the macro the comparison renders the two sides of an association with
         $template = $twig->createTemplate(<<<'TWIG'
-            {% import '@DHAuditor/Audit/entry.html.twig' as macros %}
+            {% import '@DHAuditor/History/_macros.html.twig' as macros %}
             <table><tr>
-                <td>{{ macros.displayRelatedEntity(entry.diffs.source) }}</td>
-                <td>{{ macros.displayRelatedEntity(entry.diffs.target) }}</td>
+                <td>{{ macros.related(entry.diffs.source) }}</td>
+                <td>{{ macros.related(entry.diffs.target) }}</td>
             </tr></table>
             TWIG);
 

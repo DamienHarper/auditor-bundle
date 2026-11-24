@@ -8,8 +8,8 @@
 {% set transaction_url = transaction ? dh_auditor_transaction_url(transaction, root: root ?? null) : null %}
 {#- The whole row leads to the action: the link of its time stretches over the row (::after), the links it names, its
     origin badges and its details sit above that layer. -#}
-<li class="relative -mx-2 flex gap-3 rounded-lg px-2 py-3{{ transaction_url ? ' hover:bg-slate-50 dark:hover:bg-slate-800/50' : '' }}" data-dh-auditor-action="{{ item.key }}" data-dh-auditor-entities="{{ item.getEntities()|join(' ') }}">
-    <span class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+<li class="relative -mx-2 flex gap-3 rounded-lg px-2 py-3{{ transaction_url ? ' hover:bg-dh-accent/50' : '' }}" data-dh-auditor-action="{{ item.key }}" data-dh-auditor-entities="{{ item.getEntities()|join(' ') }}">
+    <span class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-dh-muted text-dh-muted-foreground">
         {{- history.icon(row.phrase.icon) -}}
     </span>
     <div class="min-w-0 flex-1">
@@ -32,7 +32,7 @@
         </p>
         {#- Time, origin and the details toggle on one line, which wraps between them; opened, the details take the
             whole width below. -#}
-        <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+        <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-dh-muted-foreground">
             {% set full_date = item.createdAt|format_datetime('full', 'medium', timezone: false) %}
             {% set time -%}
                 <time datetime="{{ item.createdAt|date('c') }}" title="{{ full_date }}">
@@ -46,14 +46,14 @@
             {% if transaction_url %}
                 <a href="{{ transaction_url }}"
                    aria-label="{{ 'audit.action.title'|trans({'%date%': full_date}, 'auditor') }}"
-                   class="whitespace-nowrap underline decoration-slate-300 underline-offset-2 hover:text-slate-700 hover:decoration-current focus-visible:outline-none after:absolute after:inset-0 after:rounded-lg focus-visible:after:ring-2 focus-visible:after:ring-indigo-500 dark:decoration-slate-600 dark:hover:text-slate-200">{{ time }}</a>
+                   class="whitespace-nowrap underline decoration-dh-muted-foreground/50 underline-offset-2 hover:text-dh-foreground hover:decoration-current focus-visible:outline-none after:absolute after:inset-0 after:rounded-lg focus-visible:after:ring-2 focus-visible:after:ring-dh-ring">{{ time }}</a>
             {% else %}
                 <span class="whitespace-nowrap">{{ time }}</span>
             {% endif %}
             <span class="contents [&>span]:relative [&>span]:z-10">{{ history.origin(item) }}</span>
             {% if details ?? true %}
             <details class="group relative z-10 open:basis-full" data-dh-auditor-details>
-                <summary class="inline-flex cursor-pointer list-none items-center gap-1 font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 [&::-webkit-details-marker]:hidden">
+                <summary class="inline-flex cursor-pointer list-none items-center gap-1 font-medium text-dh-muted-foreground hover:text-dh-foreground [&::-webkit-details-marker]:hidden">
                     <svg class="h-3 w-3 transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     <span class="group-open:hidden">{{ 'audit.history.details'|trans(domain='auditor') }}</span>
                     <span class="hidden group-open:inline">{{ 'audit.history.hide_details'|trans(domain='auditor') }}</span>

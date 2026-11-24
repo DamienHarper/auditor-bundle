@@ -4,9 +4,9 @@
 {%- set url = dh_auditor_object_url(reference) -%}
 <strong class="font-medium">
     {%- if url and url.visible -%}
-        <a href="{{ url.url }}" class="underline decoration-slate-300 underline-offset-2 hover:decoration-current dark:decoration-slate-600">{{ reference.label }}</a>
+        <a href="{{ url.url }}" class="underline decoration-dh-muted-foreground/50 underline-offset-2 hover:decoration-current">{{ reference.label }}</a>
     {%- else -%}
         {{- reference.label -}}
     {%- endif -%}
 </strong>
-{%- if not reference.deletedByThePhrase and dh_auditor_is_deleted(reference) %} <span class="text-slate-500 dark:text-slate-400">{{ 'audit.history.deleted'|trans(domain='auditor') }}</span>{% endif -%}
+{%- if not reference.deletedByThePhrase and dh_auditor_is_deleted(reference) %} <span class="text-dh-muted-foreground">{{ 'audit.history.deleted'|trans(domain='auditor') }}</span>{% endif -%}

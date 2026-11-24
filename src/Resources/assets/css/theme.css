@@ -1,0 +1,90 @@
+/*
+ * Design tokens of the auditor viewer, in the manner of shadcn/ui: every color of the templates
+ * goes through a --dh-* variable, exposed to Tailwind as a dh-* color (bg-dh-card, text-dh-muted-foreground…).
+ *
+ * The bundle's precompiled app.css already contains them. A host that compiles the bundle templates with
+ * its own Tailwind (@source) imports this file after tailwindcss, and may override any --dh-* variable
+ * to blend the viewer into its own theme (for instance --dh-primary: var(--primary)).
+ *
+ * Dark values apply under the .dark class, set on <html> by the viewer.
+ */
+
+@theme inline {
+    --color-dh-background: var(--dh-background);
+    --color-dh-foreground: var(--dh-foreground);
+    --color-dh-card: var(--dh-card);
+    --color-dh-card-foreground: var(--dh-card-foreground);
+    --color-dh-primary: var(--dh-primary);
+    --color-dh-primary-foreground: var(--dh-primary-foreground);
+    --color-dh-muted: var(--dh-muted);
+    --color-dh-muted-foreground: var(--dh-muted-foreground);
+    --color-dh-accent: var(--dh-accent);
+    --color-dh-accent-foreground: var(--dh-accent-foreground);
+    --color-dh-border: var(--dh-border);
+    --color-dh-input: var(--dh-input);
+    --color-dh-ring: var(--dh-ring);
+    --color-dh-brand: var(--dh-brand);
+    --color-dh-brand-from: var(--dh-brand-from);
+    --color-dh-brand-to: var(--dh-brand-to);
+    --color-dh-deleted: var(--dh-deleted);
+    --color-dh-deleted-foreground: var(--dh-deleted-foreground);
+    --color-dh-inserted: var(--dh-inserted);
+    --color-dh-inserted-foreground: var(--dh-inserted-foreground);
+    --color-dh-warning: var(--dh-warning);
+    --color-dh-warning-foreground: var(--dh-warning-foreground);
+    --color-dh-warning-border: var(--dh-warning-border);
+}
+
+@layer base {
+    :root {
+        --dh-background: #fafafa;
+        --dh-foreground: #0a0a0a;
+        --dh-card: #ffffff;
+        --dh-card-foreground: #0a0a0a;
+        --dh-primary: #171717;
+        --dh-primary-foreground: #fafafa;
+        --dh-muted: #f5f5f5;
+        --dh-muted-foreground: #737373;
+        --dh-accent: #f5f5f5;
+        --dh-accent-foreground: #171717;
+        --dh-border: #e5e5e5;
+        --dh-input: #e5e5e5;
+        /* Teal of the logo: activity bars, selected revision, focus ring */
+        --dh-brand: #0ebaa1;
+        --dh-brand-from: #0ebaa1;
+        --dh-brand-to: #0a6d82;
+        --dh-ring: color-mix(in oklab, var(--dh-brand) 50%, transparent);
+        --dh-deleted: #ffe4e6;
+        --dh-deleted-foreground: #9f1239;
+        --dh-inserted: #dcfce7;
+        --dh-inserted-foreground: #166534;
+        --dh-warning: #fffbeb;
+        --dh-warning-foreground: #92400e;
+        --dh-warning-border: #fde68a;
+    }
+
+    .dark {
+        --dh-background: #0a0a0a;
+        --dh-foreground: #fafafa;
+        --dh-card: #171717;
+        --dh-card-foreground: #fafafa;
+        --dh-primary: #fafafa;
+        --dh-primary-foreground: #171717;
+        --dh-muted: #262626;
+        --dh-muted-foreground: #a3a3a3;
+        --dh-accent: #262626;
+        --dh-accent-foreground: #fafafa;
+        --dh-border: rgb(255 255 255 / 10%);
+        --dh-input: rgb(255 255 255 / 15%);
+        --dh-brand: #2dd4bf;
+        --dh-brand-from: #2fd8bf;
+        --dh-brand-to: #169bb3;
+        --dh-deleted: rgb(159 18 57 / 35%);
+        --dh-deleted-foreground: #fecdd3;
+        --dh-inserted: rgb(22 101 52 / 35%);
+        --dh-inserted-foreground: #bbf7d0;
+        --dh-warning: rgb(120 53 15 / 20%);
+        --dh-warning-foreground: #fde68a;
+        --dh-warning-border: rgb(146 64 14 / 50%);
+    }
+}

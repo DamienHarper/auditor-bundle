@@ -684,7 +684,7 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertResponseIsSuccessful();
         $table = $crawler->filter('section table')->first();
         $this->assertStringContainsString('table-fixed', (string) $table->attr('class'), 'The columns do not depend on the values of the action.');
-        $this->assertStringContainsString('dark:text-slate-200', (string) $table->attr('class'), 'The values stay readable in dark mode.');
+        $this->assertStringContainsString('text-dh-foreground', (string) $table->attr('class'), 'The values take the foreground token, readable in both themes.');
         $this->assertSame(
             ['w-[14%]', 'w-[9%]', 'w-[13%]', 'w-[14%]', 'w-1/4', 'w-1/4'],
             $table->filter('colgroup > col')->each(static fn (Crawler $col): string => (string) $col->attr('class')),
@@ -1222,8 +1222,8 @@ final class ViewerControllerTest extends WebTestCase
 
             $this->assertResponseIsSuccessful();
             $this->assertSame([
-                'body Body X → Body Y',
-                'title Title A → Title C',
+                'body X → Y',
+                'title A → C',
             ], $this->comparedFields($crawler), 'Revisions are compared in chronological order, whichever is picked first.');
         }
     }
@@ -1238,7 +1238,7 @@ final class ViewerControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', \sprintf('%s/%d/compare?from=%d&to=%d', self::POST_URL, $postId, $revisions[1], $revisions[2]));
 
         $this->assertResponseIsSuccessful();
-        $this->assertSame(['title Title A → Title C'], $this->comparedFields($crawler));
+        $this->assertSame(['title A → C'], $this->comparedFields($crawler));
         $this->assertCount(0, $crawler->selectLink('Previous change'), 'There is no revision left before the purged ones.');
     }
 
@@ -1290,11 +1290,11 @@ final class ViewerControllerTest extends WebTestCase
         $crawler = $this->client->click($crawler->selectLink('Previous change')->link());
 
         $this->assertResponseIsSuccessful();
-        $this->assertSame(['body Body X → Body Y'], $this->comparedFields($crawler));
+        $this->assertSame(['body X → Y'], $this->comparedFields($crawler));
         $this->assertCount(0, $crawler->selectLink('Previous change'));
         $crawler = $this->client->click($crawler->selectLink('Next change')->link());
 
-        $this->assertSame(['title Title A → Title C'], $this->comparedFields($crawler));
+        $this->assertSame(['title A → C'], $this->comparedFields($crawler));
     }
 
     public function testCompareRevisionsShowsRelationsAndRemoval(): void
@@ -1319,11 +1319,11 @@ final class ViewerControllerTest extends WebTestCase
 
         $this->assertResponseIsSuccessful();
         $this->assertStringContainsString('The object was deleted between these two revisions.', $crawler->filter('body')->text());
-        $relations = $crawler->filter('caption + tbody tr')->each(
+        $relations = $crawler->filter('[data-dh-auditor-relations] li')->each(
             static fn (Crawler $row): string => (string) preg_replace('/\s+/', ' ', mb_trim($row->text()))
         );
         $this->assertCount(1, $relations);
-        $this->assertMatchesRegularExpression('/^tags LINK Tag #\d+ · compared tag$/', $relations[0]);
+        $this->assertMatchesRegularExpression('/^tags \+ Tag #\d+ · compared tag$/', $relations[0]);
         $this->assertStringNotContainsString('No field or relation changed', $crawler->filter('body')->text());
     }
 
@@ -1433,7 +1433,7 @@ final class ViewerControllerTest extends WebTestCase
         $crawler = $this->client->click($crawler->filter(\sprintf('ul a[href*="to=%d"]', $revisions[2]))->link());
 
         $this->assertResponseIsSuccessful();
-        $this->assertSame(['body Body X → Body Y', 'title Title A → Title C'], $this->comparedFields($crawler));
+        $this->assertSame(['body X → Y', 'title A → C'], $this->comparedFields($crawler));
     }
 
     public function testSelectRevisionsRejectsASelectionOfAnotherObject(): void
@@ -1479,12 +1479,18 @@ final class ViewerControllerTest extends WebTestCase
     }
 
     /**
-     * @return list<string> one "field old → new" line per compared field
+     * @return list<string> one "field deleted → inserted" line per compared field: the field, then the text its change
+     *                      marks as deleted and as inserted
      */
     private function comparedFields(Crawler $crawler): array
     {
-        return $crawler->filter('thead + tbody tr')->each(
-            static fn (Crawler $row): string => (string) preg_replace('/\s+/', ' ', mb_trim($row->text()))
+        return $crawler->filter('tbody tr[data-field]')->each(
+            static fn (Crawler $row): string => \sprintf(
+                '%s %s → %s',
+                $row->attr('data-field'),
+                implode('', $row->filter('del')->each(static fn (Crawler $node): string => $node->text())),
+                implode('', $row->filter('ins')->each(static fn (Crawler $node): string => $node->text())),
+            )
         );
     }
 
