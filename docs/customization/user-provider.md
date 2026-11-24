@@ -22,10 +22,14 @@ namespace DH\Auditor\User;
 
 interface UserInterface
 {
-    public function getIdentifier(): ?string;
-    public function getUsername(): ?string;
+    public ?string $identifier { get; }
+
+    public ?string $username { get; }
 }
 ```
+
+The interface declares read-only property hooks, not getter methods: read `$user->identifier` and `$user->username`.
+The built-in `DH\Auditor\User\User` implements it and is what the examples below return.
 
 ## 📦 Built-in Provider
 

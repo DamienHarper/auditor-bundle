@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 /**
  * Default extra_data provider for auditor-bundle.
  *
- * Captures contextual HTTP request information (route name and route parameters)
+ * Captures contextual HTTP request information (the route name)
  * and attaches it to every audit entry via the `extra_data` JSON column.
  *
  * Return null outside of an HTTP request context (e.g. console commands) so
