@@ -1,5 +1,6 @@
 {#- An object named by a phrase, linked to the URL of dh_auditor_object_url() when the reader may see it, and marked
-    when it no longer exists (dh_auditor_is_deleted(), for the references a page checked). -#}
+    when it no longer exists (dh_auditor_is_deleted(), for the references a page checked), unless the phrase itself
+    tells its deletion. -#}
 {%- set url = dh_auditor_object_url(reference) -%}
 <strong class="font-medium">
     {%- if url and url.visible -%}
@@ -8,4 +9,4 @@
         {{- reference.label -}}
     {%- endif -%}
 </strong>
-{%- if dh_auditor_is_deleted(reference) %} <span class="text-slate-500 dark:text-slate-400">{{ 'audit.history.deleted'|trans(domain='auditor') }}</span>{% endif -%}
+{%- if not reference.deletedByThePhrase and dh_auditor_is_deleted(reference) %} <span class="text-slate-500 dark:text-slate-400">{{ 'audit.history.deleted'|trans(domain='auditor') }}</span>{% endif -%}

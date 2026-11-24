@@ -552,7 +552,7 @@ final readonly class HistoryPhraser
             'count' => $bulk ?? \count($changes),
             'entity' => [new TextPart($this->entityName($change->entity, $bulk ?? 1))],
             'field' => [new TextPart(null === $change->field ? '' : $this->fieldLabelResolver->resolve($change->entity, $change->field))],
-            'label' => [new ObjectReference($change->entity, $change->objectId, self::objectLabel($change->objectLabel, $change->entity, $change->objectId))],
+            'label' => [new ObjectReference($change->entity, $change->objectId, self::objectLabel($change->objectLabel, $change->entity, $change->objectId), ChangeKind::Deleted === $change->kind)],
             'old' => [],
             'new' => [],
             'names' => [],
