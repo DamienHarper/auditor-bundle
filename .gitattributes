@@ -13,4 +13,3 @@ webpack.config.js    export-ignore
 tailwind.config.js    export-ignore
 postcss.config.js    export-ignore
 package.json    export-ignore
-src/Resources/assets    export-ignore
