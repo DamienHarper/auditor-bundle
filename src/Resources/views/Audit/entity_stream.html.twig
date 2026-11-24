@@ -78,7 +78,7 @@
                         <input type="date" id="filter-{{ name }}" name="{{ name }}" value="{{ filters[name] }}" class="dh-auditor-control">
                     </label>
                 {% endfor %}
-                <button type="submit" class="dh-auditor-control font-medium">
+                <button type="submit" class="dh-auditor-control dh-auditor-control-primary">
                     {{ 'audit.filter.apply'|trans(domain='auditor') }}
                 </button>
                 {% if filters.date_from or filters.date_to %}
