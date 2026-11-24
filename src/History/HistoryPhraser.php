@@ -286,7 +286,7 @@ final readonly class HistoryPhraser
      */
     private function groups(HistoryItem $item): array
     {
-        $changes = $this->ordered($item->getChanges());
+        $changes = $this->ordered($this->toldChanges($item->getChanges()));
 
         // a describer tells its change, and the other changes its fragments list. When two described phrases tell the
         // same change, the one telling the most changes is kept (the first one on a tie); the changes only the other one
@@ -384,6 +384,42 @@ final readonly class HistoryPhraser
         }
 
         return $result;
+    }
+
+    /**
+     * The changes a phrase tells: adding to a collection an object the action creates, or removing from it an object
+     * the action deletes, is part of that creation or deletion ("deleted Comment “spam”", not "deleted Comment “spam”
+     * and removed from Comments: spam"). The details of the action still list them.
+     *
+     * @param list<Change> $changes
+     *
+     * @return list<Change>
+     */
+    private function toldChanges(array $changes): array
+    {
+        $created = [];
+        $deleted = [];
+        foreach ($changes as $change) {
+            if (ChangeKind::Deleted === $change->kind) {
+                $deleted[$change->entity.'#'.$change->objectId] = true;
+            } elseif ($change->kind->isEntityLevel()) {
+                $created[$change->entity.'#'.$change->objectId] = true;
+            }
+        }
+
+        if ([] === $created && [] === $deleted) {
+            return $changes;
+        }
+
+        return array_values(array_filter($changes, static function (Change $change) use ($created, $deleted): bool {
+            $target = $change->getTargetClass().'#'.$change->getTargetId();
+
+            return match ($change->kind) {
+                ChangeKind::Added => !isset($created[$target]),
+                ChangeKind::Removed => !isset($deleted[$target]),
+                default => true,
+            };
+        }));
     }
 
     /**
