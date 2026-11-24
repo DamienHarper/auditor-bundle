@@ -77,17 +77,19 @@
                         {% set text = dh_auditor_text_change(old, new) %}
                         <td class="block px-3 py-0.5 sm:table-cell sm:py-2">
                             {%- if text is not null and text.mode == 'inline' -%}
-                                <code class="whitespace-pre-wrap break-words font-mono text-xs">"
+                                {#- between quotes only when one of the texts needs them to be read -#}
+                                {%- set quote = dh_auditor_is_ambiguous_text(old) or dh_auditor_is_ambiguous_text(new) ? '"' : '' -%}
+                                <code class="whitespace-pre-wrap break-words font-mono text-xs">{{ quote }}
                                     {%- for run in text.runs -%}
                                         {%- if run[0] == 'delete' -%}{{ history.deleted(run[1]) }}
                                         {%- elseif run[0] == 'insert' -%}{{ history.inserted(run[1]) }}
                                         {%- else -%}{{ run[1] }}{%- endif -%}
                                     {%- endfor -%}
-                                "</code>
+                                {{ quote }}</code>
                             {%- elseif text is not null and text.mode == 'stack' -%}
                                 <div class="flex flex-col gap-1">
-                                    <code class="whitespace-pre-wrap break-words font-mono text-xs">{{ history.deleted('"' ~ old ~ '"') }}</code>
-                                    <code class="whitespace-pre-wrap break-words font-mono text-xs">{{ history.inserted('"' ~ new ~ '"') }}</code>
+                                    <code class="whitespace-pre-wrap break-words font-mono text-xs">{{ history.deleted(dh_auditor_value_text(old)) }}</code>
+                                    <code class="whitespace-pre-wrap break-words font-mono text-xs">{{ history.inserted(dh_auditor_value_text(new)) }}</code>
                                 </div>
                             {%- else -%}
                                 {{ history.marked(old, 'deleted') }} <span class="text-slate-400">→</span> {{ history.marked(new, 'inserted') }}

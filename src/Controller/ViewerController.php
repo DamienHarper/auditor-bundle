@@ -171,7 +171,7 @@ final readonly class ViewerController
             'entryCount' => \count($entries),
             'tables' => $tables,
             'objects' => \count(array_unique(array_map(static fn (array $e): string => $e['entity'].'#'.$e['entry']->objectId, $entries))),
-            'ulidDate' => $this->ulidDate($hash),
+            'ulidDate' => $this->ulidDate($hash)?->setTimezone($this->timezone($reader)),
             'root' => $root,
             'neighbours' => $neighbours,
         ]);

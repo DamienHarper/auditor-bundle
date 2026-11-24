@@ -27,7 +27,7 @@
             <h2 class="text-sm font-semibold">{{ 'audit.home.audited'|trans(domain='auditor') }}</h2>
             <select id="sort-entities"
                     aria-label="{{ 'audit.sort.label'|trans(domain='auditor') }}"
-                    class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                    class="dh-auditor-control"
                     data-dh-auditor-sort>
                 {% for option in sortOptions %}
                     <option value="{{ option.value }}" {% if sort == option.value %}selected{% endif %}>

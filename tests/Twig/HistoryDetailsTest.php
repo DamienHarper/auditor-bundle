@@ -81,32 +81,41 @@ final class HistoryDetailsTest extends KernelTestCase
     {
         yield 'most of a text kept: the changed words inline' => [
             ['old' => 'Aut adipisci necessitatibus laudantium mollitia.', 'new' => 'Aut adipisci necessitatibus laudantium mollitia - Revised Edition'],
-            '"Aut adipisci necessitatibus laudantium mollitia. - Revised Edition"',
+            'Aut adipisci necessitatibus laudantium mollitia. - Revised Edition',
             ['.'],
             ['- Revised Edition'],
         ];
 
         yield 'short values replaced: old → new' => [
             ['old' => 'draft', 'new' => 'published'],
-            '"draft" → "published"',
-            ['"draft"'],
-            ['"published"'],
+            'draft → published',
+            ['draft'],
+            ['published'],
         ];
 
         yield 'a text rewritten: old above new' => [
             ['old' => 'Sit aliquid sequi quia distinctio odit quos consequatur debitis sunt provident.', 'new' => 'Rerum quia fuga velit doloribus ea qui non dolores et quasi veritatis eaque.'],
-            '"Sit aliquid sequi quia distinctio odit quos consequatur debitis sunt provident." "Rerum quia fuga velit doloribus ea qui non dolores et quasi veritatis eaque."',
-            ['"Sit aliquid sequi quia distinctio odit quos consequatur debitis sunt provident."'],
-            ['"Rerum quia fuga velit doloribus ea qui non dolores et quasi veritatis eaque."'],
+            'Sit aliquid sequi quia distinctio odit quos consequatur debitis sunt provident. Rerum quia fuga velit doloribus ea qui non dolores et quasi veritatis eaque.',
+            ['Sit aliquid sequi quia distinctio odit quos consequatur debitis sunt provident.'],
+            ['Rerum quia fuga velit doloribus ea qui non dolores et quasi veritatis eaque.'],
         ];
 
-        yield 'a value set from null' => [['old' => null, 'new' => 'First'], 'null → "First"', [], ['"First"']];
+        yield 'a value set from null' => [['old' => null, 'new' => 'First'], 'null → First', [], ['First']];
 
-        yield 'a value cleared' => [['old' => 'First', 'new' => null], '"First" → null', ['"First"'], []];
+        yield 'a value cleared' => [['old' => 'First', 'new' => null], 'First → null', ['First'], []];
 
-        yield 'an association: its labels' => [['old' => null, 'new' => self::AUTHOR], 'null → "John"', [], ['"John"']];
+        yield 'an association: its labels' => [['old' => null, 'new' => self::AUTHOR], 'null → John', [], ['John']];
 
         yield 'numbers' => [['old' => 1, 'new' => 2], '1 → 2', ['1'], ['2']];
+
+        yield 'texts that need their quotes' => [['old' => '', 'new' => '42'], '"" → "42"', ['""'], ['"42"']];
+
+        yield 'most of a text kept, a trailing space added: between quotes' => [
+            ['old' => 'Aut adipisci necessitatibus laudantium mollitia.', 'new' => 'Aut adipisci necessitatibus laudantium mollitia. '],
+            '"Aut adipisci necessitatibus laudantium mollitia. "',
+            [],
+            [''], // the inserted space, trimmed by text()
+        ];
     }
 
     /**
@@ -125,7 +134,7 @@ final class HistoryDetailsTest extends KernelTestCase
         }
 
         ksort($rows);
-        $this->assertSame(['author' => '"John"', 'status' => '"draft"', 'title' => '"First"'], $rows, 'The label of an association, the raw value of the other fields.');
+        $this->assertSame(['author' => 'John', 'status' => 'draft', 'title' => 'First'], $rows, 'The label of an association, the raw value of the other fields.');
         $this->assertCount(0, $crawler->filter('tr[data-field] del, tr[data-field] ins'), 'The values of a creation or removal are not marked.');
     }
 
@@ -161,7 +170,7 @@ final class HistoryDetailsTest extends KernelTestCase
         foreach ([$this->entry('update', ['title' => ['old' => null, 'new' => $text]]), $this->entry('insert', ['title' => ['old' => null, 'new' => $text]])] as $entry) {
             $code = $this->render([$entry])->filter('table code')->last();
 
-            $this->assertSame('"'.$text.'"', $code->text(null, false), 'A text is shown with its line breaks, not as escaped JSON.');
+            $this->assertSame($text, $code->text(null, false), 'A text is shown with its line breaks, not as escaped JSON.');
             $this->assertStringContainsString('whitespace-pre-wrap', (string) $code->attr('class'));
         }
     }

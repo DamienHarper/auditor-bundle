@@ -189,6 +189,46 @@ final class DiffExtensionTest extends KernelTestCase
         $this->assertSame(['mode' => 'replace', 'runs' => [['equal', 'a '], ['delete', 'b'], ['insert', 'c']]], $change, 'Short values replaced, half of their words changed.');
     }
 
+    #[DataProvider('provideValueTextCases')]
+    public function testValueText(mixed $value, string $expected): void
+    {
+        $this->assertSame($expected, new DiffExtension()->valueText($value));
+    }
+
+    /**
+     * @return iterable<string, array{mixed, string}>
+     */
+    public static function provideValueTextCases(): iterable
+    {
+        yield 'a text: no quotes' => ['published', 'published'];
+
+        yield 'a text with inner spaces and accents' => ['Brouillon publié', 'Brouillon publié'];
+
+        yield 'an empty text' => ['', '""'];
+
+        yield 'a leading space' => [' draft', '" draft"'];
+
+        yield 'a trailing line break' => ["draft\n", "\"draft\n\""];
+
+        yield 'a text that looks like a number' => ['42', '"42"'];
+
+        yield 'a text that looks like a decimal' => ['-1.5e3', '"-1.5e3"'];
+
+        yield 'a text that looks like a boolean' => ['False', '"False"'];
+
+        yield 'a text that looks like null' => ['null', '"null"'];
+
+        yield 'a text that only starts with a number' => ['42 posts', '42 posts'];
+
+        yield 'null' => [null, 'null'];
+
+        yield 'a number' => [42, '42'];
+
+        yield 'a boolean' => [false, 'false'];
+
+        yield 'an array, as JSON' => [['label' => 'Violet', 'url' => 'https://example.com/é'], '{"label":"Violet","url":"https://example.com/é"}'];
+    }
+
     /**
      * @param array<string, mixed> $changes
      * @param list<string>         $deepDiffs fields listed in the "deep_diffs" envelope marker (written only when not empty)

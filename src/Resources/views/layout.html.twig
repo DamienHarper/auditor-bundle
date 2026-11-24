@@ -18,14 +18,18 @@
                     flex items-center justify-between gap-4">
             <a href="{{ path('dh_auditor_list_audits') }}"
                class="flex items-center gap-3 group">
-                {# Icon #}
-                <div class="w-10 h-10 rounded-lg
-                            bg-slate-900 dark:bg-slate-100
-                            text-white dark:text-slate-900
-                            flex items-center justify-center
-                            text-xl font-bold">
-                    A
-                </div>
+                {#- Logo of auditor, inline (no extra request, no style attribute: strict CSP). Its gradient is lighter in the
+                    dark theme so that it keeps its contrast on the dark background. -#}
+                <svg class="h-8 w-auto shrink-0" viewBox="0 0 122 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                    <defs>
+                        <linearGradient id="dh-auditor-logo-gradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0" class="[stop-color:#0ebaa1] dark:[stop-color:#2fd8bf]"/>
+                            <stop offset="1" class="[stop-color:#0a6d82] dark:[stop-color:#169bb3]"/>
+                        </linearGradient>
+                    </defs>
+                    <path fill="url(#dh-auditor-logo-gradient)" d="M68.325 37.236c0 0-.437 1.935-1.946 4.144c-.419.699-.868 1.333-1.354 1.895c-.795.919-1.728 1.645-2.829 2.127c-3.937 2.449-10.268 3.67-20.324.198c14.389 8.792 22.388 7.478 27.564 1.491c8.014-9.263 6.976-26.65 13.985-36.453c4.952-6.927 14.732-7.822 37.728 8.621C109.559 7.301 88.966-7.148 78.668 7.254C74.73 12.759 73.178 20 71.44 26.471C70.481 30.282 69.531 34.044 68.325 37.236z"/>
+                    <path fill="url(#dh-auditor-logo-gradient)" d="M27.21 27.262c-34.758-30.065 7.576-16.556 42.427-2.996l1.479-5.681C26.818 1.359-34-17.969 23.394 31.673c7.142 6.178 13.245 10.725 18.504 13.935c10.041 3.46 16.365 2.24 20.299-.207c.017-.007.031-.017.048-.024C56.661 47.873 46.643 44.071 27.21 27.262zM108.642 34.107c-.128-.056-12.053-5.342-27.951-11.733l-1.451 5.7c15.124 6.101 26.936 11.333 27.048 11.383C110.894 41.421 112.542 35.995 108.642 34.107z"/>
+                </svg>
                 <div class="leading-tight">
                     {# Bundle name #}
                     <div class="text-lg font-semibold tracking-tight">auditor</div>

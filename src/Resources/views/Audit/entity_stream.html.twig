@@ -8,7 +8,7 @@
 {% block dh_auditor_content %}
     {# Sub-header - sticky with back link #}
     {% block dh_auditor_header %}
-    <div class="sticky top-16 z-40 -mx-6 px-6 py-3 mb-4 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur">
+    <div class="-mx-4 px-4 sm:-mx-6 sm:px-6 sm:sticky sm:top-16 sm:z-40 py-3 mb-4 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur">
         {# Back link #}
         <a href="{{ path('dh_auditor_list_audits') }}"
            class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 mb-3">
@@ -29,12 +29,12 @@
                 </p>
             </div>
             <form method="get" action="{{ path('dh_auditor_show_entity_stream', {entity: helper.namespaceToParam(entity), id: id}) }}"
-                  class="flex flex-wrap items-end gap-2 mt-3 sm:mt-0">
+                  class="flex flex-wrap items-center gap-2 mt-3 sm:mt-0">
                 {# Type filter #}
-                <select id="filter-type" name="type" aria-label="{{ 'audit.filter.all_actions'|trans(domain='auditor') }}"
-                        class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                <select id="filter-type" name="type" aria-label="{{ 'audit.history.filter.what'|trans(domain='auditor') }}"
+                        class="dh-auditor-control"
                         data-dh-auditor-autosubmit>
-                    <option value="">{{ 'audit.filter.all_actions'|trans(domain='auditor') }}</option>
+                    <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.filter.what'|trans(domain='auditor'), '%value%': 'audit.history.filter.everything'|trans(domain='auditor')}, 'auditor') }}</option>
                     {% for type in filterOptions.types %}
                         <option value="{{ type }}" {% if filters.type == type %}selected{% endif %}>
                             {{ ('audit.filter.type.' ~ type)|trans(domain='auditor') }}
@@ -43,10 +43,10 @@
                 </select>
 
                 {# User filter #}
-                <select id="filter-user" name="user" aria-label="{{ 'audit.filter.all_users'|trans(domain='auditor') }}"
-                        class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                <select id="filter-user" name="user" aria-label="{{ 'audit.history.filter.who'|trans(domain='auditor') }}"
+                        class="dh-auditor-control"
                         data-dh-auditor-autosubmit>
-                    <option value="">{{ 'audit.filter.all_users'|trans(domain='auditor') }}</option>
+                    <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.filter.who'|trans(domain='auditor'), '%value%': 'audit.history.filter.everyone'|trans(domain='auditor')}, 'auditor') }}</option>
                     {% if filterOptions.hasAnonymous %}
                         <option value="__anonymous__" {% if filters.user == '__anonymous__' %}selected{% endif %}>
                             {{ 'audit.filter.anonymous'|trans(domain='auditor') }}
@@ -61,30 +61,29 @@
 
                 {# Changed field filter #}
                 {% if filterOptions.fields|length > 0 %}
-                    <select id="filter-field" name="field" aria-label="{{ 'audit.filter.all_fields'|trans(domain='auditor') }}"
-                            class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                    <select id="filter-field" name="field" aria-label="{{ 'audit.history.field'|trans(domain='auditor') }}"
+                            class="dh-auditor-control"
                             data-dh-auditor-autosubmit>
-                        <option value="">{{ 'audit.filter.all_fields'|trans(domain='auditor') }}</option>
+                        <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.field'|trans(domain='auditor'), '%value%': 'audit.history.filter.all_fields'|trans(domain='auditor')}, 'auditor') }}</option>
                         {% for field in filterOptions.fields %}
                             <option value="{{ field }}" {% if filters.field == field %}selected{% endif %}>
-                                {{ field }}
+                                {{ dh_auditor_field_label(entity, field) }}
                             </option>
                         {% endfor %}
                     </select>
                 {% endif %}
                 {% for name, label in {'date_from': 'from', 'date_to': 'to'} %}
-                    <label class="text-xs text-slate-500 dark:text-slate-400" for="filter-{{ name }}">
+                    <label class="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400" for="filter-{{ name }}">
                         {{ ('audit.filter.' ~ label)|trans(domain='auditor') }}
-                        <input type="date" id="filter-{{ name }}" name="{{ name }}" value="{{ filters[name] }}"
-                               class="block text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                        <input type="date" id="filter-{{ name }}" name="{{ name }}" value="{{ filters[name] }}" class="dh-auditor-control">
                     </label>
                 {% endfor %}
-                <button type="submit" class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-slate-700 dark:text-slate-300">
+                <button type="submit" class="dh-auditor-control font-medium hover:bg-slate-100 dark:hover:bg-slate-700">
                     {{ 'audit.filter.apply'|trans(domain='auditor') }}
                 </button>
                 {% if filters.date_from or filters.date_to %}
                     <a href="{{ path('dh_auditor_show_entity_stream', {entity: helper.namespaceToParam(entity), id: id, type: filters.type, user: filters.user, field: filters.field}) }}"
-                       class="text-sm px-3 py-1.5 text-slate-500 dark:text-slate-400 hover:underline">
+                       class="inline-flex h-9 items-center px-2 text-sm text-slate-500 hover:underline dark:text-slate-400">
                         {{ 'audit.filter.clear_period'|trans(domain='auditor') }}
                     </a>
                 {% endif %}

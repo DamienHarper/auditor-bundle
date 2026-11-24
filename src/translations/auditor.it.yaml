@@ -70,9 +70,6 @@ audit:
     to: Al
     apply: Applica
     clear_period: Cancella periodo
-    all_actions: Tutte le azioni
-    all_users: Tutti gli utenti
-    all_fields: Tutti i campi
     anonymous: Anonimo
     type:
       insert: Inserimento
@@ -134,6 +131,7 @@ audit:
       everyone: 'tutti'
       everything: 'tutto'
       all_origins: 'tutte'
+      all_fields: 'tutti'
       all_time: 'sempre'
       days: '[0,1] ultimo giorno|]1,Inf[ ultimi %count% giorni'
     origin:

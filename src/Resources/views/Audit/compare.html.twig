@@ -7,7 +7,7 @@
     {% set entity_param = helper.namespaceToParam(entity) %}
 
     {% block dh_auditor_header %}
-    <div class="sticky top-16 z-40 -mx-6 px-6 py-3 mb-4 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur">
+    <div class="-mx-4 px-4 sm:-mx-6 sm:px-6 sm:sticky sm:top-16 sm:z-40 py-3 mb-4 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur">
         {# Back link #}
         <a href="{{ path('dh_auditor_show_entity_stream', {entity: entity_param, id: id}) }}"
            class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 mb-3">

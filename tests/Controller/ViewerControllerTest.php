@@ -965,7 +965,11 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertSame([Post::class, Tag::class], $entities($actions[0]), 'An action written in two tables is one row, the most recent first.');
         $this->assertSame([Post::class], $entities($actions[1]));
         $this->assertSame([Comment::class], $entities($actions[2]));
-        $this->assertCount(1, $crawler->filter('section')->first()->filter('[data-dh-auditor-action] a[href^="/audit/transaction/"]')->first(), 'The time of a row links to its action.');
+        $link = $crawler->filter('section')->first()->filter('[data-dh-auditor-action] a[href^="/audit/transaction/"]')->first();
+        $this->assertCount(1, $link, 'The time of a row links to its action.');
+        $this->assertStringStartsWith('Action of ', (string) $link->attr('aria-label'), 'The link of the time is named after the action.');
+        $this->assertContains('after:inset-0', explode(' ', (string) $link->attr('class')), 'The link of the time stretches over the whole row.');
+        $this->assertStringContainsString('relative', (string) $link->closest('[data-dh-auditor-action]')?->attr('class'), 'The row bounds the stretched link.');
     }
 
     public function testDaysAcrossOlderActions(): void

@@ -70,9 +70,6 @@ audit:
     to: Kuni
     apply: Rakenda
     clear_period: Tühjenda periood
-    all_actions: Kõik toimingud
-    all_users: Kõik kasutajad
-    all_fields: Kõik väljad
     anonymous: Anonüümne
     type:
       insert: Lisamine
@@ -134,6 +131,7 @@ audit:
       everyone: 'kõik'
       everything: 'kõik'
       all_origins: 'kõik'
+      all_fields: 'kõik'
       all_time: 'kogu aeg'
       days: '[0,1] viimane päev|]1,Inf[ viimased %count% päeva'
     origin:

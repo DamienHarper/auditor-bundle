@@ -70,9 +70,6 @@ audit:
     to: Tot
     apply: Toepassen
     clear_period: Periode wissen
-    all_actions: Alle acties
-    all_users: Alle gebruikers
-    all_fields: Alle velden
     anonymous: Anoniem
     type:
       insert: Invoegen
@@ -134,6 +131,7 @@ audit:
       everyone: 'iedereen'
       everything: 'alles'
       all_origins: 'alle'
+      all_fields: 'alle'
       all_time: 'altijd'
       days: '[0,1] laatste dag|]1,Inf[ laatste %count% dagen'
     origin:

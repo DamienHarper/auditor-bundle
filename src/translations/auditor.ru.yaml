@@ -70,9 +70,6 @@ audit:
     to: По
     apply: Применить
     clear_period: Сбросить период
-    all_actions: Все действия
-    all_users: Все пользователи
-    all_fields: Все поля
     anonymous: Аноним
     type:
       insert: Вставка
@@ -134,6 +131,7 @@ audit:
       everyone: 'все'
       everything: 'всё'
       all_origins: 'все'
+      all_fields: 'все'
       all_time: 'за всё время'
       days: 'последний %count% день|последние %count% дня|последние %count% дней'
     origin:

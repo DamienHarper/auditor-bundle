@@ -47,6 +47,33 @@ final readonly class DiffExtension
     }
 
     /**
+     * A value of the action details as it is shown: a text as it is, between quotes only when it would otherwise be
+     * misread (see isAmbiguousText()), null as "null", any other value as JSON.
+     */
+    #[AsTwigFunction('dh_auditor_value_text')]
+    public function valueText(mixed $value): string
+    {
+        if (\is_string($value)) {
+            return $this->isAmbiguousText($value) ? '"'.$value.'"' : $value;
+        }
+
+        return (string) json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+    }
+
+    /**
+     * Tells whether a text shown without quotes would be misread: empty, starting or ending with a white space, or
+     * looking like a number, a boolean or null.
+     */
+    #[AsTwigFunction('dh_auditor_is_ambiguous_text')]
+    public function isAmbiguousText(string $text): bool
+    {
+        return '' === $text
+            || mb_trim($text) !== $text
+            || is_numeric($text)
+            || \in_array(mb_strtolower($text), ['true', 'false', 'null'], true);
+    }
+
+    /**
      * How to show the change of a text into another one, with the runs of their word diff:
      * - inline: most of the text is kept, the changed words are shown in place;
      * - replace: short values whose words mostly changed, shown as old → new;
