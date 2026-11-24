@@ -31,10 +31,10 @@
             <form method="get" action="{{ path('dh_auditor_show_entity_stream', {entity: helper.namespaceToParam(entity), id: id}) }}"
                   class="flex flex-wrap items-center gap-2 mt-3 sm:mt-0">
                 {# Type filter #}
-                <select id="filter-type" name="type" aria-label="{{ 'audit.filter.all_actions'|trans(domain='auditor') }}"
+                <select id="filter-type" name="type" aria-label="{{ 'audit.history.filter.what'|trans(domain='auditor') }}"
                         class="dh-auditor-control"
                         data-dh-auditor-autosubmit>
-                    <option value="">{{ 'audit.filter.all_actions'|trans(domain='auditor') }}</option>
+                    <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.filter.what'|trans(domain='auditor'), '%value%': 'audit.history.filter.everything'|trans(domain='auditor')}, 'auditor') }}</option>
                     {% for type in filterOptions.types %}
                         <option value="{{ type }}" {% if filters.type == type %}selected{% endif %}>
                             {{ ('audit.filter.type.' ~ type)|trans(domain='auditor') }}
@@ -43,10 +43,10 @@
                 </select>
 
                 {# User filter #}
-                <select id="filter-user" name="user" aria-label="{{ 'audit.filter.all_users'|trans(domain='auditor') }}"
+                <select id="filter-user" name="user" aria-label="{{ 'audit.history.filter.who'|trans(domain='auditor') }}"
                         class="dh-auditor-control"
                         data-dh-auditor-autosubmit>
-                    <option value="">{{ 'audit.filter.all_users'|trans(domain='auditor') }}</option>
+                    <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.filter.who'|trans(domain='auditor'), '%value%': 'audit.history.filter.everyone'|trans(domain='auditor')}, 'auditor') }}</option>
                     {% if filterOptions.hasAnonymous %}
                         <option value="__anonymous__" {% if filters.user == '__anonymous__' %}selected{% endif %}>
                             {{ 'audit.filter.anonymous'|trans(domain='auditor') }}
@@ -61,13 +61,13 @@
 
                 {# Changed field filter #}
                 {% if filterOptions.fields|length > 0 %}
-                    <select id="filter-field" name="field" aria-label="{{ 'audit.filter.all_fields'|trans(domain='auditor') }}"
+                    <select id="filter-field" name="field" aria-label="{{ 'audit.history.field'|trans(domain='auditor') }}"
                             class="dh-auditor-control"
                             data-dh-auditor-autosubmit>
-                        <option value="">{{ 'audit.filter.all_fields'|trans(domain='auditor') }}</option>
+                        <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.field'|trans(domain='auditor'), '%value%': 'audit.history.filter.all_fields'|trans(domain='auditor')}, 'auditor') }}</option>
                         {% for field in filterOptions.fields %}
                             <option value="{{ field }}" {% if filters.field == field %}selected{% endif %}>
-                                {{ field }}
+                                {{ dh_auditor_field_label(entity, field) }}
                             </option>
                         {% endfor %}
                     </select>

@@ -63,7 +63,7 @@
                 {% if fields is not empty %}
                     <select name="field" data-dh-auditor-autosubmit aria-label="{{ 'audit.history.field'|trans(domain='auditor') }}"
                             class="dh-auditor-control">
-                        <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.field'|trans(domain='auditor'), '%value%': 'audit.filter.all_fields'|trans(domain='auditor')}, 'auditor') }}</option>
+                        <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.field'|trans(domain='auditor'), '%value%': 'audit.history.filter.all_fields'|trans(domain='auditor')}, 'auditor') }}</option>
                         {% for field in fields %}
                             <option value="{{ field }}" {{ filters.field == field ? 'selected' }}>{{ dh_auditor_field_label(entity, field) }}</option>
                         {% endfor %}
