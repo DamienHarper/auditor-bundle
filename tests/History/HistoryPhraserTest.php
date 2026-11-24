@@ -138,6 +138,30 @@ final class HistoryPhraserTest extends TestCase
         $this->assertSame('a créé article « Why audit? »', (string) $phraser->phrase($this->item(self::entry('insert', Post::class, '1', [], 'Why audit?'))));
     }
 
+    public function testAnElementDeletedOrCreatedByTheActionIsNotToldTwice(): void
+    {
+        $comment = self::target(Comment::class, 9, 'spam', 'post');
+
+        $deleted = $this->phraser()->phrase($this->item(
+            self::entry('dissociate', Post::class, '1', [], 'Why audit?', id: 2, target: $comment, field: 'comments'),
+            self::entry('remove', Comment::class, '9', [], 'spam', id: 1),
+        ));
+        $this->assertSame('deleted Comment “spam”', (string) $deleted, 'Removing a deleted comment from the comments of its post is part of its deletion.');
+        $this->assertSame('deleted', $deleted->icon);
+
+        $created = $this->phraser()->phrase($this->item(
+            self::entry('associate', Post::class, '1', [], 'Why audit?', id: 2, target: $comment, field: 'comments'),
+            self::entry('insert', Comment::class, '9', ['body' => ['old' => null, 'new' => 'spam']], 'spam', id: 1),
+        ));
+        $this->assertSame('created Comment “spam”', (string) $created, 'Adding a created comment to the comments of its post is part of its creation.');
+
+        $other = $this->phraser()->phrase($this->item(
+            $this->tagEntry('dissociate', 3, 'php', 2),
+            self::entry('remove', Comment::class, '9', [], 'spam', id: 1),
+        ));
+        $this->assertSame('deleted Comment “spam” and removed from Tags: php', (string) $other, 'An element that still exists is told.');
+    }
+
     public function testCollectionChangesOfTheSameFieldAreMerged(): void
     {
         $phrase = $this->phraser()->phrase($this->item(
