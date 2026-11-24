@@ -122,6 +122,7 @@ audit:
     entries: 'Invoeren'
     object: 'Object'
     field: 'Veld'
+    change: 'Wijziging'
     firewall: 'firewall'
     schema: 'schema'
     filter:

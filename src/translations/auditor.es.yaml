@@ -122,6 +122,7 @@ audit:
     entries: 'Entradas'
     object: 'Objeto'
     field: 'Campo'
+    change: 'Cambio'
     firewall: 'cortafuegos'
     schema: 'esquema'
     filter:

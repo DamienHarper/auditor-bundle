@@ -122,6 +122,7 @@ audit:
     entries: 'Kirjed'
     object: 'Objekt'
     field: 'Väli'
+    change: 'Muudatus'
     firewall: 'tulemüür'
     schema: 'skeem'
     filter:
