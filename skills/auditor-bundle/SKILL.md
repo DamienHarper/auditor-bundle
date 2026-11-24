@@ -109,7 +109,7 @@ entity `retention` only accepts `max_age` / `max_entries`; the four resolver opt
 `retention.schedule` must be a valid cron expression and needs `symfony/scheduler` and `dragonmantank/cron-expression`
 (then run `bin/console messenger:consume scheduler_dh_auditor_retention`).
 
-Reference: https://damienharper.github.io/auditor-docs/auditor-bundle/configuration/ ·
+Reference: https://damienharper.github.io/auditor-docs/auditor-bundle/configuration ·
 multi-database storage: https://damienharper.github.io/auditor-docs/auditor-bundle/configuration/storage
 
 ## 4. Mark entities with attributes (alternative or complement to YAML)
@@ -185,7 +185,7 @@ under a strict CSP once assets are installed.
 To show a history inside your own pages: `composer require symfony/ux-twig-component`, then
 `<twig:DhAuditor:History :subject="post" />`.
 
-Docs: https://damienharper.github.io/auditor-docs/auditor-bundle/viewer/ ·
+Docs: https://damienharper.github.io/auditor-docs/auditor-bundle/viewer ·
 https://damienharper.github.io/auditor-docs/auditor-bundle/customization/histories
 
 ## 6. Customize who, where and what extra
@@ -259,7 +259,7 @@ Other services: `DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader` (autowi
 `createRootQuery()`), `DH\Auditor\Provider\Doctrine\DoctrineProvider` (alias `dh_auditor.provider.doctrine`,
 or an argument `DH\Auditor\Provider\ProviderInterface $doctrineProvider`), `DH\Auditor\Auditor`. Custom providers: tag a service `dh_auditor.provider`.
 
-Docs: https://damienharper.github.io/auditor-docs/auditor-bundle/customization/ (user-provider, security-provider,
+Docs: https://damienharper.github.io/auditor-docs/auditor-bundle/customization (user-provider, security-provider,
 role-checker, extra-data, blame-context, custom-provider)
 
 ## 7. Audit tables and console commands

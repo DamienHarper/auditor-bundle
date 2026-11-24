@@ -4,9 +4,9 @@
   "description": "Symfony bundle for auditor: automatic Doctrine ORM audit logs, entity change history and an audit log viewer (formerly DoctrineAuditBundle).",
   "keywords": ["symfony", "symfony-bundle", "doctrine", "doctrine-orm", "audit", "auditor", "audit-log", "audit-trail", "auditing", "change-tracking", "entity-history", "history", "doctrine-audit-bundle"],
   "license": "MIT",
-  "homepage": "https://damienharper.github.io/auditor-docs/auditor-bundle/",
+  "homepage": "https://damienharper.github.io/auditor-docs/auditor-bundle",
   "support": {
-    "docs": "https://damienharper.github.io/auditor-docs/auditor-bundle/",
+    "docs": "https://damienharper.github.io/auditor-docs/auditor-bundle",
     "issues": "https://github.com/DamienHarper/auditor-bundle/issues",
     "source": "https://github.com/DamienHarper/auditor-bundle"
   },

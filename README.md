@@ -53,7 +53,7 @@ Follow instructions at [auditor-bundle-demo](https://github.com/DamienHarper/aud
 
 
 ## Official Documentation
-`auditor-bundle` official documentation can be found [here](https://damienharper.github.io/auditor-docs/auditor-bundle/).
+`auditor-bundle` official documentation can be found [here](https://damienharper.github.io/auditor-docs/auditor-bundle).
 
 
 ## Version Information
@@ -73,7 +73,7 @@ See [UPGRADE-8.0.md](UPGRADE-8.0.md) for upgrade instructions from 7.x to 8.0 (t
 
 
 ## Usage
-Once [installed](https://damienharper.github.io/auditor-docs/auditor-bundle/getting-started/installation) and [configured](https://damienharper.github.io/auditor-docs/auditor-bundle/configuration/), any database change 
+Once [installed](https://damienharper.github.io/auditor-docs/auditor-bundle/getting-started/installation) and [configured](https://damienharper.github.io/auditor-docs/auditor-bundle/configuration), any database change 
 affecting audited entities will be logged to audit logs automatically.
 Also, running schema update or similar will automatically setup audit logs for every 
 new auditable entity.
