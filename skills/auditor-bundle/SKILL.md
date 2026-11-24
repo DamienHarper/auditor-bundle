@@ -17,7 +17,7 @@ The work is split over three packages; the bundle requires the other two:
 | `damienharper/auditor-doctrine-provider` (2.x) | `DoctrineProvider`: change detection, audit tables, `Reader`, `audit:*` commands |
 | `damienharper/auditor-bundle` (8.x) | Symfony wiring (`dh_auditor` config), user/security/role providers from Symfony Security, viewer at `/audit`, export, console and Messenger blame, scheduled retention, Twig helpers |
 
-Full documentation: https://damienharper.github.io/auditor-docs/auditor-bundle/
+Full documentation: https://damienharper.github.io/auditor-docs/auditor-bundle
 
 ## 1. Check the versions first
 
@@ -26,7 +26,7 @@ Run `composer show damienharper/auditor-bundle` (or read `composer.lock`). This 
 | auditor-bundle | auditor | auditor-doctrine-provider | PHP | Symfony | Doctrine |
 |---|---|---|---|---|---|
 | 8.x | 5.x | 2.x | >= 8.4, `ext-intl` | >= 8.1 | DBAL >= 4.6, ORM >= 3.7, DoctrineBundle 3 |
-| 7.x | 4.x (>= 4.4) | 1.x (>= 1.4) | >= 8.4 | >= 8.1 | DBAL 4, ORM >= 3.2 |
+| 7.x | 4.x (>= 4.4) | 1.x (>= 1.4) | >= 8.4, `ext-intl` | >= 8.1 | DBAL 4, ORM >= 3.2 |
 
 On 7.x, do not apply 8.x-only features (phrases, histories, `audit:snapshot`, `/audit/export`, schema v2 `blame` JSON)
 without upgrading; see "Upgrading" below.
@@ -294,7 +294,9 @@ bin/console audit:schema:update --force       # needed with separate storage dat
   `DH\Auditor\Provider\Doctrine\Transaction\NeedsConversionToAuditableType`; viewer templates overridden from 7.x
   must be rewritten.
 - **From DoctrineAuditBundle** (`DH\DoctrineAuditBundle`, the former name of this package): there is no direct path. Upgrade one
-  major at a time with the guides in https://damienharper.github.io/auditor-docs/auditor-bundle/upgrade/, ending
+  major at a time: no single guide covers the path; start from the frozen notes at
+  https://damienharper.github.io/auditor-docs/auditor-bundle/6.x/upgrading and
+  https://damienharper.github.io/auditor-docs/auditor/3.x/upgrading, then `UPGRADE-7.0.md` and `UPGRADE-8.0.md`, ending
   with `DH\AuditorBundle\DHAuditorBundle`, the `dh_auditor` configuration root and the `DH\Auditor\Attribute\*`
   attributes (annotations are not supported).
 
@@ -311,6 +313,6 @@ bin/console audit:schema:update --force       # needed with separate storage dat
 - Giving `storage_mapper` a service ID: it is an invokable class name.
 - Setting `batch_size` while a listener reads `$payload['id']`.
 - Symfony user classes without `getId()`: entries get an empty `blame_id` and no user page in the viewer.
-- Importing `DH\Auditor\Provider\Doctrine\Auditing\Attribute\*` or `DH\DoctrineAuditBundle\*` classes: they no longer
+- Importing `DH\Auditor\Provider\Doctrine\Auditing\Attribute\{Auditable,Ignore,Security}` or `DH\DoctrineAuditBundle\*` classes: they no longer
   exist in 8.x.
 - Expecting scheduled pruning without `retention.schedule` and a running `messenger:consume scheduler_dh_auditor_retention`.

@@ -38,7 +38,7 @@ for the viewer routes and the full configuration.
 
 ## Using an AI coding agent?
 This package ships an [Agent Skill](https://agentskills.io) in [`skills/auditor-bundle/`](skills/auditor-bundle/SKILL.md)
-(`vendor/damienharper/auditor-bundle/skills/` once installed) describing the bundle for the installed version.
+(`vendor/damienharper/auditor-bundle/skills/` once installed) describing the bundle. The copy in `vendor/` matches your installed version; the marketplace serves the current major.
 With Claude Code:
 ```
 /plugin marketplace add DamienHarper/auditor
