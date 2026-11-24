@@ -85,7 +85,14 @@
                                 <td class="px-3 py-2 font-mono">{{ entry.type }}</td>
                                 <td class="break-words px-3 py-2" title="{{ written.entity }}">{{ object }}</td>
                                 <td class="break-words px-3 py-2 font-mono">{{ diffs.source.field ?? '' }}</td>
-                                <td class="px-3 py-2" colspan="2">{{ history.raw(diffs.target ?? null) }}</td>
+                                {#- a link has no old and new values: its target was added (under new) or removed (under old) -#}
+                                {% if entry.type == 'associate' %}
+                                    <td class="px-3 py-2 text-dh-muted-foreground">—</td>
+                                    <td class="px-3 py-2">{{ history.raw(diffs.target ?? null) }}</td>
+                                {% else %}
+                                    <td class="px-3 py-2">{{ history.raw(diffs.target ?? null) }}</td>
+                                    <td class="px-3 py-2 text-dh-muted-foreground">—</td>
+                                {% endif %}
                             </tr>
                         {% else %}
                             {% for field, diff in diffs %}

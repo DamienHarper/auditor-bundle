@@ -696,6 +696,33 @@ final class ViewerControllerTest extends WebTestCase
         );
     }
 
+    public function testTheTechnicalDetailsPutTheTargetOfALinkUnderNewOrOld(): void
+    {
+        $entityManager = $this->provider->getAuditingServiceForEntity(Post::class)->getEntityManager();
+        $post = new Post()->setTitle('Title')->setBody('Body')->setCreatedAt(new \DateTimeImmutable('2026-01-01'));
+        $tag = new Tag()->setTitle('linked tag');
+        $entityManager->persist($post);
+        $entityManager->persist($tag);
+        $entityManager->flush();
+
+        $post->addTag($tag);
+        $entityManager->flush();
+        $post->removeTag($tag);
+        $entityManager->flush();
+
+        $this->login();
+        foreach (['associate' => [4, 5], 'dissociate' => [5, 4]] as $type => [$empty, $target]) {
+            $entry = $this->createReader()->createQuery(Post::class, ['object_id' => (string) $post->getId(), 'type' => $type])->execute()[0];
+            $crawler = $this->client->request('GET', '/audit/transaction/'.$entry->transactionId);
+
+            $this->assertResponseIsSuccessful();
+            $cells = $crawler->filter('section table tbody tr')->first()->filter('td');
+            $this->assertCount(6, $cells, $type.': one cell per column, none spanning old and new');
+            $this->assertSame('—', mb_trim($cells->eq($empty)->text()), $type.': the other side of the link is empty');
+            $this->assertStringContainsString('linked tag', $cells->eq($target)->text(), $type.': the target sits under '.('associate' === $type ? 'new' : 'old'));
+        }
+    }
+
     public function testViewerHasNoInlineScript(): void
     {
         $this->seedUserEntry(Post::class, 'timeline-user', 'timeline.user', '2026-01-01 10:00:00');
