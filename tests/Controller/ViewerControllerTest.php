@@ -1083,7 +1083,8 @@ final class ViewerControllerTest extends WebTestCase
     public function testATableBeingMigratedKeepsTheActionsOfItsRowsNotConvertedYet(): void
     {
         $this->seedAction(Comment::class, 'converted', '2030-01-03 10:00:00', [9_001, 9_002]);
-        $this->seedAction(Comment::class, 'legacy', '2030-01-02 10:00:00', [9_003, 9_004, 9_005]);
+        // more entries than the overview reads per table at first
+        $this->seedAction(Comment::class, 'legacy', '2030-01-02 10:00:00', range(9_100, 9_124));
         $this->seedAction(Comment::class, 'older', '2030-01-01 10:00:00', [9_006]);
         // audit:schema:migrate without --convert-transaction-hash: transaction_hash kept, transaction_id NULL
         $table = $this->createReader()->getEntityAuditTableName(Comment::class);
@@ -1095,10 +1096,10 @@ final class ViewerControllerTest extends WebTestCase
 
         $stream = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Comment');
         $this->assertSame(['converted', 'legacy'], $this->actionKeys($stream), 'The rows not converted yet are one action, by their hash.');
-        $this->assertStringContainsString('created 3 Comment', $stream->filter('[data-dh-auditor-action="legacy"]')->text());
+        $this->assertStringContainsString('created 25 Comment', $stream->filter('[data-dh-auditor-action="legacy"]')->text());
 
         $overview = $this->client->request('GET', '/audit');
-        $this->assertStringContainsString('created 3 Comment', $overview->filter('[data-dh-auditor-action="legacy"]')->text());
+        $this->assertStringContainsString('created 25 Comment', $overview->filter('[data-dh-auditor-action="legacy"]')->text());
     }
 
     public function testAnEntryWithoutTransactionIsAnActionOfItsOwn(): void
