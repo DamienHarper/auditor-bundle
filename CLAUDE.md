@@ -94,7 +94,7 @@ Compiler passes (`src/DependencyInjection/Compiler/`): `DoctrineMiddlewareCompil
 | `ConsoleEventSubscriber` | `src/Event/ConsoleEventSubscriber.php` | Console user provider during commands |
 | `UserProvider`, `ConsoleUserProvider` | `src/User/` | Blame user (impersonation aware) |
 | `SecurityProvider`, `RoleChecker` | `src/Security/` | Client IP and firewall; per-entity `roles.view` checks |
-| `ExtraDataProvider` | `src/ExtraData/ExtraDataProvider.php` | Opt-in `extra_data` (route name and params) |
+| `ExtraDataProvider` | `src/ExtraData/ExtraDataProvider.php` | Opt-in `extra_data` (route name only) |
 | `PruneAuditLogsHandler`, `RetentionSchedule` | `src/Retention/` | Scheduled pruning through Messenger and Scheduler |
 | `ActivityGraphProvider`, `RevisionComparator` | `src/Viewer/` | Activity graph and counts (cached), revision compare |
 | `ObjectHistory`, `Overview`, `HistoryFilters`, `ActionNavigator`, `ObjectExistence`, `WordDiff` | `src/Viewer/` | Data of the viewer pages: object history by cursor and its filters, recent activity and action counts, previous / next action, "(deleted)" marker, word diff |
