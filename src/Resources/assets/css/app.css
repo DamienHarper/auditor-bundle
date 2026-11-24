@@ -6,10 +6,28 @@
 /* Dark mode: use class strategy instead of media query */
 @variant dark (&:where(.dark, .dark *));
 
-/** Form controls of the viewer (filters, sort, buttons next to them): one height, one look **/
+/** Form controls of the viewer (filters, sort, buttons next to them): one height, one look. Only their focus ring
+    transitions, so that they switch at once with the theme instead of flashing. **/
 @layer components {
     .dh-auditor-control {
-        @apply h-8 rounded-lg border border-dh-input bg-dh-card px-2.5 text-sm text-dh-foreground shadow-xs transition-colors hover:bg-dh-accent focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-dh-ring dark:bg-dh-input/30 dark:[color-scheme:dark];
+        @apply h-8 rounded-lg border border-dh-input bg-dh-card px-2.5 text-sm text-dh-foreground shadow-xs transition-shadow hover:bg-dh-accent focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-dh-ring dark:bg-dh-input/30 dark:[color-scheme:dark];
+    }
+
+    /* Selects draw their own chevron, away from the border: two gradients rather than a data: image, which a strict
+       Content Security Policy (img-src 'self') would block */
+    select.dh-auditor-control {
+        @apply appearance-none pr-8;
+        background-image:
+            linear-gradient(45deg, transparent 50%, var(--dh-muted-foreground) 50%),
+            linear-gradient(135deg, var(--dh-muted-foreground) 50%, transparent 50%);
+        background-position: calc(100% - 15px) 55%, calc(100% - 11px) 55%;
+        background-size: 4px 4px, 4px 4px;
+        background-repeat: no-repeat;
+    }
+
+    /* The main button of a form (Apply) */
+    .dh-auditor-control-primary {
+        @apply border-transparent bg-dh-primary font-medium text-dh-primary-foreground hover:bg-dh-primary/90 dark:bg-dh-primary dark:hover:bg-dh-primary/90;
     }
 }
 

@@ -47,7 +47,7 @@
                 <option value="{{ days }}" {{ filters.days == days ? 'selected' }}>{{ 'audit.history.filter.days'|trans({'%count%': days}, 'auditor') }}</option>
             {% endfor %}
         </select>
-        <noscript><button type="submit" class="dh-auditor-control">{{ 'audit.filter.apply'|trans(domain='auditor') }}</button></noscript>
+        <noscript><button type="submit" class="dh-auditor-control dh-auditor-control-primary">{{ 'audit.filter.apply'|trans(domain='auditor') }}</button></noscript>
     </form>
 
     <section class="mt-2" data-dh-auditor-actions>
