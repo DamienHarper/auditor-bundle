@@ -23,7 +23,7 @@ audit:
     activity_asc: Kõige kauem passiivne
   audit_details:
     view_audit: Vaata auditit
-    most_recent: (hiljuti lisatud eespool)
+    most_recent: hiljuti lisatud eespool
     view_transaction: Vaatle kõiki selle transaktsiooni toiminguid
     property: Rekvisiit
     old_value: Vana väärtus

@@ -23,7 +23,7 @@ audit:
     activity_asc: Am längsten inaktiv
   audit_details:
     view_audit: Audits anzeigen
-    most_recent: (neueste zuerst)
+    most_recent: neueste zuerst
     view_transaction: Alle Operationen dieser Transaktion anzeigen
     property: Eigenschaft
     old_value: Alter Wert

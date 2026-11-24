@@ -6,10 +6,11 @@
 /* Dark mode: use class strategy instead of media query */
 @variant dark (&:where(.dark, .dark *));
 
-/** Form controls of the viewer (filters, sort, buttons next to them): one height, one look **/
+/** Form controls of the viewer (filters, sort, buttons next to them): one height, one look. Only their focus ring
+    transitions, so that they switch at once with the theme instead of flashing. **/
 @layer components {
     .dh-auditor-control {
-        @apply h-8 rounded-lg border border-dh-input bg-dh-card px-2.5 text-sm text-dh-foreground shadow-xs transition-colors hover:bg-dh-accent focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-dh-ring dark:bg-dh-input/30 dark:[color-scheme:dark];
+        @apply h-8 rounded-lg border border-dh-input bg-dh-card px-2.5 text-sm text-dh-foreground shadow-xs transition-shadow hover:bg-dh-accent focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-dh-ring dark:bg-dh-input/30 dark:[color-scheme:dark];
     }
 
     /* Selects draw their own chevron, away from the border: two gradients rather than a data: image, which a strict

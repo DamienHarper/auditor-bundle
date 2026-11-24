@@ -276,10 +276,10 @@ final class ViewerControllerTest extends WebTestCase
         $title = $crawler->filter('h1');
         $this->assertStringContainsString('Author', $title->text(), 'Page title contains Author');
 
-        // Check filtered events not found
+        // Check filtered entries not found
         $crawler = $this->client->request('GET', $uri.'?type=associate&user=1111111');
         $subtitle = $crawler->filter('h1+p');
-        $this->assertStringContainsString('0 events', $subtitle->text(), 'Subtitle contains 0 events');
+        $this->assertStringContainsString('no entry', $subtitle->text(), 'Subtitle counts no entry');
     }
 
     #[Depends('testShowEntityHistoryWithRoleGrantedForAuthorAuditViewing')]
@@ -308,29 +308,29 @@ final class ViewerControllerTest extends WebTestCase
         // Only the entries whose diff touches the field are listed.
         $crawler = $this->client->request('GET', $uri.'?field=coauthor');
         $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
-        $this->assertStringContainsString('3 events', $crawler->filter('h1+p')->text(), 'Exactly 3 coauthor changes');
+        $this->assertStringContainsString('3 entries', $crawler->filter('h1+p')->text(), 'Exactly 3 coauthor changes');
         $this->assertSame('coauthor', $crawler->filter('#filter-field option[selected]')->attr('value'), 'The filtered field is selected');
 
         // Collections match the associations and dissociations recorded on them.
         $crawler = $this->client->request('GET', $uri.'?field=tags');
-        $this->assertStringContainsString('10 events', $crawler->filter('h1+p')->text(), '8 tag associations and 2 dissociations');
+        $this->assertStringContainsString('10 entries', $crawler->filter('h1+p')->text(), '8 tag associations and 2 dissociations');
 
         // Filters are combined.
         $crawler = $this->client->request('GET', $uri.'?field=tags&type=dissociate');
-        $this->assertStringContainsString('2 events', $crawler->filter('h1+p')->text(), '2 tag dissociations');
+        $this->assertStringContainsString('2 entries', $crawler->filter('h1+p')->text(), '2 tag dissociations');
 
         // Clearing the period keeps the changed field filter.
         $crawler = $this->client->request('GET', $uri.'?field=tags&date_from=2000-01-01');
-        $this->assertStringContainsString('10 events', $crawler->filter('h1+p')->text(), 'Combined with a period');
+        $this->assertStringContainsString('10 entries', $crawler->filter('h1+p')->text(), 'Combined with a period');
         $this->assertStringContainsString('field=tags', (string) $crawler->selectLink('Clear period')->attr('href'), 'Clearing the period keeps the field');
 
         // Keys of the association diffs are not fields.
         $crawler = $this->client->request('GET', $uri.'?field=source');
-        $this->assertStringContainsString('0 events', $crawler->filter('h1+p')->text(), 'source is not a field');
+        $this->assertStringContainsString('no entry', $crawler->filter('h1+p')->text(), 'source is not a field');
 
         // A field that is no longer mapped stays filterable and selectable.
         $crawler = $this->client->request('GET', $uri.'?field=subtitle');
-        $this->assertStringContainsString('0 events', $crawler->filter('h1+p')->text(), 'Unknown field matches nothing');
+        $this->assertStringContainsString('no entry', $crawler->filter('h1+p')->text(), 'Unknown field matches nothing');
         $this->assertSame('subtitle', $crawler->filter('#filter-field option[selected]')->attr('value'), 'The unknown field is selected');
     }
 
@@ -412,7 +412,9 @@ final class ViewerControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Author', $filters);
 
         $this->assertResponseIsSuccessful();
-        $this->assertStringContainsString($expectedCount.' events', $crawler->filter('h1+p')->text());
+        $this->assertStringContainsString(match ($expectedCount) {
+            0 => 'no entry', 1 => '1 entry', default => $expectedCount.' entries'
+        }, $crawler->filter('h1+p')->text());
         $this->assertSame($filters['date_from'] ?? '', $crawler->filter('[name="date_from"]')->attr('value'));
         $this->assertSame($filters['date_to'] ?? '', $crawler->filter('[name="date_to"]')->attr('value'));
     }
@@ -523,13 +525,15 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertGreaterThan(0, (int) $expectedCount);
         $filtered = $this->client->click($lastBar->link());
         $this->assertResponseIsSuccessful();
-        $this->assertStringContainsString($expectedCount.' events', $filtered->filter('h1+p')->text());
+        $this->assertStringContainsString(match ($expectedCount) {
+            0 => 'no entry', 1 => '1 entry', default => $expectedCount.' entries'
+        }, $filtered->filter('h1+p')->text());
         $this->assertSame($today->format('Y-m-d'), $filtered->filter('[name="date_from"]')->attr('value'));
         $this->assertSame($today->format('Y-m-d'), $filtered->filter('[name="date_to"]')->attr('value'));
 
         $emptyDay = $this->client->click($bars->first()->link());
         $this->assertResponseIsSuccessful();
-        $this->assertStringContainsString('0 events', $emptyDay->filter('h1+p')->text());
+        $this->assertStringContainsString('no entry', $emptyDay->filter('h1+p')->text());
     }
 
     public static function provideActivityBarsLinkToTheirDayCases(): iterable

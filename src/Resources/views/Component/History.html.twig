@@ -20,7 +20,7 @@
     {% set viewer_url = this.viewerUrl %}
     {% if this.olderUrl or viewer_url %}
         <div class="mt-2 flex justify-between gap-4 text-sm">
-            {% if this.olderUrl %}<a href="{{ this.olderUrl }}" class="inline-flex h-8 items-center rounded-lg border border-dh-input bg-dh-card px-2.5 font-medium text-dh-foreground shadow-xs transition-colors hover:bg-dh-accent focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-dh-ring dark:bg-dh-input/30" data-dh-auditor-older>{{ 'audit.component.older'|trans(domain='auditor') }}</a>{% else %}<span></span>{% endif %}
+            {% if this.olderUrl %}<a href="{{ this.olderUrl }}" class="inline-flex h-8 items-center rounded-lg border border-dh-input bg-dh-card px-2.5 font-medium text-dh-foreground shadow-xs transition-shadow hover:bg-dh-accent focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-dh-ring dark:bg-dh-input/30" data-dh-auditor-older>{{ 'audit.component.older'|trans(domain='auditor') }}</a>{% else %}<span></span>{% endif %}
             {% if viewer_url %}<a href="{{ viewer_url }}" class="font-medium text-dh-foreground underline underline-offset-4 hover:decoration-2">{{ 'audit.component.open_in_viewer'|trans(domain='auditor') }} →</a>{% endif %}
         </div>
     {% endif %}

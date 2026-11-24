@@ -23,7 +23,7 @@ audit:
     activity_asc: Langst inactief
   audit_details:
     view_audit: Bekijk versie
-    most_recent: (meest recente eerst)
+    most_recent: meest recente eerst
     view_transaction: Bekijk alle operaties van deze transactie
     property: Veld
     old_value: Oude waarde

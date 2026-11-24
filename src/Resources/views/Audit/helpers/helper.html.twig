@@ -108,7 +108,7 @@
             <a href="{{ path('dh_auditor_show_entity_stream', {entity: _self.namespaceToParam(entity), date_from: date, date_to: date}) }}"
                class="group flex flex-1 items-end h-full rounded-sm" title="{{ label }}" aria-label="{{ label }}"
                data-audit-date="{{ date }}" data-audit-count="{{ rawValue }}">
-                <span class="w-full rounded-sm transition-colors group-hover:bg-dh-brand-to group-focus-visible:bg-dh-brand-to {{ color }} dh-auditor-bar-h-{{ height }}"></span>
+                <span class="w-full rounded-sm group-hover:bg-dh-brand-to group-focus-visible:bg-dh-brand-to {{ color }} dh-auditor-bar-h-{{ height }}"></span>
             </a>
         {% else %}
             <div class="flex-1 rounded-sm {{ color }} dh-auditor-bar-h-{{ height }}" title="{{ label }}"></div>

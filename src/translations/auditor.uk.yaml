@@ -23,7 +23,7 @@ audit:
     activity_asc: Найдавніша активність
   audit_details:
     view_audit: Переглянути перевірку
-    most_recent: (найновіші перші)
+    most_recent: найновіші перші
     view_transaction: Переглянути всі операції цієї транзакції
     property: Атрибут
     old_value: Старе значення

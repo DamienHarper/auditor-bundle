@@ -23,7 +23,7 @@ audit:
     activity_asc: Attività meno recente
   audit_details:
     view_audit: Visualizza audit
-    most_recent: (la più recente per prima)
+    most_recent: la più recente per prima
     view_transaction: Visualizza tutte le operazioni di questa transazione
     property: Proprietà
     old_value: Vecchio valore
