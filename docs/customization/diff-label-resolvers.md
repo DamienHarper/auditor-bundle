@@ -1,3 +1,7 @@
+---
+description: "Store readable labels next to raw values in audit diffs with #[DiffLabel] and DiffLabelResolverInterface services, and show them in the audit log viewer."
+---
+
 # Diff Label Resolvers
 
 > **Display human-readable labels instead of raw IDs in audit diffs**

@@ -1,3 +1,7 @@
+---
+description: Attach extra data to audit entries in Symfony with the extra_data_provider option or a LifecycleEvent listener, then read and filter it with JsonFilter.
+---
+
 # Extra Data
 
 > **Store additional contextual information in audit entries**

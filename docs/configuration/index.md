@@ -1,3 +1,7 @@
+---
+description: Reference of every dh_auditor option in Symfony, from global providers to Doctrine ORM provider options, entities, viewer, retention and logging.
+---
+
 # Configuration Reference
 
 > **All configuration options available in auditor-bundle**

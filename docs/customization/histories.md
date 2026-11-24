@@ -1,3 +1,7 @@
+---
+description: "Show the history of a business object across entities: audit roots, root queries, field labels, phrases, Twig functions and the History Twig component."
+---
+
 # Histories
 
 > **Show users the history of a business object and who changed each field**

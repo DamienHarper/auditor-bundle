@@ -1,3 +1,7 @@
+---
+description: Record how a change was made (an import, a console command, a Messenger message) in audit entries with BlameContextStack and the Messenger middleware.
+---
+
 # Blame Context
 
 > **Record how a change was made: an import, a console command, a Messenger message…**

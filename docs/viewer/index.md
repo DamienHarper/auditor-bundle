@@ -1,3 +1,7 @@
+---
+description: "Enable, secure and customize the audit log viewer of auditor-bundle: routes, pages, export, activity graph, access control, URL generation and templates."
+---
+
 # Audit Viewer
 
 > **Web interface for browsing audit logs**

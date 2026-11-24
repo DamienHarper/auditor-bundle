@@ -1,3 +1,7 @@
+---
+description: Customize how the client IP address and firewall name are recorded in audit entries with a SecurityProviderInterface service, for example behind a proxy.
+---
+
 # Security Provider
 
 > **Customize IP address and context detection for audit entries**
