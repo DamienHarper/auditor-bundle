@@ -1080,6 +1080,27 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertStringContainsString('created 10 Comment', $crawler->filter('[data-dh-auditor-action="small"]')->text(), 'A small action is told whole.');
     }
 
+    public function testATableBeingMigratedKeepsTheActionsOfItsRowsNotConvertedYet(): void
+    {
+        $this->seedAction(Comment::class, 'converted', '2030-01-03 10:00:00', [9_001, 9_002]);
+        $this->seedAction(Comment::class, 'legacy', '2030-01-02 10:00:00', [9_003, 9_004, 9_005]);
+        $this->seedAction(Comment::class, 'older', '2030-01-01 10:00:00', [9_006]);
+        // audit:schema:migrate without --convert-transaction-hash: transaction_hash kept, transaction_id NULL
+        $table = $this->createReader()->getEntityAuditTableName(Comment::class);
+        $connection = $this->provider->getStorageServiceForEntity(Comment::class)->getEntityManager()->getConnection();
+        $connection->executeStatement(\sprintf('ALTER TABLE %s ADD transaction_hash VARCHAR(40) NULL', $table));
+        $connection->executeStatement(\sprintf("UPDATE %s SET transaction_hash = transaction_id, transaction_id = NULL WHERE transaction_id = 'legacy'", $table));
+        $this->provider->getConfiguration()->setViewerPageSize(2);
+        $this->login(['ROLE_1']);
+
+        $stream = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Comment');
+        $this->assertSame(['converted', 'legacy'], $this->actionKeys($stream), 'The rows not converted yet are one action, by their hash.');
+        $this->assertStringContainsString('created 3 Comment', $stream->filter('[data-dh-auditor-action="legacy"]')->text());
+
+        $overview = $this->client->request('GET', '/audit');
+        $this->assertStringContainsString('created 3 Comment', $overview->filter('[data-dh-auditor-action="legacy"]')->text());
+    }
+
     public function testAnEntryWithoutTransactionIsAnActionOfItsOwn(): void
     {
         $this->seedUserEntry(Comment::class, 'lonely', 'lonely', '2030-01-02 10:00:00', null, 9_001);

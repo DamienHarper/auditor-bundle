@@ -61,7 +61,7 @@ final readonly class Overview
 
     /**
      * The most recent actions across the audited entities: the latest entries of each table give the latest actions,
-     * which are then read whole (WholeActions::MAX_ENTRIES at most per action) across the tables.
+     * which are then read whole (WholeActions::MAX_ENTRIES at most per table) across the tables.
      *
      * @param list<string> $entities
      *
@@ -92,10 +92,23 @@ final readonly class Overview
         $transactions = array_values(array_filter(array_map(static fn (HistoryItem $item): ?string => $item->entries[0]->transactionId, $latest), static fn (?string $id): bool => null !== $id));
         $entries = array_values(array_filter($rows, static fn (array $row): bool => null === $row['entry']->transactionId && isset($keys[HistoryGrouper::transactionKey($row['entry'])])));
 
-        // then the other ones read whole, across the tables (on the transaction_id index)
+        // then the other ones read whole, across the tables (on the transaction_id index), WholeActions::MAX_ENTRIES at
+        // most per table: the entries read above keep an action that a larger one leaves out
         if ([] !== $transactions) {
-            $queries = array_map(static fn (Query $query): Query => (clone $query)->addFilter(new SimpleFilter($query->getTransactionColumn(), $transactions)), $queries);
-            $entries = [...$entries, ...WholeActions::page($queries, $limit)];
+            $read = [];
+            foreach ($rows as $row) {
+                if (null !== $row['entry']->transactionId && isset($keys[HistoryGrouper::transactionKey($row['entry'])])) {
+                    $read[$row['entity'].'#'.$row['entry']->id] = $row;
+                }
+            }
+
+            foreach ($queries as $entity => $query) {
+                foreach ($query->transactionEntries($transactions, WholeActions::MAX_ENTRIES) as $entry) {
+                    $read[$entity.'#'.$entry->id] ??= ['entity' => $entity, 'entry' => $entry];
+                }
+            }
+
+            $entries = [...$entries, ...array_values($read)];
             usort($entries, WholeActions::compare(...));
         }
 

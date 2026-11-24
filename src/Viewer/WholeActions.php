@@ -50,24 +50,23 @@ final class WholeActions
         $rows = [];
         foreach ($queries as $entity => $query) {
             $entity = (string) $entity;
-            $column = $query->getTransactionColumn();
 
             $small = [];
             foreach ($transactions as $transaction) {
                 if (null === $transaction->transactionId) {
                     if ($transaction->table === $query->getTable() && null !== $transaction->entryId) {
-                        array_push($rows, ...self::entries($entity, $query, Query::ID, [(string) $transaction->entryId], 1));
+                        array_push($rows, ...self::rows($entity, (clone $query)->addFilter(new SimpleFilter(Query::ID, (string) $transaction->entryId))->execute()));
                     }
                 } elseif ($transaction->entries > $share) {
                     // a large action: only its most recent entries, so that the page stays bounded
-                    array_push($rows, ...self::entries($entity, $query, $column, [$transaction->transactionId], $share));
+                    array_push($rows, ...self::rows($entity, $query->transactionEntries([$transaction->transactionId], $share)));
                 } else {
                     $small[] = $transaction->transactionId;
                 }
             }
 
             if ([] !== $small) {
-                array_push($rows, ...self::entries($entity, $query, $column, $small, 0));
+                array_push($rows, ...self::rows($entity, $query->transactionEntries($small)));
             }
         }
 
@@ -112,21 +111,12 @@ final class WholeActions
     }
 
     /**
-     * Entries read by $query (its filters kept) whose $column is one of $values, most recent first.
-     *
-     * @param non-empty-list<string> $values
-     * @param int                    $limit  0 for no limit
+     * @param list<Entry> $entries
      *
      * @return list<array{entity: string, entry: Entry}>
      */
-    private static function entries(string $entity, Query $query, string $column, array $values, int $limit): array
+    private static function rows(string $entity, array $entries): array
     {
-        $entries = (clone $query)
-            ->addFilter(new SimpleFilter($column, $values))
-            ->limit($limit)
-            ->execute()
-        ;
-
         return array_map(static fn (Entry $entry): array => ['entity' => $entity, 'entry' => $entry], array_values($entries));
     }
 }
