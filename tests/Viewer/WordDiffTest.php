@@ -29,7 +29,17 @@ final class WordDiffTest extends TestCase
      */
     public static function provideDiffCases(): iterable
     {
-        yield 'words added' => ['Why audit?', 'Why audit your entities?', [['equal', 'Why '], ['delete', 'audit?'], ['insert', 'audit your entities?']]];
+        yield 'words added before a punctuation mark' => ['Why audit?', 'Why audit your entities?', [['equal', 'Why audit'], ['insert', ' your entities'], ['equal', '?']]];
+
+        yield 'punctuation apart from the word it follows' => [
+            'Aut adipisci mollitia.',
+            'Aut adipisci mollitia - Revised Edition',
+            [['equal', 'Aut adipisci mollitia'], ['delete', '.'], ['insert', ' - Revised Edition']],
+        ];
+
+        yield 'punctuation changed' => ['Hello, world', 'Hello; world', [['equal', 'Hello'], ['delete', ','], ['insert', ';'], ['equal', ' world']]];
+
+        yield 'apostrophe' => ["Filomena Welch's comment", "Filomena Welsh's comment", [['equal', 'Filomena '], ['delete', 'Welch'], ['insert', 'Welsh'], ['equal', "'s comment"]]];
 
         yield 'word replaced' => ['the cat sat', 'the dog sat', [['equal', 'the '], ['delete', 'cat'], ['insert', 'dog'], ['equal', ' sat']]];
 
