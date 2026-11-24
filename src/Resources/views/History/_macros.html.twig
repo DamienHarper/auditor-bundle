@@ -45,5 +45,35 @@
 
 {#- A raw value of a diff, as JSON. -#}
 {% macro raw(value) -%}
-    <code class="break-all font-mono text-xs">{{ value is null ? 'null' : value|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES')) }}</code>
+    <code class="break-words font-mono text-xs">{{ value is null ? 'null' : value|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES')) }}</code>
+{%- endmacro %}
+
+{#- Text deleted by a change. -#}
+{% macro deleted(text) -%}
+    <del class="bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200">{{ text }}</del>
+{%- endmacro %}
+
+{#- Text inserted by a change. -#}
+{% macro inserted(text) -%}
+    <ins class="bg-emerald-100 text-emerald-800 no-underline dark:bg-emerald-900/40 dark:text-emerald-200">{{ text }}</ins>
+{%- endmacro %}
+
+{#- A value of the action details: a text between quotes with its line breaks, any other value as JSON. -#}
+{% macro value(value) -%}
+    {#- a text is the only value equal to its own string conversion (a number or a boolean is not) -#}
+    {%- if value is not iterable and value is not null and value is same as(value ~ '') -%}
+        <code class="whitespace-pre-wrap break-words font-mono text-xs">"{{ value }}"</code>
+    {%- else -%}
+        {{ _self.raw(value) }}
+    {%- endif -%}
+{%- endmacro %}
+
+{#- One side of an old → new change, marked as deleted or inserted; null stays unmarked. -#}
+{% macro marked(value, side) -%}
+    {%- if value is null -%}
+        <code class="font-mono text-xs text-slate-400">null</code>
+    {%- else -%}
+        {%- set shown = value is not iterable and value is same as(value ~ '') ? '"' ~ value ~ '"' : value|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES')) -%}
+        <code class="whitespace-pre-wrap break-words font-mono text-xs">{{ side == 'deleted' ? _self.deleted(shown) : _self.inserted(shown) }}</code>
+    {%- endif -%}
 {%- endmacro %}

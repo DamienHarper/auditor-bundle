@@ -122,6 +122,7 @@ audit:
     entries: 'Entrées'
     object: 'Objet'
     field: 'Champ'
+    change: 'Modification'
     firewall: 'pare-feu'
     schema: 'schéma'
     filter:
