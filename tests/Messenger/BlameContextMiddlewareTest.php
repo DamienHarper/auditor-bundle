@@ -115,8 +115,8 @@ final class BlameContextMiddlewareTest extends TestCase
                 new StackMiddleware($failing),
             );
             $this->fail('The exception is rethrown.');
-        } catch (\RuntimeException $e) {
-            $this->assertSame('Handler failed', $e->getMessage());
+        } catch (\RuntimeException $runtimeException) {
+            $this->assertSame('Handler failed', $runtimeException->getMessage());
         }
 
         $this->assertTrue($this->configuration->getBlameContextStack()->isEmpty());
@@ -134,10 +134,10 @@ final class BlameContextMiddlewareTest extends TestCase
     private function handle(Envelope $envelope): Envelope
     {
         $stack = $this->configuration->getBlameContextStack();
-        $probe = new class($this, $stack) implements MiddlewareInterface {
+        $probe = new readonly class($this, $stack) implements MiddlewareInterface {
             public function __construct(
-                private readonly BlameContextMiddlewareTest $test,
-                private readonly BlameContextStack $stack,
+                private BlameContextMiddlewareTest $test,
+                private BlameContextStack $stack,
             ) {}
 
             public function handle(Envelope $envelope, StackInterface $stack): Envelope
