@@ -484,7 +484,7 @@ dh_auditor:
 | Option      | Type   | Default | Description         |
 |-------------|--------|---------|---------------------|
 | `enabled`   | `bool` | `false` | Enable the viewer   |
-| `page_size` | `int`  | `50`    | Actions per page of the lists of actions |
+| `page_size` | `int`  | `50`    | Actions per page of the lists of actions; revisions per page of the revisions of an object; default entries per page of the `<twig:DhAuditor:History>` component |
 | `activity_graph` | `array` | | Activity graph of the overview (`enabled`, `days`, `layout`, `cache`), see [Activity Graph](../viewer/index.md#-activity-graph) |
 
 ### retention
