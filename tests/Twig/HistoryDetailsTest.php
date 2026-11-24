@@ -25,6 +25,8 @@ final class HistoryDetailsTest extends KernelTestCase
 {
     private const array AUTHOR = ['class' => Author::class, 'id' => 1, 'label' => 'John', 'table' => 'author'];
 
+    private const array STATUS = ['value' => 'draft', 'label' => 'Draft'];
+
     /**
      * @param array<string, mixed> $changes
      */
@@ -35,6 +37,7 @@ final class HistoryDetailsTest extends KernelTestCase
 
         $this->assertSame('"John"', $values['author'], 'The association shows the label of its target, not its JSON summary.');
         $this->assertSame('"First"', $values['title'], 'A plain field shows its raw value.');
+        $this->assertSame('"draft"', $values['status'], 'A #[DiffLabel] field shows its raw value, as in the details of a field change.');
     }
 
     /**
@@ -42,11 +45,11 @@ final class HistoryDetailsTest extends KernelTestCase
      */
     public static function provideEntityLevelDetailsShowTheLabelOfAnAssociationCases(): iterable
     {
-        yield 'creation' => ['insert', ['title' => ['old' => null, 'new' => 'First'], 'author' => ['old' => null, 'new' => self::AUTHOR]]];
+        yield 'creation' => ['insert', ['title' => ['old' => null, 'new' => 'First'], 'author' => ['old' => null, 'new' => self::AUTHOR], 'status' => ['old' => null, 'new' => self::STATUS]]];
 
-        yield 'snapshot' => ['insert', ['title' => ['old' => null, 'new' => 'First'], 'author' => ['old' => null, 'new' => self::AUTHOR]], true];
+        yield 'snapshot' => ['insert', ['title' => ['old' => null, 'new' => 'First'], 'author' => ['old' => null, 'new' => self::AUTHOR], 'status' => ['old' => null, 'new' => self::STATUS]], true];
 
-        yield 'removal with full_snapshot_on_remove' => ['remove', ['title' => ['old' => 'First', 'new' => null], 'author' => ['old' => self::AUTHOR, 'new' => null]]];
+        yield 'removal with full_snapshot_on_remove' => ['remove', ['title' => ['old' => 'First', 'new' => null], 'author' => ['old' => self::AUTHOR, 'new' => null], 'status' => ['old' => self::STATUS, 'new' => null]]];
     }
 
     /**
