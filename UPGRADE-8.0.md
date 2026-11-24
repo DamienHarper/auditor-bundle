@@ -55,7 +55,10 @@ must be rewritten from the new ones:
 - `Audit/entity_stream.html.twig` only renders the stream of a whole entity: the history of an object is
   `Audit/object_history.html.twig`;
 - `Audit/transaction_stream.html.twig` renders one action, no longer paginated;
-- `Audit/user_stream.html.twig` receives actions (`rows`) instead of `entries`;
+- `Audit/user_stream.html.twig` receives actions (`rows`) instead of `entries`, and their number (`actionCount`)
+  instead of `entryCount`;
+- `Audit/entity_stream.html.twig` and `Audit/object_history.html.twig` count actions: `paginator.numResults` and the
+  new `actionCount` are numbers of actions (`entryCount` is still given to the history of an object);
 - `Audit/entry.html.twig` is removed: the comparison page renders its changes like the action details, with the
   `text_change()` and `related()` macros of `History/_macros.html.twig`.
 
@@ -75,6 +78,8 @@ removed for a strict Content Security Policy).
 
 ### Configuration
 
+- The viewer `page_size` counts actions (transactions), no longer entries: every page of a list of actions but the
+  last holds `page_size` actions, each one whole.
 - The entity `ignored_columns` set in YAML are now applied to `#[Auditable]` entities too, on top of `#[Ignore]`.
 - An audit entry that cannot be written now fails the flush and rolls the transaction back (it used to be lost
   silently).

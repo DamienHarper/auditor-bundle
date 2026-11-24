@@ -104,6 +104,7 @@ audit:
     context_separator: ':'
     created_by: 'створено: %author%, %date%'
     entries_count: '%count% запис|%count% записи|%count% записів'
+    actions_count: '%count% дія|%count% дії|%count% дій'
     fields_count: '%count% поле|%count% поля|%count% полів'
     compare: 'Порівняти два стани'
     export: 'Експорт'

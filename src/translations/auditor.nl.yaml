@@ -104,6 +104,7 @@ audit:
     context_separator: ':'
     created_by: 'aangemaakt door %author% op %date%'
     entries_count: '{0} geen invoer|{1} 1 invoer|]1,Inf[ %count% invoeren'
+    actions_count: '{0} geen actie|{1} 1 actie|]1,Inf[ %count% acties'
     fields_count: '[0,1] %count% veld|]1,Inf[ %count% velden'
     compare: 'Twee toestanden vergelijken'
     export: 'Exporteren'

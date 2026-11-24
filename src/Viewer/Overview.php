@@ -9,6 +9,8 @@ use DH\Auditor\Exception\AccessDeniedException;
 use DH\Auditor\History\HistoryGrouper;
 use DH\Auditor\History\HistoryItem;
 use DH\Auditor\Provider\Doctrine\Persistence\Helper\SchemaHelper;
+use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\SimpleFilter;
+use DH\Auditor\Provider\Doctrine\Persistence\Reader\Query;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\Auditor\Provider\Doctrine\Persistence\Schema\SchemaManager;
 use DH\Auditor\Provider\Doctrine\Service\AuditingService;
@@ -59,7 +61,7 @@ final readonly class Overview
 
     /**
      * The most recent actions across the audited entities: the latest entries of each table give the latest actions,
-     * which are then read whole (WholeActions::MAX_ENTRIES at most) across the tables.
+     * which are then read whole (WholeActions::MAX_ENTRIES at most per action) across the tables.
      *
      * @param list<string> $entities
      *
@@ -84,12 +86,20 @@ final readonly class Overview
 
         usort($rows, WholeActions::compare(...));
 
-        // the entries of the latest actions, then those of these actions the latest entries left out
+        // the latest actions; an entry without transaction id is an action of its own, already whole
         $latest = \array_slice(HistoryGrouper::byTransaction(array_column($rows, 'entry')), 0, $limit);
-        $kept = array_fill_keys(array_map(static fn (HistoryItem $item): string => $item->key, $latest), true);
-        $rows = array_values(array_filter($rows, static fn (array $row): bool => isset($kept[HistoryGrouper::transactionKey($row['entry'])])));
+        $keys = array_fill_keys(array_map(static fn (HistoryItem $item): string => $item->key, $latest), true);
+        $transactions = array_values(array_filter(array_map(static fn (HistoryItem $item): ?string => $item->entries[0]->transactionId, $latest), static fn (?string $id): bool => null !== $id));
+        $entries = array_values(array_filter($rows, static fn (array $row): bool => null === $row['entry']->transactionId && isset($keys[HistoryGrouper::transactionKey($row['entry'])])));
 
-        return \array_slice(HistoryGrouper::byTransaction(array_column(WholeActions::complete($queries, $rows), 'entry')), 0, $limit);
+        // then the other ones read whole, across the tables (on the transaction_id index)
+        if ([] !== $transactions) {
+            $queries = array_map(static fn (Query $query): Query => (clone $query)->addFilter(new SimpleFilter($query->getTransactionColumn(), $transactions)), $queries);
+            $entries = [...$entries, ...WholeActions::page($queries, $limit)];
+            usort($entries, WholeActions::compare(...));
+        }
+
+        return \array_slice(HistoryGrouper::byTransaction(array_column($entries, 'entry')), 0, $limit);
     }
 
     /**

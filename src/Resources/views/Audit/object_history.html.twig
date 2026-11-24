@@ -24,7 +24,7 @@
                 {%- if creation %}
                     · {{ 'audit.history.created_by'|trans({'%author%': creationItem|dh_auditor_author, '%date%': creation.createdAt|format_date('medium', timezone: false)}, 'auditor') }}
                 {%- endif %}
-                · {{ 'audit.history.entries_count'|trans({'%count%': entryCount}, 'auditor') }}
+                · {{ 'audit.history.actions_count'|trans({'%count%': actionCount}, 'auditor') }}
             </p>
             <p class="mt-1 break-all font-mono text-xs text-dh-muted-foreground">{{ entity }} · {{ tables|first }}</p>
         </div>
