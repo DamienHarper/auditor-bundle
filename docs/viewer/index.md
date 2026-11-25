@@ -215,7 +215,7 @@ dh_auditor:
 | Layout   | Description                                                       |
 |----------|-------------------------------------------------------------------|
 | `bottom` | Sparkline displayed below the entity info, full width (default)  |
-| `inline` | Compact sparkline displayed in the header row, next to event count |
+| `inline` | Compact sparkline displayed in the header row, next to the number of actions |
 
 ### Caching
 
