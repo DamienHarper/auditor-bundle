@@ -93,7 +93,7 @@ dh_auditor:
                         max_entries: ~
             viewer:                                 # or just `viewer: true`; disabled by default
                 enabled: false
-                page_size: 50
+                page_size: 50                       # actions per page (revisions per page for an object; default of <twig:DhAuditor:History>)
                 activity_graph:
                     enabled: true
                     days: 30                        # 1..30
