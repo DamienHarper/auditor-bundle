@@ -65,9 +65,10 @@ marked as well).
   is read whole, whatever the number of its entries (a page reads 1,000 entries at most: past that, the largest
   actions tell only their most recent entries).
 - **What is audited**: the audited entities (their name from the `dh_auditor_fields` domain, key FQCN), their number of
-  actions (distinct transactions, cached with the activity graph when its cache is on), their latest activity and,
-  when enabled, their [activity graph](#-activity-graph). The list can be sorted by name, number of actions or latest
-  activity (`?sort=name_asc`, `name_desc`, `count_desc`, `count_asc`, `activity_desc`, `activity_asc`).
+  actions (as their stream counts them, cached with the activity graph when its cache is on and no `read_scope` is
+  set), their latest activity and, when enabled, their [activity graph](#-activity-graph). The list can be sorted by
+  name, number of actions or latest activity (`?sort=name_asc`, `name_desc`, `count_desc`, `count_asc`,
+  `activity_desc`, `activity_asc`).
 
 ### Object History (`/audit/{entity}/{id}`)
 
