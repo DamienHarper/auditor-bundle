@@ -21,8 +21,6 @@ final readonly class ActivityGraphProvider
 
     private const string CACHE_KEY_PREFIX = 'dh_auditor.activity.v4.';
 
-    private const string COUNT_CACHE_KEY_PREFIX = 'dh_auditor.count.';
-
     private const string ACTION_COUNT_CACHE_KEY_PREFIX = 'dh_auditor.actions.v2.';
 
     public function __construct(
@@ -87,16 +85,8 @@ final readonly class ActivityGraphProvider
     }
 
     /**
-     * Number of audit entries of an entity, kept in the activity cache (same lifetime and tag) when it is enabled:
-     * counting reads the whole audit table.
-     */
-    public function getEventCount(string $entity, Query $query): int
-    {
-        return $this->remember(self::COUNT_CACHE_KEY_PREFIX.md5($entity), $query->count(...), \is_int(...));
-    }
-
-    /**
-     * Number of actions of an entity, as its entity stream counts them, kept in the activity cache like the entry count.
+     * Number of actions of an entity, as its entity stream counts them, kept in the activity cache (same lifetime and
+     * tag) when it is enabled.
      *
      * @param \Closure(): int $count
      */
@@ -155,7 +145,7 @@ final readonly class ActivityGraphProvider
         }
 
         if (null !== $entity) {
-            return $this->cache->deleteItems([$this->getCacheKey($entity), self::COUNT_CACHE_KEY_PREFIX.md5($entity), self::ACTION_COUNT_CACHE_KEY_PREFIX.md5($entity)]);
+            return $this->cache->deleteItems([$this->getCacheKey($entity), self::ACTION_COUNT_CACHE_KEY_PREFIX.md5($entity)]);
         }
 
         if ($this->cache instanceof TagAwareAdapterInterface) {
