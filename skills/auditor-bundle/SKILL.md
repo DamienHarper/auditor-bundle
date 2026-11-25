@@ -93,7 +93,7 @@ dh_auditor:
                         max_entries: ~
             viewer:                                 # or just `viewer: true`; disabled by default
                 enabled: false
-                page_size: 50                       # actions per page (revisions per page for an object; default of <twig:DhAuditor:History>)
+                page_size: 50                       # actions per page (revisions per page for an object; also the default limit of <twig:DhAuditor:History>)
                 activity_graph:
                     enabled: true
                     days: 30                        # 1..30
@@ -183,7 +183,10 @@ viewer cannot show the page; combine with `dh_auditor_is_viewable(post)` for acc
 under a strict CSP once assets are installed.
 
 To show a history inside your own pages: `composer require symfony/ux-twig-component`, then
-`<twig:DhAuditor:History :subject="post" />`.
+`<twig:DhAuditor:History :subject="post" />`. Options: `limit` (default `page_size`) counts **actions** per page,
+except with a `grouper` that has a key of its own (an action may then span several transactions): it then counts
+entries, more when needed to keep the last action whole. Also `with` (your own `HistoryElementInterface` elements,
+sorted with `SortKey::of()`), `attached`, `details` (`true` or a role), `cursorParameter` (default `dh_auditor_after`).
 
 Docs: https://damienharper.github.io/auditor-docs/auditor-bundle/viewer ·
 https://damienharper.github.io/auditor-docs/auditor-bundle/customization/histories
