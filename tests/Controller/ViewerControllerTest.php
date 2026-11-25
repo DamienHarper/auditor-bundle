@@ -528,12 +528,18 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertGreaterThan(0, (int) $expectedCount);
         $filtered = $this->client->click($lastBar->link());
         $this->assertResponseIsSuccessful();
-        // the bars count entries, the stream its actions
+        // the bars count actions, as the stream they lead to
         $actions = $this->createReader()->createQuery(Author::class, ['page_size' => null])
             ->addFilter(new DateRangeFilter(Query::CREATED_AT, $today, $today->setTime(23, 59, 59)))
             ->countTransactions()
         ;
-        $this->assertLessThanOrEqual((int) $expectedCount, $actions);
+        $entries = $this->createReader()->createQuery(Author::class, ['page_size' => null])
+            ->addFilter(new DateRangeFilter(Query::CREATED_AT, $today, $today->setTime(23, 59, 59)))
+            ->count()
+        ;
+        $this->assertGreaterThan($actions, $entries, 'An action of the fixtures writes several entries.');
+        $this->assertSame((string) $actions, $expectedCount);
+        $this->assertStringContainsString($date.' · '.(1 === $actions ? '1 action' : $actions.' actions'), (string) $lastBar->attr('aria-label'));
         $this->assertStringContainsString(1 === $actions ? '1 action' : $actions.' actions', $filtered->filter('h1+p')->text());
         $this->assertSame($today->format('Y-m-d'), $filtered->filter('[name="date_from"]')->attr('value'));
         $this->assertSame($today->format('Y-m-d'), $filtered->filter('[name="date_to"]')->attr('value'));
@@ -848,6 +854,40 @@ final class ViewerControllerTest extends WebTestCase
         $last = $this->client->request('GET', (string) $fragment->filter('a[data-dh-auditor-more]')->attr('href'), [], [], ['HTTP_X_DH_AUDITOR_FRAGMENT' => '1']);
         $this->assertCount(1, $last->filter('[data-dh-auditor-action]'), 'The oldest action.');
         $this->assertCount(0, $last->filter('a[data-dh-auditor-more]'), 'Nothing older.');
+    }
+
+    public function testAnActionOnAnAttachedObjectNamesIt(): void
+    {
+        $entities = $this->provider->getConfiguration()->getEntities();
+        $entities[Comment::class]['roots'] = ['post'];
+        $this->provider->getConfiguration()->setEntities($entities);
+        $this->setupAuditSchemas();
+
+        $entityManager = $this->provider->getAuditingServiceForEntity(Post::class)->getEntityManager();
+        $post = new Post()->setTitle('Why audit?')->setBody('…')->setCreatedAt(new \DateTimeImmutable());
+        $entityManager->persist($post);
+        $entityManager->flush();
+
+        $comment = new Comment()->setBody('Nice')->setAuthor('john')->setCreatedAt(new \DateTimeImmutable())->setPost($post);
+        $entityManager->persist($comment);
+        $entityManager->flush();
+
+        $comment->setBody('Very nice');
+        $entityManager->flush();
+        $post->setTitle('Why audit, really?');
+        $entityManager->flush();
+        $this->login();
+
+        $crawler = $this->client->request('GET', \sprintf('%s/%d', self::POST_URL, $post->getId()));
+        $actions = $crawler->filter('[data-dh-auditor-action]');
+        $this->assertCount(4, $actions);
+        $this->assertStringNotContainsString('on Post', $actions->eq(0)->text(), 'A change of the object of the history does not name it.');
+        $this->assertStringContainsString('on Comment', $actions->eq(1)->text(), 'A change of an attached object alone names it.');
+
+        $edit = $this->createReader()->createQuery(Comment::class, ['object_id' => (string) $comment->getId(), 'type' => 'update', 'page_size' => 1])->execute()[0];
+        $crawler = $this->client->request('GET', '/audit/transaction/'.$edit->transactionId.'?root='.urlencode(Post::class.':'.$post->getId()));
+        $this->assertCount(1, $crawler->filter('a[rel="next"]'), 'Opened from the history of the post.');
+        $this->assertStringContainsString('on Comment', $crawler->filter('h1')->text(), 'Opened from the history of the post, the action names the comment.');
     }
 
     public function testObjectHistoryNeedsTheViewRole(): void

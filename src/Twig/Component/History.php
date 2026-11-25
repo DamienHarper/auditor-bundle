@@ -58,7 +58,8 @@ final class History
     public ?HistoryGrouper $grouper = null;
 
     /**
-     * Entries per page (the page size of the viewer by default), more when needed to keep the last action whole.
+     * Actions per page (the page size of the viewer by default). With a grouper that has a key of its own, entries per
+     * page, more when needed to keep the last action whole.
      */
     public ?int $limit = null;
 
@@ -137,8 +138,11 @@ final class History
         }
 
         $limit = $this->limit ?? $this->pageSize();
-        // an invalid "after" option, or a page size below 1, is an error of the application and is thrown
-        $page = $query->fetch($limit, $after, groupKey: $this->grouper);
+        // an invalid "after" option, or a page size below 1, is an error of the application and is thrown. One action
+        // per transaction: a page of $limit transactions; a key of its own may group several, read by entries
+        $page = ($this->grouper?->groupsByTransaction() ?? true)
+            ? $query->fetchTransactions($limit, $after)
+            : $query->fetch($limit, $after, groupKey: $this->grouper);
 
         $this->firstCursor = $page->firstCursor;
 
@@ -160,7 +164,7 @@ final class History
         $elements = array_values(array_filter($elements, static fn (HistoryElementInterface $element): bool => (null === $upper || $element->getSortKey() <= $upper) && (null === $lower || $element->getSortKey() > $lower)));
 
         $rows = [];
-        foreach ($this->historyRows->build($page->group($this->grouper)) as $row) {
+        foreach ($this->historyRows->build($page->group($this->grouper), [$query->getRootClass(), $query->getRootId()]) as $row) {
             $key = $row['item']->entries[0]->getSortKey();
             while ([] !== $elements && $elements[0]->getSortKey() > $key) {
                 $rows[] = ['row' => null, 'element' => array_shift($elements)];

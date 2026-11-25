@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace DH\AuditorBundle\Viewer;
 
+use DH\Auditor\Provider\Doctrine\Configuration;
+use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\DateRangeFilter;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Query;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use Psr\Cache\CacheItemPoolInterface;
@@ -17,7 +19,7 @@ final readonly class ActivityGraphProvider
 {
     public const string CACHE_TAG = 'dh_auditor.activity';
 
-    private const string CACHE_KEY_PREFIX = 'dh_auditor.activity.v2.';
+    private const string CACHE_KEY_PREFIX = 'dh_auditor.activity.v3.';
 
     private const string COUNT_CACHE_KEY_PREFIX = 'dh_auditor.count.';
 
@@ -48,6 +50,13 @@ final readonly class ActivityGraphProvider
      */
     public function getActivityDataWithRaw(string $entity, Reader $reader): array
     {
+        /** @var Configuration $configuration */
+        $configuration = $reader->getProvider()->getConfiguration();
+        if (null !== $configuration->getReadScope()) {
+            // a read scope depends on the reader (a tenant…): its counts are not shared through the cache
+            return $this->computeActivityData($entity, $reader, true);
+        }
+
         $cacheKey = $this->getCacheKey($entity);
 
         // Try to get from cache
@@ -59,7 +68,7 @@ final readonly class ActivityGraphProvider
         }
 
         // Compute the data
-        $data = $this->computeActivityData($entity, $reader);
+        $data = $this->computeActivityData($entity, $reader, false);
 
         // Store in cache
         if ($this->cacheEnabled && $this->cache instanceof CacheItemPoolInterface) {
@@ -174,38 +183,26 @@ final readonly class ActivityGraphProvider
     }
 
     /**
-     * Compute activity data from the database.
+     * Compute activity data from the database: the number of actions (transactions) of each day, as the entity stream
+     * of that day counts them. Without a read scope the whole table is read; with one, only the entries it lets the
+     * reader see.
      *
      * @return array{normalized: array<int>, raw: array<int>, dates: list<string>} Values and their calendar dates
      */
-    private function computeActivityData(string $entity, Reader $reader): array
+    private function computeActivityData(string $entity, Reader $reader, bool $scoped): array
     {
-        $storageService = $reader->getProvider()->getStorageServiceForEntity($entity);
-        $connection = $storageService->getEntityManager()->getConnection();
-        $auditTable = $reader->getEntityAuditTableName($entity);
-
-        $timezone = new \DateTimeZone($reader->getProvider()->getAuditor()->getConfiguration()->timezone);
-        $today = new \DateTimeImmutable('today', $timezone);
+        $connection = $reader->getProvider()->getStorageServiceForEntity($entity)->getEntityManager()->getConnection();
+        $timezone = $reader->getProvider()->getAuditor()->getConfiguration()->timezone;
+        $today = new \DateTimeImmutable('today', new \DateTimeZone($timezone));
         $minDate = $today->modify(\sprintf('-%d days', $this->days - 1));
 
-        $sql = \sprintf(
-            'SELECT DATE(created_at) as day, COUNT(*) as cnt FROM %s WHERE created_at >= :minDate GROUP BY DATE(created_at) ORDER BY day ASC',
-            $auditTable
-        );
-
-        $result = $connection->executeQuery($sql, ['minDate' => $minDate->format('Y-m-d')])->fetchAllAssociative();
-
-        // Build array indexed by date
-        /** @var array<string, int> $countsByDate */
-        $countsByDate = [];
-        foreach ($result as $row) {
-            /** @var string $day */
-            $day = $row['day'];
-
-            /** @var int|string $cnt */
-            $cnt = $row['cnt'];
-            $countsByDate[$day] = (int) $cnt;
-        }
+        $query = $scoped
+            ? $reader->createQuery($entity, ['page_size' => null])
+            : new Query($reader->getEntityAuditTableName($entity), $connection, $timezone);
+        $countsByDate = $query
+            ->addFilter(new DateRangeFilter(Query::CREATED_AT, $minDate))
+            ->countTransactionsByDay()
+        ;
 
         // Generate raw values for the last N days
         $raw = [];

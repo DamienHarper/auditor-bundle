@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace DH\AuditorBundle\Tests\Twig\Component;
 
 use DH\Auditor\Exception\InvalidArgumentException;
+use DH\Auditor\History\ChangeExtractor;
 use DH\Auditor\History\HistoryGrouper;
+use DH\Auditor\History\HistoryItem;
 use DH\Auditor\Model\Entry;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
@@ -114,6 +116,43 @@ final class HistoryTest extends KernelTestCase
         $this->assertEqualsCanonicalizing($expected, $shown);
         $this->assertSame('note:newest', $shown[0]);
         $this->assertSame('note:oldest', $shown[\count($shown) - 1]);
+    }
+
+    public function testPagesHoldActions(): void
+    {
+        // actions of one entry, and actions of several entries (a post and its comments) in between
+        $entityManager = $this->provider->getAuditingServiceForEntity(Post::class)->getEntityManager();
+        $post = new Post()->setTitle('Why audit?')->setBody('…')->setCreatedAt(new \DateTimeImmutable());
+        $entityManager->persist($post);
+        $entityManager->flush();
+        foreach (['A', 'B', 'C'] as $round) {
+            $post->setTitle('Title '.$round);
+            $entityManager->flush();
+            foreach ([1, 2, 3] as $i) {
+                $entityManager->persist(new Comment()->setBody($round.$i)->setAuthor('john')->setCreatedAt(new \DateTimeImmutable())->setPost($post));
+            }
+
+            $post->setBody('Body '.$round);
+            $entityManager->flush();
+        }
+
+        $items = HistoryGrouper::byTransaction(new Reader($this->provider)->createRootQuery(Post::class, (string) $post->getId())->fetch(1_000)->entries);
+        $this->assertCount(7, $items);
+        $this->assertTrue(array_any($items, static fn (HistoryItem $item): bool => \count($item->entries) > 2), 'An action writes more entries than a page holds actions.');
+
+        foreach ([null, new HistoryGrouper(extractor: new ChangeExtractor())] as $grouper) {
+            $pages = [];
+            $url = '/posts/'.$post->getId();
+            while (null !== $url) {
+                $crawler = $this->render(['subject' => $post, 'limit' => 2, 'grouper' => $grouper], Request::create($url));
+                $pages[] = $crawler->filter('[data-dh-auditor-action]')->count();
+                $older = $crawler->filter('[data-dh-auditor-older]');
+                $url = 0 === $older->count() ? null : (string) $older->attr('href');
+            }
+
+            $this->assertSame(\count($items), array_sum($pages));
+            $this->assertSame(array_fill(0, \count($pages) - 1, 2), \array_slice($pages, 0, -1), 'Every page but the last holds "limit" actions.');
+        }
     }
 
     public function testCursorParameter(): void
@@ -297,6 +336,28 @@ final class HistoryTest extends KernelTestCase
         $this->assertStringContainsString(Comment::class, $entities(['subject' => $post]), 'The creation of the comment is part of the history of its post.');
         $this->assertStringNotContainsString(Comment::class, $entities(['subject' => $post, 'attached' => false]));
         $this->assertStringContainsString(Post::class, $entities(['subject' => $post, 'attached' => false]));
+    }
+
+    public function testAnActionOnAnAttachedObjectNamesIt(): void
+    {
+        $entityManager = $this->provider->getAuditingServiceForEntity(Post::class)->getEntityManager();
+        $post = new Post()->setTitle('Why audit?')->setBody('…')->setCreatedAt(new \DateTimeImmutable());
+        $entityManager->persist($post);
+        $entityManager->flush();
+
+        $comment = new Comment()->setBody('Nice')->setAuthor('john')->setCreatedAt(new \DateTimeImmutable())->setPost($post);
+        $entityManager->persist($comment);
+        $entityManager->flush();
+
+        $comment->setBody('Edited alone');
+        $entityManager->flush();
+
+        $crawler = $this->render(['subject' => $post]);
+
+        $comments = array_values(array_filter($crawler->filter('[data-dh-auditor-action]')->each(static fn (Crawler $li): array => [(string) $li->attr('data-dh-auditor-entities'), $li->text()]), static fn (array $row): bool => Comment::class === $row[0]));
+        $this->assertNotEmpty($comments);
+        $this->assertStringContainsString('on Comment', $comments[0][1], 'A change of an attached object alone names it.');
+        $this->assertStringNotContainsString('on Post', $crawler->filter('section')->text(), 'The object of the history is not named.');
     }
 
     public function testElementsImplementTheInterface(): void

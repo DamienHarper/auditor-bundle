@@ -165,7 +165,9 @@ command offers the same filters.
 
 ## 📊 Activity Graph
 
-Each entity card displays a visual sparkline graph showing audit activity over time.
+Each entity card displays a visual sparkline graph showing audit activity over time: one bar per day, the number of
+actions (database transactions) of that day, as the stream of the entity counts them on that day. A bar leads to that
+stream.
 
 ### Configuration
 
@@ -198,6 +200,9 @@ The activity graph uses caching to improve performance on large audit tables. Th
 entity on the audit index page is cached with it (same lifetime and tag): counting reads the whole audit table, so a
 count may lag behind by up to the cache lifetime, as the graph does. Without the activity graph, or with its cache
 disabled, the actions are counted on every page load.
+
+With a `read_scope`, the graph counts only the actions the scope lets the reader see, and is never cached: the
+scope depends on the reader (a tenant, for instance), so its counts are computed on every page load.
 
 > [!NOTE]
 > Caching requires `symfony/cache`:

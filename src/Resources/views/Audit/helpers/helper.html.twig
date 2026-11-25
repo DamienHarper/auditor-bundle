@@ -100,7 +100,7 @@
     {% for value in data %}
         {% set rawValue = rawData[loop.index0]|default(0) %}
         {% set date = dates[loop.index0]|default(null) %}
-        {% set label = (date ? date ~ ' · ' : '') ~ 'audit.audit_details.events_count'|trans({'%count%': rawValue, '%formatted_count%': rawValue|number_format}, 'auditor') %}
+        {% set label = (date ? date ~ ' · ' : '') ~ 'audit.history.actions_count'|trans({'%count%': rawValue}, 'auditor') %}
         {# Bar height in 5 % steps, rendered by the dh-auditor-bar-h-* classes of app.css (no style attribute: CSP) #}
         {% set height = hasActivity ? (value > 0 ? (max(15, value) / 5)|round * 5 : 5) : 20 %}
         {% set color = hasActivity ? 'bg-dh-brand' : 'bg-dh-muted' %}
