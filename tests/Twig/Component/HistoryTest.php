@@ -299,6 +299,28 @@ final class HistoryTest extends KernelTestCase
         $this->assertStringContainsString(Post::class, $entities(['subject' => $post, 'attached' => false]));
     }
 
+    public function testAnActionOnAnAttachedObjectNamesIt(): void
+    {
+        $entityManager = $this->provider->getAuditingServiceForEntity(Post::class)->getEntityManager();
+        $post = new Post()->setTitle('Why audit?')->setBody('…')->setCreatedAt(new \DateTimeImmutable());
+        $entityManager->persist($post);
+        $entityManager->flush();
+
+        $comment = new Comment()->setBody('Nice')->setAuthor('john')->setCreatedAt(new \DateTimeImmutable())->setPost($post);
+        $entityManager->persist($comment);
+        $entityManager->flush();
+
+        $comment->setBody('Edited alone');
+        $entityManager->flush();
+
+        $crawler = $this->render(['subject' => $post]);
+
+        $comments = array_values(array_filter($crawler->filter('[data-dh-auditor-action]')->each(static fn (Crawler $li): array => [(string) $li->attr('data-dh-auditor-entities'), $li->text()]), static fn (array $row): bool => Comment::class === $row[0]));
+        $this->assertNotEmpty($comments);
+        $this->assertStringContainsString('on Comment', $comments[0][1], 'A change of an attached object alone names it.');
+        $this->assertStringNotContainsString('on Post', $crawler->filter('section')->text(), 'The object of the history is not named.');
+    }
+
     public function testElementsImplementTheInterface(): void
     {
         $this->expectException(RuntimeError::class);

@@ -10,8 +10,9 @@ use DH\AuditorBundle\History\Part\ObjectReference;
 use DH\AuditorBundle\History\Phrase;
 
 /**
- * Rows of a list of actions, as History/_row.html.twig renders them: the phrase of each action and, optionally, what
- * it was done on (its context). The objects the phrases name are checked for deletion in one query per class.
+ * Rows of a list of actions, as History/_row.html.twig renders them: the phrase of each action and what it was done on
+ * (its context), unless that is the object of the history or the phrase names it. The objects the phrases name are
+ * checked for deletion in one query per class.
  */
 final readonly class HistoryRows
 {
@@ -27,13 +28,13 @@ final readonly class HistoryRows
      *
      * @return list<array{item: HistoryItem, phrase: Phrase, context: ?Phrase}>
      */
-    public function build(array $items, bool $withContext = false, ?array $root = null): array
+    public function build(array $items, ?array $root = null): array
     {
         $rows = [];
         $references = [];
         foreach ($items as $item) {
             $phrase = $this->phraser->phrase($item, $root[0] ?? null, $root[1] ?? null);
-            $context = $withContext ? $this->phraser->context($item) : null;
+            $context = $this->phraser->context($item, $root[0] ?? null, $root[1] ?? null);
             $focus = $context instanceof Phrase ? HistoryPhraser::contextObject($context) : null;
             $row = ['item' => $item, 'phrase' => $focus instanceof ObjectReference ? $this->phraser->focus($phrase, $focus->class, $focus->id) : $phrase, 'context' => $context];
             foreach ([$row['phrase'], $row['context']] as $phrase) {

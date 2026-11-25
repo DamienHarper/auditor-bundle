@@ -109,7 +109,7 @@ final readonly class ViewerController
 
         return $this->renderView('@DHAuditor/Audit/audits.html.twig', [
             'audited' => $this->sortAudited($audited, $sort),
-            'activity' => $this->rows($overview->recentActivity(array_keys($audited), self::RECENT_ACTIONS), $phraser, $existence, withContext: true),
+            'activity' => $this->rows($overview->recentActivity(array_keys($audited), self::RECENT_ACTIONS), $phraser, $existence),
             'sort' => $sort->value,
             'sortOptions' => EntitySort::cases(),
             'activityGraphEnabled' => $activityGraphEnabled,
@@ -160,7 +160,7 @@ final readonly class ViewerController
             }
         }
 
-        $rows = $this->rows([$item], $phraser, $existence, withContext: null === $root, root: null === $root ? null : [$root['class'], $root['id']]);
+        $rows = $this->rows([$item], $phraser, $existence, root: null === $root ? null : [$root['class'], $root['id']]);
         if (null !== $root) {
             $rows[0]['phrase'] = $phraser->focus($rows[0]['phrase'], $root['class'], $root['id']);
         }
@@ -241,7 +241,7 @@ final readonly class ViewerController
         $parameters = [
             'id' => $id,
             'latest' => $latestRows[0]['entry'] ?? null,
-            'rows' => $this->rows(HistoryGrouper::byTransaction($pageEntries), $phraser, $existence, withContext: true),
+            'rows' => $this->rows(HistoryGrouper::byTransaction($pageEntries), $phraser, $existence),
             'actionCount' => $actionCount,
             'entities' => $entities,
             'filters' => $filters,
@@ -356,7 +356,7 @@ final readonly class ViewerController
         return $this->renderView('@DHAuditor/Audit/entity_stream.html.twig', [
             'entity' => $entity,
             'paginator' => $pager,
-            'rows' => $this->rows(HistoryGrouper::byTransaction($pageEntries), $phraser, $existence, withContext: true),
+            'rows' => $this->rows(HistoryGrouper::byTransaction($pageEntries), $phraser, $existence),
             'filters' => [
                 'type' => $typeFilter,
                 'user' => $userFilter,
@@ -566,9 +566,9 @@ final readonly class ViewerController
      *
      * @return list<array{item: HistoryItem, phrase: Phrase, context: ?Phrase}>
      */
-    private function rows(array $items, HistoryPhraser $phraser, ObjectExistence $existence, bool $withContext = false, ?array $root = null): array
+    private function rows(array $items, HistoryPhraser $phraser, ObjectExistence $existence, ?array $root = null): array
     {
-        return new HistoryRows($phraser, $existence)->build($items, $withContext, $root);
+        return new HistoryRows($phraser, $existence)->build($items, $root);
     }
 
     /**

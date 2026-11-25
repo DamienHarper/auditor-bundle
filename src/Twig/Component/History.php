@@ -160,7 +160,7 @@ final class History
         $elements = array_values(array_filter($elements, static fn (HistoryElementInterface $element): bool => (null === $upper || $element->getSortKey() <= $upper) && (null === $lower || $element->getSortKey() > $lower)));
 
         $rows = [];
-        foreach ($this->historyRows->build($page->group($this->grouper)) as $row) {
+        foreach ($this->historyRows->build($page->group($this->grouper), [$query->getRootClass(), $query->getRootId()]) as $row) {
             $key = $row['item']->entries[0]->getSortKey();
             while ([] !== $elements && $elements[0]->getSortKey() > $key) {
                 $rows[] = ['row' => null, 'element' => array_shift($elements)];

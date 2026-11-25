@@ -850,6 +850,40 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertCount(0, $last->filter('a[data-dh-auditor-more]'), 'Nothing older.');
     }
 
+    public function testAnActionOnAnAttachedObjectNamesIt(): void
+    {
+        $entities = $this->provider->getConfiguration()->getEntities();
+        $entities[Comment::class]['roots'] = ['post'];
+        $this->provider->getConfiguration()->setEntities($entities);
+        $this->setupAuditSchemas();
+
+        $entityManager = $this->provider->getAuditingServiceForEntity(Post::class)->getEntityManager();
+        $post = new Post()->setTitle('Why audit?')->setBody('…')->setCreatedAt(new \DateTimeImmutable());
+        $entityManager->persist($post);
+        $entityManager->flush();
+
+        $comment = new Comment()->setBody('Nice')->setAuthor('john')->setCreatedAt(new \DateTimeImmutable())->setPost($post);
+        $entityManager->persist($comment);
+        $entityManager->flush();
+
+        $comment->setBody('Very nice');
+        $entityManager->flush();
+        $post->setTitle('Why audit, really?');
+        $entityManager->flush();
+        $this->login();
+
+        $crawler = $this->client->request('GET', \sprintf('%s/%d', self::POST_URL, $post->getId()));
+        $actions = $crawler->filter('[data-dh-auditor-action]');
+        $this->assertCount(4, $actions);
+        $this->assertStringNotContainsString('on Post', $actions->eq(0)->text(), 'A change of the object of the history does not name it.');
+        $this->assertStringContainsString('on Comment', $actions->eq(1)->text(), 'A change of an attached object alone names it.');
+
+        $edit = $this->createReader()->createQuery(Comment::class, ['object_id' => (string) $comment->getId(), 'type' => 'update', 'page_size' => 1])->execute()[0];
+        $crawler = $this->client->request('GET', '/audit/transaction/'.$edit->transactionId.'?root='.urlencode(Post::class.':'.$post->getId()));
+        $this->assertCount(1, $crawler->filter('a[rel="next"]'), 'Opened from the history of the post.');
+        $this->assertStringContainsString('on Comment', $crawler->filter('h1')->text(), 'Opened from the history of the post, the action names the comment.');
+    }
+
     public function testObjectHistoryNeedsTheViewRole(): void
     {
         $this->login(['ROLE_USER']);
