@@ -17,8 +17,8 @@ audit:
     label: Trier par
     name_asc: 'Nom (A à Z)'
     name_desc: 'Nom (Z à A)'
-    count_desc: "Plus d'événements"
-    count_asc: "Moins d'événements"
+    count_desc: "Plus d'actions"
+    count_asc: "Moins d'actions"
     activity_desc: Activité la plus récente
     activity_asc: Activité la plus ancienne
   audit_details:

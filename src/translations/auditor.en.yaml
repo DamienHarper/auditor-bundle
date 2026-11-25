@@ -17,8 +17,8 @@ audit:
     label: Sort by
     name_asc: 'Name (A-Z)'
     name_desc: 'Name (Z-A)'
-    count_desc: Most events
-    count_asc: Fewest events
+    count_desc: Most actions
+    count_asc: Fewest actions
     activity_desc: Most recently active
     activity_asc: Least recently active
   audit_details:

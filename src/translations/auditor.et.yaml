@@ -17,8 +17,8 @@ audit:
     label: Sorteeri
     name_asc: 'Nimi (A-Z)'
     name_desc: 'Nimi (Z-A)'
-    count_desc: Enim sündmusi
-    count_asc: Vähim sündmusi
+    count_desc: Enim toiminguid
+    count_asc: Vähim toiminguid
     activity_desc: Viimati aktiivne
     activity_asc: Kõige kauem passiivne
   audit_details:
