@@ -24,7 +24,7 @@
                     {{ dh_auditor_entity_name(entity, 2) }}
                 </h1>
                 <p class="text-sm text-dh-muted-foreground">
-                    {{ 'audit.history.entries_count'|trans({'%count%': paginator.numResults}, 'auditor') }}
+                    {{ 'audit.history.actions_count'|trans({'%count%': paginator.numResults}, 'auditor') }}
                     · {{ 'audit.audit_details.most_recent'|trans(domain='auditor') }}
                 </p>
             </div>

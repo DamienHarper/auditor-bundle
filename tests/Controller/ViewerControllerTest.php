@@ -7,6 +7,8 @@ namespace DH\AuditorBundle\Tests\Controller;
 use DH\Auditor\Model\Entry;
 use DH\Auditor\Provider\Doctrine\Auditing\Snapshot\Snapshotter;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
+use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\DateRangeFilter;
+use DH\Auditor\Provider\Doctrine\Persistence\Reader\Query;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Comment;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
@@ -16,6 +18,7 @@ use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
 use DH\AuditorBundle\Controller\ViewerController;
 use DH\AuditorBundle\Enum\EntitySort;
 use DH\AuditorBundle\Viewer\ActivityGraphProvider;
+use DH\AuditorBundle\Viewer\WholeActions;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\Attributes\Small;
@@ -279,7 +282,7 @@ final class ViewerControllerTest extends WebTestCase
         // Check filtered entries not found
         $crawler = $this->client->request('GET', $uri.'?type=associate&user=1111111');
         $subtitle = $crawler->filter('h1+p');
-        $this->assertStringContainsString('no entry', $subtitle->text(), 'Subtitle counts no entry');
+        $this->assertStringContainsString('no action', $subtitle->text(), 'Subtitle counts no action');
     }
 
     #[Depends('testShowEntityHistoryWithRoleGrantedForAuthorAuditViewing')]
@@ -308,29 +311,29 @@ final class ViewerControllerTest extends WebTestCase
         // Only the entries whose diff touches the field are listed.
         $crawler = $this->client->request('GET', $uri.'?field=coauthor');
         $this->assertTrue($this->client->getResponse()->isSuccessful(), 'Response status is 2xx');
-        $this->assertStringContainsString('3 entries', $crawler->filter('h1+p')->text(), 'Exactly 3 coauthor changes');
+        $this->assertStringContainsString('2 actions', $crawler->filter('h1+p')->text(), 'Exactly 3 coauthor changes, in 2 actions');
         $this->assertSame('coauthor', $crawler->filter('#filter-field option[selected]')->attr('value'), 'The filtered field is selected');
 
         // Collections match the associations and dissociations recorded on them.
         $crawler = $this->client->request('GET', $uri.'?field=tags');
-        $this->assertStringContainsString('10 entries', $crawler->filter('h1+p')->text(), '8 tag associations and 2 dissociations');
+        $this->assertStringContainsString('2 actions', $crawler->filter('h1+p')->text(), '8 tag associations and 2 dissociations, in 2 actions');
 
         // Filters are combined.
         $crawler = $this->client->request('GET', $uri.'?field=tags&type=dissociate');
-        $this->assertStringContainsString('2 entries', $crawler->filter('h1+p')->text(), '2 tag dissociations');
+        $this->assertStringContainsString('1 action', $crawler->filter('h1+p')->text(), '2 tag dissociations, in 1 action');
 
         // Clearing the period keeps the changed field filter.
         $crawler = $this->client->request('GET', $uri.'?field=tags&date_from=2000-01-01');
-        $this->assertStringContainsString('10 entries', $crawler->filter('h1+p')->text(), 'Combined with a period');
+        $this->assertStringContainsString('2 actions', $crawler->filter('h1+p')->text(), 'Combined with a period');
         $this->assertStringContainsString('field=tags', (string) $crawler->selectLink('Clear period')->attr('href'), 'Clearing the period keeps the field');
 
         // Keys of the association diffs are not fields.
         $crawler = $this->client->request('GET', $uri.'?field=source');
-        $this->assertStringContainsString('no entry', $crawler->filter('h1+p')->text(), 'source is not a field');
+        $this->assertStringContainsString('no action', $crawler->filter('h1+p')->text(), 'source is not a field');
 
         // A field that is no longer mapped stays filterable and selectable.
         $crawler = $this->client->request('GET', $uri.'?field=subtitle');
-        $this->assertStringContainsString('no entry', $crawler->filter('h1+p')->text(), 'Unknown field matches nothing');
+        $this->assertStringContainsString('no action', $crawler->filter('h1+p')->text(), 'Unknown field matches nothing');
         $this->assertSame('subtitle', $crawler->filter('#filter-field option[selected]')->attr('value'), 'The unknown field is selected');
     }
 
@@ -413,7 +416,7 @@ final class ViewerControllerTest extends WebTestCase
 
         $this->assertResponseIsSuccessful();
         $this->assertStringContainsString(match ($expectedCount) {
-            0 => 'no entry', 1 => '1 entry', default => $expectedCount.' entries'
+            0 => 'no action', 1 => '1 action', default => $expectedCount.' actions'
         }, $crawler->filter('h1+p')->text());
         $this->assertSame($filters['date_from'] ?? '', $crawler->filter('[name="date_from"]')->attr('value'));
         $this->assertSame($filters['date_to'] ?? '', $crawler->filter('[name="date_to"]')->attr('value'));
@@ -525,15 +528,19 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertGreaterThan(0, (int) $expectedCount);
         $filtered = $this->client->click($lastBar->link());
         $this->assertResponseIsSuccessful();
-        $this->assertStringContainsString(match ($expectedCount) {
-            0 => 'no entry', 1 => '1 entry', default => $expectedCount.' entries'
-        }, $filtered->filter('h1+p')->text());
+        // the bars count entries, the stream its actions
+        $actions = $this->createReader()->createQuery(Author::class, ['page_size' => null])
+            ->addFilter(new DateRangeFilter(Query::CREATED_AT, $today, $today->setTime(23, 59, 59)))
+            ->countTransactions()
+        ;
+        $this->assertLessThanOrEqual((int) $expectedCount, $actions);
+        $this->assertStringContainsString(1 === $actions ? '1 action' : $actions.' actions', $filtered->filter('h1+p')->text());
         $this->assertSame($today->format('Y-m-d'), $filtered->filter('[name="date_from"]')->attr('value'));
         $this->assertSame($today->format('Y-m-d'), $filtered->filter('[name="date_to"]')->attr('value'));
 
         $emptyDay = $this->client->click($bars->first()->link());
         $this->assertResponseIsSuccessful();
-        $this->assertStringContainsString('no entry', $emptyDay->filter('h1+p')->text());
+        $this->assertStringContainsString('no action', $emptyDay->filter('h1+p')->text());
     }
 
     public static function provideActivityBarsLinkToTheirDayCases(): iterable
@@ -556,7 +563,7 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertResponseIsSuccessful();
         $this->assertPageTitleContains('auditor');
         $this->assertStringContainsString('new.name', $crawler->filter('h1')->text(), 'The most recent username is shown');
-        $this->assertStringContainsString('3 entries', $crawler->filter('h1+p')->text());
+        $this->assertStringContainsString('3 actions', $crawler->filter('h1+p')->text());
         $this->assertSame([Post::class, Comment::class, Post::class], $this->timelineEntities($crawler), 'Newest first, across entities');
     }
 
@@ -578,7 +585,7 @@ final class ViewerControllerTest extends WebTestCase
 
         $this->assertResponseIsSuccessful();
         $this->assertSame($expectedEntities, $this->timelineEntities($crawler));
-        $this->assertStringContainsString(\count($expectedEntities).' entr', $crawler->filter('h1+p')->text(), 'Denied entities are not counted');
+        $this->assertStringContainsString(\count($expectedEntities).' action', $crawler->filter('h1+p')->text(), 'Denied entities are not counted');
     }
 
     /**
@@ -610,7 +617,7 @@ final class ViewerControllerTest extends WebTestCase
 
         $this->assertResponseIsSuccessful();
         $this->assertSame($expectedEntities, $this->timelineEntities($crawler));
-        $this->assertStringContainsString('4 entries', $crawler->filter('h1+p')->text());
+        $this->assertStringContainsString('4 actions', $crawler->filter('h1+p')->text());
         $this->assertSame($hasNextPage, $crawler->filter('a[data-dh-auditor-more][href^="/audit/user/timeline-user?page=2"]')->count() > 0);
     }
 
@@ -761,7 +768,7 @@ final class ViewerControllerTest extends WebTestCase
 
         $this->assertResponseIsSuccessful();
         $this->assertSame('Title C', $crawler->filter('h1')->text(), 'The title is the label of the object.');
-        $this->assertStringContainsString('3 entries', $crawler->filter('h1 + p')->text());
+        $this->assertStringContainsString('3 actions', $crawler->filter('h1 + p')->text());
         $this->assertCount(3, $crawler->filter('[data-dh-auditor-action]'), 'One row per action.');
         $this->assertStringContainsString('created Post', $crawler->filter('[data-dh-auditor-action]')->last()->text());
         $this->assertSelectorTextContains('aside', 'Who changed what last');
@@ -1016,42 +1023,141 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertStringContainsString('created 25 Comment', $import->text(), 'More entries than read per table: the action is read whole.');
     }
 
-    public function testEntityHistoryShowsAnActionWholeOnThePageOfItsLatestEntry(): void
+    public function testEntityHistoryPagesHoldActions(): void
     {
-        $this->seedAction(Comment::class, 'import', '2030-01-02 10:00:00', range(1_001, 1_006));
-        $this->seedAction(Comment::class, 'alone', '2030-01-01 10:00:00', [1_007]);
+        $this->seedAction(Comment::class, 'import', '2030-01-03 10:00:00', range(1_001, 1_006));
+        $this->seedAction(Comment::class, 'alone', '2030-01-02 10:00:00', [1_007]);
+        $this->seedAction(Comment::class, 'pair', '2030-01-01 10:00:00', [1_008, 1_009]);
         $this->provider->getConfiguration()->setViewerPageSize(2);
         $this->login(['ROLE_1']);
 
         $url = '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Comment';
+        $actions = $this->createReader()->createQuery(Comment::class, ['page_size' => null])->countTransactions();
         $first = $this->client->request('GET', $url);
-        $this->assertSame(['import'], $this->actionKeys($first));
+        $this->assertSame(['import', 'alone'], $this->actionKeys($first), 'A page holds page_size actions, whatever their number of entries.');
         $this->assertStringContainsString('created 6 Comment', $first->filter('[data-dh-auditor-action="import"]')->text());
+        $this->assertStringContainsString($actions.' actions', $first->filter('h1+p')->text(), 'The header counts the actions.');
+        $this->assertGreaterThan(0, $first->filter('a[href*="page='.(int) ceil($actions / 2).'"]')->count(), 'The pager counts pages of actions.');
+        $this->assertCount(0, $first->filter('a[href*="page='.((int) ceil($actions / 2) + 1).'"]'));
 
         $second = $this->client->request('GET', $url, ['page' => 2]);
-        $this->assertSame([], $this->actionKeys($second), 'The rest of the action was shown on the previous page.');
+        $this->assertSame('pair', $this->actionKeys($second)[0] ?? null);
+        $this->assertCount(2, $this->actionKeys($second));
 
-        $fourth = $this->client->request('GET', $url, ['page' => 4]);
-        $this->assertSame('alone', $this->actionKeys($fourth)[0] ?? null);
+        $beyond = $this->client->request('GET', $url, ['page' => 99]);
+        $this->assertNotSame([], $this->actionKeys($beyond), 'A page beyond the last one shows the last one.');
     }
 
-    public function testUserTimelineShowsAnActionWholeOnThePageOfItsLatestEntry(): void
+    public function testEntityHistoryReadsTheEntriesOfAnActionUpToALimit(): void
     {
-        $this->seedAction(Comment::class, 'import', '2030-01-02 10:00:00', range(1_001, 1_006), 'timeline-user');
-        $this->seedAction(Post::class, 'import', '2030-01-02 10:00:00', [1_001], 'timeline-user');
-        $this->seedAction(Comment::class, 'alone', '2030-01-01 10:00:00', [1_007], 'timeline-user');
+        $this->seedAction(Comment::class, 'import', '2030-01-03 10:00:00', range(1_001, 1_000 + WholeActions::MAX_ENTRIES + 5));
+        $this->seedAction(Comment::class, 'alone', '2030-01-02 10:00:00', [9_999]);
+        $this->provider->getConfiguration()->setViewerPageSize(2);
+        $this->login(['ROLE_1']);
+
+        $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Comment');
+
+        $this->assertSame(['import', 'alone'], $this->actionKeys($crawler), 'A very large action does not push the next one out of its page.');
+        $this->assertStringContainsString('created '.(WholeActions::MAX_ENTRIES - 1).' Comment', $crawler->filter('[data-dh-auditor-action="import"]')->text());
+        $this->assertStringContainsString('object 9999', $crawler->filter('[data-dh-auditor-action="alone"]')->text());
+    }
+
+    public function testAPageOfActionsReadsAtMostALimitOfEntries(): void
+    {
+        $half = intdiv(WholeActions::MAX_ENTRIES, 2);
+        $this->seedAction(Comment::class, 'first', '2030-01-03 10:00:00', range(1_001, 1_000 + $half + 100));
+        $this->seedAction(Comment::class, 'second', '2030-01-02 10:00:00', range(5_001, 5_000 + $half + 100));
+        $this->seedAction(Comment::class, 'small', '2030-01-01 10:00:00', range(9_001, 9_010));
+        $this->provider->getConfiguration()->setViewerPageSize(3);
+        $this->login(['ROLE_1']);
+
+        $crawler = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Comment');
+
+        $this->assertSame(['first', 'second', 'small'], $this->actionKeys($crawler));
+        $share = intdiv(WholeActions::MAX_ENTRIES - 10, 2);
+        $this->assertStringContainsString('created '.$share.' Comment', $crawler->filter('[data-dh-auditor-action="first"]')->text(), 'The large actions share what the small ones leave of the page.');
+        $this->assertStringContainsString('created '.$share.' Comment', $crawler->filter('[data-dh-auditor-action="second"]')->text());
+        $this->assertStringContainsString('created 10 Comment', $crawler->filter('[data-dh-auditor-action="small"]')->text(), 'A small action is told whole.');
+    }
+
+    public function testATableBeingMigratedKeepsTheActionsOfItsRowsNotConvertedYet(): void
+    {
+        $this->seedAction(Comment::class, 'converted', '2030-01-03 10:00:00', [9_001, 9_002]);
+        // more entries than the overview reads per table at first
+        $this->seedAction(Comment::class, 'legacy', '2030-01-02 10:00:00', range(9_100, 9_124));
+        $this->seedAction(Comment::class, 'older', '2030-01-01 10:00:00', [9_006]);
+        // audit:schema:migrate without --convert-transaction-hash: transaction_hash kept, transaction_id NULL
+        $table = $this->createReader()->getEntityAuditTableName(Comment::class);
+        $connection = $this->provider->getStorageServiceForEntity(Comment::class)->getEntityManager()->getConnection();
+        $connection->executeStatement(\sprintf('ALTER TABLE %s ADD transaction_hash VARCHAR(40) NULL', $table));
+        $connection->executeStatement(\sprintf("UPDATE %s SET transaction_hash = transaction_id, transaction_id = NULL WHERE transaction_id = 'legacy'", $table));
+        $this->provider->getConfiguration()->setViewerPageSize(2);
+        $this->login(['ROLE_1']);
+
+        $stream = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Comment');
+        $this->assertSame(['converted', 'legacy'], $this->actionKeys($stream), 'The rows not converted yet are one action, by their hash.');
+        $this->assertStringContainsString('created 25 Comment', $stream->filter('[data-dh-auditor-action="legacy"]')->text());
+
+        $overview = $this->client->request('GET', '/audit');
+        $this->assertStringContainsString('created 25 Comment', $overview->filter('[data-dh-auditor-action="legacy"]')->text());
+    }
+
+    public function testAnEntryWithoutTransactionIsAnActionOfItsOwn(): void
+    {
+        $this->seedUserEntry(Comment::class, 'lonely', 'lonely', '2030-01-02 10:00:00', null, 9_001);
+        $this->seedUserEntry(Comment::class, 'lonely', 'lonely', '2030-01-02 10:00:00', null, 9_002);
+        $this->seedAction(Comment::class, 'next', '2030-01-01 10:00:00', [9_003]);
+        $connection = $this->provider->getStorageServiceForEntity(Comment::class)->getEntityManager()->getConnection();
+        $connection->executeStatement(\sprintf('UPDATE %s SET transaction_id = NULL WHERE id IN (9001, 9002)', $this->createReader()->getEntityAuditTableName(Comment::class)));
+        $this->provider->getConfiguration()->setViewerPageSize(2);
+        $this->login(['ROLE_1']);
+
+        $stream = $this->client->request('GET', '/audit/DH-Auditor-Tests-Provider-Doctrine-Fixtures-Entity-Standard-Blog-Comment');
+        $this->assertSame([Comment::class.'#9002', Comment::class.'#9001'], $this->actionKeys($stream));
+
+        $user = $this->client->request('GET', '/audit/user/lonely');
+        $this->assertSame([Comment::class.'#9002', Comment::class.'#9001'], $this->actionKeys($user));
+        $this->assertStringContainsString('2 actions', $user->filter('h1+p')->text());
+
+        $overview = $this->client->request('GET', '/audit');
+        $this->assertSame([Comment::class.'#9002', Comment::class.'#9001', 'next'], \array_slice($this->actionKeys($overview->filter('section')->first()), 0, 3));
+    }
+
+    public function testUserTimelinePagesHoldActions(): void
+    {
+        $this->seedAction(Comment::class, 'import', '2030-01-03 10:00:00', range(1_001, 1_006), 'timeline-user');
+        $this->seedAction(Post::class, 'import', '2030-01-03 10:00:00', [1_001], 'timeline-user');
+        $this->seedAction(Comment::class, 'alone', '2030-01-02 10:00:00', [1_007], 'timeline-user');
+        $this->seedAction(Post::class, 'last', '2030-01-01 10:00:00', [1_002], 'timeline-user');
         $this->provider->getConfiguration()->setViewerPageSize(2);
         $this->login(['ROLE_1']);
 
         $first = $this->client->request('GET', '/audit/user/timeline-user');
-        $this->assertSame(['import'], $this->actionKeys($first));
+        $this->assertSame(['import', 'alone'], $this->actionKeys($first));
         $this->assertStringContainsString('created 6 Comment', $first->filter('[data-dh-auditor-action="import"]')->text());
+        $this->assertStringContainsString('3 actions', $first->filter('h1+p')->text(), 'An action on two tables is one action.');
+        $this->assertCount(1, $first->filter('a[data-dh-auditor-more][href^="/audit/user/timeline-user?page=2"]'));
 
         $second = $this->client->request('GET', '/audit/user/timeline-user', ['page' => 2]);
-        $this->assertSame([], $this->actionKeys($second), 'The rest of the action was shown on the previous page.');
+        $this->assertSame(['last'], $this->actionKeys($second));
+        $this->assertCount(0, $second->filter('a[data-dh-auditor-more]'));
+    }
 
-        $fourth = $this->client->request('GET', '/audit/user/timeline-user', ['page' => 4]);
-        $this->assertSame(['alone'], $this->actionKeys($fourth));
+    public function testObjectHistoryPagesHoldActions(): void
+    {
+        [$postId, $revisions] = $this->createPostHistory();
+        // the two updates made one action of two entries
+        $connection = $this->provider->getStorageServiceForEntity(Post::class)->getEntityManager()->getConnection();
+        $table = $this->createReader()->getEntityAuditTableName(Post::class);
+        $connection->executeStatement(\sprintf('UPDATE %1$s SET transaction_id = (SELECT transaction_id FROM %1$s WHERE id = ?), created_at = (SELECT created_at FROM %1$s WHERE id = ?) WHERE id = ?', $table), [$revisions[2], $revisions[2], $revisions[1]]);
+        $this->provider->getConfiguration()->setViewerPageSize(2);
+        $this->login();
+
+        $page = $this->client->request('GET', \sprintf('%s/%d', self::POST_URL, $postId));
+        $this->assertCount(2, $page->filter('[data-dh-auditor-action]'), 'Two actions per page, the first one of two entries.');
+        $this->assertCount(0, $page->filter('a[data-dh-auditor-more]'));
+        $this->assertStringContainsString('2 actions', $page->filter('h1 + p')->text());
+        $this->assertStringContainsString('3 entries', $page->filter('aside')->text(), 'The technical side counts the entries.');
     }
 
     public function testDaysAcrossOlderActions(): void
@@ -1602,8 +1708,9 @@ final class ViewerControllerTest extends WebTestCase
         $row['blame_id'] = 'period-user';
         $row['type'] = 'insert';
 
-        foreach (['2026-02-09 23:59:59', '2026-02-10 00:00:00', '2026-02-10 23:59:59', '2026-02-11 00:00:00'] as $date) {
+        foreach (['2026-02-09 23:59:59', '2026-02-10 00:00:00', '2026-02-10 23:59:59', '2026-02-11 00:00:00'] as $index => $date) {
             $row['created_at'] = $date;
+            $row['transaction_id'] = 'period-'.$index; // an action of its own
             $connection->insert($table, $row);
         }
     }

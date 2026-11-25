@@ -180,8 +180,7 @@ final readonly class ViewerController
 
     /**
      * Everything a user did, across every audited entity the reader may view (the others are skipped), told as
-     * actions. The user is identified by the blame_id column; each entity is queried for at most page * pageSize
-     * rows (newest first).
+     * actions, page_size actions per page. The user is identified by the blame_id column.
      */
     #[Route(path: '/audit/user/{id}', name: 'dh_auditor_show_user_stream', requirements: ['id' => '.{1,255}'], methods: ['GET'])]
     public function showUserStreamAction(Request $request, Reader $reader, HistoryPhraser $phraser, ObjectExistence $existence, string $id): Response
@@ -198,7 +197,9 @@ final readonly class ViewerController
         $queries = [];
         $entities = [];
         $viewable = [];
-        $numResults = 0;
+
+        /** @var list<array{entity: string, entry: Entry}> $latestRows */
+        $latestRows = [];
         foreach (array_keys($configuration->getEntities()) as $entity) {
             $entity = (string) $entity;
             if (!$reader->getProvider()->hasAuditTable($entity)) {
@@ -216,12 +217,12 @@ final readonly class ViewerController
                 $query->addFilter(new DateRangeFilter(Query::CREATED_AT, new \DateTimeImmutable('today', $timezone)->modify(\sprintf('-%d days', $filters->days - 1))));
             }
 
-            $count = $query->count();
-            if ($count > 0) {
+            $latest = (clone $query)->limit(1)->execute()[0] ?? null;
+            if ($latest instanceof Entry) {
                 $entities[] = $entity;
                 if (null === $filters->entity || $filters->entity === $entity) {
                     $queries[$entity] = $query;
-                    $numResults += $count;
+                    $latestRows[] = ['entity' => $entity, 'entry' => $latest];
                 }
             }
         }
@@ -230,31 +231,24 @@ final readonly class ViewerController
             throw new BadRequestHttpException(\sprintf('Unknown entity "%s".', $filters->entity));
         }
 
-        $page = min($page, max(1, (int) ceil($numResults / $pageSize)));
+        $actionCount = Query::countTransactionsOf(array_values($queries));
+        $page = min($page, max(1, (int) ceil($actionCount / $pageSize)));
+        $pageEntries = array_column(WholeActions::page($queries, $pageSize, ($page - 1) * $pageSize), 'entry');
 
-        // The newest `page * pageSize` rows of each entity are enough to build the requested page.
-        $entries = [];
-        foreach ($queries as $entity => $query) {
-            foreach ($query->limit($page * $pageSize)->execute() as $entry) {
-                $entries[] = ['entity' => $entity, 'entry' => $entry];
-            }
-        }
-
-        usort($entries, WholeActions::compare(...));
-        $latest = $entries[0]['entry'] ?? null;
-        $pageEntries = array_column(WholeActions::complete($queries, \array_slice($entries, ($page - 1) * $pageSize, $pageSize)), 'entry');
+        // the most recent entry of the user tells their latest name and firewall
+        usort($latestRows, WholeActions::compare(...));
 
         $parameters = [
             'id' => $id,
-            'latest' => $latest,
+            'latest' => $latestRows[0]['entry'] ?? null,
             'rows' => $this->rows(HistoryGrouper::byTransaction($pageEntries), $phraser, $existence, withContext: true),
-            'entryCount' => $numResults,
+            'actionCount' => $actionCount,
             'entities' => $entities,
             'filters' => $filters,
             'periods' => HistoryFilters::PERIODS,
             'types' => TransactionType::cases(),
             // only the filters of this page
-            'more' => ($page * $pageSize) < $numResults ? ['page' => $page + 1] + array_intersect_key($filters->toQuery(), ['on' => true, 'what' => true, 'when' => true]) : null,
+            'more' => ($page * $pageSize) < $actionCount ? ['page' => $page + 1] + array_intersect_key($filters->toQuery(), ['on' => true, 'what' => true, 'when' => true]) : null,
             'moreRoute' => 'dh_auditor_show_user_stream',
             'moreRouteParameters' => ['id' => $id],
         ];
@@ -295,10 +289,9 @@ final readonly class ViewerController
             $configuration = $reader->getProvider()->getConfiguration();
             $pageSize = $configuration->getViewerPageSize();
 
-            // Build query options with filters
+            // Build query options with filters: the page is read by actions, not by entries
             $queryOptions = [
-                'page' => $page,
-                'page_size' => $pageSize,
+                'page_size' => null,
             ];
 
             if (null !== $typeFilter && '' !== $typeFilter) {
@@ -352,13 +345,13 @@ final readonly class ViewerController
                 }
             }
 
-            $pager = $reader->paginate($query, $page, $pageSize);
+            $pager = $this->paginateActions($query, $page, $pageSize);
         } catch (AccessDeniedException) {
             throw new SymfonyAccessDeniedException('Access Denied.');
         }
 
         // the actions of the page, whole
-        $pageEntries = array_column(WholeActions::complete([$entity => $query], array_map(static fn (Entry $entry): array => ['entity' => $entity, 'entry' => $entry], iterator_to_array($pager['results'], false))), 'entry');
+        $pageEntries = array_column(WholeActions::page([$entity => $query], $pageSize, ($pager['currentPage'] - 1) * $pageSize), 'entry');
 
         return $this->renderView('@DHAuditor/Audit/entity_stream.html.twig', [
             'entity' => $entity,
@@ -552,6 +545,7 @@ final readonly class ViewerController
             'label' => \is_string($label) ? $label : null,
             'creation' => $creation,
             'creationItem' => $creation instanceof Entry ? new HistoryItem((string) $creation->transactionId, [$creation]) : null,
+            'actionCount' => $history->countActions($entity, $id, $filters->attached),
             'entryCount' => $history->count($entity, $id, $filters->attached),
             'authors' => $history->authors($entity, $id, $filters->attached),
             'fields' => JsonPlatformHelper::isJsonSearchSupported($connection) ? $fields : [],
@@ -603,6 +597,33 @@ final readonly class ViewerController
     private function ulidDate(string $transactionId): ?\DateTimeImmutable
     {
         return Ulid::isValid($transactionId, Ulid::FORMAT_BASE_32) ? Ulid::fromString($transactionId)->getDateTime() : null;
+    }
+
+    /**
+     * Pager of a list of actions, in the shape of Reader::paginate() (without results): numResults counts the actions,
+     * and a page beyond the last one is the last one.
+     *
+     * @return array{currentPage: int, hasPreviousPage: bool, hasNextPage: bool, previousPage: ?int, nextPage: ?int, numPages: int, haveToPaginate: bool, numResults: int, pageSize: int}
+     */
+    private function paginateActions(Query $query, int $page, int $pageSize): array
+    {
+        $numResults = $query->countTransactions();
+        $numPages = (int) ceil($numResults / $pageSize);
+        $currentPage = min(max(1, $page), max(1, $numPages));
+        $hasPreviousPage = $currentPage > 1;
+        $hasNextPage = $currentPage < $numPages;
+
+        return [
+            'currentPage' => $currentPage,
+            'hasPreviousPage' => $hasPreviousPage,
+            'hasNextPage' => $hasNextPage,
+            'previousPage' => $hasPreviousPage ? $currentPage - 1 : null,
+            'nextPage' => $hasNextPage ? $currentPage + 1 : null,
+            'numPages' => $numPages,
+            'haveToPaginate' => $numResults > $pageSize,
+            'numResults' => $numResults,
+            'pageSize' => $pageSize,
+        ];
     }
 
     /**

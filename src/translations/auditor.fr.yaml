@@ -104,6 +104,7 @@ audit:
     context_separator: ' :'
     created_by: 'créé par %author% le %date%'
     entries_count: '{0} aucune entrée|{1} 1 entrée|]1,Inf[ %count% entrées'
+    actions_count: '{0} aucune action|{1} 1 action|]1,Inf[ %count% actions'
     fields_count: '[0,1] %count% champ|]1,Inf[ %count% champs'
     compare: 'Comparer deux états'
     export: 'Exporter'

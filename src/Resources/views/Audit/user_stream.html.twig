@@ -16,7 +16,7 @@
         <div class="min-w-0">
             <h1 class="text-2xl font-semibold tracking-tight">{{ 'audit.user.title'|trans({'%name%': name}, 'auditor') }}</h1>
             <p class="mt-1 text-sm text-dh-muted-foreground">
-                {{ 'audit.history.entries_count'|trans({'%count%': entryCount}, 'auditor') }}
+                {{ 'audit.history.actions_count'|trans({'%count%': actionCount}, 'auditor') }}
                 {% if entities is not empty %}· {{ 'audit.user.entities'|trans({'%count%': entities|length}, 'auditor') }}{% endif %}
                 · <span class="font-mono">blame_id {{ id }}</span>
                 {% if latest and latest.userFqdn %}· <span class="font-mono">{{ latest.userFqdn }}</span>{% endif %}

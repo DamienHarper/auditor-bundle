@@ -104,6 +104,7 @@ audit:
     context_separator: ':'
     created_by: 'loonud %author%, %date%'
     entries_count: '{0} kirjeid pole|{1} 1 kirje|]1,Inf[ %count% kirjet'
+    actions_count: '{0} toiminguid pole|{1} 1 toiming|]1,Inf[ %count% toimingut'
     fields_count: '[0,1] %count% väli|]1,Inf[ %count% välja'
     compare: 'Võrdle kahte olekut'
     export: 'Ekspordi'

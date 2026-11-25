@@ -62,7 +62,8 @@ marked as well).
 
 - **Recent activity**: the last 10 actions across the audited entities the reader may view, with what they were done
   on (*alice on Post “Why audit?”: …*). An action touching many objects is summed up by type (*deleted 38 Post*); it
-  is read whole (up to 1,000 entries), whatever the number of its entries.
+  is read whole, whatever the number of its entries (a page reads 1,000 entries at most: past that, the largest
+  actions tell only their most recent entries).
 - **What is audited**: the audited entities (their name from the `dh_auditor_fields` domain, key FQCN), their number of
   actions (distinct transactions, cached with the activity graph when its cache is on), their latest activity and,
   when enabled, their [activity graph](#-activity-graph). The list can be sorted by name, number of actions or latest
@@ -81,7 +82,8 @@ The history of one object and of the entities attached to it (`#[AuditRoot]`, `r
 - **filters**: who, what (`insert`, `update`, `remove`, `associate`, `dissociate`), field (needs native JSON
   search), origin (`http`, `console`, `messenger`, `system`), when (last 7, 30 or 90 days), and, when entities can
   be attached, with or without them;
-- **Show older actions** reads the next page through a cursor (`?after=`): a link, which `viewer.js` loads in place;
+- **Show older actions** reads the next `page_size` actions through a cursor (`?after=`): a link, which `viewer.js`
+  loads in place; the header counts the actions of the history;
 - **Who changed what last**: the 8 fields changed most recently, with who changed them and when (or *at creation*);
 - **Technical side**: class, identifier, audit tables read, number of entries.
 
@@ -110,9 +112,11 @@ user), changed field, and period.
 
 The dates are days, inclusive, in the `dh_auditor.timezone` time zone. Filters are kept by the pager.
 
-Pages hold `page_size` entries, but an action is never cut: it is shown whole on the page of its most recent entry
-(up to 1,000 entries), and left out of the next pages. A page can hold more actions than another, or none when all its
-entries belong to an action of the previous page.
+Pages hold `page_size` actions (transactions), whatever their number of entries: every page but the last holds as
+many actions, each one whole. A page reads 1,000 entries at most: past that, the small actions stay whole and the
+largest ones share the rest, each telling only its most recent entries. The header counts the actions the filters keep,
+and a page beyond the last one shows the last one. The actions of a page are found by grouping the entries the filters
+keep by transaction in the database: on a large audit table, a filter (type, user, period) keeps that cheap.
 
 ### Action (`/audit/transaction/{hash}`)
 
@@ -129,9 +133,8 @@ done on (*On Post “Why audit?”: …*), with filters on the entity (`on`), th
 
 - Anonymous entries (no `blame_id`) have no page. Neither do entries recorded with an empty `blame_id`, which is what
   happens when the Symfony user class has no `getId()` method.
-- Each audited entity is queried separately, for at most `page × page_size` rows: browsing deep pages of a very
-  active user costs more than browsing the first ones. As in the entity stream, an action is shown whole on the page
-  of its most recent entry.
+- Pages hold `page_size` actions, as in the entity stream: an action that wrote in several audit tables is one
+  action, shown and counted once (the audit tables of one connection are read in one statement).
 
 ### Compare Revisions (`/audit/{entity}/{id}/compare`)
 

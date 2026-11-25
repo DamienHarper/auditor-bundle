@@ -60,9 +60,20 @@ final readonly class ObjectHistory
         return $query;
     }
 
+    /**
+     * A page of $limit actions of the history, each one whole.
+     */
     public function page(string $class, string $id, HistoryFilters $filters, ?string $after, int $limit, ?\DateTimeZone $timezone = null): RootPage
     {
-        return $this->query($class, $id, $filters, $timezone)->fetch($limit, $after);
+        return $this->query($class, $id, $filters, $timezone)->fetchTransactions($limit, $after);
+    }
+
+    /**
+     * Number of actions of the history, attached entities included or not.
+     */
+    public function countActions(string $class, string $id, bool $attached): int
+    {
+        return $this->query($class, $id, new HistoryFilters(attached: $attached))->countTransactions();
     }
 
     /**
