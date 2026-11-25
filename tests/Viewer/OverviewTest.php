@@ -75,15 +75,20 @@ final class OverviewTest extends TestCase
         $reader = new Reader($this->provider);
         $connection = $this->provider->getStorageServiceForEntity(Tag::class)->getEntityManager()->getConnection();
         $table = $reader->getEntityAuditTableName(Tag::class);
-        $expected = (int) $connection->fetchOne(\sprintf('SELECT COUNT(DISTINCT transaction_id) FROM %s', $table)) + 1;
+        $expected = (int) $connection->fetchOne(\sprintf('SELECT COUNT(DISTINCT transaction_id) FROM %s', $table));
+
+        // two entries of a transaction that has more: the transaction still counts, its two entries add one action
+        $transaction = $connection->fetchOne(\sprintf('SELECT transaction_id FROM %s GROUP BY transaction_id HAVING COUNT(*) > 2', $table));
+        $this->assertIsString($transaction);
+        $ids = $connection->fetchFirstColumn(\sprintf('SELECT id FROM %s WHERE transaction_id = ? ORDER BY id LIMIT 2', $table), [$transaction]);
 
         // while a table is migrated to the schema v2, its older entries only have a transaction_hash
         $connection->executeStatement(\sprintf('ALTER TABLE %s ADD COLUMN transaction_hash VARCHAR(40) DEFAULT NULL', $table));
 
         try {
-            $connection->executeStatement(\sprintf('UPDATE %s SET transaction_id = NULL, transaction_hash = ? WHERE id = (SELECT MIN(id) FROM %1$s)', $table), [sha1('legacy')]);
+            $connection->executeStatement(\sprintf('UPDATE %s SET transaction_id = NULL, transaction_hash = ? WHERE id IN (?, ?)', $table), [sha1('legacy'), ...$ids]);
 
-            $this->assertSame($expected, new Overview($reader)->actionCount(Tag::class));
+            $this->assertSame($expected + 1, new Overview($reader)->actionCount(Tag::class));
         } finally {
             // the SQLite file outlives the test
             $connection->executeStatement(\sprintf('ALTER TABLE %s DROP COLUMN transaction_hash', $table));

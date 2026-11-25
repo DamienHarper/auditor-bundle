@@ -96,7 +96,7 @@ final readonly class ActivityGraphProvider
     }
 
     /**
-     * Number of actions (distinct transactions) of an entity, kept in the activity cache like the entry count.
+     * Number of actions of an entity, as its entity stream counts them, kept in the activity cache like the entry count.
      *
      * @param \Closure(): int $count
      */
