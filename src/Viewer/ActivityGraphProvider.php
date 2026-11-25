@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DH\AuditorBundle\Viewer;
 
+use DH\Auditor\Provider\Doctrine\Configuration;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\DateRangeFilter;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Query;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
@@ -49,6 +50,13 @@ final readonly class ActivityGraphProvider
      */
     public function getActivityDataWithRaw(string $entity, Reader $reader): array
     {
+        /** @var Configuration $configuration */
+        $configuration = $reader->getProvider()->getConfiguration();
+        if (null !== $configuration->getReadScope()) {
+            // a read scope depends on the reader (a tenant…): its counts are not shared through the cache
+            return $this->computeActivityData($entity, $reader, true);
+        }
+
         $cacheKey = $this->getCacheKey($entity);
 
         // Try to get from cache
@@ -60,7 +68,7 @@ final readonly class ActivityGraphProvider
         }
 
         // Compute the data
-        $data = $this->computeActivityData($entity, $reader);
+        $data = $this->computeActivityData($entity, $reader, false);
 
         // Store in cache
         if ($this->cacheEnabled && $this->cache instanceof CacheItemPoolInterface) {
@@ -176,18 +184,22 @@ final readonly class ActivityGraphProvider
 
     /**
      * Compute activity data from the database: the number of actions (transactions) of each day, as the entity stream
-     * of that day counts them. The whole table is read, whatever the read scope: the data is shared through the cache.
+     * of that day counts them. Without a read scope the whole table is read; with one, only the entries it lets the
+     * reader see.
      *
      * @return array{normalized: array<int>, raw: array<int>, dates: list<string>} Values and their calendar dates
      */
-    private function computeActivityData(string $entity, Reader $reader): array
+    private function computeActivityData(string $entity, Reader $reader, bool $scoped): array
     {
         $connection = $reader->getProvider()->getStorageServiceForEntity($entity)->getEntityManager()->getConnection();
         $timezone = $reader->getProvider()->getAuditor()->getConfiguration()->timezone;
         $today = new \DateTimeImmutable('today', new \DateTimeZone($timezone));
         $minDate = $today->modify(\sprintf('-%d days', $this->days - 1));
 
-        $countsByDate = new Query($reader->getEntityAuditTableName($entity), $connection, $timezone)
+        $query = $scoped
+            ? $reader->createQuery($entity, ['page_size' => null])
+            : new Query($reader->getEntityAuditTableName($entity), $connection, $timezone);
+        $countsByDate = $query
             ->addFilter(new DateRangeFilter(Query::CREATED_AT, $minDate))
             ->countTransactionsByDay()
         ;

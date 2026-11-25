@@ -201,6 +201,9 @@ entity on the audit index page is cached with it (same lifetime and tag): counti
 count may lag behind by up to the cache lifetime, as the graph does. Without the activity graph, or with its cache
 disabled, the actions are counted on every page load.
 
+With a `read_scope`, the graph counts only the actions the scope lets the reader see, and is never cached: the
+scope depends on the reader (a tenant, for instance), so its counts are computed on every page load.
+
 > [!NOTE]
 > Caching requires `symfony/cache`:
 > ```bash

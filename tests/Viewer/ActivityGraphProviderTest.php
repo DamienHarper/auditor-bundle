@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace DH\AuditorBundle\Tests\Viewer;
 
+use DH\Auditor\Provider\Doctrine\Persistence\Reader\Filter\SimpleFilter;
+use DH\Auditor\Provider\Doctrine\Persistence\Reader\Query;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
@@ -310,6 +312,33 @@ final class ActivityGraphProviderTest extends WebTestCase
         $data = new ActivityGraphProvider(7, 'bottom', false, 300)->getActivityDataWithRaw(Post::class, $reader);
 
         $this->assertSame([0, 0, 0, 0, 0, 0, $query->countTransactions()], $data['raw']);
+    }
+
+    public function testAReadScopeCountsInItsScopeWithoutTheCache(): void
+    {
+        $this->setupEntities();
+        $reader = $this->createReader();
+        $connection = $this->provider->getStorageServiceForEntity(Post::class)->getEntityManager()->getConnection();
+        $table = $reader->getEntityAuditTableName(Post::class);
+        $today = new \DateTimeImmutable('today', new \DateTimeZone('UTC'));
+        $connection->executeStatement('UPDATE '.$table.' SET created_at = :date', ['date' => $today->format('Y-m-d').' 12:00:00']);
+        $all = $reader->createQuery(Post::class, ['page_size' => null])->countTransactions();
+        $scoped = $reader->createQuery(Post::class, ['object_id' => '1', 'page_size' => null])->countTransactions();
+        $this->assertGreaterThan($scoped, $all, 'The scope hides actions.');
+
+        $graph = new ActivityGraphProvider(7, 'bottom', true, 300, new ArrayAdapter());
+        $scope = static function (Query $query): void {
+            $query->addFilter(new SimpleFilter(Query::OBJECT_ID, '1'));
+        };
+
+        $this->provider->getConfiguration()->setReadScope($scope);
+        $this->assertSame($scoped, $graph->getActivityDataWithRaw(Post::class, $reader)['raw'][6], 'Counted in the scope.');
+
+        $this->provider->getConfiguration()->setReadScope(null);
+        $this->assertSame($all, $graph->getActivityDataWithRaw(Post::class, $reader)['raw'][6], 'The scoped count is not cached.');
+
+        $this->provider->getConfiguration()->setReadScope($scope);
+        $this->assertSame($scoped, $graph->getActivityDataWithRaw(Post::class, $reader)['raw'][6], 'The cached count is not read in a scope.');
     }
 
     public function testDatesMatchDailyCountsInTheAuditTimezone(): void
