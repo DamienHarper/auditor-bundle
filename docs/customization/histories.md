@@ -365,7 +365,7 @@ composer require symfony/ux-twig-component
 | `subject` | (required) | The audited entity |
 | `with` | `[]` | Elements of your application mixed with the actions (see below) |
 | `grouper` | one action per transaction | A `DH\Auditor\History\HistoryGrouper` with a key of your own |
-| `limit` | the page size of the viewer (`page_size`, counted here in entries) | Entries per page, more when needed to keep the last action whole |
+| `limit` | the page size of the viewer (`page_size`) | Actions per page, as in the viewer; with a `grouper` that has a key of its own (an action may then span several transactions), entries per page, more when needed to keep the last action whole |
 | `attached` | `true` | Whether the actions on the attached entities are included |
 | `details` | `false` | Technical details of the actions: `true`, or a role (`details="ROLE_ADMIN"`) |
 | `after` | from the query string | Cursor of the page to show (an invalid one is an error, unlike in the query string) |
