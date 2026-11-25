@@ -8,7 +8,7 @@ use DH\Auditor\Attribute\Security;
 use DH\Auditor\Exception\AccessDeniedException;
 use DH\Auditor\History\HistoryGrouper;
 use DH\Auditor\History\HistoryItem;
-use DH\Auditor\Provider\Doctrine\Persistence\Helper\SchemaHelper;
+use DH\Auditor\Provider\Doctrine\Configuration;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\Auditor\Provider\Doctrine\Persistence\Schema\SchemaManager;
 use DH\Auditor\Provider\Doctrine\Service\AuditingService;
@@ -114,20 +114,19 @@ final readonly class Overview
     }
 
     /**
-     * Number of actions (distinct transactions) of an entity, cached with the activity data when the cache is on.
+     * Number of actions of an entity, counted as its entity stream counts them. Cached with the activity data when the
+     * cache is on, unless a read scope makes the count depend on the reader.
      */
     public function actionCount(string $entity): int
     {
-        $count = function () use ($entity): int {
-            $connection = $this->reader->getProvider()->getStorageServiceForEntity($entity)->getEntityManager()->getConnection();
-            $table = $this->reader->getEntityAuditTableName($entity);
-            $column = \in_array('transaction_id', SchemaHelper::getTableColumnNames($connection, $table), true) ? 'transaction_id' : 'transaction_hash';
+        $count = fn (): int => $this->reader->createQuery($entity, ['page_size' => null])->countTransactions();
 
-            $value = $connection->fetchOne(\sprintf('SELECT COUNT(DISTINCT %s) FROM %s', $column, $table));
+        /** @var Configuration $configuration */
+        $configuration = $this->reader->getProvider()->getConfiguration();
+        if (!$this->cache instanceof ActivityGraphProvider || null !== $configuration->getReadScope()) {
+            return $count();
+        }
 
-            return is_numeric($value) ? (int) $value : 0;
-        };
-
-        return $this->cache instanceof ActivityGraphProvider ? $this->cache->getActionCount($entity, $count) : $count();
+        return $this->cache->getActionCount($entity, $count);
     }
 }
