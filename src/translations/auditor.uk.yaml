@@ -17,8 +17,8 @@ audit:
     label: Сортувати за
     name_asc: "Ім'я (А-Я)"
     name_desc: "Ім'я (Я-А)"
-    count_desc: Більше подій
-    count_asc: Менше подій
+    count_desc: Більше дій
+    count_asc: Менше дій
     activity_desc: Остання активність
     activity_asc: Найдавніша активність
   audit_details:
