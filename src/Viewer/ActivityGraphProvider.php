@@ -19,11 +19,11 @@ final readonly class ActivityGraphProvider
 {
     public const string CACHE_TAG = 'dh_auditor.activity';
 
-    private const string CACHE_KEY_PREFIX = 'dh_auditor.activity.v3.';
+    private const string CACHE_KEY_PREFIX = 'dh_auditor.activity.v4.';
 
     private const string COUNT_CACHE_KEY_PREFIX = 'dh_auditor.count.';
 
-    private const string ACTION_COUNT_CACHE_KEY_PREFIX = 'dh_auditor.actions.';
+    private const string ACTION_COUNT_CACHE_KEY_PREFIX = 'dh_auditor.actions.v2.';
 
     public function __construct(
         public private(set) int $days,
@@ -54,7 +54,7 @@ final readonly class ActivityGraphProvider
         $configuration = $reader->getProvider()->getConfiguration();
         if (null !== $configuration->getReadScope()) {
             // a read scope depends on the reader (a tenant…): its counts are not shared through the cache
-            return $this->computeActivityData($entity, $reader, true);
+            return $this->computeActivityData($entity, $reader);
         }
 
         $cacheKey = $this->getCacheKey($entity);
@@ -68,7 +68,7 @@ final readonly class ActivityGraphProvider
         }
 
         // Compute the data
-        $data = $this->computeActivityData($entity, $reader, false);
+        $data = $this->computeActivityData($entity, $reader);
 
         // Store in cache
         if ($this->cacheEnabled && $this->cache instanceof CacheItemPoolInterface) {
@@ -96,7 +96,7 @@ final readonly class ActivityGraphProvider
     }
 
     /**
-     * Number of actions (distinct transactions) of an entity, kept in the activity cache like the entry count.
+     * Number of actions of an entity, as its entity stream counts them, kept in the activity cache like the entry count.
      *
      * @param \Closure(): int $count
      */
@@ -184,22 +184,17 @@ final readonly class ActivityGraphProvider
 
     /**
      * Compute activity data from the database: the number of actions (transactions) of each day, as the entity stream
-     * of that day counts them. Without a read scope the whole table is read; with one, only the entries it lets the
-     * reader see.
+     * of that day counts them (its entity alone in a single-table inheritance, in the read scope when there is one).
      *
      * @return array{normalized: array<int>, raw: array<int>, dates: list<string>} Values and their calendar dates
      */
-    private function computeActivityData(string $entity, Reader $reader, bool $scoped): array
+    private function computeActivityData(string $entity, Reader $reader): array
     {
-        $connection = $reader->getProvider()->getStorageServiceForEntity($entity)->getEntityManager()->getConnection();
         $timezone = $reader->getProvider()->getAuditor()->getConfiguration()->timezone;
         $today = new \DateTimeImmutable('today', new \DateTimeZone($timezone));
         $minDate = $today->modify(\sprintf('-%d days', $this->days - 1));
 
-        $query = $scoped
-            ? $reader->createQuery($entity, ['page_size' => null])
-            : new Query($reader->getEntityAuditTableName($entity), $connection, $timezone);
-        $countsByDate = $query
+        $countsByDate = $reader->createQuery($entity, ['page_size' => null])
             ->addFilter(new DateRangeFilter(Query::CREATED_AT, $minDate))
             ->countTransactionsByDay()
         ;
