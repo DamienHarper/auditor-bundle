@@ -165,7 +165,9 @@ command offers the same filters.
 
 ## 📊 Activity Graph
 
-Each entity card displays a visual sparkline graph showing audit activity over time.
+Each entity card displays a visual sparkline graph showing audit activity over time: one bar per day, the number of
+actions (database transactions) of that day, as the stream of the entity counts them on that day. A bar leads to that
+stream.
 
 ### Configuration
 

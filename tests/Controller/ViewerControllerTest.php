@@ -528,12 +528,18 @@ final class ViewerControllerTest extends WebTestCase
         $this->assertGreaterThan(0, (int) $expectedCount);
         $filtered = $this->client->click($lastBar->link());
         $this->assertResponseIsSuccessful();
-        // the bars count entries, the stream its actions
+        // the bars count actions, as the stream they lead to
         $actions = $this->createReader()->createQuery(Author::class, ['page_size' => null])
             ->addFilter(new DateRangeFilter(Query::CREATED_AT, $today, $today->setTime(23, 59, 59)))
             ->countTransactions()
         ;
-        $this->assertLessThanOrEqual((int) $expectedCount, $actions);
+        $entries = $this->createReader()->createQuery(Author::class, ['page_size' => null])
+            ->addFilter(new DateRangeFilter(Query::CREATED_AT, $today, $today->setTime(23, 59, 59)))
+            ->count()
+        ;
+        $this->assertGreaterThan($actions, $entries, 'An action of the fixtures writes several entries.');
+        $this->assertSame((string) $actions, $expectedCount);
+        $this->assertStringContainsString($date.' · '.(1 === $actions ? '1 action' : $actions.' actions'), (string) $lastBar->attr('aria-label'));
         $this->assertStringContainsString(1 === $actions ? '1 action' : $actions.' actions', $filtered->filter('h1+p')->text());
         $this->assertSame($today->format('Y-m-d'), $filtered->filter('[name="date_from"]')->attr('value'));
         $this->assertSame($today->format('Y-m-d'), $filtered->filter('[name="date_to"]')->attr('value'));

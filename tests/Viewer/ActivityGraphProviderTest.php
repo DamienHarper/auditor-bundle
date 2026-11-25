@@ -296,6 +296,22 @@ final class ActivityGraphProviderTest extends WebTestCase
         $this->assertSame(14, $provider->days);
     }
 
+    public function testCountsActionsNotEntries(): void
+    {
+        $this->setupEntities();
+        $reader = $this->createReader();
+        $connection = $this->provider->getStorageServiceForEntity(Post::class)->getEntityManager()->getConnection();
+        $table = $reader->getEntityAuditTableName(Post::class);
+        $today = new \DateTimeImmutable('today', new \DateTimeZone('UTC'));
+        $connection->executeStatement('UPDATE '.$table.' SET created_at = :date', ['date' => $today->format('Y-m-d').' 12:00:00']);
+        $query = $reader->createQuery(Post::class, ['page_size' => null]);
+        $this->assertGreaterThan($query->countTransactions(), $query->count(), 'An action of the fixtures writes several entries.');
+
+        $data = new ActivityGraphProvider(7, 'bottom', false, 300)->getActivityDataWithRaw(Post::class, $reader);
+
+        $this->assertSame([0, 0, 0, 0, 0, 0, $query->countTransactions()], $data['raw']);
+    }
+
     public function testDatesMatchDailyCountsInTheAuditTimezone(): void
     {
         $this->setupEntities();
