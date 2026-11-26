@@ -17,7 +17,6 @@ use DH\AuditorBundle\Tests\Controller\ViewerControllerTest;
 use DH\AuditorBundle\Viewer\ActivityGraphProvider;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException as SymfonyAccessDeniedException;
@@ -26,7 +25,6 @@ use Twig\Environment;
 /**
  * @see ViewerControllerTest
  */
-#[AsController]
 final readonly class ViewerController
 {
     public function __construct(
