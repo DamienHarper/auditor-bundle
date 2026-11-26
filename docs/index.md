@@ -92,6 +92,7 @@ flowchart TB
 - ⚙️ [Configuration Reference](configuration/index.md)
 - 🔧 [Customization](customization/index.md)
 - 👁️ [Audit Viewer](viewer/index.md)
+- 🧪 [Testing](testing.md)
 - ⬆️ [Upgrade Guides](upgrade/index.md)
 
 ## 🔗 Related Projects
