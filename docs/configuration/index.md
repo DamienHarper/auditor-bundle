@@ -16,6 +16,7 @@ dh_auditor:
     timezone: 'UTC'                         # Timezone for audit timestamps
     user_provider: 'dh_auditor.user_provider'
     security_provider: 'dh_auditor.security_provider'
+    anonymize_ip: false                     # Store 192.168.1.0 for 192.168.1.42 (default security provider)
     role_checker: 'dh_auditor.role_checker'
     extra_data_provider: ~                  # Service adding extra data to audit entries (opt-in)
 
@@ -96,6 +97,21 @@ dh_auditor:
 
 > [!TIP]
 > See [Security Provider Customization](../customization/security-provider.md) for creating custom providers.
+
+### anonymize_ip
+
+| Type   | Default | Description                                               |
+|--------|---------|-----------------------------------------------------------|
+| `bool` | `false` | Anonymize the client IP recorded by the security provider |
+
+The default security provider then records the client IP through `IpUtils::anonymize()`: the last byte of an IPv4
+address and the last 8 bytes of an IPv6 address are set to zero (`192.168.1.42` is stored as `192.168.1.0`). The IP
+addresses recorded before are left as they are. A custom `security_provider` ignores this option.
+
+```yaml
+dh_auditor:
+    anonymize_ip: true
+```
 
 ### role_checker
 

@@ -1,0 +1,2 @@
+dh_auditor:
+    anonymize_ip: true
