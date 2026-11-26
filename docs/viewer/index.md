@@ -90,8 +90,8 @@ The history of one object and of the entities attached to it (`#[AuditRoot]`, `r
 [Histories](../customization/histories.md)), newest first, grouped by day:
 
 - one row per action: icon, author (linked to their actions), phrase, time, origin (Web, Command line, Messenger,
-  System), blame context and, when the author was impersonated (switch user), who impersonated them; the whole row leads to the action page, the objects it names to their own history; its
-  details list every change with its raw field and values (long texts compared word by word; a text shows between
+  System), blame context and, when the author was impersonated (switch user), who impersonated them; the whole row
+  leads to the action page, the objects it names to their own history; its details list every change with its raw field and values (long texts compared word by word; a text shows between
   quotes only when it would be misread without them: empty, with spaces at its ends, or looking like a number, a
   boolean or null), the transaction and the blame, and link to the action page;
 - **filters**: who, what (`insert`, `update`, `remove`, `associate`, `dissociate`), field (needs native JSON
@@ -168,11 +168,15 @@ revisions, so that the comparison can be moved along the history.
 | `id`        | Object ID                                                                    |
 | `from`, `to`| Creation date range (ISO 8601, e.g. `2026-01-01`)                            |
 | `blame_id`  | User ID                                                                      |
-| `anonymize` | `1` to remove the user (ID, name, class, firewall) and the IP address        |
+| `anonymize` | `1` to remove the user (ID, name, class, firewall, impersonator) and the IP address |
 
 ```
 /audit/export?entity=App-Entity-User&format=csv&from=2026-01-01
 ```
+
+Each entry carries the blame as flat fields: `blame_id`, `blame_user`, `blame_user_fqdn`, `blame_user_firewall`,
+`blame_impersonator_id`, `blame_impersonator` and `blame_impersonator_fqdn` (the user who impersonated the author, if
+any), `ip` and `blame_via`.
 
 The export follows the same access rules as the viewer (see [Access Control](#-access-control)): an entity the user
 cannot view is refused, or left out when no entity is given. From the command line, the provider's `audit:export`

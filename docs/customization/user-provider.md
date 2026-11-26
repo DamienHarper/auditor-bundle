@@ -104,6 +104,7 @@ restored when the command ends.
 
 namespace App\Audit;
 
+use DH\Auditor\Provider\Doctrine\Persistence\Helper\DoctrineHelper;
 use DH\Auditor\User\User;
 use DH\Auditor\User\UserInterface;
 use DH\Auditor\User\UserProviderInterface;
@@ -125,7 +126,7 @@ class CustomUserProvider implements UserProviderInterface
         return new User(
             (string) $user->getId(),
             $user->getEmail(),
-            $user::class, // written as user_fqdn
+            DoctrineHelper::getRealClassName($user), // written as user_fqdn, Doctrine proxies resolved
         );
     }
 }
