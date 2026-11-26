@@ -90,7 +90,7 @@ The history of one object and of the entities attached to it (`#[AuditRoot]`, `r
 [Histories](../customization/histories.md)), newest first, grouped by day:
 
 - one row per action: icon, author (linked to their actions), phrase, time, origin (Web, Command line, Messenger,
-  System) and blame context; the whole row leads to the action page, the objects it names to their own history; its
+  System), blame context and, when the author was impersonated (switch user), who impersonated them; the whole row leads to the action page, the objects it names to their own history; its
   details list every change with its raw field and values (long texts compared word by word; a text shows between
   quotes only when it would be misread without them: empty, with spaces at its ends, or looking like a number, a
   boolean or null), the transaction and the blame, and link to the action page;
