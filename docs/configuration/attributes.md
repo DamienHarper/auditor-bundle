@@ -15,6 +15,7 @@ PHP attributes provide an alternative to YAML configuration for declaring audita
 | `#[Ignore]`      | Property, or class with `field:` | Excludes a property from auditing |
 | `#[Security]`    | Class    | Defines roles required to view audits            |
 | `#[DiffLabel]`   | Property, or class with `field:` | Attaches a human-readable label resolver to a field |
+| `#[Mask]`        | Property, or class with `field:` | Records the changes of a property without its values |
 | `#[AuditRoot]`   | Class (repeatable) | Attaches the entries to the history of another entity (see [Histories](../customization/histories.md)) |
 
 `#[Auditable]` also takes a retention policy: `#[Auditable(maxAge: 'P1Y', maxEntries: 10_000)]`.
@@ -283,6 +284,34 @@ final class CategoryResolver implements DiffLabelResolverInterface
 > See the [Diff Label Resolvers guide](../customization/diff-label-resolvers.md) for the full reference, including constraints on resolver behaviour and viewer integration.
 
 ---
+
+## 🎭 #[Mask]
+
+Records that a property changed without storing its values: unlike `#[Ignore]`, the change still shows in the
+viewer, as `***` or as a hash.
+
+```php
+use DH\Auditor\Attribute\Mask;
+
+#[ORM\Entity]
+#[Auditable]
+class User
+{
+    #[ORM\Column]
+    #[Mask(strategy: Mask::KEYED_HASH)]  // HMAC-SHA256 keyed with "mask_secret"
+    private string $email = '';
+
+    #[ORM\Column(nullable: true)]
+    #[Mask]                              // "***"
+    private ?string $pin = null;
+}
+```
+
+`Mask::KEYED_HASH` needs the `mask_secret` option of the doctrine provider (see
+[Configuration](index.md#mask_secret)): equal values give equal hashes, so the entries of one value can be found
+without storing it. A masked field gets no `#[DiffLabel]` label. See the
+[provider documentation](https://damienharper.github.io/auditor-docs/auditor-doctrine-provider/providers/doctrine/attributes#-mask)
+for the details.
 
 ## 🚀 Next Steps
 
