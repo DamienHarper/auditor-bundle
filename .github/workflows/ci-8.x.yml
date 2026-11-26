@@ -82,9 +82,6 @@ jobs:
       - name: Update project dependencies
         run: SYMFONY_REQUIRE="${{ matrix.symfony }}" composer update --no-progress --ansi --prefer-stable
 
-      - name: Install auditor from source
-        run: composer reinstall damienharper/auditor --prefer-install=source
-
       - name: Install PHPStan
         run: composer install --no-progress --ansi --working-dir=tools/phpstan
 

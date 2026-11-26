@@ -97,6 +97,10 @@
     "sort-packages": true,
     "allow-plugins": {
       "composer/package-versions-deprecated": true
+    },
+    "preferred-install": {
+      "damienharper/*": "source",
+      "*": "dist"
     }
   },
   "suggest": {
