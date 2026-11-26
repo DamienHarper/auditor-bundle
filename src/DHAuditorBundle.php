@@ -470,18 +470,20 @@ class DHAuditorBundle extends AbstractBundle
 
     private function loadBundleServices(ServicesConfigurator $services): void
     {
-        // ExportController (uses #[AsController] attribute; its route is only loaded when the viewer is enabled)
+        // The controllers are tagged explicitly, never autoconfigured: autoconfiguration would also tag their
+        // #[Route] classes "routing.controller", and the "routing.controllers" resource of the application would
+        // then load the routes outside the "auditor" loader, without the prefix of its import and even with the
+        // viewer disabled. Their routes come from RoutingLoader only, which loads them when the viewer is enabled.
         $services->set(ExportController::class)
-            ->autoconfigure()
+            ->tag('controller.service_arguments')
         ;
 
-        // ViewerController (uses #[AsController] attribute)
         $services->set(ViewerController::class)
             ->args([
                 new Reference('twig'),
                 new Reference(ActivityGraphProvider::class, ContainerBuilder::NULL_ON_INVALID_REFERENCE),
             ])
-            ->autoconfigure()
+            ->tag('controller.service_arguments')
         ;
 
         // UserProvider (autowired)

@@ -39,7 +39,6 @@ use DH\AuditorBundle\Viewer\WholeActions;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
@@ -50,7 +49,6 @@ use Twig\Environment;
 /**
  * @see ViewerControllerTest
  */
-#[AsController]
 final readonly class ViewerController
 {
     /**
