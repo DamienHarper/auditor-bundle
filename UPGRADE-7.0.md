@@ -64,6 +64,19 @@ See [auditor UPGRADE-4.0.md](https://github.com/DamienHarper/auditor/blob/master
 | `dh_auditor_show_entity_history`   | `dh_auditor_show_entity_stream`      |
 | `dh_auditor_show_transaction`      | `dh_auditor_show_transaction_stream` |
 
+### Viewer Routes and `routing.controllers`
+
+Up to 7.3.0, the bundle controllers were autoconfigured: with the `routing.controllers` resource of the
+Symfony Flex recipe (Symfony 7.4+), the viewer routes were also loaded outside the `auditor` route loader,
+at `/audit` whatever the prefix of your import, and even with the viewer disabled. As of 7.3.1, they come
+from the `auditor` loader only:
+
+- the prefix of your import applies again: with `prefix: /admin`, the viewer moves from `/audit` to
+  `/admin/audit`; adapt your `access_control` rules and links;
+- a disabled viewer (`viewer: false`) registers no route;
+- an application that only got the viewer through `routing.controllers` must import the bundle routes
+  (`config/routes/dh_auditor.yaml`, see the viewer documentation).
+
 ### ConsoleUserProvider
 
 CLI commands now use the command name as the user identifier:
@@ -114,7 +127,6 @@ The following classes now use PHP 8.4+ attributes for auto-configuration:
 |-------|-----------------|
 | `ConsoleEventSubscriber` | `#[AsEventListener]` |
 | `ViewerEventSubscriber` | `#[AsEventListener]` |
-| `ViewerController` | `#[AsController]` |
 | `TimeAgoExtension` | `#[AsTwigFilter]` |
 | `RoutingLoader` | `#[AutoconfigureTag]` |
 

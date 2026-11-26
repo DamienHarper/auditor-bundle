@@ -49,6 +49,20 @@ dh_auditor:
     type: auditor
 ```
 
+The viewer routes come from this import only, so its prefix applies to all of them. With `prefix: /admin`, the
+viewer answers at `/admin/audit`:
+
+```yaml
+dh_auditor:
+    resource: "@DHAuditorBundle/Controller/"
+    type: auditor
+    prefix: /admin
+```
+
+> [!IMPORTANT]
+> The `routing.controllers` resource of the Symfony Flex recipe does not load the viewer routes: an
+> application that imports only `routing.controllers` has no viewer. Import the bundle routes as above.
+
 ## 📄 Pages
 
 The viewer tells each action (a database transaction) as a phrase, such as *alice changed Status: Draft → Published
@@ -325,6 +339,12 @@ security:
     access_control:
         - { path: ^/audit, roles: ROLE_ADMIN }
 ```
+
+The rule must match the path the viewer is imported at: with `prefix: /admin`, write `^/admin/audit`.
+
+> [!WARNING]
+> When neither the entity nor its scope requires roles, the role checker grants the viewer to every visitor.
+> Protect the imported path with an `access_control` rule (or a firewall) unless the audits are meant to be public.
 
 > [!NOTE]
 > In association diffs (`associate` / `dissociate`), the related entity links to its audit stream
