@@ -13,6 +13,7 @@ use DH\AuditorBundle\User\UserProvider;
 use PHPUnit\Framework\Attributes\Small;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\InMemoryUser;
@@ -105,6 +106,35 @@ final class UserProviderTest extends WebTestCase
         $this->assertSame(InMemoryUser::class, $user->impersonator->fqdn);
     }
 
+    public function testTheIdOfTheUsers(): void
+    {
+        $original = new UsernamePasswordToken($this->createUserWithId(7, 'admin'), 'main');
+        $tokenStorage = new TokenStorage();
+        $tokenStorage->setToken(new SwitchUserToken($this->createUserWithId(42, 'alice'), 'main', [], $original));
+
+        $user = new UserProvider($tokenStorage)();
+
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertSame('42', $user->identifier, 'getId() gives the identifier of the user.');
+        $this->assertSame('7', $user->impersonator?->identifier, 'getId() gives the identifier of the impersonator.');
+    }
+
+    public function testAUserWithANullId(): void
+    {
+        $tokenStorage = new TokenStorage();
+        $tokenStorage->setToken(new UsernamePasswordToken($this->createUserWithId(null, 'alice'), 'main'));
+
+        $this->assertSame('', new UserProvider($tokenStorage)()?->identifier, 'A null id gives an empty identifier.');
+    }
+
+    public function testNoUserWhenTheTokenStorageFails(): void
+    {
+        $tokenStorage = $this->createStub(TokenStorageInterface::class);
+        $tokenStorage->method('getToken')->willThrowException(new \RuntimeException('No session'));
+
+        $this->assertNull(new UserProvider($tokenStorage)());
+    }
+
     public function testNoUserWithoutToken(): void
     {
         $this->assertNull(new UserProvider(new TokenStorage())());
@@ -143,6 +173,31 @@ final class UserProviderTest extends WebTestCase
     private function createAndInitDoctrineProvider(): void
     {
         $this->provider = self::getContainer()->get(DoctrineProvider::class);
+    }
+
+    private function createUserWithId(?int $id, string $username): UserInterface
+    {
+        return new readonly class($id, $username) implements UserInterface {
+            public function __construct(
+                private ?int $id,
+                private string $username,
+            ) {}
+
+            public function getId(): ?int
+            {
+                return $this->id;
+            }
+
+            public function getUserIdentifier(): string
+            {
+                return $this->username;
+            }
+
+            public function getRoles(): array
+            {
+                return [];
+            }
+        };
     }
 
     private function createUser(string $username): UserInterface
