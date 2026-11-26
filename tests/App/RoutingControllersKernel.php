@@ -10,7 +10,7 @@ use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
 /**
  * Test application that imports the bundle routes under a prefix next to the "routing.controllers"
- * resource of the current Symfony Flex recipe, in a given order, with the viewer enabled or not.
+ * resource of the symfony/routing recipe (config/routes.yaml), in a given order, with the viewer enabled or not.
  */
 final class RoutingControllersKernel extends Kernel
 {

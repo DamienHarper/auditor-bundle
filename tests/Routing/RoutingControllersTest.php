@@ -14,7 +14,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 /**
  * The bundle routes are declared through the "auditor" route loader only: importing the
- * "routing.controllers" resource of the Symfony Flex recipe must neither drop the prefix of the
+ * "routing.controllers" resource of the symfony/routing recipe must neither drop the prefix of the
  * application's import nor expose the viewer when it is disabled.
  *
  * @internal
@@ -22,6 +22,16 @@ use Symfony\Component\Routing\RouterInterface;
 #[Small]
 final class RoutingControllersTest extends KernelTestCase
 {
+    private const array VIEWER_ROUTES = [
+        'dh_auditor_export',
+        'dh_auditor_list_audits',
+        'dh_auditor_show_transaction_stream',
+        'dh_auditor_show_user_stream',
+        'dh_auditor_show_entity_stream',
+        'dh_auditor_select_revisions',
+        'dh_auditor_compare_revisions',
+    ];
+
     #[DataProvider('provideImportOrderCases')]
     public function testViewerRoutesKeepThePrefixOfTheImport(bool $routingControllersFirst): void
     {
@@ -29,7 +39,7 @@ final class RoutingControllersTest extends KernelTestCase
 
         $routes = $this->auditorRoutes();
 
-        $this->assertNotEmpty($routes, 'The viewer routes must be registered when the viewer is enabled.');
+        $this->assertEqualsCanonicalizing(self::VIEWER_ROUTES, array_keys($routes), 'Every viewer route must be registered once when the viewer is enabled.');
         foreach ($routes as $name => $route) {
             $this->assertStringStartsWith('/admin/audit', $route->getPath(), \sprintf('Route "%s" lost the prefix of the import.', $name));
         }
@@ -68,6 +78,8 @@ final class RoutingControllersTest extends KernelTestCase
     }
 
     /**
+     * The routes of the bundle controllers, whatever their name.
+     *
      * @return array<string, Route>
      */
     private function auditorRoutes(): array
@@ -77,8 +89,7 @@ final class RoutingControllersTest extends KernelTestCase
 
         return array_filter(
             $router->getRouteCollection()->all(),
-            static fn (string $name): bool => str_starts_with($name, 'dh_auditor_'),
-            ARRAY_FILTER_USE_KEY,
+            static fn (Route $route): bool => str_starts_with((string) $route->getDefault('_controller'), 'DH\AuditorBundle\Controller\\'),
         );
     }
 }
