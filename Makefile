@@ -75,8 +75,6 @@ define common_setup
 	sh -c "docker compose $(compose_files) run --rm --remove-orphans php-cli composer global require --no-progress --no-scripts --no-plugins symfony/flex --quiet"
 	@PHP_VERSION=$(php) SYMFONY_VERSION=$(sf) \
 	sh -c "docker compose $(compose_files) run --rm --remove-orphans php-cli composer install --quiet"
-	@PHP_VERSION=$(php) SYMFONY_VERSION=$(sf) \
-	sh -c "docker compose $(compose_files) run --rm --remove-orphans php-cli composer reinstall damienharper/auditor --prefer-install=source --quiet"
 endef
 
 # Run PHPUnit target

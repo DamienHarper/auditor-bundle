@@ -32,6 +32,12 @@ cd auditor-bundle
 composer install
 ```
 
+The `damienharper/*` packages are installed from source (`preferred-install` in `composer.json`): the test suite
+loads Doctrine fixtures from `vendor/damienharper/auditor-doctrine-provider/tests`, which the dist archive does not
+contain. Composer keeps the installation source of a package that is already installed, so a `vendor/` installed
+before that setting needs a one-off `composer reinstall "damienharper/*"`, and the Docker `vendor_php*` volumes
+need to be removed once (`docker volume ls`, `docker volume rm …`).
+
 4. Create a branch for your changes:
 
 ```bash
