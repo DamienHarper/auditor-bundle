@@ -13,6 +13,10 @@ parameters:
 
     ignoreErrors:
         - identifier: missingType.iterableValue
+        # used by the tests of the applications (and tests/Test/), which PHPStan does not analyse
+        -
+            identifier: trait.unused
+            path: src/Test/AuditAssertionsTrait.php
         -
             message: '~Cannot access offset .+ on mixed~'
             path: src/DHAuditorBundle.php
