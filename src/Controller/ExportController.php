@@ -17,7 +17,6 @@ use DH\AuditorBundle\Tests\Controller\ExportControllerTest;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -26,7 +25,6 @@ use Symfony\Component\Routing\Attribute\Route;
 /**
  * @see ExportControllerTest
  */
-#[AsController]
 final readonly class ExportController
 {
     private const array VALID_FORMATS = ['ndjson', 'json', 'csv'];
