@@ -27,7 +27,8 @@ cannot be undone:
 1. back up the audit tables, and rehearse on a copy of your data to measure the duration;
 2. stop writing audits (maintenance mode, Messenger workers, scheduled tasks);
 3. update the packages, without letting `doctrine:schema:update` or a generated Doctrine migration touch the audit
-   tables;
+   tables (audit tables created by Doctrine migrations need a replayable migration and a deployment order, see
+   [Audit tables managed by Doctrine Migrations](https://github.com/DamienHarper/auditor-doctrine-provider/blob/main/docs/upgrade/v2.md#audit-tables-managed-by-doctrine-migrations));
 4. migrate, then apply the rest of the schema:
 
 ```bash
