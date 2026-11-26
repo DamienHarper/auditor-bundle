@@ -60,7 +60,7 @@ dh_auditor:
 ```
 
 > [!IMPORTANT]
-> The `routing.controllers` resource of the Symfony Flex recipe does not load the viewer routes: an
+> The `routing.controllers` resource of the symfony/routing recipe (`config/routes.yaml`) does not load the viewer routes: an
 > application that imports only `routing.controllers` has no viewer. Import the bundle routes as above.
 
 ## 📄 Pages
@@ -343,7 +343,7 @@ security:
 The rule must match the path the viewer is imported at: with `prefix: /admin`, write `^/admin/audit`.
 
 > [!WARNING]
-> When neither the entity nor its scope requires roles, the role checker grants the viewer to every visitor.
+> When neither the entity nor its scope requires roles, the default role checker grants the viewer to every visitor.
 > Protect the imported path with an `access_control` rule (or a firewall) unless the audits are meant to be public.
 
 > [!NOTE]
