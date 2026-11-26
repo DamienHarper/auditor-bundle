@@ -19,7 +19,8 @@
                 {{ 'audit.history.actions_count'|trans({'%count%': actionCount}, 'auditor') }}
                 {% if entities is not empty %}· {{ 'audit.user.entities'|trans({'%count%': entities|length}, 'auditor') }}{% endif %}
                 · <span class="font-mono">blame_id {{ id }}</span>
-                {% if latest and latest.userFqdn %}· <span class="font-mono">{{ latest.userFqdn }}</span>{% endif %}
+                {% set user_class = latest ? dh_auditor_user_class(latest.userFqdn) : null %}
+                {% if user_class %}· <span class="font-mono">{{ user_class }}</span>{% endif %}
                 {% if latest and latest.userFirewall %}· {{ 'audit.history.firewall'|trans(domain='auditor') }} {{ latest.userFirewall }}{% endif %}
             </p>
         </div>

@@ -37,7 +37,7 @@
     {%- endif -%}
 {%- endmacro %}
 
-{#- Where an action came from (BlameOrigin) and in which context (via), as badges. -#}
+{#- Where an action came from (BlameOrigin), in which context (via) and who impersonated its author, as badges. -#}
 {% macro origin(item) -%}
     {%- set via = item.via -%}
     <span class="inline-flex h-5 items-center rounded-full border border-dh-border px-2 text-[11px] font-medium text-dh-foreground"
@@ -46,6 +46,13 @@
         <span class="inline-flex h-5 items-center rounded-full border border-dashed border-dh-border px-2 text-[11px] text-dh-muted-foreground"
               {% if via.data is defined and via.data is not empty %}title="{{ via.data|json_encode }}"{% endif %}>
             {{- 'audit.entry.via'|trans(domain='auditor') }} {{ via.type }}{% if via.label is defined and via.label is not empty %} · {{ via.label }}{% endif -%}
+        </span>
+    {%- endif -%}
+    {%- set impersonator = item.impersonator -%}
+    {%- if impersonator is not null %}
+        <span class="inline-flex h-5 items-center rounded-full border border-dashed border-dh-border px-2 text-[11px] text-dh-muted-foreground"
+              {% if impersonator.fqdn is defined %}title="{{ impersonator.fqdn }}"{% endif %}>
+            {{- 'audit.entry.impersonated_by'|trans({'%name%': impersonator.username ?? ('#' ~ (impersonator.id ?? '?'))}, 'auditor') -}}
         </span>
     {%- endif -%}
 {%- endmacro %}

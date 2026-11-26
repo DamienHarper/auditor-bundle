@@ -129,7 +129,8 @@
             <dt class="text-dh-muted-foreground">transaction_id</dt><dd class="break-all font-mono">{{ hash }}</dd>
             {% if ulidDate %}<dt class="text-dh-muted-foreground">{{ 'audit.action.ulid_date'|trans(domain='auditor') }}</dt><dd class="font-mono">{{ ulidDate|format_datetime('medium', 'medium', timezone: false) }}</dd>{% endif %}
             <dt class="text-dh-muted-foreground">blame_id</dt><dd class="font-mono">{{ first.userId ?? '—' }}</dd>
-            <dt class="text-dh-muted-foreground">user_fqdn</dt><dd class="break-all font-mono">{{ first.userFqdn ?? '—' }}</dd>
+            <dt class="text-dh-muted-foreground">user_fqdn</dt><dd class="break-all font-mono">{{ dh_auditor_user_class(first.userFqdn) ?? '—' }}</dd>
+            {% if first.impersonator is not null %}<dt class="text-dh-muted-foreground">impersonator</dt><dd class="break-all">{{ history.raw(first.impersonator) }}</dd>{% endif %}
             <dt class="text-dh-muted-foreground">{{ 'audit.history.firewall'|trans(domain='auditor') }}</dt><dd class="font-mono">{{ first.userFirewall ?? '—' }}</dd>
             <dt class="text-dh-muted-foreground">IP</dt><dd class="font-mono">{{ first.ip ?? '—' }}</dd>
             <dt class="text-dh-muted-foreground">via</dt><dd class="font-mono">{{ first.via is not null ? (first.via.type ~ (first.via.label is defined ? ' · ' ~ first.via.label : '')) : 'audit.action.no_via'|trans(domain='auditor') }}</dd>

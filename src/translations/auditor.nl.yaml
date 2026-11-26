@@ -55,6 +55,7 @@ audit:
   entry:
     by: door
     via: via
+    impersonated_by: 'geïmpersoneerd door %name%'
     source: Bron
     target: Doel
     extra_data: Extra gegevens
