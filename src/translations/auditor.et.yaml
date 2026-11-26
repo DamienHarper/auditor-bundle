@@ -55,6 +55,7 @@ audit:
   entry:
     by: kasutajalt
     via: kaudu
+    impersonated_by: 'kehastaja %name%'
     source: Allikas
     target: Sihtmärk
     extra_data: Lisaandmed

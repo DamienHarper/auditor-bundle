@@ -12,6 +12,7 @@ use DH\Auditor\Provider\Doctrine\Auditing\Root\ObjectIdentifier;
 use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Provider\Doctrine\Persistence\Helper\DoctrineHelper;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
+use DH\Auditor\User\User;
 use DH\AuditorBundle\Tests\Twig\HistoryExtensionTest;
 use Twig\Attribute\AsTwigFunction;
 
@@ -64,6 +65,16 @@ final readonly class HistoryExtension
     public function lastChange(object $entity, string $field): ?Change
     {
         return $this->lastChanges($entity, [$field])[$field] ?? null;
+    }
+
+    /**
+     * Class of the user of an audit entry (its user_fqdn), or null when it tells nothing: the entries written before
+     * user providers supplied the class of the user hold the class of the core User object instead.
+     */
+    #[AsTwigFunction('dh_auditor_user_class')]
+    public function userClass(?string $fqdn): ?string
+    {
+        return null === $fqdn || '' === $fqdn || User::class === $fqdn ? null : $fqdn;
     }
 
     /**

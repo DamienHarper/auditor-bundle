@@ -55,6 +55,7 @@ audit:
   entry:
     by: від
     via: через
+    impersonated_by: 'під виглядом користувача: %name%'
     source: Джерело
     target: Ціль
     extra_data: Додаткові дані

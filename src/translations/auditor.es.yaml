@@ -55,6 +55,7 @@ audit:
   entry:
     by: por
     via: vía
+    impersonated_by: 'suplantado por %name%'
     source: Origen
     target: Destino
     extra_data: Datos adicionales

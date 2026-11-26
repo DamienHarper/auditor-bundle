@@ -55,6 +55,7 @@ audit:
   entry:
     by: da
     via: tramite
+    impersonated_by: 'impersonato da %name%'
     source: Origine
     target: Destinazione
     extra_data: Dati aggiuntivi

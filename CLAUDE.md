@@ -92,14 +92,14 @@ Compiler passes (`src/DependencyInjection/Compiler/`): `DoctrineMiddlewareCompil
 | `RoutingLoader` | `src/Routing/RoutingLoader.php` | Loader of type `auditor`; routes only exist when the viewer is enabled, export first |
 | `ViewerEventSubscriber` | `src/Event/ViewerEventSubscriber.php` | 404 on the viewer when auditor or the viewer is disabled |
 | `ConsoleEventSubscriber` | `src/Event/ConsoleEventSubscriber.php` | Console user provider during commands |
-| `UserProvider`, `ConsoleUserProvider` | `src/User/` | Blame user (impersonation aware) |
+| `UserProvider`, `ConsoleUserProvider` | `src/User/` | Blame user with its class; the impersonator (switch user) apart |
 | `SecurityProvider`, `RoleChecker` | `src/Security/` | Client IP and firewall; per-entity `roles.view` checks |
 | `ExtraDataProvider` | `src/ExtraData/ExtraDataProvider.php` | Opt-in `extra_data` (route name only) |
 | `PruneAuditLogsHandler`, `RetentionSchedule` | `src/Retention/` | Scheduled pruning through Messenger and Scheduler |
 | `ActivityGraphProvider`, `RevisionComparator` | `src/Viewer/` | Activity graph and counts (cached), revision compare |
 | `ObjectHistory`, `Overview`, `HistoryFilters`, `ActionNavigator`, `ObjectExistence`, `WordDiff` | `src/Viewer/` | Data of the viewer pages: object history by cursor and its filters, recent activity and action counts, previous / next action, "(deleted)" marker, word diff |
 | `HistoryRows` | `src/Viewer/` | Rows of a list of actions (phrase, context, "(deleted)" priming), shared by the viewer and the component |
-| Twig extensions | `src/Twig/` | `time_ago`, `dh_auditor_is_viewable()`, `dh_auditor_is_diff_leaf()`, `dh_auditor_last_change(s)()`, `dh_auditor_field_label()`, `\|dh_auditor_phrase`, `\|dh_auditor_phrase_text`, `\|dh_auditor_shorten`, `\|dh_auditor_author`, `dh_auditor_object_url()`, `dh_auditor_context()`, `dh_auditor_entity_name()`, `dh_auditor_is_deleted()`, `dh_auditor_history_item()`, `dh_auditor_word_diff()`, `dh_auditor_entity_url()`, `dh_auditor_transaction_url()` (`root:` option), `dh_auditor_user_url()` (null when the viewer is unavailable) |
+| Twig extensions | `src/Twig/` | `time_ago`, `dh_auditor_is_viewable()`, `dh_auditor_is_diff_leaf()`, `dh_auditor_last_change(s)()`, `dh_auditor_field_label()`, `\|dh_auditor_phrase`, `\|dh_auditor_phrase_text`, `\|dh_auditor_shorten`, `\|dh_auditor_author`, `dh_auditor_object_url()`, `dh_auditor_context()`, `dh_auditor_entity_name()`, `dh_auditor_is_deleted()`, `dh_auditor_history_item()`, `dh_auditor_word_diff()`, `dh_auditor_entity_url()`, `dh_auditor_transaction_url()` (`root:` option), `dh_auditor_user_url()` (null when the viewer is unavailable), `dh_auditor_user_class()` |
 | `History` (`<twig:DhAuditor:History>`) | `src/Twig/Component/` | History of an object in the pages of the host app, on `RootQuery`, one page per "older" link (cursor in the query string of the main request); registered only when `symfony/ux-twig-component` is installed |
 | `HistoryElementInterface`, `SortKey` | `src/History/` | Elements of the host app mixed with the actions of the component, by a sort key comparable with `Entry::getSortKey()` |
 | `TranslatedFieldLabelResolver` | `src/History/` | `FieldLabelResolverInterface` service: `dh_auditor_fields` domain, key `FQCN.field`, humanized fallback |
@@ -127,7 +127,7 @@ Compiler passes (`src/DependencyInjection/Compiler/`): `DoctrineMiddlewareCompil
 - Tests always run on SQLite files under `tests/App/var/` (`tests/App/config/packages/doctrine.yaml`): platform-specific behaviour is tested in the provider.
 
 ### `Entry` model
-`$entry->type` is a plain string, `$entry->extraData` is already decoded, `$entry->blame` is the decoded blame array with the `username`, `userFqdn`, `userFirewall` and `ip` shortcuts (schema v2). See the core `CLAUDE.md` for details.
+`$entry->type` is a plain string, `$entry->extraData` is already decoded, `$entry->blame` is the decoded blame array with the `username`, `userFqdn`, `userFirewall`, `ip`, `impersonator` and `via` shortcuts (schema v2). See the core `CLAUDE.md` for details.
 
 ## Tooling details
 

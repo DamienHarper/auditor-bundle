@@ -15,6 +15,7 @@ use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Tag;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
+use DH\Auditor\User\User;
 use DH\AuditorBundle\Controller\ViewerController;
 use DH\AuditorBundle\Enum\EntitySort;
 use DH\AuditorBundle\Viewer\ActivityGraphProvider;
@@ -1387,6 +1388,58 @@ final class ViewerControllerTest extends WebTestCase
         $badge = $crawler->filter('span[title=\'{"file":"posts.csv"}\']');
         $this->assertCount(1, $badge, 'The blame context is shown once, with its data in the tooltip.');
         $this->assertSame('via import · Import batch #42', $badge->text());
+    }
+
+    public function testEntriesShowTheirImpersonator(): void
+    {
+        $table = $this->createReader()->getEntityAuditTableName(Post::class);
+        $connection = $this->provider->getStorageServiceForEntity(Post::class)->getEntityManager()->getConnection();
+        $row = $connection->fetchAssociative('SELECT * FROM '.$table." WHERE type = 'insert' ORDER BY id LIMIT 1");
+        $this->assertIsArray($row);
+        unset($row['id']);
+        $row['blame'] = json_encode([
+            'username' => 'alice',
+            'user_fqdn' => 'App\Entity\Customer',
+            'user_firewall' => 'main',
+            'impersonator' => ['id' => '1', 'username' => 'admin', 'fqdn' => 'App\Entity\Admin'],
+        ], JSON_THROW_ON_ERROR);
+        $row['created_at'] = '2026-01-01 10:00:00';
+        $row['transaction_id'] = 'impersonated-1';
+        $connection->insert($table, $row);
+
+        $this->login(['ROLE_1']);
+        $crawler = $this->client->request('GET', self::POST_URL);
+
+        $this->assertResponseIsSuccessful();
+        $badge = $crawler->filterXPath('//span[@title="App\Entity\Admin"]');
+        $this->assertCount(1, $badge, 'The impersonator is shown once, with its class in the tooltip.');
+        $this->assertSame('impersonated by admin', $badge->text());
+
+        $crawler = $this->client->request('GET', '/audit/transaction/impersonated-1');
+
+        $this->assertResponseIsSuccessful();
+        $details = $crawler->filter('dl')->first();
+        $this->assertContains('impersonator', $details->filter('dt')->each(static fn (Crawler $dt): string => $dt->text()));
+        $this->assertStringContainsString('App\Entity\Customer', $details->text());
+        $this->assertStringContainsString('"username":"admin"', $details->text(), 'The impersonator is in the technical details.');
+    }
+
+    public function testTheClassOfTheCoreUserIsNotShown(): void
+    {
+        $table = $this->createReader()->getEntityAuditTableName(Post::class);
+        $connection = $this->provider->getStorageServiceForEntity(Post::class)->getEntityManager()->getConnection();
+        $row = $connection->fetchAssociative('SELECT * FROM '.$table." WHERE type = 'insert' ORDER BY id LIMIT 1");
+        $this->assertIsArray($row);
+        unset($row['id']);
+        $row['blame'] = json_encode(['username' => 'legacy', 'user_fqdn' => User::class, 'user_firewall' => 'main'], JSON_THROW_ON_ERROR);
+        $row['transaction_id'] = 'legacy-fqdn';
+        $connection->insert($table, $row);
+
+        $this->login(['ROLE_1']);
+        $crawler = $this->client->request('GET', '/audit/transaction/legacy-fqdn');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertStringNotContainsString(User::class, $crawler->filter('dl')->first()->text(), 'The class of the core User written by former versions tells nothing.');
     }
 
     public function testCompareRevisionsComposesTheChangesBetweenThem(): void

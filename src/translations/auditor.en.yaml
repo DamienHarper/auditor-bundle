@@ -55,6 +55,7 @@ audit:
   entry:
     by: by
     via: via
+    impersonated_by: 'impersonated by %name%'
     source: Source
     target: Target
     extra_data: Extra Data
