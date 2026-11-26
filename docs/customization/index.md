@@ -40,7 +40,7 @@ The default `UserProvider`:
 - ✅ Gets the current user from Symfony's `TokenStorage`
 - ✅ Extracts user ID via `getId()` method (if exists)
 - ✅ Extracts username via `getUserIdentifier()`
-- ✅ Tracks impersonation (switch user)
+- ✅ Tracks impersonation (switch user) in the `impersonator` key of the blame
 
 ### SecurityProvider
 

@@ -51,6 +51,38 @@ final class BlameContextMiddlewareTest extends TestCase
         $this->assertNull($this->handledContext, 'No blame context is pushed on dispatch.');
     }
 
+    public function testDispatchStampsTheClassAndTheImpersonator(): void
+    {
+        $this->configuration->setUserProvider(static fn (): User => new User('1', 'alice', 'App\Entity\Customer', new User('9', 'admin', 'App\Entity\Admin')));
+
+        $stamp = $this->handle(new Envelope(new \stdClass()))->last(BlameStamp::class);
+
+        $this->assertInstanceOf(BlameStamp::class, $stamp);
+        $this->assertSame('App\Entity\Customer', $stamp->fqdn);
+        $this->assertSame('9', $stamp->impersonatorId);
+        $this->assertSame('admin', $stamp->impersonatorUsername);
+        $this->assertSame('App\Entity\Admin', $stamp->impersonatorFqdn);
+    }
+
+    public function testHandlingBlamesTheClassAndTheImpersonator(): void
+    {
+        $this->handle(new Envelope(new \stdClass(), [new BlameStamp('3', 'carol', 'App\Entity\Customer', '9', 'admin', 'App\Entity\Admin'), new ReceivedStamp('async')]));
+
+        $user = $this->handledContext?->user;
+        $this->assertSame('App\Entity\Customer', $user?->fqdn);
+        $this->assertSame('9', $user?->impersonator?->identifier);
+        $this->assertSame('admin', $user?->impersonator?->username);
+        $this->assertSame('App\Entity\Admin', $user?->impersonator?->fqdn);
+    }
+
+    public function testHandlingWithoutImpersonator(): void
+    {
+        $this->handle(new Envelope(new \stdClass(), [new BlameStamp('3', 'carol'), new ReceivedStamp('async')]));
+
+        $this->assertNull($this->handledContext?->user?->fqdn);
+        $this->assertNull($this->handledContext?->user?->impersonator, 'No impersonator without impersonator values in the stamp.');
+    }
+
     public function testDispatchStampsTheUserOfTheCurrentBlameContext(): void
     {
         $envelope = $this->configuration->getBlameContextStack()->run(

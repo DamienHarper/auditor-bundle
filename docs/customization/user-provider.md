@@ -25,43 +25,42 @@ interface UserInterface
     public ?string $identifier { get; }
 
     public ?string $username { get; }
+
+    public ?string $fqdn { get; }                 // class of the user, written as user_fqdn
+
+    public ?UserInterface $impersonator { get; }  // user who impersonates this one (switch user)
 }
 ```
 
-The interface declares read-only property hooks, not getter methods: read `$user->identifier` and `$user->username`.
+The interface declares read-only property hooks, not getter methods: read `$user->identifier`, `$user->username`,
+`$user->fqdn` and `$user->impersonator`.
 The built-in `DH\Auditor\User\User` implements it and is what the examples below return.
 
 ## 📦 Built-in Provider
 
 The default `DH\AuditorBundle\User\UserProvider`:
 
-```php
-public function __invoke(): ?UserInterface
+- blames the user of the security token: its `getId()` (an empty identifier without that method), its
+  `getUserIdentifier()` and its class (Doctrine proxies resolved), written as `user_fqdn`;
+- when that user is impersonated (switch user, `SwitchUserToken`), the user of the original token is its
+  impersonator, written apart in the `impersonator` key of the `blame` JSON:
+
+```json
 {
-    $tokenUser = $this->getTokenUser();
-    $impersonatorUser = $this->getImpersonatorUser();
-
-    // Get identifier if getId() method exists
-    $identifier = null;
-    if ($tokenUser instanceof SymfonyUserInterface) {
-        if (method_exists($tokenUser, 'getId')) {
-            $identifier = $tokenUser->getId();
-        }
-        $username = $tokenUser->getUserIdentifier();
-    }
-
-    // Track impersonation
-    if ($impersonatorUser instanceof SymfonyUserInterface) {
-        $username .= '[impersonator '.$impersonatorUser->getUserIdentifier().']';
-    }
-
-    if (null === $identifier && null === $username) {
-        return null;
-    }
-
-    return new User((string) $identifier, $username);
+  "username": "alice",
+  "user_fqdn": "App\\Entity\\User",
+  "user_firewall": "main",
+  "ip": "10.0.0.1",
+  "impersonator": {"id": "1", "username": "admin", "fqdn": "App\\Entity\\User"}
 }
 ```
+
+The viewer shows an "impersonated by" badge next to the origin of the action. To find the actions made by
+impersonating someone, use the `ImpersonatorFilter` of auditor-doctrine-provider, or `$entry->impersonator`.
+
+> [!NOTE]
+> Before 8.0, the built-in provider appended the impersonator to the username (`alice[impersonator admin]`) and
+> `user_fqdn` held `DH\Auditor\User\User`. Those entries are not rewritten; the viewer does not show that class.
 
 ## 🖥️ Console Commands
 
@@ -125,7 +124,8 @@ class CustomUserProvider implements UserProviderInterface
 
         return new User(
             (string) $user->getId(),
-            $user->getEmail()
+            $user->getEmail(),
+            $user::class, // written as user_fqdn
         );
     }
 }

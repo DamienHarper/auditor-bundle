@@ -46,6 +46,22 @@ the [auditor-doctrine-provider 2.0 upgrade guide](https://github.com/DamienHarpe
 - `getDiffs()` returns the `changes` of a schema v2 entry. `$entry->username`, `userFqdn`, `userFirewall` and `ip`
   keep working.
 
+### User provider and impersonation
+
+- The built-in `UserProvider` no longer appends `[impersonator <name>]` to the username: the impersonated user is
+  blamed, and the user who impersonates them is written in the `impersonator` key of the `blame` JSON
+  (`$entry->impersonator`, `ImpersonatorFilter`, an "impersonated by" badge in the viewer).
+- `user_fqdn` is the class of the user of the security token (it was `DH\Auditor\User\User`). Custom user
+  providers pass it as the third argument of `User`: `new User($id, $name, $user::class)`.
+- Existing entries are not rewritten. To find the ones written with the former suffix:
+
+```sql
+-- MySQL, MariaDB, SQLite
+SELECT * FROM post_audit WHERE JSON_EXTRACT(blame, '$.username') LIKE '%[impersonator %';
+-- PostgreSQL
+SELECT * FROM post_audit WHERE CAST(blame AS jsonb) ->> 'username' LIKE '%[impersonator %';
+```
+
 ### Viewer templates
 
 The viewer was rewritten around actions. Templates overridden from 7.x under `templates/bundles/DHAuditorBundle/`
