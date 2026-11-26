@@ -91,6 +91,7 @@ Compiler passes (`src/DependencyInjection/Compiler/`): `DoctrineMiddlewareCompil
 | `ExportController` | `src/Controller/ExportController.php` | `/audit/export`, streamed ndjson / json / csv |
 | `RoutingLoader` | `src/Routing/RoutingLoader.php` | Loader of type `auditor`; routes only exist when the viewer is enabled, export first |
 | `ViewerEventSubscriber` | `src/Event/ViewerEventSubscriber.php` | 404 on the viewer when auditor or the viewer is disabled |
+| `ViewerAccessListener` | `src/Event/ViewerAccessListener.php` | Logs each request of the viewer and of the export (`auditor` channel, `info`) |
 | `ConsoleEventSubscriber` | `src/Event/ConsoleEventSubscriber.php` | Console user provider during commands |
 | `UserProvider`, `ConsoleUserProvider` | `src/User/` | Blame user (impersonation aware) |
 | `SecurityProvider`, `RoleChecker` | `src/Security/` | Client IP and firewall; per-entity `roles.view` checks |

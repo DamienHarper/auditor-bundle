@@ -332,6 +332,31 @@ security:
 > Otherwise it is displayed as plain text. Templates can apply the same rule with the
 > `dh_auditor_is_viewable(entity)` Twig function (an entity object or class name).
 
+### Access Log
+
+Each request of the viewer and of the export is logged at the `info` level, with MonologBundle in the `auditor`
+channel, so that who read or exported the audit can be told:
+
+```
+Audit viewer request: dh_auditor_export {"route":"dh_auditor_export","route_params":[],"query":{"entity":"App-Entity-User","format":"csv"},"user":"admin@example.com","ip":"192.168.1.42"}
+```
+
+The context holds the route, its parameters, the query string (the filters of a page or of an export), the user
+identifier (null for an anonymous request) and the client IP. A request denied by the `view` roles is logged too; a
+request to a disabled viewer is not. To keep these lines, route the channel to a handler of their own:
+
+```yaml
+# config/packages/monolog.yaml
+monolog:
+    channels: [auditor]
+    handlers:
+        audit_access:
+            type: stream
+            path: '%kernel.logs_dir%/audit_access.log'
+            level: info
+            channels: [auditor]
+```
+
 ## 🔗 URL Format
 
 Entity namespaces use dashes instead of backslashes:
