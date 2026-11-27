@@ -1,0 +1,70 @@
+/*
+ * Styles of the auditor viewer and of the <twig:DhAuditor:History> component, without Tailwind itself.
+ *
+ * Every Tailwind class of the bundle templates carries the dh: prefix (dh:hidden, dh:sm:inline, dh:bg-dh-card…), so
+ * that they never meet the classes of the application, whatever the order of the stylesheets. The precompiled
+ * app.css imports this file; an application that compiles the viewer itself does it in a stylesheet of its own,
+ * apart from its main one, since a Tailwind build has one prefix only:
+ *
+ *     @layer theme, base, components, utilities;
+ *     @import "tailwindcss/theme.css" layer(theme) prefix(dh);
+ *     @import "tailwindcss/utilities.css" layer(utilities);
+ *     @import "<path to the bundle>/src/Resources/assets/css/viewer.css";
+ */
+
+@import "./theme.css";
+
+@source "../../views";
+
+/* Dark mode: under a .dark class on an ancestor (set on <html> by the viewer), not the media query */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/** Form controls of the viewer (filters, sort, buttons next to them): one height, one look. Only their focus ring
+    transitions, so that they switch at once with the theme instead of flashing. The vertical padding is reset:
+    the base rule of the application for fields (@tailwindcss/forms…) would otherwise clip their text. **/
+@layer components {
+    .dh-auditor-control {
+        @apply dh:h-8 dh:rounded-lg dh:border dh:border-dh-input dh:bg-dh-card dh:px-2.5 dh:py-0 dh:text-sm dh:text-dh-foreground dh:shadow-xs dh:transition-shadow dh:hover:bg-dh-accent dh:focus-visible:outline-none dh:focus-visible:ring-3 dh:focus-visible:ring-dh-ring dh:dark:bg-dh-input/30 dh:dark:[color-scheme:dark];
+    }
+
+    /* Selects draw their own chevron, away from the border: two gradients rather than a data: image, which a strict
+       Content Security Policy (img-src 'self') would block */
+    select.dh-auditor-control {
+        @apply dh:appearance-none dh:pr-8;
+        background-image:
+            linear-gradient(45deg, transparent 50%, var(--dh-muted-foreground) 50%),
+            linear-gradient(135deg, var(--dh-muted-foreground) 50%, transparent 50%);
+        background-position: calc(100% - 15px) 55%, calc(100% - 11px) 55%;
+        background-size: 4px 4px, 4px 4px;
+        background-repeat: no-repeat;
+    }
+
+    /* The main button of a form (Apply) */
+    .dh-auditor-control-primary {
+        @apply dh:border-transparent dh:bg-dh-primary dh:font-medium dh:text-dh-primary-foreground dh:hover:bg-dh-primary/90 dh:dark:bg-dh-primary dh:dark:hover:bg-dh-primary/90;
+    }
+}
+
+/** Activity graph bars: one class per 5 % step, so that the templates carry no style attribute (strict CSP) **/
+@layer utilities {
+    .dh-auditor-bar-h-5 { height: 5%; }
+    .dh-auditor-bar-h-10 { height: 10%; }
+    .dh-auditor-bar-h-15 { height: 15%; }
+    .dh-auditor-bar-h-20 { height: 20%; }
+    .dh-auditor-bar-h-25 { height: 25%; }
+    .dh-auditor-bar-h-30 { height: 30%; }
+    .dh-auditor-bar-h-35 { height: 35%; }
+    .dh-auditor-bar-h-40 { height: 40%; }
+    .dh-auditor-bar-h-45 { height: 45%; }
+    .dh-auditor-bar-h-50 { height: 50%; }
+    .dh-auditor-bar-h-55 { height: 55%; }
+    .dh-auditor-bar-h-60 { height: 60%; }
+    .dh-auditor-bar-h-65 { height: 65%; }
+    .dh-auditor-bar-h-70 { height: 70%; }
+    .dh-auditor-bar-h-75 { height: 75%; }
+    .dh-auditor-bar-h-80 { height: 80%; }
+    .dh-auditor-bar-h-85 { height: 85%; }
+    .dh-auditor-bar-h-90 { height: 90%; }
+    .dh-auditor-bar-h-95 { height: 95%; }
+    .dh-auditor-bar-h-100 { height: 100%; }
+}

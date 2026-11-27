@@ -1,0 +1,8 @@
+/*
+ * Preflight of Tailwind CSS (public/preflight.css), loaded by the layout of the bundle only: a layout that extends
+ * the one of the application keeps the reset of the application.
+ */
+
+@layer theme, base;
+@import "tailwindcss/theme.css" layer(theme) prefix(dh);
+@import "tailwindcss/preflight.css" layer(base);

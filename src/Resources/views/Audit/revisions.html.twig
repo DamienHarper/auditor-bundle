@@ -11,27 +11,27 @@
     {% endif %}
 
     {% block dh_auditor_header %}
-    <div class="-mx-4 px-4 sm:-mx-6 sm:px-6 sm:sticky sm:top-16 sm:z-40 py-3 mb-4 bg-dh-background/80 backdrop-blur">
+    <div class="dh:-mx-4 dh:px-4 dh:sm:-mx-6 dh:sm:px-6 dh:sm:sticky dh:sm:top-16 dh:sm:z-40 dh:py-3 dh:mb-4 dh:bg-dh-background/80 dh:backdrop-blur">
         {# Back link #}
         <a href="{{ path('dh_auditor_show_entity_stream', {entity: entity_param, id: id}) }}"
-           class="inline-flex items-center text-sm text-dh-muted-foreground hover:text-dh-foreground mb-3">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+           class="dh:inline-flex dh:items-center dh:text-sm dh:text-dh-muted-foreground dh:hover:text-dh-foreground dh:mb-3">
+            <svg class="dh:w-4 dh:h-4 dh:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
             {{ entity|split('\\')|last }} #{{ id }}
         </a>
 
         <div>
-            <h1 class="text-2xl font-semibold tracking-tight text-dh-foreground" title="{{ entity }}">
+            <h1 class="dh:text-2xl dh:font-semibold dh:tracking-tight dh:text-dh-foreground" title="{{ entity }}">
                 {{ 'audit.revisions.title'|trans(domain='auditor') }}
             </h1>
-            <p class="text-sm text-dh-muted-foreground">
+            <p class="dh:text-sm dh:text-dh-muted-foreground">
                 {% if selected is null %}
                     {{ 'audit.revisions.pick_first'|trans(domain='auditor') }}
                 {% else %}
                     {{ 'audit.revisions.pick_second'|trans(domain='auditor') }}
                     <a href="{{ path('dh_auditor_select_revisions', {entity: entity_param, id: id}) }}"
-                       class="ml-1 font-medium text-dh-link underline underline-offset-4 hover:decoration-2">
+                       class="dh:ml-1 dh:font-medium dh:text-dh-link dh:underline dh:underline-offset-4 dh:hover:decoration-2">
                         {{ 'audit.revisions.change_selection'|trans(domain='auditor') }}
                     </a>
                 {% endif %}
@@ -40,42 +40,42 @@
     </div>
     {% endblock dh_auditor_header %}
 
-    <ul class="rounded-xl border border-dh-border bg-dh-card divide-y divide-dh-border">
+    <ul class="dh:rounded-xl dh:border dh:border-dh-border dh:bg-dh-card dh:divide-y dh:divide-dh-border">
         {% for entry in paginator.results %}
             {% set is_selected = selected is not null and selected.id == entry.id %}
             {% set row_content %}
-                <span class="flex items-center gap-3 min-w-0">
+                <span class="dh:flex dh:items-center dh:gap-3 dh:min-w-0">
                     {% set revision = dh_auditor_history_item(entry) %}
-                    <span class="flex min-w-0 flex-col">
-                        <span class="truncate text-sm text-dh-foreground">{{ revision|dh_auditor_author }} {{ revision|dh_auditor_phrase_text }}</span>
-                        <span class="text-xs text-dh-muted-foreground">{{ entry.createdAt|format_datetime('full', 'short', timezone: false) }}</span>
+                    <span class="dh:flex dh:min-w-0 dh:flex-col">
+                        <span class="dh:truncate dh:text-sm dh:text-dh-foreground">{{ revision|dh_auditor_author }} {{ revision|dh_auditor_phrase_text }}</span>
+                        <span class="dh:text-xs dh:text-dh-muted-foreground">{{ entry.createdAt|format_datetime('full', 'short', timezone: false) }}</span>
                     </span>
                     {% if is_selected %}
-                        <span class="inline-flex h-5 items-center rounded-full border border-dh-border px-2 text-xs font-medium text-dh-foreground">
+                        <span class="dh:inline-flex dh:h-5 dh:items-center dh:rounded-full dh:border dh:border-dh-border dh:px-2 dh:text-xs dh:font-medium dh:text-dh-foreground">
                             {{ 'audit.revisions.selected'|trans(domain='auditor') }}
                         </span>
                     {% endif %}
                 </span>
-                <span class="text-xs text-dh-muted-foreground shrink-0">
+                <span class="dh:text-xs dh:text-dh-muted-foreground dh:shrink-0">
                     {{ helper.via(entry) }}
                 </span>
             {% endset %}
             <li>
                 {% if is_selected %}
-                    <div class="flex items-center justify-between gap-4 border-l-2 border-l-dh-brand py-3 pl-3.5 pr-4 bg-dh-accent" aria-current="true">
+                    <div class="dh:flex dh:items-center dh:justify-between dh:gap-4 dh:border-l-2 dh:border-l-dh-brand dh:py-3 dh:pl-3.5 dh:pr-4 dh:bg-dh-accent" aria-current="true">
                         {{ row_content }}
                     </div>
                 {% else %}
                     <a href="{{ selected is null
                             ? path('dh_auditor_select_revisions', {entity: entity_param, id: id, selected: entry.id, page: paginator.currentPage})
                             : path('dh_auditor_compare_revisions', {entity: entity_param, id: id, from: selected.id, to: entry.id}) }}"
-                       class="flex items-center justify-between gap-4 px-4 py-3 hover:bg-dh-accent/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-dh-ring transition">
+                       class="dh:flex dh:items-center dh:justify-between dh:gap-4 dh:px-4 dh:py-3 dh:hover:bg-dh-accent/50 dh:focus:outline-none dh:focus-visible:ring-2 dh:focus-visible:ring-inset dh:focus-visible:ring-dh-ring dh:transition">
                         {{ row_content }}
                     </a>
                 {% endif %}
             </li>
         {% else %}
-            <li class="p-8 text-center text-dh-muted-foreground">
+            <li class="dh:p-8 dh:text-center dh:text-dh-muted-foreground">
                 {{ 'audit.stream.no_entries'|trans(domain='auditor') }}
             </li>
         {% endfor %}

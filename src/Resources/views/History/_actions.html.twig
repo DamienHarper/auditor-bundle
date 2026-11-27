@@ -8,24 +8,24 @@
     {% set day = row.item.createdAt|date('Y-m-d', false) %}
     {% if day != current %}
         {% if opened %}</ol>{% endif %}
-        <h3 class="mt-6 text-xs font-semibold uppercase tracking-wide text-dh-muted-foreground">{{ history.day_label(row.item.createdAt) }}</h3>
-        <ol class="divide-y divide-dh-border">
+        <h3 class="dh:mt-6 dh:text-xs dh:font-semibold dh:uppercase dh:tracking-wide dh:text-dh-muted-foreground">{{ history.day_label(row.item.createdAt) }}</h3>
+        <ol class="dh:divide-y dh:divide-dh-border">
         {% set opened = true %}
         {% set current = day %}
     {% elseif not opened %}
-        <ol class="divide-y divide-dh-border">
+        <ol class="dh:divide-y dh:divide-dh-border">
         {% set opened = true %}
     {% endif %}
     {{ include('@DHAuditor/History/_row.html.twig', {row: row, root: root ?? null, date_format: 'time', show_author: show_author ?? true}, with_context = false) }}
 {% endfor %}
 {% if opened %}</ol>{% endif %}
 {% if rows is empty and continued is not defined %}
-    <p class="py-8 text-center text-sm text-dh-muted-foreground">{{ 'audit.history.no_actions'|trans(domain='auditor') }}</p>
+    <p class="dh:py-8 dh:text-center dh:text-sm dh:text-dh-muted-foreground">{{ 'audit.history.no_actions'|trans(domain='auditor') }}</p>
 {% endif %}
 {% if more %}
-    <div class="mt-4 text-center" data-dh-auditor-more-container>
+    <div class="dh:mt-4 dh:text-center" data-dh-auditor-more-container>
         <a href="{{ path(moreRoute, moreRouteParameters|merge(more)|merge({day: current})) }}"
-           class="dh-auditor-control inline-flex items-center font-medium"
+           class="dh-auditor-control dh:inline-flex dh:items-center dh:font-medium"
            data-dh-auditor-more>{{ 'audit.history.older'|trans(domain='auditor') }}</a>
     </div>
 {% endif %}

@@ -67,6 +67,21 @@ final class HistoryTest extends KernelTestCase
         $this->assertStringContainsString('Open in the viewer', $crawler->text());
     }
 
+    /**
+     * The classes of the component carry the dh: prefix of the precompiled app.css; the class given by the page is
+     * kept as is.
+     */
+    public function testClassesCarryThePrefix(): void
+    {
+        $crawler = $this->render(['subject' => $this->post(), 'limit' => 1, 'details' => true, 'class' => 'my-history']);
+
+        $classes = array_merge(...$crawler->filter('[class]')->each(static fn (Crawler $node): array => preg_split('/\s+/', (string) $node->attr('class'), -1, PREG_SPLIT_NO_EMPTY) ?: []));
+        $this->assertContains('my-history', $classes, 'The class of the page.');
+        $this->assertSame(['my-history'], array_values(array_unique(array_filter($classes, static fn (string $class): bool => !str_starts_with($class, 'dh:') && !str_starts_with($class, 'dh-auditor-')))));
+        $this->assertNotEmpty($crawler->filter('[data-dh-auditor-details]'), 'The details are rendered too.');
+        $this->assertNotEmpty($crawler->filter('[data-dh-auditor-older]'), 'And the link to older actions.');
+    }
+
     public function testElementsAreMixedBySortKey(): void
     {
         $entries = $this->entries();

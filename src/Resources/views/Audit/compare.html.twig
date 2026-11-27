@@ -7,22 +7,22 @@
     {% set entity_param = helper.namespaceToParam(entity) %}
 
     {% block dh_auditor_header %}
-    <div class="-mx-4 px-4 sm:-mx-6 sm:px-6 sm:sticky sm:top-16 sm:z-40 py-3 mb-4 bg-dh-background/80 backdrop-blur">
+    <div class="dh:-mx-4 dh:px-4 dh:sm:-mx-6 dh:sm:px-6 dh:sm:sticky dh:sm:top-16 dh:sm:z-40 dh:py-3 dh:mb-4 dh:bg-dh-background/80 dh:backdrop-blur">
         {# Back link #}
         <a href="{{ path('dh_auditor_show_entity_stream', {entity: entity_param, id: id}) }}"
-           class="inline-flex items-center text-sm text-dh-muted-foreground hover:text-dh-foreground mb-3">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+           class="dh:inline-flex dh:items-center dh:text-sm dh:text-dh-muted-foreground dh:hover:text-dh-foreground dh:mb-3">
+            <svg class="dh:w-4 dh:h-4 dh:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
             {{ entity|split('\\')|last }} #{{ id }}
         </a>
 
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <h1 class="text-2xl font-semibold tracking-tight text-dh-foreground" title="{{ entity }}">
+        <div class="dh:flex dh:flex-col dh:sm:flex-row dh:sm:items-center dh:sm:justify-between dh:gap-2">
+            <h1 class="dh:text-2xl dh:font-semibold dh:tracking-tight dh:text-dh-foreground" title="{{ entity }}">
                 {{ 'audit.compare.title'|trans(domain='auditor') }}
             </h1>
             <a href="{{ path('dh_auditor_select_revisions', {entity: entity_param, id: id, selected: from.id}) }}"
-               class="text-sm font-medium text-dh-link underline underline-offset-4 hover:decoration-2">
+               class="dh:text-sm dh:font-medium dh:text-dh-link dh:underline dh:underline-offset-4 dh:hover:decoration-2">
                 {{ 'audit.compare.change_revisions'|trans(domain='auditor') }}
             </a>
         </div>
@@ -30,22 +30,22 @@
     {% endblock dh_auditor_header %}
 
     {# The two compared revisions #}
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 text-sm">
+    <div class="dh:grid dh:grid-cols-1 dh:sm:grid-cols-2 dh:gap-4 dh:mb-4 dh:text-sm">
         {% for side in [{revision: from, title: 'audit.compare.before', step: previous, step_title: 'audit.compare.previous'}, {revision: to, title: 'audit.compare.after', step: next, step_title: 'audit.compare.next'}] %}
-            <section class="rounded-xl border border-dh-border bg-dh-card px-4 py-3" aria-labelledby="revision-{{ loop.index }}">
-                <h2 id="revision-{{ loop.index }}" class="text-xs font-medium uppercase tracking-wide text-dh-muted-foreground mb-2">
+            <section class="dh:rounded-xl dh:border dh:border-dh-border dh:bg-dh-card dh:px-4 dh:py-3" aria-labelledby="revision-{{ loop.index }}">
+                <h2 id="revision-{{ loop.index }}" class="dh:text-xs dh:font-medium dh:uppercase dh:tracking-wide dh:text-dh-muted-foreground dh:mb-2">
                     {{ side.title|trans(domain='auditor') }}
                 </h2>
-                <div class="flex items-center gap-2">
+                <div class="dh:flex dh:items-center dh:gap-2">
                     {{ helper.type_badge(side.revision.type, side.revision.isSnapshot()) }}
-                    <span class="font-medium text-dh-foreground">{{ side.revision.createdAt|format_datetime('full', 'short', timezone: false) }}</span>
+                    <span class="dh:font-medium dh:text-dh-foreground">{{ side.revision.createdAt|format_datetime('full', 'short', timezone: false) }}</span>
                 </div>
-                <div class="mt-1 text-xs text-dh-muted-foreground">
+                <div class="dh:mt-1 dh:text-xs dh:text-dh-muted-foreground">
                     {{ side.revision.createdAt|time_ago }} · {{ 'audit.entry.by'|trans(domain='auditor') }} {{ helper.blame(side.revision) }} {{ helper.via(side.revision) }}
                 </div>
                 {% if side.step is not null %}
                     <a href="{{ path('dh_auditor_compare_revisions', {entity: entity_param, id: id, from: side.step.from, to: side.step.to}) }}"
-                       class="inline-flex items-center gap-1 mt-2 text-xs font-medium text-dh-link underline underline-offset-4 hover:decoration-2">
+                       class="dh:inline-flex dh:items-center dh:gap-1 dh:mt-2 dh:text-xs dh:font-medium dh:text-dh-link dh:underline dh:underline-offset-4 dh:hover:decoration-2">
                         {{ side.step_title|trans(domain='auditor') }}
                     </a>
                 {% endif %}
@@ -65,8 +65,8 @@
         {% set notices = notices|merge(['audit.compare.unreadable'|trans({'%fields%': comparison.unreadable|join(', ')}, 'auditor')]) %}
     {% endif %}
     {% for notice in notices %}
-        <p class="flex items-start gap-2 mb-4 rounded-lg border border-dh-warning-border bg-dh-warning px-4 py-3 text-sm text-dh-warning-foreground">
-            <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <p class="dh:flex dh:items-start dh:gap-2 dh:mb-4 dh:rounded-lg dh:border dh:border-dh-warning-border dh:bg-dh-warning dh:px-4 dh:py-3 dh:text-sm dh:text-dh-warning-foreground">
+            <svg class="dh:w-4 dh:h-4 dh:mt-0.5 dh:shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             <span>{{ notice }}</span>
@@ -75,30 +75,30 @@
 
     {#- One way to read a change in the whole viewer: the Change column renders like the action details
         (History/_macros.html.twig, text_change). On a narrow screen, each field is stacked above its change. -#}
-    <div class="overflow-hidden rounded-xl border border-dh-border bg-dh-card">
+    <div class="dh:overflow-hidden dh:rounded-xl dh:border dh:border-dh-border dh:bg-dh-card">
         {% if comparison.fields is not empty %}
-            <table class="block w-full text-left text-xs text-dh-foreground sm:table sm:table-fixed">
+            <table class="dh:block dh:w-full dh:text-left dh:text-xs dh:text-dh-foreground dh:sm:table dh:sm:table-fixed">
                 <colgroup>
-                    <col class="w-1/4">
-                    <col class="w-3/4">
+                    <col class="dh:w-1/4">
+                    <col class="dh:w-3/4">
                 </colgroup>
-                <thead class="block bg-dh-muted/50 text-dh-muted-foreground sm:table-header-group">
-                    <tr class="flex sm:table-row">
-                        <th scope="col" class="hidden px-3 py-2 font-medium sm:table-cell">{{ 'audit.history.field'|trans(domain='auditor') }}</th>
-                        <th scope="col" class="px-3 py-2 font-medium">{{ 'audit.history.change'|trans(domain='auditor') }}</th>
+                <thead class="dh:block dh:bg-dh-muted/50 dh:text-dh-muted-foreground dh:sm:table-header-group">
+                    <tr class="dh:flex dh:sm:table-row">
+                        <th scope="col" class="dh:hidden dh:px-3 dh:py-2 dh:font-medium dh:sm:table-cell">{{ 'audit.history.field'|trans(domain='auditor') }}</th>
+                        <th scope="col" class="dh:px-3 dh:py-2 dh:font-medium">{{ 'audit.history.change'|trans(domain='auditor') }}</th>
                     </tr>
                 </thead>
-                <tbody class="block divide-y divide-dh-border sm:table-row-group">
+                <tbody class="dh:block dh:divide-y dh:divide-dh-border dh:sm:table-row-group">
                     {% for field, change in comparison.fields %}
-                        <tr class="block py-1.5 align-top sm:table-row sm:py-0" data-field="{{ field }}">
-                            <td class="block break-words px-3 py-0.5 sm:table-cell sm:py-2">
+                        <tr class="dh:block dh:py-1.5 dh:align-top dh:sm:table-row dh:sm:py-0" data-field="{{ field }}">
+                            <td class="dh:block dh:break-words dh:px-3 dh:py-0.5 dh:sm:table-cell dh:sm:py-2">
                                 {{ '.' in field ? field : dh_auditor_field_label(entity, field) }}
-                                <span class="block break-all font-mono text-[11px] text-dh-muted-foreground">{{ field }}</span>
+                                <span class="dh:block dh:break-all dh:font-mono dh:text-[11px] dh:text-dh-muted-foreground">{{ field }}</span>
                             </td>
                             {#- a to-one relation is stored as a summary of the related object: show its label, as the action details do -#}
                             {% set old = change.old is iterable and change.old.label is defined ? change.old.label : change.old %}
                             {% set new = change.new is iterable and change.new.label is defined ? change.new.label : change.new %}
-                            <td class="block px-3 py-0.5 sm:table-cell sm:py-2">{{ history.text_change(old, new) }}</td>
+                            <td class="dh:block dh:px-3 dh:py-0.5 dh:sm:table-cell dh:sm:py-2">{{ history.text_change(old, new) }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -106,18 +106,18 @@
         {% endif %}
 
         {% if comparison.associations is not empty %}
-            <div class="px-3 py-3 text-xs{% if comparison.fields is not empty %} border-t border-dh-border{% endif %}">
-                <h2 class="font-medium uppercase tracking-wide text-dh-muted-foreground">{{ 'audit.compare.associations'|trans(domain='auditor') }}</h2>
-                <ul class="mt-1.5 space-y-1" data-dh-auditor-relations>
+            <div class="dh:px-3 dh:py-3 dh:text-xs{% if comparison.fields is not empty %} dh:border-t dh:border-dh-border{% endif %}">
+                <h2 class="dh:font-medium dh:uppercase dh:tracking-wide dh:text-dh-muted-foreground">{{ 'audit.compare.associations'|trans(domain='auditor') }}</h2>
+                <ul class="dh:mt-1.5 dh:space-y-1" data-dh-auditor-relations>
                     {% for field, links in comparison.associations %}
                         {% for change in [{type: 'associate', targets: links.added}, {type: 'dissociate', targets: links.removed}] %}
                             {% for target in change.targets %}
-                                <li class="break-words">
-                                    <span class="font-mono text-dh-muted-foreground">{{ field }}</span>
+                                <li class="dh:break-words">
+                                    <span class="dh:font-mono dh:text-dh-muted-foreground">{{ field }}</span>
                                     {{ history.sign(change.type == 'associate') }}
                                     {{ history.related(target) }}
                                     {%- if target.label is defined and target.label is not empty %}
-                                        <span class="text-dh-muted-foreground">· {{ target.label is iterable ? target.label|join(', ') : target.label }}</span>
+                                        <span class="dh:text-dh-muted-foreground">· {{ target.label is iterable ? target.label|join(', ') : target.label }}</span>
                                     {%- endif %}
                                 </li>
                             {% endfor %}
@@ -128,7 +128,7 @@
         {% endif %}
 
         {% if comparison.fields is empty and comparison.associations is empty %}
-            <p class="p-8 text-center text-sm text-dh-muted-foreground">
+            <p class="dh:p-8 dh:text-center dh:text-sm dh:text-dh-muted-foreground">
                 {{ 'audit.compare.no_changes'|trans(domain='auditor') }}
             </p>
         {% endif %}

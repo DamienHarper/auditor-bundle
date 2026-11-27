@@ -5,59 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}auditor{% endblock %}</title>
     {% block stylesheets %}
+        {# Preflight (reset) of Tailwind CSS, then the viewer: app.css resets nothing, a layout that extends the one of
+           the application keeps the reset of the application #}
+        <link rel="stylesheet" href="{{ asset('bundles/dhauditor/preflight.css') }}">
         <link rel="stylesheet" href="{{ asset('bundles/dhauditor/app.css') }}">
     {% endblock %}
     {# External script (no inline JS, CSP friendly), loaded synchronously: it applies the theme before the first paint. #}
     <script src="{{ asset('bundles/dhauditor/viewer.js') }}"></script>
 </head>
-<body class="bg-dh-background text-dh-foreground antialiased">
-    <header class="sticky top-0 z-50 backdrop-blur bg-dh-background/80 border-b border-dh-border">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16
-                    flex items-center justify-between gap-4">
+<body class="dh:bg-dh-background dh:text-dh-foreground dh:antialiased">
+    <header class="dh:sticky dh:top-0 dh:z-50 dh:backdrop-blur dh:bg-dh-background/80 dh:border-b dh:border-dh-border">
+        <div class="dh:max-w-6xl dh:mx-auto dh:px-4 dh:sm:px-6 dh:h-16
+                    dh:flex dh:items-center dh:justify-between dh:gap-4">
             <a href="{{ path('dh_auditor_list_audits') }}"
-               class="flex items-center gap-3 group">
+               class="dh:flex dh:items-center dh:gap-3 dh:group">
                 {#- Logo of auditor, inline (no extra request, no style attribute: strict CSP). Its gradient comes from the
                     --dh-brand-from / --dh-brand-to tokens, lighter in the dark theme so that it keeps its contrast. -#}
-                <svg class="h-8 w-auto shrink-0" viewBox="0 0 122 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                <svg class="dh:h-8 dh:w-auto dh:shrink-0" viewBox="0 0 122 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                     <defs>
                         <linearGradient id="dh-auditor-logo-gradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0" class="[stop-color:var(--dh-brand-from)]"/>
-                            <stop offset="1" class="[stop-color:var(--dh-brand-to)]"/>
+                            <stop offset="0" class="dh:[stop-color:var(--dh-brand-from)]"/>
+                            <stop offset="1" class="dh:[stop-color:var(--dh-brand-to)]"/>
                         </linearGradient>
                     </defs>
                     <path fill="url(#dh-auditor-logo-gradient)" d="M68.325 37.236c0 0-.437 1.935-1.946 4.144c-.419.699-.868 1.333-1.354 1.895c-.795.919-1.728 1.645-2.829 2.127c-3.937 2.449-10.268 3.67-20.324.198c14.389 8.792 22.388 7.478 27.564 1.491c8.014-9.263 6.976-26.65 13.985-36.453c4.952-6.927 14.732-7.822 37.728 8.621C109.559 7.301 88.966-7.148 78.668 7.254C74.73 12.759 73.178 20 71.44 26.471C70.481 30.282 69.531 34.044 68.325 37.236z"/>
                     <path fill="url(#dh-auditor-logo-gradient)" d="M27.21 27.262c-34.758-30.065 7.576-16.556 42.427-2.996l1.479-5.681C26.818 1.359-34-17.969 23.394 31.673c7.142 6.178 13.245 10.725 18.504 13.935c10.041 3.46 16.365 2.24 20.299-.207c.017-.007.031-.017.048-.024C56.661 47.873 46.643 44.071 27.21 27.262zM108.642 34.107c-.128-.056-12.053-5.342-27.951-11.733l-1.451 5.7c15.124 6.101 26.936 11.333 27.048 11.383C110.894 41.421 112.542 35.995 108.642 34.107z"/>
                 </svg>
-                <div class="leading-tight">
+                <div class="dh:leading-tight">
                     {# Bundle name #}
-                    <div class="text-lg font-semibold tracking-tight">auditor</div>
+                    <div class="dh:text-lg dh:font-semibold dh:tracking-tight">auditor</div>
                     {# Punchline #}
-                    <div class="hidden text-[11px] text-dh-muted-foreground sm:block">The missing audit log library.</div>
+                    <div class="dh:hidden dh:text-[11px] dh:text-dh-muted-foreground dh:sm:block">The missing audit log library.</div>
                 </div>
             </a>
 
-            <nav class="ml-auto flex items-center gap-4 text-sm font-medium text-dh-muted-foreground">
-                <a href="{{ path('dh_auditor_list_audits') }}" class="hover:text-dh-foreground">{{ 'audit.header.home'|trans(domain='auditor') }}</a>
+            <nav class="dh:ml-auto dh:flex dh:items-center dh:gap-4 dh:text-sm dh:font-medium dh:text-dh-muted-foreground">
+                <a href="{{ path('dh_auditor_list_audits') }}" class="dh:hover:text-dh-foreground">{{ 'audit.header.home'|trans(domain='auditor') }}</a>
             </nav>
 
             {# Theme toggle button #}
             <button type="button"
                     data-dh-auditor-theme-toggle
-                    class="p-2 rounded-lg text-dh-muted-foreground hover:text-dh-foreground hover:bg-dh-accent transition-colors"
+                    class="dh:p-2 dh:rounded-lg dh:text-dh-muted-foreground dh:hover:text-dh-foreground dh:hover:bg-dh-accent dh:transition-colors"
                     title="{{ 'audit.theme.toggle'|trans(domain='auditor') }}">
                 {# Sun icon (visible in dark mode) #}
-                <svg class="w-5 h-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <svg class="dh:w-5 dh:h-5 dh:hidden dh:dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
                 {# Moon icon (visible in light mode) #}
-                <svg class="w-5 h-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <svg class="dh:w-5 dh:h-5 dh:block dh:dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
             </button>
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-4">
+    <main class="dh:max-w-6xl dh:mx-auto dh:px-4 dh:sm:px-6 dh:py-4">
         {% block dh_auditor_content %}{% endblock %}
     </main>
 

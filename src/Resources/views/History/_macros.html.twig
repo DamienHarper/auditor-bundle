@@ -15,42 +15,42 @@
         json: 'M8 4c-2 0-2 2-2 4s-2 4-2 4 2 2 2 4 0 4 2 4M16 4c2 0 2 2 2 4s2 4 2 4-2 2-2 4 0 4-2 4',
         edited: 'M4 20h4L19 9l-4-4L4 16z',
     } -%}
-    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ paths[name] ?? paths.edited }}"/></svg>
+    <svg class="dh:h-3.5 dh:w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ paths[name] ?? paths.edited }}"/></svg>
 {%- endmacro %}
 
 {#- Colors of the icon of a change, by its meaning: creation (green), deletion (red), a snapshot (neutral), any other
     change, links between objects included (blue). -#}
 {% macro icon_tone(name) -%}
-    {%- if name == 'created' -%}bg-dh-create text-dh-create-foreground
-    {%- elseif name == 'deleted' -%}bg-dh-delete text-dh-delete-foreground
-    {%- elseif name == 'snapshot' -%}bg-dh-muted text-dh-muted-foreground
-    {%- else -%}bg-dh-update text-dh-update-foreground
+    {%- if name == 'created' -%}dh:bg-dh-create dh:text-dh-create-foreground
+    {%- elseif name == 'deleted' -%}dh:bg-dh-delete dh:text-dh-delete-foreground
+    {%- elseif name == 'snapshot' -%}dh:bg-dh-muted dh:text-dh-muted-foreground
+    {%- else -%}dh:bg-dh-update dh:text-dh-update-foreground
     {%- endif -%}
 {%- endmacro %}
 
 {#- The sign of a link added to (+) or removed from (−) a relation. -#}
 {% macro sign(added) -%}
     {%- if added -%}
-        <span class="inline-flex size-4 items-center justify-center rounded-sm bg-dh-inserted font-sans font-bold text-dh-inserted-foreground">+</span>
+        <span class="dh:inline-flex dh:size-4 dh:items-center dh:justify-center dh:rounded-sm dh:bg-dh-inserted dh:font-sans dh:font-bold dh:text-dh-inserted-foreground">+</span>
     {%- else -%}
-        <span class="inline-flex size-4 items-center justify-center rounded-sm bg-dh-deleted font-sans font-bold text-dh-deleted-foreground">−</span>
+        <span class="dh:inline-flex dh:size-4 dh:items-center dh:justify-center dh:rounded-sm dh:bg-dh-deleted dh:font-sans dh:font-bold dh:text-dh-deleted-foreground">−</span>
     {%- endif -%}
 {%- endmacro %}
 
 {#- Where an action came from (BlameOrigin), in which context (via) and who impersonated its author, as badges. -#}
 {% macro origin(item) -%}
     {%- set via = item.via -%}
-    <span class="inline-flex h-5 items-center rounded-full border border-dh-border px-2 text-[11px] font-medium text-dh-foreground"
+    <span class="dh:inline-flex dh:h-5 dh:items-center dh:rounded-full dh:border dh:border-dh-border dh:px-2 dh:text-[11px] dh:font-medium dh:text-dh-foreground"
           title="{{ ('audit.history.origin_help.' ~ item.origin.value)|trans(domain='auditor') }}">{{ ('audit.history.origin.' ~ item.origin.value)|trans(domain='auditor') }}</span>
     {%- if via is not null %}
-        <span class="inline-flex h-5 items-center rounded-full border border-dashed border-dh-border px-2 text-[11px] text-dh-muted-foreground"
+        <span class="dh:inline-flex dh:h-5 dh:items-center dh:rounded-full dh:border dh:border-dashed dh:border-dh-border dh:px-2 dh:text-[11px] dh:text-dh-muted-foreground"
               {% if via.data is defined and via.data is not empty %}title="{{ via.data|json_encode }}"{% endif %}>
             {{- 'audit.entry.via'|trans(domain='auditor') }} {{ via.type }}{% if via.label is defined and via.label is not empty %} · {{ via.label }}{% endif -%}
         </span>
     {%- endif -%}
     {%- set impersonator = item.impersonator -%}
     {%- if impersonator is not null %}
-        <span class="inline-flex h-5 items-center rounded-full border border-dashed border-dh-border px-2 text-[11px] text-dh-muted-foreground"
+        <span class="dh:inline-flex dh:h-5 dh:items-center dh:rounded-full dh:border dh:border-dashed dh:border-dh-border dh:px-2 dh:text-[11px] dh:text-dh-muted-foreground"
               {% if impersonator.fqdn is defined %}title="{{ impersonator.fqdn }}"{% endif %}>
             {{- 'audit.entry.impersonated_by'|trans({'%name%': impersonator.username ?? ('#' ~ (impersonator.id ?? '?'))}, 'auditor') -}}
         </span>
@@ -71,32 +71,32 @@
 
 {#- A raw value of a diff, as JSON. -#}
 {% macro raw(value) -%}
-    <code class="break-words font-mono text-xs">{{ value is null ? 'null' : value|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES')) }}</code>
+    <code class="dh:break-words dh:font-mono dh:text-xs">{{ value is null ? 'null' : value|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES')) }}</code>
 {%- endmacro %}
 
 {#- Text deleted by a change. -#}
 {% macro deleted(text) -%}
-    <del class="rounded-sm bg-dh-deleted text-dh-deleted-foreground">{{ text }}</del>
+    <del class="dh:rounded-sm dh:bg-dh-deleted dh:text-dh-deleted-foreground">{{ text }}</del>
 {%- endmacro %}
 
 {#- Text inserted by a change. -#}
 {% macro inserted(text) -%}
-    <ins class="rounded-sm bg-dh-inserted text-dh-inserted-foreground no-underline">{{ text }}</ins>
+    <ins class="dh:rounded-sm dh:bg-dh-inserted dh:text-dh-inserted-foreground dh:no-underline">{{ text }}</ins>
 {%- endmacro %}
 
 {#- A value of the action details, with its line breaks: a text without quotes unless they are needed to read it
     (dh_auditor_value_text()), any other value as JSON. -#}
 {% macro value(value) -%}
-    <code class="whitespace-pre-wrap break-words font-mono text-xs">{{ dh_auditor_value_text(value) }}</code>
+    <code class="dh:whitespace-pre-wrap dh:break-words dh:font-mono dh:text-xs">{{ dh_auditor_value_text(value) }}</code>
 {%- endmacro %}
 
 {#- One side of an old → new change, marked as deleted or inserted; null stays unmarked. -#}
 {% macro marked(value, side) -%}
     {%- if value is null -%}
-        <code class="font-mono text-xs text-dh-muted-foreground">null</code>
+        <code class="dh:font-mono dh:text-xs dh:text-dh-muted-foreground">null</code>
     {%- else -%}
         {%- set shown = dh_auditor_value_text(value) -%}
-        <code class="whitespace-pre-wrap break-words font-mono text-xs">{{ side == 'deleted' ? _self.deleted(shown) : _self.inserted(shown) }}</code>
+        <code class="dh:whitespace-pre-wrap dh:break-words dh:font-mono dh:text-xs">{{ side == 'deleted' ? _self.deleted(shown) : _self.inserted(shown) }}</code>
     {%- endif -%}
 {%- endmacro %}
 
@@ -107,7 +107,7 @@
     {%- if text is not null and text.mode == 'inline' -%}
         {#- between quotes only when one of the texts needs them to be read -#}
         {%- set quote = dh_auditor_is_ambiguous_text(old) or dh_auditor_is_ambiguous_text(new) ? '"' : '' -%}
-        <code class="whitespace-pre-wrap break-words font-mono text-xs">{{ quote }}
+        <code class="dh:whitespace-pre-wrap dh:break-words dh:font-mono dh:text-xs">{{ quote }}
             {%- for run in text.runs -%}
                 {%- if run[0] == 'delete' -%}{{ _self.deleted(run[1]) }}
                 {%- elseif run[0] == 'insert' -%}{{ _self.inserted(run[1]) }}
@@ -115,12 +115,12 @@
             {%- endfor -%}
         {{ quote }}</code>
     {%- elseif text is not null and text.mode == 'stack' -%}
-        <div class="flex flex-col gap-1">
-            <code class="whitespace-pre-wrap break-words font-mono text-xs">{{ _self.deleted(dh_auditor_value_text(old)) }}</code>
-            <code class="whitespace-pre-wrap break-words font-mono text-xs">{{ _self.inserted(dh_auditor_value_text(new)) }}</code>
+        <div class="dh:flex dh:flex-col dh:gap-1">
+            <code class="dh:whitespace-pre-wrap dh:break-words dh:font-mono dh:text-xs">{{ _self.deleted(dh_auditor_value_text(old)) }}</code>
+            <code class="dh:whitespace-pre-wrap dh:break-words dh:font-mono dh:text-xs">{{ _self.inserted(dh_auditor_value_text(new)) }}</code>
         </div>
     {%- else -%}
-        {{ _self.marked(old, 'deleted') }} <span class="text-dh-muted-foreground">→</span> {{ _self.marked(new, 'inserted') }}
+        {{ _self.marked(old, 'deleted') }} <span class="dh:text-dh-muted-foreground">→</span> {{ _self.marked(new, 'inserted') }}
     {%- endif -%}
 {%- endmacro %}
 
@@ -129,7 +129,7 @@
 {% macro related(summary) -%}
     {%- set id = summary.pkName is defined ? summary[summary.pkName] : summary.id -%}
     {%- if dh_auditor_is_viewable(summary.class) -%}
-        <a href="{{ path('dh_auditor_show_entity_stream', {entity: summary.class|replace({'\\': '-'}), id: id}) }}" class="text-dh-link underline decoration-dh-link/40 underline-offset-2 hover:decoration-current" title="{{ summary.class }}">{{ summary.class|split('\\')|last }} #{{ id }}</a>
+        <a href="{{ path('dh_auditor_show_entity_stream', {entity: summary.class|replace({'\\': '-'}), id: id}) }}" class="dh:text-dh-link dh:underline dh:decoration-dh-link/40 dh:underline-offset-2 dh:hover:decoration-current" title="{{ summary.class }}">{{ summary.class|split('\\')|last }} #{{ id }}</a>
     {%- else -%}
         <span title="{{ summary.class }}">{{ summary.class|split('\\')|last }} #{{ id }}</span>
     {%- endif -%}

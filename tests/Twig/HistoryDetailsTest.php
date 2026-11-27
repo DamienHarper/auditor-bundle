@@ -33,9 +33,9 @@ final class HistoryDetailsTest extends KernelTestCase
     {
         $table = $this->render([$this->entry('update', ['title' => ['old' => 'First', 'new' => 'Second']])])->filter('table')->first();
 
-        $this->assertStringContainsString('table-fixed', (string) $table->attr('class'));
-        $this->assertStringContainsString('text-dh-foreground', (string) $table->attr('class'), 'The values take the foreground token, readable in both themes.');
-        $this->assertSame(['w-1/5', 'w-1/5', 'w-3/5'], $table->filter('colgroup > col')->each(static fn (Crawler $col): string => (string) $col->attr('class')));
+        $this->assertStringContainsString('dh:sm:table-fixed', (string) $table->attr('class'));
+        $this->assertStringContainsString('dh:text-dh-foreground', (string) $table->attr('class'), 'The values take the foreground token, readable in both themes.');
+        $this->assertSame(['dh:w-1/5', 'dh:w-1/5', 'dh:w-3/5'], $table->filter('colgroup > col')->each(static fn (Crawler $col): string => (string) $col->attr('class')));
         $this->assertSame(['Object', 'Field', 'Change'], $table->filter('thead th')->each(static fn (Crawler $th): string => mb_trim($th->text())));
     }
 
@@ -48,13 +48,13 @@ final class HistoryDetailsTest extends KernelTestCase
 
         $classes = static fn (Crawler $node): array => explode(' ', (string) $node->attr('class'));
         $table = $crawler->filter('table')->first();
-        $this->assertContains('block', $classes($table), 'On a narrow screen, the details are not a table.');
-        $this->assertContains('sm:table', $classes($table), 'From the sm breakpoint, they are.');
-        $this->assertContains('hidden', $classes($table->filter('thead')), 'The column headers only make sense for columns.');
+        $this->assertContains('dh:block', $classes($table), 'On a narrow screen, the details are not a table.');
+        $this->assertContains('dh:sm:table', $classes($table), 'From the sm breakpoint, they are.');
+        $this->assertContains('dh:hidden', $classes($table->filter('thead')), 'The column headers only make sense for columns.');
         foreach ($table->filter('table > tbody > tr, tr[data-field]') as $row) {
-            $this->assertContains('sm:table-row', $classes(new Crawler($row)));
+            $this->assertContains('dh:sm:table-row', $classes(new Crawler($row)));
             foreach (new Crawler($row)->children() as $cell) {
-                $this->assertSame(['block', 'sm:table-cell'], array_values(array_intersect(['block', 'sm:table-cell'], $classes(new Crawler($cell)))), 'Each cell is stacked on a narrow screen.');
+                $this->assertSame(['dh:block', 'dh:sm:table-cell'], array_values(array_intersect(['dh:block', 'dh:sm:table-cell'], $classes(new Crawler($cell)))), 'Each cell is stacked on a narrow screen.');
             }
         }
     }
@@ -171,7 +171,7 @@ final class HistoryDetailsTest extends KernelTestCase
             $code = $this->render([$entry])->filter('table code')->last();
 
             $this->assertSame($text, $code->text(null, false), 'A text is shown with its line breaks, not as escaped JSON.');
-            $this->assertStringContainsString('whitespace-pre-wrap', (string) $code->attr('class'));
+            $this->assertStringContainsString('dh:whitespace-pre-wrap', (string) $code->attr('class'));
         }
     }
 
@@ -180,8 +180,8 @@ final class HistoryDetailsTest extends KernelTestCase
         $crawler = $this->render([$this->entry('insert', ['title' => ['old' => null, 'new' => 'First']])]);
 
         $classes = explode(' ', (string) $crawler->filter('table code')->first()->attr('class'));
-        $this->assertContains('break-words', $classes, 'A long text wraps between its words.');
-        $this->assertNotContains('break-all', $classes, 'A long text is not cut in the middle of a word.');
+        $this->assertContains('dh:break-words', $classes, 'A long text wraps between its words.');
+        $this->assertNotContains('dh:break-all', $classes, 'A long text is not cut in the middle of a word.');
     }
 
     /**

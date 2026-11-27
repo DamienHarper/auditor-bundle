@@ -34,9 +34,9 @@
     {%- set user_id = entry.userId is null ? '' : entry.userId ~ '' -%}
     {%- if user_id != '' -%}
         <a href="{{ path('dh_auditor_show_user_stream', {id: user_id}) }}"
-           class="font-medium hover:underline">{{ entry.username ?? user_id }}</a>
+           class="dh:font-medium dh:hover:underline">{{ entry.username ?? user_id }}</a>
     {%- else -%}
-        <span class="font-medium">{{ entry.username ?? 'audit.audit_details.anonymous'|trans(domain='auditor') }}</span>
+        <span class="dh:font-medium">{{ entry.username ?? 'audit.audit_details.anonymous'|trans(domain='auditor') }}</span>
     {%- endif -%}
 {% endmacro blame %}
 
@@ -47,7 +47,7 @@
 {% macro via(entry) %}
     {%- set via = entry.via -%}
     {%- if via is not null -%}
-        <span class="inline-flex h-5 items-center rounded-full px-2 text-xs font-medium border border-dh-border text-dh-foreground"
+        <span class="dh:inline-flex dh:h-5 dh:items-center dh:rounded-full dh:px-2 dh:text-xs dh:font-medium dh:border dh:border-dh-border dh:text-dh-foreground"
               {% if via.data is defined and via.data is not empty %}title="{{ via.data|json_encode }}"{% endif %}>
             {{- 'audit.entry.via'|trans(domain='auditor') }} {{ via.type }}{% if via.label is defined and via.label is not empty %} · {{ via.label }}{% endif -%}
         </span>
@@ -57,23 +57,23 @@
 {#- Type of an audit entry, in three meanings: creation (inserted), deletion (deleted), anything else (neutral) -#}
 {% macro type_badge(type, snapshot = false) %}
     {%- if type == 'insert' and snapshot -%}
-        <span class="inline-flex h-5 items-center rounded-full px-2 text-xs font-medium border border-dh-border text-dh-foreground">SNAPSHOT</span>
+        <span class="dh:inline-flex dh:h-5 dh:items-center dh:rounded-full dh:px-2 dh:text-xs dh:font-medium dh:border dh:border-dh-border dh:text-dh-foreground">SNAPSHOT</span>
     {%- elseif type == 'insert' -%}
-        <span class="inline-flex h-5 items-center rounded-full px-2 text-xs font-medium bg-dh-inserted text-dh-inserted-foreground">INSERT</span>
+        <span class="dh:inline-flex dh:h-5 dh:items-center dh:rounded-full dh:px-2 dh:text-xs dh:font-medium dh:bg-dh-inserted dh:text-dh-inserted-foreground">INSERT</span>
     {%- elseif type == 'remove' -%}
-        <span class="inline-flex h-5 items-center rounded-full px-2 text-xs font-medium bg-dh-deleted text-dh-deleted-foreground">REMOVE</span>
+        <span class="dh:inline-flex dh:h-5 dh:items-center dh:rounded-full dh:px-2 dh:text-xs dh:font-medium dh:bg-dh-deleted dh:text-dh-deleted-foreground">REMOVE</span>
     {%- elseif type == 'associate' -%}
-        <span class="inline-flex h-5 items-center rounded-full px-2 text-xs font-medium bg-dh-muted text-dh-foreground">LINK</span>
+        <span class="dh:inline-flex dh:h-5 dh:items-center dh:rounded-full dh:px-2 dh:text-xs dh:font-medium dh:bg-dh-muted dh:text-dh-foreground">LINK</span>
     {%- elseif type == 'dissociate' -%}
-        <span class="inline-flex h-5 items-center rounded-full px-2 text-xs font-medium bg-dh-muted text-dh-foreground">UNLINK</span>
+        <span class="dh:inline-flex dh:h-5 dh:items-center dh:rounded-full dh:px-2 dh:text-xs dh:font-medium dh:bg-dh-muted dh:text-dh-foreground">UNLINK</span>
     {%- else -%}
-        <span class="inline-flex h-5 items-center rounded-full px-2 text-xs font-medium bg-dh-muted text-dh-foreground">{{ type|upper }}</span>
+        <span class="dh:inline-flex dh:h-5 dh:items-center dh:rounded-full dh:px-2 dh:text-xs dh:font-medium dh:bg-dh-muted dh:text-dh-foreground">{{ type|upper }}</span>
     {%- endif -%}
 {% endmacro type_badge %}
 
 {# Option A: Sparkline compact (pour affichage inline dans le header, max 40% de largeur) #}
 {% macro activity_sparkline(data, rawData, days, dates = [], entity = null) %}
-    <div class="relative z-10 flex items-end gap-px h-4 w-full max-w-[40%] shrink-0" title="{{ 'audit.activity_graph.period'|trans({'%days%': days}, 'auditor') }}">
+    <div class="dh:relative dh:z-10 dh:flex dh:items-end dh:gap-px dh:h-4 dh:w-full dh:max-w-[40%] dh:shrink-0" title="{{ 'audit.activity_graph.period'|trans({'%days%': days}, 'auditor') }}">
         {{ _self.activity_bars(data, rawData, dates, entity) }}
     </div>
 {% endmacro activity_sparkline %}
@@ -81,11 +81,11 @@
 {# Option B: Sparkline en bas, pleine largeur de la card #}
 {% macro activity_sparkline_bottom(data, rawData, days, dates = [], entity = null) %}
     {% set hasActivity = data|filter(v => v > 0)|length > 0 %}
-    <div class="mt-2 pt-2 border-t border-dh-border">
-        <div class="relative z-10 flex items-end gap-px h-5">
+    <div class="dh:mt-2 dh:pt-2 dh:border-t dh:border-dh-border">
+        <div class="dh:relative dh:z-10 dh:flex dh:items-end dh:gap-px dh:h-5">
             {{ _self.activity_bars(data, rawData, dates, entity) }}
         </div>
-        <div class="text-xs text-dh-muted-foreground mt-1">
+        <div class="dh:text-xs dh:text-dh-muted-foreground dh:mt-1">
             {% if hasActivity %}
                 {{ 'audit.activity_graph.title'|trans(domain='auditor') }} · {{ 'audit.activity_graph.period'|trans({'%days%': days}, 'auditor') }}
             {% else %}
@@ -103,15 +103,15 @@
         {% set label = (date ? date ~ ' · ' : '') ~ 'audit.history.actions_count'|trans({'%count%': rawValue}, 'auditor') %}
         {# Bar height in 5 % steps, rendered by the dh-auditor-bar-h-* classes of app.css (no style attribute: CSP) #}
         {% set height = hasActivity ? (value > 0 ? (max(15, value) / 5)|round * 5 : 5) : 20 %}
-        {% set color = hasActivity ? 'bg-dh-brand' : 'bg-dh-muted' %}
+        {% set color = hasActivity ? 'dh:bg-dh-brand' : 'dh:bg-dh-muted' %}
         {% if entity is not null and date is not null %}
             <a href="{{ path('dh_auditor_show_entity_stream', {entity: _self.namespaceToParam(entity), date_from: date, date_to: date}) }}"
-               class="group flex flex-1 items-end h-full rounded-sm" title="{{ label }}" aria-label="{{ label }}"
+               class="dh:group dh:flex dh:flex-1 dh:items-end dh:h-full dh:rounded-sm" title="{{ label }}" aria-label="{{ label }}"
                data-audit-date="{{ date }}" data-audit-count="{{ rawValue }}">
-                <span class="w-full rounded-sm group-hover:bg-dh-brand-to group-focus-visible:bg-dh-brand-to {{ color }} dh-auditor-bar-h-{{ height }}"></span>
+                <span class="dh:w-full dh:rounded-sm dh:group-hover:bg-dh-brand-to dh:group-focus-visible:bg-dh-brand-to {{ color }} dh-auditor-bar-h-{{ height }}"></span>
             </a>
         {% else %}
-            <div class="flex-1 rounded-sm {{ color }} dh-auditor-bar-h-{{ height }}" title="{{ label }}"></div>
+            <div class="dh:flex-1 dh:rounded-sm {{ color }} dh-auditor-bar-h-{{ height }}" title="{{ label }}"></div>
         {% endif %}
     {% endfor %}
 {% endmacro activity_bars %}

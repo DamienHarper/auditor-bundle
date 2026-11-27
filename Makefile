@@ -158,8 +158,10 @@ endef
 build-assets:
 	@echo "Building CSS assets with Tailwind CSS..."
 	cd tests/App && php bin/console tailwind:build --minify
+	cd tests/App && php bin/console tailwind:build --minify ../../src/Resources/assets/css/preflight.css
 	@cp tests/App/var/tailwind/app.built.css src/Resources/public/app.css
-	@echo "Assets built successfully: src/Resources/public/app.css"
+	@cp tests/App/var/tailwind/preflight.built.css src/Resources/public/preflight.css
+	@echo "Assets built successfully: src/Resources/public/app.css, src/Resources/public/preflight.css"
 
 # Watch and rebuild CSS assets on changes (for development)
 .PHONY: watch-assets

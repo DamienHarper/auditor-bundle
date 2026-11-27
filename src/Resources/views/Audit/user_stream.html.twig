@@ -5,28 +5,28 @@
 {% block title %}{{ name }} · auditor{% endblock %}
 
 {% block dh_auditor_content %}
-    <nav class="mb-3 text-sm text-dh-muted-foreground" aria-label="breadcrumb">
-        <a href="{{ path('dh_auditor_list_audits') }}" class="hover:underline">{{ 'audit.header.home'|trans(domain='auditor') }}</a>
-        <span class="mx-1">/</span>
+    <nav class="dh:mb-3 dh:text-sm dh:text-dh-muted-foreground" aria-label="breadcrumb">
+        <a href="{{ path('dh_auditor_list_audits') }}" class="dh:hover:underline">{{ 'audit.header.home'|trans(domain='auditor') }}</a>
+        <span class="dh:mx-1">/</span>
         <span>{{ name }}</span>
     </nav>
 
-    <div class="flex items-start gap-3">
-        <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-dh-primary text-lg font-semibold text-dh-primary-foreground">{{ name|first|upper }}</span>
-        <div class="min-w-0">
-            <h1 class="text-2xl font-semibold tracking-tight">{{ 'audit.user.title'|trans({'%name%': name}, 'auditor') }}</h1>
-            <p class="mt-1 text-sm text-dh-muted-foreground">
+    <div class="dh:flex dh:items-start dh:gap-3">
+        <span class="dh:inline-flex dh:h-10 dh:w-10 dh:shrink-0 dh:items-center dh:justify-center dh:rounded-full dh:bg-dh-primary dh:text-lg dh:font-semibold dh:text-dh-primary-foreground">{{ name|first|upper }}</span>
+        <div class="dh:min-w-0">
+            <h1 class="dh:text-2xl dh:font-semibold dh:tracking-tight">{{ 'audit.user.title'|trans({'%name%': name}, 'auditor') }}</h1>
+            <p class="dh:mt-1 dh:text-sm dh:text-dh-muted-foreground">
                 {{ 'audit.history.actions_count'|trans({'%count%': actionCount}, 'auditor') }}
                 {% if entities is not empty %}· {{ 'audit.user.entities'|trans({'%count%': entities|length}, 'auditor') }}{% endif %}
-                · <span class="font-mono">blame_id {{ id }}</span>
+                · <span class="dh:font-mono">blame_id {{ id }}</span>
                 {% set user_class = latest ? dh_auditor_user_class(latest.userFqdn) : null %}
-                {% if user_class %}· <span class="font-mono">{{ user_class }}</span>{% endif %}
+                {% if user_class %}· <span class="dh:font-mono">{{ user_class }}</span>{% endif %}
                 {% if latest and latest.userFirewall %}· {{ 'audit.history.firewall'|trans(domain='auditor') }} {{ latest.userFirewall }}{% endif %}
             </p>
         </div>
     </div>
 
-    <form method="get" class="mt-6 flex flex-wrap items-center gap-2 text-sm">
+    <form method="get" class="dh:mt-6 dh:flex dh:flex-wrap dh:items-center dh:gap-2 dh:text-sm">
         <select name="on" data-dh-auditor-autosubmit aria-label="{{ 'audit.user.on'|trans(domain='auditor') }}"
                 class="dh-auditor-control">
             <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.user.on'|trans(domain='auditor'), '%value%': 'audit.history.filter.everything'|trans(domain='auditor')}, 'auditor') }}</option>
@@ -51,7 +51,7 @@
         <noscript><button type="submit" class="dh-auditor-control dh-auditor-control-primary">{{ 'audit.filter.apply'|trans(domain='auditor') }}</button></noscript>
     </form>
 
-    <section class="mt-2" data-dh-auditor-actions>
+    <section class="dh:mt-2" data-dh-auditor-actions>
         <div data-dh-auditor-list>
             {{ include('@DHAuditor/History/_actions.html.twig', {rows: rows, more: more, moreRoute: moreRoute, moreRouteParameters: moreRouteParameters, show_author: false}, with_context = false) }}
         </div>
