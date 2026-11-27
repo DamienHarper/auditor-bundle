@@ -1,10 +1,9 @@
 /*
  * Design tokens of the auditor viewer, in the manner of shadcn/ui: every color of the templates
- * goes through a --dh-* variable, exposed to Tailwind as a dh-* color (bg-dh-card, text-dh-muted-foreground…).
+ * goes through a --dh-* variable, exposed to Tailwind as a dh-* color (dh:bg-dh-card, dh:text-dh-muted-foreground…).
  *
- * The bundle's precompiled app.css already contains them. A host that compiles the bundle templates with
- * its own Tailwind (@source) imports this file after tailwindcss, and may override any --dh-* variable
- * to blend the viewer into its own theme (for instance --dh-primary: var(--primary)).
+ * viewer.css imports this file, so the precompiled app.css already contains them. An application may override any
+ * --dh-* variable to blend the viewer into its own theme (for instance --dh-primary: var(--primary)).
  *
  * Dark values apply under the .dark class, set on <html> by the viewer.
  */

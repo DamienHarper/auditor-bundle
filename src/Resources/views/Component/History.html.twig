@@ -1,27 +1,27 @@
 {#- <twig:DhAuditor:History>: the actions of a history and the elements of the application, most recent first. Blocks:
     "title", "element" (one element of the application, in the "element" variable), "empty". -#}
-<section {{ attributes.defaults({class: 'rounded-xl border border-dh-border bg-dh-card px-4 py-3 text-dh-card-foreground', 'data-dh-auditor-history': this.root ?? ''}) }}{% if this.firstCursor %} data-dh-auditor-first-cursor="{{ this.firstCursor }}"{% endif %}>
-    <h2 class="text-sm font-semibold">{% block title %}{{ 'audit.component.title'|trans(domain='auditor') }}{% endblock %}</h2>
+<section {{ attributes.defaults({class: 'dh:rounded-xl dh:border dh:border-dh-border dh:bg-dh-card dh:px-4 dh:py-3 dh:text-dh-card-foreground', 'data-dh-auditor-history': this.root ?? ''}) }}{% if this.firstCursor %} data-dh-auditor-first-cursor="{{ this.firstCursor }}"{% endif %}>
+    <h2 class="dh:text-sm dh:font-semibold">{% block title %}{{ 'audit.component.title'|trans(domain='auditor') }}{% endblock %}</h2>
     {% set details = this.showDetails() %}
     {% if this.rows is empty %}
-        <p class="py-4 text-sm text-dh-muted-foreground">{% block empty %}{{ 'audit.component.empty'|trans(domain='auditor') }}{% endblock %}</p>
+        <p class="dh:py-4 dh:text-sm dh:text-dh-muted-foreground">{% block empty %}{{ 'audit.component.empty'|trans(domain='auditor') }}{% endblock %}</p>
     {% else %}
-        <ol class="divide-y divide-dh-border">
+        <ol class="dh:divide-y dh:divide-dh-border">
             {% for line in this.rows %}
                 {% if line.row %}
                     {{ include('@DHAuditor/History/_row.html.twig', {row: line.row, root: this.root, date_format: 'datetime', details: details}, with_context = false) }}
                 {% else %}
                     {% set element = line.element %}
-                    <li class="py-3" data-dh-auditor-element>{% block element %}{{ element }}{% endblock %}</li>
+                    <li class="dh:py-3" data-dh-auditor-element>{% block element %}{{ element }}{% endblock %}</li>
                 {% endif %}
             {% endfor %}
         </ol>
     {% endif %}
     {% set viewer_url = this.viewerUrl %}
     {% if this.olderUrl or viewer_url %}
-        <div class="mt-2 flex justify-between gap-4 text-sm">
-            {% if this.olderUrl %}<a href="{{ this.olderUrl }}" class="inline-flex h-8 items-center rounded-lg border border-dh-input bg-dh-card px-2.5 font-medium text-dh-foreground shadow-xs transition-shadow hover:bg-dh-accent focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-dh-ring dark:bg-dh-input/30" data-dh-auditor-older>{{ 'audit.component.older'|trans(domain='auditor') }}</a>{% else %}<span></span>{% endif %}
-            {% if viewer_url %}<a href="{{ viewer_url }}" class="font-medium text-dh-link underline underline-offset-4 hover:decoration-2">{{ 'audit.component.open_in_viewer'|trans(domain='auditor') }} →</a>{% endif %}
+        <div class="dh:mt-2 dh:flex dh:justify-between dh:gap-4 dh:text-sm">
+            {% if this.olderUrl %}<a href="{{ this.olderUrl }}" class="dh:inline-flex dh:h-8 dh:items-center dh:rounded-lg dh:border dh:border-dh-input dh:bg-dh-card dh:px-2.5 dh:font-medium dh:text-dh-foreground dh:shadow-xs dh:transition-shadow dh:hover:bg-dh-accent dh:focus-visible:outline-none dh:focus-visible:ring-3 dh:focus-visible:ring-dh-ring dh:dark:bg-dh-input/30" data-dh-auditor-older>{{ 'audit.component.older'|trans(domain='auditor') }}</a>{% else %}<span></span>{% endif %}
+            {% if viewer_url %}<a href="{{ viewer_url }}" class="dh:font-medium dh:text-dh-link dh:underline dh:underline-offset-4 dh:hover:decoration-2">{{ 'audit.component.open_in_viewer'|trans(domain='auditor') }} →</a>{% endif %}
         </div>
     {% endif %}
 </section>

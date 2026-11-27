@@ -2,32 +2,32 @@
     Variables: item (HistoryItem), root (optional, "FQCN:id" of the history the action is shown in). -#}
 {% import '@DHAuditor/History/_macros.html.twig' as history %}
 {% set first = item.entries|first %}
-<div class="mt-3 overflow-x-auto rounded-lg border border-dh-border bg-dh-card">
+<div class="dh:mt-3 dh:overflow-x-auto dh:rounded-lg dh:border dh:border-dh-border dh:bg-dh-card">
     {#- On a narrow screen, each change is stacked (object, field, then the change) instead of three squeezed columns.
         From the sm breakpoint, a table whose column widths never change, so that the columns line up from one
         action to the next. A change shows in one column, in a form that depends on its values: the changed words in
         place, old → new, or the old text above the new one. -#}
-    <table class="block w-full text-left text-xs text-dh-foreground sm:table sm:min-w-[40rem] sm:table-fixed">
+    <table class="dh:block dh:w-full dh:text-left dh:text-xs dh:text-dh-foreground dh:sm:table dh:sm:min-w-[40rem] dh:sm:table-fixed">
         <colgroup>
-            <col class="w-1/5">
-            <col class="w-1/5">
-            <col class="w-3/5">
+            <col class="dh:w-1/5">
+            <col class="dh:w-1/5">
+            <col class="dh:w-3/5">
         </colgroup>
-        <thead class="hidden bg-dh-muted/50 text-dh-muted-foreground sm:table-header-group">
+        <thead class="dh:hidden dh:bg-dh-muted/50 dh:text-dh-muted-foreground dh:sm:table-header-group">
             <tr>
-                <th class="px-3 py-2 font-medium">{{ 'audit.history.object'|trans(domain='auditor') }}</th>
-                <th class="px-3 py-2 font-medium">{{ 'audit.history.field'|trans(domain='auditor') }}</th>
-                <th class="px-3 py-2 font-medium">{{ 'audit.history.change'|trans(domain='auditor') }}</th>
+                <th class="dh:px-3 dh:py-2 dh:font-medium">{{ 'audit.history.object'|trans(domain='auditor') }}</th>
+                <th class="dh:px-3 dh:py-2 dh:font-medium">{{ 'audit.history.field'|trans(domain='auditor') }}</th>
+                <th class="dh:px-3 dh:py-2 dh:font-medium">{{ 'audit.history.change'|trans(domain='auditor') }}</th>
             </tr>
         </thead>
-        <tbody class="block divide-y divide-dh-border sm:table-row-group">
+        <tbody class="dh:block dh:divide-y dh:divide-dh-border dh:sm:table-row-group">
         {% set previous = null %}
         {% for change in item.changes %}
             {% set object = change.entity|split('\\')|last ~ ' #' ~ change.objectId %}
-            <tr class="block py-1.5 align-top sm:table-row sm:py-0">
-                <td class="block break-words px-3 py-0.5 text-dh-muted-foreground empty:hidden sm:table-cell sm:py-2 sm:empty:table-cell">
+            <tr class="dh:block dh:py-1.5 dh:align-top dh:sm:table-row dh:sm:py-0">
+                <td class="dh:block dh:break-words dh:px-3 dh:py-0.5 dh:text-dh-muted-foreground dh:empty:hidden dh:sm:table-cell dh:sm:py-2 dh:sm:empty:table-cell">
                     {%- if object != previous -%}
-                        <span class="font-medium text-dh-foreground" title="{{ change.entity }}">{{ object }}</span>
+                        <span class="dh:font-medium dh:text-dh-foreground" title="{{ change.entity }}">{{ object }}</span>
                     {%- endif -%}
                 </td>
                 {% if change.kind.isEntityLevel() %}
@@ -36,19 +36,19 @@
                         {#- One row per field, the value as it was written: the type of the entry tells whether it was
                             created or removed. <details> cannot wrap table rows, so the rows sit in a nested table whose
                             columns have the widths of the Field and Change columns (20 % and 60 % of the row). -#}
-                        <td class="block p-0 sm:table-cell" colspan="2">
+                        <td class="dh:block dh:p-0 dh:sm:table-cell" colspan="2">
                             <details>
-                                <summary class="cursor-pointer px-3 py-0.5 sm:py-2 text-dh-muted-foreground">{{ 'audit.history.fields_count'|trans({'%count%': values|length}, 'auditor') }}</summary>
-                                <table class="block w-full sm:table sm:table-fixed">
+                                <summary class="dh:cursor-pointer dh:px-3 dh:py-0.5 dh:sm:py-2 dh:text-dh-muted-foreground">{{ 'audit.history.fields_count'|trans({'%count%': values|length}, 'auditor') }}</summary>
+                                <table class="dh:block dh:w-full dh:sm:table dh:sm:table-fixed">
                                     <colgroup>
-                                        <col class="w-1/4">
-                                        <col class="w-3/4">
+                                        <col class="dh:w-1/4">
+                                        <col class="dh:w-3/4">
                                     </colgroup>
-                                    <tbody class="block sm:table-row-group">
+                                    <tbody class="dh:block dh:sm:table-row-group">
                                     {% for field, value in values %}
-                                        <tr class="block py-1 align-top sm:table-row sm:py-0" data-field="{{ field }}">
-                                            <td class="block break-words px-3 text-dh-muted-foreground sm:table-cell sm:py-1">{{ dh_auditor_field_label(change.entity, field) }} <span class="block break-all font-mono text-[11px] text-dh-muted-foreground">{{ field }}</span></td>
-                                            <td class="block px-3 sm:table-cell sm:py-1">{{ history.value(change.labels[field] is defined and value is iterable ? change.labels[field] : value) }}</td>
+                                        <tr class="dh:block dh:py-1 dh:align-top dh:sm:table-row dh:sm:py-0" data-field="{{ field }}">
+                                            <td class="dh:block dh:break-words dh:px-3 dh:text-dh-muted-foreground dh:sm:table-cell dh:sm:py-1">{{ dh_auditor_field_label(change.entity, field) }} <span class="dh:block dh:break-all dh:font-mono dh:text-[11px] dh:text-dh-muted-foreground">{{ field }}</span></td>
+                                            <td class="dh:block dh:px-3 dh:sm:table-cell dh:sm:py-1">{{ history.value(change.labels[field] is defined and value is iterable ? change.labels[field] : value) }}</td>
                                         </tr>
                                     {% endfor %}
                                     </tbody>
@@ -56,24 +56,24 @@
                             </details>
                         </td>
                     {% else %}
-                        <td class="block px-3 py-0.5 sm:table-cell sm:py-2" colspan="2"><span class="text-dh-muted-foreground">—</span></td>
+                        <td class="dh:block dh:px-3 dh:py-0.5 dh:sm:table-cell dh:sm:py-2" colspan="2"><span class="dh:text-dh-muted-foreground">—</span></td>
                     {% endif %}
                 {% else %}
-                    <td class="block break-words px-3 py-0.5 sm:table-cell sm:py-2">
+                    <td class="dh:block dh:break-words dh:px-3 dh:py-0.5 dh:sm:table-cell dh:sm:py-2">
                         {{ dh_auditor_field_label(change.entity, change.field) }}
-                        <span class="block break-all font-mono text-[11px] text-dh-muted-foreground">{{ change.field }}</span>
+                        <span class="dh:block dh:break-all dh:font-mono dh:text-[11px] dh:text-dh-muted-foreground">{{ change.field }}</span>
                     </td>
                     {% if change.kind.value in ['added', 'removed'] %}
-                        <td class="block break-words px-3 py-0.5 sm:table-cell sm:py-2">
+                        <td class="dh:block dh:break-words dh:px-3 dh:py-0.5 dh:sm:table-cell dh:sm:py-2">
                             {{ history.sign(change.kind.value == 'added') }} {{ (change.getTargetClass() ?? '')|split('\\')|last }} #{{ change.getTargetId() }}
                             {% if (change.newLabel ?? change.oldLabel) is not null %}“{{ change.newLabel ?? change.oldLabel }}”{% endif %}
                         </td>
                     {% elseif change.kind.value == 'json' %}
-                        <td class="block px-3 py-0.5 sm:table-cell sm:py-2">{{ history.raw(change.new) }}</td>
+                        <td class="dh:block dh:px-3 dh:py-0.5 dh:sm:table-cell dh:sm:py-2">{{ history.raw(change.new) }}</td>
                     {% else %}
                         {% set old = change.oldLabel is not null and change.old is iterable ? change.oldLabel : change.old %}
                         {% set new = change.newLabel is not null and change.new is iterable ? change.newLabel : change.new %}
-                        <td class="block px-3 py-0.5 sm:table-cell sm:py-2">{{ history.text_change(old, new) }}</td>
+                        <td class="dh:block dh:px-3 dh:py-0.5 dh:sm:table-cell dh:sm:py-2">{{ history.text_change(old, new) }}</td>
                     {% endif %}
                 {% endif %}
             </tr>
@@ -82,7 +82,7 @@
         </tbody>
     </table>
 </div>
-<div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] text-dh-muted-foreground">
+<div class="dh:mt-2 dh:flex dh:flex-wrap dh:items-center dh:gap-x-4 dh:gap-y-1 dh:font-mono dh:text-[11px] dh:text-dh-muted-foreground">
     {% if first.transactionId %}<span>transaction {{ first.transactionId }}</span>{% endif %}
     {% if first.userId is not null %}<span>blame_id {{ first.userId }}</span>{% endif %}
     {% if first.ip %}<span>{{ first.ip }}</span>{% endif %}
@@ -91,7 +91,7 @@
     <span>{{ 'audit.history.schema'|trans(domain='auditor') }} v{{ first.schemaVersion }}</span>
     {% set transaction_url = first.transactionId ? dh_auditor_transaction_url(first.transactionId, root: root ?? null) : null %}
     {% if transaction_url %}
-        <a class="ml-auto font-sans text-xs font-medium text-dh-link underline underline-offset-4 hover:decoration-2"
+        <a class="dh:ml-auto dh:font-sans dh:text-xs dh:font-medium dh:text-dh-link dh:underline dh:underline-offset-4 dh:hover:decoration-2"
            href="{{ transaction_url }}">{{ 'audit.history.all_details'|trans(domain='auditor') }}</a>
     {% endif %}
 </div>

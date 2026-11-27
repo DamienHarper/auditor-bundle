@@ -1,83 +1,11 @@
-@import "tailwindcss";
-@import "./theme.css";
+/*
+ * Precompiled stylesheet of the viewer (public/app.css): the dh:-prefixed utilities of the bundle templates, the
+ * design tokens, the controls and a reset bounded to the viewer content (see viewer.css), without the global
+ * Preflight. It resets nothing else in the page, so that an application loads it before or after its own
+ * stylesheets. The layout of the bundle adds preflight.css.
+ */
 
-@source "../../views/**/*.html.twig";
-
-/* Dark mode: use class strategy instead of media query */
-@variant dark (&:where(.dark, .dark *));
-
-/** Form controls of the viewer (filters, sort, buttons next to them): one height, one look. Only their focus ring
-    transitions, so that they switch at once with the theme instead of flashing. **/
-@layer components {
-    .dh-auditor-control {
-        @apply h-8 rounded-lg border border-dh-input bg-dh-card px-2.5 text-sm text-dh-foreground shadow-xs transition-shadow hover:bg-dh-accent focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-dh-ring dark:bg-dh-input/30 dark:[color-scheme:dark];
-    }
-
-    /* Selects draw their own chevron, away from the border: two gradients rather than a data: image, which a strict
-       Content Security Policy (img-src 'self') would block */
-    select.dh-auditor-control {
-        @apply appearance-none pr-8;
-        background-image:
-            linear-gradient(45deg, transparent 50%, var(--dh-muted-foreground) 50%),
-            linear-gradient(135deg, var(--dh-muted-foreground) 50%, transparent 50%);
-        background-position: calc(100% - 15px) 55%, calc(100% - 11px) 55%;
-        background-size: 4px 4px, 4px 4px;
-        background-repeat: no-repeat;
-    }
-
-    /* The main button of a form (Apply) */
-    .dh-auditor-control-primary {
-        @apply border-transparent bg-dh-primary font-medium text-dh-primary-foreground hover:bg-dh-primary/90 dark:bg-dh-primary dark:hover:bg-dh-primary/90;
-    }
-}
-
-/** Cards **/
-@layer components {
-    div.card {
-        @apply rounded-md bg-white border;
-    }
-
-    div.card > div.card-header {
-        @apply rounded-t-md p-3;
-    }
-
-    div.card > .card-header-sm {
-        @apply rounded-t-md px-3 py-2;
-    }
-
-    div.card > .card-body {
-        @apply px-3 py-2;
-    }
-
-    div.card > .card-footer {
-        @apply rounded-b-md border-t p-3;
-    }
-
-    div.card > .card-footer-sm {
-        @apply rounded-b-md border-t px-3 py-2;
-    }
-}
-
-/** Activity graph bars: one class per 5 % step, so that the templates carry no style attribute (strict CSP) **/
-@layer utilities {
-    .dh-auditor-bar-h-5 { height: 5%; }
-    .dh-auditor-bar-h-10 { height: 10%; }
-    .dh-auditor-bar-h-15 { height: 15%; }
-    .dh-auditor-bar-h-20 { height: 20%; }
-    .dh-auditor-bar-h-25 { height: 25%; }
-    .dh-auditor-bar-h-30 { height: 30%; }
-    .dh-auditor-bar-h-35 { height: 35%; }
-    .dh-auditor-bar-h-40 { height: 40%; }
-    .dh-auditor-bar-h-45 { height: 45%; }
-    .dh-auditor-bar-h-50 { height: 50%; }
-    .dh-auditor-bar-h-55 { height: 55%; }
-    .dh-auditor-bar-h-60 { height: 60%; }
-    .dh-auditor-bar-h-65 { height: 65%; }
-    .dh-auditor-bar-h-70 { height: 70%; }
-    .dh-auditor-bar-h-75 { height: 75%; }
-    .dh-auditor-bar-h-80 { height: 80%; }
-    .dh-auditor-bar-h-85 { height: 85%; }
-    .dh-auditor-bar-h-90 { height: 90%; }
-    .dh-auditor-bar-h-95 { height: 95%; }
-    .dh-auditor-bar-h-100 { height: 100%; }
-}
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme) prefix(dh);
+@import "tailwindcss/utilities.css" layer(utilities);
+@import "./viewer.css";

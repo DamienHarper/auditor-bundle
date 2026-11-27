@@ -81,12 +81,22 @@ must be rewritten from the new ones:
 - `Audit/entry.html.twig` is removed: the comparison page renders its changes like the action details, with the
   `text_change()` and `related()` macros of `History/_macros.html.twig`.
 
-The templates are styled with design tokens instead of the Tailwind palette (`bg-dh-card` instead of
-`bg-white dark:bg-slate-900`, `text-dh-muted-foreground` instead of `text-slate-500 dark:text-slate-400`…). The
-precompiled `app.css` only holds the classes of the bundle templates: an overridden template that keeps 7.x classes
-(`slate-*`, `indigo-*`, `emerald-*`…) loses their styles. Rewrite it with the `dh-*` tokens (see
-[Theme](docs/viewer/index.md#-theme)). An application that compiles the `<twig:DhAuditor:History>` component with its
-own Tailwind imports `src/Resources/assets/css/theme.css` (see
+The templates are styled with design tokens instead of the Tailwind palette, and every Tailwind class carries the
+`dh:` prefix (`dh:bg-dh-card` instead of `bg-white dark:bg-slate-900`, `dh:text-dh-muted-foreground` instead of
+`text-slate-500 dark:text-slate-400`, `dh:hidden dh:sm:inline` instead of `hidden sm:inline`…), so that the viewer
+never meets the classes of an application that uses Tailwind too. The precompiled `app.css` only holds the prefixed
+classes of the bundle templates: an overridden template that keeps 7.x classes (`slate-*`, `indigo-*`, `emerald-*`…)
+or unprefixed ones loses their styles. Rewrite it with prefixed classes and the `dh-*` tokens (see
+[Theme](docs/viewer/index.md#-theme)).
+
+`app.css` no longer resets the whole page: its reset only reaches the content of the viewer pages, under the
+`<div data-dh-auditor-viewer>` element in which each page of `Audit/` now wraps the content of its `dh_auditor_content`
+block (keep it in an overridden page), and the `<twig:DhAuditor:History>` component. The layout of the bundle loads
+`bundles/dhauditor/preflight.css` too; in a layout that extends the one of the application, the rest of the page keeps
+the reset and the font of the application. The wrapping element makes the content of each page one child of the element
+that renders the `dh_auditor_content` block, which a flex or grid layout around it may need to know. An application that
+compiles the viewer or the `<twig:DhAuditor:History>` component with its own Tailwind does it in a stylesheet of its own
+that imports `src/Resources/assets/css/viewer.css` with the `dh` prefix (see
 [Styling](docs/customization/histories.md#styling)).
 
 Route names are unchanged, but the history of an object reads other query parameters: `type` → `what`,
