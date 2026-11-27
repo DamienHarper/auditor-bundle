@@ -75,8 +75,6 @@ define common_setup
 	sh -c "docker compose $(compose_files) run --rm --remove-orphans php-cli composer global require --no-progress --no-scripts --no-plugins symfony/flex --quiet"
 	@PHP_VERSION=$(php) SYMFONY_VERSION=$(sf) \
 	sh -c "docker compose $(compose_files) run --rm --remove-orphans php-cli composer install --quiet"
-	@PHP_VERSION=$(php) SYMFONY_VERSION=$(sf) \
-	sh -c "docker compose $(compose_files) run --rm --remove-orphans php-cli composer reinstall damienharper/auditor --prefer-install=source --quiet"
 endef
 
 # Run PHPUnit target
@@ -160,8 +158,10 @@ endef
 build-assets:
 	@echo "Building CSS assets with Tailwind CSS..."
 	cd tests/App && php bin/console tailwind:build --minify
+	cd tests/App && php bin/console tailwind:build --minify ../../src/Resources/assets/css/preflight.css
 	@cp tests/App/var/tailwind/app.built.css src/Resources/public/app.css
-	@echo "Assets built successfully: src/Resources/public/app.css"
+	@cp tests/App/var/tailwind/preflight.built.css src/Resources/public/preflight.css
+	@echo "Assets built successfully: src/Resources/public/app.css, src/Resources/public/preflight.css"
 
 # Watch and rebuild CSS assets on changes (for development)
 .PHONY: watch-assets

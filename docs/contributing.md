@@ -32,6 +32,12 @@ cd auditor-bundle
 composer install
 ```
 
+The `damienharper/*` packages are installed from source (`preferred-install` in `composer.json`): the test suite
+loads Doctrine fixtures from `vendor/damienharper/auditor-doctrine-provider/tests`, which the dist archive does not
+contain. Composer keeps the installation source of a package that is already installed, so a `vendor/` installed
+before that setting needs a one-off `composer reinstall "damienharper/*"`, and the Docker `vendor_php*` volumes
+need to be removed once (`docker volume ls`, `docker volume rm …`).
+
 4. Create a branch for your changes:
 
 ```bash
@@ -181,9 +187,12 @@ make cs-fix args='fix --dry-run'
 
 ### 🎨 Assets
 
-The viewer styles are written with Tailwind CSS 4 (`src/Resources/assets/css/app.css`), and the compiled
-`src/Resources/public/app.css` is **committed**. After a template or CSS change that uses new classes, rebuild it
-and commit the result:
+The viewer styles are written with Tailwind CSS 4 (`src/Resources/assets/css/`: `viewer.css` for the tokens, the reset
+bounded to the viewer content, the controls and the bars, `app.css` and `preflight.css` as entry points), and the
+compiled `src/Resources/public/app.css` and `src/Resources/public/preflight.css` are **committed**. Every Tailwind class
+of the templates carries the `dh:` prefix (`dh:flex`, `dh:sm:inline`, `dh:hover:bg-dh-accent`…): a class without it is
+not compiled, and a test fails on it. After a template or CSS change that uses new classes, rebuild the assets and
+commit the result:
 
 ```bash
 make build-assets

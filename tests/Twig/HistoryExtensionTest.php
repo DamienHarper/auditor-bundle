@@ -9,6 +9,7 @@ use DH\Auditor\Provider\Doctrine\Auditing\Root\ObjectIdentifier;
 use DH\Auditor\Provider\Doctrine\Persistence\Reader\Reader;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Author;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
+use DH\Auditor\User\User;
 use DH\AuditorBundle\History\TranslatedFieldLabelResolver;
 use DH\AuditorBundle\Twig\HistoryExtension;
 use PHPUnit\Framework\Attributes\Small;
@@ -52,6 +53,15 @@ final class HistoryExtensionTest extends TestCase
 
         $this->assertSame(['name' => null], $extension->lastChanges(new \stdClass(), ['name']), 'Not an entity.');
         $this->assertSame(['fullname' => null], $extension->lastChanges(new Author(), ['fullname']), 'Not persisted yet.');
+    }
+
+    public function testUserClass(): void
+    {
+        $extension = $this->extension();
+
+        $this->assertSame('App\Entity\User', $extension->userClass('App\Entity\User'));
+        $this->assertNull($extension->userClass(User::class), 'The class of the core User written by former versions tells nothing.');
+        $this->assertNull($extension->userClass(null));
     }
 
     public function testFieldLabel(): void

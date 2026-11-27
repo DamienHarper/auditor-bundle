@@ -55,6 +55,7 @@ audit:
   entry:
     by: par
     via: via
+    impersonated_by: 'incarné par %name%'
     source: Source
     target: Cible
     extra_data: Données complémentaires

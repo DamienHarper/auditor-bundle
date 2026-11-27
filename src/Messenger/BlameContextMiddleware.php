@@ -52,7 +52,7 @@ final readonly class BlameContextMiddleware implements MiddlewareInterface
             self::CONTEXT_TYPE,
             $envelope->getMessage()::class,
             ['transport' => $receivedStamp->getTransportName()],
-            $blameStamp instanceof BlameStamp ? new User($blameStamp->userId, $blameStamp->username) : null,
+            $blameStamp instanceof BlameStamp ? $this->createUser($blameStamp) : null,
         );
 
         return $this->configuration->getBlameContextStack()->run(
@@ -74,6 +74,22 @@ final readonly class BlameContextMiddleware implements MiddlewareInterface
             return null;
         }
 
-        return new BlameStamp($user->identifier, $user->username);
+        return new BlameStamp(
+            $user->identifier,
+            $user->username,
+            $user->fqdn,
+            $user->impersonator?->identifier,
+            $user->impersonator?->username,
+            $user->impersonator?->fqdn,
+        );
+    }
+
+    private function createUser(BlameStamp $stamp): User
+    {
+        $impersonator = null === $stamp->impersonatorId && null === $stamp->impersonatorUsername && null === $stamp->impersonatorFqdn
+            ? null
+            : new User($stamp->impersonatorId, $stamp->impersonatorUsername, $stamp->impersonatorFqdn);
+
+        return new User($stamp->userId, $stamp->username, $stamp->fqdn, $impersonator);
     }
 }

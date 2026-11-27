@@ -18,19 +18,19 @@
 {# Generic pager: links to `route` with `routeParams` plus the target page number. #}
 {% macro render_route(route, routeParams, paginator) %}
     {% if paginator.haveToPaginate %}
-        <div class="flex items-center justify-center gap-1 mt-4 pt-4 border-t border-dh-border">
+        <div class="dh:flex dh:items-center dh:justify-center dh:gap-1 dh:mt-4 dh:pt-4 dh:border-t dh:border-dh-border">
             {# First page #}
             {% if paginator.currentPage > 1 %}
                 <a href="{{ path(route, routeParams|merge({page: 1})) }}"
-                   class="inline-flex items-center justify-center size-8 text-sm text-dh-muted-foreground hover:text-dh-foreground hover:bg-dh-accent rounded-lg transition-colors"
+                   class="dh:inline-flex dh:items-center dh:justify-center dh:size-8 dh:text-sm dh:text-dh-muted-foreground dh:hover:text-dh-foreground dh:hover:bg-dh-accent dh:rounded-lg dh:transition-colors"
                    title="{{ 'audit.pager.first'|trans(domain='auditor') }}">
-                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="dh:size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
                     </svg>
                 </a>
             {% else %}
-                <span class="inline-flex items-center justify-center size-8 text-dh-muted-foreground opacity-50 cursor-not-allowed">
-                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span class="dh:inline-flex dh:items-center dh:justify-center dh:size-8 dh:text-dh-muted-foreground dh:opacity-50 dh:cursor-not-allowed">
+                    <svg class="dh:size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
                     </svg>
                 </span>
@@ -39,15 +39,15 @@
             {# Previous #}
             {% if paginator.hasPreviousPage %}
                 <a href="{{ path(route, routeParams|merge({page: paginator.previousPage})) }}"
-                   class="inline-flex items-center justify-center size-8 text-sm text-dh-muted-foreground hover:text-dh-foreground hover:bg-dh-accent rounded-lg transition-colors"
+                   class="dh:inline-flex dh:items-center dh:justify-center dh:size-8 dh:text-sm dh:text-dh-muted-foreground dh:hover:text-dh-foreground dh:hover:bg-dh-accent dh:rounded-lg dh:transition-colors"
                    title="{{ 'audit.pager.previous'|trans(domain='auditor') }}">
-                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="dh:size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </a>
             {% else %}
-                <span class="inline-flex items-center justify-center size-8 text-dh-muted-foreground opacity-50 cursor-not-allowed">
-                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span class="dh:inline-flex dh:items-center dh:justify-center dh:size-8 dh:text-dh-muted-foreground dh:opacity-50 dh:cursor-not-allowed">
+                    <svg class="dh:size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </span>
@@ -68,17 +68,17 @@
 
             {# Show ellipsis before if needed #}
             {% if startPage > 1 %}
-                <span class="inline-flex items-center justify-center size-8 text-sm text-dh-muted-foreground">…</span>
+                <span class="dh:inline-flex dh:items-center dh:justify-center dh:size-8 dh:text-sm dh:text-dh-muted-foreground">…</span>
             {% endif %}
 
             {% for page in startPage..endPage %}
                 {% if page == paginator.currentPage %}
-                    <span class="inline-flex items-center justify-center size-8 rounded-lg bg-dh-link text-sm font-medium text-dh-link-foreground">
+                    <span class="dh:inline-flex dh:items-center dh:justify-center dh:size-8 dh:rounded-lg dh:bg-dh-link dh:text-sm dh:font-medium dh:text-dh-link-foreground">
                         {{ page }}
                     </span>
                 {% else %}
                     <a href="{{ path(route, routeParams|merge({page: page})) }}"
-                       class="inline-flex items-center justify-center size-8 text-sm text-dh-muted-foreground hover:text-dh-foreground hover:bg-dh-accent rounded-lg transition-colors">
+                       class="dh:inline-flex dh:items-center dh:justify-center dh:size-8 dh:text-sm dh:text-dh-muted-foreground dh:hover:text-dh-foreground dh:hover:bg-dh-accent dh:rounded-lg dh:transition-colors">
                         {{ page }}
                     </a>
                 {% endif %}
@@ -86,21 +86,21 @@
 
             {# Show ellipsis after if needed #}
             {% if endPage < paginator.numPages %}
-                <span class="inline-flex items-center justify-center size-8 text-sm text-dh-muted-foreground">…</span>
+                <span class="dh:inline-flex dh:items-center dh:justify-center dh:size-8 dh:text-sm dh:text-dh-muted-foreground">…</span>
             {% endif %}
 
             {# Next #}
             {% if paginator.hasNextPage %}
                 <a href="{{ path(route, routeParams|merge({page: paginator.nextPage})) }}"
-                   class="inline-flex items-center justify-center size-8 text-sm text-dh-muted-foreground hover:text-dh-foreground hover:bg-dh-accent rounded-lg transition-colors"
+                   class="dh:inline-flex dh:items-center dh:justify-center dh:size-8 dh:text-sm dh:text-dh-muted-foreground dh:hover:text-dh-foreground dh:hover:bg-dh-accent dh:rounded-lg dh:transition-colors"
                    title="{{ 'audit.pager.next'|trans(domain='auditor') }}">
-                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="dh:size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </a>
             {% else %}
-                <span class="inline-flex items-center justify-center size-8 text-dh-muted-foreground opacity-50 cursor-not-allowed">
-                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span class="dh:inline-flex dh:items-center dh:justify-center dh:size-8 dh:text-dh-muted-foreground dh:opacity-50 dh:cursor-not-allowed">
+                    <svg class="dh:size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </span>
@@ -109,15 +109,15 @@
             {# Last page #}
             {% if paginator.currentPage < paginator.numPages %}
                 <a href="{{ path(route, routeParams|merge({page: paginator.numPages})) }}"
-                   class="inline-flex items-center justify-center size-8 text-sm text-dh-muted-foreground hover:text-dh-foreground hover:bg-dh-accent rounded-lg transition-colors"
+                   class="dh:inline-flex dh:items-center dh:justify-center dh:size-8 dh:text-sm dh:text-dh-muted-foreground dh:hover:text-dh-foreground dh:hover:bg-dh-accent dh:rounded-lg dh:transition-colors"
                    title="{{ 'audit.pager.last'|trans(domain='auditor') }}">
-                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="dh:size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
                     </svg>
                 </a>
             {% else %}
-                <span class="inline-flex items-center justify-center size-8 text-dh-muted-foreground opacity-50 cursor-not-allowed">
-                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span class="dh:inline-flex dh:items-center dh:justify-center dh:size-8 dh:text-dh-muted-foreground dh:opacity-50 dh:cursor-not-allowed">
+                    <svg class="dh:size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
                     </svg>
                 </span>
@@ -125,7 +125,7 @@
         </div>
 
         {# Page info text #}
-        <div class="text-center mt-2 text-xs text-dh-muted-foreground">
+        <div class="dh:text-center dh:mt-2 dh:text-xs dh:text-dh-muted-foreground">
             {{ 'audit.pager.page_info'|trans({'%current%': paginator.currentPage, '%total%': paginator.numPages}, 'auditor') }}
         </div>
     {% endif %}

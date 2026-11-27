@@ -49,6 +49,20 @@ dh_auditor:
     type: auditor
 ```
 
+The viewer routes come from this import only, so its prefix applies to all of them. With `prefix: /admin`, the
+viewer answers at `/admin/audit`:
+
+```yaml
+dh_auditor:
+    resource: "@DHAuditorBundle/Controller/"
+    type: auditor
+    prefix: /admin
+```
+
+> [!IMPORTANT]
+> The `routing.controllers` resource of the symfony/routing recipe (`config/routes.yaml`) does not load the viewer routes: an
+> application that imports only `routing.controllers` has no viewer. Import the bundle routes as above.
+
 ## 📄 Pages
 
 The viewer tells each action (a database transaction) as a phrase, such as *alice changed Status: Draft → Published
@@ -76,8 +90,8 @@ The history of one object and of the entities attached to it (`#[AuditRoot]`, `r
 [Histories](../customization/histories.md)), newest first, grouped by day:
 
 - one row per action: icon, author (linked to their actions), phrase, time, origin (Web, Command line, Messenger,
-  System) and blame context; the whole row leads to the action page, the objects it names to their own history; its
-  details list every change with its raw field and values (long texts compared word by word; a text shows between
+  System), blame context and, when the author was impersonated (switch user), who impersonated them; the whole row
+  leads to the action page, the objects it names to their own history; its details list every change with its raw field and values (long texts compared word by word; a text shows between
   quotes only when it would be misread without them: empty, with spaces at its ends, or looking like a number, a
   boolean or null), the transaction and the blame, and link to the action page;
 - **filters**: who, what (`insert`, `update`, `remove`, `associate`, `dissociate`), field (needs native JSON
@@ -154,11 +168,15 @@ revisions, so that the comparison can be moved along the history.
 | `id`        | Object ID                                                                    |
 | `from`, `to`| Creation date range (ISO 8601, e.g. `2026-01-01`)                            |
 | `blame_id`  | User ID                                                                      |
-| `anonymize` | `1` to remove the user (ID, name, class, firewall) and the IP address        |
+| `anonymize` | `1` to remove the user (ID, name, class, firewall, impersonator) and the IP address |
 
 ```
 /audit/export?entity=App-Entity-User&format=csv&from=2026-01-01
 ```
+
+Each entry carries the blame as flat fields: `blame_id`, `blame_user`, `blame_user_fqdn`, `blame_user_firewall`,
+`blame_impersonator_id`, `blame_impersonator` and `blame_impersonator_fqdn` (the user who impersonated the author, if
+any), `ip` and `blame_via`.
 
 The export follows the same access rules as the viewer (see [Access Control](#-access-control)): an entity the user
 cannot view is refused, or left out when no entity is given. From the command line, the provider's `audit:export`
@@ -242,11 +260,16 @@ php bin/console audit:cache:clear --entity="App\Entity\User"
 ## 🎨 Theme
 
 The viewer follows the conventions of [shadcn/ui](https://ui.shadcn.com) without depending on it: every color of its
-templates is a CSS variable, exposed to Tailwind as a `dh-*` color (`bg-dh-card`, `text-dh-muted-foreground`,
-`border-dh-input`…). The palette is neutral and the primary button near black; the teal of the auditor logo marks the activity
+templates is a CSS variable, exposed to Tailwind as a `dh-*` color (`dh:bg-dh-card`, `dh:text-dh-muted-foreground`,
+`dh:border-dh-input`…). The palette is neutral and the primary button near black; the teal of the auditor logo marks the activity
 bars, the selected revision and the focus ring (`dh-brand`), and, darkened to read as text, the links, the time of an
 action and the current page (`dh-link`). The icon of an action tells its meaning: green for a creation, red for a
-deletion, blue for any other change. Controls share one size (`h-8`, `rounded-lg`), badges are pills (`h-5`).
+deletion, blue for any other change. Controls share one size (`dh:h-8`, `dh:rounded-lg`), badges are pills (`dh:h-5`).
+
+Every Tailwind class of the templates carries the `dh:` prefix (`dh:hidden`, `dh:sm:inline`, `dh:hover:bg-dh-accent`…),
+and the theme variables of Tailwind in `bundles/dhauditor/app.css` are `--dh-*` ones (`--dh-spacing`, `--dh-text-sm`…):
+none of them meets a class or a variable of an application that uses Tailwind too, whatever the order of the
+stylesheets on the page.
 
 The tokens live in `src/Resources/assets/css/theme.css`, already compiled into `bundles/dhauditor/app.css`:
 
@@ -290,7 +313,7 @@ The toggle works without page reload and persists across sessions.
 The viewer carries no inline script, event handler attribute nor `style` attribute: its behaviours (theme, sort of
 the entity list, filters submitted on change, technical mode, copy of the raw diffs, older actions loaded in place)
 live in `bundles/dhauditor/viewer.js`, loaded by `layout.html.twig`, and
-its styles in `bundles/dhauditor/app.css`. It therefore works under a strict policy such as
+its styles in `bundles/dhauditor/app.css` and `bundles/dhauditor/preflight.css`. It therefore works under a strict policy such as
 `script-src 'self'; style-src 'self'`, as long as the bundle assets are served from your origin
 (`bin/console assets:install`).
 
@@ -325,6 +348,12 @@ security:
     access_control:
         - { path: ^/audit, roles: ROLE_ADMIN }
 ```
+
+The rule must match the path the viewer is imported at: with `prefix: /admin`, write `^/admin/audit`.
+
+> [!WARNING]
+> When neither the entity nor its scope requires roles, the default role checker grants the viewer to every visitor.
+> Protect the imported path with an `access_control` rule (or a firewall) unless the audits are meant to be public.
 
 > [!NOTE]
 > In association diffs (`associate` / `dissociate`), the related entity links to its audit stream
@@ -455,9 +484,11 @@ templates/bundles/DHAuditorBundle/
 > `dh_auditor_is_diff_leaf(node)` Twig function for the nodes inside a deep diff.
 
 > [!IMPORTANT]
-> `bundles/dhauditor/app.css` only contains the classes of the bundle templates. An overridden template styles
-> itself with the `dh-*` tokens (see [Theme](#-theme)); a class that no bundle template uses any more, such as the
-> 7.x `bg-slate-50` or `text-indigo-600`, has no style.
+> `bundles/dhauditor/app.css` only contains the classes of the bundle templates, with the `dh:` prefix. An overridden
+> template styles itself with prefixed classes and the `dh-*` tokens (`dh:bg-dh-card`, see [Theme](#-theme)); a class
+> without the prefix, or that no bundle template uses, such as the 7.x `bg-slate-50` or `text-indigo-600`, has no
+> style. An overridden page of `Audit/` keeps the `<div data-dh-auditor-viewer>` element that wraps the content of
+> its `dh_auditor_content` block: the reset of the viewer applies under it.
 
 ### Custom Layout
 
@@ -467,6 +498,7 @@ templates/bundles/DHAuditorBundle/
 
 {% block stylesheets %}
     {{ parent() }}
+    {# the viewer, with its own reset, bounded to its content: the rest of your page is left as it is #}
     <link rel="stylesheet" href="{{ asset('bundles/dhauditor/app.css') }}">
     {# behaviours of the viewer (theme, sort, filters, technical mode, copy, older actions); loaded without defer so
        that the theme applies before the first paint #}
@@ -479,6 +511,22 @@ templates/bundles/DHAuditorBundle/
     </div>
 {% endblock %}
 ```
+
+`bundles/dhauditor/app.css` holds the `dh:` classes of the viewer, its tokens and its controls. It may come before
+or after the stylesheets of your application, which keeps its own classes, theme and font: the sans-serif text of the
+viewer is the one of your page, only its code and a few signs use the stacks of the `--dh-font-mono` and
+`--dh-font-sans` variables (`:root { --dh-font-sans: var(--font-sans); }` to change the latter). It does not reset
+your page either: its reset, the one of Tailwind (Preflight) cut down to what the templates need, only reaches the
+content of the pages of the viewer, under a `data-dh-auditor-viewer` element, so that the viewer looks the same with
+or without a reset of your own. The layout of the bundle adds `bundles/dhauditor/preflight.css`, the whole Preflight
+of Tailwind; a layout that extends yours does not need it.
+
+> [!WARNING]
+> The rules of the viewer sit in the cascade layers of Tailwind (`base`, `components`, `utilities`). A rule of your
+> application outside any layer (Bootstrap, plain CSS such as `select { padding: … }`) wins over all of them on the
+> elements it matches, whatever the order of the stylesheets. Put such rules in a layer, or scope them out of the
+> viewer. An application that compiles the viewer itself (see [Styling](../customization/histories.md#styling))
+> does not load `app.css` as well.
 
 ### Template Blocks
 
@@ -499,7 +547,8 @@ Install assets:
 bin/console assets:install
 ```
 
-Assets are installed to `public/bundles/dhauditor/`.
+Assets are installed to `public/bundles/dhauditor/`: `app.css` (the viewer), `preflight.css` (the reset of
+Tailwind, loaded by the layout of the bundle only) and `viewer.js` (its behaviours).
 
 ## 🌍 Translations
 

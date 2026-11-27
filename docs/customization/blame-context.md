@@ -60,7 +60,8 @@ framework:
 ```
 
 - On dispatch, it adds a `DH\AuditorBundle\Messenger\BlameStamp` with the current user (the user of the current
-  blame context, or else the one returned by the user provider).
+  blame context, or else the one returned by the user provider): its identifier, name and class, and its impersonator,
+  if any.
 - When a worker handles the message, the handlers run in a `messenger` context labelled with the message class
   (`"via": {"type": "messenger", "label": "App\\Message\\ImportProducts", "data": {"transport": "async"}}`) and the
   stamped user is blamed instead of the worker command.

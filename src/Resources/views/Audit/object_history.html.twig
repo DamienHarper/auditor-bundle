@@ -8,37 +8,39 @@
 {% block title %}{{ title }} · auditor{% endblock %}
 
 {% block dh_auditor_content %}
-    <nav class="mb-3 text-sm text-dh-muted-foreground" aria-label="breadcrumb">
-        <a href="{{ path('dh_auditor_list_audits') }}" class="hover:underline">{{ 'audit.header.home'|trans(domain='auditor') }}</a>
-        <span class="mx-1">/</span>
-        <a href="{{ path('dh_auditor_show_entity_stream', {entity: entity_param}) }}" class="hover:underline">{{ dh_auditor_entity_name(entity, 2) }}</a>
-        <span class="mx-1">/</span>
+{#- Root of the viewer content: bounds the reset of viewer.css, for a layout that extends the one of the application -#}
+<div data-dh-auditor-viewer>
+    <nav class="dh:mb-3 dh:text-sm dh:text-dh-muted-foreground" aria-label="breadcrumb">
+        <a href="{{ path('dh_auditor_list_audits') }}" class="dh:hover:underline">{{ 'audit.header.home'|trans(domain='auditor') }}</a>
+        <span class="dh:mx-1">/</span>
+        <a href="{{ path('dh_auditor_show_entity_stream', {entity: entity_param}) }}" class="dh:hover:underline">{{ dh_auditor_entity_name(entity, 2) }}</a>
+        <span class="dh:mx-1">/</span>
         <span>#{{ id }}</span>
     </nav>
 
-    <div class="flex flex-wrap items-start justify-between gap-4">
-        <div class="min-w-0">
-            <h1 class="text-2xl font-semibold tracking-tight">{{ title }}</h1>
-            <p class="mt-1 text-sm text-dh-muted-foreground">
+    <div class="dh:flex dh:flex-wrap dh:items-start dh:justify-between dh:gap-4">
+        <div class="dh:min-w-0">
+            <h1 class="dh:text-2xl dh:font-semibold dh:tracking-tight">{{ title }}</h1>
+            <p class="dh:mt-1 dh:text-sm dh:text-dh-muted-foreground">
                 {{ short_name }} #{{ id }}
                 {%- if creation %}
                     · {{ 'audit.history.created_by'|trans({'%author%': creationItem|dh_auditor_author, '%date%': creation.createdAt|format_date('medium', timezone: false)}, 'auditor') }}
                 {%- endif %}
                 · {{ 'audit.history.actions_count'|trans({'%count%': actionCount}, 'auditor') }}
             </p>
-            <p class="mt-1 break-all font-mono text-xs text-dh-muted-foreground">{{ entity }} · {{ tables|first }}</p>
+            <p class="dh:mt-1 dh:break-all dh:font-mono dh:text-xs dh:text-dh-muted-foreground">{{ entity }} · {{ tables|first }}</p>
         </div>
-        <div class="flex gap-2">
+        <div class="dh:flex dh:gap-2">
             <a href="{{ path('dh_auditor_select_revisions', {entity: entity_param, id: id}) }}"
-               class="dh-auditor-control inline-flex items-center font-medium">{{ 'audit.history.compare'|trans(domain='auditor') }}</a>
+               class="dh-auditor-control dh:inline-flex dh:items-center dh:font-medium">{{ 'audit.history.compare'|trans(domain='auditor') }}</a>
             <a href="{{ path('dh_auditor_export', {entity: entity_param, id: id}) }}"
-               class="dh-auditor-control inline-flex items-center font-medium">{{ 'audit.history.export'|trans(domain='auditor') }}</a>
+               class="dh-auditor-control dh:inline-flex dh:items-center dh:font-medium">{{ 'audit.history.export'|trans(domain='auditor') }}</a>
         </div>
     </div>
 
-    <div class="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
+    <div class="dh:mt-6 dh:grid dh:gap-8 dh:lg:grid-cols-[minmax(0,1fr)_18rem]">
         <section data-dh-auditor-actions>
-            <form method="get" class="flex flex-wrap items-center gap-2 text-sm">
+            <form method="get" class="dh:flex dh:flex-wrap dh:items-center dh:gap-2 dh:text-sm">
                 <select name="who" data-dh-auditor-autosubmit aria-label="{{ 'audit.history.filter.who'|trans(domain='auditor') }}"
                         class="dh-auditor-control">
                     <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.filter.who'|trans(domain='auditor'), '%value%': 'audit.history.filter.everyone'|trans(domain='auditor')}, 'auditor') }}</option>
@@ -84,16 +86,16 @@
                     {% endfor %}
                 </select>
                 {% if hasAttached %}
-                    <label class="ml-1 inline-flex items-center gap-1.5">
+                    <label class="dh:ml-1 dh:inline-flex dh:items-center dh:gap-1.5">
                         <input type="hidden" name="attached" value="0">
-                        <input type="checkbox" class="size-4 accent-dh-primary" name="attached" value="1" data-dh-auditor-autosubmit {{ filters.attached ? 'checked' }}>
+                        <input type="checkbox" class="dh:size-4 dh:accent-dh-primary" name="attached" value="1" data-dh-auditor-autosubmit {{ filters.attached ? 'checked' }}>
                         {{ 'audit.history.with_attached'|trans(domain='auditor') }}
                     </label>
                 {% endif %}
                 <noscript><button type="submit" class="dh-auditor-control dh-auditor-control-primary">{{ 'audit.filter.apply'|trans(domain='auditor') }}</button></noscript>
             </form>
-            <label class="mt-2 inline-flex items-center gap-1.5 text-sm text-dh-muted-foreground">
-                <input type="checkbox" class="size-4 accent-dh-primary" data-dh-auditor-expand-all>
+            <label class="dh:mt-2 dh:inline-flex dh:items-center dh:gap-1.5 dh:text-sm dh:text-dh-muted-foreground">
+                <input type="checkbox" class="dh:size-4 dh:accent-dh-primary" data-dh-auditor-expand-all>
                 {{ 'audit.history.expand_all'|trans(domain='auditor') }}
             </label>
 
@@ -102,39 +104,40 @@
             </div>
         </section>
 
-        <aside class="space-y-6">
+        <aside class="dh:space-y-6">
             {% if lastChanges is not empty %}
-                <section class="rounded-xl border border-dh-border bg-dh-card p-4">
-                    <h2 class="text-sm font-semibold">{{ 'audit.history.last_changes'|trans(domain='auditor') }}</h2>
-                    <ul class="mt-2 space-y-1.5 text-sm">
+                <section class="dh:rounded-xl dh:border dh:border-dh-border dh:bg-dh-card dh:p-4">
+                    <h2 class="dh:text-sm dh:font-semibold">{{ 'audit.history.last_changes'|trans(domain='auditor') }}</h2>
+                    <ul class="dh:mt-2 dh:space-y-1.5 dh:text-sm">
                         {% for field, change in lastChanges %}
                             {% set change_item = dh_auditor_history_item(change.entry) %}
                             <li>
-                                <span class="font-medium">{{ dh_auditor_field_label(entity, field) }}</span>
-                                <span class="text-dh-muted-foreground">·
+                                <span class="dh:font-medium">{{ dh_auditor_field_label(entity, field) }}</span>
+                                <span class="dh:text-dh-muted-foreground">·
                                     {{ change_item|dh_auditor_author }},
-                                    <span class="whitespace-nowrap">{% if change.kind.isEntityLevel() %}{{ 'audit.history.at_creation'|trans(domain='auditor') }}{% else %}{{ change.entry.createdAt|time_ago }}{% endif %}</span>
+                                    <span class="dh:whitespace-nowrap">{% if change.kind.isEntityLevel() %}{{ 'audit.history.at_creation'|trans(domain='auditor') }}{% else %}{{ change.entry.createdAt|time_ago }}{% endif %}</span>
                                 </span>
                             </li>
                         {% endfor %}
                     </ul>
                 </section>
             {% endif %}
-            <section class="rounded-xl border border-dh-border bg-dh-card p-4 text-sm">
-                <h2 class="font-semibold">{{ 'audit.history.technical'|trans(domain='auditor') }}</h2>
-                <dl class="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
-                    <dt class="text-dh-muted-foreground">{{ 'audit.history.class'|trans(domain='auditor') }}</dt>
-                    <dd class="break-all font-mono">{{ entity }}</dd>
-                    <dt class="text-dh-muted-foreground">{{ 'audit.history.identifier'|trans(domain='auditor') }}</dt>
-                    <dd class="font-mono">{{ id }}</dd>
-                    <dt class="text-dh-muted-foreground">{{ 'audit.history.tables'|trans(domain='auditor') }}</dt>
-                    <dd class="break-all font-mono">{{ tables|join(', ') }}</dd>
-                    <dt class="text-dh-muted-foreground">{{ 'audit.history.reading'|trans(domain='auditor') }}</dt>
-                    <dd class="break-all font-mono">createRootQuery({{ entity|split('\\')|last }}, {{ id }})</dd>
-                    <dt class="text-dh-muted-foreground">{{ 'audit.history.entries'|trans(domain='auditor') }}</dt>
+            <section class="dh:rounded-xl dh:border dh:border-dh-border dh:bg-dh-card dh:p-4 dh:text-sm">
+                <h2 class="dh:font-semibold">{{ 'audit.history.technical'|trans(domain='auditor') }}</h2>
+                <dl class="dh:mt-2 dh:grid dh:grid-cols-[auto_1fr] dh:gap-x-3 dh:gap-y-1 dh:text-xs">
+                    <dt class="dh:text-dh-muted-foreground">{{ 'audit.history.class'|trans(domain='auditor') }}</dt>
+                    <dd class="dh:break-all dh:font-mono">{{ entity }}</dd>
+                    <dt class="dh:text-dh-muted-foreground">{{ 'audit.history.identifier'|trans(domain='auditor') }}</dt>
+                    <dd class="dh:font-mono">{{ id }}</dd>
+                    <dt class="dh:text-dh-muted-foreground">{{ 'audit.history.tables'|trans(domain='auditor') }}</dt>
+                    <dd class="dh:break-all dh:font-mono">{{ tables|join(', ') }}</dd>
+                    <dt class="dh:text-dh-muted-foreground">{{ 'audit.history.reading'|trans(domain='auditor') }}</dt>
+                    <dd class="dh:break-all dh:font-mono">createRootQuery({{ entity|split('\\')|last }}, {{ id }})</dd>
+                    <dt class="dh:text-dh-muted-foreground">{{ 'audit.history.entries'|trans(domain='auditor') }}</dt>
                     <dd>{{ 'audit.history.entries_count'|trans({'%count%': entryCount}, 'auditor') }}</dd>
                 </dl>
             </section>
         </aside>
     </div>
+</div>
 {% endblock %}

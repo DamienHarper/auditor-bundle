@@ -27,7 +27,8 @@ cannot be undone:
 1. back up the audit tables, and rehearse on a copy of your data to measure the duration;
 2. stop writing audits (maintenance mode, Messenger workers, scheduled tasks);
 3. update the packages, without letting `doctrine:schema:update` or a generated Doctrine migration touch the audit
-   tables;
+   tables (audit tables created by Doctrine migrations need a replayable migration and a deployment order, see
+   [Audit tables managed by Doctrine Migrations](https://github.com/DamienHarper/auditor-doctrine-provider/blob/main/docs/upgrade/v2.md#audit-tables-managed-by-doctrine-migrations));
 4. migrate, then apply the rest of the schema:
 
 ```bash
@@ -46,6 +47,24 @@ the [auditor-doctrine-provider 2.0 upgrade guide](https://github.com/DamienHarpe
 - `getDiffs()` returns the `changes` of a schema v2 entry. `$entry->username`, `userFqdn`, `userFirewall` and `ip`
   keep working.
 
+### User provider and impersonation
+
+- The built-in `UserProvider` no longer appends `[impersonator <name>]` to the username: the impersonated user is
+  blamed, and the user who impersonates them is written in the `impersonator` key of the `blame` JSON
+  (`$entry->impersonator`, `ImpersonatorFilter`, an "impersonated by" badge in the viewer). Exports get the
+  `blame_impersonator_id`, `blame_impersonator` and `blame_impersonator_fqdn` fields.
+- `user_fqdn` is the class of the user of the security token (it was `DH\Auditor\User\User`). Custom user
+  providers pass it as the third argument of `User`: `new User($id, $name, DoctrineHelper::getRealClassName($user))`
+  (`DH\Auditor\Provider\Doctrine\Persistence\Helper\DoctrineHelper` resolves Doctrine proxies).
+- Existing entries are not rewritten. To find the ones written with the former suffix:
+
+```sql
+-- MySQL, MariaDB, SQLite
+SELECT * FROM post_audit WHERE JSON_EXTRACT(blame, '$.username') LIKE '%[impersonator %';
+-- PostgreSQL
+SELECT * FROM post_audit WHERE CAST(blame AS jsonb) ->> 'username' LIKE '%[impersonator %';
+```
+
 ### Viewer templates
 
 The viewer was rewritten around actions. Templates overridden from 7.x under `templates/bundles/DHAuditorBundle/`
@@ -62,12 +81,22 @@ must be rewritten from the new ones:
 - `Audit/entry.html.twig` is removed: the comparison page renders its changes like the action details, with the
   `text_change()` and `related()` macros of `History/_macros.html.twig`.
 
-The templates are styled with design tokens instead of the Tailwind palette (`bg-dh-card` instead of
-`bg-white dark:bg-slate-900`, `text-dh-muted-foreground` instead of `text-slate-500 dark:text-slate-400`…). The
-precompiled `app.css` only holds the classes of the bundle templates: an overridden template that keeps 7.x classes
-(`slate-*`, `indigo-*`, `emerald-*`…) loses their styles. Rewrite it with the `dh-*` tokens (see
-[Theme](docs/viewer/index.md#-theme)). An application that compiles the `<twig:DhAuditor:History>` component with its
-own Tailwind imports `src/Resources/assets/css/theme.css` (see
+The templates are styled with design tokens instead of the Tailwind palette, and every Tailwind class carries the
+`dh:` prefix (`dh:bg-dh-card` instead of `bg-white dark:bg-slate-900`, `dh:text-dh-muted-foreground` instead of
+`text-slate-500 dark:text-slate-400`, `dh:hidden dh:sm:inline` instead of `hidden sm:inline`…), so that the viewer
+never meets the classes of an application that uses Tailwind too. The precompiled `app.css` only holds the prefixed
+classes of the bundle templates: an overridden template that keeps 7.x classes (`slate-*`, `indigo-*`, `emerald-*`…)
+or unprefixed ones loses their styles. Rewrite it with prefixed classes and the `dh-*` tokens (see
+[Theme](docs/viewer/index.md#-theme)).
+
+`app.css` no longer resets the whole page: its reset only reaches the content of the viewer pages, under the
+`<div data-dh-auditor-viewer>` element in which each page of `Audit/` now wraps the content of its `dh_auditor_content`
+block (keep it in an overridden page), and the `<twig:DhAuditor:History>` component. The layout of the bundle loads
+`bundles/dhauditor/preflight.css` too; in a layout that extends the one of the application, the rest of the page keeps
+the reset and the font of the application. The wrapping element makes the content of each page one child of the element
+that renders the `dh_auditor_content` block, which a flex or grid layout around it may need to know. An application that
+compiles the viewer or the `<twig:DhAuditor:History>` component with its own Tailwind does it in a stylesheet of its own
+that imports `src/Resources/assets/css/viewer.css` with the `dh` prefix (see
 [Styling](docs/customization/histories.md#styling)).
 
 Route names are unchanged, but the history of an object reads other query parameters: `type` → `what`,

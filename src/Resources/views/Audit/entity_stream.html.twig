@@ -6,33 +6,35 @@
 {% set id = null %}
 
 {% block dh_auditor_content %}
+{#- Root of the viewer content: bounds the reset of viewer.css, for a layout that extends the one of the application -#}
+<div data-dh-auditor-viewer>
     {# Sub-header - sticky with back link #}
     {% block dh_auditor_header %}
-    <div class="-mx-4 px-4 sm:-mx-6 sm:px-6 sm:sticky sm:top-16 sm:z-40 py-3 mb-4 bg-dh-background/80 backdrop-blur">
+    <div class="dh:-mx-4 dh:px-4 dh:sm:-mx-6 dh:sm:px-6 dh:sm:sticky dh:sm:top-16 dh:sm:z-40 dh:py-3 dh:mb-4 dh:bg-dh-background/80 dh:backdrop-blur">
         {# Back link #}
         <a href="{{ path('dh_auditor_list_audits') }}"
-           class="inline-flex items-center text-sm text-dh-muted-foreground hover:text-dh-foreground mb-3">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           class="dh:inline-flex dh:items-center dh:text-sm dh:text-dh-muted-foreground dh:hover:text-dh-foreground dh:mb-3">
+            <svg class="dh:w-4 dh:h-4 dh:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
             {{ 'audit.header.back_to_entities'|trans(domain='auditor') }}
         </a>
 
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div class="dh:flex dh:flex-col dh:sm:flex-row dh:sm:items-center dh:sm:justify-between">
             <div>
-                <h1 class="text-2xl font-semibold tracking-tight text-dh-foreground" title="{{ entity }}">
+                <h1 class="dh:text-2xl dh:font-semibold dh:tracking-tight dh:text-dh-foreground" title="{{ entity }}">
                     {{ dh_auditor_entity_name(entity, 2) }}
                 </h1>
-                <p class="text-sm text-dh-muted-foreground">
+                <p class="dh:text-sm dh:text-dh-muted-foreground">
                     {{ 'audit.history.actions_count'|trans({'%count%': paginator.numResults}, 'auditor') }}
                     · {{ 'audit.audit_details.most_recent'|trans(domain='auditor') }}
                 </p>
             </div>
             <form method="get" action="{{ path('dh_auditor_show_entity_stream', {entity: helper.namespaceToParam(entity), id: id}) }}"
-                  class="mt-3 grid grid-cols-2 gap-2 sm:mt-0 sm:flex sm:flex-wrap sm:items-center">
+                  class="dh:mt-3 dh:grid dh:grid-cols-2 dh:gap-2 dh:sm:mt-0 dh:sm:flex dh:sm:flex-wrap dh:sm:items-center">
                 {# Type filter #}
                 <select id="filter-type" name="type" aria-label="{{ 'audit.history.filter.what'|trans(domain='auditor') }}"
-                        class="dh-auditor-control col-span-2"
+                        class="dh-auditor-control dh:col-span-2"
                         data-dh-auditor-autosubmit>
                     <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.filter.what'|trans(domain='auditor'), '%value%': 'audit.history.filter.everything'|trans(domain='auditor')}, 'auditor') }}</option>
                     {% for type in filterOptions.types %}
@@ -44,7 +46,7 @@
 
                 {# User filter #}
                 <select id="filter-user" name="user" aria-label="{{ 'audit.history.filter.who'|trans(domain='auditor') }}"
-                        class="dh-auditor-control col-span-2"
+                        class="dh-auditor-control dh:col-span-2"
                         data-dh-auditor-autosubmit>
                     <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.filter.who'|trans(domain='auditor'), '%value%': 'audit.history.filter.everyone'|trans(domain='auditor')}, 'auditor') }}</option>
                     {% if filterOptions.hasAnonymous %}
@@ -62,7 +64,7 @@
                 {# Changed field filter #}
                 {% if filterOptions.fields|length > 0 %}
                     <select id="filter-field" name="field" aria-label="{{ 'audit.history.field'|trans(domain='auditor') }}"
-                            class="dh-auditor-control col-span-2"
+                            class="dh-auditor-control dh:col-span-2"
                             data-dh-auditor-autosubmit>
                         <option value="">{{ 'audit.history.filter.option'|trans({'%filter%': 'audit.history.field'|trans(domain='auditor'), '%value%': 'audit.history.filter.all_fields'|trans(domain='auditor')}, 'auditor') }}</option>
                         {% for field in filterOptions.fields %}
@@ -73,17 +75,17 @@
                     </select>
                 {% endif %}
                 {% for name, label in {'date_from': 'from', 'date_to': 'to'} %}
-                    <label class="flex flex-col gap-1 text-xs text-dh-muted-foreground sm:flex-row sm:items-center sm:gap-1.5" for="filter-{{ name }}">
+                    <label class="dh:flex dh:flex-col dh:gap-1 dh:text-xs dh:text-dh-muted-foreground dh:sm:flex-row dh:sm:items-center dh:sm:gap-1.5" for="filter-{{ name }}">
                         {{ ('audit.filter.' ~ label)|trans(domain='auditor') }}
-                        <input type="date" id="filter-{{ name }}" name="{{ name }}" value="{{ filters[name] }}" class="dh-auditor-control w-full sm:w-auto">
+                        <input type="date" id="filter-{{ name }}" name="{{ name }}" value="{{ filters[name] }}" class="dh-auditor-control dh:w-full dh:sm:w-auto">
                     </label>
                 {% endfor %}
-                <button type="submit" class="dh-auditor-control dh-auditor-control-primary col-span-2">
+                <button type="submit" class="dh-auditor-control dh-auditor-control-primary dh:col-span-2">
                     {{ 'audit.filter.apply'|trans(domain='auditor') }}
                 </button>
                 {% if filters.date_from or filters.date_to %}
                     <a href="{{ path('dh_auditor_show_entity_stream', {entity: helper.namespaceToParam(entity), id: id, type: filters.type, user: filters.user, field: filters.field}) }}"
-                       class="col-span-2 inline-flex h-8 items-center px-2 text-sm text-dh-link underline underline-offset-4 hover:decoration-2">
+                       class="dh:col-span-2 dh:inline-flex dh:h-8 dh:items-center dh:px-2 dh:text-sm dh:text-dh-link dh:underline dh:underline-offset-4 dh:hover:decoration-2">
                         {{ 'audit.filter.clear_period'|trans(domain='auditor') }}
                     </a>
                 {% endif %}
@@ -94,8 +96,8 @@
 
     {# Actions of the page #}
     <section data-dh-auditor-actions>
-        <label class="inline-flex items-center gap-1.5 text-sm text-dh-muted-foreground">
-            <input type="checkbox" class="size-4 accent-dh-primary" data-dh-auditor-expand-all>
+        <label class="dh:inline-flex dh:items-center dh:gap-1.5 dh:text-sm dh:text-dh-muted-foreground">
+            <input type="checkbox" class="dh:size-4 dh:accent-dh-primary" data-dh-auditor-expand-all>
             {{ 'audit.history.expand_all'|trans(domain='auditor') }}
         </label>
         {{ include('@DHAuditor/History/_actions.html.twig', {rows: rows, more: null}, with_context = false) }}
@@ -106,4 +108,5 @@
         {{ pager.render(helper.namespaceToParam(entity), id, paginator, filters) }}
     {% endblock dh_auditor_pager %}
 
+</div>
 {% endblock dh_auditor_content %}

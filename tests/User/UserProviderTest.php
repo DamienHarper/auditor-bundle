@@ -8,8 +8,12 @@ use DH\Auditor\Provider\Doctrine\DoctrineProvider;
 use DH\Auditor\Tests\Provider\Doctrine\Fixtures\Entity\Standard\Blog\Post;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\ReaderTrait;
 use DH\Auditor\Tests\Provider\Doctrine\Traits\Schema\BlogSchemaSetupTrait;
+use DH\Auditor\User\User;
+use DH\AuditorBundle\User\UserProvider;
 use PHPUnit\Framework\Attributes\Small;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\InMemoryUser;
@@ -68,6 +72,72 @@ final class UserProviderTest extends WebTestCase
         // get history
         $entries = $this->createReader()->createQuery(Post::class)->execute();
         $this->assertSame('dark.vador', $entries[0]->username);
+        $this->assertSame(InMemoryUser::class, $entries[0]->userFqdn, 'user_fqdn is the class of the user of the token.');
+        $this->assertNull($entries[0]->impersonator);
+    }
+
+    public function testTheUserOfTheToken(): void
+    {
+        $tokenStorage = new TokenStorage();
+        $tokenStorage->setToken(new UsernamePasswordToken($this->createUser('dark.vador'), 'main'));
+
+        $user = new UserProvider($tokenStorage)();
+
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertSame('dark.vador', $user->username);
+        $this->assertSame(InMemoryUser::class, $user->fqdn);
+        $this->assertNull($user->impersonator);
+    }
+
+    public function testTheImpersonatorIsKeptApart(): void
+    {
+        $original = new UsernamePasswordToken($this->createUser('dark.vador'), 'main');
+        $tokenStorage = new TokenStorage();
+        $tokenStorage->setToken(new SwitchUserToken($this->createUser('second_user'), 'main', [], $original));
+
+        $user = new UserProvider($tokenStorage)();
+
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertSame('second_user', $user->username, 'The impersonated user is blamed, without suffix.');
+        $this->assertSame(InMemoryUser::class, $user->fqdn);
+        $this->assertInstanceOf(User::class, $user->impersonator);
+        $this->assertNull($user->impersonator->identifier, 'A user without getId() has no identifier.');
+        $this->assertSame('dark.vador', $user->impersonator->username);
+        $this->assertSame(InMemoryUser::class, $user->impersonator->fqdn);
+    }
+
+    public function testTheIdOfTheUsers(): void
+    {
+        $original = new UsernamePasswordToken($this->createUserWithId(7, 'admin'), 'main');
+        $tokenStorage = new TokenStorage();
+        $tokenStorage->setToken(new SwitchUserToken($this->createUserWithId(42, 'alice'), 'main', [], $original));
+
+        $user = new UserProvider($tokenStorage)();
+
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertSame('42', $user->identifier, 'getId() gives the identifier of the user.');
+        $this->assertSame('7', $user->impersonator?->identifier, 'getId() gives the identifier of the impersonator.');
+    }
+
+    public function testAUserWithANullId(): void
+    {
+        $tokenStorage = new TokenStorage();
+        $tokenStorage->setToken(new UsernamePasswordToken($this->createUserWithId(null, 'alice'), 'main'));
+
+        $this->assertSame('', new UserProvider($tokenStorage)()?->identifier, 'A null id gives an empty identifier.');
+    }
+
+    public function testNoUserWhenTheTokenStorageFails(): void
+    {
+        $tokenStorage = $this->createStub(TokenStorageInterface::class);
+        $tokenStorage->method('getToken')->willThrowException(new \RuntimeException('No session'));
+
+        $this->assertNull(new UserProvider($tokenStorage)());
+    }
+
+    public function testNoUserWithoutToken(): void
+    {
+        $this->assertNull(new UserProvider(new TokenStorage())());
     }
 
     public function testBlameImpersonator(): void
@@ -96,12 +166,38 @@ final class UserProviderTest extends WebTestCase
 
         // get history
         $entries = $this->createReader()->createQuery(Post::class)->execute();
-        $this->assertSame('second_user[impersonator dark.vador]', $entries[0]->username);
+        $this->assertSame('second_user', $entries[0]->username);
+        $this->assertSame(['username' => 'dark.vador', 'fqdn' => InMemoryUser::class], $entries[0]->impersonator, 'The impersonator is written apart.');
     }
 
     private function createAndInitDoctrineProvider(): void
     {
         $this->provider = self::getContainer()->get(DoctrineProvider::class);
+    }
+
+    private function createUserWithId(?int $id, string $username): UserInterface
+    {
+        return new readonly class($id, $username) implements UserInterface {
+            public function __construct(
+                private ?int $id,
+                private string $username,
+            ) {}
+
+            public function getId(): ?int
+            {
+                return $this->id;
+            }
+
+            public function getUserIdentifier(): string
+            {
+                return $this->username;
+            }
+
+            public function getRoles(): array
+            {
+                return [];
+            }
+        };
     }
 
     private function createUser(string $username): UserInterface
