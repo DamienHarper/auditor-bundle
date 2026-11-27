@@ -89,9 +89,11 @@ classes of the bundle templates: an overridden template that keeps 7.x classes (
 or unprefixed ones loses their styles. Rewrite it with prefixed classes and the `dh-*` tokens (see
 [Theme](docs/viewer/index.md#-theme)).
 
-`app.css` no longer contains the reset of Tailwind (Preflight): the layout of the bundle loads
-`bundles/dhauditor/preflight.css` too, a layout that extends the one of the application keeps the reset of the
-application. An application that compiles the viewer or the `<twig:DhAuditor:History>` component with its own
+`app.css` no longer resets the whole page: its reset only reaches the content of the viewer pages, under the
+`<div data-dh-auditor-viewer>` element that each page of `Audit/` now wraps its `dh_auditor_content` block in (keep it
+in an overridden page), and the `<twig:DhAuditor:History>` component. The layout of the bundle loads
+`bundles/dhauditor/preflight.css` too; a layout that extends the one of the application keeps the reset and the font
+of the application. An application that compiles the viewer or the `<twig:DhAuditor:History>` component with its own
 Tailwind does it in a stylesheet of its own that imports `src/Resources/assets/css/viewer.css` with the `dh` prefix
 (see [Styling](docs/customization/histories.md#styling)).
 

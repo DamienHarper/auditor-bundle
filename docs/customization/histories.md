@@ -431,7 +431,9 @@ the bundle on the pages that render it, before or after yours:
 <link rel="stylesheet" href="{{ asset('bundles/dhauditor/app.css') }}">
 ```
 
-It resets nothing (no Preflight): the component keeps the font and the reset of your page. A `class` given to the
+It does not reset your page: its reset, the one of Tailwind (Preflight) cut down to what the rows need, only reaches
+the elements of the component (under its `data-dh-auditor-history` root), which looks the same with or without a reset
+of your own, in the font of your page. A `class` given to the
 component (`<twig:DhAuditor:History class="mt-4" …>`) joins the ones of its root element and is styled by your own
 stylesheet.
 

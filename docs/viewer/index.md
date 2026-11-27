@@ -487,7 +487,8 @@ templates/bundles/DHAuditorBundle/
 > `bundles/dhauditor/app.css` only contains the classes of the bundle templates, with the `dh:` prefix. An overridden
 > template styles itself with prefixed classes and the `dh-*` tokens (`dh:bg-dh-card`, see [Theme](#-theme)); a class
 > without the prefix, or that no bundle template uses, such as the 7.x `bg-slate-50` or `text-indigo-600`, has no
-> style.
+> style. An overridden page of `Audit/` keeps the `<div data-dh-auditor-viewer>` element that wraps its
+> `dh_auditor_content` block: the reset of the viewer applies under it.
 
 ### Custom Layout
 
@@ -511,10 +512,14 @@ templates/bundles/DHAuditorBundle/
 {% endblock %}
 ```
 
-`bundles/dhauditor/app.css` holds the `dh:` classes of the viewer, its tokens and its controls, and resets nothing: it
-may come before or after the stylesheets of your application, which keeps its own classes, theme and font. The
-layout of the bundle adds `bundles/dhauditor/preflight.css`, the reset of Tailwind; a layout that extends yours does
-not need it.
+`bundles/dhauditor/app.css` holds the `dh:` classes of the viewer, its tokens and its controls. It may come before
+or after the stylesheets of your application, which keeps its own classes, theme and font: the sans-serif text of the
+viewer is the one of your page, only its code and a few signs use the stacks of the `--dh-font-mono` and
+`--dh-font-sans` variables (`:root { --dh-font-sans: var(--font-sans); }` to change the latter). It does not reset
+your page either: its reset, the one of Tailwind (Preflight) cut down to what the templates need, only reaches the
+content of the pages of the viewer, under a `data-dh-auditor-viewer` element, so that the viewer looks the same with
+or without a reset of your own. The layout of the bundle adds `bundles/dhauditor/preflight.css`, the whole Preflight
+of Tailwind; a layout that extends yours does not need it.
 
 > [!WARNING]
 > The rules of the viewer sit in the cascade layers of Tailwind (`base`, `components`, `utilities`). A rule of your
