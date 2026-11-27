@@ -87,11 +87,11 @@ final class AuditViewerUrlGenerator
     /**
      * Returns the URL of the page grouping every change made in one database transaction
      * ($entry->transactionId), optionally opened from the history of an object ("FQCN:id"), which offers the previous and
-     * next actions of that history.
+     * next actions of that history. Null for an entry without transaction id.
      */
-    public function generateTransactionUrl(string $transactionId, int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH, ?string $root = null): ?string
+    public function generateTransactionUrl(?string $transactionId, int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH, ?string $root = null): ?string
     {
-        if ('' === $transactionId || !$this->isViewerAvailable()) {
+        if (null === $transactionId || '' === $transactionId || !$this->isViewerAvailable()) {
             return null;
         }
 
@@ -99,9 +99,10 @@ final class AuditViewerUrlGenerator
     }
 
     /**
-     * Returns the URL of the activity timeline of one user ($entry->userId, the recorded blame_id).
+     * Returns the URL of the activity timeline of one user ($entry->userId, the recorded blame_id). Null for an
+     * anonymous entry.
      */
-    public function generateUserUrl(int|string $userId, int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    public function generateUserUrl(int|string|null $userId, int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
         if ('' === (string) $userId || !$this->isViewerAvailable()) {
             return null;

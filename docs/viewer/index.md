@@ -412,7 +412,8 @@ entity class in its URLs.
 ```
 
 Each function returns `null` when the viewer cannot show the page: viewer disabled, auditor
-disabled, entity not audited, or entity not persisted yet. Access rights are not checked: combine
+disabled, entity not audited, entity not persisted yet, or an entry without user (anonymous change) or without
+transaction id. Access rights are not checked: combine
 the link with `dh_auditor_is_viewable()` to show it only to users allowed to open it.
 
 ```twig

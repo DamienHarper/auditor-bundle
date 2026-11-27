@@ -186,9 +186,8 @@ Secure it in two layers:
 
 Link to the viewer from your pages instead of building route parameters: Twig `dh_auditor_entity_url(post)`,
 `dh_auditor_transaction_url(entry.transactionId)`, `dh_auditor_user_url(entry.userId)` (they return `null` when the
-viewer cannot show the page; combine with `dh_auditor_is_viewable(post)` for access), or the autowirable
-`DH\AuditorBundle\Viewer\AuditViewerUrlGenerator` service. The user and transaction functions do not accept null:
-guard anonymous entries (`entry.userId ? dh_auditor_user_url(entry.userId)`). Override templates under
+viewer cannot show the page, or for an anonymous entry; combine with `dh_auditor_is_viewable(post)` for access), or
+the autowirable `DH\AuditorBundle\Viewer\AuditViewerUrlGenerator` service. Override templates under
 `templates/bundles/DHAuditorBundle/`: their Tailwind classes carry the `dh:` prefix and use the `dh-*` design tokens
 (`dh:bg-dh-card`). The precompiled `app.css` only holds the `dh:` classes the bundle templates use: a class they do not
 use (`dh:bg-red-500`) has no style, and unprefixed or 7.x classes neither. Keep the `<div data-dh-auditor-viewer>`
@@ -352,5 +351,3 @@ bin/console audit:schema:update --force       # needed with separate storage dat
   exist in 8.x.
 - Expecting scheduled pruning without `retention.schedule`, `symfony/scheduler` + `symfony/messenger` +
   `dragonmantank/cron-expression`, and a running `messenger:consume scheduler_dh_auditor_retention`.
-- Calling `dh_auditor_user_url(entry.userId)` or `dh_auditor_transaction_url(entry.transactionId)` on an entry
-  without user or transaction id: a `TypeError`, not `null`.
