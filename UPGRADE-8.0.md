@@ -81,13 +81,19 @@ must be rewritten from the new ones:
 - `Audit/entry.html.twig` is removed: the comparison page renders its changes like the action details, with the
   `text_change()` and `related()` macros of `History/_macros.html.twig`.
 
-The templates are styled with design tokens instead of the Tailwind palette (`bg-dh-card` instead of
-`bg-white dark:bg-slate-900`, `text-dh-muted-foreground` instead of `text-slate-500 dark:text-slate-400`…). The
-precompiled `app.css` only holds the classes of the bundle templates: an overridden template that keeps 7.x classes
-(`slate-*`, `indigo-*`, `emerald-*`…) loses their styles. Rewrite it with the `dh-*` tokens (see
-[Theme](docs/viewer/index.md#-theme)). An application that compiles the `<twig:DhAuditor:History>` component with its
-own Tailwind imports `src/Resources/assets/css/theme.css` (see
-[Styling](docs/customization/histories.md#styling)).
+The templates are styled with design tokens instead of the Tailwind palette, and every Tailwind class carries the
+`dh:` prefix (`dh:bg-dh-card` instead of `bg-white dark:bg-slate-900`, `dh:text-dh-muted-foreground` instead of
+`text-slate-500 dark:text-slate-400`, `dh:hidden dh:sm:inline` instead of `hidden sm:inline`…), so that the viewer
+never meets the classes of an application that uses Tailwind too. The precompiled `app.css` only holds the prefixed
+classes of the bundle templates: an overridden template that keeps 7.x classes (`slate-*`, `indigo-*`, `emerald-*`…)
+or unprefixed ones loses their styles. Rewrite it with prefixed classes and the `dh-*` tokens (see
+[Theme](docs/viewer/index.md#-theme)).
+
+`app.css` no longer contains the reset of Tailwind (Preflight): the layout of the bundle loads
+`bundles/dhauditor/preflight.css` too, a layout that extends the one of the application keeps the reset of the
+application. An application that compiles the viewer or the `<twig:DhAuditor:History>` component with its own
+Tailwind does it in a stylesheet of its own that imports `src/Resources/assets/css/viewer.css` with the `dh` prefix
+(see [Styling](docs/customization/histories.md#styling)).
 
 Route names are unchanged, but the history of an object reads other query parameters: `type` → `what`,
 `user` → `who`, `date_from` / `date_to` → `when` (last 7, 30 or 90 days), `page` → the `after` cursor.

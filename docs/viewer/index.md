@@ -260,11 +260,16 @@ php bin/console audit:cache:clear --entity="App\Entity\User"
 ## 🎨 Theme
 
 The viewer follows the conventions of [shadcn/ui](https://ui.shadcn.com) without depending on it: every color of its
-templates is a CSS variable, exposed to Tailwind as a `dh-*` color (`bg-dh-card`, `text-dh-muted-foreground`,
-`border-dh-input`…). The palette is neutral and the primary button near black; the teal of the auditor logo marks the activity
+templates is a CSS variable, exposed to Tailwind as a `dh-*` color (`dh:bg-dh-card`, `dh:text-dh-muted-foreground`,
+`dh:border-dh-input`…). The palette is neutral and the primary button near black; the teal of the auditor logo marks the activity
 bars, the selected revision and the focus ring (`dh-brand`), and, darkened to read as text, the links, the time of an
 action and the current page (`dh-link`). The icon of an action tells its meaning: green for a creation, red for a
-deletion, blue for any other change. Controls share one size (`h-8`, `rounded-lg`), badges are pills (`h-5`).
+deletion, blue for any other change. Controls share one size (`dh:h-8`, `dh:rounded-lg`), badges are pills (`dh:h-5`).
+
+Every Tailwind class of the templates carries the `dh:` prefix (`dh:hidden`, `dh:sm:inline`, `dh:hover:bg-dh-accent`…),
+and the theme variables of Tailwind in `bundles/dhauditor/app.css` are `--dh-*` ones (`--dh-spacing`, `--dh-text-sm`…):
+none of them meets a class or a variable of an application that uses Tailwind too, whatever the order of the
+stylesheets on the page.
 
 The tokens live in `src/Resources/assets/css/theme.css`, already compiled into `bundles/dhauditor/app.css`:
 
@@ -308,7 +313,7 @@ The toggle works without page reload and persists across sessions.
 The viewer carries no inline script, event handler attribute nor `style` attribute: its behaviours (theme, sort of
 the entity list, filters submitted on change, technical mode, copy of the raw diffs, older actions loaded in place)
 live in `bundles/dhauditor/viewer.js`, loaded by `layout.html.twig`, and
-its styles in `bundles/dhauditor/app.css`. It therefore works under a strict policy such as
+its styles in `bundles/dhauditor/app.css` and `bundles/dhauditor/preflight.css`. It therefore works under a strict policy such as
 `script-src 'self'; style-src 'self'`, as long as the bundle assets are served from your origin
 (`bin/console assets:install`).
 
@@ -479,9 +484,10 @@ templates/bundles/DHAuditorBundle/
 > `dh_auditor_is_diff_leaf(node)` Twig function for the nodes inside a deep diff.
 
 > [!IMPORTANT]
-> `bundles/dhauditor/app.css` only contains the classes of the bundle templates. An overridden template styles
-> itself with the `dh-*` tokens (see [Theme](#-theme)); a class that no bundle template uses any more, such as the
-> 7.x `bg-slate-50` or `text-indigo-600`, has no style.
+> `bundles/dhauditor/app.css` only contains the classes of the bundle templates, with the `dh:` prefix. An overridden
+> template styles itself with prefixed classes and the `dh-*` tokens (`dh:bg-dh-card`, see [Theme](#-theme)); a class
+> without the prefix, or that no bundle template uses, such as the 7.x `bg-slate-50` or `text-indigo-600`, has no
+> style.
 
 ### Custom Layout
 
@@ -491,6 +497,7 @@ templates/bundles/DHAuditorBundle/
 
 {% block stylesheets %}
     {{ parent() }}
+    {# the viewer, without Preflight: the reset of your application applies #}
     <link rel="stylesheet" href="{{ asset('bundles/dhauditor/app.css') }}">
     {# behaviours of the viewer (theme, sort, filters, technical mode, copy, older actions); loaded without defer so
        that the theme applies before the first paint #}
@@ -503,6 +510,18 @@ templates/bundles/DHAuditorBundle/
     </div>
 {% endblock %}
 ```
+
+`bundles/dhauditor/app.css` holds the `dh:` classes of the viewer, its tokens and its controls, and resets nothing: it
+may come before or after the stylesheets of your application, which keeps its own classes, theme and font. The
+layout of the bundle adds `bundles/dhauditor/preflight.css`, the reset of Tailwind; a layout that extends yours does
+not need it.
+
+> [!WARNING]
+> The rules of the viewer sit in the cascade layers of Tailwind (`base`, `components`, `utilities`). A rule of your
+> application outside any layer (Bootstrap, plain CSS such as `select { padding: … }`) wins over all of them on the
+> elements it matches, whatever the order of the stylesheets. Put such rules in a layer, or scope them out of the
+> viewer. An application that compiles the viewer itself (see [Styling](../customization/histories.md#styling))
+> does not load `app.css` as well.
 
 ### Template Blocks
 
@@ -523,7 +542,8 @@ Install assets:
 bin/console assets:install
 ```
 
-Assets are installed to `public/bundles/dhauditor/`.
+Assets are installed to `public/bundles/dhauditor/`: `app.css` (the viewer), `preflight.css` (the reset of
+Tailwind, loaded by the layout of the bundle only) and `viewer.js` (its behaviours).
 
 ## 🌍 Translations
 

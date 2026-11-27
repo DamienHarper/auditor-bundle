@@ -187,9 +187,11 @@ make cs-fix args='fix --dry-run'
 
 ### 🎨 Assets
 
-The viewer styles are written with Tailwind CSS 4 (`src/Resources/assets/css/app.css`), and the compiled
-`src/Resources/public/app.css` is **committed**. After a template or CSS change that uses new classes, rebuild it
-and commit the result:
+The viewer styles are written with Tailwind CSS 4 (`src/Resources/assets/css/`: `viewer.css` for the tokens, the
+controls and the bars, `app.css` and `preflight.css` as entry points), and the compiled `src/Resources/public/app.css`
+and `src/Resources/public/preflight.css` are **committed**. Every Tailwind class of the templates carries the `dh:`
+prefix (`dh:flex`, `dh:sm:inline`, `dh:hover:bg-dh-accent`…): a class without it is not compiled, and a test fails
+on it. After a template or CSS change that uses new classes, rebuild the assets and commit the result:
 
 ```bash
 make build-assets
