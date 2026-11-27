@@ -318,6 +318,25 @@ final class DHAuditorBundleTest extends KernelTestCase
         $this->assertTrue($configuration->isCompressionEnabled(), '"compression" is passed to the DoctrineProvider configuration.');
     }
 
+    public function testMaskSecretIsPassedToTheDoctrineProvider(): void
+    {
+        self::bootKernel(['config' => static function (TestKernel $kernel): void {
+            $kernel->setClearCacheAfterShutdown(false);
+            $kernel->addTestBundle(DoctrineBundle::class);
+            $kernel->addTestBundle(SecurityBundle::class);
+            $kernel->addTestBundle(TwigBundle::class);
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/dh_auditor.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/mask_secret.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/doctrine.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/security.yaml');
+        }]);
+
+        $configuration = self::getContainer()->get(DoctrineProviderConfiguration::class);
+        Assert::assertInstanceOf(DoctrineProviderConfiguration::class, $configuration);
+
+        $this->assertSame('a-mask-secret-of-at-least-32-bytes', $configuration->getMaskSecret(), '"mask_secret" is passed to the DoctrineProvider configuration.');
+    }
+
     #[\Override]
     protected static function getKernelClass(): string
     {
