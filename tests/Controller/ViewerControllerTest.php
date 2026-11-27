@@ -54,6 +54,10 @@ final class ViewerControllerTest extends WebTestCase
         $this->client = self::createClient();
         $this->client->disableReboot();
 
+        // the overview caches the counts of actions in cache.app, a file pool kept across the tests of a run: a test
+        // that adds an action would otherwise leave its counts to the next one
+        self::getContainer()->get('cache.app')->clear();
+
         // provider with 1 em for both storage and auditing
         $this->createAndInitDoctrineProvider();
 
