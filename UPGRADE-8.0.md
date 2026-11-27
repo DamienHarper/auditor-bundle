@@ -89,9 +89,9 @@ classes of the bundle templates: an overridden template that keeps 7.x classes (
 or unprefixed ones loses their styles. Rewrite it with prefixed classes and the `dh-*` tokens (see
 [Theme](docs/viewer/index.md#-theme)).
 
-`app.css` no longer resets the whole page: its reset only reaches the content of the viewer pages, under the `<div
-data-dh-auditor-viewer>` element in which each page of `Audit/` now wraps the content of its `dh_auditor_content` block
-(keep it in an overridden page), and the `<twig:DhAuditor:History>` component. The layout of the bundle loads
+`app.css` no longer resets the whole page: its reset only reaches the content of the viewer pages, under the
+`<div data-dh-auditor-viewer>` element in which each page of `Audit/` now wraps the content of its `dh_auditor_content`
+block (keep it in an overridden page), and the `<twig:DhAuditor:History>` component. The layout of the bundle loads
 `bundles/dhauditor/preflight.css` too; in a layout that extends the one of the application, the rest of the page keeps
 the reset and the font of the application. The wrapping element makes the content of each page one child of the element
 that renders the `dh_auditor_content` block, which a flex or grid layout around it may need to know. An application that

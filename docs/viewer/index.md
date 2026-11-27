@@ -487,8 +487,8 @@ templates/bundles/DHAuditorBundle/
 > `bundles/dhauditor/app.css` only contains the classes of the bundle templates, with the `dh:` prefix. An overridden
 > template styles itself with prefixed classes and the `dh-*` tokens (`dh:bg-dh-card`, see [Theme](#-theme)); a class
 > without the prefix, or that no bundle template uses, such as the 7.x `bg-slate-50` or `text-indigo-600`, has no
-> style. An overridden page of `Audit/` keeps the `<div data-dh-auditor-viewer>` element that wraps its
-> `dh_auditor_content` block: the reset of the viewer applies under it.
+> style. An overridden page of `Audit/` keeps the `<div data-dh-auditor-viewer>` element that wraps the content of
+> its `dh_auditor_content` block: the reset of the viewer applies under it.
 
 ### Custom Layout
 
