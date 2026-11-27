@@ -40,6 +40,7 @@ dh_auditor:
             full_snapshot_on_remove: false  # Record every audited field of removed entities (opt-in)
             batch_size: 0                   # Multi-row INSERTs for audit entries (0: one INSERT per entry)
             compression: false              # Compress diffs/extra_data columns (MariaDB only)
+            mask_secret: ~                  # Secret of the #[Mask(strategy: MaskStrategy::KeyedHash)] fields (32 bytes min.)
             skip_disabled_entities: false   # No audit table for entities disabled by their configuration
             viewer: false
             retention:
@@ -434,6 +435,25 @@ uncompressed columns without losing data.
 > [!NOTE]
 > See the [DoctrineProvider configuration](https://github.com/DamienHarper/auditor-doctrine-provider/blob/main/docs/providers/doctrine/configuration.md)
 > for details.
+
+### mask_secret
+
+| Type             | Default | Description                                                              |
+|------------------|---------|--------------------------------------------------------------------------|
+| `string \| null` | `null`  | Secret of the `#[Mask(strategy: MaskStrategy::KeyedHash)]` fields, at least 32 bytes |
+
+Keys the HMAC-SHA256 stored instead of the value of a field marked with `#[Mask(strategy: MaskStrategy::KeyedHash)]` (see
+[Attributes](attributes.md#-mask)). A flush that writes a keyed hash without it throws.
+
+```yaml
+dh_auditor:
+    providers:
+        doctrine:
+            mask_secret: '%env(AUDIT_MASK_SECRET)%'
+```
+
+Changing the secret changes the hashes recorded from then on: the entries recorded before can no longer be matched
+with the new ones.
 
 ### skip_disabled_entities
 

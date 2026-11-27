@@ -53,7 +53,7 @@ composer agent-qa          # agent-rector + agent-cs-fix + agent-phpstan
 make tests php=8.5                       # PHPUnit in Docker (PHP 8.4–8.6, Symfony 8.1–8.2); no db option
 make tests args='--filter=ViewerControllerTest'
 make qa                                  # rector + cs-fix + phpstan in Docker
-make build-assets                        # rebuild src/Resources/public/app.css (Tailwind, host PHP)
+make build-assets                        # rebuild src/Resources/public/app.css and preflight.css (Tailwind, host PHP)
 make help                                # all targets and options
 ```
 
@@ -78,7 +78,7 @@ work from a worktree (`make -C .claude/worktrees/<name> tests`).
 `DHAuditorBundle` (`src/DHAuditorBundle.php`) extends `AbstractBundle`: the `dh_auditor` configuration tree is in `configure()` and the service wiring in `loadExtension()` — there is no `DependencyInjection/Configuration.php` nor Extension class.
 
 - Root keys: `enabled`, `timezone`, `user_provider`, `security_provider`, `role_checker`, `extra_data_provider`, `providers`.
-- `providers.doctrine`: `table_prefix`, `table_suffix`, `ignored_columns`, `ignored_columns_resolver` / `root_resolver` / `entity_label_resolver` / `read_scope` (service IDs set by method calls, see `CALLABLE_SERVICE_OPTIONS`), `entities` (with `roles.view`, `retention` and `roots`), `storage_services`, `auditing_services`, `viewer` (off by default; `page_size`, `activity_graph`), `retention` (`schedule`, `default_max_age`), `storage_mapper`.
+- `providers.doctrine`: `table_prefix`, `table_suffix`, `ignored_columns`, `ignored_columns_resolver` / `root_resolver` / `entity_label_resolver` / `read_scope` (service IDs set by method calls, see `CALLABLE_SERVICE_OPTIONS`), `entities` (with `roles.view`, `retention` and `roots`), `storage_services`, `auditing_services`, `viewer` (off by default; `page_size`, `activity_graph`), `retention` (`schedule`, `default_max_age`), `storage_mapper`, `mask_secret` (passed through to the provider, keys `#[Mask(strategy: MaskStrategy::KeyedHash)]`).
 - The `DoctrineProvider` service is tagged `dh_auditor.provider` and aliased `dh_auditor.provider.doctrine`.
 
 Compiler passes (`src/DependencyInjection/Compiler/`): `DoctrineMiddlewareCompilerPass` adds the auditor DBAL middleware to each auditing connection, `RegisterDoctrineListenersCompilerPass` declares the provider's `DoctrineSubscriber` as a lazy Doctrine listener of those connections (the provider then attaches no listener itself, so flushes made before anything builds it are audited; when an auditing entity manager does not use its DoctrineBundle connection's event manager, the pass logs it and leaves the runtime attachment), `RegisterProvidersCompilerPass` registers the providers on `Auditor`, `RegisterDiffLabelResolversCompilerPass` collects the `DiffLabelResolverInterface` services (service ID = FQCN), `RegisterChangeDescribersCompilerPass` gives `HistoryPhraser` a locator of the `#[AsChangeDescriber]` services.
@@ -110,7 +110,7 @@ Compiler passes (`src/DependencyInjection/Compiler/`): `DoctrineMiddlewareCompil
 ### Templates and assets
 
 - Plain Twig in `src/Resources/views/` (`layout.html.twig`, `Audit/*.html.twig`, `History/*.html.twig`: one row per action in `History/_row.html.twig`), overridable under `templates/bundles/DHAuditorBundle/`. No Stimulus nor AssetMapper; one optional Twig component (`Component/History.html.twig`), which renders the `History/` row partials outside the viewer: they link through the viewer URL functions, never `path()`.
-- Tailwind CSS 4: source `src/Resources/assets/css/app.css`, compiled `src/Resources/public/app.css` **committed**. After a template or CSS change that uses new classes, run `make build-assets` and commit the compiled file.
+- Tailwind CSS 4 with the `dh` prefix: every Tailwind class of the templates (macros and class strings included) is written `dh:…` (`dh:hidden dh:sm:inline`, `dh:bg-dh-card`, `dh:group`), so that it never meets the classes of a host application; `ViewerControllerTest::testViewerClassesCarryThePrefix` and `HistoryTest::testClassesCarryThePrefix` fail on an unprefixed class. Sources in `src/Resources/assets/css/`: `viewer.css` (tokens of `theme.css`, `@source` of the views, a reset bounded to `[data-dh-auditor-viewer]` (inside the `dh_auditor_content` block of each `Audit/` page, around its content) and `[data-dh-auditor-history]`, controls, bars; importable by an application), entry points `app.css` (no global Preflight, loadable next to a host stylesheet) and `preflight.css` (loaded by the bundle layout only). The compiled `src/Resources/public/app.css` and `preflight.css` are **committed**: after a template or CSS change that uses new classes, run `make build-assets` and commit them.
 - JSON deep diffs: templates must use `entry.isDeepDiff(field)` and `dh_auditor_is_diff_leaf(node)`, not key checks. Association links use `dh_auditor_is_viewable()`.
 
 ## Testing conventions

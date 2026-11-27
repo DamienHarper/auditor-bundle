@@ -1,0 +1,9 @@
+/*
+ * Preflight of Tailwind CSS (public/preflight.css), for the whole page, loaded by the layout of the bundle only: app.css
+ * only resets the content of the viewer (see viewer.css), so that a layout that extends the one of the application
+ * leaves the rest of its page as it is.
+ */
+
+@layer theme, base;
+@import "tailwindcss/theme.css" layer(theme) prefix(dh);
+@import "tailwindcss/preflight.css" layer(base);

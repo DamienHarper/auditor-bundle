@@ -427,19 +427,39 @@ them with a Turbo Stream for instance. The attribute is absent while the history
 
 ### Styling
 
-The component renders the rows of the viewer, styled with Tailwind CSS. With Tailwind 4 in your application, add the
-bundle templates to the sources of its stylesheet (the path below is relative to `assets/styles/app.css`):
+The component renders the rows of the viewer, styled with Tailwind CSS classes that carry the `dh:` prefix
+(`dh:hidden`, `dh:sm:inline`…): they never meet the classes of your application. Load the precompiled stylesheet of
+the bundle on the pages that render it, before or after yours:
 
-```css
-@import "tailwindcss";
-@import "../../vendor/damienharper/auditor-bundle/src/Resources/assets/css/theme.css";
-@source "../../vendor/damienharper/auditor-bundle/src/Resources/views";
+```twig
+<link rel="stylesheet" href="{{ asset('bundles/dhauditor/app.css') }}">
 ```
 
-`theme.css` declares the `dh-*` colors the templates use (see [Theme](../viewer/index.md#-theme)), with their dark
-values under a `dark` class on an ancestor. A page that follows `prefers-color-scheme` without such a class copies the
-`.dark` block of `theme.css` into a `@media (prefers-color-scheme: dark) { :root { … } }` rule. To blend the component
-into a shadcn/ui theme, map the tokens onto yours:
+It does not reset your page: its reset, the one of Tailwind (Preflight) cut down to what the rows need, only reaches the
+elements of the component (under its `data-dh-auditor-history` root), which looks the same with or without a reset of
+your own, in the font of your page. What you render in the `element` block is left out of it: it keeps the margins,
+lists, links and controls of your page, and inherits the colors and the line height (1.5) of the component. The `title`
+and `empty` blocks sit inside a heading and a paragraph of the component, under its reset. A `class` given to the
+component (`<twig:DhAuditor:History class="mt-4" …>`) joins the ones of its root element and is styled by your own
+stylesheet.
+
+To compile the viewer with your own Tailwind 4 instead, give it a stylesheet of its own, apart from your main one: a
+Tailwind build has one prefix only. With symfonycasts/tailwind-bundle, add it to `input_css`, and load its built file
+instead of `bundles/dhauditor/app.css` (the path below is relative to `assets/styles/auditor.css`):
+
+```css
+/* assets/styles/auditor.css */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme) prefix(dh);
+@import "tailwindcss/utilities.css" layer(utilities);
+@import "../../vendor/damienharper/auditor-bundle/src/Resources/assets/css/viewer.css";
+```
+
+`viewer.css` brings the bundle templates as sources, the `dh-*` design tokens of `theme.css` (see
+[Theme](../viewer/index.md#-theme)), the form controls and the bars of the activity graph. The dark values of the
+tokens apply under a `dark` class on an ancestor. A page that follows `prefers-color-scheme` without such a class
+copies the `.dark` block of `theme.css` into a `@media (prefers-color-scheme: dark) { :root { … } }` rule. To blend
+the component into a shadcn/ui theme, map the tokens onto yours, in either way:
 
 ```css
 :root {

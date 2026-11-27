@@ -54,6 +54,10 @@ final class ViewerControllerTest extends WebTestCase
         $this->client = self::createClient();
         $this->client->disableReboot();
 
+        // the overview caches the counts of actions in cache.app, a file pool kept across the tests of a run: a test
+        // that adds an action would otherwise leave its counts to the next one
+        self::getContainer()->get('cache.app')->clear();
+
         // provider with 1 em for both storage and auditing
         $this->createAndInitDoctrineProvider();
 
@@ -701,10 +705,10 @@ final class ViewerControllerTest extends WebTestCase
 
         $this->assertResponseIsSuccessful();
         $table = $crawler->filter('section table')->first();
-        $this->assertStringContainsString('table-fixed', (string) $table->attr('class'), 'The columns do not depend on the values of the action.');
-        $this->assertStringContainsString('text-dh-foreground', (string) $table->attr('class'), 'The values take the foreground token, readable in both themes.');
+        $this->assertStringContainsString('dh:table-fixed', (string) $table->attr('class'), 'The columns do not depend on the values of the action.');
+        $this->assertStringContainsString('dh:text-dh-foreground', (string) $table->attr('class'), 'The values take the foreground token, readable in both themes.');
         $this->assertSame(
-            ['w-[14%]', 'w-[9%]', 'w-[13%]', 'w-[14%]', 'w-1/4', 'w-1/4'],
+            ['dh:w-[14%]', 'dh:w-[9%]', 'dh:w-[13%]', 'dh:w-[14%]', 'dh:w-1/4', 'dh:w-1/4'],
             $table->filter('colgroup > col')->each(static fn (Crawler $col): string => (string) $col->attr('class')),
             'The old and new values get the same room.',
         );
@@ -739,23 +743,7 @@ final class ViewerControllerTest extends WebTestCase
 
     public function testViewerHasNoInlineScript(): void
     {
-        $this->seedUserEntry(Post::class, 'timeline-user', 'timeline.user', '2026-01-01 10:00:00');
-        $this->login(['ROLE_1']);
-
-        $reader = $this->createReader();
-        $first = $reader->createQuery(Post::class)->execute()[0];
-        $revisions = $this->revisionIds(Post::class, (int) $first->objectId);
-        $object = \sprintf('%s/%s', self::POST_URL, $first->objectId);
-
-        foreach ([
-            '/audit',
-            self::POST_URL,
-            $object,
-            '/audit/user/timeline-user',
-            '/audit/transaction/'.$first->transactionId.'?root='.urlencode(Post::class.':'.$first->objectId),
-            $object.'/revisions',
-            \sprintf('%s/compare?from=%d&to=%d', $object, $revisions[0], $revisions[\count($revisions) - 1]),
-        ] as $url) {
+        foreach ($this->viewerPages() as $url) {
             $crawler = $this->client->request('GET', $url);
             $this->assertResponseIsSuccessful();
 
@@ -763,6 +751,24 @@ final class ViewerControllerTest extends WebTestCase
             $this->assertDoesNotMatchRegularExpression('/\son[a-z]+\s*=/i', $html, $url.': no event handler attribute');
             $this->assertDoesNotMatchRegularExpression('/\sstyle\s*=/i', $html, $url.': no style attribute');
             $this->assertCount(0, $crawler->filter('script:not([src])'), $url.': no inline script');
+        }
+    }
+
+    /**
+     * The classes of the templates carry the dh: prefix of the precompiled app.css, so that they never meet the
+     * classes of an application whose stylesheet is loaded on the same page (its .hidden against the sm:inline of
+     * the viewer), and one root bounds the reset of viewer.css.
+     */
+    public function testViewerClassesCarryThePrefix(): void
+    {
+        foreach ($this->viewerPages() as $url) {
+            $crawler = $this->client->request('GET', $url);
+            $this->assertResponseIsSuccessful();
+            $this->assertCount(1, $crawler->filter('main > [data-dh-auditor-viewer]'), $url.': one root bounds the reset of viewer.css');
+
+            $classes = array_merge(...$crawler->filter('[class]')->each(static fn (Crawler $node): array => preg_split('/\s+/', (string) $node->attr('class'), -1, PREG_SPLIT_NO_EMPTY) ?: []));
+            $this->assertNotEmpty($classes, $url.': the page has classes');
+            $this->assertSame([], array_values(array_unique(array_filter($classes, static fn (string $class): bool => !str_starts_with($class, 'dh:') && !str_starts_with($class, 'dh-auditor-')))), $url.': every class is prefixed');
         }
     }
 
@@ -1047,8 +1053,8 @@ final class ViewerControllerTest extends WebTestCase
         $link = $crawler->filter('section')->first()->filter('[data-dh-auditor-action] a[href^="/audit/transaction/"]')->first();
         $this->assertCount(1, $link, 'The time of a row links to its action.');
         $this->assertStringStartsWith('Action of ', (string) $link->attr('aria-label'), 'The link of the time is named after the action.');
-        $this->assertContains('after:inset-0', explode(' ', (string) $link->attr('class')), 'The link of the time stretches over the whole row.');
-        $this->assertStringContainsString('relative', (string) $link->closest('[data-dh-auditor-action]')?->attr('class'), 'The row bounds the stretched link.');
+        $this->assertContains('dh:after:inset-0', explode(' ', (string) $link->attr('class')), 'The link of the time stretches over the whole row.');
+        $this->assertStringContainsString('dh:relative', (string) $link->closest('[data-dh-auditor-action]')?->attr('class'), 'The row bounds the stretched link.');
     }
 
     public function testRecentActivityTellsTheLatestActionsWhole(): void
@@ -1240,8 +1246,8 @@ final class ViewerControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', \sprintf('%s/%d', self::POST_URL, (int) $post->getId()));
         $row = $crawler->filter('[data-dh-auditor-action]')->first();
 
-        $this->assertStringContainsString('1 other change', $row->filterXPath('.//span[contains(concat(" ", @class, " "), " sm:hidden ")]')->text(), 'Three fragments on a small screen.');
-        $this->assertStringNotContainsString('other change', $row->filterXPath('.//span[contains(concat(" ", @class, " "), " sm:inline ")]')->text(), 'The whole phrase otherwise.');
+        $this->assertStringContainsString('1 other change', $row->filterXPath('.//span[contains(concat(" ", @class, " "), " dh:sm:hidden ")]')->text(), 'Three fragments on a small screen.');
+        $this->assertStringNotContainsString('other change', $row->filterXPath('.//span[contains(concat(" ", @class, " "), " dh:sm:inline ")]')->text(), 'The whole phrase otherwise.');
     }
 
     public function testUserPageFilters(): void
@@ -1806,6 +1812,30 @@ final class ViewerControllerTest extends WebTestCase
             $row['transaction_id'] = 'period-'.$index; // an action of its own
             $connection->insert($table, $row);
         }
+    }
+
+    /**
+     * @return list<string> one URL per page of the viewer, each one with content
+     */
+    private function viewerPages(): array
+    {
+        $this->seedUserEntry(Post::class, 'timeline-user', 'timeline.user', '2026-01-01 10:00:00');
+        $this->login(['ROLE_1']);
+
+        $reader = $this->createReader();
+        $first = $reader->createQuery(Post::class)->execute()[0];
+        $revisions = $this->revisionIds(Post::class, (int) $first->objectId);
+        $object = \sprintf('%s/%s', self::POST_URL, $first->objectId);
+
+        return [
+            '/audit',
+            self::POST_URL,
+            $object,
+            '/audit/user/timeline-user',
+            '/audit/transaction/'.$first->transactionId.'?root='.urlencode(Post::class.':'.$first->objectId),
+            $object.'/revisions',
+            \sprintf('%s/compare?from=%d&to=%d', $object, $revisions[0], $revisions[\count($revisions) - 1]),
+        ];
     }
 
     /**

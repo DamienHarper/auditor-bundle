@@ -3,28 +3,30 @@
 {% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
 
 {% block dh_auditor_content %}
-    <div class="mb-6 mt-4">
-        <h1 class="text-2xl font-semibold tracking-tight">{{ 'audit.home.title'|trans(domain='auditor') }}</h1>
-        <p class="text-sm text-dh-muted-foreground">{{ 'audit.home.subtitle'|trans(domain='auditor') }}</p>
+{#- Root of the viewer content: bounds the reset of viewer.css, for a layout that extends the one of the application -#}
+<div data-dh-auditor-viewer>
+    <div class="dh:mb-6 dh:mt-4">
+        <h1 class="dh:text-2xl dh:font-semibold dh:tracking-tight">{{ 'audit.home.title'|trans(domain='auditor') }}</h1>
+        <p class="dh:text-sm dh:text-dh-muted-foreground">{{ 'audit.home.subtitle'|trans(domain='auditor') }}</p>
     </div>
 
-    <section class="rounded-xl border border-dh-border bg-dh-card p-4">
-        <h2 class="text-sm font-semibold">{{ 'audit.home.recent_activity'|trans(domain='auditor') }}</h2>
+    <section class="dh:rounded-xl dh:border dh:border-dh-border dh:bg-dh-card dh:p-4">
+        <h2 class="dh:text-sm dh:font-semibold">{{ 'audit.home.recent_activity'|trans(domain='auditor') }}</h2>
         {% if activity is empty %}
-            <p class="py-6 text-center text-sm text-dh-muted-foreground">{{ 'audit.history.no_actions'|trans(domain='auditor') }}</p>
+            <p class="dh:py-6 dh:text-center dh:text-sm dh:text-dh-muted-foreground">{{ 'audit.history.no_actions'|trans(domain='auditor') }}</p>
         {% else %}
-            <ol class="divide-y divide-dh-border">
+            <ol class="dh:divide-y dh:divide-dh-border">
                 {% for row in activity %}
                     {{ include('@DHAuditor/History/_row.html.twig', {row: row, date_format: 'datetime', shorten: 1, details: false}, with_context = false) }}
                 {% endfor %}
             </ol>
-            <p class="mt-2 text-xs text-dh-muted-foreground">{{ 'audit.home.bulk_note'|trans(domain='auditor') }}</p>
+            <p class="dh:mt-2 dh:text-xs dh:text-dh-muted-foreground">{{ 'audit.home.bulk_note'|trans(domain='auditor') }}</p>
         {% endif %}
     </section>
 
-    <section class="mt-8">
-        <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 class="text-sm font-semibold">{{ 'audit.home.audited'|trans(domain='auditor') }}</h2>
+    <section class="dh:mt-8">
+        <div class="dh:mb-3 dh:flex dh:flex-col dh:gap-3 dh:sm:flex-row dh:sm:items-center dh:sm:justify-between">
+            <h2 class="dh:text-sm dh:font-semibold">{{ 'audit.home.audited'|trans(domain='auditor') }}</h2>
             <select id="sort-entities"
                     aria-label="{{ 'audit.sort.label'|trans(domain='auditor') }}"
                     class="dh-auditor-control"
@@ -37,38 +39,39 @@
             </select>
         </div>
 
-        <div class="overflow-x-auto rounded-xl border border-dh-border bg-dh-card">
-            <table class="w-full text-left text-sm">
-                <thead class="bg-dh-muted/50 text-xs text-dh-muted-foreground">
+        <div class="dh:overflow-x-auto dh:rounded-xl dh:border dh:border-dh-border dh:bg-dh-card">
+            <table class="dh:w-full dh:text-left dh:text-sm">
+                <thead class="dh:bg-dh-muted/50 dh:text-xs dh:text-dh-muted-foreground">
                     <tr>
-                        <th class="px-4 py-2 font-medium">{{ 'audit.home.entity'|trans(domain='auditor') }}</th>
-                        <th class="px-4 py-2 text-right font-medium">{{ 'audit.home.actions'|trans(domain='auditor') }}</th>
-                        {% if activityGraphEnabled %}<th class="hidden px-4 py-2 font-medium sm:table-cell">{{ 'audit.activity_graph.title'|trans(domain='auditor') }}</th>{% endif %}
-                        <th class="px-4 py-2 font-medium">{{ 'audit.audit_details.last_activity'|trans(domain='auditor') }}</th>
+                        <th class="dh:px-4 dh:py-2 dh:font-medium">{{ 'audit.home.entity'|trans(domain='auditor') }}</th>
+                        <th class="dh:px-4 dh:py-2 dh:text-right dh:font-medium">{{ 'audit.home.actions'|trans(domain='auditor') }}</th>
+                        {% if activityGraphEnabled %}<th class="dh:hidden dh:px-4 dh:py-2 dh:font-medium dh:sm:table-cell">{{ 'audit.activity_graph.title'|trans(domain='auditor') }}</th>{% endif %}
+                        <th class="dh:px-4 dh:py-2 dh:font-medium">{{ 'audit.audit_details.last_activity'|trans(domain='auditor') }}</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-dh-border">
+                <tbody class="dh:divide-y dh:divide-dh-border">
                     {% for entity, data in audited %}
-                        <tr class="hover:bg-dh-accent/50" data-dh-auditor-entity="{{ entity }}">
-                            <td class="px-4 py-2">
-                                <a href="{{ path('dh_auditor_show_entity_stream', {entity: helper.namespaceToParam(entity)}) }}" class="font-medium hover:underline" title="{{ entity }}">{{ dh_auditor_entity_name(entity, 2) }}</a>
-                                <div class="font-mono text-xs text-dh-muted-foreground">{{ entity }}</div>
+                        <tr class="dh:hover:bg-dh-accent/50" data-dh-auditor-entity="{{ entity }}">
+                            <td class="dh:px-4 dh:py-2">
+                                <a href="{{ path('dh_auditor_show_entity_stream', {entity: helper.namespaceToParam(entity)}) }}" class="dh:font-medium dh:hover:underline" title="{{ entity }}">{{ dh_auditor_entity_name(entity, 2) }}</a>
+                                <div class="dh:font-mono dh:text-xs dh:text-dh-muted-foreground">{{ entity }}</div>
                             </td>
-                            <td class="px-4 py-2 text-right tabular-nums">{{ data.count|number_format }}</td>
+                            <td class="dh:px-4 dh:py-2 dh:text-right dh:tabular-nums">{{ data.count|number_format }}</td>
                             {% if activityGraphEnabled %}
-                                <td class="hidden px-4 py-2 sm:table-cell">
+                                <td class="dh:hidden dh:px-4 dh:py-2 dh:sm:table-cell">
                                     {% if data.activityGraph is defined %}
                                         {{ helper.activity_sparkline(data.activityGraph, data.activityGraphRaw|default([]), activityGraphDays, data.activityGraphDates, entity) }}
                                     {% endif %}
                                 </td>
                             {% endif %}
-                            <td class="whitespace-nowrap px-4 py-2 text-dh-muted-foreground">{{ data.latest.createdAt|time_ago }}</td>
+                            <td class="dh:whitespace-nowrap dh:px-4 dh:py-2 dh:text-dh-muted-foreground">{{ data.latest.createdAt|time_ago }}</td>
                         </tr>
                     {% else %}
-                        <tr><td colspan="4" class="px-4 py-8 text-center text-dh-muted-foreground">{{ 'audit.home.no_audits'|trans(domain='auditor') }}</td></tr>
+                        <tr><td colspan="4" class="dh:px-4 dh:py-8 dh:text-center dh:text-dh-muted-foreground">{{ 'audit.home.no_audits'|trans(domain='auditor') }}</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </section>
+</div>
 {% endblock dh_auditor_content %}
