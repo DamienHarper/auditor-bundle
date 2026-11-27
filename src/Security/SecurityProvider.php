@@ -8,6 +8,7 @@ use DH\Auditor\Security\SecurityProviderInterface;
 use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
 use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\IpUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -17,6 +18,7 @@ final readonly class SecurityProvider implements SecurityProviderInterface
         private RequestStack $requestStack,
         #[Autowire(service: 'security.firewall.map')]
         private FirewallMap $firewallMap,
+        private bool $anonymizeIp = false,
     ) {}
 
     public function __invoke(): array
@@ -29,6 +31,10 @@ final readonly class SecurityProvider implements SecurityProviderInterface
             $firewallConfig = $this->firewallMap->getFirewallConfig($request);
 
             $clientIp = $request->getClientIp();
+            if ($this->anonymizeIp && null !== $clientIp) {
+                $clientIp = IpUtils::anonymize($clientIp);
+            }
+
             $firewallName = $firewallConfig instanceof FirewallConfig ? $firewallConfig->getName() : null;
         }
 

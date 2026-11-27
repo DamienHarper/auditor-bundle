@@ -20,6 +20,7 @@ use DH\AuditorBundle\Controller\ViewerController;
 use DH\AuditorBundle\DHAuditorBundle;
 use DH\AuditorBundle\Event\ConsoleEventSubscriber;
 use DH\AuditorBundle\Messenger\BlameContextMiddleware;
+use DH\AuditorBundle\Security\SecurityProvider;
 use DH\AuditorBundle\Tests\Fixtures\Provider\StubProviderA;
 use DH\AuditorBundle\Tests\Fixtures\User\CustomUserProvider;
 use DH\AuditorBundle\User\ConsoleUserProvider;
@@ -41,6 +42,8 @@ use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
@@ -318,6 +321,16 @@ final class DHAuditorBundleTest extends KernelTestCase
         $this->assertTrue($configuration->isCompressionEnabled(), '"compression" is passed to the DoctrineProvider configuration.');
     }
 
+    public function testTheClientIpIsKeptByDefault(): void
+    {
+        $this->assertSame('192.168.1.42', $this->clientIpOfTheSecurityProvider([]));
+    }
+
+    public function testAnonymizeIpIsPassedToTheSecurityProvider(): void
+    {
+        $this->assertSame('192.168.1.0', $this->clientIpOfTheSecurityProvider([__DIR__.'/Fixtures/Resources/config/anonymize_ip.yaml']));
+    }
+
     #[\Override]
     protected static function getKernelClass(): string
     {
@@ -335,5 +348,35 @@ final class DHAuditorBundleTest extends KernelTestCase
         $kernel->handleOptions($options);
 
         return $kernel;
+    }
+
+    /**
+     * Client IP that the security provider of a kernel booted with $configs gives for a request from 192.168.1.42.
+     *
+     * @param list<string> $configs
+     */
+    private function clientIpOfTheSecurityProvider(array $configs): ?string
+    {
+        self::bootKernel(['config' => static function (TestKernel $kernel) use ($configs): void {
+            $kernel->setClearCacheAfterShutdown(false);
+            $kernel->addTestBundle(DoctrineBundle::class);
+            $kernel->addTestBundle(SecurityBundle::class);
+            $kernel->addTestBundle(TwigBundle::class);
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/dh_auditor.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/doctrine.yaml');
+            $kernel->addTestConfig(__DIR__.'/Fixtures/Resources/config/security.yaml');
+            foreach ($configs as $config) {
+                $kernel->addTestConfig($config);
+            }
+        }]);
+
+        $requestStack = self::getContainer()->get('request_stack');
+        Assert::assertInstanceOf(RequestStack::class, $requestStack);
+        $requestStack->push(Request::create('/', server: ['REMOTE_ADDR' => '192.168.1.42']));
+
+        $securityProvider = self::getContainer()->get(SecurityProvider::class);
+        Assert::assertInstanceOf(SecurityProvider::class, $securityProvider);
+
+        return $securityProvider()[0];
     }
 }

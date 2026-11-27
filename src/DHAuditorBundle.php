@@ -146,6 +146,9 @@ class DHAuditorBundle extends AbstractBundle
             ->scalarNode('security_provider')
             ->defaultValue('dh_auditor.security_provider')
             ->end()
+            ->booleanNode('anonymize_ip')
+            ->defaultFalse()
+            ->end()
             ->scalarNode('role_checker')
             ->defaultValue('dh_auditor.role_checker')
             ->end()
@@ -167,7 +170,7 @@ class DHAuditorBundle extends AbstractBundle
     }
 
     /**
-     * @param array{enabled: bool, timezone: string, user_provider: string, security_provider: string, role_checker: string, extra_data_provider: ?string, providers: array<string, array<string, mixed>>} $config
+     * @param array{enabled: bool, timezone: string, user_provider: string, security_provider: string, anonymize_ip: bool, role_checker: string, extra_data_provider: ?string, providers: array<string, array<string, mixed>>} $config
      */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
@@ -175,8 +178,9 @@ class DHAuditorBundle extends AbstractBundle
 
         // Auditor core configuration
         $auditorConfig = $config;
-        unset($auditorConfig['providers']);
+        unset($auditorConfig['providers'], $auditorConfig['anonymize_ip']);
         $builder->setParameter('dh_auditor.configuration', $auditorConfig);
+        $builder->setParameter('dh_auditor.anonymize_ip', $config['anonymize_ip']);
 
         // Auditor Configuration service
         $configDefinition = $services->set(Configuration::class)
@@ -494,7 +498,7 @@ class DHAuditorBundle extends AbstractBundle
         $services->set(ConsoleUserProvider::class);
 
         // SecurityProvider (autowired)
-        $services->set(SecurityProvider::class)->autowire();
+        $services->set(SecurityProvider::class)->autowire()->arg('$anonymizeIp', '%dh_auditor.anonymize_ip%');
         $services->alias('dh_auditor.security_provider', SecurityProvider::class);
 
         // RoleChecker (autowired)
