@@ -53,6 +53,14 @@ final class ViewerUrlExtensionTest extends KernelTestCase
         );
     }
 
+    public function testNullForAnEntryWithoutUserOrTransaction(): void
+    {
+        $context = ['entry' => ['userId' => null, 'transactionId' => null]];
+
+        $this->assertSame('none', $this->render("{% set url = dh_auditor_user_url(entry.userId) %}{{ url is null ? 'none' : url }}", $context));
+        $this->assertSame('none', $this->render("{% set url = dh_auditor_transaction_url(entry.transactionId) %}{{ url is null ? 'none' : url }}", $context));
+    }
+
     /**
      * @param array<string, mixed> $context
      */

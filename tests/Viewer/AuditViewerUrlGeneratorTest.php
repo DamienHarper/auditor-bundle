@@ -96,6 +96,15 @@ final class AuditViewerUrlGeneratorTest extends KernelTestCase
         $this->assertNull($generator->generateUserUrl(''));
     }
 
+    public function testNoUrlForAnEntryWithoutUserOrTransaction(): void
+    {
+        $generator = $this->getGenerator();
+
+        // Entry::$userId is null for an anonymous change, Entry::$transactionId for a legacy row without hash
+        $this->assertNull($generator->generateUserUrl(null));
+        $this->assertNull($generator->generateTransactionUrl(null));
+    }
+
     public function testTransactionUrlKeepsTheHistoryItWasOpenedFrom(): void
     {
         $generator = $this->getGenerator();
