@@ -1,5 +1,5 @@
 ---
-description: "Configure audited Doctrine ORM entities with the #[Auditable], #[Ignore], #[Security], #[DiffLabel] and #[AuditRoot] attributes, combined with YAML."
+description: "Configure audited Doctrine ORM entities with the #[Auditable], #[Ignore], #[Mask], #[Security], #[DiffLabel] and #[AuditRoot] attributes, combined with YAML."
 ---
 
 # Entity Attributes

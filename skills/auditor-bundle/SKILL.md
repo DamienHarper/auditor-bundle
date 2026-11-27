@@ -70,6 +70,7 @@ dh_auditor:
             ignored_columns_resolver: ~             # service ID: (object $entity): list<string>
             root_resolver: ~                        # service ID, see Histories
             entity_label_resolver: ~                # service ID (EntityLabelResolverInterface)
+            mask_secret: ~                          # key of #[Mask(strategy: MaskStrategy::KeyedHash)], 32 bytes min., e.g. '%env(AUDIT_MASK_SECRET)%'
             read_scope: ~                           # service ID: (Query $query, string $entity): void
             storage_services: ['@doctrine.orm.default_entity_manager']
             auditing_services: ['@doctrine.orm.default_entity_manager']
@@ -119,7 +120,9 @@ use DH\Auditor\Attribute\Auditable;
 use DH\Auditor\Attribute\AuditRoot;
 use DH\Auditor\Attribute\DiffLabel;
 use DH\Auditor\Attribute\Ignore;
+use DH\Auditor\Attribute\Mask;
 use DH\Auditor\Attribute\Security;
+use DH\Auditor\Masking\MaskStrategy;
 
 #[ORM\Entity]
 #[Auditable(maxAge: 'P1Y')]                  // enabled: true by default; maxAge / maxEntries = retention
@@ -133,6 +136,10 @@ class User
     private ?string $password = null;
 
     #[ORM\Column]
+    #[Mask(strategy: MaskStrategy::KeyedHash)]  // change shown in the viewer as a hash; needs mask_secret
+    private string $email = '';                 // plain #[Mask]: shown as "***"
+
+    #[ORM\Column]
     #[DiffLabel(resolver: CategoryLabelResolver::class)] // class implementing DH\Auditor\Contract\DiffLabelResolverInterface
     private int $categoryId;
 }
@@ -143,6 +150,8 @@ class User
   `#[Auditable(enabled: false)]`; `#[Ignore]` adds to `ignored_columns`; YAML `roles` override `#[Security]` scope by
   scope; YAML `retention` overrides `maxAge` / `maxEntries` key by key; YAML `roots` add to `#[AuditRoot]`.
 - Diff label resolvers are autoconfigured services (service ID = FQCN).
+- `#[Mask]` keeps a change without its values (unlike `#[Ignore]`); it cannot go on an identifier or a collection.
+  The entity label (`__toString()` or `entity_label_resolver`) is shown in clear: never build it from a masked field.
 
 Docs: https://damienharper.github.io/auditor-docs/auditor-bundle/configuration/attributes ·
 https://damienharper.github.io/auditor-docs/auditor-bundle/customization/diff-label-resolvers
@@ -179,11 +188,14 @@ Link to the viewer from your pages instead of building route parameters: Twig `d
 `dh_auditor_transaction_url(entry.transactionId)`, `dh_auditor_user_url(entry.userId)` (all return `null` when the
 viewer cannot show the page; combine with `dh_auditor_is_viewable(post)` for access), or the autowirable
 `DH\AuditorBundle\Viewer\AuditViewerUrlGenerator` service. Override templates under
-`templates/bundles/DHAuditorBundle/`. The viewer has no inline script (`bundles/dhauditor/viewer.js`), so it works
+`templates/bundles/DHAuditorBundle/`: their Tailwind classes carry the `dh:` prefix and use the `dh-*` design tokens
+(`dh:bg-dh-card`), since the precompiled `app.css` only holds those; keep the `<div data-dh-auditor-viewer>` wrapper
+of an overridden `Audit/` page (the viewer reset only reaches inside it). The viewer has no inline script (`bundles/dhauditor/viewer.js`), so it works
 under a strict CSP once assets are installed.
 
 To show a history inside your own pages: `composer require symfony/ux-twig-component`, then
-`<twig:DhAuditor:History :subject="post" />`. Options: `limit` (default `page_size`) counts **actions** per page,
+`<twig:DhAuditor:History :subject="post" />`, and load `{{ asset('bundles/dhauditor/app.css') }}` on that page (its
+classes are `dh:`-prefixed and its reset stays inside the component). Options: `limit` (default `page_size`) counts **actions** per page,
 except with a `grouper` that has a key of its own (an action may then span several transactions): it then counts
 entries, more when needed to keep the last action whole. Also `with` (your own `HistoryElementInterface` elements,
 sorted with `SortKey::of()`), `attached`, `details` (`true` or a role), `cursorParameter` (default `dh_auditor_after`).
