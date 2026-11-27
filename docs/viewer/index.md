@@ -1,3 +1,7 @@
+---
+description: "Enable, secure and customize the audit log viewer of auditor-bundle: routes, pages, export, activity graph, access control, URL generation and templates."
+---
+
 # Audit Viewer
 
 > **Web interface for browsing audit logs**
@@ -211,7 +215,7 @@ dh_auditor:
 | Layout   | Description                                                       |
 |----------|-------------------------------------------------------------------|
 | `bottom` | Sparkline displayed below the entity info, full width (default)  |
-| `inline` | Compact sparkline displayed in the header row, next to event count |
+| `inline` | Compact sparkline displayed in the header row, next to the number of actions |
 
 ### Caching
 

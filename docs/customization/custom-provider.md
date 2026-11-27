@@ -1,3 +1,7 @@
+---
+description: Register a custom auditor provider in a Symfony application with the dh_auditor.provider service tag, alone or next to the Doctrine ORM provider.
+---
+
 # Custom Audit Provider
 
 > **Register a custom provider with the bundle using a single service tag**

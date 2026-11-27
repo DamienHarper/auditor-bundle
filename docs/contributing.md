@@ -1,3 +1,7 @@
+---
+description: "Contribute to auditor-bundle: report bugs, set up the development environment, run the tests and QA tools locally or with Docker, open pull requests."
+---
+
 # Contributing
 
 > **Help improve auditor-bundle**

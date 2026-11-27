@@ -1,0 +1,21 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "auditor-bundle",
+  "description": "Symfony bundle for the auditor PHP audit log library: automatic Doctrine ORM audit logs, entity change history and an audit log viewer. Formerly DoctrineAuditBundle.",
+  "folders": [
+    "docs",
+    "skills"
+  ],
+  "excludeFiles": [
+    "contributing.md"
+  ],
+  "rules": [
+    "auditor-bundle was formerly DoctrineAuditBundle: the DH\\DoctrineAuditBundle namespace no longer exists, use DH\\AuditorBundle and DH\\Auditor.",
+    "The bundle configuration lives under the dh_auditor key (config/packages/dh_auditor.yaml)."
+  ],
+  "previousVersions": [
+    {
+      "branch": "7.x"
+    }
+  ]
+}

@@ -1,3 +1,7 @@
+---
+description: "Overview of the customizable services of auditor-bundle: user provider, security provider, role checker, console user tracking and other extension points."
+---
+
 # Customization
 
 > **Customize the bundle's providers for your specific needs**

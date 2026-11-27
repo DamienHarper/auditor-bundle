@@ -1,3 +1,7 @@
+---
+description: Find the upgrade guide between auditor-bundle major versions, the supported versions and the audit table schema commands to run after an upgrade.
+---
+
 # Upgrade Guide
 
 > **Navigate between major versions of auditor-bundle**

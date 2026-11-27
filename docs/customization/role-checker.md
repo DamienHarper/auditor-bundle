@@ -1,3 +1,7 @@
+---
+description: "Control who can view the audit logs of each entity in the audit log viewer and export with roles.view, #[Security] or a custom RoleCheckerInterface service."
+---
+
 # Role Checker
 
 > **Customize access control for the audit viewer**

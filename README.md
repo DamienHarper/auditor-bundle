@@ -11,6 +11,41 @@
 
 `auditor-bundle`, formerly known as `DoctrineAuditBundle` integrates `auditor` library into any Symfony 8.1+ application.
 
+It records every insert, update, removal and many-to-many change of your Doctrine ORM entities in
+audit tables, with who made the change, when and how, and ships a web viewer to browse the history.
+It pulls in [`auditor`](https://github.com/DamienHarper/auditor) (the core) and
+[`auditor-doctrine-provider`](https://github.com/DamienHarper/auditor-doctrine-provider) (the Doctrine ORM provider).
+
+
+## Quick start
+```bash
+composer require damienharper/auditor-bundle
+```
+
+```yaml
+# config/packages/dh_auditor.yaml
+dh_auditor:
+    providers:
+        doctrine:
+            entities:
+                App\Entity\Post: ~
+```
+
+Then create the audit tables (`bin/console doctrine:migrations:diff` and `doctrine:migrations:migrate`).
+See the [installation guide](https://damienharper.github.io/auditor-docs/auditor-bundle/getting-started/installation)
+for the viewer routes and the full configuration.
+
+
+## Using an AI coding agent?
+This package ships an [Agent Skill](https://agentskills.io) in [`skills/auditor-bundle/`](skills/auditor-bundle/SKILL.md)
+(`vendor/damienharper/auditor-bundle/skills/` once installed) describing the bundle. The copy in `vendor/` matches your installed version; the marketplace serves the current major.
+With Claude Code:
+```
+/plugin marketplace add DamienHarper/auditor
+/plugin install auditor-bundle@auditor
+```
+The documentation is also available as [llms.txt](https://damienharper.github.io/auditor-docs/llms.txt).
+
 
 ## Demo
 You can try out this bundle by cloning its companion demo app. 
@@ -18,7 +53,7 @@ Follow instructions at [auditor-bundle-demo](https://github.com/DamienHarper/aud
 
 
 ## Official Documentation
-`auditor-bundle` official documentation can be found [here](https://damienharper.github.io/auditor-docs/auditor-bundle/).
+`auditor-bundle` official documentation can be found [here](https://damienharper.github.io/auditor-docs/auditor-bundle).
 
 
 ## Version Information
@@ -38,7 +73,7 @@ See [UPGRADE-8.0.md](UPGRADE-8.0.md) for upgrade instructions from 7.x to 8.0 (t
 
 
 ## Usage
-Once [installed](https://damienharper.github.io/auditor-docs/auditor-bundle/getting-started/installation) and [configured](https://damienharper.github.io/auditor-docs/auditor-bundle/configuration/), any database change 
+Once [installed](https://damienharper.github.io/auditor-docs/auditor-bundle/getting-started/installation) and [configured](https://damienharper.github.io/auditor-docs/auditor-bundle/configuration), any database change 
 affecting audited entities will be logged to audit logs automatically.
 Also, running schema update or similar will automatically setup audit logs for every 
 new auditable entity.

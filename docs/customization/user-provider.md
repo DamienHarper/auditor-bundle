@@ -1,3 +1,7 @@
+---
+description: Customize how the user who made a change is identified in audit entries with a UserProviderInterface service, and how console commands are blamed.
+---
+
 # User Provider
 
 > **Customize how the current user is identified in audit entries**

@@ -2,6 +2,7 @@
 id: index
 title: Introduction
 slug: /
+description: Overview of auditor-bundle, the Symfony bundle that records Doctrine ORM entity changes in audit tables, with its features and version compatibility.
 ---
 
 # auditor-bundle

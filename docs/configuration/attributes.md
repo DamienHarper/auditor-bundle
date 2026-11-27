@@ -1,3 +1,7 @@
+---
+description: "Configure audited Doctrine ORM entities with the #[Auditable], #[Ignore], #[Mask], #[Security], #[DiffLabel] and #[AuditRoot] attributes, combined with YAML."
+---
+
 # Entity Attributes
 
 > **Configure auditing with PHP 8 attributes**

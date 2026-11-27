@@ -1,3 +1,7 @@
+---
+description: Install auditor-bundle in a Symfony application, with its requirements, Composer install, bundle and route registration, audit tables and assets.
+---
+
 # Installation
 
 > **Install auditor-bundle in your Symfony application**
