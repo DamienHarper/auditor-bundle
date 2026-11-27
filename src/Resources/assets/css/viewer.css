@@ -19,6 +19,91 @@
 /* Dark mode: under a .dark class on an ancestor (set on <html> by the viewer), not the media query */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/** Reset of the viewer content, after Preflight of Tailwind CSS: app.css leaves out Preflight, which would reset the
+    whole page of the application, so a page without a reset of its own (no Tailwind, no Reboot…) would show the
+    viewer with the margins, list indents and box model of the browser. These rules only reach the elements inside a
+    page of the viewer ([data-dh-auditor-viewer]) or the <twig:DhAuditor:History> component
+    ([data-dh-auditor-history]), with no specificity (:where), so that any class wins over them. The font stays the
+    one of the page. **/
+@layer base {
+    :where([data-dh-auditor-viewer], [data-dh-auditor-viewer] *, [data-dh-auditor-history], [data-dh-auditor-history] *),
+    :where([data-dh-auditor-viewer], [data-dh-auditor-viewer] *, [data-dh-auditor-history], [data-dh-auditor-history] *)::before,
+    :where([data-dh-auditor-viewer], [data-dh-auditor-viewer] *, [data-dh-auditor-history], [data-dh-auditor-history] *)::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        border: 0 solid;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) {
+        line-height: 1.5;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(h1, h2, h3, h4, h5, h6) {
+        font-size: inherit;
+        font-weight: inherit;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(a) {
+        color: inherit;
+        text-decoration: inherit;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(b, strong) {
+        font-weight: bolder;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(code, kbd, samp, pre) {
+        font-family: var(--dh-font-mono);
+        font-size: 1em;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(small) {
+        font-size: 80%;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(table) {
+        text-indent: 0;
+        border-color: inherit;
+        border-collapse: collapse;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(ol, ul, menu) {
+        list-style: none;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(summary) {
+        display: list-item;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(img, svg, video, canvas) {
+        display: block;
+        vertical-align: middle;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(img, video) {
+        max-width: 100%;
+        height: auto;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(button, input, select, optgroup, textarea) {
+        font: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+        border-radius: 0;
+        background-color: transparent;
+        opacity: 1;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(button, input:where([type='button'], [type='reset'], [type='submit'])) {
+        appearance: button;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where([hidden]:not([hidden='until-found'])) {
+        display: none !important;
+    }
+}
+
 /** Form controls of the viewer (filters, sort, buttons next to them): one height, one look. Only their focus ring
     transitions, so that they switch at once with the theme instead of flashing. The vertical padding is reset:
     the base rule of the application for fields (@tailwindcss/forms…) would otherwise clip their text. **/

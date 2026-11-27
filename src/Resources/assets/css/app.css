@@ -1,7 +1,8 @@
 /*
  * Precompiled stylesheet of the viewer (public/app.css): the dh:-prefixed utilities of the bundle templates, the
- * design tokens and the controls, without Preflight. It resets nothing in the page, so that an application loads it
- * before or after its own stylesheets. The layout of the bundle adds preflight.css.
+ * design tokens, the controls and a reset bounded to the viewer content (see viewer.css), without the global
+ * Preflight. It resets nothing else in the page, so that an application loads it before or after its own
+ * stylesheets. The layout of the bundle adds preflight.css.
  */
 
 @layer theme, base, components, utilities;

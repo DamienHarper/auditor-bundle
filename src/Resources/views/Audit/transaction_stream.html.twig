@@ -7,6 +7,8 @@
 {% block title %}{{ 'audit.action.title'|trans({'%date%': item.createdAt|format_datetime('medium', 'short', timezone: false)}, 'auditor') }} · auditor{% endblock %}
 
 {% block dh_auditor_content %}
+{#- Root of the viewer content: bounds the reset of viewer.css, for a layout that extends the one of the application -#}
+<div data-dh-auditor-viewer>
     <nav class="dh:mb-3 dh:text-sm dh:text-dh-muted-foreground" aria-label="breadcrumb">
         <a href="{{ path('dh_auditor_list_audits') }}" class="dh:hover:underline">{{ 'audit.header.home'|trans(domain='auditor') }}</a>
         {% if root %}
@@ -152,4 +154,5 @@
             {% endfor %}
         </div>
     </section>
+</div>
 {% endblock %}

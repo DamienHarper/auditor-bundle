@@ -753,13 +753,14 @@ final class ViewerControllerTest extends WebTestCase
     /**
      * The classes of the templates carry the dh: prefix of the precompiled app.css, so that they never meet the
      * classes of an application whose stylesheet is loaded on the same page (its .hidden against the sm:inline of
-     * the viewer).
+     * the viewer), and one root bounds the reset of viewer.css.
      */
     public function testViewerClassesCarryThePrefix(): void
     {
         foreach ($this->viewerPages() as $url) {
             $crawler = $this->client->request('GET', $url);
             $this->assertResponseIsSuccessful();
+            $this->assertCount(1, $crawler->filter('main > [data-dh-auditor-viewer]'), $url.': one root bounds the reset of viewer.css');
 
             $classes = array_merge(...$crawler->filter('[class]')->each(static fn (Crawler $node): array => preg_split('/\s+/', (string) $node->attr('class'), -1, PREG_SPLIT_NO_EMPTY) ?: []));
             $this->assertNotEmpty($classes, $url.': the page has classes');

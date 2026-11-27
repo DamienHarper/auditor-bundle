@@ -4,6 +4,8 @@
 {% import '@DHAuditor/History/_macros.html.twig' as history %}
 
 {% block dh_auditor_content %}
+{#- Root of the viewer content: bounds the reset of viewer.css, for a layout that extends the one of the application -#}
+<div data-dh-auditor-viewer>
     {% set entity_param = helper.namespaceToParam(entity) %}
 
     {% block dh_auditor_header %}
@@ -133,4 +135,5 @@
             </p>
         {% endif %}
     </div>
+</div>
 {% endblock dh_auditor_content %}

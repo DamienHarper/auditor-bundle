@@ -3,6 +3,8 @@
 {% import '@DHAuditor/Audit/helpers/helper.html.twig' as helper %}
 
 {% block dh_auditor_content %}
+{#- Root of the viewer content: bounds the reset of viewer.css, for a layout that extends the one of the application -#}
+<div data-dh-auditor-viewer>
     <div class="dh:mb-6 dh:mt-4">
         <h1 class="dh:text-2xl dh:font-semibold dh:tracking-tight">{{ 'audit.home.title'|trans(domain='auditor') }}</h1>
         <p class="dh:text-sm dh:text-dh-muted-foreground">{{ 'audit.home.subtitle'|trans(domain='auditor') }}</p>
@@ -71,4 +73,5 @@
             </table>
         </div>
     </section>
+</div>
 {% endblock dh_auditor_content %}

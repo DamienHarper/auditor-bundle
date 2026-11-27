@@ -4,6 +4,8 @@
 {% import '@DHAuditor/Audit/helpers/pager.html.twig' as pager %}
 
 {% block dh_auditor_content %}
+{#- Root of the viewer content: bounds the reset of viewer.css, for a layout that extends the one of the application -#}
+<div data-dh-auditor-viewer>
     {% set entity_param = helper.namespaceToParam(entity) %}
     {% set route_params = {entity: entity_param, id: id} %}
     {% if selected is not null %}
@@ -84,4 +86,5 @@
     {% block dh_auditor_pager %}
         {{ pager.render_route('dh_auditor_select_revisions', route_params, paginator) }}
     {% endblock dh_auditor_pager %}
+</div>
 {% endblock dh_auditor_content %}

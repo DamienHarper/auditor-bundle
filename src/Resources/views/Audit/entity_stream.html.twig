@@ -6,6 +6,8 @@
 {% set id = null %}
 
 {% block dh_auditor_content %}
+{#- Root of the viewer content: bounds the reset of viewer.css, for a layout that extends the one of the application -#}
+<div data-dh-auditor-viewer>
     {# Sub-header - sticky with back link #}
     {% block dh_auditor_header %}
     <div class="dh:-mx-4 dh:px-4 dh:sm:-mx-6 dh:sm:px-6 dh:sm:sticky dh:sm:top-16 dh:sm:z-40 dh:py-3 dh:mb-4 dh:bg-dh-background/80 dh:backdrop-blur">
@@ -106,4 +108,5 @@
         {{ pager.render(helper.namespaceToParam(entity), id, paginator, filters) }}
     {% endblock dh_auditor_pager %}
 
+</div>
 {% endblock dh_auditor_content %}

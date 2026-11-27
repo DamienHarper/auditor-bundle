@@ -8,6 +8,8 @@
 {% block title %}{{ title }} · auditor{% endblock %}
 
 {% block dh_auditor_content %}
+{#- Root of the viewer content: bounds the reset of viewer.css, for a layout that extends the one of the application -#}
+<div data-dh-auditor-viewer>
     <nav class="dh:mb-3 dh:text-sm dh:text-dh-muted-foreground" aria-label="breadcrumb">
         <a href="{{ path('dh_auditor_list_audits') }}" class="dh:hover:underline">{{ 'audit.header.home'|trans(domain='auditor') }}</a>
         <span class="dh:mx-1">/</span>
@@ -137,4 +139,5 @@
             </section>
         </aside>
     </div>
+</div>
 {% endblock %}
