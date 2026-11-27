@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}auditor{% endblock %}</title>
     {% block stylesheets %}
-        {# Preflight (reset) of Tailwind CSS, then the viewer: app.css resets nothing, a layout that extends the one of
-           the application keeps the reset of the application #}
+        {# Preflight (reset) of Tailwind CSS for the whole page, then the viewer: app.css only resets the content of the
+           viewer, so that a layout that extends the one of the application leaves the rest of its page as it is #}
         <link rel="stylesheet" href="{{ asset('bundles/dhauditor/preflight.css') }}">
         <link rel="stylesheet" href="{{ asset('bundles/dhauditor/app.css') }}">
     {% endblock %}

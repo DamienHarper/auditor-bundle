@@ -23,12 +23,13 @@
     whole page of the application, so a page without a reset of its own (no Tailwind, no Reboot…) would show the
     viewer with the margins, list indents and box model of the browser. These rules only reach the elements inside a
     page of the viewer ([data-dh-auditor-viewer]) or the <twig:DhAuditor:History> component
-    ([data-dh-auditor-history]), with no specificity (:where), so that any class wins over them. The font stays the
-    one of the page. **/
+    ([data-dh-auditor-history]), with no specificity (:where), so that any class wins over them. What the application
+    renders in an element of the component ([data-dh-auditor-element]) is left out, and the font stays the one of
+    the page. **/
 @layer base {
-    :where([data-dh-auditor-viewer], [data-dh-auditor-viewer] *, [data-dh-auditor-history], [data-dh-auditor-history] *),
-    :where([data-dh-auditor-viewer], [data-dh-auditor-viewer] *, [data-dh-auditor-history], [data-dh-auditor-history] *)::before,
-    :where([data-dh-auditor-viewer], [data-dh-auditor-viewer] *, [data-dh-auditor-history], [data-dh-auditor-history] *)::after {
+    :where([data-dh-auditor-viewer], [data-dh-auditor-viewer] *, [data-dh-auditor-history], [data-dh-auditor-history] *):not(:where([data-dh-auditor-element] *)),
+    :where([data-dh-auditor-viewer], [data-dh-auditor-viewer] *, [data-dh-auditor-history], [data-dh-auditor-history] *):not(:where([data-dh-auditor-element] *))::before,
+    :where([data-dh-auditor-viewer], [data-dh-auditor-viewer] *, [data-dh-auditor-history], [data-dh-auditor-history] *):not(:where([data-dh-auditor-element] *))::after {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
@@ -39,55 +40,57 @@
         line-height: 1.5;
     }
 
-    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(h1, h2, h3, h4, h5, h6) {
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(h1, h2, h3, h4, h5, h6):not(:where([data-dh-auditor-element] *)) {
         font-size: inherit;
         font-weight: inherit;
     }
 
-    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(a) {
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(a):not(:where([data-dh-auditor-element] *)) {
         color: inherit;
         text-decoration: inherit;
     }
 
-    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(b, strong) {
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(b, strong):not(:where([data-dh-auditor-element] *)) {
         font-weight: bolder;
     }
 
-    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(code, kbd, samp, pre) {
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(code, kbd, samp, pre):not(:where([data-dh-auditor-element] *)) {
         font-family: var(--dh-font-mono);
         font-size: 1em;
     }
 
-    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(small) {
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(small):not(:where([data-dh-auditor-element] *)) {
         font-size: 80%;
     }
 
-    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(table) {
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(table):not(:where([data-dh-auditor-element] *)) {
         text-indent: 0;
         border-color: inherit;
         border-collapse: collapse;
     }
 
-    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(ol, ul, menu) {
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(ol, ul, menu):not(:where([data-dh-auditor-element] *)) {
         list-style: none;
     }
 
-    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(summary) {
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(summary):not(:where([data-dh-auditor-element] *)) {
         display: list-item;
     }
 
-    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(img, svg, video, canvas) {
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(img, svg, video, canvas):not(:where([data-dh-auditor-element] *)) {
         display: block;
         vertical-align: middle;
     }
 
-    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(img, video) {
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(img, video):not(:where([data-dh-auditor-element] *)) {
         max-width: 100%;
         height: auto;
     }
 
-    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(button, input, select, optgroup, textarea) {
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(button, input, select, optgroup, textarea):not(:where([data-dh-auditor-element] *)) {
         font: inherit;
+        font-feature-settings: inherit;
+        font-variation-settings: inherit;
         letter-spacing: inherit;
         color: inherit;
         border-radius: 0;
@@ -95,12 +98,71 @@
         opacity: 1;
     }
 
-    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(button, input:where([type='button'], [type='reset'], [type='submit'])) {
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(button, input:where([type='button'], [type='reset'], [type='submit'])):not(:where([data-dh-auditor-element] *)) {
         appearance: button;
     }
 
-    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where([hidden]:not([hidden='until-found'])) {
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where([hidden]:not([hidden='until-found'])):not(:where([data-dh-auditor-element] *)) {
         display: none !important;
+    }
+
+    /* The date field of the filters: one rule per prefixed pseudo-element, which another engine would not know and
+       for which it would drop the whole rule */
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(input):not(:where([data-dh-auditor-element] *))::-webkit-date-and-time-value {
+        min-height: 1lh;
+        text-align: inherit;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(input):not(:where([data-dh-auditor-element] *))::-webkit-datetime-edit {
+        display: inline-flex;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(input):not(:where([data-dh-auditor-element] *))::-webkit-datetime-edit-fields-wrapper {
+        padding: 0;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(input):not(:where([data-dh-auditor-element] *))::-webkit-datetime-edit {
+        padding-block: 0;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(input):not(:where([data-dh-auditor-element] *))::-webkit-datetime-edit-year-field {
+        padding-block: 0;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(input):not(:where([data-dh-auditor-element] *))::-webkit-datetime-edit-month-field {
+        padding-block: 0;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(input):not(:where([data-dh-auditor-element] *))::-webkit-datetime-edit-day-field {
+        padding-block: 0;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(input):not(:where([data-dh-auditor-element] *))::-webkit-datetime-edit-hour-field {
+        padding-block: 0;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(input):not(:where([data-dh-auditor-element] *))::-webkit-datetime-edit-minute-field {
+        padding-block: 0;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(input):not(:where([data-dh-auditor-element] *))::-webkit-datetime-edit-second-field {
+        padding-block: 0;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(input):not(:where([data-dh-auditor-element] *))::-webkit-datetime-edit-millisecond-field {
+        padding-block: 0;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(input):not(:where([data-dh-auditor-element] *))::-webkit-datetime-edit-meridiem-field {
+        padding-block: 0;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(input):not(:where([data-dh-auditor-element] *))::-webkit-calendar-picker-indicator {
+        line-height: 1;
+    }
+
+    :where([data-dh-auditor-viewer], [data-dh-auditor-history]) :where(input):not(:where([data-dh-auditor-element] *)):-moz-ui-invalid {
+        box-shadow: none;
     }
 }
 
