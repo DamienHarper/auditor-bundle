@@ -41,6 +41,7 @@ use DH\AuditorBundle\DependencyInjection\Compiler\RegisterDiffLabelResolversComp
 use DH\AuditorBundle\DependencyInjection\Compiler\RegisterDoctrineListenersCompilerPass;
 use DH\AuditorBundle\DependencyInjection\Compiler\RegisterProvidersCompilerPass;
 use DH\AuditorBundle\Event\ConsoleEventSubscriber;
+use DH\AuditorBundle\Event\ViewerAccessListener;
 use DH\AuditorBundle\Event\ViewerEventSubscriber;
 use DH\AuditorBundle\ExtraData\ExtraDataProvider;
 use DH\AuditorBundle\History\AuthorNameResolverInterface;
@@ -509,6 +510,16 @@ class DHAuditorBundle extends AbstractBundle
         // Event listeners (using #[AsEventListener] attributes)
         $services->set(ViewerEventSubscriber::class)
             ->args([new Reference(Auditor::class), '%dh_auditor.viewer_enabled%'])
+            ->autoconfigure()
+        ;
+
+        // with MonologBundle, the requests of the viewer and of the export are logged in the "auditor" channel
+        $services->set(ViewerAccessListener::class)
+            ->args([
+                new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+                new Reference('security.token_storage', ContainerInterface::NULL_ON_INVALID_REFERENCE),
+            ])
+            ->tag('monolog.logger', ['channel' => 'auditor'])
             ->autoconfigure()
         ;
 
