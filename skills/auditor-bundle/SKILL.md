@@ -26,7 +26,7 @@ Run `composer show damienharper/auditor-bundle` (or read `composer.lock`). This 
 | auditor-bundle | auditor | auditor-doctrine-provider | PHP | Symfony | Doctrine |
 |---|---|---|---|---|---|
 | 8.x | 5.x | 2.x | >= 8.4, `ext-intl` | >= 8.1 | DBAL >= 4.6, ORM >= 3.7, DoctrineBundle 3 |
-| 7.x | 4.x (>= 4.4) | 1.x (>= 1.4) | >= 8.4, `ext-intl` | >= 8.1 | DBAL 4, ORM >= 3.2 |
+| 7.x | 4.x (>= 4.4 since 7.3) | 1.x (>= 1.4 since 7.3) | >= 8.4, `ext-intl` | >= 8.0 (>= 8.1 since 7.3) | DBAL 4, ORM >= 3.2 |
 
 On 7.x, do not apply 8.x-only features (phrases, histories, `audit:snapshot`, `/audit/export`, schema v2 `blame` JSON)
 without upgrading; see "Upgrading" below.
@@ -94,7 +94,7 @@ dh_auditor:
                         max_entries: ~
             viewer:                                 # or just `viewer: true`; disabled by default
                 enabled: false
-                page_size: 50                       # actions per page (revisions per page for an object; also the default limit of <twig:DhAuditor:History>)
+                page_size: 50                       # actions per page (the revisions picker counts revisions; also the default limit of <twig:DhAuditor:History>)
                 activity_graph:
                     enabled: true
                     days: 30                        # 1..30
@@ -105,7 +105,7 @@ dh_auditor:
                 default_max_age: ~                  # ISO 8601 duration for entities without a policy
 ```
 
-Rules the container enforces at build time: `ignored_columns` / `audited_columns` / `roots` are lists of strings;
+Rules the container enforces at build time: entity `ignored_columns` / `audited_columns` / `roots` are lists of strings;
 entity `retention` only accepts `max_age` / `max_entries`; the four resolver options must be service IDs;
 `retention.schedule` must be a valid cron expression and needs `symfony/scheduler` and `dragonmantank/cron-expression`
 (then run `bin/console messenger:consume scheduler_dh_auditor_retention`).
@@ -163,7 +163,7 @@ Enable it with `providers.doctrine.viewer: true` (it is off by default; when off
 
 | Route name | Path |
 |---|---|
-| `dh_auditor_export` | `/audit/export` (`format=ndjson|json|csv`, `entity`, `id`, `from`, `to`, `blame_id`, `anonymize=1`) |
+| `dh_auditor_export` | `/audit/export` (`format`: ndjson, json or csv; `entity`, `id`, `from`, `to`, `blame_id`, `anonymize=1`) |
 | `dh_auditor_list_audits` | `/audit` |
 | `dh_auditor_show_transaction_stream` | `/audit/transaction/{hash}` |
 | `dh_auditor_show_user_stream` | `/audit/user/{id}` |
@@ -177,7 +177,7 @@ Secure it in two layers:
    ```yaml
    security:
        access_control:
-           - { path: ^/audit, roles: ROLE_ADMIN }
+           - { path: ^/audit, roles: ROLE_ADMIN }    # with `prefix: /admin` on the route import: ^/admin/audit
    ```
 2. **Per entity**: `roles.view` (YAML) or `#[Security(view: [...])]`. The default `RoleChecker` grants access when no
    `view` roles are set, denies it when roles are set and no user is authenticated, and otherwise requires any one
@@ -185,12 +185,17 @@ Secure it in two layers:
    component.
 
 Link to the viewer from your pages instead of building route parameters: Twig `dh_auditor_entity_url(post)`,
-`dh_auditor_transaction_url(entry.transactionId)`, `dh_auditor_user_url(entry.userId)` (all return `null` when the
+`dh_auditor_transaction_url(entry.transactionId)`, `dh_auditor_user_url(entry.userId)` (they return `null` when the
 viewer cannot show the page; combine with `dh_auditor_is_viewable(post)` for access), or the autowirable
-`DH\AuditorBundle\Viewer\AuditViewerUrlGenerator` service. Override templates under
+`DH\AuditorBundle\Viewer\AuditViewerUrlGenerator` service. The user and transaction functions do not accept null:
+guard anonymous entries (`entry.userId ? dh_auditor_user_url(entry.userId)`). Override templates under
 `templates/bundles/DHAuditorBundle/`: their Tailwind classes carry the `dh:` prefix and use the `dh-*` design tokens
-(`dh:bg-dh-card`), since the precompiled `app.css` only holds those; keep the `<div data-dh-auditor-viewer>` wrapper
-of an overridden `Audit/` page (the viewer reset only reaches inside it). The viewer has no inline script (`bundles/dhauditor/viewer.js`), so it works
+(`dh:bg-dh-card`). The precompiled `app.css` only holds the `dh:` classes the bundle templates use: a class they do not
+use (`dh:bg-red-500`) has no style, and unprefixed or 7.x classes neither. Keep the `<div data-dh-auditor-viewer>`
+wrapper of an overridden `Audit/` page (the viewer reset only reaches inside it). A custom `layout.html.twig` that
+extends your own base must load `bundles/dhauditor/app.css` and `bundles/dhauditor/viewer.js` (without `defer`) and
+render the `dh_auditor_content` block; CSS of your application outside any `@layer` (Bootstrap…) wins over the
+viewer's. The viewer has no inline script (`bundles/dhauditor/viewer.js`), so it works
 under a strict CSP once assets are installed.
 
 To show a history inside your own pages: `composer require symfony/ux-twig-component`, then
@@ -198,7 +203,16 @@ To show a history inside your own pages: `composer require symfony/ux-twig-compo
 classes are `dh:`-prefixed and its reset stays inside the component). Options: `limit` (default `page_size`) counts **actions** per page,
 except with a `grouper` that has a key of its own (an action may then span several transactions): it then counts
 entries, more when needed to keep the last action whole. Also `with` (your own `HistoryElementInterface` elements,
-sorted with `SortKey::of()`), `attached`, `details` (`true` or a role), `cursorParameter` (default `dh_auditor_after`).
+sorted with `SortKey::of()`, rendered by the `element` block or their `__toString()`), `attached`, `details` (`true`
+or a role), `after` (cursor), `cursorParameter` (default `dh_auditor_after`; give two components on one page their
+own). Dark values apply under a `dark` class on an ancestor; wrap it in a `<turbo-frame>` to load older actions in
+place.
+
+Phrases and labels: field and entity labels come from the `dh_auditor_fields` translation domain, phrases from
+`dh_auditor_history` (ICU, `+intl-icu` files); customize them with `#[AsChangeDescriber]` services,
+`AuthorNameResolverInterface` and `ObjectUrlResolverInterface`. In Twig: `item|dh_auditor_author`,
+`item|dh_auditor_phrase` (`|dh_auditor_phrase_text` without markup), `dh_auditor_last_change(object, 'field')`,
+`dh_auditor_field_label(object, 'field')`.
 
 Docs: https://damienharper.github.io/auditor-docs/auditor-bundle/viewer ·
 https://damienharper.github.io/auditor-docs/auditor-bundle/customization/histories
@@ -206,8 +220,10 @@ https://damienharper.github.io/auditor-docs/auditor-bundle/customization/histori
 ## 6. Customize who, where and what extra
 
 All three are invokable services referenced by ID in `dh_auditor.yaml`. Defaults: `dh_auditor.user_provider`
-(Symfony token user: `getId()` if present, `getUserIdentifier()`, impersonation noted), `dh_auditor.security_provider`
-(`[client IP, firewall name]`), `dh_auditor.role_checker`.
+(Symfony token user: `getId()` if present, `getUserIdentifier()`, its class, and the impersonator on switch user),
+`dh_auditor.security_provider` (`[client IP, firewall name]`), `dh_auditor.role_checker`. During a console command
+(`messenger:consume` included) the user provider is replaced by the console one
+(`DH\AuditorBundle\User\ConsoleUserProviderInterface`, decoratable) and restored when the command ends.
 
 ```php
 use DH\Auditor\User\User;
@@ -222,7 +238,7 @@ final readonly class ApiUserProvider implements UserProviderInterface
     {
         $token = $this->tokens->getCurrentToken();
 
-        return null === $token ? null : new User($token->getClientId(), 'API: '.$token->getClientName());
+        return null === $token ? null : new User($token->getClientId(), 'API: '.$token->getClientName(), ApiClient::class); // 3rd: user class (user_fqdn)
     }
 }
 ```
@@ -256,7 +272,8 @@ final class OrderAuditExtraData
         if (Order::class !== $payload['entity'] || null === $event->entity) {
             return;
         }
-        $payload['extra_data'] = json_encode(['channel' => $event->entity->getChannel()], JSON_THROW_ON_ERROR);
+        $existing = null !== $payload['extra_data'] ? json_decode($payload['extra_data'], true, 512, JSON_THROW_ON_ERROR) : [];
+        $payload['extra_data'] = json_encode([...$existing, 'channel' => $event->entity->getChannel()], JSON_THROW_ON_ERROR); // keep the extra_data_provider's keys
         $event->setPayload($payload);
     }
 }
@@ -293,8 +310,8 @@ bin/console audit:schema:update --force       # needed with separate storage dat
 | `audit:schema:migrate` | Convert 7.x (schema v1) audit tables to v2 (`--dump-sql`, `--force`, `--convert-all`) |
 | `audit:clean` | Delete old entries (`keep` argument, ISO 8601 interval, default `P12M`; entity `max_age` policies win; `--dry-run`, `--include`, `--exclude`, `--date`, `--no-confirm`) |
 | `audit:export` | Export entries (`entity` argument, `--format`, `--id`, `--from`, `--to`, `--blame-id`, `--anonymize`, `--output`) |
-| `audit:snapshot` | Write a snapshot `insert` entry for existing rows when auditing is added to a populated database (`--all`, `--dry-run`) |
-| `audit:roots:rebuild` | Rebuild the audit root index after adding `roots` / `#[AuditRoot]` (`--entity`, `--dry-run`) |
+| `audit:snapshot` | Write a snapshot `insert` entry for existing rows when auditing is added to a populated database (`entities` argument or `--all`, `--batch-size`, `--dry-run`; skips entities that already have a history unless `--force`) |
+| `audit:roots:rebuild` | Rebuild the audit root index after adding `roots` / `#[AuditRoot]` (`--entity`, `--dry-run`); run `audit:schema:update --force` first (it creates the `audit_root` table) |
 | `audit:cache:clear` | Clear the viewer activity graph cache (`--entity=FQCN`) |
 
 ## 8. Upgrading
@@ -307,7 +324,10 @@ bin/console audit:schema:update --force       # needed with separate storage dat
   `DH\Auditor\Provider\Doctrine\Auditing\Attribute\{Auditable,Ignore,Security}` are gone, import
   `DH\Auditor\Attribute\*`; `NeedsConversionToAuditableType` is now
   `DH\Auditor\Provider\Doctrine\Transaction\NeedsConversionToAuditableType`; viewer templates overridden from 7.x
-  must be rewritten.
+  must be rewritten. Behaviour changes: an audit entry that cannot be written now fails the flush (the transaction is
+  rolled back), `extra_data_provider` is called once per flush, YAML `ignored_columns` apply to `#[Auditable]`
+  entities, `page_size` counts actions, and the history of an object takes new query parameters (`what`, `who`,
+  `when`, `after`).
 - **From DoctrineAuditBundle** (`DH\DoctrineAuditBundle`, the former name of this package): there is no direct path. Upgrade one
   major at a time: no single guide covers the path; start from the frozen notes at
   https://damienharper.github.io/auditor-docs/auditor-bundle/6.x/upgrading and
@@ -324,10 +344,13 @@ bin/console audit:schema:update --force       # needed with separate storage dat
 - Using an `#[Auditable]` entity without creating its audit table (flush fails on a missing table).
 - Running `doctrine:schema:update` / a migration on 7.x audit tables before `audit:schema:migrate --convert-all`.
 - Setting `extra_data` to an array in a `LifecycleEvent` listener (must be a JSON string or `null`), or writing to
-  the audited entity manager inside that listener (it runs during the flush).
+  the audited entity manager inside that listener (it runs while the entries are written, at the commit).
 - Giving `storage_mapper` a service ID: it is an invokable class name.
 - Setting `batch_size` while a listener reads `$payload['id']`.
 - Symfony user classes without `getId()`: entries get an empty `blame_id` and no user page in the viewer.
 - Importing `DH\Auditor\Provider\Doctrine\Auditing\Attribute\{Auditable,Ignore,Security}` or `DH\DoctrineAuditBundle\*` classes: they no longer
   exist in 8.x.
-- Expecting scheduled pruning without `retention.schedule` and a running `messenger:consume scheduler_dh_auditor_retention`.
+- Expecting scheduled pruning without `retention.schedule`, `symfony/scheduler` + `symfony/messenger` +
+  `dragonmantank/cron-expression`, and a running `messenger:consume scheduler_dh_auditor_retention`.
+- Calling `dh_auditor_user_url(entry.userId)` or `dh_auditor_transaction_url(entry.transactionId)` on an entry
+  without user or transaction id: a `TypeError`, not `null`.
