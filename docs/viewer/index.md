@@ -498,7 +498,7 @@ templates/bundles/DHAuditorBundle/
 
 {% block stylesheets %}
     {{ parent() }}
-    {# the viewer, without Preflight: the reset of your application applies #}
+    {# the viewer, with its own reset, bounded to its content: the rest of your page is left as it is #}
     <link rel="stylesheet" href="{{ asset('bundles/dhauditor/app.css') }}">
     {# behaviours of the viewer (theme, sort, filters, technical mode, copy, older actions); loaded without defer so
        that the theme applies before the first paint #}

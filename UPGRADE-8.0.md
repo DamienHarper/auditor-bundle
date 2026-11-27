@@ -92,8 +92,9 @@ or unprefixed ones loses their styles. Rewrite it with prefixed classes and the 
 `app.css` no longer resets the whole page: its reset only reaches the content of the viewer pages, under the
 `<div data-dh-auditor-viewer>` element that each page of `Audit/` now wraps its `dh_auditor_content` block in (keep it
 in an overridden page), and the `<twig:DhAuditor:History>` component. The layout of the bundle loads
-`bundles/dhauditor/preflight.css` too; a layout that extends the one of the application keeps the reset and the font
-of the application. An application that compiles the viewer or the `<twig:DhAuditor:History>` component with its own
+`bundles/dhauditor/preflight.css` too; in a layout that extends the one of the application, the rest of the page keeps
+the reset and the font of the application. The wrapping element makes the content of each page one child of the
+element that renders the `dh_auditor_content` block, which a flex or grid layout around it may need to know. An application that compiles the viewer or the `<twig:DhAuditor:History>` component with its own
 Tailwind does it in a stylesheet of its own that imports `src/Resources/assets/css/viewer.css` with the `dh` prefix
 (see [Styling](docs/customization/histories.md#styling)).
 
