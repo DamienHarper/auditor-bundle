@@ -24,8 +24,8 @@
     viewer with the margins, list indents and box model of the browser. These rules only reach the elements inside a
     page of the viewer ([data-dh-auditor-viewer]) or the <twig:DhAuditor:History> component
     ([data-dh-auditor-history]), with no specificity (:where), so that any class wins over them. What the application
-    renders in an element of the component ([data-dh-auditor-element]) is left out, and the font stays the one of
-    the page. **/
+    renders in an element of the component ([data-dh-auditor-element]) is left out, though it inherits the colors and
+    the line height of the component, and the font stays the one of the page. **/
 @layer base {
     :where([data-dh-auditor-viewer], [data-dh-auditor-viewer] *, [data-dh-auditor-history], [data-dh-auditor-history] *):not(:where([data-dh-auditor-element] *)),
     :where([data-dh-auditor-viewer], [data-dh-auditor-viewer] *, [data-dh-auditor-history], [data-dh-auditor-history] *):not(:where([data-dh-auditor-element] *))::before,
